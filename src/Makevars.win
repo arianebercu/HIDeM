@@ -1,0 +1,19 @@
+PKG_LIBS = $(BLAS_LIBS) $(FLIBS)
+FCFLAGS = -mtune=native -O3 -Wall -pedantic -flto=10
+
+FMODSRC = commun.f90 
+FSRC = idmlikelihood.f90 vecspli.f90 
+CSRC= init.c
+
+# Define the order of compilation
+OBJECTS = $(FMODSRC:.f90=.o) $(FSRC:.f90=.o) $(CSRC:.c=.o)
+
+$(SHLIB): $(OBJECTS)
+
+# Setup dependencies for parallel make
+
+
+idmlikelihood.o: commun.o 
+vecspli.o: commun.o 
+
+
