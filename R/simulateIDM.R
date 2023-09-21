@@ -376,8 +376,9 @@ simulateIDM <- function(n=100){
 ##' @param shape.lifetime Weilbull shape for latent life time
 ##' @param scale.waittime Weilbull scale for latent life time
 ##' @param shape.waittime Weilbull shape for latent life time
-##' @param scale.censtime Weilbull scale for censoring time
-##' @param shape.censtime Weilbull shape for censoring time
+##' @param seed specify the seed 
+##' @param prob.censoring probability of censoring at each visit 
+##' @param administrative.censoring specify time of administrative censoring
 ##' @param n.inspections Number of inspection times
 ##' @param schedule Mean of the waiting time between adjacent
 ##' inspections.

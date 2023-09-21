@@ -33,6 +33,8 @@ simulatepenIDM(
 \arguments{
 \item{n}{number of observations}
 
+\item{seed}{specify the seed}
+
 \item{scale.illtime}{Weilbull scale for latent illness time}
 
 \item{shape.illtime}{Weilbull shape for latent illness time}
@@ -44,6 +46,10 @@ simulatepenIDM(
 \item{scale.waittime}{Weilbull scale for latent life time}
 
 \item{shape.waittime}{Weilbull shape for latent life time}
+
+\item{prob.censoring}{probability of censoring at each visit}
+
+\item{administrative.censoring}{specify time of administrative censoring}
 
 \item{n.inspections}{Number of inspection times}
 
@@ -72,10 +78,6 @@ inspections.}
 \item{beta02}{value of beta on transition 0 --> 2}
 
 \item{beta12}{value of beta on transition 1 --> 2}
-
-\item{scale.censtime}{Weilbull scale for censoring time}
-
-\item{shape.censtime}{Weilbull shape for censoring time}
 }
 \description{
 Simulate data from an illness-death model with interval censored event times and penalized covariates
