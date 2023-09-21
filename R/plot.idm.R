@@ -17,6 +17,7 @@
 #' @param ylim Limits for y-axis
 #' @param xlab Label for x-axis
 #' @param ylab Label for y-axis
+#' @param lambda give the lambda for which you want to plot the penalised model
 #' @param legend If TRUE a legend is drawn, which can be further controlled via \code{\link{SmartControl}}.
 #' @param transition Choose one of the transition intensities: \code{c("01","02","12")}.
 #' @param ... Passed to \code{\link{SmartControl}}

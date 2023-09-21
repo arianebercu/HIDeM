@@ -109,6 +109,8 @@
 #' @param clustertype in which cluster to work
 #' @param nproc number of cluster
 #' @param print.info shloud we print info during mla convergence
+#' @param option.sequential parameters to give if you want to do the optimisation version to
+#'  fix splines
 #' @return
 #'
 #' \item{call}{the call that produced the result.} \item{coef}{regression
@@ -1306,7 +1308,7 @@ idm <- function(formula01,
                     id.keepV<-id.keepV[id.keepV%in%((i-1)*npm+id.keep)]
                     V[id.keep,id.keepV]<-solve(H_spec)
                     H_pl<-H_spec+lambda.matrix
-                    trace_model<-tr(solve(H_pl)%*%H_spec)
+                    trace_model<-lava::tr(solve(H_pl)%*%H_spec)
                     fit$GCV[i]<--1/N*(out$fn.value[i]-trace_model)}
                   }
                 }
@@ -1650,7 +1652,7 @@ idm <- function(formula01,
                       
                       V[id.keep,id.keepV]<-solve(H_spec)
                       H_pl<-H_spec+lambda.matrix
-                      trace_model<-tr(solve(H_pl)%*%H_spec)
+                      trace_model<-lava::tr(solve(H_pl)%*%H_spec)
                       fit$GCV[i]<--1/N*(out$fn.value[i]-trace_model)}
                     }
                   }

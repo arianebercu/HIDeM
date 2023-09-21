@@ -120,8 +120,8 @@ idm.no.step.sequential<-function(b,clustertype,epsa,epsb,epsd,print.info,nproc,
       V.theta<-4*theta*Vr%*%diag(theta)
       H.nopena.theta<-4*theta*Hnopena%*%diag(theta)
       browser()
-      trLCV.theta<-tr(-V.theta%*%H.nopena.theta)
-      trLCV<-tr(-V%*%H.nopena)
+      trLCV.theta<-lava::tr(-V.theta%*%H.nopena.theta)
+      trLCV<-lava::tr(-V%*%H.nopena)
       
       
     }else{
@@ -166,7 +166,7 @@ idm.no.step.sequential<-function(b,clustertype,epsa,epsb,epsd,print.info,nproc,
     doParallel::registerDoParallel(clustpar)
     
     
-    res<-foreach(i = 1:length(lambda),.combine=cbind) %dopar% {
+    res<-foreach::foreach(i = 1:length(lambda),.combine=cbind) %dopar% {
       
       
       out<-marqLevAlg::mla(b=b,
@@ -259,7 +259,7 @@ idm.no.step.sequential<-function(b,clustertype,epsa,epsb,epsd,print.info,nproc,
     
     doParallel::registerDoParallel(clustpar)
     
-    res<-foreach(i=1:length(lambda),.combine = combine_var)%dopar%{
+    res<-foreach::foreach(i=1:length(lambda),.combine = combine_var)%dopar%{
       
       Vr <- matrix(0,npm,npm)
       Vr[upper.tri(Vr,diag=TRUE)] <-v[,i]
@@ -324,8 +324,8 @@ idm.no.step.sequential<-function(b,clustertype,epsa,epsb,epsd,print.info,nproc,
         H.nopena.theta<-4*theta*Hnopena%*%diag(theta)
         browser()
         
-        trLCV.theta<-tr(-V.theta%*%H.nopena.theta)
-        trLCV<-tr(-V%*%H.nopena)
+        trLCV.theta<-lava::tr(-V.theta%*%H.nopena.theta)
+        trLCV<-lava::tr(-V%*%H.nopena)
         
         
         
