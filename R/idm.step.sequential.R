@@ -41,7 +41,7 @@ idm.step.sequential<-function(b,clustertype,epsa,epsb,epsd,print.info,nproc,
       
 
       
-      out<-mla(b=b,
+      out<-marqLevAlg::mla(b=b,
                m=length(b),
                fn=idmlLikelihoodpena,
                clustertype=clustertype,
@@ -124,7 +124,7 @@ idm.step.sequential<-function(b,clustertype,epsa,epsb,epsd,print.info,nproc,
           
         
         
-        out<-mla(b=b,
+        out<-marqLevAlg::mla(b=b,
                  m=length(b),
                  fn=idmlLikelihoodpena,
                  clustertype=clustertype,
@@ -257,8 +257,8 @@ idm.step.sequential<-function(b,clustertype,epsa,epsb,epsd,print.info,nproc,
       V.theta<-4*theta*Vr%*%diag(theta)
       H.nopena.theta<-4*theta*Hnopena%*%diag(theta)
       browser()
-      trLCV.theta<-tr(-V.theta%*%H.nopena.theta)
-      trLCV<-tr(-V%*%H.nopena)
+      trLCV.theta<-lava::tr(-V.theta%*%H.nopena.theta)
+      trLCV<-lava::tr(-V%*%H.nopena)
       
     }else{
       H<-matrix(0,size_V,size_V)

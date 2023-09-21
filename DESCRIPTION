@@ -18,11 +18,9 @@ Depends:
 Imports:
     lava (>= 1.4.1),
     mvtnorm (>= 1.0-3),
-    stringr (>= 1.4.0),
     splines2 (>= 0.4.5),
     marqLevAlg (> 2.0), 
-    testthat,
-    doParallel, foreach, parallel,iterators, MASS,graphics, grDevices, stats, utils, survival,ggplot2
+    doParallel, foreach, parallel, MASS,graphics, grDevices, stats, utils,ggplot2
 Maintainer: Ariane Bercu <ariane.bercu@gmail.com>
 License: GPL (>= 2)
 RoxygenNote: 7.2.3

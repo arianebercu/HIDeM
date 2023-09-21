@@ -420,7 +420,7 @@ simulatepenIDM <- function(n=100,seed,scale.illtime,shape.illtime,
   
   # Generate random data for exogenous variables X1 to XN
   #exogenous_data <- as.data.frame(matrix(rnorm(nvar * n, mean = mean, sd = sd), ncol = nvar))
-  exogenous_data<-mvrnorm(n = n, mu = mean, Sigma = cov)
+  exogenous_data<-MASS::mvrnorm(n = n, mu = mean, Sigma = cov)
   # Set the column names of the exogenous data frame
   #colnames(exogenous_data) <- paste0("X", 1:nvar)
   
