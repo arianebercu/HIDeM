@@ -2,7 +2,7 @@
 % Please edit documentation in R/simulateIDM.R
 \name{simulatepenIDM}
 \alias{simulatepenIDM}
-\title{Sample illness-death model data}
+\title{Sample illness-death model data for penalised regression}
 \usage{
 simulatepenIDM(
   n = 100,
@@ -32,6 +32,50 @@ simulatepenIDM(
 }
 \arguments{
 \item{n}{number of observations}
+
+\item{scale.illtime}{Weilbull scale for latent illness time}
+
+\item{shape.illtime}{Weilbull shape for latent illness time}
+
+\item{scale.lifetime}{Weilbull scale for latent life time}
+
+\item{shape.lifetime}{Weilbull shape for latent life time}
+
+\item{scale.waittime}{Weilbull scale for latent life time}
+
+\item{shape.waittime}{Weilbull shape for latent life time}
+
+\item{n.inspections}{Number of inspection times}
+
+\item{schedule}{Mean of the waiting time between adjacent
+inspections.}
+
+\item{punctuality}{Standard deviation of waiting time between
+inspections.}
+
+\item{nvar}{number of variables}
+
+\item{mean}{mean of each explanatory variables}
+
+\item{sd}{standard-error of each explanatory variables}
+
+\item{cov}{covariance matrix of explanatory variables}
+
+\item{x01}{names of variables on transition 0 --> 1}
+
+\item{x02}{names of variables on transition 0 --> 2}
+
+\item{x12}{names of variables on transition 1 --> 2}
+
+\item{beta01}{value of beta on transition 0 --> 1}
+
+\item{beta02}{value of beta on transition 0 --> 2}
+
+\item{beta12}{value of beta on transition 1 --> 2}
+
+\item{scale.censtime}{Weilbull scale for censoring time}
+
+\item{shape.censtime}{Weilbull shape for censoring time}
 }
 \description{
 Simulate data from an illness-death model with interval censored event times and penalized covariates

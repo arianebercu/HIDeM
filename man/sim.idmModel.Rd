@@ -22,6 +22,10 @@
 
 \item{n}{Number of observations}
 
+\item{plot}{plot of base survival for all transition}
+
+\item{pen}{if the simulated data are for a penalised version of illness-death model}
+
 \item{illness.known.at.death}{Affects the value of variable
 seen.ill}
 

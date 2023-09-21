@@ -168,6 +168,9 @@ This argument is only used for models with M-splines.}
 
 \item{step.sequential}{should we use the optimisation version to fix splines}
 
+\item{option.sequential}{parameters to give if you want to do the optimisation version to
+fix splines}
+
 \item{nproc}{number of cluster}
 
 \item{clustertype}{in which cluster to work}

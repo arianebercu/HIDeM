@@ -70,8 +70,6 @@ idmlLikelihoodweib(
 \item{t30}{time of event/out}
 
 \item{troncature0}{indicator if troncature or not}
-
-\item{gausspoint0}{number of gausspoint quadrature}
 }
 \description{
 idm log likelihood

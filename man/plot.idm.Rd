@@ -27,6 +27,8 @@
 \item{x}{a \code{idmWeib} class object (output from calling
 \code{idm} with the (default) option \code{intensities}="Weib".}
 
+\item{lambda}{give the lambda for which you want to plot the penalised model}
+
 \item{conf.int}{If TRUE show confidence limits}
 
 \item{citype}{Type of confidence limits, can be "shadow" or "bars"}
