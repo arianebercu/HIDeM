@@ -36,16 +36,14 @@ times.}
 }
 \value{
 A data set with interval censored observations from an illness-death model
+example(idmModel)
+help(idmModel)
 }
 \description{
 Function to simulate illness-death model data
 }
 \details{
 Based on the functionality of the lava PACKAGE
-}
-\examples{
-example(idmModel)
-help(idmModel)
 }
 \author{
 Thomas Alexander Gerds
