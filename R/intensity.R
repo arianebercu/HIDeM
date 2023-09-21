@@ -45,13 +45,15 @@
 ##'
 ##' @seealso \code{\link{shr}}, \code{\link{idm}}
 ##' @examples
-##' data(testdata)
+##'
+##'
+##' \dontrun{
+##'  data(testdata)
 ##' fit.su <- shr(Hist(time=list(l, r), id) ~ cov,
 ##'               data = testdata,method = "Splines",CV = TRUE)
 ##' intensity(times = fit.su$time, knots = fit.su$knots,
 ##'            number.knots = fit.su$nknots, theta = fit.su$theta^2)
-##'
-##' \dontrun{
+##'            
 ##'   data(Paq1000)
 ##'   fit.idm <-  idm(formula02 = Hist(time = t, event = death, entry = e) ~ certif,
 ##'                   formula01 = Hist(time = list(l,r), event = dementia) ~ certif,

@@ -335,7 +335,7 @@ sim.idmModel <- function(x,
 ##' @title Sample illness-death model data
 ##' @examples
 ##' # simulateIDM
-##' simulateIDM(100)
+##' simulateIDM(100)$data
 ##' @useDynLib SmoothHazardoptim9
 #' @export
 #' @param n number of observations
@@ -368,8 +368,6 @@ simulateIDM <- function(n=100){
 ##' @seealso idmModel sim.idmModel simulateIDM
 ##' @title Sample illness-death model data
 ##' @examples
-##' # simulatepenIDM
-##' simulatepenIDM(100)
 ##' @useDynLib SmoothHazardoptim9
 #' @export
 #' @param n number of observations

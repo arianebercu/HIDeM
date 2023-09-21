@@ -46,7 +46,7 @@
 #'
 #' \dontrun{
 #' set.seed(100)
-#' d=simulateIDM(n = 100)
+#' d=simulateIDM(n = 100)$data
 #' fit <- idm(formula01=Hist(time=list(L,R),event=seen.ill)~X1+X2+X3,
 #'                formula02=Hist(time=observed.lifetime,event=seen.exit)~X1+X2+X3,
 #'                data=d,conf.int=FALSE)

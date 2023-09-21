@@ -164,7 +164,7 @@
 ##' library(lava)
 ##' library(prodlim)
 ##' set.seed(17)
-##' d <- simulateIDM(100)
+##' d <- simulateIDM(100)$data
 ##' # right censored data
 ##' fitRC <- idm(formula01=Hist(time=observed.illtime,event=seen.ill)~X1+X2,
 ##'              formula02=Hist(time=observed.lifetime,event=seen.exit)~X1+X2,
@@ -174,7 +174,7 @@
 ##'
 ##' \dontrun{
 ##' set.seed(17)
-##' d <- simulateIDM(300)
+##' d <- simulateIDM(300)$data
 ##' fitRC.splines <- idm(formula01=Hist(time=observed.illtime,event=seen.ill)~X1+X2,
 ##'              formula02=Hist(time=observed.lifetime,event=seen.exit)~X1+X2,
 ##'              formula12=Hist(time=observed.lifetime,event=seen.exit)~1,data=d,
@@ -203,7 +203,7 @@
 ##'     fit.splines <-  idm(formula02=Hist(time=t,event=death,entry=e)~certif,
 ##'                         formula01=Hist(time=list(l,r),event=dementia)~certif,
 ##'                         formula12=~1,
-##'                         method="Splines",
+##'                         method="splines",
 ##'                         data=Paq1000)
 ##'     fit.weib
 ##'     summary(fit.splines)

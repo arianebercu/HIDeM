@@ -2,7 +2,7 @@ Package: SmoothHazardoptim9
 Title: Estimation of Smooth Hazard Models for Interval-Censored Data with
     Applications to Survival and Illness-Death Models
 Version: 1.4.1
-Author: Celia Touraine, Pierre Joly, Thomas A. Gerds
+Author: Ariane Bercu, Celia Touraine, Pierre Joly and Thomas A. Gerds
 Description: Estimation of two-state (survival) models and irreversible illness-
     death models with possibly interval-censored,left-truncated and right-censored
     data. Proportional intensities regression models can be specified to allow for
@@ -23,7 +23,7 @@ Imports:
     marqLevAlg (> 2.0), 
     testthat,
     doParallel, foreach, parallel,iterators, MASS,graphics, grDevices, stats, utils, survival,ggplot2
-Maintainer: Thomas Alexander Gerds <tag@biostat.ku.dk>
+Maintainer: Ariane Bercu <ariane.bercu@gmail.com>
 License: GPL (>= 2)
 Packaged: Wed May 6 15:36:28 2010; tag
 RoxygenNote: 6.0.1
