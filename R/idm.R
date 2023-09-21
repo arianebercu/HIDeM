@@ -430,9 +430,9 @@ idm <- function(formula01,
         if(!(inherits(option.sequential$step,c("numeric","integer")))|(option.sequential$step!=floor(option.sequential$step)))stop("The step has to be a integer.")
         if(!(inherits(option.sequential$min,c("numeric","integer")))|(option.sequential$min!=floor(option.sequential$min)))stop("The min has to be a integer.")
         if(option.sequential$step<=0)stop("Steps need to be at least of 1.")
-        if(option.sequential$min<=0)stop("The minimum of itération must be at least 0")
+        if(option.sequential$min<=0)stop("The minimum of iteration must be at least 0")
         if(option.sequential$cutoff<=0)stop("The cutoff for spline need to be positive.")
-        if(!(option.sequential$min<=maxiter))stop(paste0("The algorithm must do at least one itération before reaching ",maxiter," , min inferior or equal to maxiter."))
+        if(!(option.sequential$min<=maxiter))stop(paste0("The algorithm must do at least one iteration before reaching ",maxiter," , min inferior or equal to maxiter."))
         if(!(option.sequential$step<=maxiter))stop(paste0("The step must be inferior or equal to ",maxiter))
 
       }

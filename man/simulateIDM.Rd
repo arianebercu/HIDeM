@@ -18,8 +18,10 @@ and covariates for the purpose of illustrating the help pages of the SmoothHazar
 See the body of the function for details, i.e., evaluate simulateIDM
 }
 \examples{
+\dontrun{
 # simulateIDM
 simulateIDM(100)$data
+}
 }
 \seealso{
 idmModel sim.idmModel

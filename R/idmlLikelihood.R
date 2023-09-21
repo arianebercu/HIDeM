@@ -1,5 +1,55 @@
-#' @useDynLib SmoothHazardoptim8
-#' @export
+### idmlLikelihood.R ---
+#----------------------------------------------------------------------
+## author: Thomas Alexander Gerds
+## created: Feb  6 2016 (08:47)
+## Version:
+## last-updated: Feb 25 2016 (13:17)
+##           By: Thomas Alexander Gerds
+##     Update #: 27
+#----------------------------------------------------------------------
+##
+### Commentary:
+##
+### Change Log:
+#----------------------------------------------------------------------
+##
+### Code:
+##' @title idm log likelihood
+##' @param b0  parameters not fixed
+##' @param np0  number of parameters not fixed
+##' @param npar0 number of parameters
+##' @param bfix0 parameters fixed
+##' @param fix0 indicators of fixed and unfixed parameters
+##' @param zi010 knots of transition 0 --> 1
+##' @param zi020 knots of transition 0 --> 2
+##' @param zi120 knots of transition 1 --> 2
+##' @param c0 classification of subject according to their observations
+##' @param no0 number of subjects
+##' @param nz010 number of knots for transition 0 -->1 
+##' @param nz020 number of knots for transition 0 -->2
+##' @param nz120 number of knots for transition 1 -->2
+##' @param ve010 variables for transition 0 -->1 
+##' @param ve020 variables for transition 0 -->2
+##' @param ve120 variables for transition 1 -->2
+##' @param dimnva01 number of variables for transition 0 -->1 
+##' @param dimnva02 number of variables for transition 0 -->2
+##' @param dimnva12 number of variables for transition 1 -->2
+##' @param nva01 number of variables for transition 0 -->1 
+##' @param nva02 number of variables for transition 0 -->2
+##' @param nva12 number of variables for transition 1 -->2
+##' @param t00 time entry
+##' @param t10 time L
+##' @param t20 time R
+##' @param t30 time of event/out
+##' @param troncature0 indicator if troncature or not
+##' @param gausspoint0 number of gausspoint quadrature
+##'  @return
+##' @seealso \code{ \code{\link{idm}}
+#' @useDynLib SmoothHazardoptim9
+##' @export
+#' @author R: Ariane Bercu, Celia Touraine <Celia.Touraine@@isped.u-bordeaux2.fr> and Thomas Alexander Gerds <tag@@biostat.ku.dk>
+#' Fortran: Pierre Joly <Pierre.Joly@@isped.u-bordeaux2.fr>
+#' 
 
 idmlLikelihood<-function(b0,np0,npar0,bfix0,fix0,zi010,zi020,zi120,c0,no0,nz010,nz020,nz120,ve010,ve020,ve120,
                          dimnva01,dimnva02,dimnva12,nva01,nva02,nva12,

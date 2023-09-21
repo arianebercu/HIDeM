@@ -31,11 +31,12 @@ Function to simulate interval censored survival data
 Based on the functionality of the lava PACKAGE
 }
 \examples{
+\dontrun{
 library(lava)
 example(survIC)
 help(survIC)
 ol <- survIC()
-dat.ol <- sim(ol,10)
+dat.ol <- sim(ol,10)}
 }
 \author{
 Thomas Alexander Gerds

@@ -24,11 +24,11 @@
 ##' M-spline is called I-spline). The coefficients \code{theta} are the same for
 ##' the M-splines and I-splines.
 ##'
-##' Important: the theta parameters returned by \code{idm} and \code{shr} are in fact
+##' Important: the theta parameters returned by \code{idm} are in fact
 ##' the square root of the splines coefficients. See examples.
 ##'
 ##' This function is a R-translation of a corresponding Fortran function called \code{susp}. \code{susp} is
-##' used internally by \code{idm} and \code{shr}.
+##' used internally by \code{idm}.
 ##'
 ##' @title M-spline estimate of the transition intensity function
 ##' @param times Time points at which to estimate the intensity function
@@ -43,16 +43,11 @@
 ##' \item{cumulative.intensity}{The cumulative transition intensity function evaluated at \code{times}}
 ##' \item{survival}{The "survival" function, i.e., exp(-cumulative.intensity)}
 ##'
-##' @seealso \code{\link{shr}}, \code{\link{idm}}
+##' @seealso \code{ \code{\link{idm}}
 ##' @examples
 ##'
 ##'
 ##' \dontrun{
-##'  data(testdata)
-##' fit.su <- shr(Hist(time=list(l, r), id) ~ cov,
-##'               data = testdata,method = "Splines",CV = TRUE)
-##' intensity(times = fit.su$time, knots = fit.su$knots,
-##'            number.knots = fit.su$nknots, theta = fit.su$theta^2)
 ##'            
 ##'   data(Paq1000)
 ##'   fit.idm <-  idm(formula02 = Hist(time = t, event = death, entry = e) ~ certif,
