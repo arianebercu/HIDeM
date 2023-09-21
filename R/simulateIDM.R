@@ -333,8 +333,10 @@ sim.idmModel <- function(x,
 ##' @seealso idmModel sim.idmModel
 ##' @title Sample illness-death model data
 ##' @examples
+##' \dontrun{
 ##' # simulateIDM
 ##' simulateIDM(100)$data
+##' }
 ##' @useDynLib SmoothHazardoptim9
 #' @export
 #' @param n number of observations

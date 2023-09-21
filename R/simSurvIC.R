@@ -74,11 +74,12 @@ survIC <- function(scale.time=1/100,
 ##' @param ... Extra arguments given to \code{sim}
 ##' @return A data set with interval censored observations 
 ##' @examples
+##' \dontrun{
 ##' library(lava)
 ##' example(survIC)
 ##' help(survIC)
 ##' ol <- survIC()
-##' dat.ol <- sim(ol,10)
+##' dat.ol <- sim(ol,10)}
 ##' @author Thomas Alexander Gerds
 ##' @importFrom lava sim
 ##' @export
