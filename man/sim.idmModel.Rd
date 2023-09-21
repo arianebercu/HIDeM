@@ -4,7 +4,7 @@
 \alias{sim.idmModel}
 \title{Simulate illness-death model data}
 \usage{
-\method{sim}{idmModel}(
+sim.idmModel(
   x,
   n,
   plot,

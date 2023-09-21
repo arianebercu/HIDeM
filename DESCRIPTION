@@ -20,7 +20,7 @@ Imports:
     mvtnorm (>= 1.0-3),
     splines2 (>= 0.4.5),
     marqLevAlg (> 2.0), 
-    doParallel, foreach, parallel, MASS,graphics, grDevices, stats, utils,ggplot2, testthat
+    doParallel, foreach, parallel, MASS,graphics, grDevices, stats, utils,ggplot2
 Maintainer: Ariane Bercu <ariane.bercu@gmail.com>
 License: GPL (>= 2)
 RoxygenNote: 7.2.3
