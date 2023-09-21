@@ -186,7 +186,6 @@ idmModel <- function(scale.illtime=1/100,
 ##' times.
 ##' @param ... Extra arguments given to \code{sim}
 ##' @return A data set with interval censored observations from an illness-death model
-##' @examples
 ##' example(idmModel)
 ##' help(idmModel)
 ##' @author Thomas Alexander Gerds
@@ -367,7 +366,6 @@ simulateIDM <- function(n=100){
 ##' See the body of the function for details, i.e., evaluate simulateIDM
 ##' @seealso idmModel sim.idmModel simulateIDM
 ##' @title Sample illness-death model data
-##' @examples
 ##' @useDynLib SmoothHazardoptim9
 #' @export
 #' @param n number of observations

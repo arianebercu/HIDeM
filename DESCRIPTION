@@ -25,4 +25,4 @@ Imports:
     doParallel, foreach, parallel,iterators, MASS,graphics, grDevices, stats, utils, survival,ggplot2
 Maintainer: Ariane Bercu <ariane.bercu@gmail.com>
 License: GPL (>= 2)
-RoxygenNote: 6.0.1
+RoxygenNote: 7.2.3
