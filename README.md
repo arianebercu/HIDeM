@@ -4,6 +4,8 @@
 # SmoothHazardoptim9
 
 <!-- badges: start -->
+
+[![R-CMD-check](https://github.com/arianebercu/penidm/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/arianebercu/penidm/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
 Penalized Smooth Hazard Models for Interval-Censored Data with

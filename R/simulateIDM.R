@@ -191,7 +191,7 @@ idmModel <- function(scale.illtime=1/100,
 ##' help(idmModel)
 ##' @author Thomas Alexander Gerds
 ##' @importFrom lava sim
-##' @useDynLib SmoothHazard.optim
+##' @useDynLib SmoothHazardoptim9
 ##' @export
 sim.idmModel <- function(x,
                          n,
@@ -336,7 +336,7 @@ sim.idmModel <- function(x,
 ##' @examples
 ##' # simulateIDM
 ##' simulateIDM(100)
-##' @useDynLib SmoothHazard.optim
+##' @useDynLib SmoothHazardoptim9
 #' @export
 #' @param n number of observations
 simulateIDM <- function(n=100){
@@ -360,6 +360,19 @@ simulateIDM <- function(n=100){
 
 
 
+##' Simulate data from an illness-death model with interval censored event times and penalized covariates 
+##'
+##' Simulate data from an illness-death model with interval censored event times
+##' and covariates for the purpose of illustrating the help pages of the SmoothHazard package.
+##' See the body of the function for details, i.e., evaluate simulateIDM
+##' @seealso idmModel sim.idmModel simulateIDM
+##' @title Sample illness-death model data
+##' @examples
+##' # simulatepenIDM
+##' simulatepenIDM(100)
+##' @useDynLib SmoothHazardoptim9
+#' @export
+#' @param n number of observations
 
 simulatepenIDM <- function(n=100,seed,scale.illtime,shape.illtime,
                            scale.lifetime,shape.lifetime,
@@ -404,10 +417,10 @@ simulatepenIDM <- function(n=100,seed,scale.illtime,shape.illtime,
       V[,j]<-0
     }else{
       #V[,j]<-runif(n=N[i],min=(j-1)*step[i],max=(step[i]*(j-1)+var.step[i]))}
-      V[,j]<-runif(n=n,min=(j-1)*schedule,max=(schedule*(j-1)+punctuality))}
+      V[,j]<-stats::runif(n=n,min=(j-1)*schedule,max=(schedule*(j-1)+punctuality))}
      
      if(j>1){
-       id.censoring<-rbinom(N_max,1,prob.censoring)
+       id.censoring<-stats::rbinom(N_max,1,prob.censoring)
        C[still]<-ifelse(id.censoring==1,V[still,j-1],NA)
        N_max<-N_max-sum(id.censoring)
        still<-still[id.censoring==0]
@@ -423,7 +436,7 @@ simulatepenIDM <- function(n=100,seed,scale.illtime,shape.illtime,
   #cov(exogenous_data)[1:nvar,1:nvar] <- cov
   #diag(cov(exogenous_data)[(nvar+1):num_exogenous_vars,(nvar+1):num_exogenous_vars]) <- punctuality
   # Define the structural model for latent processes following a Weibull distribution
-  U<-runif(n=n)
+  U<-stats::runif(n=n)
   X01<-as.matrix(exogenous_data[,colnames(exogenous_data)%in%x01])
   X02<-as.matrix(exogenous_data[,colnames(exogenous_data)%in%x02])
   X12<-as.matrix(exogenous_data[,colnames(exogenous_data)%in%x12])
@@ -448,14 +461,14 @@ simulatepenIDM <- function(n=100,seed,scale.illtime,shape.illtime,
   S12<-exp(-(scale.waittime*time)^shape.waittime)
   #cens<-exp(-(scale.censtime*time)^shape.censtime)
   
-  data.weibull<-data.frame(survival=c(S01,S02,S12),
+  data.weibull<-base::data.frame(survie=c(S01,S02,S12),
                            type=c(rep("01",length(S01)),
                                   rep("02",length(S02)),
                                   rep("12",length(S12))),
                            time=rep(time,3))
   
-  p2<-ggplot(data=data.weibull,aes(y=survival,x=time,color=type))+geom_point()+geom_line()+
-    theme_classic()
+  p2<-ggplot2::ggplot(data=data.weibull,aes(y=survie,x=time,color=type))+ggplot2::geom_point()+ggplot2::geom_line()+
+    ggplot2::theme_classic()+ggplot2::ylab("Survival")
   
   
   sim.idmModel(x=fit,n=n,plot=p2,pen=T,illness.known.at.death=F)

@@ -267,8 +267,8 @@ idm <- function(formula01,
     ptm <- proc.time()
     if(missing(formula01))stop("Argument formula01 is missing.")
     if(missing(formula02))stop("Argument formula02 is missing.")
-    if(class(formula01)!="formula")stop("The argument formula01 must be a class 'formula'.")
-    if(class(formula02)!="formula")stop("The argument formula02 must be a class 'formula'.")
+    if(!inherits(formula01,"formula"))stop("The argument formula01 must be a class 'formula'.")
+    if(!inherits(formula02,"formula"))stop("The argument formula02 must be a class 'formula'.")
     
     if(!method%in%c("Weib","splines"))stop("The argument method needs to be either splines or Weib")
     ## if(missing(formula02)) formula02 <- formula01
@@ -286,7 +286,7 @@ idm <- function(formula01,
     if(missing(data)) stop("Need a data frame.")
     if(sum(is.na(data))>0)stop("Need a data frame with no missing data.")
 
-    if(class(data)!="data.frame")stop("Argument 'data' must be a data.frame")
+    if(!inherits(data,"data.frame"))stop("Argument 'data' must be a data.frame")
  
     m <- match.call()
     m01 <- m02 <- m12 <- m[match(c("","data","subset","na.action"),names(m),nomatch=0)]
@@ -417,18 +417,18 @@ idm <- function(formula01,
 
 
 
-      if(!class(option.sequential$cutoff)%in%c("numeric","integer"))stop("The cutoff for spline has to a numeric or integer.")
-      if(!(class(maxiter)%in%c("numeric","integer"))|(maxiter!=floor(maxiter)))stop("Maxiter has to be an integer.")
-      if(!(class(nproc)%in%c("numeric","integer"))|(nproc!=floor(nproc)))stop("nproc has to be an integer.")
+      if(!inherits(option.sequential$cutoff,c("numeric","integer")))stop("The cutoff for spline has to a numeric or integer.")
+      if(!inherits(maxiter,c("numeric","integer"))|(maxiter!=floor(maxiter)))stop("Maxiter has to be an integer.")
+      if(!inherits(nproc,c("numeric","integer"))|(nproc!=floor(nproc)))stop("nproc has to be an integer.")
     
       if(!gauss.point%in%c(10,15,21,31,41,51,61))stop("Argument type.quantile has to a numeric : 10, 15, 21, 31, 51 or 61.")
-      if(class(step.sequential)!="logical")stop("Argument step.sequential has to be TRUE or FALSE.")
+      if(!inherits(step.sequential,"logical"))stop("Argument step.sequential has to be TRUE or FALSE.")
 
       if(step.sequential==T){
 
-        if(!class(option.sequential$cutoff)%in%c("numeric","integer"))stop("The cutoff for spline has to be a numeric or integer.")
-        if(!(class(option.sequential$step)%in%c("numeric","integer"))|(option.sequential$step!=floor(option.sequential$step)))stop("The step has to be a integer.")
-        if(!(class(option.sequential$min)%in%c("numeric","integer"))|(option.sequential$min!=floor(option.sequential$min)))stop("The min has to be a integer.")
+        if(!inherits(option.sequential$cutoff,c("numeric","integer")))stop("The cutoff for spline has to be a numeric or integer.")
+        if(!(inherits(option.sequential$step,c("numeric","integer")))|(option.sequential$step!=floor(option.sequential$step)))stop("The step has to be a integer.")
+        if(!(inherits(option.sequential$min,c("numeric","integer")))|(option.sequential$min!=floor(option.sequential$min)))stop("The min has to be a integer.")
         if(option.sequential$step<=0)stop("Steps need to be at least of 1.")
         if(option.sequential$min<=0)stop("The minimum of itération must be at least 0")
         if(option.sequential$cutoff<=0)stop("The cutoff for spline need to be positive.")
@@ -630,7 +630,7 @@ idm <- function(formula01,
         b<-c(rep(0.5,size_spline),rep(0,size1))
         # define splines and initialize them
       }else{
-        if(class(B)!="numeric"){stop(paste0("B need to be a numeric"))}
+        if(!inherits(B,"numeric")){stop(paste0("B need to be a numeric"))}
         # if(any(B[1:size_spline]<0)){stop(paste0("B need to be positive for spline parameters"))}
         if(length(B)!=(size_V)){stop(paste0("The length of the initialization must be : ",size_V))}
         b<-B}
@@ -647,7 +647,7 @@ idm <- function(formula01,
       
       if (!is.null(B)){
         
-        if(class(B)!="numeric"){stop(paste0("B need to be a numeric"))}
+        if(!inherits(B,"numeric")){stop(paste0("B need to be a numeric"))}
         # if(any(B[1:size_spline]<0)){stop(paste0("B need to be positive for spline parameters"))}
         if(length(B)!=(size_V)){stop(paste0("The length of the initialization must be : ",size_V))}
         b<-B}else{
@@ -665,7 +665,7 @@ idm <- function(formula01,
     
     if(!is.null(posfix)){
       
-      if(!class(posfix)%in%c("numeric","integer")){stop(paste0("Posfix need to be a numeric"))}
+      if(!inherits(posfix,c("numeric","integer"))){stop(paste0("Posfix need to be a numeric"))}
       posfix<-na.omit(posfix)
       if(min(posfix)<=0){stop(paste0("The indexation of posfix need to start at 1"))}
       if(max(posfix)>(size_V)){stop(paste0("The indexation of posfix cannot exceed the number of parameters : ",size_V))}
@@ -998,20 +998,20 @@ idm <- function(formula01,
           if(penalty=="ridge"){alpha<-0}
           if(length(alpha)>1)stop("Can only specify one value for alpha")
           if(penalty=="mcp"){
-            if(!class(alpha)%in%c("numeric","integer")  | alpha<=1)stop("Alpha need to be a numeric and 1 superior to 1")
+            if(!inherits(alpha,c("numeric","integer"))  | alpha<=1)stop("Alpha need to be a numeric and 1 superior to 1")
             
           }
       
           if(penalty=="scad"){
-            if(!class(alpha)%in%c("numeric","integer")  | alpha<=1)stop("Alpha need to be a numeric and 1 superior to 1")
+            if(!inherits(alpha,c("numeric","integer")) | alpha<=1)stop("Alpha need to be a numeric and 1 superior to 1")
             
           }
           if(penalty%in%c("elasticnet","corrected.elasticnet")){
-           if(!class(alpha)%in%c("numeric","integer")  | alpha>1 | alpha <0)stop("Alpha need to be a numeric between 0 and 1")
+           if(!inherits(alpha,c("numeric","integer"))  | alpha>1 | alpha <0)stop("Alpha need to be a numeric between 0 and 1")
           }
-          if(!class(nlambda01)%in%c("numeric","integer") | round(nlambda01)!=nlambda01 | nlambda01<1)stop("Nlambda01 need to be an integer superior or equal to 1")
-          if(!class(nlambda02)%in%c("numeric","integer") | round(nlambda02)!=nlambda02 | nlambda02<1)stop("Nlambda02 need to be an integer superior or equal to 1")
-          if(!class(nlambda12)%in%c("numeric","integer") | round(nlambda12)!=nlambda12 | nlambda12<1)stop("Nlambda12 need to be an integer superior or equal to 1")
+          if(!inherits(nlambda01,c("numeric","integer")) | round(nlambda01)!=nlambda01 | nlambda01<1)stop("Nlambda01 need to be an integer superior or equal to 1")
+          if(!inherits(nlambda02,c("numeric","integer")) | round(nlambda02)!=nlambda02 | nlambda02<1)stop("Nlambda02 need to be an integer superior or equal to 1")
+          if(!inherits(nlambda12,c("numeric","integer")) | round(nlambda12)!=nlambda12 | nlambda12<1)stop("Nlambda12 need to be an integer superior or equal to 1")
           
           pace.lambda<-ifelse(N<size_V,0.05,0.0001)
        

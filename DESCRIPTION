@@ -19,7 +19,10 @@ Imports:
     lava (>= 1.4.1),
     mvtnorm (>= 1.0-3),
     stringr (>= 1.4.0),
-    splines2 (>= 0.4.5)
+    splines2 (>= 0.4.5),
+    marqLevAlg (> 2.0), 
+    testthat,
+    doParallel, foreach, parallel,iterators, MASS,graphics, grDevices, stats, utils, survival,ggplot2
 Maintainer: Thomas Alexander Gerds <tag@biostat.ku.dk>
 License: GPL (>= 2)
 Packaged: Wed May 6 15:36:28 2010; tag

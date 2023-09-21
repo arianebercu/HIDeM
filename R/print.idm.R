@@ -89,11 +89,11 @@ print.idm <- function(x,conf.int=.95,digits=4,pvalDigits=4,eps=0.0001,...){
           cat("                    : likelihood=", signif(x$cv$ca,2), "\n") 
           cat("                    : second derivatives=", signif(x$cv$rdm,2), "\n")
           }else{
-            ca.beta<-apply(m01$cv$ca.beta,MARGIN=2,FUN=function(x){x<-na.omit(x) 
+            ca.beta<-apply(x$cv$ca.beta,MARGIN=2,FUN=function(x){x<-na.omit(x) 
             return(x[length(x)])})
-            ca.spline<-apply(m01$cv$ca.spline,MARGIN=2,FUN=function(x){x<-na.omit(x) 
+            ca.spline<-apply(x$cv$ca.spline,MARGIN=2,FUN=function(x){x<-na.omit(x) 
             return(x[length(x)])})
-            cb<-apply(m01$cv$cb,MARGIN=2,FUN=function(x){x<-na.omit(x) 
+            cb<-apply(x$cv$cb,MARGIN=2,FUN=function(x){x<-na.omit(x) 
             return(abs(x[length(x)]-x[length(x)-1]))})
             cat("convergence criteria: parameters beta=", ca.beta, "\n")
             cat("                    : parameters base risk=", ca.spline, "\n") 
@@ -159,28 +159,50 @@ print.idm <- function(x,conf.int=.95,digits=4,pvalDigits=4,eps=0.0001,...){
         }
       }
         
-        wald <- (x$coef/se)**2
+        
         z <- abs(qnorm((1 + conf.int)/2))
-        coefmat <- data.frame("coef"=format(round(x$coef,digits)),
-                              "SE coef"=format(round(se,digits)),
-                              "exp(coef)"=format(round(x$HR,digits)),
-                              "CI"=matrix(paste("[",
-                                         format(round(exp(x$coef - z * se),2)),
-                                         ";",
-                                         format(round(exp(x$coef + z * se),2)),
-                                         "]",
-                                         sep=""),ncol=n_model,nrow=dim(x$coef)),
-                              ## "Wald"=format(wald,digits),
-                              "p-value"=matrix(format.pval(1 - pchisq(wald, 1),digits=pvalDigits,eps=eps),
-                                               ,ncol=n_model,nrow=dim(x$coef)),
-                              check.names=FALSE)
-        coefmat <- cbind(Factor=ifelse(n_model==1,names(x$coef),
-                                       rownames(x$coef)),coefmat)
-        coeflist <- split(coefmat,rep(c("transition 0 -> 1","transition 0 -> 2","transition 1 -> 2"),x$NC))
-        cat("\n\nRegression coefficients:\n\n")
-        print(coeflist)
+        
+        for(k in 1:n_model){
+          if(n_model==1){
+            wald <- (x$coef/se)**2
+            coefmat <- data.frame("coef"=format(round(x$coef,digits)),
+                                  "SE coef"=format(round(se,digits)),
+                                  "exp(coef)"=format(round(x$HR,digits)),
+                                  "CI"=paste0("[",
+                                                        format(round(exp(x$coef - z * se),2)),
+                                                        ";",
+                                                        format(round(exp(x$coef + z * se),2)),
+                                                        "]"),
+                                  ## "Wald"=format(wald,digits),
+                                  "p-value"=format.pval(1 - pchisq(wald, 1),digits=pvalDigits,eps=eps),
+                                        
+                                  check.names=FALSE)
+            coefmat <- cbind(Factor=names(x$coef),coefmat)
+            coeflist <- split(coefmat,rep(c("transition 0 -> 1","transition 0 -> 2","transition 1 -> 2"),x$NC))
+            cat("\n\nRegression coefficients:\n\n")
+            print(coeflist)
+            }else{
+              wald <- (x$coef[,k]/se[,k])**2
+                coefmat <- data.frame("coef"=format(round(x$coef[,k],digits)),
+                                "SE coef"=format(round(se[,k],digits)),
+                                "exp(coef)"=format(round(x$HR[,k],digits)),
+                                "CI"=paste0("[",
+                                            format(round(exp(x$coef[,k] - z * se[,k]),2)),
+                                            ";",
+                                            format(round(exp(x$coef[,k] + z * se[,k]),2)),
+                                            "]"),
+                                ## "Wald"=format(wald,digits),
+                                "p-value"=format.pval(1 - pchisq(wald, 1),digits=pvalDigits,eps=eps),
+                                
+                                check.names=FALSE)
+          coefmat <- cbind(Factor=names(x$coef),coefmat)
+          coeflist <- split(coefmat,rep(c("transition 0 -> 1","transition 0 -> 2","transition 1 -> 2"),x$NC))
+          cat(paste0("\n\nRegression coefficients for model",k,":\n\n"))
+          print(coeflist)
       }
        
+    }
+    }
     }
 }
 
