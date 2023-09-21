@@ -28,6 +28,16 @@ intensity(
 
 \item{linear.predictor}{Linear predictor beta*Z. When it is non-zero,
 transition and cumulative transition are multiplied by \code{exp(linear.predictor)}. Default is zero.}
+
+\item{V}{matrix of variance co-variance}
+
+\item{fix}{indicators if parameters are fixed}
+
+\item{converged}{indicator of convergence of the models}
+
+\item{conf.int}{confidence intervals, 1 - alpha}
+
+\item{method}{the methodology, splines or weib}
 }
 \value{
 \item{times}{The time points at which the following estimates are evaluated.}
@@ -47,21 +57,16 @@ intensity function is a linear combination of I-splines (the integral of a
 M-spline is called I-spline). The coefficients \code{theta} are the same for
 the M-splines and I-splines.
 
-Important: the theta parameters returned by \code{idm} and \code{shr} are in fact
+Important: the theta parameters returned by \code{idm} are in fact
 the square root of the splines coefficients. See examples.
 
 This function is a R-translation of a corresponding Fortran function called \code{susp}. \code{susp} is
-used internally by \code{idm} and \code{shr}.
+used internally by \code{idm}.
 }
 \examples{
 
 
 \dontrun{
- data(testdata)
-fit.su <- shr(Hist(time=list(l, r), id) ~ cov,
-              data = testdata,method = "Splines",CV = TRUE)
-intensity(times = fit.su$time, knots = fit.su$knots,
-           number.knots = fit.su$nknots, theta = fit.su$theta^2)
            
   data(Paq1000)
   fit.idm <-  idm(formula02 = Hist(time = t, event = death, entry = e) ~ certif,
@@ -84,9 +89,6 @@ intensity(times = fit.su$time, knots = fit.su$knots,
   # Same result as:
   predict(fit.idm, s = 70, t = 80, conf.int = FALSE) # see first element
 }
-}
-\seealso{
-\code{\link{shr}}, \code{\link{idm}}
 }
 \author{
 R: Celia Touraine <Celia.Touraine@isped.u-bordeaux2.fr> and Thomas Alexander Gerds <tag@biostat.ku.dk>

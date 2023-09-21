@@ -36,7 +36,6 @@ idm(
   penalty.factor = NULL,
   alpha = ifelse(penalty == "scad", 3.7, ifelse(penalty == "mcp", 3, ifelse(penalty
     \%in\% c("elasticnet", "corrected.elasticnet"), 0.5, 1))),
-  def.positive = T,
   step.sequential = F,
   option.sequential = list(cutoff = 10^-3, min = 20, step = 10),
   nproc = 1,
@@ -71,7 +70,11 @@ intensities by M-splines, "Weib" for a parametric approach with a
 Weibull distribution on the transition intensities. Default is
 "Weib".}
 
+\item{scale.X}{do you want to center and reduce your explanatory variables}
+
 \item{maxiter}{Maximum number of iterations. The default is 200.}
+
+\item{maxiter.pena}{Maximum number of iterations for penalised coefficients}
 
 \item{eps}{A vector of 3 integers >0 used to define the power of
 three convergence criteria: 1. for the regression parameters,
@@ -81,7 +84,11 @@ respective values change less then \eqn{10^{-5}} (for regression
 parameters and likelihood) and \eqn{10^{-3}} for the second
 derivatives between two iterations.}
 
-\item{n.knots}{For \code{method="Splines"} only, a vector of length
+\item{eps.spline}{the power of convergence for splines parameters only}
+
+\item{eps.eigen}{the power of convergence for eigen values of covariance matrix only}
+
+\item{n.knots}{For \code{method="splines"} only, a vector of length
 3 specifing the number of knots, one for each transition, for the
 M-splines estimate of the baseline intensities in the order \code{0
 --> 1}, \code{0 --> 2}, \code{1 --> 2}. The default is c(7,7,7). When \code{knots}
@@ -100,8 +107,9 @@ one vector of placements for each transition in the order \code{0 --> 1}, \code{
 If only vector is specifified the knots are used for all transitions. If only 2 vectors are specifified, the
 knots for the \code{0 --> 1} transition are also used for the \code{1 --> 2} transition.}
 }
-The algorithm needs at least 3 knots in sparse.spline and 5 knots in spline and allows no more than 20 knots.
-#' @param type.quantile Argument only active for the likelihood approach \code{method="splines","sparse.spline"}.
+The algorithm needs at least 3 knots in sparse.spline and 5 knots in spline and allows no more than 20 knots.}
+
+\item{type.quantile}{Argument only active for the likelihood approach \code{method="splines","sparse.spline"}.
 There are three ways to control the placement of the knots  according to the time considered between states :=
 \itemize{
 #'  \item{\code{type.quantile=1}}{Time for \code{0 --> 1} is the imputed to the middle of the interval left and right for demence . Time for \code{0 --> 2}
@@ -136,15 +144,35 @@ is na.omit. Another possible value is NULL.}
 second the parameters of explanatory variables in order  \code{0 --> 1}, \code{0 --> 2}, \code{1 --> 2}.
 This argument is only used for models with M-splines.}
 
-\item{CV}{Binary variable equals to 1 when search (by approximated
-cross validation) of the smoothing parameters \code{kappa} and 0
-otherwise. Argument for the penalized likelihood approach. The
-default is 0.}
+\item{posfix}{index of fixed parameters}
 
-\item{kappa}{Argument only active for the penalized likelihood approach \code{method="Splines"}.
-A vector with 3 positive values (smoothing parameters), one for each transition, in the order
-0 --> 1, 0 --> 2 and 1 --> 2..
-If CV=1 these are used as starting values for a cross validation search to optimize kappa.}
+\item{gauss.point}{gauss quadrature points in the approximation of integrals}
+
+\item{lambda01}{Lambda on transition 0 --> 1}
+
+\item{lambda02}{Lambda on transition 0 --> 2}
+
+\item{lambda12}{Lambda on transition 1 --> 2}
+
+\item{nlambda01}{number of Lambda on transition 0 --> 1}
+
+\item{nlambda02}{number of Lambda on transition 0 --> 2}
+
+\item{nlambda12}{number of Lambda on transition 1 --> 2}
+
+\item{penalty}{which penalty to consider}
+
+\item{penalty.factor}{which variable should be penalised}
+
+\item{alpha}{alpha on all transitions}
+
+\item{step.sequential}{should we use the optimisation version to fix splines}
+
+\item{nproc}{number of cluster}
+
+\item{clustertype}{in which cluster to work}
+
+\item{print.info}{shloud we print info during mla convergence}
 }
 \value{
 \item{call}{the call that produced the result.} \item{coef}{regression
