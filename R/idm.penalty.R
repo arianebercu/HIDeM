@@ -5,7 +5,7 @@ idm.penalty<-function(b,fix0,size_V,size_spline,
                       t0,t1,t2,t3,troncature,gauss.point,
                       nlambda01,lambda01,nlambda02,lambda02,
                       nlambda12,lambda12,alpha,penalty.factor,
-                      def.positive,step.sequential,option.sequential,penalty){
+                      step.sequential,option.sequential,penalty){
   
   
   # need to keep original fix to calculate for beta 
@@ -311,13 +311,7 @@ idm.penalty<-function(b,fix0,size_V,size_spline,
                                  
                                  eigen.values<-eigen(V,symmetric=T,only.values=T)$values
                                  
-                                 
-                                 if(def.positive==T){
-                                   # need to be defined positive 
-                                   idpos<-ifelse(any(eigen.values<=eps.eigen),1,0)
-                                 }else{
-                                   # only need to be inversible 
-                                   idpos<-ifelse(any(abs(eigen.values)<=eps.eigen),1,0)}
+                                 idpos<-ifelse(any(eigen.values<=eps.eigen),1,0)
                                  
                                  
                                  idpos0<-idpos
@@ -354,9 +348,7 @@ idm.penalty<-function(b,fix0,size_V,size_spline,
                                    eigen.values<-eigen(V,symmetric=T,only.values=T)$values
                                    # check if hessienne defined positive
                                    
-                                   if(def.positive==T){
-                                     idpos<-ifelse(any(eigen.values<=eps.eigen),1,0)
-                                   }else{idpos<-ifelse(any(abs(eigen.values)<=eps.eigen),1,0)}
+                                   idpos<-ifelse(any(eigen.values<=eps.eigen),1,0)
                                    
                                    
                                    # if(def.positive==T){
@@ -1042,12 +1034,7 @@ idm.penalty<-function(b,fix0,size_V,size_spline,
                                  eigen.values<-eigen(V,symmetric=T,only.values=T)$values
                                  
                                  
-                                 if(def.positive==T){
-                                   # need to be defined positive 
-                                   idpos<-ifelse(any(eigen.values<=eps.eigen),1,0)
-                                 }else{
-                                   # only need to be inversible 
-                                   idpos<-ifelse(any(abs(eigen.values)<=eps.eigen),1,0)}
+                                 idpos<-ifelse(any(eigen.values<=eps.eigen),1,0)
                                  
                                  
                                  idpos0<-idpos
@@ -1084,9 +1071,7 @@ idm.penalty<-function(b,fix0,size_V,size_spline,
                                    eigen.values<-eigen(V,symmetric=T,only.values=T)$values
                                    # check if hessienne defined positive
                                    
-                                   if(def.positive==T){
-                                     idpos<-ifelse(any(eigen.values<=eps.eigen),1,0)
-                                   }else{idpos<-ifelse(any(abs(eigen.values)<=eps.eigen),1,0)}
+                                   idpos<-ifelse(any(eigen.values<=eps.eigen),1,0)
                                    
                                    
                                    # if(def.positive==T){

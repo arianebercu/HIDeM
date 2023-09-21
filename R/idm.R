@@ -29,6 +29,7 @@
 #' @param data A data frame in which to interpret the variables of
 #' \code{formula01}, \code{formula02} and \code{formula12}.
 #' @param maxiter Maximum number of iterations. The default is 200.
+#' @param maxiter.pena Maximum number of iterations for penalised coefficients
 #' @param eps A vector of 3 integers >0 used to define the power of
 #' three convergence criteria: 1. for the regression parameters,
 #' 2. for the likelihood, 3. for the second derivatives. The default
@@ -36,7 +37,9 @@
 #' respective values change less then \eqn{10^{-5}} (for regression
 #' parameters and likelihood) and \eqn{10^{-3}} for the second
 #' derivatives between two iterations.
-#' @param n.knots For \code{method="Splines"} only, a vector of length
+#' @param eps.spline the power of convergence for splines parameters only
+#' @param eps.eigen the power of convergence for eigen values of covariance matrix only
+#' @param n.knots For \code{method="splines"} only, a vector of length
 #' 3 specifing the number of knots, one for each transition, for the
 #' M-splines estimate of the baseline intensities in the order \code{0
 #' --> 1}, \code{0 --> 2}, \code{1 --> 2}. The default is c(7,7,7). When \code{knots}
@@ -55,7 +58,7 @@
 #' knots for the \code{0 --> 1} transition are also used for the \code{1 --> 2} transition.}
 #' }
 #' The algorithm needs at least 3 knots in sparse.spline and 5 knots in spline and allows no more than 20 knots.
-#' #' @param type.quantile Argument only active for the likelihood approach \code{method="splines","sparse.spline"}.
+#' @param type.quantile Argument only active for the likelihood approach \code{method="splines","sparse.spline"}.
 #' There are three ways to control the placement of the knots  according to the time considered between states :=
 #' \itemize{
 #' #'  \item{\code{type.quantile=1}}{Time for \code{0 --> 1} is the imputed to the middle of the interval left and right for demence . Time for \code{0 --> 2}
@@ -98,6 +101,18 @@
 #' na.action attribute of data, second a na.action setting of options,
 #' and third 'na.fail' if that is unset. The 'factory-fresh' default
 #' is na.omit. Another possible value is NULL.
+#' @param scale.X do you want to center and reduce your explanatory variables
+#' @param posfix index of fixed parameters 
+#' @param gauss.point gauss quadrature points in the approximation of integrals
+#' @param lambda01 Lambda on transition 0 --> 1
+#' @param lambda02 Lambda on transition 0 --> 2
+#' @param lambda12 Lambda on transition 1 --> 2
+#' @param nlambda01 number of Lambda on transition 0 --> 1
+#' @param nlambda02 number of Lambda on transition 0 --> 2
+#' @param nlambda12 number of Lambda on transition 1 --> 2
+#' @param alpha alpha on all transitions 
+#' @param penalty which penalty to consider
+#' 
 #' @return
 #'
 #' \item{call}{the call that produced the result.} \item{coef}{regression
@@ -249,8 +264,6 @@ idm <- function(formula01,
                 alpha=ifelse(penalty=="scad",3.7,
                              ifelse(penalty=="mcp",3,
                                     ifelse(penalty%in%c("elasticnet","corrected.elasticnet"),0.5,1))),
-                def.positive=T,
-
                 step.sequential=F,
                 option.sequential=list(cutoff=10^-3,
                                     min=20,
@@ -1146,7 +1159,6 @@ idm <- function(formula01,
                              lambda12=lambda12,
                              alpha=alpha,
                              penalty.factor=penalty.factor,
-                             def.positive=def.positive,
                              step.sequential=step.sequential,
                              option.sequential=option.sequential,
                              penalty=penalty)
@@ -1483,7 +1495,6 @@ idm <- function(formula01,
                                lambda12=lambda12,
                                alpha=alpha,
                                penalty.factor=penalty.factor,
-                               def.positive=def.positive,
                                penalty=penalty)
               
               

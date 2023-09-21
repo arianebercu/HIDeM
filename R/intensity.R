@@ -37,13 +37,17 @@
 ##' @param theta The coefficients for the linear combination of M-splines (and I-splines see details), theta from the model
 ##' @param linear.predictor Linear predictor beta*Z. When it is non-zero,
 ##' transition and cumulative transition are multiplied by \code{exp(linear.predictor)}. Default is zero.
+##' @param V matrix of variance co-variance
+##' @param fix indicators if parameters are fixed 
+##' @param converged indicator of convergence of the models
+##' @param conf.int confidence intervals, 1 - alpha
+##' @param method the methodology, splines or weib
 ##' @return
 ##' \item{times}{The time points at which the following estimates are evaluated.}
 ##' \item{intensity}{The transition intensity function evaluated at \code{times}.}
 ##' \item{cumulative.intensity}{The cumulative transition intensity function evaluated at \code{times}}
 ##' \item{survival}{The "survival" function, i.e., exp(-cumulative.intensity)}
 ##'
-##' @seealso \code{ \code{\link{idm}}
 ##' @examples
 ##'
 ##'
@@ -200,8 +204,8 @@ intensity <- function(times,knots,number.knots,theta,linear.predictor=0,V=NULL,
       if(is.null(times)){
         times<-seq(from=knots.bound[1],to=knots.bound[2],length.out=100)}
       
-      msplines<-mSpline(x=times,knots=knots.int,Boundary.knots=knots.bound,intercept = T)
-      isplines<-iSpline(x=times,knots=knots.int,Boundary.knots=knots.bound,intercept = T)
+      msplines<-splines2::mSpline(x=times,knots=knots.int,Boundary.knots=knots.bound,intercept = T)
+      isplines<-splines2::iSpline(x=times,knots=knots.int,Boundary.knots=knots.bound,intercept = T)
       
       
       intensity<-msplines%*%theta.square

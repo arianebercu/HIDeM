@@ -37,8 +37,6 @@
 ##' @param t30 time of event/out
 ##' @param troncature0 indicator if troncature or not
 ##' @param gausspoint0 number of gausspoint quadrature
-##'  @return
-##' @seealso \code{ \code{\link{idm}}
 #' @useDynLib SmoothHazardoptim9
 ##' @export
 #' @author R: Ariane Bercu, Celia Touraine <Celia.Touraine@@isped.u-bordeaux2.fr> and Thomas Alexander Gerds <tag@@biostat.ku.dk>

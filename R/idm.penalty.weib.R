@@ -4,8 +4,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                    ve01,ve02,ve12,dimnva01,dimnva02,dimnva12,nvat01,nvat02,nvat12,
                    t0,t1,t2,t3,idd,idm,ts,troncature,
                    nlambda01,lambda01,nlambda02,lambda02,nlambda12,lambda12,
-                   alpha,penalty.factor,
-                   def.positive,penalty){
+                   alpha,penalty.factor,penalty){
   
   
   # need to keep original fix to calculate for beta 
@@ -307,13 +306,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                  
                                  eigen.values<-eigen(V,symmetric=T,only.values=T)$values
                                  
-                                 
-                                 if(def.positive==T){
-                                   # need to be defined positive 
-                                   idpos<-ifelse(any(eigen.values<=eps.eigen),1,0)
-                                 }else{
-                                   # only need to be inversible 
-                                   idpos<-ifelse(any(abs(eigen.values)<=eps.eigen),1,0)}
+                                 idpos<-ifelse(any(eigen.values<=eps.eigen),1,0)
                                  
                                  
                                  idpos0<-idpos
@@ -350,10 +343,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                    eigen.values<-eigen(V,symmetric=T,only.values=T)$values
                                    # check if hessienne defined positive
                                    
-                                   if(def.positive==T){
-                                     idpos<-ifelse(any(eigen.values<=eps.eigen),1,0)
-                                   }else{idpos<-ifelse(any(abs(eigen.values)<=eps.eigen),1,0)}
-                                   
+                                   idpos<-ifelse(any(eigen.values<=eps.eigen),1,0)
                                    
                                    # if(def.positive==T){
                                    #   idpos<-ifelse(any(eigen.values<=0),1,0)
@@ -992,13 +982,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                  
                                  eigen.values<-eigen(V,symmetric=T,only.values=T)$values
                                 
-                                 
-                                 if(def.positive==T){
-                                   # need to be defined positive 
-                                   idpos<-ifelse(any(eigen.values<=eps.eigen),1,0)
-                                 }else{
-                                   # only need to be inversible 
-                                   idpos<-ifelse(any(abs(eigen.values)<=eps.eigen),1,0)}
+                                 idpos<-ifelse(any(eigen.values<=eps.eigen),1,0)
                                  
                                  
                                  idpos0<-idpos
@@ -1034,10 +1018,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                    if(sum(V==Inf)>0|sum(V==-Inf)>0){break}
                                    eigen.values<-eigen(V,symmetric=T,only.values=T)$values
                                    # check if hessienne defined positive
-                                   
-                                   if(def.positive==T){
-                                     idpos<-ifelse(any(eigen.values<=eps.eigen),1,0)
-                                   }else{idpos<-ifelse(any(abs(eigen.values)<=eps.eigen),1,0)}
+                                   idpos<-ifelse(any(eigen.values<=eps.eigen),1,0)
                                    
                                    
                                    # if(def.positive==T){
