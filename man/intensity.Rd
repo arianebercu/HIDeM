@@ -4,7 +4,18 @@
 \alias{intensity}
 \title{M-spline estimate of the transition intensity function}
 \usage{
-intensity(times, knots, number.knots, theta, linear.predictor = 0)
+intensity(
+  times,
+  knots,
+  number.knots,
+  theta,
+  linear.predictor = 0,
+  V = NULL,
+  fix = NULL,
+  converged = NULL,
+  conf.int = 0.95,
+  method = "weib"
+)
 }
 \arguments{
 \item{times}{Time points at which to estimate the intensity function}
@@ -13,9 +24,9 @@ intensity(times, knots, number.knots, theta, linear.predictor = 0)
 
 \item{number.knots}{Number of knots for the M-splines (and I-splines see details)}
 
-\item{theta}{The coefficients for the linear combination of M-splines (and I-splines see details)}
+\item{theta}{The coefficients for the linear combination of M-splines (and I-splines see details), theta from the model}
 
-\item{linear.predictor}{Linear predictor beta*Z. When it is non-zero, 
+\item{linear.predictor}{Linear predictor beta*Z. When it is non-zero,
 transition and cumulative transition are multiplied by \code{exp(linear.predictor)}. Default is zero.}
 }
 \value{
@@ -43,33 +54,35 @@ This function is a R-translation of a corresponding Fortran function called \cod
 used internally by \code{idm} and \code{shr}.
 }
 \examples{
-data(testdata)
+
+
+\dontrun{
+ data(testdata)
 fit.su <- shr(Hist(time=list(l, r), id) ~ cov,
               data = testdata,method = "Splines",CV = TRUE)
 intensity(times = fit.su$time, knots = fit.su$knots,
            number.knots = fit.su$nknots, theta = fit.su$theta^2)
-
-\dontrun{
+           
   data(Paq1000)
   fit.idm <-  idm(formula02 = Hist(time = t, event = death, entry = e) ~ certif,
                   formula01 = Hist(time = list(l,r), event = dementia) ~ certif,
                   formula12 = ~ certif, method = "Splines", data = Paq1000)
   # Probability of survival in state 0 at age 80 for a subject with no cep given
     that he is in state 0 at 70
-  su0 <- (intensity(times = 80, knots = fit.idm$knots01, 
-                   number.knots = fit.idm$nknots01, 
+  su0 <- (intensity(times = 80, knots = fit.idm$knots01,
+                   number.knots = fit.idm$nknots01,
                    theta = fit.idm$theta01^2)$survival
-         *intensity(times = 80, knots = fit.idm$knots02, 
-                   number.knots = fit.idm$nknots02, 
+         *intensity(times = 80, knots = fit.idm$knots02,
+                   number.knots = fit.idm$nknots02,
                    theta = fit.idm$theta02^2)$survival)/
-        (intensity(times = 70, knots = fit.idm$knots01, 
-                   number.knots = fit.idm$nknots01, 
+        (intensity(times = 70, knots = fit.idm$knots01,
+                   number.knots = fit.idm$nknots01,
                    theta = fit.idm$theta01^2)$survival
-        *intensity(times = 70, knots = fit.idm$knots02, 
-                   number.knots = fit.idm$nknots02, 
+        *intensity(times = 70, knots = fit.idm$knots02,
+                   number.knots = fit.idm$nknots02,
                    theta = fit.idm$theta02^2)$survival)
-  # Same result as:  
-  predict(fit.idm, s = 70, t = 80, conf.int = FALSE) # see first element               
+  # Same result as:
+  predict(fit.idm, s = 70, t = 80, conf.int = FALSE) # see first element
 }
 }
 \seealso{

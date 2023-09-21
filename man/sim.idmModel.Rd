@@ -4,8 +4,17 @@
 \alias{sim.idmModel}
 \title{Simulate illness-death model data}
 \usage{
-\method{sim}{idmModel}(x, n, illness.known.at.death = TRUE, compliance = 1,
-  latent = FALSE, keep.inspectiontimes = FALSE, ...)
+\method{sim}{idmModel}(
+  x,
+  n,
+  plot,
+  pen,
+  illness.known.at.death = TRUE,
+  compliance = 1,
+  latent = FALSE,
+  keep.inspectiontimes = FALSE,
+  ...
+)
 }
 \arguments{
 \item{x}{An \code{idmModel} object as obtained with

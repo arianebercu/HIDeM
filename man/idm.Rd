@@ -4,10 +4,45 @@
 \alias{idm}
 \title{Fit an illness-death model}
 \usage{
-idm(formula01, formula02, formula12, data, maxiter = 200, eps = c(5, 5, 3),
-  n.knots = c(7, 7, 7), knots = "equidistant", CV = FALSE,
-  kappa = c(1000000, 500000, 20000), method = "Weib", conf.int = 0.95,
-  print.iter = FALSE, subset = NULL, na.action = na.fail)
+idm(
+  formula01,
+  formula02,
+  formula12,
+  data,
+  method = "Weib",
+  scale.X = T,
+  maxiter = 100,
+  maxiter.pena = 10,
+  eps = c(5, 5, 3),
+  eps.spline = 3,
+  eps.eigen = 2,
+  n.knots = NULL,
+  knots = "equidistant",
+  type.quantile = 1,
+  conf.int = 0.95,
+  print.iter = FALSE,
+  subset = NULL,
+  na.action = na.fail,
+  B = NULL,
+  posfix = NULL,
+  gauss.point = 10,
+  lambda01 = NULL,
+  lambda02 = NULL,
+  lambda12 = NULL,
+  nlambda01 = 50,
+  nlambda02 = 50,
+  nlambda12 = 50,
+  penalty = NULL,
+  penalty.factor = NULL,
+  alpha = ifelse(penalty == "scad", 3.7, ifelse(penalty == "mcp", 3, ifelse(penalty
+    \%in\% c("elasticnet", "corrected.elasticnet"), 0.5, 1))),
+  def.positive = T,
+  step.sequential = F,
+  option.sequential = list(cutoff = 10^-3, min = 20, step = 10),
+  nproc = 1,
+  clustertype = "FORK",
+  print.info = F
+)
 }
 \arguments{
 \item{formula01}{A formula specifying a regression model for the
@@ -28,6 +63,13 @@ state.  operator is not required. If missing it is set to
 
 \item{data}{A data frame in which to interpret the variables of
 \code{formula01}, \code{formula02} and \code{formula12}.}
+
+\item{method}{type of estimation method: "splines" for a
+penalized likelihood approach with approximation of the transition
+intensities by M-splines, "sparse.splines" for a likelihood approach with approximation of the transition
+intensities by M-splines, "Weib" for a parametric approach with a
+Weibull distribution on the transition intensities. Default is
+"Weib".}
 
 \item{maxiter}{Maximum number of iterations. The default is 200.}
 
@@ -53,28 +95,24 @@ of all time points:
  \item{\code{knots="equidistant"}}{Knots are placed with same distance on the time scale.}
  \item{\code{knots="quantiles"}}{Knots are placed such that the number of observations is roughly the same between knots.}
 \item{knots=list()}{List of 1 or 2 or three vectors. The list elements are the actual placements
-(timepoints) of the knots for the M-spline. The list may contain 
+(timepoints) of the knots for the M-spline. The list may contain
 one vector of placements for each transition in the order \code{0 --> 1}, \code{0 --> 2}, \code{1 --> 2}.
 If only vector is specifified the knots are used for all transitions. If only 2 vectors are specifified, the
 knots for the \code{0 --> 1} transition are also used for the \code{1 --> 2} transition.}
 }
-The algorithm needs at least 5 knots and allows no more than 20 knots.}
-
-\item{CV}{Binary variable equals to 1 when search (by approximated
-cross validation) of the smoothing parameters \code{kappa} and 0
-otherwise. Argument for the penalized likelihood approach. The
-default is 0.}
-
-\item{kappa}{Argument only active for the penalized likelihood approach \code{method="Splines"}.
-A vector with 3 positive values (smoothing parameters), one for each transition, in the order 
-0 --> 1, 0 --> 2 and 1 --> 2..
-If CV=1 these are used as starting values for a cross validation search to optimize kappa.}
-
-\item{method}{type of estimation method: "Splines" for a
-penalized likelihood approach with approximation of the transition
-intensities by M-splines, "Weib" for a parametric approach with a
-Weibull distribution on the transition intensities. Default is
-"Weib".}
+The algorithm needs at least 3 knots in sparse.spline and 5 knots in spline and allows no more than 20 knots.
+#' @param type.quantile Argument only active for the likelihood approach \code{method="splines","sparse.spline"}.
+There are three ways to control the placement of the knots  according to the time considered between states :=
+\itemize{
+#'  \item{\code{type.quantile=1}}{Time for \code{0 --> 1} is the imputed to the middle of the interval left and right for demence . Time for \code{0 --> 2}
+ and \code{1 --> 2} is the same t, time of news. }
+ \item{\code{type.quantile=2}}{Time for \code{0 --> 1} is the imputed to the middle of the interval left and right. Time for \code{0 --> 2}
+ and \code{1 --> 2} is the same t, time of news. }
+\item{\code{type.quantile=3}}{Time for \code{0 --> 1} is the imputed to the middle of the interval left and right. Time for \code{0 --> 2}
+ is time of death for non demented sujects only. Time for \code{1 --> 2} is time of death for suject diagnose with dementia. }
+ #' \item{\code{type.quantile=4}}{Time for \code{0 --> 1} is left and right. Time for \code{0 --> 2}
+ is time of death for non demented sujects only. Time for \code{1 --> 2} is time of death for suject diagnose with dementia. }
+}}
 
 \item{conf.int}{Level of confidence pointwise confidence intervals of the transition intensities, i.e.,
 a value between 0 and 1, the default is \code{0.95}.
@@ -93,6 +131,20 @@ to be used in the fit. All observations are included by default.}
 na.action attribute of data, second a na.action setting of options,
 and third 'na.fail' if that is unset. The 'factory-fresh' default
 is na.omit. Another possible value is NULL.}
+
+\item{B}{vector of size the number of parameters, in the following order, first the parameters of splines \code{0 --> 1}, \code{0 --> 2}, \code{1 --> 2},
+second the parameters of explanatory variables in order  \code{0 --> 1}, \code{0 --> 2}, \code{1 --> 2}.
+This argument is only used for models with M-splines.}
+
+\item{CV}{Binary variable equals to 1 when search (by approximated
+cross validation) of the smoothing parameters \code{kappa} and 0
+otherwise. Argument for the penalized likelihood approach. The
+default is 0.}
+
+\item{kappa}{Argument only active for the penalized likelihood approach \code{method="Splines"}.
+A vector with 3 positive values (smoothing parameters), one for each transition, in the order
+0 --> 1, 0 --> 2 and 1 --> 2..
+If CV=1 these are used as starting values for a cross validation search to optimize kappa.}
 }
 \value{
 \item{call}{the call that produced the result.} \item{coef}{regression
@@ -122,9 +174,9 @@ the intensities for transition 1 --> 2.} \item{lowerIntensity12}{lower
 confidence intervals for the values of the intensities for transition 1 -->
 2.} \item{upperIntensity12}{upper confidence intervals for the values of the
 intensities for transition 1 --> 2.} \item{RR}{vector of relative risks.}
-\item{V}{variance-covariance matrix derived from the Hessian of the log-likelihood 
-if using method="Weib" or, from the Hessian of the penalized log-likelihood 
-if using method="Splines".} 
+\item{V}{variance-covariance matrix derived from the Hessian of the log-likelihood
+if using method="Weib" or, from the Hessian of the penalized log-likelihood
+if using method="Splines".}
 \item{se}{standart errors of the
 regression parameters.} \item{Xnames01}{names of covariates on 0 --> 1.}
 \item{Xnames02}{names of covariates on 0 --> 2.} \item{Xnames12}{names of
@@ -165,7 +217,7 @@ and a steepest descent algorithm.
 library(lava)
 library(prodlim)
 set.seed(17)
-d <- simulateIDM(100)
+d <- simulateIDM(100)$data
 # right censored data
 fitRC <- idm(formula01=Hist(time=observed.illtime,event=seen.ill)~X1+X2,
              formula02=Hist(time=observed.lifetime,event=seen.exit)~X1+X2,
@@ -175,7 +227,7 @@ fitRC
 
 \dontrun{
 set.seed(17)
-d <- simulateIDM(300)
+d <- simulateIDM(300)$data
 fitRC.splines <- idm(formula01=Hist(time=observed.illtime,event=seen.ill)~X1+X2,
              formula02=Hist(time=observed.lifetime,event=seen.exit)~X1+X2,
              formula12=Hist(time=observed.lifetime,event=seen.exit)~1,data=d,
@@ -204,7 +256,7 @@ fitIC
     fit.splines <-  idm(formula02=Hist(time=t,event=death,entry=e)~certif,
                         formula01=Hist(time=list(l,r),event=dementia)~certif,
                         formula12=~1,
-                        method="Splines",
+                        method="splines",
                         data=Paq1000)
     fit.weib
     summary(fit.splines)

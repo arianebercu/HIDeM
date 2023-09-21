@@ -19,7 +19,7 @@ See the body of the function for details, i.e., evaluate simulateIDM
 }
 \examples{
 # simulateIDM
-simulateIDM(100)
+simulateIDM(100)$data
 }
 \seealso{
 idmModel sim.idmModel

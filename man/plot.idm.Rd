@@ -4,9 +4,24 @@
 \alias{plot.idm}
 \title{Plot method for an illness-death model}
 \usage{
-\method{plot}{idm}(x, conf.int = FALSE, citype = "shadow", add = FALSE,
-  axes = TRUE, col, lwd, lty, xlim, ylim, xlab, ylab, legend = TRUE,
-  transition = c("01", "02", "12"), ...)
+\method{plot}{idm}(
+  x,
+  lambda = NULL,
+  conf.int = FALSE,
+  citype = "shadow",
+  add = FALSE,
+  axes = TRUE,
+  col,
+  lwd,
+  lty,
+  xlim,
+  ylim,
+  xlab,
+  ylab,
+  legend = TRUE,
+  transition = c("01", "02", "12"),
+  ...
+)
 }
 \arguments{
 \item{x}{a \code{idmWeib} class object (output from calling
@@ -69,7 +84,6 @@ formula01=Hist(time=list(L,R),event=seen.ill)~1,data=d,conf.int=TRUE)
 plot(fit.weib)
 }
  
-
 }
 \seealso{
 \code{\link{print.idm}},\code{\link{summary.idm}},\code{\link{idm}},

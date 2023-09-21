@@ -4,10 +4,19 @@
 \alias{idmModel}
 \title{Generate illness-death model objects}
 \usage{
-idmModel(scale.illtime = 1/100, shape.illtime = 1, scale.lifetime = 1/100,
-  shape.lifetime = 1, scale.waittime = 1/100, shape.waittime = 1,
-  scale.censtime = 1/100, shape.censtime = 1, n.inspections = 5,
-  schedule = 10, punctuality = 5)
+idmModel(
+  scale.illtime = 1/100,
+  shape.illtime = 1,
+  scale.lifetime = 1/100,
+  shape.lifetime = 1,
+  scale.waittime = 1/100,
+  shape.waittime = 1,
+  scale.censtime = 1/100,
+  shape.censtime = 1,
+  n.inspections = 5,
+  schedule = 10,
+  punctuality = 5
+)
 }
 \arguments{
 \item{scale.illtime}{Weilbull scale for latent illness time}

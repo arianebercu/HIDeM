@@ -5,8 +5,13 @@
 \alias{survModelIC}
 \title{Generate survival model objects}
 \usage{
-survIC(scale.time = 1/100, shape.time = 1, n.inspections = 5,
-  schedule = 10, punctuality = 5)
+survIC(
+  scale.time = 1/100,
+  shape.time = 1,
+  n.inspections = 5,
+  schedule = 10,
+  punctuality = 5
+)
 }
 \arguments{
 \item{scale.time}{Weilbull scale for latent time}

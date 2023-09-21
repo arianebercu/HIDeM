@@ -4,8 +4,7 @@
 \alias{sim.survIC}
 \title{Simulate interval censored survival data}
 \usage{
-\method{sim}{survIC}(x, n, compliance = 1, latent = TRUE,
-  keep.inspectiontimes = FALSE, ...)
+\method{sim}{survIC}(x, n, compliance = 1, latent = TRUE, keep.inspectiontimes = FALSE, ...)
 }
 \arguments{
 \item{x}{An \code{survIC} object as obtained with

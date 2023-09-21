@@ -5,8 +5,18 @@
 \title{Predictions for an illness-death model using either a penalized likelihood
 approach or a Weibull parametrization.}
 \usage{
-\method{predict}{idm}(object, s, t, newdata, nsim = 200, seed = 21,
-  conf.int = 0.95, lifeExpect = FALSE, maxtime, ...)
+\method{predict}{idm}(
+  object,
+  s,
+  t,
+  newdata,
+  nsim = 200,
+  seed = 21,
+  conf.int = 0.95,
+  lifeExpect = FALSE,
+  maxtime,
+  ...
+)
 }
 \arguments{
 \item{object}{an \code{idm} class objects returned by a call to the
@@ -50,14 +60,6 @@ a list containing the following predictions with pointwise
     risk of disease. \code{F01}=\code{p01}+\code{p02_1}.}
     \item{F0.}{the probability of exit from state
     0. \code{F0.}=\code{p02_0}+\code{p01}+\code{p02_1}.}
-    \item{RM}{the restricted mean survival time without disease.}
-  or a list containing the following life expectancies with pointwise confidence intervals (when \code{lifeExpect=TRUE}):
-  \item{LE.0.}{Total life expectancy}
-\item{LE.00}{Life expectancy free of the disease (ie. Healthy life expectancy)}
-\item{LE.01}{Life expectancy with the disease (for a non-disease subject at time=s) (Note that \code{LE.01}=\code{LE.0.}-\code{LE.00}).}
-\item{LE.11}{Life expectancy for diseased subject at time=s}
-\item{LTR}{Life-time risk of the disease.}
-  
 }
 \description{
 Predict transition probabilities and cumulative probabilities from an object
@@ -67,7 +69,7 @@ of class \code{idmSplines} with confidence intervals are calculated.
 
 \dontrun{
 set.seed(100)
-d=simulateIDM(n = 100)
+d=simulateIDM(n = 100)$data
 fit <- idm(formula01=Hist(time=list(L,R),event=seen.ill)~X1+X2+X3,
                formula02=Hist(time=observed.lifetime,event=seen.exit)~X1+X2+X3,
                data=d,conf.int=FALSE)
@@ -94,7 +96,6 @@ predict(fit.splines,s=70,t=80,lifeExpect=TRUE,newdata=data.frame(certif=1),nsim=
 
 
 }
-
 }
 \seealso{
 \code{\link{idm}}

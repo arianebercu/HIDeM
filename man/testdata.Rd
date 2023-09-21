@@ -4,12 +4,14 @@
 \name{testdata}
 \alias{testdata}
 \title{Data set for survival models: right-censored and interval-censored data.}
-\format{A data frame with 936 observations on the following 4 variables.
+\format{
+A data frame with 936 observations on the following 4 variables.
 \describe{ \item{l}{for diseased subjects: left endpoint of
 censoring interval; for non-diseased subjects: right censoring time}
 \item{r}{for diseased subjects: right endpoint of censoring
 interval; for non-diseased subjects: right censoring time for the disease
-event} \item{id}{disease status} \item{cov}{covariate} }}
+event} \item{id}{disease status} \item{cov}{covariate} }
+}
 \description{
 A simulated data frame for survival models composed of right-censored and
 interval-censored data.
