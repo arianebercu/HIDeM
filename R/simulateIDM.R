@@ -184,6 +184,8 @@ idmModel <- function(scale.illtime=1/100,
 ##' @param latent if TRUE keep the latent event times
 ##' @param keep.inspectiontimes if \code{TRUE} keep the inspection
 ##' times.
+##' @param pen if the simulated data are for a penalised version of illness-death model
+##' @param plot plot of base survival for all transition
 ##' @param ... Extra arguments given to \code{sim}
 ##' @return A data set with interval censored observations from an illness-death model
 ##' example(idmModel)
@@ -367,7 +369,30 @@ simulateIDM <- function(n=100){
 ##' and covariates for the purpose of illustrating the help pages of the SmoothHazard package.
 ##' See the body of the function for details, i.e., evaluate simulateIDM
 ##' @seealso idmModel sim.idmModel simulateIDM
-##' @title Sample illness-death model data
+##' @title Sample illness-death model data for penalised regression
+##' @param scale.illtime Weilbull scale for latent illness time
+##' @param shape.illtime Weilbull shape for latent illness time
+##' @param scale.lifetime Weilbull scale for latent life time
+##' @param shape.lifetime Weilbull shape for latent life time
+##' @param scale.waittime Weilbull scale for latent life time
+##' @param shape.waittime Weilbull shape for latent life time
+##' @param scale.censtime Weilbull scale for censoring time
+##' @param shape.censtime Weilbull shape for censoring time
+##' @param n.inspections Number of inspection times
+##' @param schedule Mean of the waiting time between adjacent
+##' inspections.
+##' @param punctuality Standard deviation of waiting time between
+##' inspections.
+##' @param nvar number of variables
+##' @param mean mean of each explanatory variables
+##' @param sd standard-error of each explanatory variables
+##' @param cov covariance matrix of explanatory variables
+##' @param x01 names of variables on transition 0 --> 1
+##' @param x02 names of variables on transition 0 --> 2
+##' @param x12 names of variables on transition 1 --> 2
+##' @param beta01 value of beta on transition 0 --> 1
+##' @param beta02 value of beta on transition 0 --> 2
+##' @param beta12 value of beta on transition 1 --> 2
 ##' @useDynLib SmoothHazardoptim9
 #' @export
 #' @param n number of observations
