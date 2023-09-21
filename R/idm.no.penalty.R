@@ -7,7 +7,7 @@ idm.no.penalty<-function(b,clustertype,epsa,epsb,epsd,print.info,nproc,maxiter,s
   if(step.sequential==F){
     
     
-    out<-mla(b=b,
+    out<-marqLevAlg::mla(b=b,
              m=length(b),
              fn=idmlLikelihood,
              clustertype=clustertype,
@@ -59,7 +59,7 @@ idm.no.penalty<-function(b,clustertype,epsa,epsb,epsd,print.info,nproc,maxiter,s
     
     if(option.sequential$min>0){
       
-      out<-mla(b=b,
+      out<-marqLevAlg::mla(b=b,
                m=length(b),
                fn=idmlLikelihood,
                clustertype=clustertype,
@@ -150,7 +150,7 @@ idm.no.penalty<-function(b,clustertype,epsa,epsb,epsd,print.info,nproc,maxiter,s
     while(maxstep<maxiter & out_first_mla!=1){
       
       
-      out<-mla(b=b,
+      out<-marqLevAlg::mla(b=b,
                m=length(b),
                fn=idmlLikelihood,
                clustertype=clustertype,

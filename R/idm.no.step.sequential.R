@@ -10,7 +10,7 @@ idm.no.step.sequential<-function(b,clustertype,epsa,epsb,epsd,print.info,nproc,
   
   if(length(lambda)==1){
     
-    out<-mla(b=b,
+    out<-marqLevAlg::mla(b=b,
              m=npm,
              fn=idmlLikelihoodpena,
              clustertype=clustertype,
@@ -169,7 +169,7 @@ idm.no.step.sequential<-function(b,clustertype,epsa,epsb,epsd,print.info,nproc,
     res<-foreach(i = 1:length(lambda),.combine=cbind) %dopar% {
       
       
-      out<-mla(b=b,
+      out<-marqLevAlg::mla(b=b,
                m=npm,
                fn=idmlLikelihoodpena,
                clustertype=clustertype,

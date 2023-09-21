@@ -25,7 +25,7 @@ idm.weib<-function(b,fix0,size_V,
       if(size_V>6){
         fix.weib[(6+1):size_V]<-1}
 
-      output.mla<- mla(b=start.weib,
+      output.mla<- marqLevAlg::mla(b=start.weib,
                        fn=idmlLikelihoodweib,
                        epsa=epsa,
                        epsb=epsb,
@@ -66,7 +66,7 @@ idm.weib<-function(b,fix0,size_V,
   b<-b[fix0==0]
 
   
-  out<- mla(b=b,
+  out<- marqLevAlg::mla(b=b,
                     fn=idmlLikelihoodweib,
                     epsa=epsa,
                     epsb=epsb,

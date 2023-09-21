@@ -544,7 +544,7 @@ idm.penalty<-function(b,fix0,size_V,size_spline,
                                  bfix<-b[fix0.beta==1]
                                  b<-b[fix0.beta==0]
                                  
-                                 output.mla<- mla(b=b,
+                                 output.mla<- marqLevAlg::mla(b=b,
                                                   fn=idmlLikelihood,
                                                   epsa=eps.spline,
                                                   epsb=epsb,
@@ -1274,7 +1274,7 @@ idm.penalty<-function(b,fix0,size_V,size_spline,
                                  bfix<-b[fix0.beta==1]
                                  b<-b[fix0.beta==0]
                                  
-                                 output.mla<- mla(b=b,
+                                 output.mla<- marqLevAlg::mla(b=b,
                                                   fn=idmlLikelihood,
                                                   epsa=eps.spline,
                                                   epsb=epsb,

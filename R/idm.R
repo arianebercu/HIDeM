@@ -1327,7 +1327,7 @@ idm <- function(formula01,
           if(method=="Weib"){
               #	cat("------ Program Weibull ------ \n")
             
-            output.mla<- mla(b=b[1:6],
+            output.mla<- marqLevAlg::mla(b=b[1:6],
                              fn=idmlLikelihoodweib,
                              epsa=epsa,
                              epsb=epsb,

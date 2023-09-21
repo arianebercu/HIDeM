@@ -529,7 +529,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                  bfix<-b[fix0.beta==1]
                                  b<-b[fix0.beta==0]
                                  
-                                 output.mla<- mla(b=b,
+                                 output.mla<- marqLevAlg::mla(b=b,
                                                   fn=idmlLikelihoodweib,
                                                   epsa=epsa,
                                                   epsb=epsb,
@@ -1211,7 +1211,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                  bfix<-b[fix0.beta==1]
                                  b<-b[fix0.beta==0]
                                  
-                                 output.mla<- mla(b=b,
+                                 output.mla<- marqLevAlg::mla(b=b,
                                                   fn=idmlLikelihoodweib,
                                                   epsa=epsa,
                                                   epsb=epsb,
