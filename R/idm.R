@@ -73,14 +73,6 @@
 #' @param B vector of size the number of parameters, in the following order, first the parameters of splines \code{0 --> 1}, \code{0 --> 2}, \code{1 --> 2},
 #' second the parameters of explanatory variables in order  \code{0 --> 1}, \code{0 --> 2}, \code{1 --> 2}.
 #' This argument is only used for models with M-splines.
-#' @param CV Binary variable equals to 1 when search (by approximated
-#' cross validation) of the smoothing parameters \code{kappa} and 0
-#' otherwise. Argument for the penalized likelihood approach. The
-#' default is 0.
-#' @param kappa Argument only active for the penalized likelihood approach \code{method="Splines"}.
-#' A vector with 3 positive values (smoothing parameters), one for each transition, in the order
-#' 0 --> 1, 0 --> 2 and 1 --> 2..
-#' If CV=1 these are used as starting values for a cross validation search to optimize kappa.
 #' @param method type of estimation method: "splines" for a
 #' penalized likelihood approach with approximation of the transition
 #' intensities by M-splines, "sparse.splines" for a likelihood approach with approximation of the transition
@@ -112,7 +104,11 @@
 #' @param nlambda12 number of Lambda on transition 1 --> 2
 #' @param alpha alpha on all transitions 
 #' @param penalty which penalty to consider
-#' 
+#' @param penalty.factor which variable should be penalised
+#' @param step.sequential should we use the optimisation version to fix splines 
+#' @param clustertype in which cluster to work
+#' @param nproc number of cluster
+#' @param print.info shloud we print info during mla convergence
 #' @return
 #'
 #' \item{call}{the call that produced the result.} \item{coef}{regression
