@@ -17,7 +17,7 @@
 library(SmoothHazardoptim9)
 library(testthat)
 
-test_that("idm weibull paquid data with covariates",{
+testthat::test_that("idm weibull paquid data with covariates",{
     data(Paq1000)
     set.seed(17)
     paq <- Paq1000[sample(1:NROW(Paq1000),size=200),]
