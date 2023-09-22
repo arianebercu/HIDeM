@@ -25,126 +25,135 @@ cv.model<-function(beta,
                ifelse(num>0,1,0))
   denum<-diag(v)
   num<-abs(num)
-  NEWBETA<-sapply(c(1:dim(v)[1]),FUN=function(x){
-
-    if(penalty.factor[x]==0){
-      return(as.double(sign[x]*num[x]/denum[x]))
-    }else{
-      if(x<=nva01){
-        if(penalty%in%c("lasso","ridge","elasticnet","corrected.elasticnet")){
-          if(num[x]>lambda[1]*alpha){
-            if(penalty%in%c("lasso","ridge","elasticnet")){
-            return(as.double(sign[x]*(num[x]-lambda[1]*alpha)/(denum[x]+2*lambda[1]*(1-alpha))))}
-            if(penalty=="corrected.elasticnet"){
-              return(as.double(sign[x]*(1+lambda[1]*(1-alpha))*(num[x]-lambda[1]*alpha)/(denum[x]+2*lambda[1]*(1-alpha))))}
-            
-            
-          }else{return(0)}
-        }
-        
-        if(penalty=="mcp"){
-          if(num[x]>alpha*lambda[1]*denum[x]){
-            return(as.double(sign[x]*num[x]/denum[x]))
-          }else{
-            if(num[x]>lambda[1]){
-              return(as.double(sign[x]*(num[x]-lambda[1])/(denum[x]-(1/alpha))))
-            }else{return(0)}
-          }
-        }
-        
-        if(penalty=="scad"){
-          if(num[x]>alpha*lambda[1]*denum[x]){
-            return(as.double(sign[x]*num[x]/denum[x]))
-          }else{
-          if(num[x]<=lambda[1]*(1+denum[x])){
-            if(num[x]>lambda[1]){
-              return(as.double(sign[x]*(num[x]-lambda[1])/denum[x]))
-            }else{return(0)}
-          }else{
-            if(num[x]>(lambda[1]*alpha/(1-alpha))){
-              return(as.double(sign[x]*(num[x]-lambda[1]*alpha/(1-alpha))/(denum[x]-(1/(alpha-1)))))
-            }else{return(0)}
-          }
-          }
-        }
-      }else{
-        if(x>nva01 & x<=(nva01+nva02)){
-          if(penalty%in%c("lasso","ridge","elasticnet","corrected.elasticnet")){
-            if(num[x]>lambda[2]*alpha){
-              if(penalty%in%c("lasso","ridge","elasticnet")){
-              return(as.double(sign[x]*(num[x]-lambda[2]*alpha)/(denum[x]+2*lambda[2]*(1-alpha))))}
-              if(penalty=="corrected.elasticnet"){
-                return(as.double(sign[x]*(1+lambda[2]*(1-alpha))*(num[x]-lambda[2]*alpha)/(denum[x]+2*lambda[2]*(1-alpha))))}
-            }else{return(0)}
-          }
-          
-          if(penalty=="mcp"){
-            if(num[x]>alpha*lambda[2]*denum[x]){
-              return(as.double(sign[x]*num[x]/denum[x]))
-            }else{
-              if(num[x]>lambda[2]){
-                return(as.double(sign[x]*(num[x]-lambda[2])/(denum[x]-(1/alpha))))
-              }else{return(0)}
-            }
-          }
-          
-          if(penalty=="scad"){
-            if(num[x]>alpha*lambda[2]*denum[x]){
-              return(as.double(sign[x]*num[x]/denum[x]))
-            }else{
-              if(num[x]<=lambda[2]*(1+denum[x])){
-                if(num[x]>lambda[2]){
-                  return(as.double(sign[x]*(num[x]-lambda[2])/denum[x]))
-                }else{return(0)}
-              }else{
-                if(num[x]>(lambda[2]*alpha/(1-alpha))){
-                  return(as.double(sign[x]*(num[x]-lambda[2]*alpha/(1-alpha))/(denum[x]-(1/(alpha-1)))))
-                }else{return(0)}
-              }
-            }
-          }
-        }else{
-          
-          if(penalty%in%c("lasso","ridge","elasticnet","corrected.elasticnet")){
-            if(num[x]>lambda[3]*alpha){
-              if(penalty%in%c("lasso","ridge","elasticnet")){
-              return(as.double(sign[x]*(num[x]-lambda[3]*alpha)/(denum[x]+2*lambda[3]*(1-alpha))))}
-              if(penalty=="corrected.elasticnet"){
-                return(as.double(sign[x]*(1+lambda[3]*(1-alpha))*(num[x]-lambda[3]*alpha)/(denum[x]+2*lambda[3]*(1-alpha))))}
-            }else{return(0)}
-          }
-          
-          
-          if(penalty=="mcp"){
-            if(num[x]>alpha*lambda[3]*denum[x]){
-              return(as.double(sign[x]*num[x]/denum[x]))
-            }else{
-              if(num[x]>lambda[3]){
-                return(as.double(sign[x]*(num[x]-lambda[3])/(denum[x]-(1/alpha))))
-              }else{return(0)}
-            }
-          }
-          
-          if(penalty=="scad"){
-            if(num[x]>alpha*lambda[3]*denum[x]){
-              return(as.double(sign[x]*num[x]/denum[x]))
-            }else{
-              if(num[x]<=lambda[3]*(1+denum[x])){
-                if(num[x]>lambda[3]){
-                  return(as.double(sign[x]*(num[x]-lambda[3])/denum[x]))
-                }else{return(0)}
-              }else{
-                if(num[x]>(lambda[3]*alpha/(1-alpha))){
-                  return(as.double(sign[x]*(num[x]-lambda[3]*alpha/(1-alpha))/(denum[x]-(1/(alpha-1)))))
-                }else{return(0)}
-              }
-            }
-          }
-        }
-      }
+  
+  num01<-num[1:nva01]
+  num02<-num[(nva01+1):(nva01+nva02)]
+  num12<-num[(nva01+nva02+1):length(num)]
+  
+  denum01<-denum[1:nva01]
+  denum02<-denum[(nva01+1):(nva01+nva02)]
+  denum12<-denum[(nva01+nva02+1):length(denum)]
+  
+  sign01<-sign[1:nva01]
+  sign02<-sign[(nva01+1):(nva01+nva02)]
+  sign12<-sign[(nva01+nva02+1):length(num)]
+  
+  
+  NEWBETA[penalty.factor==0]<-as.double(sign[penalty.factor==0]*num[penalty.factor==0]/denum[penalty.factor==0])
+  
+  if(penalty%in%c("lasso","ridge","elasticnet")){
+    # 0 -> 1
+    idbeta<-which(num01>lambda[1]*alpha)
+    NEWBETA[idbeta]<-as.double(sign01[idbeta]*(num01[idbeta]-lambda[1]*alpha)/(denum01[idbeta]+2*lambda[1]*(1-alpha)))
+    idbeta<-which(num01<=lambda[1]*alpha)
+    NEWBETA[idbeta]<-0
+    
+    # 0 ->2
+    idbeta<-which(num02>lambda[2]*alpha)
+    NEWBETA[idbeta+nva01]<-as.double(sign02[idbeta]*(num02[idbeta]-lambda[2]*alpha)/(denum02[idbeta]+2*lambda[2]*(1-alpha)))
+    idbeta<-which(num02<=lambda[2]*alpha)
+    NEWBETA[idbeta+nva01]<-0
+    
+    # 1 ->2
+    idbeta<-which(num12>lambda[3]*alpha)
+    NEWBETA[idbeta+nva01+nva02]<-as.double(sign12[idbeta]*(num12[idbeta]-lambda[3]*alpha)/(denum12[idbeta]+2*lambda[3]*(1-alpha)))
+    idbeta<-which(num12<=lambda[3]*alpha)
+    NEWBETA[idbeta+nva01+nva02]<-0
     }
+  
+  if(penalty%in%c("corrected.elasticnet")){
+    
+    # 0 ->1
+    idbeta<-which(num01>lambda[1]*alpha)
+    NEWBETA[idbeta]<-as.double(sign01[idbeta]*(1+lambda[1]*(1-alpha))*(num01[idbeta]-lambda[1]*alpha)/(denum01[idbeta]+2*lambda[1]*(1-alpha)))
+    idbeta<-which(num01<=lambda[1]*alpha)
+    NEWBETA[idbeta]<-0
+    
+    # 0 ->2
+    idbeta<-which(num02>lambda[2]*alpha)+
+    NEWBETA[idbeta+nva01]<-as.double(sign02[idbeta]*(1+lambda[2]*(1-alpha))*(num02[idbeta]-lambda[2]*alpha)/(denum02[idbeta]+2*lambda[2]*(1-alpha)))
+    idbeta<-which(num02<=lambda[2]*alpha)
+    NEWBETA[idbeta+nva01]<-0
+    
+    # 1 ->2
+    idbeta<-which(num12>lambda[3]*alpha)+
+    NEWBETA[idbeta+nva01+nva02]<-as.double(sign12[idbeta]*(1+lambda[3]*(1-alpha))*(num12[idbeta]-lambda[3]*alpha)/(denum12[idbeta]+2*lambda[3]*(1-alpha)))
+    idbeta<-which(num12<=lambda[3]*alpha)
+    NEWBETA[idbeta+nva01+nva02]<-0
   }
-  )
+  
+  
+  if(penalty=="mcp"){
+    
+    # 0 -> 1
+    idbeta<-which(num01>alpha*lambda[1]*denum01)
+    NEWBETA[idbeta]<-as.double(sign01[idbeta]*num01[idbeta]/denum01[idbeta])
+    idbeta<-which((num01<=alpha*lambda[1]*denum01) & num01>lambda[1])
+    NEWBETA[idbeta]<-as.double(sign01[idbeta]*(num01[idbeta]-lambda[1])/(denum01[idbeta]-(1/alpha)))
+    idbeta<-which((num01<=alpha*lambda[1]*denum01) & num01<=lambda[1])
+    NEWBETA[idbeta]<-0
+    
+    # 0 -> 2
+    idbeta<-which(num02>alpha*lambda[2]*denum02)
+    NEWBETA[idbeta+nva01]<-as.double(sign02[idbeta]*num02[idbeta]/denum02[idbeta])
+    idbeta<-which((num02<=alpha*lambda[2]*denum02) & num02>lambda[2])
+    NEWBETA[idbeta+nva01]<-as.double(sign02[idbeta]*(num02[idbeta]-lambda[2])/(denum02[idbeta]-(1/alpha)))
+    idbeta<-which((num02<=alpha*lambda[2]*denum02) & num02<=lambda[2])
+    NEWBETA[idbeta+nva01]<-0
+    
+    
+    # 1 -> 2
+    idbeta<-which(num12>alpha*lambda[3]*denum12)
+    NEWBETA[idbeta+nva01+nva02]<-as.double(sign12[idbeta]*num12[idbeta]/denum12[idbeta])
+    idbeta<-which((num12<=alpha*lambda[3]*denum12) & num12>lambda[3])
+    NEWBETA[idbeta+nva01+nva02]<-as.double(sign12[idbeta]*(num12[idbeta]-lambda[3])/(denum12[idbeta]-(1/alpha)))
+    idbeta<-which((num12<=alpha*lambda[3]*denum12) & num12<=lambda[3])
+    NEWBETA[idbeta+nva01+nva02]<-0
+    
+    }
+  
+  
+  if(penalty=="scad"){
+    
+    # 0 ->1 
+    idbeta<-which(num01>alpha*lambda[1]*denum01)
+    NEWBETA[idbeta]<-as.double(sign01[idbeta]*num01[idbeta]/denum01[idbeta])
+    idbeta<-which((num01>alpha*lambda[1]*denum01) & (num01<=lambda[1]*(1+denum01)) & (num01>lambda[1]))
+    NEWBETA[idbeta]<-as.double(sign01[idbeta]*(num01[idbeta]-lambda[1])/denum01[idbeta])
+    idbeta<-which((num01>alpha*lambda[1]*denum01) & (num01<=lambda[1]*(1+denum01)) & (num01<=lambda[1]))
+    NEWBETA[idbeta]<-0
+    idbeta<-which((num01>alpha*lambda[1]*denum01) & (num01>lambda[1]*(1+denum01)) & (num01>(lambda[1]*alpha/(1-alpha))))
+    NEWBETA[idbeta]<-as.double(sign01[idbeta]*(num01[idbeta]-lambda[1]*alpha/(1-alpha))/(denum01[idbeta]-(1/(alpha-1))))
+    idbeta<-which((num01>alpha*lambda[1]*denum01) & (num01>lambda[1]*(1+denum01)) & (num01<=(lambda[1]*alpha/(1-alpha))))
+    NEWBETA[idbeta]<-0
+    
+    # 0 ->2
+    idbeta<-which(num02>alpha*lambda[2]*denum02)
+    NEWBETA[idbeta+nva01]<-as.double(sign02[idbeta]*num02[idbeta]/denum02[idbeta])
+    idbeta<-which((num02>alpha*lambda[2]*denum02) & (num02<=lambda[2]*(1+denum02)) & (num02>lambda[2]))
+    NEWBETA[idbeta+nva01]<-as.double(sign02[idbeta]*(num02[idbeta]-lambda[2])/denum02[idbeta])
+    idbeta<-which((num02>alpha*lambda[2]*denum02) & (num02<=lambda[2]*(1+denum02)) & (num02<=lambda[2]))
+    NEWBETA[idbeta+nva01]<-0
+    idbeta<-which((num02>alpha*lambda[2]*denum02) & (num02>lambda[2]*(1+denum02)) & (num02>(lambda[2]*alpha/(1-alpha))))
+    NEWBETA[idbeta+nva01]<-as.double(sign02[idbeta]*(num02[idbeta]-lambda[2]*alpha/(1-alpha))/(denum02[idbeta]-(1/(alpha-1))))
+    idbeta<-which((num02>alpha*lambda[2]*denum02) & (num02>lambda[2]*(1+denum02)) & (num02<=(lambda[2]*alpha/(1-alpha))))
+    NEWBETA[idbeta+nva01]<-0
+    
+    # 1 ->2
+    idbeta<-which(num12>alpha*lambda[3]*denum12)
+    NEWBETA[idbeta+nva01+nva02]<-as.double(sign12[idbeta]*num12[idbeta]/denum12[idbeta])
+    idbeta<-which((num12>alpha*lambda[3]*denum12) & (num12<=lambda[3]*(1+denum12)) & (num12>lambda[3]))
+    NEWBETA[idbeta+nva01+nva02]<-as.double(sign12[idbeta]*(num12[idbeta]-lambda[3])/denum12[idbeta])
+    idbeta<-which((num12>alpha*lambda[3]*denum12) & (num12<=lambda[3]*(1+denum12)) & (num12<=lambda[3]))
+    NEWBETA[idbeta+nva01+nva02]<-0
+    idbeta<-which((num12>alpha*lambda[3]*denum12) & (num12>lambda[3]*(1+denum12)) & (num12>(lambda[3]*alpha/(1-alpha))))
+    NEWBETA[idbeta+nva01+nva02]<-as.double(sign12[idbeta]*(num12[idbeta]-lambda[3]*alpha/(1-alpha))/(denum12[idbeta]-(1/(alpha-1))))
+    idbeta<-which((num12>alpha*lambda[3]*denum12) & (num12>lambda[3]*(1+denum12)) & (num12<=(lambda[3]*alpha/(1-alpha))))
+    NEWBETA[idbeta+nva01+nva02]<-0
+    
+    
+    }
+
   
   NEW.BETA.all[fix==0]<-NEWBETA
   
