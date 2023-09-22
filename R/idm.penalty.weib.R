@@ -19,7 +19,6 @@
 ##' @param t1 time L
 ##' @param t2 time R
 ##' @param t3 time of event/out
-##' @param troncature0 indicator if troncature or not
 ##' @param epsa control convergence parameter for beta 
 ##' @param epsb control convergence parameter for loglik
 ##' @param epsd control convergence for distance to minimum rdm

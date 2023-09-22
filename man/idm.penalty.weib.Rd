@@ -118,8 +118,6 @@ idm.penalty.weib(
 \item{penalty.factor}{which variable should be penalised}
 
 \item{penalty}{which penalty to consider}
-
-\item{troncature0}{indicator if troncature or not}
 }
 \description{
 programmation for penalised idm with weibull as risk bases 
