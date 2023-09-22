@@ -1208,32 +1208,22 @@ idm <- function(formula01,
                 fit$GCV[i]<--1/N*out$fn.value[i]
               }else{
                 lambda.matrix<-matrix(0,npm,npm)
+                browser()
                 if(nvat01>0){
                   
                   if(penalty%in%c("none","lasso","ridge","elasticnet","corrected.elasticnet")){
                     diag(lambda.matrix)[1:npm01]<-rep(2*(1-alpha[i])*lambda[1,i],npm01)}
                   
                   if(penalty=="mcp"){
-                    diag(lambda.matrix)[1:npm01]<-unlist(sapply(1:npm01,FUN=function(x){
-                      if(abs(betaCoef[x,i])<=alpha[i]*lambda[1,i]){
-                        return(-1/alpha[i])
-                      }else{
-                        return(0)
-                      }
-                    }))
+                    idbeta<-which(abs(betaCoef[1:npm01,i])<=alpha[i]*lambda[1,i])
+                    diag(lambda.matrix)[1:npm01]<-rep(0,npm01)
+                    diag(lambda.matrix)[idbeta]<--1/alpha[i]
                     
                   }
                   if(penalty=="scad"){
-                    diag(lambda.matrix)[1:npm01]<-unlist(sapply(1:npm01,FUN=function(x){
-                      if(abs(betaCoef[x,i])<=lambda[1,i]){
-                        return(0)
-                      }else{
-                        if(abs(betaCoef[x,i])<=lambda[1,i]*alpha[i]){
-                          return(-1/(alpha[i]-1))
-                        }else{return(0)}
-                        
-                      }
-                    }))
+                    idbeta<-which((abs(betaCoef[1:npm01,i])>lambda[1,i])&(abs(betaCoef[1:npm01,i])<=lambda[1,i]*alpha[i]))
+                    diag(lambda.matrix)[1:npm01]<-rep(0,npm01)
+                    diag(lambda.matrix)[idbeta]<--1/(alpha[i]-1)
                     
                   }
                 }
@@ -1243,26 +1233,18 @@ idm <- function(formula01,
                     diag(lambda.matrix)[(npm01+1):(npm01+npm02)]<-rep(2*(1-alpha[i])*lambda[2,i],npm02)}
                   
                   if(penalty=="mcp"){
-                    diag(lambda.matrix)[(npm01+1):(npm01+npm02)]<-unlist(sapply((npm01+1):(npm01+npm02),FUN=function(x){
-                      if(abs(betaCoef[x,i])<=alpha[i]*lambda[2,i]){
-                        return(-1/alpha[i])
-                      }else{
-                        return(0)
-                      }
-                    }))
+                    
+                    idbeta<-which(abs(betaCoef[(npm01+1):(npm01+npm02),i])<=alpha[i]*lambda[2,i])
+                    diag(lambda.matrix)[(npm01+1):(npm01+npm02)]<-rep(0,npm02)
+                    diag(lambda.matrix)[idbeta+npm01]<--1/alpha[i]
+                    
                     
                   }
                   if(penalty=="scad"){
-                    diag(lambda.matrix)[(npm01+1):(npm01+npm02)]<-unlist(sapply((npm01+1):(npm01+npm02),FUN=function(x){
-                      if(abs(betaCoef[x,i])<=lambda[2,i]){
-                        return(0)
-                      }else{
-                        if(abs(betaCoef[x,i])<=lambda[2,i]*alpha[i]){
-                          return(-1/(alpha[i]-1))
-                        }else{return(0)}
-                        
-                      }
-                    }))
+                    
+                    idbeta<-which((abs(betaCoef[(npm01+1):(npm01+npm02):npm01,i])>lambda[2,i])&(abs(betaCoef[(npm01+1):(npm01+npm02),i])<=lambda[2,i]*alpha[i]))
+                    diag(lambda.matrix)[(npm01+1):(npm01+npm02)]<-rep(0,npm02)
+                    diag(lambda.matrix)[idbeta+npm01]<--1/(alpha[i]-1)
                     
                   }
                 }
@@ -1272,26 +1254,16 @@ idm <- function(formula01,
                   
                   
                   if(penalty=="mcp"){
-                    diag(lambda.matrix)[(npm01+npm02+1):npm]<-unlist(sapply((npm01+npm02+1):npm,FUN=function(x){
-                      if(abs(betaCoef[x,i])<=alpha[i]*lambda[3,i]){
-                        return(-1/alpha[i])
-                      }else{
-                        return(0)
-                      }
-                    }))
+                    idbeta<-which(abs(betaCoef[(npm01+npm02+1):npm,i])<=alpha[i]*lambda[3,i])
+                    diag(lambda.matrix)[(npm01+npm02+1):npm]<-rep(0,npm12)
+                    diag(lambda.matrix)[idbeta+npm01+npm02]<--1/alpha[i]
                     
                   }
+                  
                   if(penalty=="scad"){
-                    diag(lambda.matrix)[(npm01+npm02+1):npm]<-unlist(sapply((npm01+npm02+1):npm,FUN=function(x){
-                      if(abs(betaCoef[x,i])<=lambda[3,i]){
-                        return(0)
-                      }else{
-                        if(abs(betaCoef[x,i])<=lambda[3,i]*alpha[i]){
-                          return(-1/(alpha[i]-1))
-                        }else{return(0)}
-                        
-                      }
-                    }))
+                    idbeta<-which((abs(betaCoef[(npm01+npm02+1):npm,i])>lambda[3,i])&(abs(betaCoef[(npm01+npm02+1):npm,i])<=lambda[3,i]*alpha[i]))
+                    diag(lambda.matrix)[(npm01+npm02+1):npm]<-rep(0,npm12)
+                    diag(lambda.matrix)[idbeta+npm01+npm02]<--1/(alpha[i]-1)
                     
                   }
                 }
@@ -1550,87 +1522,58 @@ idm <- function(formula01,
                   if(nvat01>0){
                     
                     if(penalty%in%c("none","lasso","ridge","elasticnet","corrected.elasticnet")){
-                    diag(lambda.matrix)[1:npm01]<-rep(2*(1-alpha[i])*lambda[1,i],npm01)}
+                      diag(lambda.matrix)[1:npm01]<-rep(2*(1-alpha[i])*lambda[1,i],npm01)}
                     
                     if(penalty=="mcp"){
-                      diag(lambda.matrix)[1:npm01]<-unlist(sapply(1:npm01,FUN=function(x){
-                        if(abs(betaCoef[x,i])<=alpha[i]*lambda[1,i]){
-                          return(-1/alpha[i])
-                        }else{
-                          return(0)
-                        }
-                      }))
-                             
+                      idbeta<-which(abs(betaCoef[1:npm01,i])<=alpha[i]*lambda[1,i])
+                      diag(lambda.matrix)[1:npm01]<-rep(0,npm01)
+                      diag(lambda.matrix)[idbeta]<--1/alpha[i]
+                      
                     }
                     if(penalty=="scad"){
-                      diag(lambda.matrix)[1:npm01]<-unlist(sapply(1:npm01,FUN=function(x){
-                        if(abs(betaCoef[x,i])<=lambda[1,i]){
-                          return(0)
-                        }else{
-                          if(abs(betaCoef[x,i])<=lambda[1,i]*alpha[i]){
-                            return(-1/(alpha[i]-1))
-                          }else{return(0)}
-                          
-                        }
-                      }))
+                      idbeta<-which((abs(betaCoef[1:npm01,i])>lambda[1,i])&(abs(betaCoef[1:npm01,i])<=lambda[1,i]*alpha[i]))
+                      diag(lambda.matrix)[1:npm01]<-rep(0,npm01)
+                      diag(lambda.matrix)[idbeta]<--1/(alpha[i]-1)
                       
                     }
                   }
                   if(nvat02>0){
                     
                     if(penalty%in%c("none","lasso","ridge","elasticnet","corrected.elasticnet")){
-                    diag(lambda.matrix)[(npm01+1):(npm01+npm02)]<-rep(2*(1-alpha[i])*lambda[2,i],npm02)}
-                  
+                      diag(lambda.matrix)[(npm01+1):(npm01+npm02)]<-rep(2*(1-alpha[i])*lambda[2,i],npm02)}
+                    
                     if(penalty=="mcp"){
-                      diag(lambda.matrix)[(npm01+1):(npm01+npm02)]<-unlist(sapply((npm01+1):(npm01+npm02),FUN=function(x){
-                        if(abs(betaCoef[x,i])<=alpha[i]*lambda[2,i]){
-                          return(-1/alpha[i])
-                        }else{
-                          return(0)
-                        }
-                      }))
+                      
+                      idbeta<-which(abs(betaCoef[(npm01+1):(npm01+npm02),i])<=alpha[i]*lambda[2,i])
+                      diag(lambda.matrix)[(npm01+1):(npm01+npm02)]<-rep(0,npm02)
+                      diag(lambda.matrix)[idbeta+npm01]<--1/alpha[i]
+                      
                       
                     }
                     if(penalty=="scad"){
-                      diag(lambda.matrix)[(npm01+1):(npm01+npm02)]<-unlist(sapply((npm01+1):(npm01+npm02),FUN=function(x){
-                        if(abs(betaCoef[x,i])<=lambda[2,i]){
-                          return(0)
-                        }else{
-                          if(abs(betaCoef[x,i])<=lambda[2,i]*alpha[i]){
-                            return(-1/(alpha[i]-1))
-                          }else{return(0)}
-                          
-                        }
-                      }))
+                      
+                      idbeta<-which((abs(betaCoef[(npm01+1):(npm01+npm02):npm01,i])>lambda[2,i])&(abs(betaCoef[(npm01+1):(npm01+npm02),i])<=lambda[2,i]*alpha[i]))
+                      diag(lambda.matrix)[(npm01+1):(npm01+npm02)]<-rep(0,npm02)
+                      diag(lambda.matrix)[idbeta+npm01]<--1/(alpha[i]-1)
                       
                     }
-                    }
+                  }
                   if(nvat12>0){
                     if(penalty%in%c("none","lasso","ridge","elasticnet","corrected.elasticnet")){
-                    diag(lambda.matrix)[(npm01+npm02+1):npm]<-rep(2*(1-alpha[i])*lambda[3,i],npm12)}
+                      diag(lambda.matrix)[(npm01+npm02+1):npm]<-rep(2*(1-alpha[i])*lambda[3,i],npm12)}
                     
                     
                     if(penalty=="mcp"){
-                      diag(lambda.matrix)[(npm01+npm02+1):npm]<-unlist(sapply((npm01+npm02+1):npm,FUN=function(x){
-                        if(abs(betaCoef[x,i])<=alpha[i]*lambda[3,i]){
-                          return(-1/alpha[i])
-                        }else{
-                          return(0)
-                        }
-                      }))
+                      idbeta<-which(abs(betaCoef[(npm01+npm02+1):npm,i])<=alpha[i]*lambda[3,i])
+                      diag(lambda.matrix)[(npm01+npm02+1):npm]<-rep(0,npm12)
+                      diag(lambda.matrix)[idbeta+npm01+npm02]<--1/alpha[i]
                       
                     }
+                    
                     if(penalty=="scad"){
-                      diag(lambda.matrix)[(npm01+npm02+1):npm]<-unlist(sapply((npm01+npm02+1):npm,FUN=function(x){
-                        if(abs(betaCoef[x,i])<=lambda[3,i]){
-                          return(0)
-                        }else{
-                          if(abs(betaCoef[x,i])<=lambda[3,i]*alpha[i]){
-                            return(-1/(alpha[i]-1))
-                          }else{return(0)}
-                          
-                        }
-                      }))
+                      idbeta<-which((abs(betaCoef[(npm01+npm02+1):npm,i])>lambda[3,i])&(abs(betaCoef[(npm01+npm02+1):npm,i])<=lambda[3,i]*alpha[i]))
+                      diag(lambda.matrix)[(npm01+npm02+1):npm]<-rep(0,npm12)
+                      diag(lambda.matrix)[idbeta+npm01+npm02]<--1/(alpha[i]-1)
                       
                     }
                   }
