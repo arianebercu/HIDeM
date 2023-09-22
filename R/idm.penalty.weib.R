@@ -175,7 +175,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                  b<-c(s,beta)
                                  bfix<-b[fix0==1]
                                  b<-b[fix0==0]
-                                 output<-derivaweib(b0=b,
+                                 output<-derivaweib(b=b,
                                                     np0=length(b),
                                                     npar0=size_V,
                                                     bfix0=bfix,
@@ -429,7 +429,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                  
                                  betanew<-b[(6+1):size_V]
                                  
-                                 res<-idmlLikelihoodweibpena(b0=b,
+                                 res<-idmlLikelihoodweibpena(b=b,
                                                              np0=length(b),
                                                              npar0=size_V,
                                                              bfix0=1,
@@ -520,7 +520,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                    b<-c(s,betanew)
                                    
                                    
-                                   res<-idmlLikelihoodweibpena(b0=b,
+                                   res<-idmlLikelihoodweibpena(b=b,
                                                                np0=length(b),
                                                                npar0=size_V,
                                                                bfix0=1,
@@ -691,7 +691,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                    bfix<-b[fix0==1]
                                    b<-b[fix0==0]
                                    
-                                   output<-derivaweib(b0=b,
+                                   output<-derivaweib(b=b,
                                                       np0=length(b),
                                                       npar0=size_V,
                                                       bfix0=bfix,
@@ -833,7 +833,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                  bfix<-b[fix0==1]
                                  b<-b[fix0==0]
                                  
-                                 output<-derivaweib(b0=b,
+                                 output<-derivaweib(b=b,
                                                     np0=length(b),
                                                     npar0=size_V,
                                                     bfix0=bfix,
@@ -1085,7 +1085,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                  
                                  betanew<-b[(6+1):size_V]
                                  
-                                 res<-idmlLikelihoodweibpena(b0=b,
+                                 res<-idmlLikelihoodweibpena(b=b,
                                                          np0=length(b),
                                                          npar0=size_V,
                                                          bfix0=1,
@@ -1176,7 +1176,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                    b<-c(s,betanew)
                                    
                                    
-                                   res<-idmlLikelihoodweibpena(b0=b,
+                                   res<-idmlLikelihoodweibpena(b=b,
                                                                np0=length(b),
                                                                npar0=size_V,
                                                                bfix0=1,
@@ -1345,7 +1345,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                    bfix<-b[fix0==1]
                                    b<-b[fix0==0]
                                    
-                                   output<-derivaweib(b0=b,
+                                   output<-derivaweib(b=b,
                                                       np0=length(b),
                                                       npar0=size_V,
                                                       bfix0=bfix,

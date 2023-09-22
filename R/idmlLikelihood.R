@@ -20,9 +20,9 @@
 ##' @param npar0 number of parameters
 ##' @param bfix0 parameters fixed
 ##' @param fix0 indicators of fixed and unfixed parameters
-##' @param zi010 knots of transition 0 --> 1
-##' @param zi020 knots of transition 0 --> 2
-##' @param zi120 knots of transition 1 --> 2
+##' @param zi01 knots of transition 0 --> 1
+##' @param zi02 knots of transition 0 --> 2
+##' @param zi12 knots of transition 1 --> 2
 ##' @param c0 classification of subject according to their observations
 ##' @param no0 number of subjects
 ##' @param nz01 number of knots for transition 0 -->1 
@@ -49,21 +49,21 @@
 #' Fortran: Pierre Joly <Pierre.Joly@@isped.u-bordeaux2.fr>
 #' 
 
-idmlLikelihood<-function(b0,np0,npar0,bfix0,fix0,zi010,zi020,zi120,c0,no0,nz01,nz02,nz12,ve010,ve020,ve120,
+idmlLikelihood<-function(b,np0,npar0,bfix0,fix0,zi01,zi02,zi12,c0,no0,nz01,nz02,nz12,ve010,ve020,ve120,
                          dimnva01,dimnva02,dimnva12,nva01,nva02,nva12,
                          t00,t10,t20,t30,troncature0,gausspoint0){
   res<-0
   #browser()
   .Fortran("idmlikelihood",
            ## input
-           as.double(b0),
+           as.double(b),
            as.integer(np0),
            as.integer(npar0),
            as.double(bfix0),
            as.integer(fix0),
-           as.double(zi010),
-           as.double(zi120),
-           as.double(zi020),
+           as.double(zi01),
+           as.double(zi12),
+           as.double(zi02),
            as.integer(c0),
            as.integer(no0),
            as.integer(nz01),

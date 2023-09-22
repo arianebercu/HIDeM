@@ -1,18 +1,19 @@
-idmlLikelihoodpena<-function(b0,np0,npar0,bfix0,fix0,zi010,zi020,zi120,c0,no0,nz01,nz02,nz12,ve010,ve020,ve120,
+idmlLikelihoodpena<-function(b,np0,npar0,bfix0,fix0,zi01,zi02,zi12,c0,no0,nz01,nz02,nz12,ve010,ve020,ve120,
                          dimnva01,dimnva02,dimnva12,nva01,nva02,nva12,
                          t00,t10,t20,t30,troncature0,gausspoint0,lambda,alpha,penalty.factor,penalty){
   res<-0
+  b0<-b
   #browser()
   res<-.Fortran("idmlikelihood",
            ## input
-           as.double(b0),
+           as.double(b),
            as.integer(np0),
            as.integer(npar0),
            as.double(bfix0),
            as.integer(fix0),
-           as.double(zi010),
-           as.double(zi120),
-           as.double(zi020),
+           as.double(zi01),
+           as.double(zi12),
+           as.double(zi02),
            as.integer(c0),
            as.integer(no0),
            as.integer(nz01),

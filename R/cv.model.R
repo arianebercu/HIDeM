@@ -48,7 +48,7 @@ cv.model<-function(beta,
   NEWBETA<-rep(NA,length(num))
   NEWBETA[penalty.factor==0]<-as.double(sign[penalty.factor==0]*num[penalty.factor==0]/denum[penalty.factor==0])
   
-
+  idbeta<-NULL
   if(penalty%in%c("lasso","ridge","elasticnet")){
     # 0 -> 1
     idbeta<-which(num01>lambda[,1]*alpha)

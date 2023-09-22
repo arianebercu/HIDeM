@@ -1,11 +1,12 @@
-idmlLikelihoodweibpena<-function(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve020,ve120,
+idmlLikelihoodweibpena<-function(b,np0,npar0,bfix0,fix0,c0,no0,ve010,ve020,ve120,
                          dimnva01,dimnva02,dimnva12,nva01,nva02,nva12,
                          t00,t10,t20,t30,troncature0,lambda,alpha,penalty.factor,penalty){
   res<-0
+  b0<-b
   #browser()
   res<-.Fortran("idmlikelihoodweib",
            ## input
-           as.double(b0),
+           as.double(b),
            as.integer(np0),
            as.integer(npar0),
            as.double(bfix0),
