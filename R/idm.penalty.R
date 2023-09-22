@@ -655,63 +655,45 @@ idm.penalty<-function(b,fix0,size_V,size_spline,
                                    
                                    
                                  if(penalty=="mcp"){
-                                   p01<-unlist(sapply(1:length(b01),FUN=function(x){
-                                     if(b01[x]<=alpha*lambda[id.lambda,1]){
-                                       return(lambda[id.lambda,1]*abs(b01[x])-((b01[x]*b01[x])/2*alpha))
-                                     }else{return(alpha*lambda[id.lambda,1]*lambda[id.lambda,1]/2)}
-                                   }))
                                    
-                                   p02<-unlist(sapply(1:length(b02),FUN=function(x){
-                                     if(b02[x]<=alpha*lambda[id.lambda,2]){
-                                       return(lambda[id.lambda,2]*abs(b02[x])-((b02[x]*b02[x])/2*alpha))
-                                     }else{return(alpha*lambda[id.lambda,2]*lambda[id.lambda,2]/2)}
-                                   }))
-                                   p12<-unlist(sapply(1:length(b12),FUN=function(x){
-                                     if(b12[x]<=alpha*lambda[id.lambda,3]){
-                                       return(lambda[id.lambda,3]*abs(b12[x])-((b12[x]*b12[x])/2*alpha))
-                                     }else{return(alpha*lambda[id.lambda,3]*lambda[id.lambda,3]/2)}
-                                   }))
+                                   p01<-rep(alpha*lambda[id.lambda,1]*lambda[id.lambda,1]/2,length(b01))
+                                   idbeta<-which(b01<=alpha*lambda[id.lambda,1])
+                                   p01[idbeta]<-lambda[id.lambda,1]*abs(b01[idbeta])-((b01[idbeta]*b01[idbeta])/2*alpha)
+                                   
+                                   p02<-rep(alpha*lambda[id.lambda,2]*lambda[id.lambda,2]/2,length(b02))
+                                   idbeta<-which(b02<=alpha*lambda[id.lambda,2])
+                                   p02[idbeta]<-lambda[id.lambda,2]*abs(b02[idbeta])-((b02[idbeta]*b02[idbeta])/2*alpha)
+                                   
+                                   p12<-rep(alpha*lambda[id.lambda,3]*lambda[id.lambda,3]/2,length(b12))
+                                   idbeta<-which(b12<=alpha*lambda[id.lambda,3])
+                                   p12[idbeta]<-lambda[id.lambda,3]*abs(b12[idbeta])-((b12[idbeta]*b12[idbeta])/2*alpha)
+                                   
+                                   
                                    fn.valuenew<-output.mla$fn.value+sum(p01)+sum(p02)+sum(p12)
                                    
                                  }
                                  
                                  if(penalty=="scad"){
                                    
-                                   p01<-unlist(sapply(1:length(b01),FUN=function(x){
-                                     if(b01[x]<=lambda[id.lambda,1]){
-                                       return(lambda[id.lambda,1]*abs(b01[x]))
-                                     }else{
-                                       if(abs(b01[x])<lambda[id.lambda,1]*alpha){
-                                         return((2*alpha*lambda[id.lambda,1]*abs(b01[x])-b01[x]^2-lambda[id.lambda,1]^2)/(2*(alpha-1)))
-                                       }else{
-                                         return((lambda[id.lambda,1]^2)*(alpha+1)/2)
-                                       }
-                                     }
-                                   }))
+                                   p01<-rep((lambda[id.lambda,1]^2)*(alpha+1)/2,length(b01))
+                                   idbeta<-which(b01<=lambda[id.lambda,1])
+                                   p01[idbeta]<-lambda[id.lambda,1]*abs(b01[idbeta])
+                                   idbeta<-which(abs(b01)<lambda[id.lambda,1]*alpha)
+                                   p01[idbeta]<-(2*alpha*lambda[id.lambda,1]*abs(b01[idbeta])-b01[idbeta]^2-lambda[id.lambda,1]^2)/(2*(alpha-1))
                                    
-                                   p02<-unlist(sapply(1:length(b02),FUN=function(x){
-                                     if(b02[x]<=lambda[id.lambda,2]){
-                                       return(lambda[id.lambda,2]*abs(b02[x]))
-                                     }else{
-                                       if(abs(b02[x])<lambda[id.lambda,2]*alpha){
-                                         return((2*alpha*lambda[id.lambda,2]*abs(b02[x])-b02[x]^2-lambda[id.lambda,2]^2)/(2*(alpha-1)))
-                                       }else{
-                                         return((lambda[id.lambda,2]^2)*(alpha+1)/2)
-                                       }
-                                     }
-                                   }))
+                                   p02<-rep((lambda[id.lambda,2]^2)*(alpha+1)/2,length(b02))
+                                   idbeta<-which(b02<=lambda[id.lambda,2])
+                                   p02[idbeta]<-lambda[id.lambda,2]*abs(b02[idbeta])
+                                   idbeta<-which(abs(b02)<lambda[id.lambda,2]*alpha)
+                                   p02[idbeta]<-(2*alpha*lambda[id.lambda,2]*abs(b02[idbeta])-b02[idbeta]^2-lambda[id.lambda,2]^2)/(2*(alpha-1))
                                    
-                                   p12<-unlist(sapply(1:length(b12),FUN=function(x){
-                                     if(b12[x]<=lambda[id.lambda,3]){
-                                       return(lambda[id.lambda,3]*abs(b12[x]))
-                                     }else{
-                                       if(abs(b12[x])<lambda[id.lambda,3]*alpha){
-                                         return((2*alpha*lambda[id.lambda,3]*abs(b12[x])-b12[x]^2-lambda[id.lambda,3]^2)/(2*(alpha-1)))
-                                       }else{
-                                         return((lambda[id.lambda,3]^2)*(alpha+1)/2)
-                                       }
-                                     }
-                                   }))
+                                   p12<-rep((lambda[id.lambda,3]^2)*(alpha+1)/2,length(b12))
+                                   idbeta<-which(b12<=lambda[id.lambda,3])
+                                   p12[idbeta]<-lambda[id.lambda,3]*abs(b12[idbeta])
+                                   idbeta<-which(abs(b12)<lambda[id.lambda,3]*alpha)
+                                   p12[idbeta]<-(2*alpha*lambda[id.lambda,3]*abs(b12[idbeta])-b12[idbeta]^2-lambda[id.lambda,3]^2)/(2*(alpha-1))
+                                   
+                                   
                                    fn.valuenew<-output.mla$fn.value+sum(p01)+sum(p02)+sum(p12)
                                    
                                  }
@@ -1381,63 +1363,45 @@ idm.penalty<-function(b,fix0,size_V,size_spline,
                                    
                                  
                                  if(penalty=="mcp"){
-                                   p01<-unlist(sapply(1:length(b01),FUN=function(x){
-                                     if(b01[x]<=alpha*lambda[id.lambda,1]){
-                                       return(lambda[id.lambda,1]*abs(b01[x])-((b01[x]*b01[x])/2*alpha))
-                                     }else{return(alpha*lambda[id.lambda,1]*lambda[id.lambda,1]/2)}
-                                   }))
                                    
-                                   p02<-unlist(sapply(1:length(b02),FUN=function(x){
-                                     if(b02[x]<=alpha*lambda[id.lambda,2]){
-                                       return(lambda[id.lambda,2]*abs(b02[x])-((b02[x]*b02[x])/2*alpha))
-                                     }else{return(alpha*lambda[id.lambda,2]*lambda[id.lambda,2]/2)}
-                                   }))
-                                   p12<-unlist(sapply(1:length(b12),FUN=function(x){
-                                     if(b12[x]<=alpha*lambda[id.lambda,3]){
-                                       return(lambda[id.lambda,3]*abs(b12[x])-((b12[x]*b12[x])/2*alpha))
-                                     }else{return(alpha*lambda[id.lambda,3]*lambda[id.lambda,3]/2)}
-                                   }))
-                                   fn.valuenew<-output.mla$fn.value+sum(p01)+sum(p02)+sum(p12)
+                                 p01<-rep(alpha*lambda[id.lambda,1]*lambda[id.lambda,1]/2,length(b01))
+                                 idbeta<-which(b01<=alpha*lambda[id.lambda,1])
+                                 p01[idbeta]<-lambda[id.lambda,1]*abs(b01[idbeta])-((b01[idbeta]*b01[idbeta])/2*alpha)
+                                     
+                                 p02<-rep(alpha*lambda[id.lambda,2]*lambda[id.lambda,2]/2,length(b02))
+                                 idbeta<-which(b02<=alpha*lambda[id.lambda,2])
+                                 p02[idbeta]<-lambda[id.lambda,2]*abs(b02[idbeta])-((b02[idbeta]*b02[idbeta])/2*alpha)
+                                 
+                                 p12<-rep(alpha*lambda[id.lambda,3]*lambda[id.lambda,3]/2,length(b12))
+                                 idbeta<-which(b12<=alpha*lambda[id.lambda,3])
+                                 p12[idbeta]<-lambda[id.lambda,3]*abs(b12[idbeta])-((b12[idbeta]*b12[idbeta])/2*alpha)
+                                 
+                                 
+                                 fn.valuenew<-output.mla$fn.value+sum(p01)+sum(p02)+sum(p12)
                                    
                                  }
                                  
                                  if(penalty=="scad"){
                                    
-                                   p01<-unlist(sapply(1:length(b01),FUN=function(x){
-                                     if(b01[x]<=lambda[id.lambda,1]){
-                                       return(lambda[id.lambda,1]*abs(b01[x]))
-                                     }else{
-                                       if(abs(b01[x])<lambda[id.lambda,1]*alpha){
-                                         return((2*alpha*lambda[id.lambda,1]*abs(b01[x])-b01[x]^2-lambda[id.lambda,1]^2)/(2*(alpha-1)))
-                                       }else{
-                                         return((lambda[id.lambda,1]^2)*(alpha+1)/2)
-                                       }
-                                     }
-                                   }))
+                                   p01<-rep((lambda[id.lambda,1]^2)*(alpha+1)/2,length(b01))
+                                   idbeta<-which(b01<=lambda[id.lambda,1])
+                                   p01[idbeta]<-lambda[id.lambda,1]*abs(b01[idbeta])
+                                   idbeta<-which(abs(b01)<lambda[id.lambda,1]*alpha)
+                                   p01[idbeta]<-(2*alpha*lambda[id.lambda,1]*abs(b01[idbeta])-b01[idbeta]^2-lambda[id.lambda,1]^2)/(2*(alpha-1))
                                    
-                                   p02<-unlist(sapply(1:length(b02),FUN=function(x){
-                                     if(b02[x]<=lambda[id.lambda,2]){
-                                       return(lambda[id.lambda,2]*abs(b02[x]))
-                                     }else{
-                                       if(abs(b02[x])<lambda[id.lambda,2]*alpha){
-                                         return((2*alpha*lambda[id.lambda,2]*abs(b02[x])-b02[x]^2-lambda[id.lambda,2]^2)/(2*(alpha-1)))
-                                       }else{
-                                         return((lambda[id.lambda,2]^2)*(alpha+1)/2)
-                                       }
-                                     }
-                                   }))
+                                   p02<-rep((lambda[id.lambda,2]^2)*(alpha+1)/2,length(b02))
+                                   idbeta<-which(b02<=lambda[id.lambda,2])
+                                   p02[idbeta]<-lambda[id.lambda,2]*abs(b02[idbeta])
+                                   idbeta<-which(abs(b02)<lambda[id.lambda,2]*alpha)
+                                   p02[idbeta]<-(2*alpha*lambda[id.lambda,2]*abs(b02[idbeta])-b02[idbeta]^2-lambda[id.lambda,2]^2)/(2*(alpha-1))
                                    
-                                   p12<-unlist(sapply(1:length(b12),FUN=function(x){
-                                     if(b12[x]<=lambda[id.lambda,3]){
-                                       return(lambda[id.lambda,3]*abs(b12[x]))
-                                     }else{
-                                       if(abs(b12[x])<lambda[id.lambda,3]*alpha){
-                                         return((2*alpha*lambda[id.lambda,3]*abs(b12[x])-b12[x]^2-lambda[id.lambda,3]^2)/(2*(alpha-1)))
-                                       }else{
-                                         return((lambda[id.lambda,3]^2)*(alpha+1)/2)
-                                       }
-                                     }
-                                   }))
+                                   p12<-rep((lambda[id.lambda,3]^2)*(alpha+1)/2,length(b12))
+                                   idbeta<-which(b12<=lambda[id.lambda,3])
+                                   p12[idbeta]<-lambda[id.lambda,3]*abs(b12[idbeta])
+                                   idbeta<-which(abs(b12)<lambda[id.lambda,3]*alpha)
+                                   p12[idbeta]<-(2*alpha*lambda[id.lambda,3]*abs(b12[idbeta])-b12[idbeta]^2-lambda[id.lambda,3]^2)/(2*(alpha-1))
+                                   
+                                   
                                    fn.valuenew<-output.mla$fn.value+sum(p01)+sum(p02)+sum(p12)
                                    
                                  }
