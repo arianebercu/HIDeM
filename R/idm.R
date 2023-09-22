@@ -1208,7 +1208,6 @@ idm <- function(formula01,
                 fit$GCV[i]<--1/N*out$fn.value[i]
               }else{
                 lambda.matrix<-matrix(0,npm,npm)
-                browser()
                 if(nvat01>0){
                   
                   if(penalty%in%c("none","lasso","ridge","elasticnet","corrected.elasticnet")){
