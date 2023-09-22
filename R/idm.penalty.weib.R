@@ -1,4 +1,4 @@
-##' programmation for penalised idm with splines as risk bases 
+##' programmation for penalised idm with weibull as risk bases 
 ##' Code:
 ##' @title idm penalty weib
 ##' @param b  parameters not fixed
@@ -42,6 +42,7 @@
 ##' @param idd indicator of death
 ##' @param idm indicator of illness
 ##' @param ts time of death or last news
+##' @param troncature0 indicator if troncature or not
 #' @importFrom foreach "%do%"
 #' @importFrom foreach "%dopar%"
 #' @useDynLib SmoothHazardoptim9

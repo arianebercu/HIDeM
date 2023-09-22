@@ -131,6 +131,6 @@ idm.penalty.weib(
 \item{troncature0}{indicator if troncature or not}
 }
 \description{
-programmation for penalised idm with splines as risk bases 
+programmation for penalised idm with weibull as risk bases 
 Code:
 }
