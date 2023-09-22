@@ -39,10 +39,7 @@
 ##' @param alpha alpha on all transitions 
 ##' @param penalty which penalty to consider
 ##' @param penalty.factor which variable should be penalised
-##' @param idd indicator of death
-##' @param idm indicator of illness
-##' @param ts time of death or last news
-##' @param troncature0 indicator if troncature or not
+##' @param troncature indicator if troncature or not
 #' @importFrom foreach "%do%"
 #' @importFrom foreach "%dopar%"
 #' @useDynLib SmoothHazardoptim9
@@ -52,7 +49,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                    clustertype,epsa,epsb,epsd,eps.eigen,print.info,nproc,maxiter,maxiter.pena,
                    ctime,N,
                    ve01,ve02,ve12,dimnva01,dimnva02,dimnva12,nvat01,nvat02,nvat12,
-                   t0,t1,t2,t3,idd,idm,ts,troncature,
+                   t0,t1,t2,t3,troncature,
                    nlambda01,lambda01,nlambda02,lambda02,nlambda12,lambda12,
                    alpha,penalty.factor,penalty){
   

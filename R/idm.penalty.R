@@ -24,11 +24,12 @@
 ##' @param nknots01 number of knots for transition 0 -->1 
 ##' @param nknots02 number of knots for transition 0 -->2
 ##' @param nknots12 number of knots for transition 1 -->2
+##' @param step.sequential do we want to fix some splines parameters
+##' @param option.sequential what are the options of we fix somes splines
 ##' @param t0 time entry
 ##' @param t1 time L
 ##' @param t2 time R
 ##' @param t3 time of event/out
-##' @param troncature0 indicator if troncature or not
 ##' @param epsa control convergence parameter for beta 
 ##' @param epsb control convergence parameter for loglik
 ##' @param epsd control convergence for distance to minimum rdm
@@ -49,9 +50,6 @@
 ##' @param alpha alpha on all transitions 
 ##' @param penalty which penalty to consider
 ##' @param penalty.factor which variable should be penalised
-##' @param idd indicator of death
-##' @param idm indicator of illness
-##' @param ts time of death or last news
 ##' @param troncature indicator if troncature or not
 ##' @param gauss.point number of points in gauss quadrature
 #' @importFrom foreach "%do%"

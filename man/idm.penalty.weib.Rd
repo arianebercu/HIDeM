@@ -32,9 +32,6 @@ idm.penalty.weib(
   t1,
   t2,
   t3,
-  idd,
-  idm,
-  ts,
   troncature,
   nlambda01,
   lambda01,
@@ -101,12 +98,6 @@ idm.penalty.weib(
 \item{t2}{time R}
 
 \item{t3}{time of event/out}
-
-\item{idd}{indicator of death}
-
-\item{idm}{indicator of illness}
-
-\item{ts}{time of death or last news}
 
 \item{troncature}{indicator if troncature or not}
 

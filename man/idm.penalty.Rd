@@ -146,15 +146,11 @@ idm.penalty(
 
 \item{penalty.factor}{which variable should be penalised}
 
+\item{step.sequential}{do we want to fix some splines parameters}
+
+\item{option.sequential}{what are the options of we fix somes splines}
+
 \item{penalty}{which penalty to consider}
-
-\item{troncature0}{indicator if troncature or not}
-
-\item{idd}{indicator of death}
-
-\item{idm}{indicator of illness}
-
-\item{ts}{time of death or last news}
 }
 \description{
 programmation for penalised idm with splines as risk bases 
