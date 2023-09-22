@@ -15,7 +15,7 @@
 ##
 ### Code:
 ##' @title idm log likelihood
-##' @param b0  parameters not fixed
+##' @param b  parameters not fixed
 ##' @param np0  number of parameters not fixed
 ##' @param npar0 number of parameters
 ##' @param bfix0 parameters fixed

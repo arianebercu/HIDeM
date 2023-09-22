@@ -5,7 +5,7 @@
 \title{idm log likelihood}
 \usage{
 idmlLikelihoodweib(
-  b0,
+  b,
   np0,
   npar0,
   bfix0,
@@ -29,7 +29,7 @@ idmlLikelihoodweib(
 )
 }
 \arguments{
-\item{b0}{parameters not fixed}
+\item{b}{parameters not fixed}
 
 \item{np0}{number of parameters not fixed}
 

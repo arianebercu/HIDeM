@@ -5,14 +5,14 @@
 \title{idm log likelihood}
 \usage{
 idmlLikelihood(
-  b0,
+  b,
   np0,
   npar0,
   bfix0,
   fix0,
-  zi010,
-  zi020,
-  zi120,
+  zi01,
+  zi02,
+  zi12,
   c0,
   no0,
   nz01,
@@ -36,7 +36,7 @@ idmlLikelihood(
 )
 }
 \arguments{
-\item{b0}{parameters not fixed}
+\item{b}{parameters not fixed}
 
 \item{np0}{number of parameters not fixed}
 
@@ -46,11 +46,11 @@ idmlLikelihood(
 
 \item{fix0}{indicators of fixed and unfixed parameters}
 
-\item{zi010}{knots of transition 0 --> 1}
+\item{zi01}{knots of transition 0 --> 1}
 
-\item{zi020}{knots of transition 0 --> 2}
+\item{zi02}{knots of transition 0 --> 2}
 
-\item{zi120}{knots of transition 1 --> 2}
+\item{zi12}{knots of transition 1 --> 2}
 
 \item{c0}{classification of subject according to their observations}
 
