@@ -44,6 +44,7 @@ deriva <- function(nproc=1,b,funcpa,.packages=NULL,...){
     
     
     ## derivees premieres:
+    k<-NULL # for cran check 
     ll <- foreach::foreach(k=(m*(m+1)/2)+1:m,
                   .combine=cbind,
                   .packages=.packages) %dopar%
@@ -67,6 +68,7 @@ deriva <- function(nproc=1,b,funcpa,.packages=NULL,...){
     v1 <- ll[2,] 
     
     ## derivees secondes:
+    k<-NULL # for cran check 
     v2 <- foreach::foreach(k=1:(m*(m+1)/2),
                   .combine=c,
                   .packages=.packages) %dopar%
@@ -129,6 +131,8 @@ deriva_grad <- function(nproc=1,b,grad,.packages=NULL,...){
   if(nproc>1)
   {
     ## derivees du gradient
+    
+    j<-NULL # for cran check 
     vtmp <- foreach::foreach(j=1:m,
                     .combine=rbind,
                     .packages=.packages) %dopar%
@@ -184,6 +188,7 @@ deriva_gradient <- function(nproc=1,b,funcpa,.packages=NULL,...){
     h <- sapply(b,function(x){max(1E-7,(1E-4*abs(x)))})
     
     
+    k<-NULL # for cran check 
     ## derivees premieres:
     ll <- foreach::foreach(k=(m*(m+1)/2)+1:m,
                   .combine=cbind,

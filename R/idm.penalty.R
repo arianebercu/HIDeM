@@ -144,6 +144,8 @@ idm.penalty<-function(b,fix0,size_V,size_spline,
     
     doParallel::registerDoParallel(clustpar)
     
+    
+    id.lambda<-NULL # for cran check 
     output<-foreach::foreach(id.lambda=1:nlambda,
                              .combine = combine_lambda,
                              .errorhandling = "remove")%dopar%{
@@ -866,6 +868,8 @@ idm.penalty<-function(b,fix0,size_V,size_spline,
     parallel::stopCluster(clustpar)
     
   }else{
+    
+    id.lambda<-NULL # for cran check 
     output<-foreach::foreach(id.lambda=1:nlambda,
                              .combine = combine_lambda,
                              .errorhandling = "remove")%do%{

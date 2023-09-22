@@ -166,6 +166,7 @@ idm.no.step.sequential<-function(b,clustertype,epsa,epsb,epsd,print.info,nproc,
     doParallel::registerDoParallel(clustpar)
     
     
+    i<-NULL # for cran check 
     res<-foreach::foreach(i = 1:length(lambda),.combine=cbind) %dopar% {
       
       
@@ -259,6 +260,8 @@ idm.no.step.sequential<-function(b,clustertype,epsa,epsb,epsd,print.info,nproc,
     
     doParallel::registerDoParallel(clustpar)
     
+    
+    i<-NULL # for cran check 
     res<-foreach::foreach(i=1:length(lambda),.combine = combine_var)%dopar%{
       
       Vr <- matrix(0,npm,npm)

@@ -139,6 +139,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
     
     
     
+    id.lambda<-NULL # for cran check 
     output<-foreach::foreach(id.lambda=1:nlambda,
                              .combine = combine_lambda,
                              .errorhandling = "remove")%dopar%{
@@ -814,7 +815,8 @@ idm.penalty.weib<-function(b,fix0,size_V,
     
   }else{
     
-
+    
+    id.lambda<-NULL # for cran check 
     output<-foreach::foreach(id.lambda=1:nlambda,
                              .combine = combine_lambda,
                              .errorhandling = "remove")%do%{
