@@ -1,4 +1,4 @@
-idmlLikelihoodpena<-function(b0,np0,npar0,bfix0,fix0,zi010,zi020,zi120,c0,no0,nz010,nz020,nz120,ve010,ve020,ve120,
+idmlLikelihoodpena<-function(b0,np0,npar0,bfix0,fix0,zi010,zi020,zi120,c0,no0,nz01,nz02,nz12,ve010,ve020,ve120,
                          dimnva01,dimnva02,dimnva12,nva01,nva02,nva12,
                          t00,t10,t20,t30,troncature0,gausspoint0,lambda,alpha,penalty.factor,penalty){
   res<-0
@@ -15,9 +15,9 @@ idmlLikelihoodpena<-function(b0,np0,npar0,bfix0,fix0,zi010,zi020,zi120,c0,no0,nz
            as.double(zi020),
            as.integer(c0),
            as.integer(no0),
-           as.integer(nz010),
-           as.integer(nz120),
-           as.integer(nz020),
+           as.integer(nz01),
+           as.integer(nz12),
+           as.integer(nz02),
            as.double(ve010),
            as.double(ve120),
            as.double(ve020),
@@ -39,7 +39,7 @@ idmlLikelihoodpena<-function(b0,np0,npar0,bfix0,fix0,zi010,zi020,zi120,c0,no0,nz
   b<-rep(NA,npar0)
   b[fix0==0]<-b0
   b[fix0==1]<-bfix0
-  size_spline<-nz010+nz020+nz120+6
+  size_spline<-nz01+nz02+nz12+6
   if(nva01>0){
   b01<-b[(size_spline+1):(size_spline+nva01)][penalty.factor[1:nva01]==1]
   }else{b01<-0}

@@ -25,9 +25,9 @@
 ##' @param zi120 knots of transition 1 --> 2
 ##' @param c0 classification of subject according to their observations
 ##' @param no0 number of subjects
-##' @param nz010 number of knots for transition 0 -->1 
-##' @param nz020 number of knots for transition 0 -->2
-##' @param nz120 number of knots for transition 1 -->2
+##' @param nz01 number of knots for transition 0 -->1 
+##' @param nz02 number of knots for transition 0 -->2
+##' @param nz12 number of knots for transition 1 -->2
 ##' @param ve010 variables for transition 0 -->1 
 ##' @param ve020 variables for transition 0 -->2
 ##' @param ve120 variables for transition 1 -->2
@@ -49,7 +49,7 @@
 #' Fortran: Pierre Joly <Pierre.Joly@@isped.u-bordeaux2.fr>
 #' 
 
-idmlLikelihood<-function(b0,np0,npar0,bfix0,fix0,zi010,zi020,zi120,c0,no0,nz010,nz020,nz120,ve010,ve020,ve120,
+idmlLikelihood<-function(b0,np0,npar0,bfix0,fix0,zi010,zi020,zi120,c0,no0,nz01,nz02,nz12,ve010,ve020,ve120,
                          dimnva01,dimnva02,dimnva12,nva01,nva02,nva12,
                          t00,t10,t20,t30,troncature0,gausspoint0){
   res<-0
@@ -66,9 +66,9 @@ idmlLikelihood<-function(b0,np0,npar0,bfix0,fix0,zi010,zi020,zi120,c0,no0,nz010,
            as.double(zi020),
            as.integer(c0),
            as.integer(no0),
-           as.integer(nz010),
-           as.integer(nz120),
-           as.integer(nz020),
+           as.integer(nz01),
+           as.integer(nz12),
+           as.integer(nz02),
            as.double(ve010),
            as.double(ve120),
            as.double(ve020),
