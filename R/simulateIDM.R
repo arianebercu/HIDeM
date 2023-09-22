@@ -395,12 +395,7 @@ simulateIDM <- function(n=100){
 ##' @param beta02 value of beta on transition 0 --> 2
 ##' @param beta12 value of beta on transition 1 --> 2
 ##' @param n number of observations
-#' @importFrom ggplot2 ggplot
-#' @importFrom ggplot2 geom_line
-#' @importFrom ggplot2 geom_point
-#' @importFrom ggplot2 theme_classic
-#' @importFrom ggplot2 ylab
-#' @importFrom ggplot2 aes
+#' @importFrom ggplot2 ggplot geom_line geom_point theme_classic ylab aes_string
 #' @useDynLib SmoothHazardoptim9
 #' @export
 
