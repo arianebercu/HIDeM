@@ -1,5 +1,54 @@
+##' programmation for penalised idm with splines as risk bases 
+##' Code:
+##' @title idm penalty weib
+##' @param b  parameters not fixed
+##' @param size_V number of parameters
+##' @param fix0 indicators of fixed and unfixed parameters
+##' @param ctime classification of subject according to their observations
+##' @param N number of subjects
+##' @param ve01 variables for transition 0 -->1 
+##' @param ve02 variables for transition 0 -->2
+##' @param ve12 variables for transition 1 -->2
+##' @param dimnva01 number of variables for transition 0 -->1 
+##' @param dimnva02 number of variables for transition 0 -->2
+##' @param dimnva12 number of variables for transition 1 -->2
+##' @param nvat01 number of variables for transition 0 -->1 
+##' @param nvat02 number of variables for transition 0 -->2
+##' @param nvat12 number of variables for transition 1 -->2
+##' @param t0 time entry
+##' @param t1 time L
+##' @param t2 time R
+##' @param t3 time of event/out
+##' @param troncature0 indicator if troncature or not
+##' @param epsa control convergence parameter for beta 
+##' @param epsb control convergence parameter for loglik
+##' @param epsd control convergence for distance to minimum rdm
+##' @param eps.eigen the power of convergence for eigen values of covariance matrix only
+##' @param print.info shloud we print info during mla convergence
+##' @param clustertype in which cluster to work
+##' @param nproc number of cluster
+##' @param maxiter Maximum number of iterations. The default is 200.
+##' @param maxiter.pena Maximum number of iterations for penalised coefficients
+##' @param troncature indicator if troncature or not
+##' @param lambda01 Lambda on transition 0 --> 1
+##' @param lambda02 Lambda on transition 0 --> 2
+##' @param lambda12 Lambda on transition 1 --> 2
+##' @param nlambda01 number of Lambda on transition 0 --> 1
+##' @param nlambda02 number of Lambda on transition 0 --> 2
+##' @param nlambda12 number of Lambda on transition 1 --> 2
+##' @param alpha alpha on all transitions 
+##' @param penalty which penalty to consider
+##' @param penalty.factor which variable should be penalised
+##' @param idd indicator of death
+##' @param idm indicator of illness
+##' @param ts time of death or last news
+#' @importFrom foreach "%do%"
+#' @importFrom foreach "%dopar%"
+#' @useDynLib SmoothHazardoptim9
+
+
 idm.penalty.weib<-function(b,fix0,size_V,
-                   clustertype,epsa,epsb,epsd,eps.eigen,print.info,nproc,maxiter,maxiter.pena,nfolds,
+                   clustertype,epsa,epsb,epsd,eps.eigen,print.info,nproc,maxiter,maxiter.pena,
                    ctime,N,
                    ve01,ve02,ve12,dimnva01,dimnva02,dimnva12,nvat01,nvat02,nvat12,
                    t0,t1,t2,t3,idd,idm,ts,troncature,

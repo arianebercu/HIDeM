@@ -394,9 +394,16 @@ simulateIDM <- function(n=100){
 ##' @param beta01 value of beta on transition 0 --> 1
 ##' @param beta02 value of beta on transition 0 --> 2
 ##' @param beta12 value of beta on transition 1 --> 2
-##' @useDynLib SmoothHazardoptim9
+##' @param n number of observations
+#' @importFrom ggplot2 ggplot
+#' @importFrom ggplot2 geom_line
+#' @importFrom ggplot2 geom_point
+#' @importFrom ggplot2 theme_classic
+#' @importFrom ggplot2 ylab
+#' @importFrom ggplot2 aes
+#' @useDynLib SmoothHazardoptim9
 #' @export
-#' @param n number of observations
+
 
 simulatepenIDM <- function(n=100,seed,scale.illtime,shape.illtime,
                            scale.lifetime,shape.lifetime,
@@ -491,8 +498,8 @@ simulatepenIDM <- function(n=100,seed,scale.illtime,shape.illtime,
                                   rep("12",length(S12))),
                            time=rep(time,3))
   
-  p2<-ggplot2::ggplot(data=data.weibull,aes(y=survie,x=time,color=type))+ggplot2::geom_point()+ggplot2::geom_line()+
-    ggplot2::theme_classic()+ggplot2::ylab("Survival")
+  p2<-ggplot2::ggplot(data=data.weibull,aes(y=survie,x=time,color=type))+geom_point()+geom_line()+
+    theme_classic()+ylab("Survival")
   
   
   sim.idmModel(x=fit,n=n,plot=p2,pen=T,illness.known.at.death=F)

@@ -1,3 +1,8 @@
+
+##' programmation for penalised idm with splines as risk bases 
+#' @importFrom foreach %do%
+#' @importFrom foreach %dopar%
+#' @useDynLib SmoothHazardoptim9
 idm.penalty<-function(b,fix0,size_V,size_spline,
                       clustertype,epsa,epsb,epsd,eps.spline,eps.eigen,print.info,nproc,maxiter,maxiter.pena,nfolds,
                       knots01,knots02,knots12,ctime,N,nknots01,nknots02,nknots12,
