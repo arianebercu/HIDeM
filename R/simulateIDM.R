@@ -492,12 +492,13 @@ simulatepenIDM <- function(n=100,seed,scale.illtime,shape.illtime,
   S12<-exp(-(scale.waittime*time)^shape.waittime)
   #cens<-exp(-(scale.censtime*time)^shape.censtime)
   
-  data.weibull<-base::data.frame(survie=c(S01,S02,S12),
-                           type=c(rep("01",length(S01)),
-                                  rep("02",length(S02)),
-                                  rep("12",length(S12))),
-                           time=rep(time,3))
+  data.weibull<-base::data.frame(NULL)
   
+  data.weibull$survie<-c(S01,S02,S12)
+  data.weibull$type<-c(rep("01",length(S01)),
+                       rep("02",length(S02)),
+                       rep("12",length(S12)))
+  data.weibull$time<-rep(time,3)
   p2<-ggplot2::ggplot(data=data.weibull,aes(y=survie,x=time,color=type))+geom_point()+geom_line()+
     theme_classic()+ylab("Survival")
   
