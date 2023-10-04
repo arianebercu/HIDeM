@@ -207,7 +207,6 @@ intensity <- function(times,knots,number.knots,theta,linear.predictor=0,V=NULL,
       msplines<-splines2::mSpline(x=times,knots=knots.int,Boundary.knots=knots.bound,intercept = T)
       isplines<-splines2::iSpline(x=times,knots=knots.int,Boundary.knots=knots.bound,intercept = T)
       
-      
       intensity<-msplines%*%theta.square
       cumulative.intensity<-isplines%*%theta.square
       
