@@ -200,7 +200,7 @@ intensity <- function(times,knots,number.knots,theta,linear.predictor=0,V=NULL,
       
   
       knots.int<-knots.unique[-c(1,length(knots.unique))]
-      
+      #browser()
       if(is.null(times)){
         times<-seq(from=knots.bound[1],to=knots.bound[2],length.out=100)}
       
