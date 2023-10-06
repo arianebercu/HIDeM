@@ -475,6 +475,7 @@ simulatepenIDM <- function(n=100,seed,scale.illtime,shape.illtime,
   #censtime<-((-log(1-U))^(shape.censtime))/shape.censtime
   
   censtime<-C
+  administrative.censoring<-rep(administrative.censoring,n)
   censtime<-pmin(censtime,administrative.censoring)
   
   fit <- data.frame(latent.illtime=latent.illtime,
