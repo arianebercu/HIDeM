@@ -207,12 +207,12 @@ sim.idmModel <- function(x,
     #class(x) <- "lvm"
     #dat <- lava::sim(x,n=n,...)
     # construct illtime and true illness status
-  browser()
+
   if(pen==T){
     dat<-x
     T01<-dat$latent.illtime
     T02<-dat$latent.lifetime
-    T12<-dat$latent.illtime+dat$latent.waitime
+    T12<-dat$latent.illtime+dat$latent.waittime
     dat$illtime <- dat$latent.illtime
     dat$illstatus <- 1*(dat$illtime<=dat$latent.lifetime)
     dat$illtime[dat$illtime>dat$latent.lifetime] <- 0
@@ -314,7 +314,7 @@ sim.idmModel <- function(x,
             dat <- dat[,-grep("latent\\.",names(dat))]
         if (keep.inspectiontimes) dat <- cbind(dat,iframe)
     }
-  browser()
+
     dat$seen.exit <- 1*(dat$lifetime<dat$censtime)
     dat$observed.lifetime <- pmin(dat$lifetime,dat$censtime)
     dat$observed.illtime <- pmin(dat$illtime,dat$censtime)
@@ -476,7 +476,7 @@ simulatepenIDM <- function(n=100,seed,scale.illtime,shape.illtime,
   #censtime<-((-log(1-U))^(shape.censtime))/shape.censtime
   
   censtime<-C
-  browser()
+
   administrative.censoring<-rep(administrative.censoring,n)
   censtime<-pmin(censtime,administrative.censoring)
   
