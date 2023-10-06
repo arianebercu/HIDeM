@@ -470,14 +470,9 @@ simulatepenIDM <- function(n=100,seed,scale.illtime,shape.illtime,
   X02<-as.matrix(exogenous_data[,colnames(exogenous_data)%in%x02])
   X12<-as.matrix(exogenous_data[,colnames(exogenous_data)%in%x12])
   
-  #latent.illtimebis<-((-log(1-U)*exp(-X01%*%beta01))^(1/shape.illtime))/scale.illtime
-  #latent.lifetime<-((-log(1-U)*exp(-X02%*%beta02))^(1/shape.lifetime))/scale.lifetime
-  #latent.waittime<-((-log(1-U)*exp(-X12%*%beta12))^(1/shape.waittime))/scale.waittime
-  
-  #browser()
-  latent.illtime<-((-log(U)*exp(X01%*%beta01))^(1/shape.illtime))/scale.illtime
-  latent.lifetime<-((-log(U)*exp(X02%*%beta02))^(1/shape.lifetime))/scale.lifetime
-  latent.waittime<-((-log(U)*exp(X12%*%beta12))^(1/shape.waittime))/scale.waittime
+  latent.illtimebis<-((-log(1-U)*exp(-X01%*%beta01))^(1/shape.illtime))/scale.illtime
+  latent.lifetime<-((-log(1-U)*exp(-X02%*%beta02))^(1/shape.lifetime))/scale.lifetime
+  latent.waittime<-((-log(1-U)*exp(-X12%*%beta12))^(1/shape.waittime))/scale.waittime
   #censtime<-((-log(1-U))^(shape.censtime))/shape.censtime
   
   censtime<-C
