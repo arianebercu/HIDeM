@@ -212,6 +212,7 @@ sim.idmModel <- function(x,
     dat<-x
     T01<-dat$latent.illtime
     T02<-dat$latent.lifetime
+    T12<-dat$latent.illtime+dat$latent.waitime
     dat$illtime <- dat$latent.illtime
     dat$illstatus <- 1*(dat$illtime<=dat$latent.lifetime)
     dat$illtime[dat$illtime>dat$latent.lifetime] <- 0
@@ -321,7 +322,8 @@ sim.idmModel <- function(x,
     dat$illtime[dat$illstatus==0] <- -9
     if(pen==T){
     dat$T01<-T01
-    dat$T02<-T02}
+    dat$T02<-T02
+    dat$T12<-T12}
     return(list(data=dat,
                 plot=plot))
 }
