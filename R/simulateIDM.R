@@ -207,7 +207,7 @@ sim.idmModel <- function(x,
     #class(x) <- "lvm"
     #dat <- lava::sim(x,n=n,...)
     # construct illtime and true illness status
-
+  browser()
   if(pen==T){
     dat<-x
     T01<-dat$latent.illtime
@@ -314,6 +314,7 @@ sim.idmModel <- function(x,
             dat <- dat[,-grep("latent\\.",names(dat))]
         if (keep.inspectiontimes) dat <- cbind(dat,iframe)
     }
+  browser()
     dat$seen.exit <- 1*(dat$lifetime<dat$censtime)
     dat$observed.lifetime <- pmin(dat$lifetime,dat$censtime)
     dat$observed.illtime <- pmin(dat$illtime,dat$censtime)
@@ -475,6 +476,7 @@ simulatepenIDM <- function(n=100,seed,scale.illtime,shape.illtime,
   #censtime<-((-log(1-U))^(shape.censtime))/shape.censtime
   
   censtime<-C
+  browser()
   administrative.censoring<-rep(administrative.censoring,n)
   censtime<-pmin(censtime,administrative.censoring)
   
@@ -490,13 +492,17 @@ simulatepenIDM <- function(n=100,seed,scale.illtime,shape.illtime,
   S12<-exp(-(scale.waittime*time)^shape.waittime)
   #cens<-exp(-(scale.censtime*time)^shape.censtime)
   
-  data.weibull<-base::data.frame(NULL)
+  data.weibull<-matrix(nrow=length(time)*3,ncol=3)
   
-  data.weibull$survie<-c(S01,S02,S12)
-  data.weibull$type<-c(rep("01",length(S01)),
+  data.weibull[,1]<-c(S01,S02,S12)
+  data.weibull[,2]<-c(rep("01",length(S01)),
                        rep("02",length(S02)),
                        rep("12",length(S12)))
-  data.weibull$time<-rep(time,3)
+  data.weibull[,3]<-rep(time,3)
+  colnames(data.weibull)<-c("survie","type","time")
+  data.weibull<-as.data.frame(data.weibull)
+  data.weibull$survie<-as.numeric(data.weibull$survie)
+  data.weibull$time<-as.numeric(data.weibull$time)
   p2<-ggplot2::ggplot(data=data.weibull,aes_string(y="survie",x="time",color="type"))+geom_point()+geom_line()+
     theme_classic()+ylab("Survival")
   
