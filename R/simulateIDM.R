@@ -491,9 +491,9 @@ simulatepenIDM <- function(n=100,seed,scale.illtime,shape.illtime,
   fit<-cbind(fit,exogenous_data)
   
   time<-c(1:max(V))
-  S01<-exp(-((1/scale.illtime)*time)^shape.illtime)
-  S02<-exp(-((1/scale.lifetime)*time)^shape.lifetime)
-  S12<-exp(-((1/scale.waittime)*time)^shape.waittime)
+  S01<-1-exp(-(time/scale.illtime)^shape.illtime)
+  S02<-1-exp(-(time/scale.lifetime)^shape.lifetime)
+  S12<-1-exp(-(time/scale.waittime)^shape.waittime)
   #cens<-exp(-(scale.censtime*time)^shape.censtime)
   
   data.weibull<-matrix(nrow=length(time)*3,ncol=3)
