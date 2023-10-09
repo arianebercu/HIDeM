@@ -362,10 +362,10 @@ simulateIDM <- function(n=100){
     lava::distribution(m,"X2") <- lava::normal.lvm(mean=120,sd=20)
     lava::distribution(m,"X3") <- lava::normal.lvm(mean=50,sd=20)
     lava::regression(m,to="latent.illtime",from="X1") <- 0.7
-    lava::regression(m,to="latent.illtime",from="X2") <- 0.07
-    lava::regression(m,to="latent.illtime",from="X3") <- -0.1
+    #lava::regression(m,to="latent.illtime",from="X2") <- 0.07
+    #lava::regression(m,to="latent.illtime",from="X3") <- -0.1
     lava::regression(m,to="latent.waittime",from="X1") <- 0.8
-    lava::regression(m,to="latent.lifetime",from="X1") <- 0.7
+    lava::regression(m,to="latent.lifetime",from="X1") <- 0.6
     
     sim.idmModel(m,n,plot=NULL,pen = F,semi.markov = T)
 }
