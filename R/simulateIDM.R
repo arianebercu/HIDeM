@@ -497,11 +497,13 @@ simulatepenIDM <- function(n=100,seed,scale.illtime,shape.illtime,
     
     }
     if(length(iderase)!=0){
+      if(length(iderase)==n)stop("Could not simulate in markov latent.waittime")
       n<-n-length(iderase)
       latent.illtime<-latent.illtime[-iderase]
       latent.lifetime<-latent.lifetime[-iderase]
       latent.waittime<-latent.waittime[-iderase]
       C<-C[-iderase]
+      exogenous_data<-exogenous_data[-iderase,]
     }
   }
   #censtime<-((-log(1-U))^(shape.censtime))/shape.censtime
