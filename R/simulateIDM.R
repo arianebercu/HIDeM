@@ -484,14 +484,24 @@ simulatepenIDM <- function(n=100,seed,scale.illtime,shape.illtime,
   if(semi.markov==F){
     illstatus <- 1*(latent.illtime<=latent.lifetime)
     nmax<-1000
+    iderase<-NULL
+    
     for(i in which(illstatus==1)){
+      
       k<-0
       while(latent.waittime[i]<=latent.illtime[i] & k<=nmax){
         k<-k+1
         latent.waittime[i]<-(((-log(1-U)*exp(-X12%*%beta12))^(1/shape.waittime))/scale.waittime)[i]
       }
-      if(k>=nmax){stop("Could not simulate latent.waittime in markov")}
+      if(k>=nmax){iderase<-c(iderase,i)}
     
+    }
+    if(length(iderase)!=0){
+      n<-n-length(iderase)
+      latent.illtime<-latent.illtime[-iderase]
+      latent.lifetime<-latent.lifetime[-iderase]
+      latent.waittime<-latent.waittime[-iderase]
+      C<-C[-iderase]
     }
   }
   #censtime<-((-log(1-U))^(shape.censtime))/shape.censtime
@@ -528,7 +538,7 @@ simulatepenIDM <- function(n=100,seed,scale.illtime,shape.illtime,
     theme_classic()+ylab("Survival")
   
   
-  sim.idmModel(x=fit,n=n,plot=p2,pen=T,illness.known.at.death=F,semi.markov=)
+  sim.idmModel(x=fit,n=n,plot=p2,pen=T,illness.known.at.death=F,semi.markov)
   
 }
 
