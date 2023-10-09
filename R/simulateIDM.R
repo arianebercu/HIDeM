@@ -202,6 +202,7 @@ sim.idmModel <- function(x,
                          compliance=1,
                          latent=FALSE,
                          keep.inspectiontimes=FALSE,
+                         semi.markov=T,
                          ...){
     # simulate latent data
     #class(x) <- "lvm"
@@ -220,7 +221,12 @@ sim.idmModel <- function(x,
     # for ill subjects as the sum of the time to illness (illtime) and
     # the time spent in the illness state (waittime)
     dat$lifetime <- dat$latent.lifetime
+    if(semi.markov==T){
     dat$lifetime[dat$illstatus==1] <- dat$illtime[dat$illstatus==1]+dat$latent.waittime[dat$illstatus==1]
+    }else{
+      dat$lifetime[dat$illstatus==1]<-dat$latent.waittime[dat$illstatus==1]
+      }
+  
     # interval censored illtime
     ipos <- grep("inspection[0-9]+",names(dat))
   }else{
@@ -361,7 +367,7 @@ simulateIDM <- function(n=100){
     lava::regression(m,to="latent.waittime",from="X1") <- 0.8
     lava::regression(m,to="latent.lifetime",from="X1") <- 0.7
     
-    sim.idmModel(m,n,plot=NULL,pen = F)
+    sim.idmModel(m,n,plot=NULL,pen = F,semi.markov = T)
 }
 
 
@@ -410,7 +416,8 @@ simulatepenIDM <- function(n=100,seed,scale.illtime,shape.illtime,
                            prob.censoring,administrative.censoring,
                            n.inspections,
                            schedule,punctuality,nvar,mean,sd,cov,
-                           x01,x02,x12,beta01,beta02,beta12){
+                           x01,x02,x12,beta01,beta02,beta12,
+                           semi.markov=T){
 
   # Set the seed for reproducibility
   set.seed(seed)
@@ -473,6 +480,20 @@ simulatepenIDM <- function(n=100,seed,scale.illtime,shape.illtime,
   latent.illtime<-((-log(1-U)*exp(-X01%*%beta01))^(1/shape.illtime))/scale.illtime
   latent.lifetime<-((-log(1-U)*exp(-X02%*%beta02))^(1/shape.lifetime))/scale.lifetime
   latent.waittime<-((-log(1-U)*exp(-X12%*%beta12))^(1/shape.waittime))/scale.waittime
+  
+  if(semi.markov==F){
+    illstatus <- 1*(latent.illtime<=latent.lifetime)
+    nmax<-1000
+    for(i in which(illstatus==1)){
+      k<-0
+      while(latent.waittime[i]<=latent.illtime[i] & k<=nmax){
+        k<-k+1
+        latent.waittime[i]<-(((-log(1-U)*exp(-X12%*%beta12))^(1/shape.waittime))/scale.waittime)[i]
+      }
+      if(k>=nmax){stop("Could not simulate latent.waittime in markov")}
+    
+    }
+  }
   #censtime<-((-log(1-U))^(shape.censtime))/shape.censtime
   
   censtime<-C
@@ -507,7 +528,7 @@ simulatepenIDM <- function(n=100,seed,scale.illtime,shape.illtime,
     theme_classic()+ylab("Survival")
   
   
-  sim.idmModel(x=fit,n=n,plot=p2,pen=T,illness.known.at.death=F)
+  sim.idmModel(x=fit,n=n,plot=p2,pen=T,illness.known.at.death=F,semi.markov=)
   
 }
 
