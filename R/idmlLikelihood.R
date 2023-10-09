@@ -28,9 +28,9 @@
 ##' @param nz01 number of knots for transition 0 -->1 
 ##' @param nz02 number of knots for transition 0 -->2
 ##' @param nz12 number of knots for transition 1 -->2
-##' @param ve010 variables for transition 0 -->1 
-##' @param ve020 variables for transition 0 -->2
-##' @param ve120 variables for transition 1 -->2
+##' @param ve01 variables for transition 0 -->1 
+##' @param ve02 variables for transition 0 -->2
+##' @param ve12 variables for transition 1 -->2
 ##' @param dimnva01 number of variables for transition 0 -->1 
 ##' @param dimnva02 number of variables for transition 0 -->2
 ##' @param dimnva12 number of variables for transition 1 -->2
@@ -49,7 +49,7 @@
 #' Fortran: Pierre Joly <Pierre.Joly@@isped.u-bordeaux2.fr>
 #' 
 
-idmlLikelihood<-function(b,np0,npar0,bfix0,fix0,zi01,zi02,zi12,c0,no0,nz01,nz02,nz12,ve010,ve020,ve120,
+idmlLikelihood<-function(b,np0,npar0,bfix0,fix0,zi01,zi02,zi12,c0,no0,nz01,nz02,nz12,ve01,ve02,ve12,
                          dimnva01,dimnva02,dimnva12,nva01,nva02,nva12,
                          t00,t10,t20,t30,troncature0,gausspoint0){
   res<-0
@@ -69,9 +69,9 @@ idmlLikelihood<-function(b,np0,npar0,bfix0,fix0,zi01,zi02,zi12,c0,no0,nz01,nz02,
            as.integer(nz01),
            as.integer(nz12),
            as.integer(nz02),
-           as.double(ve010),
-           as.double(ve120),
-           as.double(ve020),
+           as.double(ve01),
+           as.double(ve12),
+           as.double(ve02),
            as.integer(dimnva01),
            as.integer(dimnva12),
            as.integer(dimnva02),

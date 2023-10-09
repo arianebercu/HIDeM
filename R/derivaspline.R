@@ -1,4 +1,4 @@
-derivaspline<-function(b,np0,npar0,bfix0,fix0,zi01,zi02,zi12,c0,no0,nz01,nz02,nz12,ve010,ve020,ve120,
+derivaspline<-function(b,np0,npar0,bfix0,fix0,zi01,zi02,zi12,c0,no0,nz01,nz02,nz12,ve01,ve02,ve12,
                        dimnva01,dimnva02,dimnva12,nva01,nva02,nva12,
                        t0,t1,t2,t3,troncature){
   res<-rep(0,(np0*(np0+1)/2)+np0)
@@ -17,9 +17,9 @@ derivaspline<-function(b,np0,npar0,bfix0,fix0,zi01,zi02,zi12,c0,no0,nz01,nz02,nz
            as.integer(nz01),
            as.integer(nz12),
            as.integer(nz02),
-           as.double(ve010),
-           as.double(ve120),
-           as.double(ve020),
+           as.double(ve01),
+           as.double(ve12),
+           as.double(ve02),
            as.integer(dimnva01),
            as.integer(dimnva12),
            as.integer(dimnva02),
