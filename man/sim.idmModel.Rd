@@ -13,6 +13,7 @@
   compliance = 1,
   latent = FALSE,
   keep.inspectiontimes = FALSE,
+  semi.markov = T,
   ...
 )
 }

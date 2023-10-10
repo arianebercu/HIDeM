@@ -27,7 +27,8 @@ simulatepenIDM(
   x12,
   beta01,
   beta02,
-  beta12
+  beta12,
+  semi.markov = T
 )
 }
 \arguments{

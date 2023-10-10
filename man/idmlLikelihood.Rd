@@ -18,9 +18,9 @@ idmlLikelihood(
   nz01,
   nz02,
   nz12,
-  ve010,
-  ve020,
-  ve120,
+  ve01,
+  ve02,
+  ve12,
   dimnva01,
   dimnva02,
   dimnva12,
@@ -62,11 +62,11 @@ idmlLikelihood(
 
 \item{nz12}{number of knots for transition 1 -->2}
 
-\item{ve010}{variables for transition 0 -->1}
+\item{ve01}{variables for transition 0 -->1}
 
-\item{ve020}{variables for transition 0 -->2}
+\item{ve02}{variables for transition 0 -->2}
 
-\item{ve120}{variables for transition 1 -->2}
+\item{ve12}{variables for transition 1 -->2}
 
 \item{dimnva01}{number of variables for transition 0 -->1}
 

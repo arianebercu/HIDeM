@@ -259,18 +259,18 @@ intensity <- function(times,knots,number.knots,theta,linear.predictor=0,V=NULL,
 #----------------------------------------------------------------------
 ### intensity.R ends here
 # # 
-# library(SmoothHazard)
+# library(SmoothHazardoptim9)
 # data(Paq1000)
 # 
 # # Illness-death model with certif on the 3 transitions
 # # Weibull parametrization and likelihood maximization
 # 
-# fit.weib <- SmoothHazard::idm(formula02=Hist(time=t,event=death,entry=e)~certif,
+# fit.weib <- SmoothHazardpptim9::idm(formula02=Hist(time=t,event=death,entry=e)~certif,
 #                 formula01=Hist(time=list(l,r),event=dementia)~certif,
 #                 data=Paq1000)
 # 
 # 
-# fit.weib.8 <- SmoothHazardoptim8::idm(formula02=Hist(time=t,event=death,entry=e)~certif,
+# fit.weib.8 <- SmoothHazardoptim9::idm(formula02=Hist(time=t,event=death,entry=e)~certif,
 #                 formula01=Hist(time=list(l,r),event=dementia)~certif,
 #                 data=Paq1000)
 # test<-intensity(times=fit.weib$time,
@@ -285,7 +285,7 @@ intensity <- function(times,knots,number.knots,theta,linear.predictor=0,V=NULL,
 # test$upperintensity
 # fit.weib$upperIntensity01
 # 
-# fit.s<- SmoothHazardoptim8::idm(formula02=Hist(time=t,event=death,entry=e)~certif,
+# fit.s<- SmoothHazardoptim9::idm(formula02=Hist(time=t,event=death,entry=e)~certif,
 #                                       formula01=Hist(time=list(l,r),event=dementia)~certif,
 #                                       data=Paq1000,method = "splines",n.knots = c(3,3,3))
 # 
@@ -298,7 +298,7 @@ intensity <- function(times,knots,number.knots,theta,linear.predictor=0,V=NULL,
 #                 fix=rep(0,5),converged=1,conf.int = 0.95,
 #                 method="splines")
 # 
-# fit.idm <-  SmoothHazard::idm(formula02 = Hist(time = t, event = death, entry = e) ~ certif,
+# fit.idm <-  SmoothHazardoptim9::idm(formula02 = Hist(time = t, event = death, entry = e) ~ certif,
 #                 formula01 = Hist(time = list(l,r), event = dementia) ~ certif,
 #                 formula12 = ~ certif, method = "Splines", data = Paq1000)
 # 

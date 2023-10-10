@@ -100,7 +100,7 @@ There are three ways to control the placement of the knots between the smallest 
 of all time points:
 \itemize{
  \item{\code{knots="equidistant"}}{Knots are placed with same distance on the time scale.}
- \item{\code{knots="quantiles"}}{Knots are placed such that the number of observations is roughly the same between knots.}
+ \item{\code{knots="quantile"}}{Knots are placed such that the number of observations is roughly the same between knots.}
 \item{knots=list()}{List of 1 or 2 or three vectors. The list elements are the actual placements
 (timepoints) of the knots for the M-spline. The list may contain
 one vector of placements for each transition in the order \code{0 --> 1}, \code{0 --> 2}, \code{1 --> 2}.

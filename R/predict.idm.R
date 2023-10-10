@@ -565,8 +565,8 @@ lifexpect0.idmPl <- function(s,knots01,nknots01,the01,knots12,nknots12,the12,kno
 # 
 # data(Paq1000)
 # library(prodlim)
-# library(SmoothHazard)
-# fit.paq <- SmoothHazard::idm(formula02=Hist(time=t,event=death,entry=e)~certif,
+# library(SmoothHazardoptim9)
+# fit.paq <- SmoothHazardoptim9::idm(formula02=Hist(time=t,event=death,entry=e)~certif,
 #                formula01=Hist(time=list(l,r),event=dementia)~certif,data=Paq1000)
 # 
 # p1<-predict(fit.paq,s=70,t=80,lifeExpect=F,conf.int=T,newdata=data.frame(certif=1))
