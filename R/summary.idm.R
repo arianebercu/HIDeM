@@ -33,7 +33,7 @@ summary.idm <- function(object,conf.int=.95,digits=4,pvalDigits=4,eps=.0001, ...
     if (!inherits(object,"idm")) stop("Object must be of class 'idm'")
   
     if(!is.null(object$modelPar)){
-      object$method<-"weib"
+      object$method<-"Weib"
     }else{object$method<-"splines"
     }
   
