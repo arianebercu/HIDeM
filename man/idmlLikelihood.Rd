@@ -6,15 +6,15 @@
 \usage{
 idmlLikelihood(
   b,
-  np0,
-  npar0,
-  bfix0,
-  fix0,
+  np,
+  npar,
+  bfix,
+  fix,
   zi01,
   zi02,
   zi12,
-  c0,
-  no0,
+  ctime,
+  no,
   nz01,
   nz02,
   nz12,
@@ -27,24 +27,24 @@ idmlLikelihood(
   nva01,
   nva02,
   nva12,
-  t00,
-  t10,
-  t20,
-  t30,
-  troncature0,
-  gausspoint0
+  t0,
+  t1,
+  t2,
+  t3,
+  troncature,
+  gausspoint
 )
 }
 \arguments{
 \item{b}{parameters not fixed}
 
-\item{np0}{number of parameters not fixed}
+\item{np}{number of parameters not fixed}
 
-\item{npar0}{number of parameters}
+\item{npar}{number of parameters}
 
-\item{bfix0}{parameters fixed}
+\item{bfix}{parameters fixed}
 
-\item{fix0}{indicators of fixed and unfixed parameters}
+\item{fix}{indicators of fixed and unfixed parameters}
 
 \item{zi01}{knots of transition 0 --> 1}
 
@@ -52,9 +52,9 @@ idmlLikelihood(
 
 \item{zi12}{knots of transition 1 --> 2}
 
-\item{c0}{classification of subject according to their observations}
+\item{ctime}{classification of subject according to their observations}
 
-\item{no0}{number of subjects}
+\item{no}{number of subjects}
 
 \item{nz01}{number of knots for transition 0 -->1}
 
@@ -80,17 +80,17 @@ idmlLikelihood(
 
 \item{nva12}{number of variables for transition 1 -->2}
 
-\item{t00}{time entry}
+\item{t0}{time entry}
 
-\item{t10}{time L}
+\item{t1}{time L}
 
-\item{t20}{time R}
+\item{t2}{time R}
 
-\item{t30}{time of event/out}
+\item{t3}{time of event/out}
 
-\item{troncature0}{indicator if troncature or not}
+\item{troncature}{indicator if troncature or not}
 
-\item{gausspoint0}{number of gausspoint quadrature}
+\item{gausspoint}{number of gausspoint quadrature}
 }
 \description{
 idm log likelihood

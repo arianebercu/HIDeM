@@ -1,7 +1,7 @@
 derivaspline<-function(b,np,npar,bfix,fix,zi01,zi02,zi12,ctime,no,nz01,nz02,nz12,ve01,ve02,ve12,
                        dimnva01,dimnva02,dimnva12,nva01,nva02,nva12,
                        t0,t1,t2,t3,troncature){
-  res<-rep(0,(np0*(np0+1)/2)+np0)
+  res<-rep(0,(np*(np+1)/2)+np)
   .Fortran("derivaspline",
            ## input
            as.double(b),

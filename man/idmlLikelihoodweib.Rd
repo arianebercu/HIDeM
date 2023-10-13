@@ -6,48 +6,48 @@
 \usage{
 idmlLikelihoodweib(
   b,
-  np0,
-  npar0,
-  bfix0,
-  fix0,
-  c0,
-  no0,
-  ve010,
-  ve020,
-  ve120,
+  np,
+  npar,
+  bfix,
+  fix,
+  ctime,
+  no,
+  ve01,
+  ve02,
+  ve12,
   dimnva01,
   dimnva02,
   dimnva12,
   nva01,
   nva02,
   nva12,
-  t00,
-  t10,
-  t20,
-  t30,
-  troncature0
+  t0,
+  t1,
+  t2,
+  t3,
+  troncature
 )
 }
 \arguments{
 \item{b}{parameters not fixed}
 
-\item{np0}{number of parameters not fixed}
+\item{np}{number of parameters not fixed}
 
-\item{npar0}{number of parameters}
+\item{npar}{number of parameters}
 
-\item{bfix0}{parameters fixed}
+\item{bfix}{parameters fixed}
 
-\item{fix0}{indicators of fixed and unfixed parameters}
+\item{fix}{indicators of fixed and unfixed parameters}
 
-\item{c0}{classification of subject according to their observations}
+\item{ctime}{classification of subject according to their observations}
 
-\item{no0}{number of subjects}
+\item{no}{number of subjects}
 
-\item{ve010}{variables for transition 0 -->1}
+\item{ve01}{variables for transition 0 -->1}
 
-\item{ve020}{variables for transition 0 -->2}
+\item{ve02}{variables for transition 0 -->2}
 
-\item{ve120}{variables for transition 1 -->2}
+\item{ve12}{variables for transition 1 -->2}
 
 \item{dimnva01}{number of variables for transition 0 -->1}
 
@@ -61,15 +61,15 @@ idmlLikelihoodweib(
 
 \item{nva12}{number of variables for transition 1 -->2}
 
-\item{t00}{time entry}
+\item{t0}{time entry}
 
-\item{t10}{time L}
+\item{t1}{time L}
 
-\item{t20}{time R}
+\item{t2}{time R}
 
-\item{t30}{time of event/out}
+\item{t3}{time of event/out}
 
-\item{troncature0}{indicator if troncature or not}
+\item{troncature}{indicator if troncature or not}
 }
 \description{
 idm log likelihood
