@@ -16,7 +16,7 @@
 ### Code:
 ##' @title idm log likelihood
 ##' @param b  parameters not fixed
-##' @param np  number of parameters not fixed
+##' @param npm  number of parameters not fixed
 ##' @param npar number of parameters
 ##' @param bfix parameters fixed
 ##' @param fix indicators of fixed and unfixed parameters
@@ -49,7 +49,7 @@
 #' Fortran: Pierre Joly <Pierre.Joly@@isped.u-bordeaux2.fr>
 #' 
 
-idmlLikelihood<-function(b,np,npar,bfix,fix,zi01,zi02,zi12,ctime,no,nz01,nz02,nz12,ve01,ve02,ve12,
+idmlLikelihood<-function(b,npm,npar,bfix,fix,zi01,zi02,zi12,ctime,no,nz01,nz02,nz12,ve01,ve02,ve12,
                          dimnva01,dimnva02,dimnva12,nva01,nva02,nva12,
                          t0,t1,t2,t3,troncature,gausspoint){
   res<-0
@@ -57,7 +57,7 @@ idmlLikelihood<-function(b,np,npar,bfix,fix,zi01,zi02,zi12,ctime,no,nz01,nz02,nz
   .Fortran("idmlikelihood",
            ## input
            as.double(b),
-           as.integer(np),
+           as.integer(npm),
            as.integer(npar),
            as.double(bfix),
            as.integer(fix),

@@ -1,4 +1,4 @@
-idmlLikelihoodweibpena<-function(b,np,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
+idmlLikelihoodweibpena<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
                          dimnva01,dimnva02,dimnva12,nva01,nva02,nva12,
                          t0,t1,t2,t3,troncature,lambda,alpha,penalty.factor,penalty){
   res<-0
@@ -7,7 +7,7 @@ idmlLikelihoodweibpena<-function(b,np,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
   res<-.Fortran("idmlikelihoodweib",
            ## input
            as.double(b),
-           as.integer(np),
+           as.integer(npm),
            as.integer(npar),
            as.double(bfix),
            as.integer(fix),
@@ -42,9 +42,9 @@ idmlLikelihoodweibpena<-function(b,np,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
   }else{b02<-0}
   #b02<-b02[fix0[(6+1+nva01):(6+nva01+nva02)]==0]
   if(nva12>0){
-  b12<-b[(6+1+nva01+nva02):npar0][penalty.factor[(nva01+nva02+1):(nva01+nva02+nva12)]==1]
+  b12<-b[(6+1+nva01+nva02):npar][penalty.factor[(nva01+nva02+1):(nva01+nva02+nva12)]==1]
   }else{b12<-0}
-  #b12<-b12[fix0[(6+1+nva01+nva02):npar0]==0]
+  #b12<-b12[fix0[(6+1+nva01+nva02):npar]==0]
   if(penalty%in%c("lasso","ridge","elasticnet","corrected.elasticnet")){
     res<-res+lambda[,1]*alpha*sum(abs(b01))+lambda[,1]*(1-alpha)*sum(b01*b01)
     res<-res+lambda[,2]*alpha*sum(abs(b02))+lambda[,2]*(1-alpha)*sum(b02*b02)

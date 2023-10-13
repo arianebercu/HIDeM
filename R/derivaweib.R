@@ -1,12 +1,12 @@
-derivaweib<-function(b,np,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
+derivaweib<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
                      dimnva01,dimnva02,dimnva12,nva01,nva02,nva12,
                      t0,t1,t2,t3,troncature){
-  res<-rep(0,(np*(np+1)/2)+np)
+  res<-rep(0,(npm*(npm+1)/2)+npm)
   
   .Fortran("derivaweib",
            ## input
            as.double(b),
-           as.integer(np),
+           as.integer(npm),
            as.integer(npar),
            as.double(bfix),
            as.integer(fix),
