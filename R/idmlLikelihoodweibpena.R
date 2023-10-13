@@ -1,38 +1,38 @@
-idmlLikelihoodweibpena<-function(b,np0,npar0,bfix0,fix0,c0,no0,ve010,ve020,ve120,
+idmlLikelihoodweibpena<-function(b,np,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
                          dimnva01,dimnva02,dimnva12,nva01,nva02,nva12,
-                         t00,t10,t20,t30,troncature0,lambda,alpha,penalty.factor,penalty){
+                         t0,t1,t2,t3,troncature,lambda,alpha,penalty.factor,penalty){
   res<-0
   b0<-b
   #browser()
   res<-.Fortran("idmlikelihoodweib",
            ## input
            as.double(b),
-           as.integer(np0),
-           as.integer(npar0),
-           as.double(bfix0),
-           as.integer(fix0),
-           as.integer(c0),
-           as.integer(no0),
-           as.double(ve010),
-           as.double(ve120),
-           as.double(ve020),
+           as.integer(np),
+           as.integer(npar),
+           as.double(bfix),
+           as.integer(fix),
+           as.integer(ctime),
+           as.integer(no),
+           as.double(ve01),
+           as.double(ve12),
+           as.double(ve02),
            as.integer(dimnva01),
            as.integer(dimnva12),
            as.integer(dimnva02),
            as.integer(nva01),
            as.integer(nva12),
            as.integer(nva02),
-           as.double(t00),
-           as.double(t10),
-           as.double(t20),
-           as.double(t30),
-           as.integer(troncature0),
+           as.double(t0),
+           as.double(t1),
+           as.double(t2),
+           as.double(t3),
+           as.integer(troncature),
            likelihood_res=as.double(res),
            PACKAGE="SmoothHazardoptim9")$likelihood_res
   #browser()
-  b<-rep(NA,npar0)
-  b[fix0==0]<-b0
-  b[fix0==1]<-bfix0
+  b<-rep(NA,npar)
+  b[fix==0]<-b0
+  b[fix==1]<-bfix
   if(nva01>0){
   b01<-b[(6+1):(6+nva01)][penalty.factor[1:nva01]==1]
   }else{b01<-0}

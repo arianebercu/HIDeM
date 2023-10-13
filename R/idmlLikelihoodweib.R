@@ -16,60 +16,60 @@
 ### Code:
 ##' @title idm log likelihood
 ##' @param b  parameters not fixed
-##' @param np0  number of parameters not fixed
-##' @param npar0 number of parameters
-##' @param bfix0 parameters fixed
-##' @param fix0 indicators of fixed and unfixed parameters
-##' @param c0 classification of subject according to their observations
-##' @param no0 number of subjects
-##' @param ve010 variables for transition 0 -->1 
-##' @param ve020 variables for transition 0 -->2
-##' @param ve120 variables for transition 1 -->2
+##' @param np  number of parameters not fixed
+##' @param npar number of parameters
+##' @param bfix parameters fixed
+##' @param fix indicators of fixed and unfixed parameters
+##' @param ctime classification of subject according to their observations
+##' @param no number of subjects
+##' @param ve01 variables for transition 0 -->1 
+##' @param ve02 variables for transition 0 -->2
+##' @param ve12 variables for transition 1 -->2
 ##' @param dimnva01 number of variables for transition 0 -->1 
 ##' @param dimnva02 number of variables for transition 0 -->2
 ##' @param dimnva12 number of variables for transition 1 -->2
 ##' @param nva01 number of variables for transition 0 -->1 
 ##' @param nva02 number of variables for transition 0 -->2
 ##' @param nva12 number of variables for transition 1 -->2
-##' @param t00 time entry
-##' @param t10 time L
-##' @param t20 time R
-##' @param t30 time of event/out
-##' @param troncature0 indicator if troncature or not
+##' @param t0 time entry
+##' @param t1 time L
+##' @param t2 time R
+##' @param t3 time of event/out
+##' @param troncature indicator if troncature or not
 #' @useDynLib SmoothHazardoptim9
 ##' @export
 #' @author R: Ariane Bercu, Celia Touraine <Celia.Touraine@@isped.u-bordeaux2.fr> and Thomas Alexander Gerds <tag@@biostat.ku.dk>
 #' Fortran: Pierre Joly <Pierre.Joly@@isped.u-bordeaux2.fr>
 #' 
 
-idmlLikelihoodweib<-function(b,np0,npar0,bfix0,fix0,c0,no0,ve010,ve020,ve120,
+idmlLikelihoodweib<-function(b,np,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
                          dimnva01,dimnva02,dimnva12,nva01,nva02,nva12,
-                         t00,t10,t20,t30,troncature0){
+                         t0,t1,t2,t3,troncature){
   res<-0
 
   .Fortran("idmlikelihoodweib",
            ## input
            as.double(b),
-           as.integer(np0),
-           as.integer(npar0),
-           as.double(bfix0),
-           as.integer(fix0),
-           as.integer(c0),
-           as.integer(no0),
-           as.double(ve010),
-           as.double(ve120),
-           as.double(ve020),
+           as.integer(np),
+           as.integer(npar),
+           as.double(bfix),
+           as.integer(fix),
+           as.integer(ctime),
+           as.integer(no),
+           as.double(ve01),
+           as.double(ve12),
+           as.double(ve02),
            as.integer(dimnva01),
            as.integer(dimnva12),
            as.integer(dimnva02),
            as.integer(nva01),
            as.integer(nva12),
            as.integer(nva02),
-           as.double(t00),
-           as.double(t10),
-           as.double(t20),
-           as.double(t30),
-           as.integer(troncature0),
+           as.double(t0),
+           as.double(t1),
+           as.double(t2),
+           as.double(t3),
+           as.integer(troncature),
            likelihood_res=as.double(res),
            PACKAGE="SmoothHazardoptim9")$likelihood_res
 }

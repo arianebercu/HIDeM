@@ -1,21 +1,21 @@
-idmlLikelihoodpena<-function(b,np0,npar0,bfix0,fix0,zi01,zi02,zi12,c0,no0,nz01,nz02,nz12,ve01,ve02,ve12,
+idmlLikelihoodpena<-function(b,np,npar,bfix,fix,zi01,zi02,zi12,ctime,no,nz01,nz02,nz12,ve01,ve02,ve12,
                          dimnva01,dimnva02,dimnva12,nva01,nva02,nva12,
-                         t00,t10,t20,t30,troncature0,gausspoint0,lambda,alpha,penalty.factor,penalty){
+                         t0,t1,t2,t3,troncature,gausspoint,lambda,alpha,penalty.factor,penalty){
   res<-0
   b0<-b
   #browser()
   res<-.Fortran("idmlikelihood",
            ## input
            as.double(b),
-           as.integer(np0),
-           as.integer(npar0),
-           as.double(bfix0),
-           as.integer(fix0),
+           as.integer(np),
+           as.integer(npar),
+           as.double(bfix),
+           as.integer(fix),
            as.double(zi01),
            as.double(zi12),
            as.double(zi02),
-           as.integer(c0),
-           as.integer(no0),
+           as.integer(ctime),
+           as.integer(no),
            as.integer(nz01),
            as.integer(nz12),
            as.integer(nz02),
@@ -28,18 +28,18 @@ idmlLikelihoodpena<-function(b,np0,npar0,bfix0,fix0,zi01,zi02,zi12,c0,no0,nz01,n
            as.integer(nva01),
            as.integer(nva12),
            as.integer(nva02),
-           as.double(t00),
-           as.double(t10),
-           as.double(t20),
-           as.double(t30),
-           as.integer(troncature0),
-           as.integer(gausspoint0),
+           as.double(t0),
+           as.double(t1),
+           as.double(t2),
+           as.double(t3),
+           as.integer(troncature),
+           as.integer(gausspoint),
            likelihood_res=as.double(res),
            PACKAGE="SmoothHazardoptim9")$likelihood_res
   #browser()
-  b<-rep(NA,npar0)
-  b[fix0==0]<-b0
-  b[fix0==1]<-bfix0
+  b<-rep(NA,npar)
+  b[fix==0]<-b0
+  b[fix==1]<-bfix
   size_spline<-nz01+nz02+nz12+6
   if(nva01>0){
   b01<-b[(size_spline+1):(size_spline+nva01)][penalty.factor[1:nva01]==1]

@@ -195,7 +195,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                                     t1=t1,
                                                     t2=t2,
                                                     t3=t3,
-                                                    troncature0=troncature)
+                                                    troncature=troncature)
                                  
                                  if(ite==0){
                                    fn.value<-idmlLikelihoodweibpena(b=b,
