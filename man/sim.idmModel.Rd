@@ -37,6 +37,8 @@ seen.ill}
 \item{keep.inspectiontimes}{if \code{TRUE} keep the inspection
 times.}
 
+\item{semi.markov}{True if you want to simulate 1 --> 2 in Semi Markov process}
+
 \item{...}{Extra arguments given to \code{sim}}
 }
 \value{
