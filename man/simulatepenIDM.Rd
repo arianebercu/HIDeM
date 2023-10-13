@@ -79,6 +79,8 @@ inspections.}
 \item{beta02}{value of beta on transition 0 --> 2}
 
 \item{beta12}{value of beta on transition 1 --> 2}
+
+\item{semi.markov}{True if you want to simulate 1 --> 2 in Semi Markov process}
 }
 \description{
 Simulate data from an illness-death model with interval censored event times and penalized covariates

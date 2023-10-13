@@ -186,6 +186,7 @@ idmModel <- function(scale.illtime=1/100,
 ##' times.
 ##' @param pen if the simulated data are for a penalised version of illness-death model
 ##' @param plot plot of base survival for all transition
+##' @param semi.markov True if you want to simulate 1 --> 2 in Semi Markov process
 ##' @param ... Extra arguments given to \code{sim}
 ##' @return A data set with interval censored observations from an illness-death model
 ##' example(idmModel)
