@@ -404,6 +404,7 @@ simulateIDM <- function(n=100){
 ##' @param beta02 value of beta on transition 0 --> 2
 ##' @param beta12 value of beta on transition 1 --> 2
 ##' @param n number of observations
+##' @param semi.markov True if you want to simulate 1 --> 2 in Semi Markov process
 #' @importFrom ggplot2 ggplot geom_line geom_point theme_classic ylab aes_string
 #' @useDynLib SmoothHazardoptim9
 #' @export

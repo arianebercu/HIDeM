@@ -6,7 +6,7 @@
 \usage{
 idmlLikelihood(
   b,
-  np,
+  npm,
   npar,
   bfix,
   fix,
@@ -38,7 +38,7 @@ idmlLikelihood(
 \arguments{
 \item{b}{parameters not fixed}
 
-\item{np}{number of parameters not fixed}
+\item{npm}{number of parameters not fixed}
 
 \item{npar}{number of parameters}
 

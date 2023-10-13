@@ -6,7 +6,7 @@
 \usage{
 idmlLikelihoodweib(
   b,
-  np,
+  npm,
   npar,
   bfix,
   fix,
@@ -31,7 +31,7 @@ idmlLikelihoodweib(
 \arguments{
 \item{b}{parameters not fixed}
 
-\item{np}{number of parameters not fixed}
+\item{npm}{number of parameters not fixed}
 
 \item{npar}{number of parameters}
 
