@@ -483,7 +483,7 @@ simulatepenIDM <- function(n=100,seed,scale.illtime,shape.illtime,
   
   if(semi.markov==F){
     illstatus <- 1*(latent.illtime<=latent.lifetime)
-    nmax<-1000
+    nmax<-10000
     iderase<-NULL
     
     for(i in which(illstatus==1)){
