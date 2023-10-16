@@ -263,7 +263,6 @@ simulatepenIDM <- function(n=100,seed,scale.illtime,shape.illtime,
   administrative.censoring<-rep(administrative.censoring,n)
   censtime<-pmin(censtime,administrative.censoring)
   if(semi.markov==F){
-    browser()
     #S12<-exp(-(scale.waittime*latent.illtime)^shape.waittime)
     cumulative.intensity<-(scale.waittime*latent.illtime)^shape.waittime
     e <- exp(X12%*%beta12)
