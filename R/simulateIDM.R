@@ -263,11 +263,15 @@ simulatepenIDM <- function(n=100,seed,scale.illtime,shape.illtime,
   administrative.censoring<-rep(administrative.censoring,n)
   censtime<-pmin(censtime,administrative.censoring)
   if(semi.markov==F){
-    S12<-exp(-(scale.waittime*latent.illtime)^shape.waittime)
+    browser()
+    #S12<-exp(-(scale.waittime*latent.illtime)^shape.waittime)
+    cumulative.intensity<-(scale.waittime*latent.illtime)^shape.waittime
+    e <- exp(X12%*%beta12)
+    cumulative.intensity<-cumulative.intensity*e
+    S12 <- exp(-cumulative.intensity)
     illstatus <-1*((latent.illtime<=latent.lifetime)&(latent.illtime<=censtime))
-    latent.waittime[illstatus]<-((-log((1-U)*S12)*exp(-X12%*%beta12))^(1/shape.waittime))/scale.waittime
-    
-  }
+    latent.waittime[illstatus]<-(((-log((1-U)*S12)*exp(-X12%*%beta12))^(1/shape.waittime))/scale.waittime)
+    }
   #censtime<-((-log(1-U))^(shape.censtime))/shape.censtime
   
   
@@ -294,27 +298,27 @@ simulatepenIDM <- function(n=100,seed,scale.illtime,shape.illtime,
   cumulative.intensity<-cumulative.intensity%*%t(e)
   survival12 <- exp(-cumulative.intensity)
   
-  surv01<-data.frame(time=rep(time,n+length(iderase)),
+  surv01<-data.frame(time=rep(time,n),
              surv=as.vector(survival01),
-             id=sort(rep(c(1:(n+length(iderase))),length(time))))
+             id=sort(rep(c(1:(n)),length(time))))
   
   surv01$id<-as.factor(surv01$id)
   p01<-ggplot(surv01[surv01$id%in%c(1:3),],aes(x=time,y=surv,color=id))+
     geom_point()+
     geom_line() +facet_grid(~id)
   
-  surv02<-data.frame(time=rep(time,n+length(iderase)),
+  surv02<-data.frame(time=rep(time,n),
                      surv=as.vector(survival02),
-                     id=sort(rep(c(1:(n+length(iderase))),length(time))))
+                     id=sort(rep(c(1:(n)),length(time))))
   
   surv02$id<-as.factor(surv02$id)
   p02<-ggplot(surv02[surv02$id%in%c(1:3),],aes(x=time,y=surv,color=id))+
     geom_point()+
     geom_line() +facet_grid(~id)
   
-  surv12<-data.frame(time=rep(time,n+length(iderase)),
+  surv12<-data.frame(time=rep(time,n),
                      surv=as.vector(survival12),
-                     id=sort(rep(c(1:(n+length(iderase))),length(time))))
+                     id=sort(rep(c(1:(n)),length(time))))
   surv12$id<-as.factor(surv12$id)
   p12<-ggplot(surv12[surv12$id%in%c(1:3),],aes(x=time,y=surv,color=id))+
     geom_point()+
@@ -341,7 +345,7 @@ simulatepenIDM <- function(n=100,seed,scale.illtime,shape.illtime,
     theme_classic()+ylab("Survival")
   
   
-  sim.idmModel(x=fit,n=n,plot=list(iderase,p2,surv01,p01,surv02,p02,surv12,p12),pen=T,illness.known.at.death=F,semi.markov)
+  sim.idmModel(x=fit,n=n,plot=list(p2,surv01,p01,surv02,p02,surv12,p12),pen=T,illness.known.at.death=F,semi.markov)
   
 }
 
