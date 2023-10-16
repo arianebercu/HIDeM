@@ -270,7 +270,7 @@ simulatepenIDM <- function(n=100,seed,scale.illtime,shape.illtime,
     cumulative.intensity<-cumulative.intensity*e
     S12 <- exp(-cumulative.intensity)
     illstatus <-1*((latent.illtime<=latent.lifetime)&(latent.illtime<=censtime))
-    latent.waittime[illstatus]<-(((-log((1-U)*S12)*exp(-X12%*%beta12))^(1/shape.waittime))/scale.waittime)
+    latent.waittime[illstatus==1]<-(((-log((1-U)*S12)*exp(-X12%*%beta12))^(1/shape.waittime))/scale.waittime)[illstatus==1]
     }
   #censtime<-((-log(1-U))^(shape.censtime))/shape.censtime
   
