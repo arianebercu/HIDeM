@@ -118,10 +118,10 @@ idm.no.step.sequential<-function(b,clustertype,epsa,epsb,epsd,print.info,nproc,
       theta[size_spline:length(theta)]<-rep(0,size_spline+length(theta)-1)}
       
       theta<-theta[which(fix0==0)]
-      browser()
+
       V.theta<-4*theta*Vr%*%diag(theta)
       H.nopena.theta<-4*theta*Hnopena%*%diag(theta)
-      browser()
+   
       trLCV.theta<-lava::tr(-V.theta%*%H.nopena.theta)
       trLCV<-lava::tr(-V%*%H.nopena)
       
