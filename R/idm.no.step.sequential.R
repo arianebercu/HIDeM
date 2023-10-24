@@ -114,7 +114,9 @@ idm.no.step.sequential<-function(b,clustertype,epsa,epsb,epsd,print.info,nproc,
       
       theta<-beta
       size_spline<-nknots01+nknots02+nknots12+6
-      theta[size_spline:length(theta)]<-rep(0,size_spline+length(theta)-1)
+      if(size_spline<length(theta)){ # if explanatory variables
+      theta[size_spline:length(theta)]<-rep(0,size_spline+length(theta)-1)}
+      
       theta<-theta[which(fix0==0)]
       browser()
       V.theta<-4*theta*Vr%*%diag(theta)
@@ -320,7 +322,8 @@ idm.no.step.sequential<-function(b,clustertype,epsa,epsb,epsd,print.info,nproc,
         
         theta<-beta[,i]
         size_spline<-nknots01+nknots02+nknots12+6
-        theta[size_spline:length(theta)]<-rep(0,size_spline+length(theta)-1)
+        if(size_spline<length(theta)){
+        theta[size_spline:length(theta)]<-rep(0,size_spline+length(theta)-1)}
         theta<-theta[which(fix0==0)]
 
         V.theta<-4*theta*Vr%*%diag(theta)

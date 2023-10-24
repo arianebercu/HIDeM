@@ -9,10 +9,11 @@ idm.weib<-function(b,fix0,size_V,
    s.start<-b[1:6]
   
   # Initiate value of eta : all the same for each lambda
+  if(size_V>6){
+  beta.start<-b[(6+1):(size_V)]
+  }else{beta.start<-NULL}}
   
-  beta.start<-b[(6+1):(size_V)]}
-  
-  
+
   if(is.null(b)){
       
       s.start<-c(1,sqrt(sum(idm)/ts),1,sqrt(sum(idd)/ts),1,sqrt(sum(idd)/ts))

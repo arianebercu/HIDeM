@@ -9,8 +9,7 @@
   n,
   plot,
   pen,
-  illness.known.at.death = TRUE,
-  compliance = 1,
+  illness.known.at.death = FALSE,
   latent = FALSE,
   keep.inspectiontimes = FALSE,
   semi.markov = T,
@@ -30,8 +29,6 @@
 \item{illness.known.at.death}{Affects the value of variable
 seen.ill}
 
-\item{compliance}{Probability of missing an inspection time.}
-
 \item{latent}{if TRUE keep the latent event times}
 
 \item{keep.inspectiontimes}{if \code{TRUE} keep the inspection
@@ -40,6 +37,8 @@ times.}
 \item{semi.markov}{True if you want to simulate 1 --> 2 in Semi Markov process}
 
 \item{...}{Extra arguments given to \code{sim}}
+
+\item{compliance}{Probability of missing an inspection time.}
 }
 \value{
 A data set with interval censored observations from an illness-death model
