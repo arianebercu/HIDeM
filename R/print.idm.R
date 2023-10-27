@@ -124,7 +124,7 @@ print.idm <- function(x,conf.int=.95,digits=4,pvalDigits=4,eps=0.0001,...){
       n_spline<-6
         cat("Parameters of the Weibull distributions: 'S(t) = exp(-(b*t)^a)'\n")
       if(n_model==1){
-        wpars <- matrix(x$modelPar,nrow=2)
+        wpars <- matrix(x$modelPar^2,nrow=2)
         dimnames(wpars) <- list(c("shape (a)","scale (b)"),
                                 c("transition 0 -> 1",
                                   "transition 0 -> 2",
@@ -133,13 +133,13 @@ print.idm <- function(x,conf.int=.95,digits=4,pvalDigits=4,eps=0.0001,...){
       }else{
         rownames(x$modelPar)<-rep(c("shape (a)","scale (b)"),3)
         cat("transition 0 ->1 : \n")
-        print(x$modelPar[1:2,],row.names=TRUE)
+        print(x$modelPar[1:2,]^2,row.names=TRUE)
         cat("\n")
         cat("transition 0 ->2 : \n")
-        print(x$modelPar[3:4,],row.names=TRUE)
+        print(x$modelPar[3:4,]^2,row.names=TRUE)
         cat("\n")
         cat("transition 1 ->2 : \n")
-        print(x$modelPar[5:6,],row.names=TRUE)
+        print(x$modelPar[5:6,]^2,row.names=TRUE)
         cat("\n")
         
       }
