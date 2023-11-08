@@ -817,7 +817,6 @@ idm <- function(formula01,
       }
       if(method=="Weib"){
         
-        
         out <- idm.weib(b=b,
                                 fix0=fix0,
                                 size_V=size_V,
@@ -848,7 +847,6 @@ idm <- function(formula01,
                                 idd=idd,
                                 ts=ts,
                                 troncature=troncature)
-        
         
         
         

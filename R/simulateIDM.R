@@ -6,7 +6,6 @@
 ##' @param x An \code{idmModel} object as obtained with
 ##' \code{idmModel}
 ##' @param n Number of observations
-##' @param illness.known.at.death Affects the value of variable
 ##' seen.ill
 ##' @param compliance Probability of missing an inspection time.
 ##' @param latent if TRUE keep the latent event times
@@ -14,7 +13,6 @@
 ##' times.
 ##' @param pen if the simulated data are for a penalised version of illness-death model
 ##' @param plot plot of base survival for all transition
-##' @param semi.markov True if you want to simulate 1 --> 2 in Semi Markov process
 ##' @param ... Extra arguments given to \code{sim}
 ##' @return A data set with interval censored observations from an illness-death model
 ##' example(idmModel)
@@ -26,10 +24,8 @@ sim.idmModel <- function(x,
                          n,
                          plot,
                          pen,
-                         illness.known.at.death=FALSE,
                          latent=FALSE,
                          keep.inspectiontimes=FALSE,
-                         semi.markov=T,
                          ...){
     # simulate latent data
     #class(x) <- "lvm"
@@ -41,21 +37,21 @@ sim.idmModel <- function(x,
     T02<-dat$latent.lifetime
     T12<-dat$latent.waittime
     dat$illtime <- dat$latent.illtime
-    dat$illstatus <- 1*((dat$illtime<=dat$latent.lifetime)& (dat$illtime<=dat$censtime))
-    dat$illtime[dat$illtime>dat$latent.lifetime] <- 0
+    dat$illstatus <- 1*((dat$illtime<dat$latent.lifetime)& (dat$illtime<dat$censtime))
+    #dat$illtime[dat$illtime>dat$latent.lifetime] <- 0
     # construct lifetime
     # for ill subjects as the sum of the time to illness (illtime) and
     # the time spent in the illness state (waittime)
     dat$lifetime <- dat$latent.lifetime
-    if(semi.markov==T){
-    dat$lifetime[dat$illstatus==1] <- dat$illtime[dat$illstatus==1]+dat$latent.waittime[dat$illstatus==1]
-    }else{
-      dat$lifetime[dat$illstatus==1]<-dat$latent.waittime[dat$illstatus==1]
-      }
+    dat$lifetime[dat$illstatus==1]<-dat$latent.waittime[dat$illstatus==1]
+    id.nodem.death<-rep(0,n)
+    
+    
 
     # interval censored illtime
     ipos <- grep("inspection[0-9]+",names(dat))
 
+    browser()
     if (length(ipos)>0) {
         # compute inspection times
         # make sure all inspection times are in the future
@@ -65,6 +61,7 @@ sim.idmModel <- function(x,
         dat <- dat[,-ipos]
         
         interval <- do.call("rbind",lapply(1:n,function(i){
+          
             ## remove duplicates
             itimes <- unique(iframe[i,])
             
@@ -72,73 +69,74 @@ sim.idmModel <- function(x,
             ## larger than the individual lifetime
             itimes <- itimes[itimes<dat$lifetime[i]]
             ## and those larger than the right censoring time
-            itimes <- itimes[itimes<dat$censtime[i]]
+            itimes <- itimes[itimes<=dat$censtime[i]]
             ## if all inspection times are censored
             ## set a single one at 0
-            if (length(itimes)==0) {
-              itimes <- 0}
+            #if (length(itimes)==0) {
+            #  itimes <- 0}
             
             ## mark the last inspection time 
-            last.inspection <- itimes[length(itimes)]
+            #last.inspection <- itimes[length(itimes)]
             ## find the interval where illness happens
+            
             if (dat$illstatus[i]){
-                ## subject was ill
-                if (dat$illtime[i] > last.inspection){
-                    ## no illness observed at last inspection
-                    if (dat$censtime[i]<dat$lifetime[i]){
-                        ## right censored: no illness observed
-                        c(last.inspection,dat$censtime[i],0)
-                    }else{
-                        ## user option decides if illness is recorded at death
-                        c(last.inspection,dat$lifetime[i],illness.known.at.death)
-                    }
-                }else{ ## illtime is smaller or equal to last inspection time
+              
+              idL<-which(itimes<dat$illtime[i])
+              idR<-which(itimes>=dat$illtime[i])
+      
+              # only one visit at inclusion
+              if(length(idR)==0){
+                R<-L<-itimes[max(idL)]
+                if(dat$lifetime[i]>dat$administrative.censoring[i]){
+                  c(L,R,dat$administrative.censoring[i],0,0)
+                }else{
+                  c(L,R,dat$lifetime[i],0,1)
+                }
+              }else{
+                L<-itimes[max(idL)]
+                R<-itimes[min(idR)]
+                  ## subject was ill
+                if (dat$lifetime[i]>dat$administrative.censoring[i]){
+                  ## illness observed but not death
+                     c(L,R,dat$administrative.censoring[i],1,0)
+                 }else{
+                   ## death observed all times
+                   browser()
+                   idVis<-which(itimes>dat$illtime[i])
+                   # no visit between the two times : illness not observed
+                   if(length(idVis)==0){
+                     c(itimes[length(itimes)],itimes[length(itimes)],dat$lifetime[i],-1,1)
+                      }else{ ## we observe illness 
+                        c(L,R,dat$lifetime[i],1,1)
+                      }
+                 }
+              }
+              }else{
+                
+                # check administrative censoring for death
+                if(dat$lifetime[i]<dat$administrative.censoring[i]){
                   
-                  # prevalent dementia at inclusion
-                    if (length(itimes)==1){
-                        c(0,itimes,1)
-                    } else{
-                        hit <- prodlim::sindex(eval.times=dat$illtime[i],
-                                                   jump.times=itimes,
-                                                   strict=TRUE)
-                      c(itimes[c(hit,1+hit)],1)
-                    }
-                }
-            } else {
-                ## subject was never ill
-                if (dat$censtime[i]<dat$lifetime[i]){
-                    ## right censored: no illness observed
-                    ## until last inspection
-                    c(last.inspection,dat$censtime[i],0)
-                } else{
-                    ## no illness observed until death
-                    if(illness.known.at.death==1){
-                        c(dat$lifetime[i],dat$lifetime[i],0)
-                    }else{
-                        ## no illness observed
-                        ## until last inspection
-                        ## provide [L=last insp.; R=lifetime]
-                        c(last.inspection,dat$lifetime[i],0)
-                    }
-                }
-            }
-        }))
-        colnames(interval) <- c("L","R","seen.ill")
+                  c(itimes[length(itimes)],itimes[length(itimes)],dat$lifetime[i],0,1)
+                }else{
+                  
+                  c(itimes[length(itimes)],itimes[length(itimes)],dat$administrative.censoring[i],0,0)}
+              }
+          }))
+        colnames(interval) <- c("L","R","observed.lifetime","seen.ill","seen.exit")
+        # count illness not observed due to death 
         dat <- cbind(dat,interval)
         if (latent==FALSE)
             dat <- dat[,-grep("latent\\.",names(dat))]
         if (keep.inspectiontimes) dat <- cbind(dat,iframe)
     }
+    browser()
+    id.nodem.death[which(dat$seen.ill==-1)]<-1
+    dat$seen.ill[dat$seen.ill==-1]<-0
 
-    dat$seen.exit <- 1*(dat$lifetime<dat$censtime)
-    dat$observed.lifetime <- pmin(dat$lifetime,dat$censtime)
-    dat$observed.illtime <- pmin(dat$illtime,dat$censtime)
-    dat$observed.illtime[dat$illstatus==0] <- -9
-    dat$lifetime <- x$latent.lifetime
-    dat$illtime[dat$illstatus==0] <- -9
     dat$T01<-T01
     dat$T02<-T02
     dat$T12<-T12
+    dat$id.nodem.death<-id.nodem.death
     return(list(data=dat,
                 plot=plot))
 }
@@ -179,7 +177,6 @@ sim.idmModel <- function(x,
 ##' @param beta02 value of beta on transition 0 --> 2
 ##' @param beta12 value of beta on transition 1 --> 2
 ##' @param n number of observations
-##' @param semi.markov True if you want to simulate 1 --> 2 in Semi Markov process
 #' @importFrom ggplot2 ggplot geom_line geom_point theme_classic ylab aes_string aes facet_grid
 #' @useDynLib SmoothHazardoptim9
 #' @export
@@ -192,8 +189,7 @@ simulatepenIDM <- function(n=100,seed,scale.illtime,shape.illtime,
                            prob.censoring,administrative.censoring,
                            n.inspections,
                            schedule,punctuality,nvar,mean,sd,cov,
-                           x01,x02,x12,beta01,beta02,beta12,
-                           semi.markov=T){
+                           x01,x02,x12,beta01,beta02,beta12){
 
   # Set the seed for reproducibility
   set.seed(seed)
@@ -248,7 +244,9 @@ simulatepenIDM <- function(n=100,seed,scale.illtime,shape.illtime,
   #cov(exogenous_data)[1:nvar,1:nvar] <- cov
   #diag(cov(exogenous_data)[(nvar+1):num_exogenous_vars,(nvar+1):num_exogenous_vars]) <- punctuality
   # Define the structural model for latent processes following a Weibull distribution
-  U<-stats::runif(n=n)
+  U01<-stats::runif(n=n)
+  U02<-stats::runif(n=n)
+  U12<-stats::runif(n=n)
   # center and reduce var : 
   #exogenous_data<-scale(exogenous_data)
   
@@ -256,27 +254,25 @@ simulatepenIDM <- function(n=100,seed,scale.illtime,shape.illtime,
   X02<-as.matrix(exogenous_data[,colnames(exogenous_data)%in%x02])
   X12<-as.matrix(exogenous_data[,colnames(exogenous_data)%in%x12])
   
-  latent.illtime<-((-log(1-U)*exp(-X01%*%beta01))^(1/shape.illtime))/scale.illtime
-  latent.lifetime<-((-log(1-U)*exp(-X02%*%beta02))^(1/shape.lifetime))/scale.lifetime
-  latent.waittime<-((-log(1-U)*exp(-X12%*%beta12))^(1/shape.waittime))/scale.waittime
+  latent.illtime<-((-log(U01)*exp(-X01%*%beta01))^(1/shape.illtime))/scale.illtime
+  latent.lifetime<-((-log(U02)*exp(-X02%*%beta02))^(1/shape.lifetime))/scale.lifetime
+  latent.waittime<-rep(0,n)
   censtime<-C
   administrative.censoring<-rep(administrative.censoring,n)
-  censtime<-pmin(censtime,administrative.censoring)
-  if(semi.markov==F){
-    #S12<-exp(-(scale.waittime*latent.illtime)^shape.waittime)
-    cumulative.intensity<-(scale.waittime*latent.illtime)^shape.waittime
-    e <- exp(X12%*%beta12)
-    cumulative.intensity<-cumulative.intensity*e
-    S12 <- exp(-cumulative.intensity)
-    illstatus <-1*((latent.illtime<=latent.lifetime)&(latent.illtime<=censtime))
-    latent.waittime[illstatus==1]<-(((-log((1-U)*S12)*exp(-X12%*%beta12))^(1/shape.waittime))/scale.waittime)[illstatus==1]
-    }
-  #censtime<-((-log(1-U))^(shape.censtime))/shape.censtime
+  if(any(censtime>administrative.censoring)){stop("All visit should be performed before the administrative censoring")}
+  
+  cumulative.intensity<-(scale.waittime*latent.illtime)^shape.waittime
+  e <- exp(X12%*%beta12)
+  cumulative.intensity<-cumulative.intensity*e
+  S12 <- exp(-cumulative.intensity)
+  illstatus <-1*((latent.illtime<latent.lifetime)&(latent.illtime<censtime))
+  latent.waittime[illstatus==1]<-(((-log(U12*S12)*exp(-X12%*%beta12))^(1/shape.waittime))/scale.waittime)[illstatus==1]
   
   
   fit <- data.frame(latent.illtime=latent.illtime,
                     latent.lifetime=latent.lifetime,
                     latent.waittime=latent.waittime,
+                    administrative.censoring=administrative.censoring,
                     censtime=censtime)
   fit<-cbind(fit,exogenous_data)
   
@@ -344,7 +340,7 @@ simulatepenIDM <- function(n=100,seed,scale.illtime,shape.illtime,
     theme_classic()+ylab("Survival")
   
   
-  sim.idmModel(x=fit,n=n,plot=list(p2,surv01,p01,surv02,p02,surv12,p12),pen=T,illness.known.at.death=F,semi.markov)
+  sim.idmModel(x=fit,n=n,plot=list(p2,surv01,p01,surv02,p02,surv12,p12),pen=T)
   
 }
 

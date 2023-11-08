@@ -66,7 +66,6 @@ idm.weib<-function(b,fix0,size_V,
   bfix<-b[fix0==1]
   b<-b[fix0==0]
 
-  
   out<- marqLevAlg::mla(b=b,
                     fn=idmlLikelihoodweib,
                     epsa=epsa,
@@ -101,6 +100,8 @@ idm.weib<-function(b,fix0,size_V,
   if(out$istop==4){
     stop("Problem in the loglikelihood computation.")
   }
+  
+
 
   return(list(b=out$b,
               fn.value=out$fn.value,
