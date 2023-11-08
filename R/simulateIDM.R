@@ -51,12 +51,10 @@ sim.idmModel <- function(x,
     # interval censored illtime
     ipos <- grep("inspection[0-9]+",names(dat))
 
-    browser()
     if (length(ipos)>0) {
         # compute inspection times
         # make sure all inspection times are in the future
         # of the previous inspection time
-
         iframe <- dat[,ipos]
         dat <- dat[,-ipos]
         
@@ -84,13 +82,18 @@ sim.idmModel <- function(x,
               idL<-which(itimes<dat$illtime[i])
               idR<-which(itimes>=dat$illtime[i])
       
-              # only one visit at inclusion
+              
               if(length(idR)==0){
                 R<-L<-itimes[max(idL)]
+                
                 if(dat$lifetime[i]>dat$administrative.censoring[i]){
+                  # dementia not observed due to censoring 
                   c(L,R,dat$administrative.censoring[i],0,0)
-                }else{
-                  c(L,R,dat$lifetime[i],0,1)
+                }else{ # dementia not observed due to death 
+                  if(dat$lifetime[i]<dat$censtime[i]){
+                    c(L,R,dat$lifetime[i],-1,1)
+                  }else{# dementia not observed due to censoring 
+                    c(L,R,dat$lifetime[i],0,1)}
                 }
               }else{
                 L<-itimes[max(idL)]
@@ -101,14 +104,8 @@ sim.idmModel <- function(x,
                      c(L,R,dat$administrative.censoring[i],1,0)
                  }else{
                    ## death observed all times
-                   browser()
-                   idVis<-which(itimes>dat$illtime[i])
-                   # no visit between the two times : illness not observed
-                   if(length(idVis)==0){
-                     c(itimes[length(itimes)],itimes[length(itimes)],dat$lifetime[i],-1,1)
-                      }else{ ## we observe illness 
-                        c(L,R,dat$lifetime[i],1,1)
-                      }
+                   c(L,R,dat$lifetime[i],1,1)
+                      
                  }
               }
               }else{
@@ -129,7 +126,6 @@ sim.idmModel <- function(x,
             dat <- dat[,-grep("latent\\.",names(dat))]
         if (keep.inspectiontimes) dat <- cbind(dat,iframe)
     }
-    browser()
     id.nodem.death[which(dat$seen.ill==-1)]<-1
     dat$seen.ill[dat$seen.ill==-1]<-0
 
@@ -259,6 +255,7 @@ simulatepenIDM <- function(n=100,seed,scale.illtime,shape.illtime,
   latent.waittime<-rep(0,n)
   censtime<-C
   administrative.censoring<-rep(administrative.censoring,n)
+  
   if(any(censtime>administrative.censoring)){stop("All visit should be performed before the administrative censoring")}
   
   cumulative.intensity<-(scale.waittime*latent.illtime)^shape.waittime
@@ -266,9 +263,22 @@ simulatepenIDM <- function(n=100,seed,scale.illtime,shape.illtime,
   cumulative.intensity<-cumulative.intensity*e
   S12 <- exp(-cumulative.intensity)
   illstatus <-1*((latent.illtime<latent.lifetime)&(latent.illtime<censtime))
+  
   latent.waittime[illstatus==1]<-(((-log(U12*S12)*exp(-X12%*%beta12))^(1/shape.waittime))/scale.waittime)[illstatus==1]
-  
-  
+  latent.waittime[illstatus!=1]<-latent.lifetime[illstatus!=1]
+
+  #for(i in 1:n){
+  #   if(illstatus[i]==1){
+  #     cv<-F
+  #     while(cv==F){
+  #       U12<-stats::runif(n=1)
+  #       latent.waittime[i]<-(((-log(U12)*exp(-X12%*%beta12))^(1/shape.waittime))/scale.waittime)[i]
+  #       if(latent.waittime[i]>latent.illtime[i]){cv<-T}
+  #     }
+  #   }else{
+  #     latent.waittime[i]<-latent.lifetime[i]
+  #   }
+  # }
   fit <- data.frame(latent.illtime=latent.illtime,
                     latent.lifetime=latent.lifetime,
                     latent.waittime=latent.waittime,
