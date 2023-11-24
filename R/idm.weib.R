@@ -65,7 +65,6 @@ idm.weib<-function(b,fix0,size_V,
   b<-c(s,beta)
   bfix<-b[fix0==1]
   b<-b[fix0==0]
-
   out<- marqLevAlg::mla(b=b,
                     fn=idmlLikelihoodweib,
                     epsa=epsa,

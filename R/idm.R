@@ -1007,12 +1007,12 @@ idm <- function(formula01,
           if(penalty=="ridge"){alpha<-0}
           if(length(alpha)>1)stop("Can only specify one value for alpha")
           if(penalty=="mcp"){
-            if(!inherits(alpha,c("numeric","integer"))  | alpha<=1)stop("Alpha need to be a numeric and 1 superior to 1")
+            if(!inherits(alpha,c("numeric","integer"))  | alpha<=1)stop("Alpha need to be a numeric and superior to 1")
             
           }
       
           if(penalty=="scad"){
-            if(!inherits(alpha,c("numeric","integer")) | alpha<=1)stop("Alpha need to be a numeric and 1 superior to 1")
+            if(!inherits(alpha,c("numeric","integer")) | alpha<=2)stop("Alpha need to be a numeric and superior to 2")
             
           }
           if(penalty%in%c("elasticnet","corrected.elasticnet")){
