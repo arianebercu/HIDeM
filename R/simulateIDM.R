@@ -90,7 +90,7 @@ sim.idmModel <- function(x,
                   # dementia not observed due to censoring 
                   c(L,R,dat$administrative.censoring[i],0,0)
                 }else{ # dementia not observed due to death 
-                  if(dat$lifetime[i]<dat$censtime[i]){
+                  if(dat$lifetime[i]<=dat$censtime[i]){
                     c(L,R,dat$lifetime[i],-1,1)
                   }else{# dementia not observed due to censoring 
                     c(L,R,dat$lifetime[i],0,1)}
@@ -111,7 +111,7 @@ sim.idmModel <- function(x,
               }else{
                 
                 # check administrative censoring for death
-                if(dat$lifetime[i]<dat$administrative.censoring[i]){
+                if(dat$lifetime[i]<=dat$administrative.censoring[i]){
                   
                   c(itimes[length(itimes)],itimes[length(itimes)],dat$lifetime[i],0,1)
                 }else{
