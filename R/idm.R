@@ -269,7 +269,8 @@ idm <- function(formula01,
 
                 nproc=1,
                 clustertype="FORK",
-                print.info=F){
+                print.info=F,
+                envir=parent.frame()){
 
 
     # {{{ check formula
@@ -425,7 +426,6 @@ idm <- function(formula01,
     ## is_truncated|0=no, 1=yes|length 1|integer|
     ## eps|convergence criteria: 1:likelihood,2:parameter est,3:gradient parameter est |length 3|integer|example eps=c(7,4,5) then use 10^-7,10^-4,10^-5. Defaults to c(5,5,3)
     ## maxiter| maximum number of iteration | length 1 | integer | > 0 default to 200
-
 
 
       if(!inherits(option.sequential$cutoff,c("numeric","integer")))stop("The cutoff for spline has to a numeric or integer.")
@@ -649,6 +649,7 @@ idm <- function(formula01,
       
     }
 
+   
     if(method=="Weib"){
       
       size2 <- size1^2
@@ -934,7 +935,6 @@ idm <- function(formula01,
       
     }else{
 
-          
          
           # need at least one variable to do penalization
           #if((sum((Xnames01%in%Xnames02)==F)+sum((Xnames01%in%Xnames12)==F)+sum((Xnames02%in%Xnames12)==F))>0){
