@@ -277,7 +277,8 @@ calibrate.penidm <- function(
                 clustertype="FORK",
                 print.info=F){
   
-  if(class(K)!=("integer")|K<=1){stop("K need to be an integer higher than 1")}
+  if((!class(K)%in%c("integer","numeric"))|K<=1){stop("K need to be an integer higher than 1")}
+  K<-round(K) # in case if not integer
   if(missing(data)) stop("Need a data frame.")
   if(sum(is.na(data))>0)stop("Need a data frame with no missing data.")
   
@@ -295,12 +296,16 @@ calibrate.penidm <- function(
   
   if(is.null(lambda01)|is.null(lambda02)|is.null(lambda12)){
     stop("You need to specify lambda on all transition")}
+  
   # keep in list
   model<-list()
   length(model)<-K
   
+  # be careful to environment of formula 
+  environment(formula01)<-environment(formula02)<-environment(formula12)<-environment()
+  
   for(k in 1:K){
-    
+    set.seed(seed+k)
     if(resampling == "subsampling"){
       # sample 
       id<-sample(1:dim(data)[1],size=dim(data)[1]*tau)
@@ -309,8 +314,8 @@ calibrate.penidm <- function(
       # if start is specified or first ite 
       if(k>1 & is.null(B)){
         if(method=="Weib"){
-          B<-c(model.idm$modelPar,model.idm$coef)
-        }else{B<-c(model.idm$theta01,model.idm$theta02,model.idm$theta12,model.idm$coef)}
+          B<-c(model.idm$modelPar[,1],model.idm$coef[,1])
+        }else{B<-c(model.idm$theta01[,1],model.idm$theta02[,1],model.idm$theta12[,1],model.idm$coef[,1])}
       }
       model.idm<-SmoothHazardoptim9::idm(formula01=formula01,
                  formula02=formula02,
@@ -360,8 +365,8 @@ calibrate.penidm <- function(
       # if start is specified or first ite 
       if(k>1 & is.null(B)){
         if(method=="Weib"){
-          B<-c(model.idm$modelPar,model.idm$coef)
-        }else{B<-c(model.idm$theta01,model.idm$theta02,model.idm$theta12,model.idm$coef)}
+          B<-c(model.idm$modelPar[,1],model.idm$coef[,1])
+        }else{B<-c(model.idm$theta01[,1],model.idm$theta02[,1],model.idm$theta12[,1],model.idm$coef[,1])}
       }
       model.idm<-SmoothHazardoptim9::idm(formula01=formula01,
                      formula02=formula02,
@@ -402,12 +407,12 @@ calibrate.penidm <- function(
                      clustertype=clustertype,
                      print.info=print.info)
     }
+    model[[k]]<-model.idm
     
       
-      model[[k]]<-model.idm
   }
   
-  browser()
+  
   BIC<-GCV<-CV<-matrix(NA,ncol=K,nrow=length(model[[1]]$BIC))
   pi<-score<-rep(NA,length(model[[1]]$BIC))
   
@@ -422,13 +427,13 @@ calibrate.penidm <- function(
   lambda02<-model[[1]]$lambda[2,]
   lambda12<-model[[1]]$lambda[3,]
   
-  meanBIC<-apply(c(1:dim(BIC)[1]),FUN=function(x){
+  meanBIC<-sapply(c(1:dim(BIC)[1]),FUN=function(x){
     y<-BIC[x,]
     y<-y[CV[x,]==1]
     mean(y)
   })
   
-  meanGCV<-apply(c(1:dim(GCV)[1]),FUN=function(x){
+  meanGCV<-sapply(c(1:dim(GCV)[1]),FUN=function(x){
     y<-GCV[x,]
     y<-y[CV[x,]==1]
     mean(y)
@@ -443,37 +448,51 @@ calibrate.penidm <- function(
                lambda12=lambda12[which.min(meanGCV)],
                GCV=min(meanGCV))
   
+  init<-0
+  pi_list <-seq(0.6, 0.9, by = 0.01)
   if(calscore==T){
-    N<-length(model[[k]]$coef)
+    
     #selprop proportions de fois où le coef est sélectionné
     # do a loop on lambda
-    for (m in 1:dim(lambda01)[1]){
-      coef<-rep(0,length(model[[k]]$coef[,m]))
-      names(coef)<-rownames(model[[k]]$coef)
+    for (m in 1:length(lambda01)[1]){
+      coef<-rep(0,length(model[[1]]$coef[,m]))
+      names(coef)<-rownames(model[[1]]$coef)
       for(k in 1:K){
         coef<-coef+ifelse(model[[k]]$coef[,m]!=0,1,0)
       }
       selprop<-coef/K
     
-      value<-penidm::StabilityScore(selprop, 
-                               pi_list = seq(0.6, 0.9, by = 0.01),
+      if(any(selprop!=1)){
+      value<-StabilityScore(selprop, 
+                               pi_list = pi_list,
                                K=K, 
-                               n_cat = 3, group = NULL)
-      pi[m]<-seq(0.6, 0.9, by = 0.01)[which.min(value)]
+                               n_cat = 3)
+      id_NA<-which(!is.na(value))
+      value<-value[id_NA]
+      pi_seq<-pi_list[id_NA]
+      pi[m]<-pi_seq[which.min(value)]
       score[m]<-min(value)
-      if(m==1){opt<-score[1]
-      prop<-selprop}else{
-        if(score[m]<opt){
-          opt<-score[m]
-          prop<-selprop
+      if(init==0){
+        opt<-score[m]
+        prop<-selprop
+        init<-1
+        }else{
+          if(score[m]<opt){
+            opt<-score[m]
+            prop<-selprop
+          }
         }
-      }
       
+      }else{score[m]<-pi[m]<-NA}
+      
+  
+        
     }
+      
     
     optCal<-list(score=score,
                  pi=pi,
-                 selpro=prop,
+                 selprop=prop,
                  lambda01=lambda01,
                  lambda02=lambda02,
                  lambda12=lambda12,

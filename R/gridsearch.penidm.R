@@ -370,7 +370,7 @@ gridsearch.penidm <- function(
     }
   
   ############################### 01 #####################################
-  browser()
+ # be careful to formulas environnement 
   
   f12<-as.formula("~1")
   f02<-as.character(formula02)[2]
@@ -396,7 +396,7 @@ gridsearch.penidm <- function(
                                   maxiter=maxiter,
                                   maxiter.pena = maxiter.pena,
                                   eps.spline=eps.spline,
-                                  eps.eigen=eps.eigen, # cut here 
+                                  eps.eigen=eps.eigen, 
                                   n.knots=n.knots,
                                   knots=knots,
                                   type.quantile=type.quantile,
@@ -411,7 +411,7 @@ gridsearch.penidm <- function(
   
   
   ################################ 02 ############################################
-  browser()
+  
     
     f12<-as.formula("~1")
     f01<-as.character(formula01)[2]
@@ -454,7 +454,7 @@ gridsearch.penidm <- function(
  
   
   ######################################## 12 ###################################
-    browser()
+  
   
   f01<-as.character(formula01)[2]
   f01<-as.formula(paste0(f01,"~1"))
@@ -496,7 +496,7 @@ gridsearch.penidm <- function(
                                   clustertype=clustertype,
                                   print.info=print.info)
   
-  browser()
+  
   if(gridmethod=="BIC"){
     
   # sort BIC 

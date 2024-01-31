@@ -69,6 +69,7 @@ StabilityScore <- function(selprop, pi_list = seq(0.6, 0.9, by = 0.01), K, n_cat
     pi <- pi_list[i]
 
     # Computing the probabilities of being stable-in, stable-out or unstable under the null (uniform selection)
+    # if all 1 pbr 
     p_vect <- BinomialProbabilities(q, N, pi, K, n_cat = n_cat)
 
     # Computing the log-likelihood
