@@ -816,6 +816,7 @@ idm <- function(formula01,
         
         
       }
+     
       if(method=="Weib"){
         
         out <- idm.weib(b=b,
@@ -1648,6 +1649,42 @@ idm <- function(formula01,
        
 
         ptm.intensity <- proc.time()
+        
+        var.level<-var.class<-list(NULL)
+        N_var<-c(all.vars(formula01)[all.vars(formula01)%in%labels(terms(formula01))],
+          all.vars(formula02)[all.vars(formula02)%in%labels(terms(formula02))],
+          all.vars(formula12)[all.vars(formula12)%in%labels(terms(formula12))])
+        length(var.level)<-length(var.class)<-length(N_var)
+        m<-1
+        if(NC01>0){
+        for(k in 2:dim(m01)[2]){
+          var.class[[m]]<-class(m01[,k])
+          if(class(m01[,k])[1]%in%c("character","factor")){
+          var.level[[m]]<-names(table(m01[,k]))}
+          m<-m+1
+        }
+        }
+        if(NC02>0){
+          for(k in 2:dim(m02)[2]){
+            var.class[[m]]<-class(m02[,k])
+            if(class(m02[,k])[1]%in%c("character","factor")){
+              var.level[[m]]<-names(table(m02[,k]))}
+            m<-m+1
+          }
+        }
+        
+        if(NC12>0){
+          for(k in 1:dim(m12)[2]){
+            var.class[[m]]<-class(m12[,k])
+            if(class(m12[,k])[1]%in%c("character","factor")){
+              var.level[[m]]<-names(table(m12[,k]))}
+            m<-m+1
+          }
+        }
+        
+        fit$levels<-list(values=var.level,
+                         class=var.class)
+        
 
         fit$runtime.intensity<- proc.time()- ptm.intensity
         fit$na.action <- "na.fail"

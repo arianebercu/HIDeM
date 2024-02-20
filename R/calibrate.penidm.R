@@ -467,6 +467,7 @@ calibrate.penidm <- function(
                                pi_list = pi_list,
                                K=K, 
                                n_cat = 3)
+      
       id_NA<-which(!is.na(value))
       value<-value[id_NA]
       pi_seq<-pi_list[id_NA]
@@ -495,7 +496,7 @@ calibrate.penidm <- function(
                  selprop=prop,
                  lambda01=lambda01,
                  lambda02=lambda02,
-                 lambda12=lambda12,
+                 lambda12=lambda12
                  )
     
   }else{

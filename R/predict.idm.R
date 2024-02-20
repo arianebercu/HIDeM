@@ -78,7 +78,7 @@
 predict.idm <- function(object,s,t,newdata,nsim=200,seed=21,conf.int=.95,lifeExpect=FALSE,maxtime,...) {
     ## if (lifeExpect==TRUE) t <- Inf
   # Ok for new version
-  
+
   if(!is.null(object$modelPar)){
     object$method<-"weib"
     }else{object$method<-"splines"
@@ -99,7 +99,7 @@ predict.idm <- function(object,s,t,newdata,nsim=200,seed=21,conf.int=.95,lifeExp
     if (is.logical(conf.int)) conf.int <- .95
     if (do.conf.int == TRUE){
         stopifnot(0<conf.int && conf.int<1)
-        if (nsim < 2) stop("Need at least two simulations to construct confidence limits.")
+        #if (nsim < 2) stop("Need at least two simulations to construct confidence limits.")
     }
     if (missing(t) && lifeExpect==FALSE) stop("Argument t is missing.")
     if (lifeExpect==TRUE) t <- Inf
@@ -109,18 +109,38 @@ predict.idm <- function(object,s,t,newdata,nsim=200,seed=21,conf.int=.95,lifeExp
     nvar01 <- object$NC[1]
     nvar02 <- object$NC[2]
     nvar12 <- object$NC[3]
+   
+    # keep previous levels 
+    object$levels$class[sapply(object$levels$class, is.null)] <- NA
+    object$levels$values[sapply(object$levels$values, is.null)] <- NA
+    xlevels<-unlist(object$levels$class)
+    if(any(xlevels%in%c("factor","character"))){
+      xnames<-c(all.vars(object$terms$Formula01)[all.vars(object$terms$Formula01)%in%labels(terms(object$terms$Formula01))],
+                      all.vars(object$terms$Formula02)[all.vars(object$terms$Formula02)%in%labels(terms(object$terms$Formula02))],
+                      all.vars(object$terms$Formula12)[all.vars(object$terms$Formula12)%in%labels(terms(object$terms$Formula12))])
+      xnamesfactor<-xnames[which(xlevels%in%c("factor","character"))]
+      if(length(xnamesfactor)>0){
+        id<-which(xlevels%in%c("factor","character"))
+        m<-1
+        for(k in xnamesfactor){
+          newdata[,k] <- factor(newdata[,k], levels=object$levels$values[[id[m]]])
+          m<-m+1 }
+      }
+      
+      
+    }
     if (!missing(newdata)){
         if (NROW(newdata)>1) stop("Argument newdata has more than one row\n.Currently this function works only for one covariate constallation at a time.")
         if (length(object$Xnames01)>0)
-            Z01 <- as.matrix(model.frame(formula=update.formula(formula(object$terms$Formula01),NULL~.),data=newdata))
-        else 
+          Z01 <- model.matrix(object$terms$Formula01,data=newdata)[, -1, drop = FALSE]
+          else
             Z01 <- 0
         if (length(object$Xnames02)>0)
-            Z02 <- as.matrix(model.frame(formula=update.formula(formula(object$terms$Formula02),NULL~.),data=newdata))
+          Z02 <- model.matrix(object$terms$Formula02,data=newdata)[, -1, drop = FALSE]
         else
             Z02 <- 0
         if (length(object$Xnames12)>0)
-            Z12 <- as.matrix(model.frame(formula=update.formula(formula(object$terms$Formula12),NULL~.),data=newdata))
+          Z12 <- model.matrix(object$terms$Formula12,data=newdata)[, -1, drop = FALSE]
         else
             Z12 <- 0
     }else{
@@ -131,6 +151,7 @@ predict.idm <- function(object,s,t,newdata,nsim=200,seed=21,conf.int=.95,lifeExp
         Z02 <- matrix(rep(0,length(object$Xnames02)),nrow=1)
         Z12 <- matrix(rep(0,length(object$Xnames12)),nrow=1)
     }
+    
     if(nvar01 > 0){
         beta01 <- object$coef[1:nvar01]
         names(beta01) <- paste0("beta01.",names(beta01))
@@ -157,7 +178,7 @@ predict.idm <- function(object,s,t,newdata,nsim=200,seed=21,conf.int=.95,lifeExp
     }
     ## Splines
     if (object$method=="splines"){
-      
+      browser()
         
         nknots01 <- object$nknots01
         nknots02 <- object$nknots02
@@ -175,7 +196,7 @@ predict.idm <- function(object,s,t,newdata,nsim=200,seed=21,conf.int=.95,lifeExp
         names(the02) <- paste0("the02.",1:length(the02))
         the12 <- object$theta12
         names(the12) <- paste0("the12.",1:length(the12))
-        if (do.conf.int == TRUE){
+        if (do.conf.int == TRUE & nsim>2){
             ### conf.int prediction by Monte-Carlo
             Vmean <- c(the01,the02,the12,beta01,beta02,beta12) # vector of estimates
             #Vmean<-Vmean[object$fix==0]   # vector of estimates not fixed
@@ -240,6 +261,122 @@ predict.idm <- function(object,s,t,newdata,nsim=200,seed=21,conf.int=.95,lifeExp
             ci <- apply(simResults,2,function(x)quantile(unlist(x),c(q.lower,q.upper)))
         }
         
+        
+        if (do.conf.int == TRUE & nsim<=2){
+          
+          # need to verify if works 
+          knots.unique<-unique(object$knots01)
+          knots.bound<-knots.unique[c(1,length(knots.unique))]
+          knots.int<-knots.unique[-c(1,length(knots.unique))]
+          msplines01<-splines2::mSpline(x=t,knots=knots.int,Boundary.knots=knots.bound,intercept = T)
+          isplines01<-splines2::iSpline(x=t,knots=knots.int,Boundary.knots=knots.bound,intercept = T)
+          
+          knots.unique<-unique(object$knots02)
+          knots.bound<-knots.unique[c(1,length(knots.unique))]
+          knots.int<-knots.unique[-c(1,length(knots.unique))]
+          msplines02<-splines2::mSpline(x=t,knots=knots.int,Boundary.knots=knots.bound,intercept = T)
+          isplines02<-splines2::iSpline(x=t,knots=knots.int,Boundary.knots=knots.bound,intercept = T)
+          
+          knots.unique<-unique(object$knots12)
+          knots.bound<-knots.unique[c(1,length(knots.unique))]
+          knots.int<-knots.unique[-c(1,length(knots.unique))]
+          msplines12<-splines2::mSpline(x=t,knots=knots.int,Boundary.knots=knots.bound,intercept = T)
+          isplines12<-splines2::iSpline(x=t,knots=knots.int,Boundary.knots=knots.bound,intercept = T)
+          
+          
+          theta.square01<-the01^2
+          intensity01<-msplines%*%theta.square01
+          cumulative.intensity01<-isplines%*%theta.square01
+          
+          theta.square02<-the02^2
+          intensity02<-msplines%*%theta.square02
+          cumulative.intensity02<-isplines%*%theta.square02
+          
+          theta.square12<-the12^2
+          intensity12<-msplines%*%theta.square12
+          cumulative.intensity12<-isplines%*%theta.square12
+          
+          if (!is.null(beta01))
+            linPred01<-beta01 %*% t(Z01)
+          else
+            linPred01<-0
+          if (!is.null(beta02))
+            linPred02<-0
+          else
+            linPred02<-matrix(0,nrow=nsim,ncol=1)
+          if (!is.null(beta12))
+            linPred12<-beta12 %*% t(Z12)
+          else
+            linPred12<-0
+          
+          
+          e01 <- exp(linPred01)
+          intensity01<-intensity01*e01
+          cumulative.intensity01<-cumulative.intensity01*e01
+          survival <- exp(-cumulative.intensity01)
+          
+          e02 <- exp(linPred02)
+          intensity02<-intensity02*e02
+          cumulative.intensity02<-cumulative.intensity02*e02
+          survival <- exp(-cumulative.intensity02)
+          
+          e12 <- exp(linPred12)
+          intensity12<-intensity12*e12
+          cumulative.intensity12<-cumulative.intensity12*e12
+          survival <- exp(-cumulative.intensity12)
+          
+          #msplines<-matrix(msplines[,object$fix[1:(object$nknots01+object$nknots02+object$nknots12+6)]==0],nrow=1,ncol=sum(object$fix[1:(object$nknots01+object$nknots02+object$nknots12+6)]==0))
+          #isplines<-matrix(isplines[,object$fix[1:(object$nknots01+object$nknots02+object$nknots12+6)]==0],nrow=1,ncol=sum(object$fix[1:(object$nknots01+object$nknots02+object$nknots12+6)]==0))
+          
+          lowerintensity<-rep(NA,3)
+          upperintensity<-rep(NA,3)
+          lowercumulative.intensity<-rep(NA,3)
+          uppercumulative.intensity<-rep(NA,3)
+          
+           #V<-object$V[object$fix==0,object$fix==0]
+           Nspline<-object$nknots01+object$nknots02+object$nknots12+6+1
+           V01<-object$V[c(1:(object$nknots01+2),Nspline:(Nspline+object$NC[1]-1)),c(1:(object$nknots01+2),Nspline:(Nspline+object$NC[1]-1))]
+           Nspline<-object$nknots01+object$nknots02+object$nknots12+6+object$NC[1]+1
+           V02<-object$V[c((object$nknots01+3):(object$nknots01+object$nknots02+4),Nspline:(Nspline+object$NC[2]-1)),c((object$nknots01+3):(object$nknots01+object$nknots02+4),Nspline:(Nspline+object$NC[2]-1))]
+           Nspline<-object$nknots01+object$nknots02+object$nknots12+6+object$NC[1]+object$NC[2]+1
+           V12<-object$V[c((object$nknots01+object$nknots02+5):(object$nknots01+object$nknots02+object$nknots12+6),Nspline:(Nspline+object$NC[3]-1)),c((object$nknots01+object$nknots02+5):(object$nknots01+object$nknots02+object$nknots12+6),Nspline:(Nspline+object$NC[3]-1))]
+           
+           
+            deriv01<-c(2*theta01*msplines01*e01,intensity01*Z01)
+            se01<-sqrt(deriv01%*%V01%*%deriv01)
+            
+            deriv02<-c(2*theta02*msplines02*e02,intensity02*Z02)
+            se02<-sqrt(deriv02%*%V02%*%deriv02)
+            
+            deriv12<-c(2*theta12*msplines12*e12,intensity12*Z12)
+            se12<-sqrt(deriv12%*%V12%*%deriv12)
+            
+            lowerintensity[1]<-intensity01+qnorm((1-conf.int)/2)*se01
+            lowerintensity[2]<-intensity02+qnorm((1-conf.int)/2)*se02
+            lowerintensity[3]<-intensity12+qnorm((1-conf.int)/2)*se12
+            upperintensity[1]<-intensity01-qnorm((1-conf.int)/2)*se01
+            upperintensity[2]<-intensity02-qnorm((1-conf.int)/2)*se02
+            upperintensity[3]<-intensity12-qnorm((1-conf.int)/2)*se12
+            
+            deriv01<-c(2*theta01*isplines01*e01,cumulative.intensity01*Z01)
+            se01<-sqrt(deriv01%*%V01%*%deriv01)
+            
+            deriv02<-c(2*theta02*isplines02*e02,cumulative.intensity02*Z02)
+            se02<-sqrt(deriv02%*%V02%*%deriv02)
+            
+            deriv12<-c(2*theta12*isplines12*e12,cumulative.intensity12*Z12)
+            se12<-sqrt(deriv12%*%V12%*%deriv12)
+            
+            lowercumulative.intensity[1]<-cumulative.intensity01+qnorm((1-conf.int)/2)*se01
+            lowercumulative.intensity[2]<-cumulative.intensity02+qnorm((1-conf.int)/2)*se02
+            lowercumulative.intensity[3]<-cumulative.intensity12+qnorm((1-conf.int)/2)*se12
+            uppercumulative.intensity[1]<-cumulative.intensity01-qnorm((1-conf.int)/2)*se01
+            uppercumulative.intensity[2]<-cumulative.intensity02-qnorm((1-conf.int)/2)*se02
+            uppercumulative.intensity[3]<-cumulative.intensity12-qnorm((1-conf.int)/2)*se12
+            
+              }
+         
+        
         if (lifeExpect==TRUE){
             transprob <- unlist(lifexpect0.idmPl(s,
                                                  knots01,
@@ -264,7 +401,7 @@ predict.idm <- function(object,s,t,newdata,nsim=200,seed=21,conf.int=.95,lifeExp
         b02 <- object$modelPar[4]
         a12 <- object$modelPar[5]
         b12 <- object$modelPar[6]
-        if (do.conf.int==TRUE) {
+        if (do.conf.int==TRUE & nsim>2) {
             ## conf.int prediction by Monte-Carlo
             ## vector of parameter estimates
             Vmean <- c(a01,b01,a02,b02,a12,b12,beta01,beta02,beta12)
@@ -326,6 +463,117 @@ predict.idm <- function(object,s,t,newdata,nsim=200,seed=21,conf.int=.95,lifeExp
             q.upper <- 1-q.lower
             ci <- apply(simResults,2,function(x)quantile(unlist(x),c(q.lower,q.upper)))
         }
+        
+        if (do.conf.int==TRUE & nsim<=2) {
+          # need to test
+          
+          
+          modelPar01<-object$modelPar[1:2]^2
+          intensity01<-modelPar01[1]*(modelPar01[2]^modelPar01[1])*t^(modelPar01[1]-1)
+          cumulative.intensity01<-(modelPar01[2]*times)^modelPar01[1]
+          
+          modelPar02<-object$modelPar[3:4]^2
+          intensity02<-modelPar02[1]*(modelPar02[2]^modelPar02[1])*t^(modelPar02[1]-1)
+          cumulative.intensity02<-(modelPar02[2]*times)^modelPar02[1]
+          
+          modelPar12<-object$modelPar[5:6]^2
+          intensity12<-modelPar12[1]*(modelPar12[2]^modelPar12[1])*t^(modelPar12[1]-1)
+          cumulative.intensity12<-(modelPar12[2]*times)^modelPar12[1]
+          
+          if (!is.null(beta01))
+            linPred01<-beta01 %*% t(Z01)
+          else
+            linPred01<-0
+          if (!is.null(beta02))
+            linPred02<-0
+          else
+            linPred02<-matrix(0,nrow=nsim,ncol=1)
+          if (!is.null(beta12))
+            linPred12<-beta12 %*% t(Z12)
+          else
+            linPred12<-0
+          
+          
+          e01 <- exp(linPred01)
+          intensity01<-intensity01*e01
+          cumulative.intensity01<-cumulative.intensity01*e01
+          survival <- exp(-cumulative.intensity01)
+          
+          e02 <- exp(linPred02)
+          intensity02<-intensity02*e02
+          cumulative.intensity02<-cumulative.intensity02*e02
+          survival <- exp(-cumulative.intensity02)
+          
+          e12 <- exp(linPred12)
+          intensity12<-intensity12*e12
+          cumulative.intensity12<-cumulative.intensity12*e12
+          survival <- exp(-cumulative.intensity12)
+          
+         
+          lowerintensity<-rep(NA,3)
+          upperintensity<-rep(NA,3)
+          lowercumulative.intensity<-rep(NA,3)
+          uppercumulative.intensity<-rep(NA,3)
+          
+          
+          V01<-object$V[c(1:2,7:(7+object$NC[1]-1)),c(1:2,7:(7+object$NC[1]-1))]
+          V02<-object$V[c(3:4,(6+object$NC[1]+1):(6+object$NC[1]+object$NC[2])),c(3:4,(6+object$NC[1]+1):(6+object$NC[1]+object$NC[2]))]
+          V12<-object$V[c(5:6,(6+object$NC[1]+object$NC[2]+1):(6+object$NC[1]+object$NC[2]+object$NC[3])),c(5:6,(6+object$NC[1]+object$NC[2]+1):(6+object$NC[1]+object$NC[2]+object$NC[3]))]
+          
+          
+          deriv01<-c((t^(modelPar01[1]-1))*(modelPar01[2]^modelPar01[1])*(modelPar01[1]*log(t)+modelPar01[1]*log(modelPar01[2])+1),
+                     (modelPar01[1]^2)*(t^(modelPar01[1]-1))*(modelPar01[2]^(modelPar01[1]-1)),
+                     intensity01*Z01)
+          deriv01[1,2]<-deriv01[1,2]*(2*sqrt(modelPar01))
+          se01<-sqrt(deriv01%*%V01%*%deriv01)
+          
+          deriv02<-c((t^(modelPar02[1]-1))*(modelPar02[2]^modelPar02[1])*(modelPar02[1]*log(t)+modelPar02[1]*log(modelPar02[2])+1),
+                     (modelPar02[1]^2)*(t^(modelPar02[1]-1))*(modelPar02[2]^(modelPar02[1]-1)),
+                     intensity02*Z02)
+          deriv02[1,2]<-deriv02[1,2]*(2*sqrt(modelPar02))
+          se02<-sqrt(deriv02%*%V02%*%deriv02)
+          
+          deriv12<-c((t^(modelPar12[1]-1))*(modelPar12[2]^modelPar12[1])*(modelPar12[1]*log(t)+modelPar12[1]*log(modelPar12[2])+1),
+                     (modelPar12[1]^2)*(t^(modelPar12[1]-1))*(modelPar12[2]^(modelPar12[1]-1)),
+                     intensity12*Z12)
+          deriv12[1,2]<-deriv12[1,2]*(2*sqrt(modelPar12))
+          se12<-sqrt(deriv12%*%V12%*%deriv12)
+          
+          lowerintensity[1]<-intensity01+qnorm((1-conf.int)/2)*se01
+          lowerintensity[2]<-intensity02+qnorm((1-conf.int)/2)*se02
+          lowerintensity[3]<-intensity12+qnorm((1-conf.int)/2)*se12
+          upperintensity[1]<-intensity01-qnorm((1-conf.int)/2)*se01
+          upperintensity[2]<-intensity02-qnorm((1-conf.int)/2)*se02
+          upperintensity[3]<-intensity12-qnorm((1-conf.int)/2)*se12
+          
+          deriv01<-c(((t*modelPar01[2])^modelPar[1])*log(t*modelPar[2]),
+                     (modelPar01[1]*((t*modelPar01[2])^modelPar01[1]))/modelPar01[2],
+                     cumulative.intensity01*Z01)
+          deriv01[1,2]<-deriv01[1,2]*(2*sqrt(modelPar01))
+          se01<-sqrt(deriv01%*%V01%*%deriv01)
+          
+          deriv02<-c(((t*modelPar02[2])^modelPar[1])*log(t*modelPar[2]),
+                     (modelPar02[1]*((t*modelPar02[2])^modelPar02[1]))/modelPar02[2],
+                     cumulative.intensity02*Z02)
+          deriv02[1,2]<-deriv02[1,2]*(2*sqrt(modelPar02))
+          se02<-sqrt(deriv02%*%V02%*%deriv02)
+          
+          deriv12<-c(((t*modelPar12[2])^modelPar[1])*log(t*modelPar[2]),
+                     (modelPar12[1]*((t*modelPar12[2])^modelPar12[1]))/modelPar12[2],
+                     cumulative.intensity12*Z12)
+          deriv12[1,2]<-deriv12[1,2]*(2*sqrt(modelPar12))
+          se12<-sqrt(deriv12%*%V12%*%deriv12)
+          
+          lowercumulative.intensity[1]<-cumulative.intensity01+qnorm((1-conf.int)/2)*se01
+          lowercumulative.intensity[2]<-cumulative.intensity02+qnorm((1-conf.int)/2)*se02
+          lowercumulative.intensity[3]<-cumulative.intensity12+qnorm((1-conf.int)/2)*se12
+          uppercumulative.intensity[1]<-cumulative.intensity01-qnorm((1-conf.int)/2)*se01
+          uppercumulative.intensity[2]<-cumulative.intensity02-qnorm((1-conf.int)/2)*se02
+          uppercumulative.intensity[3]<-cumulative.intensity12-qnorm((1-conf.int)/2)*se12
+          
+          
+          
+        }
         if (lifeExpect==TRUE){
             transprob <- unlist(lifexpect0.idmWeib(s,
                                                    a01^2,
@@ -351,7 +599,7 @@ predict.idm <- function(object,s,t,newdata,nsim=200,seed=21,conf.int=.95,lifeExp
                                                  bZ12))
         }
     }
-    if (do.conf.int==TRUE){
+    if (do.conf.int==TRUE & nsim>2){
         transprob <- data.frame(cbind(transprob,t(ci)))
         names(transprob) <- c("Estimate",paste("Lower",round(100*conf.int),sep="."),paste("Upper",round(100*conf.int),sep="."))
         transprob <- cbind("Parameter"=rownames(transprob),transprob)
