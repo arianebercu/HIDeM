@@ -78,13 +78,13 @@
 predict.idm <- function(object,s,t,newdata,nsim=200,seed=21,conf.int=.95,lifeExpect=FALSE,maxtime,...) {
     ## if (lifeExpect==TRUE) t <- Inf
   # Ok for new version
-
+#browser()
   if(!is.null(object$modelPar)){
     object$method<-"weib"
     }else{object$method<-"splines"
   }
   
-  
+  if(length(s)>1|length(t)>1) {stop("s and t must be a single value")}
   
     if (lifeExpect==TRUE) {
         t <- Inf
@@ -129,20 +129,31 @@ predict.idm <- function(object,s,t,newdata,nsim=200,seed=21,conf.int=.95,lifeExp
       
       
     }
+    #browser()
     if (!missing(newdata)){
         if (NROW(newdata)>1) stop("Argument newdata has more than one row\n.Currently this function works only for one covariate constallation at a time.")
-        if (length(object$Xnames01)>0)
+        if (length(object$Xnames01)>0){
+          if(length(grep(":",names(object$coef[1:object$NC[1]])))>0){
           Z01 <- model.matrix(object$terms$Formula01,data=newdata)[, -1, drop = FALSE]
-          else
-            Z01 <- 0
-        if (length(object$Xnames02)>0)
-          Z02 <- model.matrix(object$terms$Formula02,data=newdata)[, -1, drop = FALSE]
-        else
-            Z02 <- 0
-        if (length(object$Xnames12)>0)
-          Z12 <- model.matrix(object$terms$Formula12,data=newdata)[, -1, drop = FALSE]
-        else
-            Z12 <- 0
+          }else{
+            Z01 <-as.matrix(model.frame(formula=update.formula(formula(object$terms$Formula01),NULL~.),data=newdata))}
+          }else{
+            Z01 <- 0}
+        if (length(object$Xnames02)>0){
+          
+          if(length(grep(":",names(object$coef[(1+object$NC[1]):(object$NC[2]+object$NC[1])])))>0){
+            Z02 <- model.matrix(object$terms$Formula02,data=newdata)[, -1, drop = FALSE]
+          }else{
+            Z02 <-as.matrix(model.frame(formula=update.formula(formula(object$terms$Formula02),NULL~.),data=newdata))}
+        }else{
+            Z02 <- 0}
+        if (length(object$Xnames12)>0){
+          if(length(grep(":",names(object$coef[(1+object$NC[1]+object$NC[2]):(object$NC[3]+object$NC[2]+object$NC[1])])))>0){
+            Z12 <- model.matrix(object$terms$Formula12,data=newdata)[, -1, drop = FALSE]
+          }else{
+            Z12 <-as.matrix(model.frame(formula=update.formula(formula(object$terms$Formula12),NULL~.),data=newdata))}
+          }else{
+            Z12 <- 0}
     }else{
         vars <- unique(c(object$Xnames01,object$Xnames02,object$Xnames12))
         newdata <- data.frame(matrix(0,ncol=pmax(1,length(vars))))
@@ -176,9 +187,11 @@ predict.idm <- function(object,s,t,newdata,nsim=200,seed=21,conf.int=.95,lifeExp
         beta12 <- NULL
         bZ12 <- 0
     }
+    uppercumulative.intensity<-lowercumulative.intensity<-cumulative.intensity<-NULL
+    upperintensity<-lowerintensity<-intensity<-NULL
     ## Splines
     if (object$method=="splines"){
-      browser()
+      #browser()
         
         nknots01 <- object$nknots01
         nknots02 <- object$nknots02
@@ -263,47 +276,47 @@ predict.idm <- function(object,s,t,newdata,nsim=200,seed=21,conf.int=.95,lifeExp
         
         
         if (do.conf.int == TRUE & nsim<=2){
-          
+          #browser()
           # need to verify if works 
           knots.unique<-unique(object$knots01)
           knots.bound<-knots.unique[c(1,length(knots.unique))]
           knots.int<-knots.unique[-c(1,length(knots.unique))]
           msplines01<-splines2::mSpline(x=t,knots=knots.int,Boundary.knots=knots.bound,intercept = T)
-          isplines01<-splines2::iSpline(x=t,knots=knots.int,Boundary.knots=knots.bound,intercept = T)
+          isplines01<-(splines2::iSpline(x=t,knots=knots.int,Boundary.knots=knots.bound,intercept = T)-splines2::iSpline(x=s,knots=knots.int,Boundary.knots=knots.bound,intercept = T))
           
           knots.unique<-unique(object$knots02)
           knots.bound<-knots.unique[c(1,length(knots.unique))]
           knots.int<-knots.unique[-c(1,length(knots.unique))]
           msplines02<-splines2::mSpline(x=t,knots=knots.int,Boundary.knots=knots.bound,intercept = T)
-          isplines02<-splines2::iSpline(x=t,knots=knots.int,Boundary.knots=knots.bound,intercept = T)
+          isplines02<-(splines2::iSpline(x=t,knots=knots.int,Boundary.knots=knots.bound,intercept = T)-splines2::iSpline(x=s,knots=knots.int,Boundary.knots=knots.bound,intercept = T))
           
           knots.unique<-unique(object$knots12)
           knots.bound<-knots.unique[c(1,length(knots.unique))]
           knots.int<-knots.unique[-c(1,length(knots.unique))]
           msplines12<-splines2::mSpline(x=t,knots=knots.int,Boundary.knots=knots.bound,intercept = T)
-          isplines12<-splines2::iSpline(x=t,knots=knots.int,Boundary.knots=knots.bound,intercept = T)
+          isplines12<-(splines2::iSpline(x=t,knots=knots.int,Boundary.knots=knots.bound,intercept = T)-splines2::iSpline(x=s,knots=knots.int,Boundary.knots=knots.bound,intercept = T))
           
           
           theta.square01<-the01^2
-          intensity01<-msplines%*%theta.square01
-          cumulative.intensity01<-isplines%*%theta.square01
+          intensity01<-msplines01%*%theta.square01
+          cumulative.intensity01<-isplines01%*%theta.square01
           
           theta.square02<-the02^2
-          intensity02<-msplines%*%theta.square02
-          cumulative.intensity02<-isplines%*%theta.square02
+          intensity02<-msplines02%*%theta.square02
+          cumulative.intensity02<-isplines02%*%theta.square02
           
           theta.square12<-the12^2
-          intensity12<-msplines%*%theta.square12
-          cumulative.intensity12<-isplines%*%theta.square12
+          intensity12<-msplines12%*%theta.square12
+          cumulative.intensity12<-isplines12%*%theta.square12
           
           if (!is.null(beta01))
             linPred01<-beta01 %*% t(Z01)
           else
             linPred01<-0
           if (!is.null(beta02))
-            linPred02<-0
+            linPred02<-beta02 %*% t(Z02)
           else
-            linPred02<-matrix(0,nrow=nsim,ncol=1)
+            linPred02<-0
           if (!is.null(beta12))
             linPred12<-beta12 %*% t(Z12)
           else
@@ -313,20 +326,17 @@ predict.idm <- function(object,s,t,newdata,nsim=200,seed=21,conf.int=.95,lifeExp
           e01 <- exp(linPred01)
           intensity01<-intensity01*e01
           cumulative.intensity01<-cumulative.intensity01*e01
-          survival <- exp(-cumulative.intensity01)
           
           e02 <- exp(linPred02)
           intensity02<-intensity02*e02
           cumulative.intensity02<-cumulative.intensity02*e02
-          survival <- exp(-cumulative.intensity02)
           
           e12 <- exp(linPred12)
           intensity12<-intensity12*e12
           cumulative.intensity12<-cumulative.intensity12*e12
-          survival <- exp(-cumulative.intensity12)
           
-          #msplines<-matrix(msplines[,object$fix[1:(object$nknots01+object$nknots02+object$nknots12+6)]==0],nrow=1,ncol=sum(object$fix[1:(object$nknots01+object$nknots02+object$nknots12+6)]==0))
-          #isplines<-matrix(isplines[,object$fix[1:(object$nknots01+object$nknots02+object$nknots12+6)]==0],nrow=1,ncol=sum(object$fix[1:(object$nknots01+object$nknots02+object$nknots12+6)]==0))
+          intensity<-c(intensity01,intensity02,intensity12)
+          cumulative.intensity<-c(cumulative.intensity01,cumulative.intensity02,cumulative.intensity12)
           
           lowerintensity<-rep(NA,3)
           upperintensity<-rep(NA,3)
@@ -342,13 +352,13 @@ predict.idm <- function(object,s,t,newdata,nsim=200,seed=21,conf.int=.95,lifeExp
            V12<-object$V[c((object$nknots01+object$nknots02+5):(object$nknots01+object$nknots02+object$nknots12+6),Nspline:(Nspline+object$NC[3]-1)),c((object$nknots01+object$nknots02+5):(object$nknots01+object$nknots02+object$nknots12+6),Nspline:(Nspline+object$NC[3]-1))]
            
            
-            deriv01<-c(2*theta01*msplines01*e01,intensity01*Z01)
+            deriv01<-c(2*the01*msplines01*as.numeric(e01),as.numeric(intensity01)*Z01)
             se01<-sqrt(deriv01%*%V01%*%deriv01)
             
-            deriv02<-c(2*theta02*msplines02*e02,intensity02*Z02)
+            deriv02<-c(2*the02*msplines02*as.numeric(e02),as.numeric(intensity02)*Z02)
             se02<-sqrt(deriv02%*%V02%*%deriv02)
             
-            deriv12<-c(2*theta12*msplines12*e12,intensity12*Z12)
+            deriv12<-c(2*the12*msplines12*as.numeric(e12),as.numeric(intensity12)*Z12)
             se12<-sqrt(deriv12%*%V12%*%deriv12)
             
             lowerintensity[1]<-intensity01+qnorm((1-conf.int)/2)*se01
@@ -358,13 +368,13 @@ predict.idm <- function(object,s,t,newdata,nsim=200,seed=21,conf.int=.95,lifeExp
             upperintensity[2]<-intensity02-qnorm((1-conf.int)/2)*se02
             upperintensity[3]<-intensity12-qnorm((1-conf.int)/2)*se12
             
-            deriv01<-c(2*theta01*isplines01*e01,cumulative.intensity01*Z01)
+            deriv01<-c(2*the01*isplines01*as.numeric(e01),as.numeric(cumulative.intensity01)*Z01)
             se01<-sqrt(deriv01%*%V01%*%deriv01)
             
-            deriv02<-c(2*theta02*isplines02*e02,cumulative.intensity02*Z02)
+            deriv02<-c(2*the02*isplines02*as.numeric(e02),as.numeric(cumulative.intensity02)*Z02)
             se02<-sqrt(deriv02%*%V02%*%deriv02)
             
-            deriv12<-c(2*theta12*isplines12*e12,cumulative.intensity12*Z12)
+            deriv12<-c(2*the12*isplines12*as.numeric(e12),as.numeric(cumulative.intensity12)*Z12)
             se12<-sqrt(deriv12%*%V12%*%deriv12)
             
             lowercumulative.intensity[1]<-cumulative.intensity01+qnorm((1-conf.int)/2)*se01
@@ -485,9 +495,9 @@ predict.idm <- function(object,s,t,newdata,nsim=200,seed=21,conf.int=.95,lifeExp
           else
             linPred01<-0
           if (!is.null(beta02))
-            linPred02<-0
+            linPred02<-beta02 %*% t(Z02)
           else
-            linPred02<-matrix(0,nrow=nsim,ncol=1)
+            linPred02<-0
           if (!is.null(beta12))
             linPred12<-beta12 %*% t(Z12)
           else
@@ -497,19 +507,17 @@ predict.idm <- function(object,s,t,newdata,nsim=200,seed=21,conf.int=.95,lifeExp
           e01 <- exp(linPred01)
           intensity01<-intensity01*e01
           cumulative.intensity01<-cumulative.intensity01*e01
-          survival <- exp(-cumulative.intensity01)
           
           e02 <- exp(linPred02)
           intensity02<-intensity02*e02
           cumulative.intensity02<-cumulative.intensity02*e02
-          survival <- exp(-cumulative.intensity02)
           
           e12 <- exp(linPred12)
           intensity12<-intensity12*e12
           cumulative.intensity12<-cumulative.intensity12*e12
-          survival <- exp(-cumulative.intensity12)
           
-         
+          intensity<-c(intensity01,intensity02,intensity12)
+          cumulative.intensity<-c(cumulative.intensity01,cumulative.intensity02,cumulative.intensity12)
           lowerintensity<-rep(NA,3)
           upperintensity<-rep(NA,3)
           lowercumulative.intensity<-rep(NA,3)
@@ -523,19 +531,19 @@ predict.idm <- function(object,s,t,newdata,nsim=200,seed=21,conf.int=.95,lifeExp
           
           deriv01<-c((t^(modelPar01[1]-1))*(modelPar01[2]^modelPar01[1])*(modelPar01[1]*log(t)+modelPar01[1]*log(modelPar01[2])+1),
                      (modelPar01[1]^2)*(t^(modelPar01[1]-1))*(modelPar01[2]^(modelPar01[1]-1)),
-                     intensity01*Z01)
+                     as.numeric(intensity01)*Z01)
           deriv01[1,2]<-deriv01[1,2]*(2*sqrt(modelPar01))
           se01<-sqrt(deriv01%*%V01%*%deriv01)
           
           deriv02<-c((t^(modelPar02[1]-1))*(modelPar02[2]^modelPar02[1])*(modelPar02[1]*log(t)+modelPar02[1]*log(modelPar02[2])+1),
                      (modelPar02[1]^2)*(t^(modelPar02[1]-1))*(modelPar02[2]^(modelPar02[1]-1)),
-                     intensity02*Z02)
+                     as.numeric(intensity02)*Z02)
           deriv02[1,2]<-deriv02[1,2]*(2*sqrt(modelPar02))
           se02<-sqrt(deriv02%*%V02%*%deriv02)
           
           deriv12<-c((t^(modelPar12[1]-1))*(modelPar12[2]^modelPar12[1])*(modelPar12[1]*log(t)+modelPar12[1]*log(modelPar12[2])+1),
                      (modelPar12[1]^2)*(t^(modelPar12[1]-1))*(modelPar12[2]^(modelPar12[1]-1)),
-                     intensity12*Z12)
+                     as.numeric(intensity12)*Z12)
           deriv12[1,2]<-deriv12[1,2]*(2*sqrt(modelPar12))
           se12<-sqrt(deriv12%*%V12%*%deriv12)
           
@@ -548,19 +556,19 @@ predict.idm <- function(object,s,t,newdata,nsim=200,seed=21,conf.int=.95,lifeExp
           
           deriv01<-c(((t*modelPar01[2])^modelPar[1])*log(t*modelPar[2]),
                      (modelPar01[1]*((t*modelPar01[2])^modelPar01[1]))/modelPar01[2],
-                     cumulative.intensity01*Z01)
+                     as.numeric(cumulative.intensity01)*Z01)
           deriv01[1,2]<-deriv01[1,2]*(2*sqrt(modelPar01))
           se01<-sqrt(deriv01%*%V01%*%deriv01)
           
           deriv02<-c(((t*modelPar02[2])^modelPar[1])*log(t*modelPar[2]),
                      (modelPar02[1]*((t*modelPar02[2])^modelPar02[1]))/modelPar02[2],
-                     cumulative.intensity02*Z02)
+                     as.numeric(cumulative.intensity02)*Z02)
           deriv02[1,2]<-deriv02[1,2]*(2*sqrt(modelPar02))
           se02<-sqrt(deriv02%*%V02%*%deriv02)
           
           deriv12<-c(((t*modelPar12[2])^modelPar[1])*log(t*modelPar[2]),
                      (modelPar12[1]*((t*modelPar12[2])^modelPar12[1]))/modelPar12[2],
-                     cumulative.intensity12*Z12)
+                     as.numeric(cumulative.intensity12)*Z12)
           deriv12[1,2]<-deriv12[1,2]*(2*sqrt(modelPar12))
           se12<-sqrt(deriv12%*%V12%*%deriv12)
           
@@ -613,6 +621,12 @@ predict.idm <- function(object,s,t,newdata,nsim=200,seed=21,conf.int=.95,lifeExp
     out <- list(transprob=transprob)
     out <- c(out,list(newdata=newdata))
     out <- c(out,list(s=s,t=t,conf.int=ifelse(do.conf.int,conf.int,FALSE)))
+    out<- c(out,list(uppercumulative.intensity= uppercumulative.intensity,
+                     lowercumulative.intensity= lowercumulative.intensity,
+                     cumulative.intensity=cumulative.intensity,
+                     upperintensity= upperintensity,
+                     lowerintensity=lowerintensity,
+                     intensity=intensity))
     class(out) <- "predict.idm"
     out
 }

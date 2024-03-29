@@ -4,37 +4,23 @@
 \alias{sim.idmModel}
 \title{Simulate illness-death model data}
 \usage{
-\method{sim}{idmModel}(
-  x,
-  n,
-  plot,
-  pen,
-  illness.known.at.death = FALSE,
-  latent = FALSE,
-  keep.inspectiontimes = FALSE,
-  semi.markov = T,
-  ...
-)
+\method{sim}{idmModel}(x, n, plot, pen, latent = FALSE, keep.inspectiontimes = FALSE, ...)
 }
 \arguments{
 \item{x}{An \code{idmModel} object as obtained with
 \code{idmModel}}
 
-\item{n}{Number of observations}
+\item{n}{Number of observations
+seen.ill}
 
 \item{plot}{plot of base survival for all transition}
 
 \item{pen}{if the simulated data are for a penalised version of illness-death model}
 
-\item{illness.known.at.death}{Affects the value of variable
-seen.ill}
-
 \item{latent}{if TRUE keep the latent event times}
 
 \item{keep.inspectiontimes}{if \code{TRUE} keep the inspection
 times.}
-
-\item{semi.markov}{True if you want to simulate 1 --> 2 in Semi Markov process}
 
 \item{...}{Extra arguments given to \code{sim}}
 

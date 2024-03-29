@@ -47,8 +47,12 @@ cv.model<-function(beta,
   NEW.BETA.all<-beta
   penalty.factor<-penalty.factor[fix==0]
   
+  # num<-sapply(c(1:dim(v)[1]),FUN=function(x){
+  #   fu[x]-sum(v[x,-x]*BETA[-x])+sum(BETA*v[x,])
+  # }) new version below : 29/03/24
+  
   num<-sapply(c(1:dim(v)[1]),FUN=function(x){
-    fu[x]-sum(v[x,-x]*BETA[-x])+sum(BETA*v[x,])
+    -fu[x]+sum(v[x,-x]*BETA[-x])-sum(BETA*v[x,])
   })
 
   
@@ -91,24 +95,49 @@ cv.model<-function(beta,
   NEWBETA<-rep(NA,length(num))
   idbeta<-NULL
   idbeta<-base::which(penalty.factor==0)
+  # if no penalty on parameter, beta_k=A_k/-x_kk
   NEWBETA[idbeta]<-sign[idbeta]*num[idbeta]/denum[idbeta]
-
+browser()
   if(penalty%in%c("lasso","ridge","elasticnet")){
     # 0 -> 1
-    idbeta<-base::which(num01>(lambda[,1]*alpha))
-    NEWBETA[idbeta]<-sign01[idbeta]*(num01[idbeta]-lambda[,1]*alpha)/(denum01[idbeta]+2*lambda[,1]*(1-alpha))
+    #idbeta<-base::which(num01>(lambda[,1]*alpha))
+    #NEWBETA[idbeta]<-sign01[idbeta]*(num01[idbeta]-lambda[,1]*alpha)/(denum01[idbeta]+2*lambda[,1]*(1-alpha))
+    #NEWBETA[idbeta]<-sign01[idbeta]*(num01[idbeta]-lambda[,1]*alpha)/(denum01[idbeta]+2*lambda[,1]*(1-alpha))
+    #idbeta<-base::which(num01<=(lambda[,1]*alpha))
+    #NEWBETA[idbeta]<-0
+    
+    # 0 -> 1, 29/03/24 version
+    idbeta<-base::which(num01>(lambda[,1]*alpha) & (-denum01+2*lambda[,1]*(1-alpha))>0))
+    NEWBETA[idbeta]<-(num01[idbeta]-sign01[idbeta]*lambda[,1]*alpha)/(-denum01[idbeta]+2*lambda[,1]*(1-alpha))
+    idbeta<-base::which(num01>(lambda[,1]*alpha) & (-denum01+2*lambda[,1]*(1-alpha))<0))
+    NEWBETA[idbeta]<-(num01[idbeta]+sign01[idbeta]*lambda[,1]*alpha)/(-denum01[idbeta]+2*lambda[,1]*(1-alpha))
     idbeta<-base::which(num01<=(lambda[,1]*alpha))
     NEWBETA[idbeta]<-0
     
-    # 0 ->2
-    idbeta<-base::which(num02>(lambda[,2]*alpha))
-    NEWBETA[idbeta+nva01]<-sign02[idbeta]*(num02[idbeta]-lambda[,2]*alpha)/(denum02[idbeta]+2*lambda[,2]*(1-alpha))
+    # # 0 ->2
+    # idbeta<-base::which(num02>(lambda[,2]*alpha))
+    # NEWBETA[idbeta+nva01]<-sign02[idbeta]*(num02[idbeta]-lambda[,2]*alpha)/(denum02[idbeta]+2*lambda[,2]*(1-alpha))
+    # idbeta<-base::which(num02<=(lambda[,2]*alpha))
+    # NEWBETA[idbeta+nva01]<-0
+    
+    # 0 -> 2, 29/03/24 version
+    idbeta<-base::which(num02>(lambda[,2]*alpha) & (-denum02+2*lambda[,2]*(1-alpha))>0))
+    NEWBETA[idbeta+nva01]<-(num02[idbeta]-sign02[idbeta]*lambda[,2]*alpha)/(-denum02[idbeta]+2*lambda[,2]*(1-alpha))
+    idbeta<-base::which(num02>(lambda[,2]*alpha) & (-denum02+2*lambda[,2]*(1-alpha))<0))
+    NEWBETA[idbeta+nva01]<-(num02[idbeta]+sign02[idbeta]*lambda[,2]*alpha)/(-denum02[idbeta]+2*lambda[,2]*(1-alpha))
     idbeta<-base::which(num02<=(lambda[,2]*alpha))
     NEWBETA[idbeta+nva01]<-0
+    # # 1 ->2
+    # idbeta<-base::which(num12>(lambda[,3]*alpha))
+    # NEWBETA[idbeta+nva01+nva02]<-sign12[idbeta]*(num12[idbeta]-lambda[,3]*alpha)/(denum12[idbeta]+2*lambda[,3]*(1-alpha))
+    # idbeta<-base::which(num12<=(lambda[,3]*alpha))
+    # NEWBETA[idbeta+nva01+nva02]<-0
     
-    # 1 ->2
-    idbeta<-base::which(num12>(lambda[,3]*alpha))
-    NEWBETA[idbeta+nva01+nva02]<-sign12[idbeta]*(num12[idbeta]-lambda[,3]*alpha)/(denum12[idbeta]+2*lambda[,3]*(1-alpha))
+    # 1 -> 2, 29/03/24 version
+    idbeta<-base::which(num12>(lambda[,3]*alpha) & (-denum12+2*lambda[,3]*(1-alpha))>0))
+    NEWBETA[idbeta+nva01+nva02]<-(num12[idbeta]-sign12[idbeta]*lambda[,3]*alpha)/(-denum12[idbeta]+2*lambda[,3]*(1-alpha))
+    idbeta<-base::which(num12>(lambda[,3]*alpha) & (-denum12+2*lambda[,3]*(1-alpha))<0))
+    NEWBETA[idbeta+nva01+nva02]<-(num12[idbeta]+sign12[idbeta]*lambda[,3]*alpha)/(-denum12[idbeta]+2*lambda[,3]*(1-alpha))
     idbeta<-base::which(num12<=(lambda[,3]*alpha))
     NEWBETA[idbeta+nva01+nva02]<-0
     }
