@@ -45,7 +45,7 @@ idmlLikelihoodweibpena<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
   b12<-b[(6+1+nva01+nva02):npar][penalty.factor[(nva01+nva02+1):(nva01+nva02+nva12)]==1]
   }else{b12<-0}
   #b12<-b12[fix0[(6+1+nva01+nva02):npar]==0]
-  if(penalty%in%c("lasso","ridge","elasticnet","corrected.elasticnet")){
+  if(penalty%in%c("lasso","ridge","elasticnet")){
     res<-res+lambda[,1]*alpha*sum(abs(b01))+lambda[,1]*(1-alpha)*sum(b01*b01)
     res<-res+lambda[,2]*alpha*sum(abs(b02))+lambda[,2]*(1-alpha)*sum(b02*b02)
     res<-res+lambda[,3]*alpha*sum(abs(b12))+lambda[,3]*(1-alpha)*sum(b12*b12)

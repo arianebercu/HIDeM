@@ -261,7 +261,7 @@ idm <- function(formula01,
                 penalty.factor=NULL,
                 alpha=ifelse(penalty=="scad",3.7,
                              ifelse(penalty=="mcp",3,
-                                    ifelse(penalty%in%c("elasticnet","corrected.elasticnet"),0.5,1))),
+                                    ifelse(penalty%in%c("elasticnet"),0.5,1))),
                 step.sequential=F,
                 option.sequential=list(cutoff=10^-3,
                                     min=20,
@@ -671,8 +671,8 @@ idm <- function(formula01,
     fix0<-rep(0,size_V)
     if(is.null(penalty)){
       penalty<-"none"}
-    if(!penalty%in%c("none","lasso","ridge","elasticnet","corrected.elasticnet","mcp","scad")){
-      stop(paste0("Parameter penalty must be either : lasso, ridge, elastic.net, corrected.elasticnet, mcp or scad"))}
+    if(!penalty%in%c("none","lasso","ridge","elasticnet","mcp","scad")){
+      stop(paste0("Parameter penalty must be either : lasso, ridge, elastic.net, mcp or scad"))}
     
     
     if(!is.null(posfix)){
@@ -685,7 +685,7 @@ idm <- function(formula01,
       
       # adapt to penalised setting :
       #if(any(posfix>size_spline) & penalty==T){stop(paste0("Fixed parameters can only be on spline when penalised model is request "))}
-      if(length(posfix)==6 & penalty%in%c("lasso","ridge","elasticnet","corrected.elasticnet","mcp","scad") & !any(posfix>6)){
+      if(length(posfix)==6 & penalty%in%c("lasso","ridge","elasticnet","mcp","scad") & !any(posfix>6)){
         stop(paste0("All weibull parameters cannot be fixed when penalised model is request "))}
       
       fix0[posfix]<-1
@@ -1016,7 +1016,7 @@ idm <- function(formula01,
             if(!inherits(alpha,c("numeric","integer")) | alpha<=2)stop("Alpha need to be a numeric and superior to 2")
             
           }
-          if(penalty%in%c("elasticnet","corrected.elasticnet")){
+          if(penalty%in%c("elasticnet")){
            if(!inherits(alpha,c("numeric","integer"))  | alpha>1 | alpha <0)stop("Alpha need to be a numeric between 0 and 1")
           }
           if(!inherits(nlambda01,c("numeric","integer")) | round(nlambda01)!=nlambda01 | nlambda01<1)stop("Nlambda01 need to be an integer superior or equal to 1")
@@ -1209,7 +1209,7 @@ idm <- function(formula01,
                 lambda.matrix<-matrix(0,npm,npm)
                 if(nvat01>0){
                   
-                  if(penalty%in%c("none","lasso","ridge","elasticnet","corrected.elasticnet")){
+                  if(penalty%in%c("none","lasso","ridge","elasticnet")){
                     diag(lambda.matrix)[1:npm01]<-rep(2*(1-alpha[i])*lambda[1,i],npm01)}
                   
                   if(penalty=="mcp"){
@@ -1227,7 +1227,7 @@ idm <- function(formula01,
                 }
                 if(nvat02>0){
                   
-                  if(penalty%in%c("none","lasso","ridge","elasticnet","corrected.elasticnet")){
+                  if(penalty%in%c("none","lasso","ridge","elasticnet")){
                     diag(lambda.matrix)[(npm01+1):(npm01+npm02)]<-rep(2*(1-alpha[i])*lambda[2,i],npm02)}
                   
                   if(penalty=="mcp"){
@@ -1247,7 +1247,7 @@ idm <- function(formula01,
                   }
                 }
                 if(nvat12>0){
-                  if(penalty%in%c("none","lasso","ridge","elasticnet","corrected.elasticnet")){
+                  if(penalty%in%c("none","lasso","ridge","elasticnet")){
                     diag(lambda.matrix)[(npm01+npm02+1):npm]<-rep(2*(1-alpha[i])*lambda[3,i],npm12)}
                   
                   
@@ -1519,7 +1519,7 @@ idm <- function(formula01,
                   lambda.matrix<-matrix(0,npm,npm)
                   if(nvat01>0){
                     
-                    if(penalty%in%c("none","lasso","ridge","elasticnet","corrected.elasticnet")){
+                    if(penalty%in%c("none","lasso","ridge","elasticnet")){
                       diag(lambda.matrix)[1:npm01]<-rep(2*(1-alpha[i])*lambda[1,i],npm01)}
                     
                     if(penalty=="mcp"){
@@ -1537,7 +1537,7 @@ idm <- function(formula01,
                   }
                   if(nvat02>0){
                     
-                    if(penalty%in%c("none","lasso","ridge","elasticnet","corrected.elasticnet")){
+                    if(penalty%in%c("none","lasso","ridge","elasticnet")){
                       diag(lambda.matrix)[(npm01+1):(npm01+npm02)]<-rep(2*(1-alpha[i])*lambda[2,i],npm02)}
                     
                     if(penalty=="mcp"){
@@ -1557,7 +1557,7 @@ idm <- function(formula01,
                     }
                   }
                   if(nvat12>0){
-                    if(penalty%in%c("none","lasso","ridge","elasticnet","corrected.elasticnet")){
+                    if(penalty%in%c("none","lasso","ridge","elasticnet")){
                       diag(lambda.matrix)[(npm01+npm02+1):npm]<-rep(2*(1-alpha[i])*lambda[3,i],npm12)}
                     
                     
