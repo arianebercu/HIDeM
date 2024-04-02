@@ -157,7 +157,7 @@ cv.model<-function(beta,
     # 0 -> 1, 29/03/24 version
     idbeta<-base::which((num01>=(alpha*lambda[,1]*denum01)) & (num01<lambda[,1]) & (denum01<=(1/alpha)))
     NEWBETA[idbeta]<--sign01[idbeta]*alpha*lambda[,1]
-    idbeta<-base::which(((num01<(alpha*lambda[,1]*denum01)) | (num01=>lambda[,1])) & (denum01<=(1/alpha)))
+    idbeta<-base::which(((num01<(alpha*lambda[,1]*denum01)) | (num01>=lambda[,1])) & (denum01<=(1/alpha)))
     NEWBETA[idbeta]<-0
     
     idbeta<-base::which((num01<=(alpha*lambda[,1]*denum01)) & num01>lambda[,1] & (denum01>(1/alpha)))
@@ -176,7 +176,7 @@ cv.model<-function(beta,
     # 0 -> 2, 29/03/24 version
     idbeta<-base::which((num02>=(alpha*lambda[,2]*denum02)) & (num02<lambda[,2]) & (denum02<=(1/alpha)))
     NEWBETA[idbeta]<--sign02[idbeta]*alpha*lambda[,2]
-    idbeta<-base::which(((num02<(alpha*lambda[,2]*denum02)) | (num02=>lambda[,2])) & (denum02<=(1/alpha)))
+    idbeta<-base::which(((num02<(alpha*lambda[,2]*denum02)) | (num02>=lambda[,2])) & (denum02<=(1/alpha)))
     NEWBETA[idbeta]<-0
     
     idbeta<-base::which((num02<=(alpha*lambda[,2]*denum02)) & num02>lambda[,2] & (denum02>(1/alpha)))
@@ -196,7 +196,7 @@ cv.model<-function(beta,
     # 1 -> 2, 29/03/24 version
     idbeta<-base::which((num12>=(alpha*lambda[,3]*denum12)) & (num12<lambda[,3]) & (denum12<=(1/alpha)))
     NEWBETA[idbeta]<--sign12[idbeta]*alpha*lambda[,3]
-    idbeta<-base::which(((num12<(alpha*lambda[,3]*denum12)) | (num12=>lambda[,3])) & (denum12<=(1/alpha)))
+    idbeta<-base::which(((num12<(alpha*lambda[,3]*denum12)) | (num12>=lambda[,3])) & (denum12<=(1/alpha)))
     NEWBETA[idbeta]<-0
     
     idbeta<-base::which((num12<=(alpha*lambda[,3]*denum12)) & num12>lambda[,3] & (denum12>(1/alpha)))
