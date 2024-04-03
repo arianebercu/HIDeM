@@ -35,7 +35,7 @@ idm(
   penalty = NULL,
   penalty.factor = NULL,
   alpha = ifelse(penalty == "scad", 3.7, ifelse(penalty == "mcp", 3, ifelse(penalty
-    \%in\% c("elasticnet", "corrected.elasticnet"), 0.5, 1))),
+    \%in\% c("elasticnet"), 0.5, 1))),
   step.sequential = F,
   option.sequential = list(cutoff = 10^-3, min = 20, step = 10),
   nproc = 1,
