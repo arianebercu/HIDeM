@@ -53,56 +53,69 @@ idmlLikelihoodpena<-function(b,npm,npar,bfix,fix,zi01,zi02,zi12,ctime,no,nz01,nz
   b12<-b[(size_spline+1+nva01+nva02):npar][penalty.factor[(nva01+nva02+1):(nva01+nva02+nva12)]==1]
   }else{b12<-0}
   #b12<-b12[fix0[(size_spline+1+nva01+nva02):npar]==0]
+  # lpen = l - pen as we tend to maximise : 10/04/24
+  # if(penalty%in%c("lasso","ridge","elasticnet")){
+  #   res<-res+lambda[,1]*alpha*sum(abs(b01))+lambda[,1]*(1-alpha)*sum(b01*b01)
+  #   res<-res+lambda[,2]*alpha*sum(abs(b02))+lambda[,2]*(1-alpha)*sum(b02*b02)
+  #   res<-res+lambda[,3]*alpha*sum(abs(b12))+lambda[,3]*(1-alpha)*sum(b12*b12)
+  # }
+  
   if(penalty%in%c("lasso","ridge","elasticnet")){
-    res<-res+lambda[,1]*alpha*sum(abs(b01))+lambda[,1]*(1-alpha)*sum(b01*b01)
-    res<-res+lambda[,2]*alpha*sum(abs(b02))+lambda[,2]*(1-alpha)*sum(b02*b02)
-    res<-res+lambda[,3]*alpha*sum(abs(b12))+lambda[,3]*(1-alpha)*sum(b12*b12)
+    res<-res-lambda[,1]*alpha*sum(abs(b01))-lambda[,1]*(1-alpha)*sum(b01*b01)
+    res<-res-lambda[,2]*alpha*sum(abs(b02))-lambda[,2]*(1-alpha)*sum(b02*b02)
+    res<-res-lambda[,3]*alpha*sum(abs(b12))-lambda[,3]*(1-alpha)*sum(b12*b12)
   }
   
 
+  # we need to maximise so - : 10/04/24
+   if(penalty=="mcp"){
   
-  if(penalty=="mcp"){
-    
-    p01<-rep(alpha*lambda[,1]*lambda[,1]/2,length(b01))
-    idbeta<-which(b01<=alpha*lambda[,1])
-    p01[idbeta]<-lambda[,1]*abs(b01[idbeta])-((b01[idbeta]*b01[idbeta])/2*alpha)
-    
-    p02<-rep(alpha*lambda[,2]*lambda[,2]/2,length(b02))
-    idbeta<-which(b02<=alpha*lambda[,2])
-    p02[idbeta]<-lambda[,2]*abs(b02[idbeta])-((b02[idbeta]*b02[idbeta])/2*alpha)
-    
-    p12<-rep(alpha*lambda[,3]*lambda[,3]/2,length(b12))
-    idbeta<-which(b12<=alpha*lambda[,3])
-    p12[idbeta]<-lambda[,3]*abs(b12[idbeta])-((b12[idbeta]*b12[idbeta])/2*alpha)
-
-    
-    res<-res+sum(p01)+sum(p02)+sum(p12)
-    
-  }
+     p01<-rep(alpha*lambda[,1]*lambda[,1]/2,length(b01))
+     idbeta<-which(b01<=alpha*lambda[,1])
+     p01[idbeta]<-lambda[,1]*abs(b01[idbeta])-((b01[idbeta]*b01[idbeta])/2*alpha)
   
-  if(penalty=="scad"){
-    
-    p01<-rep((lambda[,,1]^2)*(alpha+1)/2,length(b01))
-    idbeta<-which(b01<=lambda[,1])
-    p01[idbeta]<-lambda[,1]*abs(b01[idbeta])
-    idbeta<-which(abs(b01)<lambda[,1]*alpha)
-    p01[idbeta]<-(2*alpha*lambda[,1]*abs(b01[idbeta])-b01[idbeta]^2-lambda[,1]^2)/(2*(alpha-1))
-    
-    p02<-rep((lambda[,2]^2)*(alpha+1)/2,length(b02))
-    idbeta<-which(b02<=lambda[,2])
-    p02[idbeta]<-lambda[,2]*abs(b02[idbeta])
-    idbeta<-which(abs(b02)<lambda[,2]*alpha)
-    p02[idbeta]<-(2*alpha*lambda[,2]*abs(b02[idbeta])-b02[idbeta]^2-lambda[,2]^2)/(2*(alpha-1))
-    
-    p12<-rep((lambda[,3]^2)*(alpha+1)/2,length(b12))
-    idbeta<-which(b12<=lambda[,3])
-    p12[idbeta]<-lambda[,3]*abs(b12[idbeta])
-    idbeta<-which(abs(b12)<lambda[,3]*alpha)
-    p12[idbeta]<-(2*alpha*lambda[,3]*abs(b12[idbeta])-b12[idbeta]^2-lambda[,3]^2)/(2*(alpha-1))
+     p02<-rep(alpha*lambda[,2]*lambda[,2]/2,length(b02))
+     idbeta<-which(b02<=alpha*lambda[,2])
+     p02[idbeta]<-lambda[,2]*abs(b02[idbeta])-((b02[idbeta]*b02[idbeta])/2*alpha)
+  
+     p12<-rep(alpha*lambda[,3]*lambda[,3]/2,length(b12))
+     idbeta<-which(b12<=alpha*lambda[,3])
+     p12[idbeta]<-lambda[,3]*abs(b12[idbeta])-((b12[idbeta]*b12[idbeta])/2*alpha)
+  
+  
+  #   res<-res+sum(p01)+sum(p02)+sum(p12)
+     res<-res-sum(p01)-sum(p02)-sum(p12)
+  
+   }
 
-    
-    res<-res+sum(p01)+sum(p02)+sum(p12)
-  }
+
+  # lpen = l -pen as maximisation so change : 10/04/24
+   if(penalty=="scad"){
+  
+     p01<-rep((lambda[,1]^2)*(alpha+1)/2,length(b01))
+     idbeta<-which(b01<=lambda[,1])
+     p01[idbeta]<-lambda[,1]*abs(b01[idbeta])
+     idbeta<-which(abs(b01)<lambda[,1]*alpha)
+     p01[idbeta]<-(2*alpha*lambda[,1]*abs(b01[idbeta])-b01[idbeta]^2-lambda[,1]^2)/(2*(alpha-1))
+  
+     p02<-rep((lambda[,2]^2)*(alpha+1)/2,length(b02))
+     idbeta<-which(b02<=lambda[,2])
+     p02[idbeta]<-lambda[,2]*abs(b02[idbeta])
+     idbeta<-which(abs(b02)<lambda[,2]*alpha)
+     p02[idbeta]<-(2*alpha*lambda[,2]*abs(b02[idbeta])-b02[idbeta]^2-lambda[,2]^2)/(2*(alpha-1))
+  
+     p12<-rep((lambda[,3]^2)*(alpha+1)/2,length(b12))
+     idbeta<-which(b12<=lambda[,3])
+     p12[idbeta]<-lambda[,3]*abs(b12[idbeta])
+     idbeta<-which(abs(b12)<lambda[,3]*alpha)
+     p12[idbeta]<-(2*alpha*lambda[,3]*abs(b12[idbeta])-b12[idbeta]^2-lambda[,3]^2)/(2*(alpha-1))
+  
+  
+  #   res<-res+sum(p01)+sum(p02)+sum(p12)
+     res<-res-sum(p01)-sum(p02)-sum(p12)
+   }
+  
+
   
   return(as.double(res))
 }

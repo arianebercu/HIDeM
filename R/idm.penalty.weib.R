@@ -175,6 +175,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                  b<-c(s,beta)
                                  bfix<-b[fix0==1]
                                  b<-b[fix0==0]
+                                 # derivative of loglik
                                  output<-derivaweib(b=b,
                                                     npm=length(b),
                                                     npar=size_V,
@@ -197,7 +198,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                                     t3=t3,
                                                     troncature=troncature)
                                  
-                                 if(ite==0){
+                                 if(ite==0){# loglik 
                                    fn.value<-idmlLikelihoodweibpena(b=b,
                                                                     npm=length(b),
                                                                     npar=size_V,
@@ -281,7 +282,8 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                      
                                      V<-V+t(V)
                                      diag(V)<-diag(V)/2
-                                     # hessian is - second derivatives 
+                                     # hessian is - second derivatives of loglik
+                                     
                                      V<--V
                                      
                                      tr <- sum(diag(V))/npm
@@ -345,7 +347,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                  
                                  V<-V+t(V)
                                  diag(V)<-diag(V)/2
-                                 # hessian is - second derivatives 
+                                 # hessian is - second derivatives of loglik
                                  V<--V
                                  
                                  tr <- sum(diag(V))/npm
@@ -408,7 +410,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                  
                                  
                                  
-                                 # attention -V as second derivative = -H
+                                
                                  output.cv<-cv.model(beta=beta,
                                                      nva01=npm01,
                                                      nva02=npm02,
@@ -429,6 +431,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                  
                                  betanew<-b[(6+1):size_V]
                                  
+                                 # penalised loglik see if inferior to previous
                                  res<-idmlLikelihoodweibpena(b=b,
                                                              npm=length(b),
                                                              npar=size_V,
@@ -596,7 +599,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                                   troncature=troncature)
                                  
                                  # look at convergence for each lambda :
-                                
+                                 # mla output is loglik
                                  # new values for splines:
                                  snew<-s
                                  snew[fix00[1:6]==0]<-output.mla$b
@@ -609,10 +612,17 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                  if(nvat12>0){
                                  b12<-betanew[(nvat01+nvat02+1):length(betanew)][penalty.factor[(nvat01+nvat02+1):length(betanew)]==1]
                                  }else{b12<-0}
+                                 # maximisation so lpen=l-pen : 10/04/24
+                                 # if(penalty%in%c("lasso","ridge","elasticnet","corrected.elasticnet")){
+                                 #   fn.valuenew<-output.mla$fn.value+lambda[id.lambda,1]*alpha*sum(abs(b01))+lambda[id.lambda,1]*(1-alpha)*sum(b01*b01)
+                                 #   fn.valuenew<-fn.valuenew+lambda[id.lambda,2]*alpha*sum(abs(b02))+lambda[id.lambda,2]*(1-alpha)*sum(b02*b02)
+                                 #   fn.valuenew<-fn.valuenew+lambda[id.lambda,3]*alpha*sum(abs(b12))+lambda[id.lambda,3]*(1-alpha)*sum(b12*b12)
+                                 # }
+                                 # calculate loglik pen 
                                  if(penalty%in%c("lasso","ridge","elasticnet","corrected.elasticnet")){
-                                   fn.valuenew<-output.mla$fn.value+lambda[id.lambda,1]*alpha*sum(abs(b01))+lambda[id.lambda,1]*(1-alpha)*sum(b01*b01)
-                                   fn.valuenew<-fn.valuenew+lambda[id.lambda,2]*alpha*sum(abs(b02))+lambda[id.lambda,2]*(1-alpha)*sum(b02*b02)
-                                   fn.valuenew<-fn.valuenew+lambda[id.lambda,3]*alpha*sum(abs(b12))+lambda[id.lambda,3]*(1-alpha)*sum(b12*b12)
+                                   fn.valuenew<-output.mla$fn.value-lambda[id.lambda,1]*alpha*sum(abs(b01))-lambda[id.lambda,1]*(1-alpha)*sum(b01*b01)
+                                   fn.valuenew<-fn.valuenew-lambda[id.lambda,2]*alpha*sum(abs(b02))-lambda[id.lambda,2]*(1-alpha)*sum(b02*b02)
+                                   fn.valuenew<-fn.valuenew-lambda[id.lambda,3]*alpha*sum(abs(b12))-lambda[id.lambda,3]*(1-alpha)*sum(b12*b12)
                                  }
                                  
                                  
@@ -631,7 +641,8 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                    p12[idbeta]<-lambda[id.lambda,3]*abs(b12[idbeta])-((b12[idbeta]*b12[idbeta])/2*alpha)
                                    
                                    
-                                   fn.valuenew<-output.mla$fn.value+sum(p01)+sum(p02)+sum(p12)
+                                   #fn.valuenew<-output.mla$fn.value+sum(p01)+sum(p02)+sum(p12)
+                                   fn.valuenew<-output.mla$fn.value-sum(p01)-sum(p02)-sum(p12)
                                    
                                  }
                                  
@@ -656,7 +667,8 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                    p12[idbeta]<-(2*alpha*lambda[id.lambda,3]*abs(b12[idbeta])-b12[idbeta]^2-lambda[id.lambda,3]^2)/(2*(alpha-1))
                                    
                                    
-                                   fn.valuenew<-output.mla$fn.value+sum(p01)+sum(p02)+sum(p12)
+                                   #fn.valuenew<-output.mla$fn.value+sum(p01)+sum(p02)+sum(p12)
+                                   fn.valuenew<-output.mla$fn.value-sum(p01)-sum(p02)-sum(p12)
                                    
                                  }
                                  
@@ -782,8 +794,8 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                            H=V0,
                                            lambda=as.double(lambda[id.lambda,]),
                                            alpha=alpha,
-                                           fn.value=ifelse(!exists("output.mla"),NA,output.mla$fn.value),
-                                           fn.value.pena=fn.value,
+                                           fn.value=ifelse(!exists("output.mla"),NA,output.mla$fn.value), # loglik
+                                           fn.value.pena=fn.value, # penalised loglik
                                            ni=ite,
                                            ca.beta=eval.cv.beta,
                                            ca.spline=eval.cv.spline,
@@ -1064,7 +1076,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                    break
                                  }
                                  
-                                 # attention -V as second derivative = -H
+                                 
                                  output.cv<-cv.model(beta=beta,
                                                     nva01=npm01,
                                                     nva02=npm02,
@@ -1114,7 +1126,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                  
                                  # we want to maximise the loglik thus : 
                                  # we have issue if res is NA or if not higher than previous one 
-                                 
+                               
                                 if(res %in%c(-1e9,1e9) | res < fn.value){
                                   
                                    th<-1e-5
@@ -1264,12 +1276,13 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                  if(nvat12>0){
                                  b12<-betanew[(nvat01+nvat02+1):length(betanew)][penalty.factor[(nvat01+nvat02+1):length(betanew)]==1]
                                  }else{b12<-0}
-                                 
+                                 # maximisation issue : lpen =l - pen
                                  if(penalty%in%c("lasso","ridge","elasticnet","corrected.elasticnet")){
-                                   fn.valuenew<-output.mla$fn.value+lambda[id.lambda,1]*alpha*sum(abs(b01))+lambda[id.lambda,1]*(1-alpha)*sum(b01*b01)
-                                   fn.valuenew<-fn.valuenew+lambda[id.lambda,2]*alpha*sum(abs(b02))+lambda[id.lambda,2]*(1-alpha)*sum(b02*b02)
-                                   fn.valuenew<-fn.valuenew+lambda[id.lambda,3]*alpha*sum(abs(b12))+lambda[id.lambda,3]*(1-alpha)*sum(b12*b12)
-                                 }
+                                   fn.valuenew<-output.mla$fn.value-lambda[id.lambda,1]*alpha*sum(abs(b01))-lambda[id.lambda,1]*(1-alpha)*sum(b01*b01)
+                                   fn.valuenew<-fn.valuenew-lambda[id.lambda,2]*alpha*sum(abs(b02))-lambda[id.lambda,2]*(1-alpha)*sum(b02*b02)
+                                   fn.valuenew<-fn.valuenew-lambda[id.lambda,3]*alpha*sum(abs(b12))-lambda[id.lambda,3]*(1-alpha)*sum(b12*b12)
+
+                                   }
                                  
                                  if(penalty=="mcp"){
                                    
@@ -1285,8 +1298,9 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                    idbeta<-which(b12<=alpha*lambda[id.lambda,3])
                                    p12[idbeta]<-lambda[id.lambda,3]*abs(b12[idbeta])-((b12[idbeta]*b12[idbeta])/2*alpha)
                                    
-                                   
-                                   fn.valuenew<-output.mla$fn.value+sum(p01)+sum(p02)+sum(p12)
+                                  
+                                   #fn.valuenew<-output.mla$fn.value+sum(p01)+sum(p02)+sum(p12)
+                                   fn.valuenew<-output.mla$fn.value-sum(p01)-sum(p02)-sum(p12)
                                    
                                  }
                                  
@@ -1310,8 +1324,8 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                    idbeta<-which(abs(b12)<lambda[id.lambda,3]*alpha)
                                    p12[idbeta]<-(2*alpha*lambda[id.lambda,3]*abs(b12[idbeta])-b12[idbeta]^2-lambda[id.lambda,3]^2)/(2*(alpha-1))
                                    
-                                   
-                                   fn.valuenew<-output.mla$fn.value+sum(p01)+sum(p02)+sum(p12)
+                                   #fn.valuenew<-output.mla$fn.value+sum(p01)+sum(p02)+sum(p12)
+                                   fn.valuenew<-output.mla$fn.value-sum(p01)-sum(p02)-sum(p12)
                                    
                                  }
                                  

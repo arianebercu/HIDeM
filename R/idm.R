@@ -472,8 +472,6 @@ idm <- function(formula01,
     
     troncature<-ifelse(truncated==T,1,0)
 
-
-
     if(truncated==1){
       t0<-entrytime
     }else{t0<-rep(0,N)}
@@ -906,7 +904,7 @@ idm <- function(formula01,
                          "modelPar2 01",
                          "modelPar1 02",
                          "modelPar2 02",
-                         "modelParc1 12",
+                         "modelPar1 12",
                          "modelPar2 12")
         
         names(beta)<- c(theta_names,c(Xnames01,Xnames02,Xnames12))
@@ -1277,6 +1275,9 @@ idm <- function(formula01,
                     id.keepV<-(1+(i-1)*npm):(i*npm)
                     id.keepV<-id.keepV[id.keepV%in%((i-1)*npm+id.keep)]
                     V[id.keep,id.keepV]<-solve(H_spec)
+                    # maximisation issue thus : 10/04/24
+                    #H_pl<-H_spec+lambda.matrix
+                    # as mla return v=-second derivatives when maximisation^-1
                     H_pl<-H_spec+lambda.matrix
                     trace_model<-lava::tr(solve(H_pl)%*%H_spec)
                     fit$GCV[i]<--1/N*(out$fn.value[i]-trace_model)}
@@ -1479,7 +1480,7 @@ idm <- function(formula01,
               "modelPar2 01",
               "modelPar1 02",
               "modelPar2 02",
-              "modelParc1 12",
+              "modelPar1 12",
               "modelPar2 12")
               rownames(beta) <-c(theta_names,Xnames01,Xnames02,Xnames12)
               names(fix)<-c(theta_names,c(Xnames01,Xnames02,Xnames12))
@@ -1589,6 +1590,8 @@ idm <- function(formula01,
                       id.keepV<-id.keepV[id.keepV%in%((i-1)*npm+id.keep)]
                       
                       V[id.keep,id.keepV]<-solve(H_spec)
+                      # maximisation issue thus : 10/04/24
+                      # as mla in maximisation return -second derivatives 
                       H_pl<-H_spec+lambda.matrix
                       trace_model<-lava::tr(solve(H_pl)%*%H_spec)
                       fit$GCV[i]<--1/N*(out$fn.value[i]-trace_model)}
