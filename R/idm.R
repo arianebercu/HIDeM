@@ -1071,10 +1071,12 @@ idm <- function(formula01,
                                   gausspoint=gauss.point)
               
               if(nproc>1){parallel::stopCluster(clustpar)}
+              ## what should we do if max(output$v) == 0
               if(penalty%in%c("ridge","mcp","scad")){
-              lambda.max<-max(output$v)
+                #lambda.max<-ifelse(max(output$v)==0,0.001,max(output$v))
+                lambda.max<-ifelse(max(abs(output$v))==0,0.001,max(abs(output$v)))
               }else{
-                lambda.max<-max(output$v)/alpha
+                lambda.max<-ifelse(max(abs(output$v))==0,0.001,max(abs(output$v))/alpha)
               }
             }
             
@@ -1383,10 +1385,12 @@ idm <- function(formula01,
               if(nproc>1){parallel::stopCluster(clustpar)}
               
               
+              ## what should we do if max(output$v) == 0
               if(penalty%in%c("ridge","mcp","scad")){
-                lambda.max<-max(output$v)
+                #lambda.max<-ifelse(max(output$v)==0,0.001,max(output$v))
+                lambda.max<-ifelse(max(abs(output$v))==0,0.001,max(abs(output$v)))
               }else{
-                lambda.max<-max(output$v)/alpha
+                lambda.max<-ifelse(max(abs(output$v))==0,0.001,max(abs(output$v))/alpha)
               }
               
             }
