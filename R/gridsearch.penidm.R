@@ -61,8 +61,8 @@
 #' If only vector is specifified the knots are used for all transitions. If only 2 vectors are specifified, the
 #' knots for the \code{0 --> 1} transition are also used for the \code{1 --> 2} transition.}
 #' }
-#' The algorithm needs at least 3 knots in sparse.spline and 5 knots in spline and allows no more than 20 knots.
-#' @param type.quantile Argument only active for the likelihood approach \code{method="splines","sparse.spline"}.
+#' The algorithm needs at least 3 knots in spline and allows no more than 20 knots.
+#' @param type.quantile Argument only active for the likelihood approach \code{method="splines"}.
 #' There are three ways to control the placement of the knots  according to the time considered between states :=
 #' \itemize{
 #' #'  \item{\code{type.quantile=1}}{Time for \code{0 --> 1} is the imputed to the middle of the interval left and right for demence . Time for \code{0 --> 2}
@@ -77,20 +77,10 @@
 #' @param B vector of size the number of parameters, in the following order, first the parameters of splines \code{0 --> 1}, \code{0 --> 2}, \code{1 --> 2},
 #' second the parameters of explanatory variables in order  \code{0 --> 1}, \code{0 --> 2}, \code{1 --> 2}.
 #' This argument is only used for models with M-splines.
-#' @param method type of estimation method: "splines" for a
-#' penalized likelihood approach with approximation of the transition
-#' intensities by M-splines, "sparse.splines" for a likelihood approach with approximation of the transition
+#' @param method type of estimation method: "splines" for a likelihood approach with approximation of the transition
 #' intensities by M-splines, "Weib" for a parametric approach with a
 #' Weibull distribution on the transition intensities. Default is
 #' "Weib".
-#' @param conf.int Level of confidence pointwise confidence intervals of the transition intensities, i.e.,
-#' a value between 0 and 1, the default is \code{0.95}.
-#' The default is also used when \code{conf.int=TRUE}.
-#' To avoid computation of confidence intervals, set \code{conf.int} to FALSE or NULL.
-#' @param print.iter boolean parameter. Equals to \code{TRUE} to print
-#' the likelihood during the iteration process, \code{FALSE}
-#' otherwise. Default is \code{FALSE}. This option is not running on
-#' Windows.
 #' @param subset expression indicating the subset of the rows of data
 #' to be used in the fit. All observations are included by default.
 #' @param na.action how NAs are treated. The default is first, any
@@ -112,7 +102,6 @@
 #' @param step.sequential should we use the optimisation version to fix splines 
 #' @param clustertype in which cluster to work
 #' @param nproc number of cluster
-#' @param print.info shloud we print info during mla convergence
 #' @param option.sequential parameters to give if you want to do the optimisation version to
 #'  fix splines
 #' @return
@@ -131,19 +120,7 @@
 #' \item{time}{times for which transition intensities have been evaluated for
 #' plotting. Vector in the Weibull approach. Matrix in the penalized likelihhod
 #' approach for which the colums corresponds to the transitions 0 --> 1, 1 -->
-#' 2, 0 --> 2.} \item{intensity01}{matched values of the intensities for
-#' transition 0 --> 1.} \item{lowerIntensity01}{lower confidence intervals for
-#' the values of the intensities for transition 0 --> 1.}
-#' \item{upperIntensity01}{upper confidence intervals for the values of the
-#' intensities for transition 0 --> 1.} \item{intensity02}{matched values of
-#' the intensities for transition 0 --> 2.} \item{lowerIntensity02}{lower
-#' confidence intervals for the values of the intensities for transition 0 -->
-#' 2.} \item{upperIntensity02}{upper confidence intervals for the values of the
-#' intensities for transition 0 --> 2.} \item{intensity12}{matched values of
-#' the intensities for transition 1 --> 2.} \item{lowerIntensity12}{lower
-#' confidence intervals for the values of the intensities for transition 1 -->
-#' 2.} \item{upperIntensity12}{upper confidence intervals for the values of the
-#' intensities for transition 1 --> 2.} \item{RR}{vector of relative risks.}
+#' 2, 0 --> 2.} 
 #' \item{V}{variance-covariance matrix derived from the Hessian of the log-likelihood
 #' if using method="Weib" or, from the Hessian of the penalized log-likelihood
 #' if using method="Splines".}
@@ -248,8 +225,6 @@ gridsearch.penidm <- function(
                 n.knots=NULL,
                 knots="equidistant",
                 type.quantile=1,
-                conf.int=.95,
-                print.iter=FALSE,
                 subset=NULL,
                 na.action = na.fail,
 
@@ -270,8 +245,7 @@ gridsearch.penidm <- function(
                              ifelse(penalty=="mcp",3,
                                     ifelse(penalty%in%c("elasticnet","corrected.elasticnet"),0.5,1))),
                 nproc=1,
-                clustertype="FORK",
-                print.info=F){
+                clustertype="FORK"){
   
   call <- match.call()
 
@@ -400,14 +374,11 @@ gridsearch.penidm <- function(
                                   n.knots=n.knots,
                                   knots=knots,
                                   type.quantile=type.quantile,
-                                  conf.int=conf.int,
-                                  print.iter=print.iter,
                                   subset=subset,
                                   na.action =na.action,
                                   B=B,
                                   gauss.point=gauss.point,
-                                  clustertype=clustertype,
-                                  print.info=print.info)
+                                  clustertype=clustertype)
   
   
   ################################ 02 ############################################
@@ -443,14 +414,11 @@ gridsearch.penidm <- function(
                                   n.knots=n.knots,
                                   knots=knots,
                                   type.quantile=type.quantile,
-                                  conf.int=conf.int,
-                                  print.iter=print.iter,
                                   subset=subset,
                                   na.action =na.action,
                                   B=B,
                                   gauss.point=gauss.point,
-                                  clustertype=clustertype,
-                                  print.info=print.info)
+                                  clustertype=clustertype)
  
   
   ######################################## 12 ###################################
@@ -487,14 +455,11 @@ gridsearch.penidm <- function(
                                   n.knots=n.knots,
                                   knots=knots,
                                   type.quantile=type.quantile,
-                                  conf.int=conf.int,
-                                  print.iter=print.iter,
                                   subset=subset,
                                   na.action =na.action,
                                   B=B,
                                   gauss.point=gauss.point,
-                                  clustertype=clustertype,
-                                  print.info=print.info)
+                                  clustertype=clustertype)
   
   
   if(gridmethod=="BIC"){

@@ -1,9 +1,10 @@
-idm.no.penalty<-function(b,clustertype,epsa,epsb,epsd,print.info,nproc,maxiter,size_V,size_spline,noVar,bfix,
+idm.no.penalty<-function(b,clustertype,epsa,epsb,epsd,nproc,maxiter,size_V,size_spline,noVar,bfix,
                          fix0,knots01,knots02,knots12,ctime,N,nknots01,nknots02,nknots12,
                          ve01,ve02,ve12,dimnva01,dimnva02,dimnva12,nvat01,nvat02,nvat12,
                          t0,t1,t2,t3,troncature,gauss.point,step.sequential,option.sequential){
   fix00<-fix0
   
+  # if do not fix more splines parameters step.sequential==F
   if(step.sequential==F){
     
     
@@ -14,7 +15,6 @@ idm.no.penalty<-function(b,clustertype,epsa,epsb,epsd,print.info,nproc,maxiter,s
              epsa=epsa,
              epsb=epsb,
              epsd=epsd,
-             print.info = print.info,
              nproc=nproc,
              maxiter=maxiter,
              minimize=F,
@@ -66,7 +66,6 @@ idm.no.penalty<-function(b,clustertype,epsa,epsb,epsd,print.info,nproc,maxiter,s
                epsa=epsa,
                epsb=epsb,
                epsd=epsd,
-               print.info = print.info,
                nproc=nproc,
                maxiter=option.sequential$min,
                minimize=F,
@@ -146,10 +145,10 @@ idm.no.penalty<-function(b,clustertype,epsa,epsb,epsd,print.info,nproc,maxiter,s
       out_first_mla<-2
     }
     
-    
+    # verify maxiter still not reach and first mla did not CV
     while(maxstep<maxiter & out_first_mla!=1){
       
-      
+      # calculate updates
       out<-marqLevAlg::mla(b=b,
                m=length(b),
                fn=idmlLikelihood,
@@ -157,7 +156,6 @@ idm.no.penalty<-function(b,clustertype,epsa,epsb,epsd,print.info,nproc,maxiter,s
                epsa=epsa,
                epsb=epsb,
                epsd=epsd,
-               print.info = print.info,
                nproc=nproc,
                maxiter=option.sequential$step,
                minimize=F,
@@ -190,7 +188,7 @@ idm.no.penalty<-function(b,clustertype,epsa,epsb,epsd,print.info,nproc,maxiter,s
                gausspoint=gauss.point
       )
       
-      #browser()
+     
       
       if(out$istop==4){
         stop("Problem in the loglikelihood computation.")
@@ -201,7 +199,7 @@ idm.no.penalty<-function(b,clustertype,epsa,epsb,epsd,print.info,nproc,maxiter,s
       
       if(maxstep>=maxiter){break}
       
-      # replace while(out$ca<=epsa & out$cb<=epsb & out$rdm>epsd) by : 
+      # check CV 
       if(out$ca<=epsa & out$cb<=epsb & out$rdm>epsd){
         
         btot<-rep(NA,size_V)
@@ -211,6 +209,7 @@ idm.no.penalty<-function(b,clustertype,epsa,epsb,epsd,print.info,nproc,maxiter,s
         nparspline<-sum(fix0[1:size_spline]==0) 
         
         # if we still have parameters to fix possibly we evaluate it 
+        # evaluate if we fix parameters based on cutoff
         if(nparspline>0){
           
           fix0<-ifelse(fix0==1 | ((abs(btot)<=option.sequential$cutoff) & fix0==0),1,0)

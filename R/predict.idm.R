@@ -75,10 +75,10 @@
 #' }
 #'@useDynLib SmoothHazardoptim9
 #' @export
-predict.idm <- function(object,s,t,newdata,nsim=200,seed=21,conf.int=.95,lifeExpect=FALSE,maxtime,...) {
-    ## if (lifeExpect==TRUE) t <- Inf
-  # Ok for new version
-#browser()
+predict.idm <- function(object,s,
+                        t,newdata,nsim=200,seed=21,conf.int=.95,lifeExpect=FALSE,maxtime,
+                        lambda="BIC",...) {
+    # check if model has weibull or splines baseline risk 
   if(!is.null(object$modelPar)){
     object$method<-"weib"
     }else{object$method<-"splines"
@@ -129,7 +129,10 @@ predict.idm <- function(object,s,t,newdata,nsim=200,seed=21,conf.int=.95,lifeExp
       
       
     }
-    #browser()
+    
+    #################### prediction if model not from penalty ##################
+    if(penalty=="none"){
+    #update dataset from the formula 
     if (!missing(newdata)){
         if (NROW(newdata)>1) stop("Argument newdata has more than one row\n.Currently this function works only for one covariate constallation at a time.")
         if (length(object$Xnames01)>0){
@@ -189,7 +192,7 @@ predict.idm <- function(object,s,t,newdata,nsim=200,seed=21,conf.int=.95,lifeExp
     }
     uppercumulative.intensity<-lowercumulative.intensity<-cumulative.intensity<-NULL
     upperintensity<-lowerintensity<-intensity<-NULL
-    ## Splines
+    ############### splines ####################################################
     if (object$method=="splines"){
       #browser()
         
@@ -274,10 +277,9 @@ predict.idm <- function(object,s,t,newdata,nsim=200,seed=21,conf.int=.95,lifeExp
             ci <- apply(simResults,2,function(x)quantile(unlist(x),c(q.lower,q.upper)))
         }
         
-        
+        # want to calculate variability based on variance-covariance matrix
         if (do.conf.int == TRUE & nsim<=2){
-          #browser()
-          # need to verify if works 
+          
           knots.unique<-unique(object$knots01)
           knots.bound<-knots.unique[c(1,length(knots.unique))]
           knots.int<-knots.unique[-c(1,length(knots.unique))]
@@ -405,6 +407,7 @@ predict.idm <- function(object,s,t,newdata,nsim=200,seed=21,conf.int=.95,lifeExp
             transprob <- unlist(Predict0.idmPl(s,t,knots01,nknots01,the01,knots12,nknots12,the12,knots02,nknots02,the02,bZ01,bZ12,bZ02))
         }
     }else {
+      ############################ weibull #####################################
         a01 <- object$modelPar[1]
         b01 <- object$modelPar[2]
         a02 <- object$modelPar[3]
@@ -473,7 +476,7 @@ predict.idm <- function(object,s,t,newdata,nsim=200,seed=21,conf.int=.95,lifeExp
             q.upper <- 1-q.lower
             ci <- apply(simResults,2,function(x)quantile(unlist(x),c(q.lower,q.upper)))
         }
-        
+        # want to calculate variability based on variance-covariance matrix
         if (do.conf.int==TRUE & nsim<=2) {
           # need to test
           
@@ -629,9 +632,10 @@ predict.idm <- function(object,s,t,newdata,nsim=200,seed=21,conf.int=.95,lifeExp
                      intensity=intensity))
     class(out) <- "predict.idm"
     out
+    }
 }
 
-# Ok for new version
+## prediction indicators with splines 
 Predict0.idmPl <- function(s,t,knots01,nknots01,the01,knots12,nknots12,the12,knots02,nknots02,the02,bZ01=0,bZ12=0,bZ02=0) {
     if (s>(min(knots01[nknots01+6],knots02[nknots02+6],knots12[nknots12+6]))) {stop("argument s is off")}    
     if (any(t>knots12[nknots12+6])) {stop("argument t is off")}
@@ -649,7 +653,7 @@ Predict0.idmPl <- function(s,t,knots01,nknots01,the01,knots12,nknots12,the12,kno
     list(p00=p00,p01=p01,p11=p11,p12=p12,p02_0=p02_0,p02_1=p02_1,p02=p02,F01=F01,F0.=p02_0+p01+p02_1, RM=RM)
 }
 
-# Ok for new version
+## prediction indicators with weibull 
 Predict0.idmWeib <- function(s,t,a01,b01,a02,b02,a12,b12,bZ01=0,bZ02=0,bZ12=0) {
     p11 = S.weib(s,t,a12,b12,bZ12)
     p12 = 1-p11
@@ -666,7 +670,7 @@ Predict0.idmWeib <- function(s,t,a01,b01,a02,b02,a12,b12,bZ01=0,bZ02=0,bZ12=0) {
 
 # a = shape parameter
 # b = scale parameter
-# Ok for new version
+
 iweibull <- function(x,a,b,bZ=0) {
     res = (a/b) * (x/b)**(a-1) * exp(bZ)
     return(res) 
@@ -674,7 +678,7 @@ iweibull <- function(x,a,b,bZ=0) {
 
 # S(s,t) = S(t)/S(s)
 # if S(s)=0, S(s,t)=0
-# Ok for new version
+# survival weibull
 S.weib <- function(s,t,a,b,bZ=0) {	
     res <- 0
     St <- (1-pweibull(t,shape=a,scale=b))^(exp(bZ))
@@ -725,10 +729,10 @@ A <- function(s,t,zi,nknots,the,bZ=0) {
     return(res)
 }
 
-### Survival function with two time s, t
+### Survival function with two time s, t for splines
 # S(s,t) = S(t)/S(s)
 #        = exp(-A(s,t))
-# Ok for new version
+
 S.pl <- function(s,t,zi,nknots,the,bZ=0) {
     if (length(t)>=length(s)){
         res=rep(0,length(t))
@@ -767,7 +771,7 @@ S.pl <- function(s,t,zi,nknots,the,bZ=0) {
 }
 
 
-# Ok for new version
+# Life expectency with weibull 
 lifexpect0.idmWeib <- function(s,a01,b01,a02,b02,a12,b12,bZ01=0,bZ02=0,bZ12=0,max) {
     ## print("lifexpect0.idmWeib")
     # max <- 100
@@ -793,7 +797,7 @@ lifexpect0.idmWeib <- function(s,a01,b01,a02,b02,a12,b12,bZ01=0,bZ02=0,bZ12=0,ma
          LTR=LTR$value)
 
 }
-# Ok for new version
+# Life expectency with splines
 lifexpect0.idmPl <- function(s,knots01,nknots01,the01,knots12,nknots12,the12,knots02,nknots02,the02,bZ01=0,bZ12=0,bZ02=0) {
   ET12 = integrate(f=function(x) {
     S.pl(s,x,knots12,nknots12,the12,bZ12)},s,knots12[nknots12+6])

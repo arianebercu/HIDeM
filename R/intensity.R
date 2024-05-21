@@ -163,21 +163,16 @@ intensity <- function(times,knots,number.knots,theta,linear.predictor=0,V=NULL,
           
           
           if(fix[1]==0){
-            #deriv1int<-2*theta.square[1]*(times[j]^(theta.square[1]-1))*(theta.square[2]^theta.square[1])*
-            # ((theta.square[1]^2)*(log(times[j])+log(theta.square[2]^2))+1)
             deriv1int<-(times[j]^(theta[1]-1))*(theta[2]^theta[1])*(theta[1]*log(times[j])+theta[1]*log(theta[2])+1)
             deriv1int<-deriv1int*(2*sqrt(theta[1]))
             
-            #deriv1cumu<-2*theta[1]*((times[j]*theta.square[2])^theta.square[1])*log(times[j]*theta.square[2])
             deriv1cumu<-((times[j]*theta[2])^theta[1])*log(times[j]*theta[2])
             deriv1cumu<-deriv1cumu*(2*sqrt(theta[1]))
           }else{deriv1int<-deriv1cumu<-NULL}
           if(fix[2]==0){
-            #deriv2int<-2*(theta.square[1]^2)*(times[j]^(theta.square[1]-1))*(theta.square[2]^theta.square[1])/theta[2]
             deriv2int<-(theta[1]^2)*(times[j]^(theta[1]-1))*(theta[2]^(theta[1]-1))
             deriv2int<-deriv2int*(2*sqrt(theta[2]))
             
-            #deriv2cumu<-2*theta.square[1]*((times[j]*theta.square[2])^theta.square[1])/theta[2]
             deriv2cumu<-(theta[1]*((times[j]*theta[2])^theta[1]))/theta[2]
             deriv2cumu<-deriv2cumu*(2*sqrt(theta[2]))
           }else{deriv2int<-deriv2cumu<-NULL}
@@ -200,7 +195,7 @@ intensity <- function(times,knots,number.knots,theta,linear.predictor=0,V=NULL,
       
   
       knots.int<-knots.unique[-c(1,length(knots.unique))]
-      #browser()
+
       if(is.null(times)){
         times<-seq(from=knots.bound[1],to=knots.bound[2],length.out=100)}
       

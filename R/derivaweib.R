@@ -2,7 +2,7 @@ derivaweib<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
                      dimnva01,dimnva02,dimnva12,nva01,nva02,nva12,
                      t0,t1,t2,t3,troncature){
   res<-rep(0,(npm*(npm+1)/2)+npm)
-  # return first and second derivates of the loglik
+  # return first and second derivatives of the loglik
   .Fortran("derivaweib",
            ## input
            as.double(b),

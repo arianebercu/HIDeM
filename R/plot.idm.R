@@ -71,7 +71,7 @@ plot.idm <- function(x,
   
   
   
-  if(x$converged!=1){
+  if(any(x$converged!=1)){
     conf.int<-F
   }
   
@@ -80,6 +80,11 @@ plot.idm <- function(x,
   }else{conf<-F}
   
   if(x$penalty=="none"){
+    
+    if(x$converged!=1){
+      stop("The model did not converged, plot can not be displayed")
+    }
+    
     if(!is.null(x$modelPar)){
       
       x$method<-"weib"
@@ -168,6 +173,9 @@ plot.idm <- function(x,
       }
   }else{
     
+    if(sum(x$converged==1)==0){
+      stop("None of the model converged, no plot can be displayed")
+    }
     if(is.null(lambda)){
       BIC<-min(x$BIC[x$converged==1])
       lambda<-x$lambda[which(x$BIC%in%BIC)[1]]

@@ -4,16 +4,17 @@ idm.weib<-function(b,fix0,size_V,
                    ve01,ve02,ve12,dimnva01,dimnva02,dimnva12,nvat01,nvat02,nvat12,
                    t0,t1,t2,t3,idd,idm,ts,troncature){
 
+  # initiate parameters values 
   if(!is.null(b)){
   
    s.start<-b[1:6]
   
-  # Initiate value of eta : all the same for each lambda
   if(size_V>6){
   beta.start<-b[(6+1):(size_V)]
   }else{beta.start<-NULL}}
   
 
+  # if no intial values for beta do some iterations with mla 
   if(is.null(b)){
       
       s.start<-c(1,sqrt(sum(idm)/ts),1,sqrt(sum(idd)/ts),1,sqrt(sum(idd)/ts))
@@ -65,6 +66,8 @@ idm.weib<-function(b,fix0,size_V,
   b<-c(s,beta)
   bfix<-b[fix0==1]
   b<-b[fix0==0]
+  
+  # maximise loglik 
   out<- marqLevAlg::mla(b=b,
                     fn=idmlLikelihoodweib,
                     epsa=epsa,

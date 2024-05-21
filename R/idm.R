@@ -57,8 +57,8 @@
 #' If only vector is specifified the knots are used for all transitions. If only 2 vectors are specifified, the
 #' knots for the \code{0 --> 1} transition are also used for the \code{1 --> 2} transition.}
 #' }
-#' The algorithm needs at least 3 knots in sparse.spline and 5 knots in spline and allows no more than 20 knots.
-#' @param type.quantile Argument only active for the likelihood approach \code{method="splines","sparse.spline"}.
+#' The algorithm needs at least 3 knots in spline and allows no more than 20 knots.
+#' @param type.quantile Argument only active for the likelihood approach \code{method="splines"}.
 #' There are three ways to control the placement of the knots  according to the time considered between states :=
 #' \itemize{
 #' #'  \item{\code{type.quantile=1}}{Time for \code{0 --> 1} is the imputed to the middle of the interval left and right for demence . Time for \code{0 --> 2}
@@ -73,20 +73,10 @@
 #' @param B vector of size the number of parameters, in the following order, first the parameters of splines \code{0 --> 1}, \code{0 --> 2}, \code{1 --> 2},
 #' second the parameters of explanatory variables in order  \code{0 --> 1}, \code{0 --> 2}, \code{1 --> 2}.
 #' This argument is only used for models with M-splines.
-#' @param method type of estimation method: "splines" for a
-#' penalized likelihood approach with approximation of the transition
-#' intensities by M-splines, "sparse.splines" for a likelihood approach with approximation of the transition
+#' @param method type of estimation method: "splines" for a likelihood approach with approximation of the transition
 #' intensities by M-splines, "Weib" for a parametric approach with a
 #' Weibull distribution on the transition intensities. Default is
 #' "Weib".
-#' @param conf.int Level of confidence pointwise confidence intervals of the transition intensities, i.e.,
-#' a value between 0 and 1, the default is \code{0.95}.
-#' The default is also used when \code{conf.int=TRUE}.
-#' To avoid computation of confidence intervals, set \code{conf.int} to FALSE or NULL.
-#' @param print.iter boolean parameter. Equals to \code{TRUE} to print
-#' the likelihood during the iteration process, \code{FALSE}
-#' otherwise. Default is \code{FALSE}. This option is not running on
-#' Windows.
 #' @param subset expression indicating the subset of the rows of data
 #' to be used in the fit. All observations are included by default.
 #' @param na.action how NAs are treated. The default is first, any
@@ -108,7 +98,6 @@
 #' @param step.sequential should we use the optimisation version to fix splines 
 #' @param clustertype in which cluster to work
 #' @param nproc number of cluster
-#' @param print.info shloud we print info during mla convergence
 #' @param option.sequential parameters to give if you want to do the optimisation version to
 #'  fix splines
 #' @return
@@ -127,19 +116,7 @@
 #' \item{time}{times for which transition intensities have been evaluated for
 #' plotting. Vector in the Weibull approach. Matrix in the penalized likelihhod
 #' approach for which the colums corresponds to the transitions 0 --> 1, 1 -->
-#' 2, 0 --> 2.} \item{intensity01}{matched values of the intensities for
-#' transition 0 --> 1.} \item{lowerIntensity01}{lower confidence intervals for
-#' the values of the intensities for transition 0 --> 1.}
-#' \item{upperIntensity01}{upper confidence intervals for the values of the
-#' intensities for transition 0 --> 1.} \item{intensity02}{matched values of
-#' the intensities for transition 0 --> 2.} \item{lowerIntensity02}{lower
-#' confidence intervals for the values of the intensities for transition 0 -->
-#' 2.} \item{upperIntensity02}{upper confidence intervals for the values of the
-#' intensities for transition 0 --> 2.} \item{intensity12}{matched values of
-#' the intensities for transition 1 --> 2.} \item{lowerIntensity12}{lower
-#' confidence intervals for the values of the intensities for transition 1 -->
-#' 2.} \item{upperIntensity12}{upper confidence intervals for the values of the
-#' intensities for transition 1 --> 2.} \item{RR}{vector of relative risks.}
+#' 2, 0 --> 2.} \item{RR}{vector of relative risks.}
 #' \item{V}{variance-covariance matrix derived from the Hessian of the log-likelihood
 #' if using method="Weib" or, from the Hessian of the penalized log-likelihood
 #' if using method="Splines".}
@@ -181,8 +158,7 @@
 ##' # right censored data
 ##' fitRC <- idm(formula01=Hist(time=observed.illtime,event=seen.ill)~X1+X2,
 ##'              formula02=Hist(time=observed.lifetime,event=seen.exit)~X1+X2,
-##'              formula12=Hist(time=observed.lifetime,event=seen.exit)~X1+X2,data=d,
-##'              conf.int=FALSE)
+##'              formula12=Hist(time=observed.lifetime,event=seen.exit)~X1+X2,data=d)
 ##' fitRC
 ##'
 ##' \dontrun{
@@ -191,13 +167,12 @@
 ##' fitRC.splines <- idm(formula01=Hist(time=observed.illtime,event=seen.ill)~X1+X2,
 ##'              formula02=Hist(time=observed.lifetime,event=seen.exit)~X1+X2,
 ##'              formula12=Hist(time=observed.lifetime,event=seen.exit)~1,data=d,
-##'              conf.int=FALSE,method="splines")
+##'              method="splines")
 ##' }
 ##' # interval censored data
 ##' fitIC <- idm(formula01=Hist(time=list(L,R),event=seen.ill)~X1+X2,
 ##'              formula02=Hist(time=observed.lifetime,event=seen.exit)~X1+X2,
-##'              formula12=Hist(time=observed.lifetime,event=seen.exit)~X1+X2,data=d,
-##'              conf.int=FALSE)
+##'              formula12=Hist(time=observed.lifetime,event=seen.exit)~X1+X2,data=d)
 ##' fitIC
 ##'
 ##' \dontrun{
@@ -241,8 +216,6 @@ idm <- function(formula01,
                 n.knots=NULL,
                 knots="equidistant",
                 type.quantile=1,
-                conf.int=.95,
-                print.iter=FALSE,
                 subset=NULL,
                 na.action = na.fail,
 
@@ -269,12 +242,11 @@ idm <- function(formula01,
 
                 nproc=1,
                 clustertype="FORK",
-                print.info=F,
                 envir=parent.frame()){
 
 
     # {{{ check formula
-
+    ################################ check what has been given ##################
     call <- match.call()
     ptm <- proc.time()
     if(missing(formula01))stop("Argument formula01 is missing.")
@@ -286,20 +258,13 @@ idm <- function(formula01,
     ## if(missing(formula02)) formula02 <- formula01
     if(missing(formula12)) formula12 <- formula02
     # }}}
-    # {{{ parse confidence level
-    do.conf.int <- !is.null(conf.int) && !is.na(conf.int) && !conf.int==FALSE
-    if (is.logical(conf.int)) conf.int <- .95
-    if (do.conf.int == TRUE){
-        stopifnot(0<conf.int && conf.int<1)
-    }
-    if(!is.logical(print.info))stop("Argument print.info must be TRUE or FALSE")
-    # }}}
     # {{{ evaluate formula in data
     if(missing(data)) stop("Need a data frame.")
     if(sum(is.na(data))>0)stop("Need a data frame with no missing data.")
 
     if(!inherits(data,"data.frame"))stop("Argument 'data' must be a data.frame")
  
+    ############################### get database defined by formulas ###########
     m <- match.call()
     m01 <- m02 <- m12 <- m[match(c("","data","subset","na.action"),names(m),nomatch=0)]
     m01$formula <- formula01
@@ -389,7 +354,7 @@ idm <- function(formula01,
         Ltime[idm==0] <- abstime[idm==0]
         Rtime[idm==0] <- abstime[idm==0]
     }
-    ## find time bounderies
+    ## find time boundaries 
     if (length(entrytime)>0){
         alltimes <- sort(unique(c(Ltime, Rtime,entrytime,abstime)))
         amax <- max(alltimes)
@@ -432,9 +397,12 @@ idm <- function(formula01,
       if(!inherits(maxiter,c("numeric","integer"))|(maxiter!=floor(maxiter)))stop("Maxiter has to be an integer.")
       if(!inherits(nproc,c("numeric","integer"))|(nproc!=floor(nproc)))stop("nproc has to be an integer.")
     
+      # nbr of quadrature points for estimating integral in idm without penalisation
       if(!gauss.point%in%c(10,15,21,31,41,51,61))stop("Argument type.quantile has to a numeric : 10, 15, 21, 31, 51 or 61.")
       if(!inherits(step.sequential,"logical"))stop("Argument step.sequential has to be TRUE or FALSE.")
 
+    #################### if the user want to fix splines parameters put #######
+    #################### (step.sequential==T) #################################
       if(step.sequential==T){
 
         if(!inherits(option.sequential$cutoff,c("numeric","integer")))stop("The cutoff for spline has to be a numeric or integer.")
@@ -464,6 +432,7 @@ idm <- function(formula01,
     nvat12 <- ifelse(noVar[3]==1,0,NC12)
 
 
+    #cv criterias
     epsa<-0.1^eps[1]
     epsb<-0.1^eps[2]
     epsd<-0.1^eps[3]
@@ -471,7 +440,9 @@ idm <- function(formula01,
     eps.eigen<-0.1^eps.eigen[1]
     
     troncature<-ifelse(truncated==T,1,0)
-
+    
+ ####################### define profile of subjects ############################
+    
     if(truncated==1){
       t0<-entrytime
     }else{t0<-rep(0,N)}
@@ -482,6 +453,7 @@ idm <- function(formula01,
     t4<-rep(NA,N)
     ctime<-rep(NA,N)
 
+    
     ctime<-ifelse(idm==0 & idd==0 & t1==t3,1,NA)
     ctime<-ifelse(idm==1 & idd==0 & t1<t2,2,ctime)
     ctime<-ifelse(idm==1 & idd==0 & t1==t2,3,ctime)
@@ -504,6 +476,7 @@ idm <- function(formula01,
     t4<-ifelse(ctime==1 | ctime==2 | ctime==3 | ctime==4 | ctime==5, t1,
                ifelse( ctime==6 | ctime==7,t3,NA))
     
+    #################### defines knots placements for splines ##################
     if(method=="splines"){
       
       if (is.character(knots)){
@@ -605,10 +578,7 @@ idm <- function(formula01,
         
         
       }
-      ## double check to avoid crash
-      # if (any(c(nknots01,nknots02,nknots12)<5)) {#AB still will relax this condition
-      #   stop("Need at least 5 knots.")
-      # }
+
       if (any(c(nknots01,nknots02,nknots12)>20)){
         stop("Cannot handle more than 20 knots.")
       }
@@ -632,8 +602,8 @@ idm <- function(formula01,
       size_spline<-nknots01+nknots02+nknots12 + 6
       size_V <- size1 + size_spline
       
-      # if B is step put b at B otherwise as.numeric(NULL)
-      
+      # if B is step put b at B otherwise 0.5 for splines and 0 for parameters
+      # initiate parameters values for method=splines
       if (is.null(B)){
         
         b<-c(rep(0.5,size_spline),rep(0,size1))
@@ -652,7 +622,8 @@ idm <- function(formula01,
       
       size2 <- size1^2
       size_V <- size1 + 6
-      # if B is step put b at B otherwise as.numeric(NULL)
+      # if B is step put b at B otherwise defined by events in data for
+      # weibull parameters and 0 for beta
       ts<-sum(abstime-t0)
       
       if (!is.null(B)){
@@ -666,6 +637,7 @@ idm <- function(formula01,
     }
     
     
+###### check if we have penalty and if some parameters are fixed by user #######
     fix0<-rep(0,size_V)
     if(is.null(penalty)){
       penalty<-"none"}
@@ -705,10 +677,10 @@ idm <- function(formula01,
     if(noVar[2]==1){ve02<-as.double(rep(0,N))}else{ve02<-as.double(x02)}
     if(noVar[3]==1){ve12<-as.double(rep(0,N))}else{ve12<-as.double(x12)}
     
-
+######################### algorithm if no penalty ##############################
     if(penalty=="none"){
  
-      
+######################### call for splines #####################################
       if(method=="splines"){
         
         if(sum(fix0)>0){
@@ -717,7 +689,7 @@ idm <- function(formula01,
         }else{bfix<-1}
         
       
-        out<-idm.no.penalty(b,clustertype,epsa,epsb,epsd,print.info,nproc,maxiter,size_V,size_spline,noVar,bfix,
+        out<-idm.no.penalty(b,clustertype,epsa,epsb,epsd,nproc,maxiter,size_V,size_spline,noVar,bfix,
                             fix0,knots01,knots02,knots12,ctime,N,nknots01,nknots02,nknots12,
                             ve01,ve02,ve12,dimnva01,dimnva02,dimnva12,nvat01,nvat02,nvat12,
                             t0,t1,t2,t3,troncature,gauss.point,step.sequential,option.sequential)
@@ -729,7 +701,7 @@ idm <- function(formula01,
         beta[fix==0]<-out$b
         beta[fix==1]<-out$bfix
         npm<-sum(fix==0)
-        
+### if CV is true keep V and solve V to have inverse for confidence intervals###
         if(out$istop==1){
           
           
@@ -746,7 +718,7 @@ idm <- function(formula01,
           H<- matrix(0,size_V,size_V)
           H[setdiff(1:size_V,posfix),setdiff(1:size_V,posfix)] <- Hr
           
-        }else{
+        }else{ #otherwise put 0
           Hr <- matrix(0,npm,npm)
           Hr[upper.tri(Hr,diag=TRUE)] <- out$v[1:(npm*(npm+1)/2)]
           Hr <- t(Hr)
@@ -761,7 +733,7 @@ idm <- function(formula01,
           
         }
         
-        
+        # output of beta and HR 
         if (sum(NC)>0){  
           
           # if at least one covariate
@@ -774,7 +746,7 @@ idm <- function(formula01,
         }
         
         
-        
+        # splines parameters values
         theta_names <- cbind(c(rep("theta01",(nknots01+2)),rep("theta02",(nknots02+2)),rep("theta12",(nknots12+2))),c((1:(nknots01+2)),(1:(nknots02+2)),(1:(nknots12+2))))
         theta_names <- as.vector(apply(theta_names,1,paste,collapse=" "))
         
@@ -790,7 +762,7 @@ idm <- function(formula01,
         theta02<-beta[(nknots01+3):(nknots01+nknots02+4)]
         theta12<-beta[(nknots01+nknots02+5):(nknots01+nknots12+nknots02+6)]
         
-        
+        # No value given by BIC as no penalty
         fit$BIC<-NULL
         
         cv<-list(ca=out$ca,cb=out$cb,rdm=out$rdm)
@@ -806,7 +778,7 @@ idm <- function(formula01,
         fit$theta12 <- theta12
         
         
-        
+############# output times to do prediction on #################################
         fit$time <- matrix(NA,ncol=3,nrow=100)
         fit$time[,1]<-seq(from=knots01[1],to=knots01[length(knots01)],length.out=100)
         fit$time[,2]<-seq(from=knots02[1],to=knots02[length(knots02)],length.out=100)
@@ -814,7 +786,8 @@ idm <- function(formula01,
         
         
       }
-     
+      ######################### call for weibull #####################################
+      
       if(method=="Weib"){
         
         out <- idm.weib(b=b,
@@ -825,7 +798,6 @@ idm <- function(formula01,
                                 epsb=epsb,
                                 epsd=epsd,
                                 eps.eigen=eps.eigen,
-                                print.info=print.info,
                                 nproc=nproc,
                                 maxiter=maxiter,
                                 ctime=ctime,
@@ -856,6 +828,8 @@ idm <- function(formula01,
         beta[fix==1]<-out$bfix
         npm<-sum(fix==0)
         
+### if CV is true keep V and solve V to have inverse for confidence intervals###
+        
         if(out$istop==1){
           
           
@@ -886,7 +860,7 @@ idm <- function(formula01,
           
           
         }
-        
+        # output of beta and HR 
         if (sum(NC)>0){  
           
           # if at least one covariate
@@ -898,7 +872,7 @@ idm <- function(formula01,
           
         }
         
-        
+        # weibull parameters
         
         theta_names <- c("modelPar1 01",
                          "modelPar2 01",
@@ -916,7 +890,7 @@ idm <- function(formula01,
         
         modelPar<-beta[1:6]
         
-        
+        # no value for BIC as no penalty
         fit$BIC<-NULL
         
         cv<-list(ca=out$ca,cb=out$cb,rdm=out$rdm)
@@ -934,15 +908,11 @@ idm <- function(formula01,
       
     }else{
 
-         
-          # need at least one variable to do penalization
-          #if((sum((Xnames01%in%Xnames02)==F)+sum((Xnames01%in%Xnames12)==F)+sum((Xnames02%in%Xnames12)==F))>0){
-          #  stop("All transition need to have the same explanatory variables")
-          #}
+############################# Penalty algorithm ################################
 
           if(nvat01==0 & nvat02==0 & nvat12==0)stop("To perform penalisation you need explanatory variables in each transition")
           
-          
+          # permits to not penalise on some parameters
           if(is.null(penalty.factor)){
             penalty.factor<-rep(1, nvat01+nvat02+nvat12)
           }else{
@@ -951,8 +921,9 @@ idm <- function(formula01,
             }
           }
 
+
           if(scale.X==T){
-            # to know wich variable to center and reduces : 
+            # to know which variable to center and reduces : 
             names<-as.vector(unlist(lapply(m01, class)))[-1]
             
             # standardize variable : 
@@ -1002,6 +973,7 @@ idm <- function(formula01,
             
           }
            
+############################ set value of penalty parameters ###################
           if(penalty=="lasso"){alpha<-1}
           if(penalty=="ridge"){alpha<-0}
           if(length(alpha)>1)stop("Can only specify one value for alpha")
@@ -1024,7 +996,7 @@ idm <- function(formula01,
           pace.lambda<-ifelse(N<size_V,0.05,0.0001)
        
           if(method=="splines"){
-            
+            # if user did not specified the lambda values 
             if(is.null(lambda01)|is.null(lambda02)|is.null(lambda12)){
               
               if(nproc>1){
@@ -1038,7 +1010,8 @@ idm <- function(formula01,
                 doParallel::registerDoParallel(clustpar)
                 
               }
-             
+             # calculate derivatives when all beta=0 to 
+             # estimate range of values for lambda
               output<-deriva_gradient(b=c(b[1:size_spline],rep(0,size_V-size_spline)),
                                   nproc=nproc,
                                   funcpa=idmlLikelihood,
@@ -1072,6 +1045,7 @@ idm <- function(formula01,
               
               if(nproc>1){parallel::stopCluster(clustpar)}
               ## what should we do if max(output$v) == 0
+              # take maximum of absolute derivatives
               if(penalty%in%c("ridge","mcp","scad")){
                 #lambda.max<-ifelse(max(output$v)==0,0.001,max(output$v))
                 lambda.max<-ifelse(max(abs(output$v))==0,0.001,max(abs(output$v)))
@@ -1121,7 +1095,6 @@ idm <- function(formula01,
                              epsd=epsd,
                              eps.spline=eps.spline,
                              eps.eigen=eps.eigen,
-                             print.info=print.info,
                              nproc=nproc,
                              maxiter=maxiter,
                              maxiter.pena=maxiter.pena,
@@ -1185,7 +1158,7 @@ idm <- function(formula01,
             fit$coef <- betaCoef
             fit$HR <- exp(betaCoef)
             
-          
+########################## define BIC and GCV ##################################
             if(dim(beta)[2]>1){
               fit$BIC<--2*out$fn.value+log(N)*colSums(beta[(size_spline+1):size_V,]!=0)
             }else{fit$BIC<--2*out$fn.value+log(N)*sum(beta[(size_spline+1):size_V,]!=0)}
@@ -1309,7 +1282,7 @@ idm <- function(formula01,
           }
           if(method=="Weib"){
               #	cat("------ Program Weibull ------ \n")
-            
+            # some initial steps to have values for weibull parameters
             output.mla<- marqLevAlg::mla(b=b[1:6],
                              fn=idmlLikelihoodweib,
                              epsa=epsa,
@@ -1317,7 +1290,6 @@ idm <- function(formula01,
                              epsd=epsd,
                              nproc=nproc,
                              clustertype = clustertype,
-                             print.info = print.info,
                              maxiter=maxiter,
                              minimize=F,
                              npm=6,
@@ -1341,6 +1313,8 @@ idm <- function(formula01,
                              t3=t3,
                              troncature=troncature)
             
+            # take thoses values if converged only otherwise thoses
+            # by default or by the user
             if(output.mla$istop==1){
               b<-c(output.mla$b,b[7:size_V])}
                    
@@ -1357,7 +1331,8 @@ idm <- function(formula01,
                 doParallel::registerDoParallel(clustpar)
                 
               }
-              
+              # calculate derivatives at beta=0, to have a range of 
+              # value for lambda 
               output<-deriva_gradient(b=c(b[1:6],rep(0,size_V-6)),
                                   nproc=nproc,
                                   funcpa=idmlLikelihoodweib,
@@ -1437,7 +1412,6 @@ idm <- function(formula01,
                                epsb=epsb,
                                epsd=epsd,
                                eps.eigen=eps.eigen,
-                               print.info=print.info,
                                nproc=nproc,
                                maxiter=maxiter,
                                maxiter.pena=maxiter.pena,
@@ -1497,13 +1471,13 @@ idm <- function(formula01,
               fit$HR <- exp(betaCoef)
               
               
-              # calculate BIC 
+####################   calculate BIC    #######################################
               if(dim(beta)[2]>1){
                 fit$BIC<--2*out$fn.value+log(N)*colSums(beta[7:size_V,]!=0)
               }else{fit$BIC<--2*out$fn.value+log(N)*sum(beta[7:size_V,]!=0)}
               
               
-              # calculate GCV 
+###################### calculate GCV ###########################################
               fit$GCV<-rep(NA,dim(lambda)[2])
               
               npm<-sum(fix0[7:size_V]==0)
@@ -1639,8 +1613,6 @@ idm <- function(formula01,
         fit$responseTrans <- responseTrans
 
 
-        # intensity calculus
-
         fit$V <- V
         fit$H <- H
         fit$fix<-fix
@@ -1653,9 +1625,8 @@ idm <- function(formula01,
         if(NC02>0) fit$Xnames02 <- Xnames02
         if(NC12>0) fit$Xnames12 <- Xnames12
 
-       
-
-        ptm.intensity <- proc.time()
+       ################### need to have levels for values binary/qualitative ###
+        ################## useful for prediction purpose #######################
         
         var.level<-var.class<-list(NULL)
         N_var<-c(all.vars(formula01)[all.vars(formula01)%in%labels(terms(formula01))],
@@ -1693,7 +1664,6 @@ idm <- function(formula01,
                          class=var.class)
         
 
-        fit$runtime.intensity<- proc.time()- ptm.intensity
         fit$na.action <- "na.fail"
 
 

@@ -36,7 +36,7 @@ idmlLikelihoodpena<-function(b,npm,npar,bfix,fix,zi01,zi02,zi12,ctime,no,nz01,nz
            as.integer(gausspoint),
            likelihood_res=as.double(res),
            PACKAGE="SmoothHazardoptim9")$likelihood_res
-  #browser()
+
   b<-rep(NA,npar)
   b[fix==0]<-b0
   b[fix==1]<-bfix
@@ -44,22 +44,16 @@ idmlLikelihoodpena<-function(b,npm,npar,bfix,fix,zi01,zi02,zi12,ctime,no,nz01,nz
   if(nva01>0){
   b01<-b[(size_spline+1):(size_spline+nva01)][penalty.factor[1:nva01]==1]
   }else{b01<-0}
-  #b01<-b01[fix0[(size_spline+1):(size_spline+nva01)]==0]
+  
   if(nva02>0){
   b02<-b[(size_spline+1+nva01):(size_spline+nva01+nva02)][penalty.factor[(nva01+1):(nva01+nva02)]==1]
   }else{b02<-0}
-  #b02<-b02[fix0[(size_spline+1+nva01):(size_spline+nva01+nva02)]==0]
+  
   if(nva12>0){
   b12<-b[(size_spline+1+nva01+nva02):npar][penalty.factor[(nva01+nva02+1):(nva01+nva02+nva12)]==1]
   }else{b12<-0}
-  #b12<-b12[fix0[(size_spline+1+nva01+nva02):npar]==0]
-  # lpen = l - pen as we tend to maximise : 10/04/24
-  # if(penalty%in%c("lasso","ridge","elasticnet")){
-  #   res<-res+lambda[,1]*alpha*sum(abs(b01))+lambda[,1]*(1-alpha)*sum(b01*b01)
-  #   res<-res+lambda[,2]*alpha*sum(abs(b02))+lambda[,2]*(1-alpha)*sum(b02*b02)
-  #   res<-res+lambda[,3]*alpha*sum(abs(b12))+lambda[,3]*(1-alpha)*sum(b12*b12)
-  # }
   
+  # calculate lpen = l-pen
   if(penalty%in%c("lasso","ridge","elasticnet")){
     res<-res-lambda[,1]*alpha*sum(abs(b01))-lambda[,1]*(1-alpha)*sum(b01*b01)
     res<-res-lambda[,2]*alpha*sum(abs(b02))-lambda[,2]*(1-alpha)*sum(b02*b02)
@@ -67,7 +61,6 @@ idmlLikelihoodpena<-function(b,npm,npar,bfix,fix,zi01,zi02,zi12,ctime,no,nz01,nz
   }
   
 
-  # we need to maximise so - : 10/04/24
    if(penalty=="mcp"){
   
      p01<-rep(alpha*lambda[,1]*lambda[,1]/2,length(b01))
@@ -83,13 +76,11 @@ idmlLikelihoodpena<-function(b,npm,npar,bfix,fix,zi01,zi02,zi12,ctime,no,nz01,nz
      p12[idbeta]<-lambda[,3]*abs(b12[idbeta])-((b12[idbeta]*b12[idbeta])/2*alpha)
   
   
-  #   res<-res+sum(p01)+sum(p02)+sum(p12)
      res<-res-sum(p01)-sum(p02)-sum(p12)
   
    }
 
 
-  # lpen = l -pen as maximisation so change : 10/04/24
    if(penalty=="scad"){
   
      p01<-rep((lambda[,1]^2)*(alpha+1)/2,length(b01))
@@ -111,7 +102,6 @@ idmlLikelihoodpena<-function(b,npm,npar,bfix,fix,zi01,zi02,zi12,ctime,no,nz01,nz
      p12[idbeta]<-(2*alpha*lambda[,3]*abs(b12[idbeta])-b12[idbeta]^2-lambda[,3]^2)/(2*(alpha-1))
   
   
-  #   res<-res+sum(p01)+sum(p02)+sum(p12)
      res<-res-sum(p01)-sum(p02)-sum(p12)
    }
   

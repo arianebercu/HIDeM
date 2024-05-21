@@ -35,7 +35,6 @@
 ##' @param epsd control convergence for distance to minimum rdm
 ##' @param eps.eigen the power of convergence for eigen values of covariance matrix only
 ##' @param eps.spline the power of convergence for splines parameters only
-##' @param print.info shloud we print info during mla convergence
 ##' @param clustertype in which cluster to work
 ##' @param nproc number of cluster
 ##' @param maxiter Maximum number of iterations. The default is 200.
@@ -56,7 +55,7 @@
 #' @importFrom foreach "%dopar%"
 #' @useDynLib SmoothHazardoptim9
 idm.penalty<-function(b,fix0,size_V,size_spline,
-                      clustertype,epsa,epsb,epsd,eps.spline,eps.eigen,print.info,nproc,maxiter,maxiter.pena,
+                      clustertype,epsa,epsb,epsd,eps.spline,eps.eigen,nproc,maxiter,maxiter.pena,
                       knots01,knots02,knots12,ctime,N,nknots01,nknots02,nknots12,
                       ve01,ve02,ve12,dimnva01,dimnva02,dimnva12,nvat01,nvat02,nvat12,
                       t0,t1,t2,t3,troncature,gauss.point,
@@ -70,9 +69,10 @@ idm.penalty<-function(b,fix0,size_V,size_spline,
   V0<-NA
   fix000<-fix0
  
-  # create grid 3
+  # create grid 3 == all possible combinaision 
   lambda<-expand.grid(lambda01,lambda02,lambda12)
   nlambda<-dim(lambda)[1]
+  # combine model estimations 
   combine_lambda<-function(x,newx){
 
     if(newx$combine==2){
@@ -118,7 +118,7 @@ idm.penalty<-function(b,fix0,size_V,size_spline,
   
   s.start<-b[1:(size_spline)]
   
-  # Initiate value of eta : all the same for each lambda
+  # Initiate value of beta : all the same for each lambda
   
   beta.start<-b[(size_spline+1):(size_V)]
   
@@ -424,7 +424,7 @@ idm.penalty<-function(b,fix0,size_V,size_spline,
                                  }
                                  
                                  
-                                 
+                                 # update beta 
                                  output.cv<-cv.model(beta=beta,
                                                      nva01=npm01,
                                                      nva02=npm02,
@@ -444,7 +444,7 @@ idm.penalty<-function(b,fix0,size_V,size_spline,
                                  
                                  betanew<-b[(size_spline+1):size_V]
                                  
-                                 # penalised loglik
+                                 # penalised loglik value 
                                  res<-idmlLikelihoodpena(b=b,
                                                          npm=length(b),
                                                          npar=size_V,
@@ -478,7 +478,8 @@ idm.penalty<-function(b,fix0,size_V,size_spline,
                                                          penalty.factor=penalty.factor,
                                                          penalty=penalty)
                                  
-                                 
+                                 # if not better or do not exist need to readjust
+                                 # value of beta 
                                  if(res %in%c(-1e9,1e9) | res < fn.value){
                                    th<-1e-5
                                    step<-log(1.5)
@@ -502,7 +503,7 @@ idm.penalty<-function(b,fix0,size_V,size_spline,
                                                            "old.ca"=round(1),
                                                            "old.cb"=round(1))
                                    }
-                                   
+                                   # same as in mla 
                                    sears<-searpas(vw=vw,
                                                   step=step,
                                                   b=beta,
@@ -579,7 +580,8 @@ idm.penalty<-function(b,fix0,size_V,size_spline,
                                                            penalty=penalty)
                                    
                                  }
-                                 
+                                 # if not better or do not exist need to readjust
+                                 # value of beta 
                                  if(res %in%c(-1e9,1e9) | any(is.infinite(c(s,betanew)))){
                                    ite<-ite+1
                                    validity<-F
@@ -594,13 +596,12 @@ idm.penalty<-function(b,fix0,size_V,size_spline,
                                  
                                  bfix<-b[fix0.beta==1]
                                  b<-b[fix0.beta==0]
-                                 
+                                 ################## update splines parameters ##
                                  output.mla<- marqLevAlg::mla(b=b,
                                                   fn=idmlLikelihood,
                                                   epsa=eps.spline,
                                                   epsb=epsb,
                                                   epsd=epsd,
-                                                  print.info = print.info,
                                                   maxiter=maxiter.pena,
                                                   minimize=F,
                                                   npm=length(b),
@@ -646,12 +647,11 @@ idm.penalty<-function(b,fix0,size_V,size_spline,
                                  if(nvat12>0){
                                  b12<-betanew[(nvat01+nvat02+1):length(betanew)][penalty.factor[(nvat01+nvat02+1):length(betanew)]==1]
                                  }else{b12<-0}
-                                 # maximisation issue : 10/04/24, lpen=l-pen
+                                 
+                                 ############ update to calculate lpen ######################
+                                 # maximisation : lpen=l-pen
                                  if(penalty%in%c("lasso","ridge","elasticnet","corrected.elasticnet")){
                                      
-                                   #fn.valuenew<-output.mla$fn.value+lambda[id.lambda,1]*alpha*sum(abs(b01))+lambda[id.lambda,1]*(1-alpha)*sum(b01*b01)
-                                   #fn.valuenew<-fn.valuenew+lambda[id.lambda,2]*alpha*sum(abs(b02))+lambda[id.lambda,2]*(1-alpha)*sum(b02*b02)
-                                   #fn.valuenew<-fn.valuenew+lambda[id.lambda,3]*alpha*sum(abs(b12))+lambda[id.lambda,3]*(1-alpha)*sum(b12*b12)
                                    fn.valuenew<-output.mla$fn.value-lambda[id.lambda,1]*alpha*sum(abs(b01))-lambda[id.lambda,1]*(1-alpha)*sum(b01*b01)
                                    fn.valuenew<-fn.valuenew-lambda[id.lambda,2]*alpha*sum(abs(b02))-lambda[id.lambda,2]*(1-alpha)*sum(b02*b02)
                                    fn.valuenew<-fn.valuenew-lambda[id.lambda,3]*alpha*sum(abs(b12))-lambda[id.lambda,3]*(1-alpha)*sum(b12*b12)
@@ -672,8 +672,7 @@ idm.penalty<-function(b,fix0,size_V,size_spline,
                                    idbeta<-which(b12<=alpha*lambda[id.lambda,3])
                                    p12[idbeta]<-lambda[id.lambda,3]*abs(b12[idbeta])-((b12[idbeta]*b12[idbeta])/2*alpha)
                                    
-                                   # same issue : 10/04/24
-                                   #fn.valuenew<-output.mla$fn.value+sum(p01)+sum(p02)+sum(p12)
+                                  
                                    fn.valuenew<-output.mla$fn.value-sum(p01)-sum(p02)-sum(p12)
                                    
                                  }
@@ -698,8 +697,7 @@ idm.penalty<-function(b,fix0,size_V,size_spline,
                                    idbeta<-which(abs(b12)<lambda[id.lambda,3]*alpha)
                                    p12[idbeta]<-(2*alpha*lambda[id.lambda,3]*abs(b12[idbeta])-b12[idbeta]^2-lambda[id.lambda,3]^2)/(2*(alpha-1))
                                    
-                                   # same issue : 10/04/24
-                                   #fn.valuenew<-output.mla$fn.value+sum(p01)+sum(p02)+sum(p12)
+                                   
                                    fn.valuenew<-output.mla$fn.value-sum(p01)-sum(p02)-sum(p12)
                                    
                                  }
@@ -707,6 +705,7 @@ idm.penalty<-function(b,fix0,size_V,size_spline,
                                  
                                  ite<-ite+1
                                  
+                                 # evaluate CV criterias 
                                  eval.cv.spline[ite]<-sum((snew-s)^2)
                                  eval.cv.beta[ite]<-sum((betanew-beta)^2)
                                  eval.cv.loglik[ite]<-abs(fn.valuenew-fn.value)
@@ -722,21 +721,13 @@ idm.penalty<-function(b,fix0,size_V,size_spline,
                                  if(eval.cv.beta[ite]<epsa & eval.cv.spline[ite]<eps.spline & eval.cv.loglik[ite]<epsb & validity==T){
                                    converged<-T}
                                  
-                                 # do we need to fix spline
-                                 # if(step.sequential==T){
-                                 #   # if we converged in beta and in s but not rdm fix parameters of splines 
-                                 #   if(eval.cv.beta[ite]<epsa & eval.cv.spline[ite]<eps.spline & output.mla$rdm>epsd & output.mla$cb<epsb){
-                                 #     fix00[1:size_spline]<-ifelse(abs(s)<=option.sequential$cutoff | fix00==1,1,0)}
-                                 # }
-                                 
-                                 
-                                 
                                }
                                
                                
                                if(maxiter<=ite & converged==F){
                                  istop<-2
-                               }else{
+                               }else{ ### if CV is obtained 
+                                 ### calculate derivatives 
                                  if(ite<=maxiter & converged==T){
                                    istop<-1
                                    
@@ -1191,7 +1182,8 @@ idm.penalty<-function(b,fix0,size_V,size_spline,
                                                          penalty.factor=penalty.factor,
                                                          penalty=penalty)
                                  
-                                 
+                                 # if not better or do not exist need to readjust
+                                 # value of beta 
                                  if(res %in%c(-1e9,1e9) | res < fn.value){
                                    th<-1e-5
                                    step<-log(1.5)
@@ -1292,7 +1284,8 @@ idm.penalty<-function(b,fix0,size_V,size_spline,
                                                            penalty=penalty)
                                    
                                  }
-                                 
+                                 # if not better or do not exist need to readjust
+                                 # value of beta 
                                  if(res %in%c(-1e9,1e9) | any(is.infinite(c(s,betanew)))){
                                    ite<-ite+1
                                    validity<-F
@@ -1313,7 +1306,6 @@ idm.penalty<-function(b,fix0,size_V,size_spline,
                                                   epsa=eps.spline,
                                                   epsb=epsb,
                                                   epsd=epsd,
-                                                  print.info = print.info,
                                                   maxiter=maxiter.pena,
                                                   minimize=F,
                                                   npm=length(b),
@@ -1359,12 +1351,9 @@ idm.penalty<-function(b,fix0,size_V,size_spline,
                                  if(nvat12>0){
                                  b12<-betanew[(nvat01+nvat02+1):length(betanew)][penalty.factor[(nvat01+nvat02+1):length(betanew)]==1]
                                  }else{b12<-0}
-                                 # maximisation issue : 10/04/24
+                                 # update lpen = l-pen 
                                  if(penalty%in%c("lasso","ridge","elasticnet","corrected.elasticnet")){
                                      
-                                   #fn.valuenew<-output.mla$fn.value+lambda[id.lambda,1]*alpha*sum(abs(b01))+lambda[id.lambda,1]*(1-alpha)*sum(b01*b01)
-                                   #fn.valuenew<-fn.valuenew+lambda[id.lambda,2]*alpha*sum(abs(b02))+lambda[id.lambda,2]*(1-alpha)*sum(b02*b02)
-                                   #fn.valuenew<-fn.valuenew+lambda[id.lambda,3]*alpha*sum(abs(b12))+lambda[id.lambda,3]*(1-alpha)*sum(b12*b12)
                                    fn.valuenew<-output.mla$fn.value-lambda[id.lambda,1]*alpha*sum(abs(b01))-lambda[id.lambda,1]*(1-alpha)*sum(b01*b01)
                                    fn.valuenew<-fn.valuenew-lambda[id.lambda,2]*alpha*sum(abs(b02))-lambda[id.lambda,2]*(1-alpha)*sum(b02*b02)
                                    fn.valuenew<-fn.valuenew-lambda[id.lambda,3]*alpha*sum(abs(b12))-lambda[id.lambda,3]*(1-alpha)*sum(b12*b12)
@@ -1385,8 +1374,7 @@ idm.penalty<-function(b,fix0,size_V,size_spline,
                                  idbeta<-which(b12<=alpha*lambda[id.lambda,3])
                                  p12[idbeta]<-lambda[id.lambda,3]*abs(b12[idbeta])-((b12[idbeta]*b12[idbeta])/2*alpha)
                                  
-                                 # maximisation issue : 10/04/24
-                                 #fn.valuenew<-output.mla$fn.value+sum(p01)+sum(p02)+sum(p12)
+                                 
                                  fn.valuenew<-output.mla$fn.value-sum(p01)-sum(p02)-sum(p12) 
                                  }
                                  
@@ -1410,8 +1398,6 @@ idm.penalty<-function(b,fix0,size_V,size_spline,
                                    idbeta<-which(abs(b12)<lambda[id.lambda,3]*alpha)
                                    p12[idbeta]<-(2*alpha*lambda[id.lambda,3]*abs(b12[idbeta])-b12[idbeta]^2-lambda[id.lambda,3]^2)/(2*(alpha-1))
                                    
-                                   # maximisation issue : 10/04/24
-                                   #fn.valuenew<-output.mla$fn.value+sum(p01)+sum(p02)+sum(p12)
                                    fn.valuenew<-output.mla$fn.value-sum(p01)-sum(p02)-sum(p12)
                                    
                                  }
@@ -1434,22 +1420,14 @@ idm.penalty<-function(b,fix0,size_V,size_spline,
                                  if(eval.cv.beta[ite]<epsa & eval.cv.spline[ite]<eps.spline & eval.cv.loglik[ite]<epsb & validity==T){
                                    converged<-T}
                                  
-                                 # do we need to fix spline
-                                 # if(step.sequential==T){
-                                 #   # if we converged in beta and in s but not rdm fix parameters of splines 
-                                 #   if(eval.cv.beta[ite]<epsa & eval.cv.spline[ite]<eps.spline & output.mla$rdm>epsd & output.mla$cb<epsb){
-                                 #     fix00[1:size_spline]<-ifelse(abs(s)<=option.sequential$cutoff | fix00==1,1,0)}
-                                 # }
-                                 
-                                 
-                                 
                                }
                                
                               
                                if(maxiter<=ite & converged==F){
                                  istop<-2
                                }else{
-                                 if(ite<=maxiter & converged==T){
+                                 if(ite<=maxiter & converged==T){### if CV is obtained 
+                                   ### calculate derivatives 
                                    istop<-1
                                    b<-c(s,beta)
                                    bfix<-b[fix0==1]

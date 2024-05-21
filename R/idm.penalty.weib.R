@@ -23,7 +23,6 @@
 ##' @param epsb control convergence parameter for loglik
 ##' @param epsd control convergence for distance to minimum rdm
 ##' @param eps.eigen the power of convergence for eigen values of covariance matrix only
-##' @param print.info shloud we print info during mla convergence
 ##' @param clustertype in which cluster to work
 ##' @param nproc number of cluster
 ##' @param maxiter Maximum number of iterations. The default is 200.
@@ -45,7 +44,7 @@
 
 
 idm.penalty.weib<-function(b,fix0,size_V,
-                   clustertype,epsa,epsb,epsd,eps.eigen,print.info,nproc,maxiter,maxiter.pena,
+                   clustertype,epsa,epsb,epsd,eps.eigen,nproc,maxiter,maxiter.pena,
                    ctime,N,
                    ve01,ve02,ve12,dimnva01,dimnva02,dimnva12,nvat01,nvat02,nvat12,
                    t0,t1,t2,t3,troncature,
@@ -66,6 +65,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
   # computation pbr 
   pbr_compu<-0
   
+  # combine model 
   combine_lambda<-function(x,newx){
     
     if(newx$combine==2){
@@ -116,7 +116,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
   combine<-0
   
   # fix0 will be used to calculate derivatives and second derivatives only
-  # for Beta and not theta01,02,12
+  # for Beta and not modelPar01,02,12
   fix0[1:6]<-rep(1,6)
   fix0.beta<-fix00
   fix0.beta[(6+1):size_V]<-rep(1,size_V-6)
@@ -198,7 +198,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                                     t3=t3,
                                                     troncature=troncature)
                                  
-                                 if(ite==0){# loglik 
+                                 if(ite==0){# loglik penalised
                                    fn.value<-idmlLikelihoodweibpena(b=b,
                                                                     npm=length(b),
                                                                     npar=size_V,
@@ -410,7 +410,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                  
                                  
                                  
-                                
+                                # update for beta 
                                  output.cv<-cv.model(beta=beta,
                                                      nva01=npm01,
                                                      nva02=npm02,
@@ -461,7 +461,8 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                  
                                  # we want to maximise the loglik thus : 
                                  # we have issue if res is NA or if not higher than previous one 
-                                 
+                                 # if not better or do not exist need to readjust
+                                 # value of beta 
                                  if(res %in%c(-1e9,1e9) | res < fn.value){
                                    
                                    th<-1e-5
@@ -486,7 +487,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                                            "old.ca"=round(1),
                                                            "old.cb"=round(1))
                                    }
-                                   
+                                   # from mla package 
                                    sears<-searpas(vw=vw,
                                                   step=step,
                                                   b=beta,
@@ -549,7 +550,8 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                                                penalty.factor=penalty.factor,
                                                                penalty=penalty)
                                  }
-                                 
+                                 # if not better or do not exist need to readjust
+                                 # value of beta 
                                  if(res %in%c(-1e9,1e9) | any(is.infinite(c(s,betanew)))){
                                    
                                    ite<-ite+1
@@ -568,13 +570,12 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                  
                                  bfix<-b[fix0.beta==1]
                                  b<-b[fix0.beta==0]
-                                 
+                                 # update for modelPar
                                  output.mla<- marqLevAlg::mla(b=b,
                                                   fn=idmlLikelihoodweib,
                                                   epsa=epsa,
                                                   epsb=epsb,
                                                   epsd=epsd,
-                                                  print.info = print.info,
                                                   maxiter=maxiter.pena,
                                                   minimize=F,
                                                   npm=length(b),
@@ -612,12 +613,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                  if(nvat12>0){
                                  b12<-betanew[(nvat01+nvat02+1):length(betanew)][penalty.factor[(nvat01+nvat02+1):length(betanew)]==1]
                                  }else{b12<-0}
-                                 # maximisation so lpen=l-pen : 10/04/24
-                                 # if(penalty%in%c("lasso","ridge","elasticnet","corrected.elasticnet")){
-                                 #   fn.valuenew<-output.mla$fn.value+lambda[id.lambda,1]*alpha*sum(abs(b01))+lambda[id.lambda,1]*(1-alpha)*sum(b01*b01)
-                                 #   fn.valuenew<-fn.valuenew+lambda[id.lambda,2]*alpha*sum(abs(b02))+lambda[id.lambda,2]*(1-alpha)*sum(b02*b02)
-                                 #   fn.valuenew<-fn.valuenew+lambda[id.lambda,3]*alpha*sum(abs(b12))+lambda[id.lambda,3]*(1-alpha)*sum(b12*b12)
-                                 # }
+                                 
                                  # calculate loglik pen 
                                  if(penalty%in%c("lasso","ridge","elasticnet","corrected.elasticnet")){
                                    fn.valuenew<-output.mla$fn.value-lambda[id.lambda,1]*alpha*sum(abs(b01))-lambda[id.lambda,1]*(1-alpha)*sum(b01*b01)
@@ -640,8 +636,6 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                    idbeta<-which(b12<=alpha*lambda[id.lambda,3])
                                    p12[idbeta]<-lambda[id.lambda,3]*abs(b12[idbeta])-((b12[idbeta]*b12[idbeta])/2*alpha)
                                    
-                                   
-                                   #fn.valuenew<-output.mla$fn.value+sum(p01)+sum(p02)+sum(p12)
                                    fn.valuenew<-output.mla$fn.value-sum(p01)-sum(p02)-sum(p12)
                                    
                                  }
@@ -666,14 +660,13 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                    idbeta<-which(abs(b12)<lambda[id.lambda,3]*alpha)
                                    p12[idbeta]<-(2*alpha*lambda[id.lambda,3]*abs(b12[idbeta])-b12[idbeta]^2-lambda[id.lambda,3]^2)/(2*(alpha-1))
                                    
-                                   
-                                   #fn.valuenew<-output.mla$fn.value+sum(p01)+sum(p02)+sum(p12)
                                    fn.valuenew<-output.mla$fn.value-sum(p01)-sum(p02)-sum(p12)
                                    
                                  }
                                  
                                  ite<-ite+1
                                  
+                                 #check cv 
                                  eval.cv.spline[ite]<-sum((snew-s)^2)
                                  eval.cv.beta[ite]<-sum((betanew-beta)^2)
                                  eval.cv.loglik[ite]<-abs(fn.valuenew-fn.value)
@@ -695,9 +688,10 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                  istop<-2
                                }else{
                                  if(ite<=maxiter & converged==T){
-                                   istop<-1
+                                   istop<-1 
                                    
                                    # need to recalculate second derivatives 
+                                   # if converged 
                                    
                                    b<-c(s,beta)
                                    bfix<-b[fix0==1]
@@ -1062,9 +1056,6 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                    idpos<-ifelse(any(eigen.values<=eps.eigen),1,0)
                                    
                                    
-                                   # if(def.positive==T){
-                                   #   idpos<-ifelse(any(eigen.values<=0),1,0)
-                                   # }else{idpos<-ifelse(any(abs(eigen.values)==0),1,0)}
                                    
                                  }
                                  
@@ -1076,7 +1067,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                    break
                                  }
                                  
-                                 
+                                 # update beta 
                                  output.cv<-cv.model(beta=beta,
                                                     nva01=npm01,
                                                     nva02=npm02,
@@ -1126,7 +1117,8 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                  
                                  # we want to maximise the loglik thus : 
                                  # we have issue if res is NA or if not higher than previous one 
-                               
+                                 # if not better or do not exist need to readjust
+                                 # value of beta 
                                 if(res %in%c(-1e9,1e9) | res < fn.value){
                                   
                                    th<-1e-5
@@ -1151,7 +1143,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                                            "old.ca"=round(1),
                                                            "old.cb"=round(1))
                                    }
-                                   
+                                   # from mla package
                                    sears<-searpas(vw=vw,
                                                    step=step,
                                                    b=beta,
@@ -1214,7 +1206,8 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                                                penalty.factor=penalty.factor,
                                                                penalty=penalty)
                                  }
-                                   
+                                 # if not better or do not exist need to readjust
+                                 # value of beta 
                                 if(res %in%c(-1e9,1e9) | any(is.infinite(c(s,betanew)))){
                                   
                                      ite<-ite+1
@@ -1232,13 +1225,12 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                  
                                  bfix<-b[fix0.beta==1]
                                  b<-b[fix0.beta==0]
-                                 
+                                 # update modelPar
                                  output.mla<- marqLevAlg::mla(b=b,
                                                   fn=idmlLikelihoodweib,
                                                   epsa=epsa,
                                                   epsb=epsb,
                                                   epsd=epsd,
-                                                  print.info = print.info,
                                                   maxiter=maxiter.pena,
                                                   minimize=F,
                                                   npm=length(b),
@@ -1298,8 +1290,6 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                    idbeta<-which(b12<=alpha*lambda[id.lambda,3])
                                    p12[idbeta]<-lambda[id.lambda,3]*abs(b12[idbeta])-((b12[idbeta]*b12[idbeta])/2*alpha)
                                    
-                                  
-                                   #fn.valuenew<-output.mla$fn.value+sum(p01)+sum(p02)+sum(p12)
                                    fn.valuenew<-output.mla$fn.value-sum(p01)-sum(p02)-sum(p12)
                                    
                                  }
@@ -1324,12 +1314,13 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                    idbeta<-which(abs(b12)<lambda[id.lambda,3]*alpha)
                                    p12[idbeta]<-(2*alpha*lambda[id.lambda,3]*abs(b12[idbeta])-b12[idbeta]^2-lambda[id.lambda,3]^2)/(2*(alpha-1))
                                    
-                                   #fn.valuenew<-output.mla$fn.value+sum(p01)+sum(p02)+sum(p12)
                                    fn.valuenew<-output.mla$fn.value-sum(p01)-sum(p02)-sum(p12)
                                    
                                  }
                                  
                                  ite<-ite+1
+                                 
+                                 # check cv criterias 
                                  
                                  eval.cv.spline[ite]<-sum((snew-s)^2)
                                  eval.cv.beta[ite]<-sum((betanew-beta)^2)
