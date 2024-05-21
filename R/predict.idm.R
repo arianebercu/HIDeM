@@ -483,15 +483,15 @@ predict.idm <- function(object,s,
           
           modelPar01<-object$modelPar[1:2]^2
           intensity01<-modelPar01[1]*(modelPar01[2]^modelPar01[1])*t^(modelPar01[1]-1)
-          cumulative.intensity01<-(modelPar01[2]*times)^modelPar01[1]
+          cumulative.intensity01<-(modelPar01[2]*t)^modelPar01[1]
           
           modelPar02<-object$modelPar[3:4]^2
           intensity02<-modelPar02[1]*(modelPar02[2]^modelPar02[1])*t^(modelPar02[1]-1)
-          cumulative.intensity02<-(modelPar02[2]*times)^modelPar02[1]
+          cumulative.intensity02<-(modelPar02[2]*t)^modelPar02[1]
           
           modelPar12<-object$modelPar[5:6]^2
           intensity12<-modelPar12[1]*(modelPar12[2]^modelPar12[1])*t^(modelPar12[1]-1)
-          cumulative.intensity12<-(modelPar12[2]*times)^modelPar12[1]
+          cumulative.intensity12<-(modelPar12[2]*t)^modelPar12[1]
           
           if (!is.null(beta01))
             linPred01<-beta01 %*% t(Z01)
@@ -829,27 +829,29 @@ lifexpect0.idmPl <- function(s,knots01,nknots01,the01,knots12,nknots12,the12,kno
 }
 
 # 
-# data(Paq1000)
-# library(prodlim)
-# library(SmoothHazardoptim9)
-# fit.paq <- SmoothHazardoptim9::idm(formula02=Hist(time=t,event=death,entry=e)~certif,
-#                formula01=Hist(time=list(l,r),event=dementia)~certif,data=Paq1000)
-# 
-# p1<-predict(fit.paq,s=70,t=80,lifeExpect=F,conf.int=T,newdata=data.frame(certif=1))
+ data(Paq1000)
+library(prodlim)
+ library(SmoothHazardoptim9)
+ fit.paq <- SmoothHazardoptim9::idm(formula02=Hist(time=t,event=death,entry=e)~certif,
+                formula01=Hist(time=list(l,r),event=dementia)~certif,data=Paq1000)
+ 
+ p1<-predict(fit.paq,s=70,t=80,lifeExpect=F,conf.int=T,newdata=data.frame(certif=1))
+ p1bis<-predict(fit.paq,s=70,t=80,lifeExpect=F,conf.int=T,newdata=data.frame(certif=1),
+                nsim = 1)
+ 
+ library(SmoothHazardoptim9)
+ fit.paq2 <- SmoothHazardoptim9::idm(formula02=Hist(time=t,event=death,entry=e)~certif,
+                formula01=Hist(time=list(l,r),event=dementia)~certif,data=Paq1000,method="Weib")
+ 
+ p2<-SmoothHazardoptim9::predict.idm(fit.paq2,s=70,t=80,lifeExpect=F,conf.int=T,newdata=data.frame(certif=1))
 
-# library(SmoothHazardoptim9)
-# fit.paq2 <- SmoothHazardoptim9::idm(formula02=Hist(time=t,event=death,entry=e)~certif,
-#                formula01=Hist(time=list(l,r),event=dementia)~certif,data=Paq1000,method="Weib")
-# 
-# p2<-SmoothHazardoptim9::predict.idm(fit.paq2,s=70,t=80,lifeExpect=F,conf.int=T,newdata=data.frame(certif=1))
-
-# fit.splines <-  SmoothHazardoptim9::idm(formula02=Hist(time=t,event=death,entry=e)~certif,
-#                     formula01=Hist(time=list(l,r),event=dementia)~certif,
-#                     formula12=~1,
-#                     method="splines",
-#                     data=Paq1000)
-# 
-# plot(fit.splines)
+ fit.splines <-  SmoothHazardoptim9::idm(formula02=Hist(time=t,event=death,entry=e)~certif,
+                     formula01=Hist(time=list(l,r),event=dementia)~certif,
+                     formula12=~1,
+                     method="splines",
+                     data=Paq1000)
+ 
+ plot(fit.splines)
 # 
 # p3<- SmoothHazardoptim9::predict.idm(fit.splines,s=70,t=80,newdata=data.frame(certif=1))
 # predict(fit.splines,s=70,t=80,lifeExpect=TRUE,newdata=data.frame(certif=1),nsim=20)
