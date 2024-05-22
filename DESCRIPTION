@@ -18,7 +18,6 @@ Depends:
 Imports:
     lava (>= 1.4.1),
     mvtnorm (>= 1.0-3),
-    splines2 (>= 0.4.5),
     marqLevAlg (> 2.0), 
     doParallel, 
     foreach, 
