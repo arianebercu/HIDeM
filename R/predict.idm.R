@@ -286,7 +286,7 @@ predict.idm <- function(object,s,
             q.upper <- 1-q.lower
             ci <- apply(simResults,2,function(x)quantile(unlist(x),c(q.lower,q.upper)))
         }
-        browser()
+        #browser()
         # want to calculate variability based on variance-covariance matrix
         if (do.conf.int == TRUE & nsim<=2){
 
@@ -733,7 +733,7 @@ predict.idm <- function(object,s,
         the12 <- object$theta12[,id]
         names(the12) <- paste0("the12.",1:length(the12))
         
-        browser()
+        #browser()
         
         knots.unique<-unique(object$knots01)
         knots.bound<-knots.unique[c(1,length(knots.unique))]
