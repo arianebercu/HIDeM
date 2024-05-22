@@ -83,10 +83,10 @@ predict.idm <- function(object,s,
     object$method<-"weib"
     }else{object$method<-"splines"
   }
-  
-  if(length(s)>1|length(t)>1) {stop("s and t must be a single value")}
-  if(penalty!="none" & nsim<=2){stop("With penalised model prediction can only be performed by Monte-Carlo")}
-  if(penalty!="none"){ nsim<-1}
+
+  if((length(s)>1)|(length(t)>1)) {stop("s and t must be a single value")}
+  if((object$penalty!="none") & nsim<=2){stop("With penalised model prediction can only be performed by Monte-Carlo")}
+  if(object$penalty!="none"){ nsim<-1}
     if (lifeExpect==TRUE) {
       if (!missing(maxtime) && is.numeric(maxtime)) {
         maxtime <- min(maxtime,object$maxtime)
@@ -108,7 +108,7 @@ predict.idm <- function(object,s,
         #if (nsim < 2) stop("Need at least two simulations to construct confidence limits.")
     }
     if (missing(t) && lifeExpect==FALSE) stop("Argument t is missing.")
-    if (lifeExpect==TRUE & nsim>2) t <- Inf
+    if ((lifeExpect==TRUE) & (nsim>2)) t <- Inf
     if (missing(s)) stop("Argument s is missing.")
     ## if (missing(t) || is.infinite(t)) lifeExpect <- TRUE
     # if covariates: cov=c(cov1,cov2,cov3,...)
@@ -1179,10 +1179,10 @@ lifexpect0.idmPl <- function(s,knots01,nknots01,the01,knots12,nknots12,the12,kno
 #  library(SmoothHazardoptim9)
 #  fit.paq <- SmoothHazardoptim9::idm(formula02=Hist(time=t,event=death,entry=e)~certif:gender,
 #                 formula01=Hist(time=list(l,r),event=dementia)~certif:gender,data=Paq1000)
-#  
+# 
 #  p1<-predict(fit.paq,
 #              s=70,t=80,lifeExpect=F,conf.int=T,
-#              newdata=data.frame(certif=1,gender=1))
+#              newdata=data.frame(certif=1,gender=1),nsim=2)
 #  p1<-predict(fit.paq,
 #              s=70,t=80,lifeExpect=T,conf.int=T,
 #              newdata=data.frame(certif=1,gender=0))
@@ -1190,14 +1190,14 @@ lifexpect0.idmPl <- function(s,knots01,nknots01,the01,knots12,nknots12,the12,kno
 #                 nsim = 1)
 #  p1bis<-predict(fit.paq,s=70,t=80,lifeExpect=T,conf.int=T,newdata=data.frame(certif=1,gender=1),
 #                 nsim = 1)
-#  
+# 
 #  library(SmoothHazardoptim9)
 #  fit.paq2 <- SmoothHazardoptim9::idm(formula02=Hist(time=t,event=death,entry=e)~certif:gender,
 #                 formula01=Hist(time=list(l,r),event=dementia)~certif,data=Paq1000,method="splines")
-#  
+# 
 #  p1<-predict(fit.paq2,s=70,t=80,lifeExpect=F,newdata=data.frame(certif=1,gender=1))
 #  p1bis<-predict(fit.paq2,s=70,t=80,lifeExpect=F,newdata=data.frame(certif=1),nsim=1)
-#  
+
 #  p1<-predict(fit.paq2,s=70,t=80,lifeExpect=T,newdata=data.frame(certif=1))
 #  p1bis<-predict(fit.paq2,s=70,t=80,lifeExpect=T,newdata=data.frame(certif=1),nsim=1)
  # pbr with print 
