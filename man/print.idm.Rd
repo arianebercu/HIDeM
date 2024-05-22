@@ -4,7 +4,15 @@
 \alias{print.idm}
 \title{Print method for \code{idm} objects}
 \usage{
-\method{print}{idm}(x, conf.int = 0.95, digits = 4, pvalDigits = 4, eps = 1e-04, ...)
+\method{print}{idm}(
+  x,
+  conf.int = 0.95,
+  digits = 4,
+  pvalDigits = 4,
+  eps = 1e-04,
+  coef = F,
+  ...
+)
 }
 \arguments{
 \item{x}{Class \code{idm} object, i.e. the result of a call to the
@@ -17,6 +25,8 @@
 \item{pvalDigits}{Number of digits to print for p-values.}
 
 \item{eps}{Passed to \code{format.pval}.}
+
+\item{coef}{If true print coefficient and hazard ratio}
 
 \item{\dots}{Not used.}
 }

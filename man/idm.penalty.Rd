@@ -15,7 +15,6 @@ idm.penalty(
   epsd,
   eps.spline,
   eps.eigen,
-  print.info,
   nproc,
   maxiter,
   maxiter.pena,
@@ -75,8 +74,6 @@ idm.penalty(
 \item{eps.spline}{the power of convergence for splines parameters only}
 
 \item{eps.eigen}{the power of convergence for eigen values of covariance matrix only}
-
-\item{print.info}{shloud we print info during mla convergence}
 
 \item{nproc}{number of cluster}
 

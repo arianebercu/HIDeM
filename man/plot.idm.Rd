@@ -18,6 +18,8 @@
   ylim,
   xlab,
   ylab,
+  cex,
+  y.intersp,
   legend = TRUE,
   transition = c("01", "02", "12"),
   ...

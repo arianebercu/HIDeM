@@ -13,7 +13,6 @@ idm.penalty.weib(
   epsb,
   epsd,
   eps.eigen,
-  print.info,
   nproc,
   maxiter,
   maxiter.pena,
@@ -60,8 +59,6 @@ idm.penalty.weib(
 \item{epsd}{control convergence for distance to minimum rdm}
 
 \item{eps.eigen}{the power of convergence for eigen values of covariance matrix only}
-
-\item{print.info}{shloud we print info during mla convergence}
 
 \item{nproc}{number of cluster}
 

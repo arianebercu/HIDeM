@@ -21,8 +21,6 @@ gridsearch.penidm(
   n.knots = NULL,
   knots = "equidistant",
   type.quantile = 1,
-  conf.int = 0.95,
-  print.iter = FALSE,
   subset = NULL,
   na.action = na.fail,
   B = NULL,
@@ -39,8 +37,7 @@ gridsearch.penidm(
   alpha = ifelse(penalty == "scad", 3.7, ifelse(penalty == "mcp", 3, ifelse(penalty
     \%in\% c("elasticnet", "corrected.elasticnet"), 0.5, 1))),
   nproc = 1,
-  clustertype = "FORK",
-  print.info = F
+  clustertype = "FORK"
 )
 }
 \arguments{
@@ -69,9 +66,7 @@ state.  operator is not required. If missing it is set to
 \item{data}{A data frame in which to interpret the variables of
 \code{formula01}, \code{formula02} and \code{formula12}.}
 
-\item{method}{type of estimation method: "splines" for a
-penalized likelihood approach with approximation of the transition
-intensities by M-splines, "sparse.splines" for a likelihood approach with approximation of the transition
+\item{method}{type of estimation method: "splines" for a likelihood approach with approximation of the transition
 intensities by M-splines, "Weib" for a parametric approach with a
 Weibull distribution on the transition intensities. Default is
 "Weib".}
@@ -113,9 +108,9 @@ one vector of placements for each transition in the order \code{0 --> 1}, \code{
 If only vector is specifified the knots are used for all transitions. If only 2 vectors are specifified, the
 knots for the \code{0 --> 1} transition are also used for the \code{1 --> 2} transition.}
 }
-The algorithm needs at least 3 knots in sparse.spline and 5 knots in spline and allows no more than 20 knots.}
+The algorithm needs at least 3 knots in spline and allows no more than 20 knots.}
 
-\item{type.quantile}{Argument only active for the likelihood approach \code{method="splines","sparse.spline"}.
+\item{type.quantile}{Argument only active for the likelihood approach \code{method="splines"}.
 There are three ways to control the placement of the knots  according to the time considered between states :=
 \itemize{
 #'  \item{\code{type.quantile=1}}{Time for \code{0 --> 1} is the imputed to the middle of the interval left and right for demence . Time for \code{0 --> 2}
@@ -127,16 +122,6 @@ There are three ways to control the placement of the knots  according to the tim
  #' \item{\code{type.quantile=4}}{Time for \code{0 --> 1} is left and right. Time for \code{0 --> 2}
  is time of death for non demented sujects only. Time for \code{1 --> 2} is time of death for suject diagnose with dementia. }
 }}
-
-\item{conf.int}{Level of confidence pointwise confidence intervals of the transition intensities, i.e.,
-a value between 0 and 1, the default is \code{0.95}.
-The default is also used when \code{conf.int=TRUE}.
-To avoid computation of confidence intervals, set \code{conf.int} to FALSE or NULL.}
-
-\item{print.iter}{boolean parameter. Equals to \code{TRUE} to print
-the likelihood during the iteration process, \code{FALSE}
-otherwise. Default is \code{FALSE}. This option is not running on
-Windows.}
 
 \item{subset}{expression indicating the subset of the rows of data
 to be used in the fit. All observations are included by default.}
@@ -176,8 +161,6 @@ This argument is only used for models with M-splines.}
 
 \item{clustertype}{in which cluster to work}
 
-\item{print.info}{shloud we print info during mla convergence}
-
 \item{step.sequential}{should we use the optimisation version to fix splines}
 
 \item{option.sequential}{parameters to give if you want to do the optimisation version to
@@ -198,19 +181,7 @@ response for the 0 --> 2 transition. \code{Hist} or \code{Surv} object.}
 \item{time}{times for which transition intensities have been evaluated for
 plotting. Vector in the Weibull approach. Matrix in the penalized likelihhod
 approach for which the colums corresponds to the transitions 0 --> 1, 1 -->
-2, 0 --> 2.} \item{intensity01}{matched values of the intensities for
-transition 0 --> 1.} \item{lowerIntensity01}{lower confidence intervals for
-the values of the intensities for transition 0 --> 1.}
-\item{upperIntensity01}{upper confidence intervals for the values of the
-intensities for transition 0 --> 1.} \item{intensity02}{matched values of
-the intensities for transition 0 --> 2.} \item{lowerIntensity02}{lower
-confidence intervals for the values of the intensities for transition 0 -->
-2.} \item{upperIntensity02}{upper confidence intervals for the values of the
-intensities for transition 0 --> 2.} \item{intensity12}{matched values of
-the intensities for transition 1 --> 2.} \item{lowerIntensity12}{lower
-confidence intervals for the values of the intensities for transition 1 -->
-2.} \item{upperIntensity12}{upper confidence intervals for the values of the
-intensities for transition 1 --> 2.} \item{RR}{vector of relative risks.}
+2, 0 --> 2.} 
 \item{V}{variance-covariance matrix derived from the Hessian of the log-likelihood
 if using method="Weib" or, from the Hessian of the penalized log-likelihood
 if using method="Splines".}

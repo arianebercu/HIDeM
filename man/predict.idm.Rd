@@ -15,6 +15,7 @@ approach or a Weibull parametrization.}
   conf.int = 0.95,
   lifeExpect = FALSE,
   maxtime,
+  lambda = "BIC",
   ...
 )
 }
