@@ -18,7 +18,7 @@
 #' @export
 
 print.predict.idm <- function(x,digits=3,...){
-    lifeExpect <- is.infinite(x$t)
+    lifeExpect <- (is.infinite(x$t))|("LE.00"%in%x$transprob$Parameter)
     cat("Predictions of an irreversible illness-death model with states (0,1,2).\n\n")
     cat("For covariate values:\n\n")
     print(x$newdata,row.names=FALSE)

@@ -63,6 +63,8 @@ plot.idm <- function(x,
                      ylim,
                      xlab,
                      ylab,
+                     cex,
+                     y.intersp,
                      legend=TRUE,
                      transition=c("01","02","12"),
                      ...){ 
@@ -190,34 +192,34 @@ plot.idm <- function(x,
       id<-which(x$lambda%in%lambda)[1]
       intensity01<-intensity(times=X01,theta=x$modelPar[1:2,id]^2,
                              fix=x$fix[1:2],
-                             conf.int=conf,
-                             converged=x$converged[id],
-                             V=x$V[(6*(id-1)+1):(6*(id-1)+2),(6*(id-1)+1):(6*(id-1)+2)])
+                             conf.int=F,
+                             converged=x$converged[id])
+                             #V=x$V[(6*(id-1)+1):(6*(id-1)+2),(6*(id-1)+1):(6*(id-1)+2)])
       x$intensity01<-intensity01$intensity
-      x$lowerIntensity01<-intensity01$lowerintensity
-      x$upperIntensity01<-intensity01$upperintensity
+      #x$lowerIntensity01<-intensity01$lowerintensity
+      #x$upperIntensity01<-intensity01$upperintensity
       
       intensity02<-intensity(times=X02,theta=x$modelPar[3:4,id]^2,
                              fix=x$fix[3:4],
-                             conf.int=conf,
-                             converged=x$converged[id],
-                             V=x$V[(6*(id-1)+3):(6*(id-1)+4),(6*(id-1)+3):(6*(id-1)+4)])
+                             conf.int=F,
+                             converged=x$converged[id])
+                             #V=x$V[(6*(id-1)+3):(6*(id-1)+4),(6*(id-1)+3):(6*(id-1)+4)])
       x$intensity02<-intensity02$intensity
-      x$lowerIntensity02<-intensity02$lowerintensity
-      x$upperIntensity02<-intensity02$upperintensity
+      #x$lowerIntensity02<-intensity02$lowerintensity
+      #x$upperIntensity02<-intensity02$upperintensity
       
       intensity12<-intensity(times=X12,theta=x$modelPar[5:6,id]^2,
                                fix=x$fix[5:6],
-                               conf.int=conf,
-                               converged=x$converged[id],
-                               V=x$V[(6*(id-1)+5):(6*(id-1)+6),(6*(id-1)+5):(6*(id-1)+6)])
+                               conf.int=F,
+                               converged=x$converged[id])
+                               #V=x$V[(6*(id-1)+5):(6*(id-1)+6),(6*(id-1)+5):(6*(id-1)+6)])
       x$intensity12<-intensity12$intensity
-      x$lowerIntensity12<-intensity12$lowerintensity
-      x$upperIntensity12<-intensity12$upperintensity
+      #x$lowerIntensity12<-intensity12$lowerintensity
+      #x$upperIntensity12<-intensity12$upperintensity
       
       
     }else{
-      
+
       x$method<-"splines"
       
       
@@ -234,39 +236,40 @@ plot.idm <- function(x,
                              knots=x$knots01,
                              number.knots=x$nknots01,
                              fix=x$fix[1:(x$nknots01+2)],
-                             conf.int=conf,
+                             conf.int=F,
                              converged=x$converged[id],
-                             V=x$V[(n_spline*(id-1)+1):(n_spline*(id-1)+x$nknots01+2),(n_spline*(id-1)+1):(n_spline*(id-1)+x$nknots01+2)],method="splines")
+                             #V=x$V[(n_spline*(id-1)+1):(n_spline*(id-1)+x$nknots01+2),(n_spline*(id-1)+1):(n_spline*(id-1)+x$nknots01+2)],
+                             method="splines")
       
       x$intensity01<-intensity01$intensity
-      x$lowerIntensity01<-intensity01$lowerintensity
-      x$upperIntensity01<-intensity01$upperintensity
+      #x$lowerIntensity01<-intensity01$lowerintensity
+      #x$upperIntensity01<-intensity01$upperintensity
       
       
       intensity02<-intensity(times=X02,theta=x$theta02[,id],
                              knots=x$knots02,
                              number.knots=x$nknots02,
                              fix=x$fix[(x$nknots01+3):(x$nknots01+x$nknots02+4)],
-                             conf.int=conf,
+                             conf.int=F,
                              converged=x$converged[id],
-                             V=x$V[(n_spline*(id-1)+x$nknots01+3):(n_spline*(id-1)+x$nknots01+x$nknots02+4),(n_spline*(id-1)+x$nknots01+3):(n_spline*(id-1)+x$nknots01+x$nknots02+4)],
+                             #V=x$V[(n_spline*(id-1)+x$nknots01+3):(n_spline*(id-1)+x$nknots01+x$nknots02+4),(n_spline*(id-1)+x$nknots01+3):(n_spline*(id-1)+x$nknots01+x$nknots02+4)],
                              method="splines")
       
       x$intensity02<-intensity02$intensity
-      x$lowerIntensity02<-intensity02$lowerintensity
-      x$upperIntensity02<-intensity02$upperintensity
+      #x$lowerIntensity02<-intensity02$lowerintensity
+      #x$upperIntensity02<-intensity02$upperintensity
       
       intensity12<-intensity(times=X12,theta=x$theta12[,id],
                              knots=x$knots12,
                              fix=x$fix[(x$nknots01+x$nknots02+5):(n_spline)],
-                             conf.int=conf,
+                             conf.int=F,
                              converged=x$converged[id],
-                             V=x$V[(n_spline*(id-1)+x$nknots01+x$nknots02+5):(n_spline*id),(n_spline*(id-1)+x$nknots01+x$nknots02+5):(n_spline*id)],
+                             #V=x$V[(n_spline*(id-1)+x$nknots01+x$nknots02+5):(n_spline*id),(n_spline*(id-1)+x$nknots01+x$nknots02+5):(n_spline*id)],
                              number.knots=x$nknots12,method="splines")
       
       x$intensity12<-intensity12$intensity
-      x$lowerIntensity12<-intensity12$lowerintensity
-      x$upperIntensity12<-intensity12$upperintensity
+      #x$lowerIntensity12<-intensity12$lowerintensity
+      #x$upperIntensity12<-intensity12$upperintensity
       
       
       
@@ -291,6 +294,8 @@ plot.idm <- function(x,
     if (missing(lwd)) lwd <- rep(3,nlines)
     if (missing(col)) col <- 1:nlines
     if (missing(lty)) lty <- rep(1, nlines)
+    if (missing(cex)) cex<-1.5
+    if (missing(y.intersp)) y.intersp<-0.5
     if (length(lwd) < nlines) lwd <- rep(lwd, nlines)
     if (length(lty) < nlines) lty <- rep(lty, nlines)
     if (length(col) < nlines) col <- rep(col, nlines)
@@ -298,7 +303,7 @@ plot.idm <- function(x,
     axis2.DefaultArgs <- list(at=seq(0,1,.25),side=2,percent=TRUE)
     lines.DefaultArgs <- list(type="l")
     plot.DefaultArgs <- list(x=0,y=0,type = "n",ylim = ylim,xlim = xlim,xlab = xlab,ylab = ylab)
-    legend.DefaultArgs <- list(legend=paste("Transition",names(Y)),lwd=lwd,col=col,lty=lty,cex=1.5,bty="n",y.intersp=1.3,x="topleft")
+    legend.DefaultArgs <- list(legend=paste("Transition",names(Y)),lwd=lwd,col=col,lty=lty,cex=cex,bty="n",y.intersp=y.intersp,x="topleft")
     confint.DefaultArgs <- list(x=x,citype="shadow",times=X,density=55,col=col[1:nlines],lwd=rep(2,nlines),lty=rep(3,nlines))
     # }}}
     control <- prodlim::SmartControl(call=  list(...),

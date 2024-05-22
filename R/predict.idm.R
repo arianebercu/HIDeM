@@ -85,15 +85,21 @@ predict.idm <- function(object,s,
   }
   
   if(length(s)>1|length(t)>1) {stop("s and t must be a single value")}
-  
+  if(penalty!="none" & nsim<=2){stop("With penalised model prediction can only be performed by Monte-Carlo")}
+  if(penalty!="none"){ nsim<-1}
     if (lifeExpect==TRUE) {
-        t <- Inf
-        if (!missing(maxtime) && is.numeric(maxtime)) {
-            maxtime <- min(maxtime,object$maxtime)
-        } else {
-            maxtime <- object$maxtime
+      if (!missing(maxtime) && is.numeric(maxtime)) {
+        maxtime <- min(maxtime,object$maxtime)
+      } else {
+        maxtime <- object$maxtime
+      }
+      if(nsim>2){ # need value for non montecarole approxi
+        t <- Inf}else{
+            t<-maxtime
+          }
         }
-    }
+        
+    
     if (any(s>t)) {stop("You must respect the condition 's<t' to calculate p(s,t)")}
     do.conf.int <- !is.null(conf.int) && !is.na(conf.int) && !conf.int==FALSE
     if (is.logical(conf.int)) conf.int <- .95
@@ -102,17 +108,18 @@ predict.idm <- function(object,s,
         #if (nsim < 2) stop("Need at least two simulations to construct confidence limits.")
     }
     if (missing(t) && lifeExpect==FALSE) stop("Argument t is missing.")
-    if (lifeExpect==TRUE) t <- Inf
+    if (lifeExpect==TRUE & nsim>2) t <- Inf
     if (missing(s)) stop("Argument s is missing.")
     ## if (missing(t) || is.infinite(t)) lifeExpect <- TRUE
     # if covariates: cov=c(cov1,cov2,cov3,...)
     nvar01 <- object$NC[1]
     nvar02 <- object$NC[2]
     nvar12 <- object$NC[3]
-   
+
     # keep previous levels 
     object$levels$class[sapply(object$levels$class, is.null)] <- NA
-    object$levels$values[sapply(object$levels$values, is.null)] <- NA
+    if(length(object$levels$values)>0){
+      object$levels$values[sapply(object$levels$values, is.null)] <- NA}
     xlevels<-unlist(object$levels$class)
     if(any(xlevels%in%c("factor","character"))){
       xnames<-c(all.vars(object$terms$Formula01)[all.vars(object$terms$Formula01)%in%labels(terms(object$terms$Formula01))],
@@ -131,13 +138,14 @@ predict.idm <- function(object,s,
     }
     
     #################### prediction if model not from penalty ##################
-    if(penalty=="none"){
+    if(object$penalty=="none"){
     #update dataset from the formula 
     if (!missing(newdata)){
         if (NROW(newdata)>1) stop("Argument newdata has more than one row\n.Currently this function works only for one covariate constallation at a time.")
         if (length(object$Xnames01)>0){
           if(length(grep(":",names(object$coef[1:object$NC[1]])))>0){
-          Z01 <- model.matrix(object$terms$Formula01,data=newdata)[, -1, drop = FALSE]
+          #Z01 <- model.matrix(object$terms$Formula01,data=newdata)[, -1, drop = FALSE]
+          Z01 <- model.matrix(update.formula(formula(object$terms$Formula01),NULL~.),data=newdata)[, -1, drop = FALSE]
           }else{
             Z01 <-as.matrix(model.frame(formula=update.formula(formula(object$terms$Formula01),NULL~.),data=newdata))}
           }else{
@@ -145,14 +153,16 @@ predict.idm <- function(object,s,
         if (length(object$Xnames02)>0){
           
           if(length(grep(":",names(object$coef[(1+object$NC[1]):(object$NC[2]+object$NC[1])])))>0){
-            Z02 <- model.matrix(object$terms$Formula02,data=newdata)[, -1, drop = FALSE]
+            #Z02 <- model.matrix(object$terms$Formula02,data=newdata)[, -1, drop = FALSE]
+            Z02 <- model.matrix(update.formula(formula(object$terms$Formula02),NULL~.),data=newdata)[, -1, drop = FALSE]
           }else{
             Z02 <-as.matrix(model.frame(formula=update.formula(formula(object$terms$Formula02),NULL~.),data=newdata))}
         }else{
             Z02 <- 0}
         if (length(object$Xnames12)>0){
           if(length(grep(":",names(object$coef[(1+object$NC[1]+object$NC[2]):(object$NC[3]+object$NC[2]+object$NC[1])])))>0){
-            Z12 <- model.matrix(object$terms$Formula12,data=newdata)[, -1, drop = FALSE]
+            #Z12 <- model.matrix(object$terms$Formula12,data=newdata)[, -1, drop = FALSE]
+            Z12 <- model.matrix(update.formula(formula(object$terms$Formula12),NULL~.),data=newdata)[, -1, drop = FALSE]
           }else{
             Z12 <-as.matrix(model.frame(formula=update.formula(formula(object$terms$Formula12),NULL~.),data=newdata))}
           }else{
@@ -190,12 +200,12 @@ predict.idm <- function(object,s,
         beta12 <- NULL
         bZ12 <- 0
     }
+
     uppercumulative.intensity<-lowercumulative.intensity<-cumulative.intensity<-NULL
     upperintensity<-lowerintensity<-intensity<-NULL
     ############### splines ####################################################
     if (object$method=="splines"){
-      #browser()
-        
+
         nknots01 <- object$nknots01
         nknots02 <- object$nknots02
         nknots12 <- object$nknots12
@@ -276,27 +286,27 @@ predict.idm <- function(object,s,
             q.upper <- 1-q.lower
             ci <- apply(simResults,2,function(x)quantile(unlist(x),c(q.lower,q.upper)))
         }
-        
+        browser()
         # want to calculate variability based on variance-covariance matrix
         if (do.conf.int == TRUE & nsim<=2){
-          
+
           knots.unique<-unique(object$knots01)
           knots.bound<-knots.unique[c(1,length(knots.unique))]
           knots.int<-knots.unique[-c(1,length(knots.unique))]
-          msplines01<-splines2::mSpline(x=t,knots=knots.int,Boundary.knots=knots.bound,intercept = T)
-          isplines01<-(splines2::iSpline(x=t,knots=knots.int,Boundary.knots=knots.bound,intercept = T)-splines2::iSpline(x=s,knots=knots.int,Boundary.knots=knots.bound,intercept = T))
+          msplines01<-splinesMI(x=t,knots=knots.int,Boundary.knots=knots.bound)$Mspline
+          isplines01<-(splinesMI(x=t,knots=knots.int,Boundary.knots=knots.bound)$Ispline-splinesMI(x=s,knots=knots.int,Boundary.knots=knots.bound)$Ispline)
           
           knots.unique<-unique(object$knots02)
           knots.bound<-knots.unique[c(1,length(knots.unique))]
           knots.int<-knots.unique[-c(1,length(knots.unique))]
-          msplines02<-splines2::mSpline(x=t,knots=knots.int,Boundary.knots=knots.bound,intercept = T)
-          isplines02<-(splines2::iSpline(x=t,knots=knots.int,Boundary.knots=knots.bound,intercept = T)-splines2::iSpline(x=s,knots=knots.int,Boundary.knots=knots.bound,intercept = T))
+          msplines02<-splinesMI(x=t,knots=knots.int,Boundary.knots=knots.bound)$Mspline
+          isplines02<-(splinesMI(x=t,knots=knots.int,Boundary.knots=knots.bound)$Ispline-splinesMI(x=s,knots=knots.int,Boundary.knots=knots.bound)$Ispline)
           
           knots.unique<-unique(object$knots12)
           knots.bound<-knots.unique[c(1,length(knots.unique))]
           knots.int<-knots.unique[-c(1,length(knots.unique))]
-          msplines12<-splines2::mSpline(x=t,knots=knots.int,Boundary.knots=knots.bound,intercept = T)
-          isplines12<-(splines2::iSpline(x=t,knots=knots.int,Boundary.knots=knots.bound,intercept = T)-splines2::iSpline(x=s,knots=knots.int,Boundary.knots=knots.bound,intercept = T))
+          msplines12<-splinesMI(x=t,knots=knots.int,Boundary.knots=knots.bound)$Mspline
+          isplines12<-(splinesMI(x=t,knots=knots.int,Boundary.knots=knots.bound)$Ispline-splinesMI(x=s,knots=knots.int,Boundary.knots=knots.bound)$Ispline)
           
           
           theta.square01<-the01^2
@@ -530,24 +540,24 @@ predict.idm <- function(object,s,
           V01<-object$V[c(1:2,7:(7+object$NC[1]-1)),c(1:2,7:(7+object$NC[1]-1))]
           V02<-object$V[c(3:4,(6+object$NC[1]+1):(6+object$NC[1]+object$NC[2])),c(3:4,(6+object$NC[1]+1):(6+object$NC[1]+object$NC[2]))]
           V12<-object$V[c(5:6,(6+object$NC[1]+object$NC[2]+1):(6+object$NC[1]+object$NC[2]+object$NC[3])),c(5:6,(6+object$NC[1]+object$NC[2]+1):(6+object$NC[1]+object$NC[2]+object$NC[3]))]
-          
+
           
           deriv01<-c((t^(modelPar01[1]-1))*(modelPar01[2]^modelPar01[1])*(modelPar01[1]*log(t)+modelPar01[1]*log(modelPar01[2])+1),
                      (modelPar01[1]^2)*(t^(modelPar01[1]-1))*(modelPar01[2]^(modelPar01[1]-1)),
                      as.numeric(intensity01)*Z01)
-          deriv01[1,2]<-deriv01[1,2]*(2*sqrt(modelPar01))
+          deriv01[c(1,2)]<-deriv01[c(1,2)]*(2*sqrt(modelPar01))
           se01<-sqrt(deriv01%*%V01%*%deriv01)
           
           deriv02<-c((t^(modelPar02[1]-1))*(modelPar02[2]^modelPar02[1])*(modelPar02[1]*log(t)+modelPar02[1]*log(modelPar02[2])+1),
                      (modelPar02[1]^2)*(t^(modelPar02[1]-1))*(modelPar02[2]^(modelPar02[1]-1)),
                      as.numeric(intensity02)*Z02)
-          deriv02[1,2]<-deriv02[1,2]*(2*sqrt(modelPar02))
+          deriv02[c(1,2)]<-deriv02[c(1,2)]*(2*sqrt(modelPar02))
           se02<-sqrt(deriv02%*%V02%*%deriv02)
           
           deriv12<-c((t^(modelPar12[1]-1))*(modelPar12[2]^modelPar12[1])*(modelPar12[1]*log(t)+modelPar12[1]*log(modelPar12[2])+1),
                      (modelPar12[1]^2)*(t^(modelPar12[1]-1))*(modelPar12[2]^(modelPar12[1]-1)),
                      as.numeric(intensity12)*Z12)
-          deriv12[1,2]<-deriv12[1,2]*(2*sqrt(modelPar12))
+          deriv12[c(1,2)]<-deriv12[c(1,2)]*(2*sqrt(modelPar12))
           se12<-sqrt(deriv12%*%V12%*%deriv12)
           
           lowerintensity[1]<-intensity01+qnorm((1-conf.int)/2)*se01
@@ -557,22 +567,22 @@ predict.idm <- function(object,s,
           upperintensity[2]<-intensity02-qnorm((1-conf.int)/2)*se02
           upperintensity[3]<-intensity12-qnorm((1-conf.int)/2)*se12
           
-          deriv01<-c(((t*modelPar01[2])^modelPar[1])*log(t*modelPar[2]),
+          deriv01<-c(((t*modelPar01[2])^modelPar01[1])*log(t*modelPar01[2]),
                      (modelPar01[1]*((t*modelPar01[2])^modelPar01[1]))/modelPar01[2],
                      as.numeric(cumulative.intensity01)*Z01)
-          deriv01[1,2]<-deriv01[1,2]*(2*sqrt(modelPar01))
+          deriv01[c(1,2)]<-deriv01[c(1,2)]*(2*sqrt(modelPar01))
           se01<-sqrt(deriv01%*%V01%*%deriv01)
           
-          deriv02<-c(((t*modelPar02[2])^modelPar[1])*log(t*modelPar[2]),
+          deriv02<-c(((t*modelPar02[2])^modelPar02[1])*log(t*modelPar02[2]),
                      (modelPar02[1]*((t*modelPar02[2])^modelPar02[1]))/modelPar02[2],
                      as.numeric(cumulative.intensity02)*Z02)
-          deriv02[1,2]<-deriv02[1,2]*(2*sqrt(modelPar02))
+          deriv02[c(1,2)]<-deriv02[c(1,2)]*(2*sqrt(modelPar02))
           se02<-sqrt(deriv02%*%V02%*%deriv02)
           
-          deriv12<-c(((t*modelPar12[2])^modelPar[1])*log(t*modelPar[2]),
+          deriv12<-c(((t*modelPar12[2])^modelPar12[1])*log(t*modelPar12[2]),
                      (modelPar12[1]*((t*modelPar12[2])^modelPar12[1]))/modelPar12[2],
                      as.numeric(cumulative.intensity12)*Z12)
-          deriv12[1,2]<-deriv12[1,2]*(2*sqrt(modelPar12))
+          deriv12[c(1,2)]<-deriv12[c(1,2)]*(2*sqrt(modelPar12))
           se12<-sqrt(deriv12%*%V12%*%deriv12)
           
           lowercumulative.intensity[1]<-cumulative.intensity01+qnorm((1-conf.int)/2)*se01
@@ -610,6 +620,7 @@ predict.idm <- function(object,s,
                                                  bZ12))
         }
     }
+
     if (do.conf.int==TRUE & nsim>2){
         transprob <- data.frame(cbind(transprob,t(ci)))
         names(transprob) <- c("Estimate",paste("Lower",round(100*conf.int),sep="."),paste("Upper",round(100*conf.int),sep="."))
@@ -621,6 +632,272 @@ predict.idm <- function(object,s,
         transprob <- cbind("Parameter"=rownames(transprob),transprob)
         rownames(transprob) <- NULL
     }
+  
+    }else{
+      #################### predict with penalty ################################
+    # lambda need to be either a vector of three values (01,02,12) or BIC or GCV
+
+      if(is.null(lambda)){lambda<-"BIC"}
+      if(length(lambda)==1 & (!lambda%in%c("GCV","BIC"))){stop("Lambda need to be either a vector of three values (01,02 and 12) or BIC or GCV")}
+      if(!length(lambda)%in%c(1,3)){stop("Lambda need to be either a vector of three values (01,02 and 12) or BIC or GCV")}
+
+      if(length(lambda)==3){
+        if(any(sapply(object$lambda,FUN=function(x){sum(x==lambda)})==3)){stop("Lambda need to be either a vector of three values (01,02 and 12) from object$lambda")}
+        id<-which(any(sapply(object$lambda,FUN=function(x){sum(x==lambda)})==3))[1]
+      }
+      if(length(lambda)==1){
+        if(lambda=="BIC"){id<-which.min(object$BIC)[1]
+        }else{id<-which.min(object$GCV)[1]}
+      }
+      #update dataset from the formula 
+      if (!missing(newdata)){
+        if (NROW(newdata)>1) stop("Argument newdata has more than one row\n.Currently this function works only for one covariate constallation at a time.")
+        if (length(object$Xnames01)>0){
+          if(length(grep(":",names(object$coef[1:object$NC[1]])))>0){
+            #Z01 <- model.matrix(object$terms$Formula01,data=newdata)[, -1, drop = FALSE]
+            Z01 <- model.matrix(update.formula(formula(object$terms$Formula01),NULL~.),data=newdata)[, -1, drop = FALSE]
+          }else{
+            Z01 <-as.matrix(model.frame(formula=update.formula(formula(object$terms$Formula01),NULL~.),data=newdata))}
+        }else{
+          Z01 <- 0}
+        if (length(object$Xnames02)>0){
+          
+          if(length(grep(":",names(object$coef[(1+object$NC[1]):(object$NC[2]+object$NC[1])])))>0){
+            #Z02 <- model.matrix(object$terms$Formula02,data=newdata)[, -1, drop = FALSE]
+            Z02 <- model.matrix(update.formula(formula(object$terms$Formula02),NULL~.),data=newdata)[, -1, drop = FALSE]
+          }else{
+            Z02 <-as.matrix(model.frame(formula=update.formula(formula(object$terms$Formula02),NULL~.),data=newdata))}
+        }else{
+          Z02 <- 0}
+        if (length(object$Xnames12)>0){
+          if(length(grep(":",names(object$coef[(1+object$NC[1]+object$NC[2]):(object$NC[3]+object$NC[2]+object$NC[1])])))>0){
+            #Z12 <- model.matrix(object$terms$Formula12,data=newdata)[, -1, drop = FALSE]
+            Z12 <- model.matrix(update.formula(formula(object$terms$Formula12),NULL~.),data=newdata)[, -1, drop = FALSE]
+          }else{
+            Z12 <-as.matrix(model.frame(formula=update.formula(formula(object$terms$Formula12),NULL~.),data=newdata))}
+        }else{
+          Z12 <- 0}
+      }else{
+        vars <- unique(c(object$Xnames01,object$Xnames02,object$Xnames12))
+        newdata <- data.frame(matrix(0,ncol=pmax(1,length(vars))))
+        names(newdata) <- vars
+        Z01 <- matrix(rep(0,length(object$Xnames01)),nrow=1)
+        Z02 <- matrix(rep(0,length(object$Xnames02)),nrow=1)
+        Z12 <- matrix(rep(0,length(object$Xnames12)),nrow=1)
+      }
+      
+      if(nvar01 > 0){
+        beta01 <- object$coef[1:nvar01,id]
+        names(beta01) <- paste0("beta01.",names(beta01))
+        bZ01 <- sum(Z01 * beta01)
+      }else{
+        bZ01 <- 0
+        beta01 <- NULL
+      }
+      if (nvar02 != 0) {
+        beta02 <- object$coef[(nvar01+1):(nvar01+nvar02),id]
+        names(beta02) <- paste0("beta02.",names(beta02))
+        bZ02 <- sum(Z02 * beta02)
+      }else{
+        beta02 <- NULL
+        bZ02 <- 0
+      }
+      if (nvar12 != 0) {
+        beta12 <- object$coef[(nvar01+nvar02+1):(nvar01+nvar02+nvar12),id]
+        names(beta12) <- paste0("beta12.",names(beta12))
+        bZ12 <- sum(Z12 * beta12)
+      }else{
+        beta12 <- NULL
+        bZ12 <- 0
+      }
+
+      uppercumulative.intensity<-lowercumulative.intensity<-cumulative.intensity<-NULL
+      upperintensity<-lowerintensity<-intensity<-NULL
+      ############### splines ####################################################
+      if (object$method=="splines"){
+        
+        nknots01 <- object$nknots01
+        nknots02 <- object$nknots02
+        nknots12 <- object$nknots12
+        knots01 <- object$knots01
+        knots02 <- object$knots02
+        knots12 <- object$knots12
+        the01 <- object$theta01[,id]
+        
+        if(s<min(knots01,knots02,knots12))stop(paste0("The argument s must be at least equal to :",min(knots01,knots02,knots12)))
+        if(t<min(knots01,knots02,knots12))stop(paste0("The argument t must be at least equal to :",min(knots01,knots02,knots12)))
+        
+        names(the01) <- paste0("the01.",1:length(the01))
+        the02 <- object$theta02[,id]
+        names(the02) <- paste0("the02.",1:length(the02))
+        the12 <- object$theta12[,id]
+        names(the12) <- paste0("the12.",1:length(the12))
+        
+        browser()
+        
+        knots.unique<-unique(object$knots01)
+        knots.bound<-knots.unique[c(1,length(knots.unique))]
+        knots.int<-knots.unique[-c(1,length(knots.unique))]
+        msplines01<-splinesMI(x=t,knots=knots.int,Boundary.knots=knots.bound)$Mspline
+        isplines01<-(splinesMI(x=t,knots=knots.int,Boundary.knots=knots.bound)$Ispline-splinesMI(x=s,knots=knots.int,Boundary.knots=knots.bound)$Ispline)
+        
+        knots.unique<-unique(object$knots02)
+        knots.bound<-knots.unique[c(1,length(knots.unique))]
+        knots.int<-knots.unique[-c(1,length(knots.unique))]
+        msplines02<-splinesMI(x=t,knots=knots.int,Boundary.knots=knots.bound)$Mspline
+        isplines02<-(splinesMI(x=t,knots=knots.int,Boundary.knots=knots.bound)$Ispline-splinesMI(x=s,knots=knots.int,Boundary.knots=knots.bound)$Ispline)
+        
+        knots.unique<-unique(object$knots12)
+        knots.bound<-knots.unique[c(1,length(knots.unique))]
+        knots.int<-knots.unique[-c(1,length(knots.unique))]
+        msplines12<-splinesMI(x=t,knots=knots.int,Boundary.knots=knots.bound)$Mspline
+        isplines12<-(splinesMI(x=t,knots=knots.int,Boundary.knots=knots.bound)$Ispline-splinesMI(x=s,knots=knots.int,Boundary.knots=knots.bound)$Ispline)
+        
+          
+        theta.square01<-the01^2
+        intensity01<-msplines01%*%theta.square01
+        cumulative.intensity01<-isplines01%*%theta.square01
+        
+        theta.square02<-the02^2
+        intensity02<-msplines02%*%theta.square02
+        cumulative.intensity02<-isplines02%*%theta.square02
+        
+        theta.square12<-the12^2
+        intensity12<-msplines12%*%theta.square12
+        cumulative.intensity12<-isplines12%*%theta.square12
+        
+        if (!is.null(beta01))
+          linPred01<-beta01 %*% t(Z01)
+        else
+          linPred01<-0
+        if (!is.null(beta02))
+          linPred02<-beta02 %*% t(Z02)
+        else
+          linPred02<-0
+        if (!is.null(beta12))
+          linPred12<-beta12 %*% t(Z12)
+        else
+          linPred12<-0
+          
+          
+        e01 <- exp(linPred01)
+        intensity01<-intensity01*e01
+        cumulative.intensity01<-cumulative.intensity01*e01
+        
+        e02 <- exp(linPred02)
+        intensity02<-intensity02*e02
+        cumulative.intensity02<-cumulative.intensity02*e02
+        
+        e12 <- exp(linPred12)
+        intensity12<-intensity12*e12
+        cumulative.intensity12<-cumulative.intensity12*e12
+        
+        intensity<-c(intensity01,intensity02,intensity12)
+        cumulative.intensity<-c(cumulative.intensity01,cumulative.intensity02,cumulative.intensity12)
+
+        if (lifeExpect==TRUE){
+          transprob <- unlist(lifexpect0.idmPl(s,
+                                               knots01,
+                                               nknots01,
+                                               the01,
+                                               knots12,
+                                               nknots12,
+                                               the12,
+                                               knots02,
+                                               nknots02,
+                                               the02,
+                                               bZ01,
+                                               bZ12,
+                                               bZ02))
+        }else{
+          transprob <- unlist(Predict0.idmPl(s,t,knots01,nknots01,the01,knots12,nknots12,the12,knots02,nknots02,the02,bZ01,bZ12,bZ02))
+        }
+      }else {
+        ############################ weibull #####################################
+        a01 <- object$modelPar[1,id]
+        b01 <- object$modelPar[2,id]
+        a02 <- object$modelPar[3,id]
+        b02 <- object$modelPar[4,id]
+        a12 <- object$modelPar[5,id]
+        b12 <- object$modelPar[6,id]
+        # want to calculate variability based on variance-covariance matrix
+        modelPar01<-object$modelPar[1:2,id]^2
+        intensity01<-modelPar01[1]*(modelPar01[2]^modelPar01[1])*t^(modelPar01[1]-1)
+        cumulative.intensity01<-(modelPar01[2]*t)^modelPar01[1]
+        
+        modelPar02<-object$modelPar[3:4,id]^2
+        intensity02<-modelPar02[1]*(modelPar02[2]^modelPar02[1])*t^(modelPar02[1]-1)
+        cumulative.intensity02<-(modelPar02[2]*t)^modelPar02[1]
+        
+        modelPar12<-object$modelPar[5:6]^2
+        intensity12<-modelPar12[1]*(modelPar12[2]^modelPar12[1])*t^(modelPar12[1]-1)
+        cumulative.intensity12<-(modelPar12[2]*t)^modelPar12[1]
+        
+        if (!is.null(beta01))
+          linPred01<-beta01 %*% t(Z01)
+        else
+          linPred01<-0
+        if (!is.null(beta02))
+          linPred02<-beta02 %*% t(Z02)
+        else
+          linPred02<-0
+        if (!is.null(beta12))
+          linPred12<-beta12 %*% t(Z12)
+        else
+          linPred12<-0
+        
+        
+        e01 <- exp(linPred01)
+        intensity01<-intensity01*e01
+        cumulative.intensity01<-cumulative.intensity01*e01
+        
+        e02 <- exp(linPred02)
+        intensity02<-intensity02*e02
+        cumulative.intensity02<-cumulative.intensity02*e02
+        
+        e12 <- exp(linPred12)
+        intensity12<-intensity12*e12
+        cumulative.intensity12<-cumulative.intensity12*e12
+        
+        intensity<-c(intensity01,intensity02,intensity12)
+        cumulative.intensity<-c(cumulative.intensity01,cumulative.intensity02,cumulative.intensity12)
+    
+        
+        if (lifeExpect==TRUE){
+          transprob <- unlist(lifexpect0.idmWeib(s,
+                                                 a01^2,
+                                                 1/b01^2,
+                                                 a02^2,
+                                                 1/b02^2,
+                                                 a12^2,
+                                                 1/b12^2,
+                                                 bZ01,
+                                                 bZ02,
+                                                 bZ12,max=maxtime))
+        }else{
+          transprob <- unlist(Predict0.idmWeib(s,
+                                               t,
+                                               a01^2,
+                                               1/b01^2,
+                                               a02^2,
+                                               1/b02^2,
+                                               a12^2,
+                                               1/b12^2,
+                                               bZ01,
+                                               bZ02,
+                                               bZ12))
+        }
+      }
+      
+     
+      transprob <- data.frame(cbind(transprob))
+      names(transprob) <- c("Estimate")
+      transprob <- cbind("Parameter"=rownames(transprob),transprob)
+      rownames(transprob) <- NULL
+      uppercumulative.intensity<-lowercumulative.intensity<-NULL
+      upperintensity<-lowerintensity<-NULL
+    }
+    
     out <- list(transprob=transprob)
     out <- c(out,list(newdata=newdata))
     out <- c(out,list(s=s,t=t,conf.int=ifelse(do.conf.int,conf.int,FALSE)))
@@ -632,7 +909,6 @@ predict.idm <- function(object,s,
                      intensity=intensity))
     class(out) <- "predict.idm"
     out
-    }
 }
 
 ## prediction indicators with splines 
@@ -643,18 +919,33 @@ Predict0.idmPl <- function(s,t,knots01,nknots01,the01,knots12,nknots12,the12,kno
     p11 <- S.pl(s,t,knots12,nknots12,the12,bZ12)
     p12 <- 1-p11
     p00 <- S.pl(s,t,knots01,nknots01,the01,bZ01)*S.pl(s,t,knots02,nknots02,the02,bZ02)
-    p02_0 <- sapply(t,function(t) {integrate(f=function(x){
-      S.pl(s,x,knots01,nknots01,the01,bZ01)*S.pl(s,x,knots02,nknots02,the02,bZ02)*intensity(times=x,knots=knots02,number.knots=nknots02,theta=the02,linear.predictor=bZ02,method="splines")$intensity},lower=s,upper=t)$value})
-    p01 <- sapply(t,function(t) {integrate(f=function(x){S.pl(s,x,knots01,nknots01,the01,bZ01)*S.pl(s,x,knots02,nknots02,the02,bZ02)*intensity(times=x,knots=knots01,number.knots=nknots01,theta=the01,linear.predictor=bZ01,method="splines")$intensity*S.pl(x,t,knots12,nknots12,the12,bZ12)},lower=s,upper=t)$value})
-    p02_1 <- 1-p00-p02_0-p01
-    p02 <- p02_0+p02_1
-    RM<- integrate(f = function(x) {S.pl(s, x, knots01, nknots01, the01, bZ01) * S.pl(s, x, knots02, nknots02, the02, bZ02) }, lower = s, upper = t)$value
-    F01<- integrate(f = function(x) {S.pl(s, x, knots01, nknots01, the01, bZ01) * S.pl(s, x, knots02, nknots02, the02, bZ02) * intensity(times = x, knots = knots01, number.knots = nknots01, theta = the01,linear.predictor = bZ01,method="splines")$intensity }, lower = s, upper = t)$value
+    
+    if(t==Inf){
+      p02_0 <- sapply(t,function(t) {integrate(f=function(x){
+        S.pl(s,x,knots01,nknots01,the01,bZ01)*S.pl(s,x,knots02,nknots02,the02,bZ02)*intensity(times=x,knots=knots02,number.knots=nknots02,theta=the02,linear.predictor=bZ02,method="splines")$intensity},lower=s,upper=t)$value})
+      p01 <- sapply(t,function(t) {integrate(f=function(x){S.pl(s,x,knots01,nknots01,the01,bZ01)*S.pl(s,x,knots02,nknots02,the02,bZ02)*intensity(times=x,knots=knots01,number.knots=nknots01,theta=the01,linear.predictor=bZ01,method="splines")$intensity*S.pl(x,t,knots12,nknots12,the12,bZ12)},lower=s,upper=t)$value})
+      p02_1 <- 1-p00-p02_0-p01
+      p02 <- p02_0+p02_1
+      RM<- integrate(f = function(x) {S.pl(s, x, knots01, nknots01, the01, bZ01) * S.pl(s, x, knots02, nknots02, the02, bZ02) }, lower = s, upper = t)$value
+      F01<- integrate(f = function(x) {S.pl(s, x, knots01, nknots01, the01, bZ01) * S.pl(s, x, knots02, nknots02, the02, bZ02) * intensity(times = x, knots = knots01, number.knots = nknots01, theta = the01,linear.predictor = bZ01,method="splines")$intensity }, lower = s, upper = t)$value
+
+    }else{
+      p02_0 <- sapply(t,function(t) {gauss_kronrod(f=function(x){
+        S.pl(s,x,knots01,nknots01,the01,bZ01)*S.pl(s,x,knots02,nknots02,the02,bZ02)*intensity(times=x,knots=knots02,number.knots=nknots02,theta=the02,linear.predictor=bZ02,method="splines")$intensity},a=s,b=t)$value})
+      p01 <- sapply(t,function(t) {gauss_kronrod(f=function(x){S.pl(s,x,knots01,nknots01,the01,bZ01)*S.pl(s,x,knots02,nknots02,the02,bZ02)*intensity(times=x,knots=knots01,number.knots=nknots01,theta=the01,linear.predictor=bZ01,method="splines")$intensity*S.pl(x,t,knots12,nknots12,the12,bZ12)},a=s,b=t)$value})
+      p02_1 <- 1-p00-p02_0-p01
+      p02 <- p02_0+p02_1
+      RM<- gauss_kronrod(f = function(x) {S.pl(s, x, knots01, nknots01, the01, bZ01) * S.pl(s, x, knots02, nknots02, the02, bZ02) }, a = s, b = t)$value
+      F01<- gauss_kronrod(f = function(x) {S.pl(s, x, knots01, nknots01, the01, bZ01) * S.pl(s, x, knots02, nknots02, the02, bZ02) * intensity(times = x, knots = knots01, number.knots = nknots01, theta = the01,linear.predictor = bZ01,method="splines")$intensity }, a = s, b = t)$value
+
+    }
     list(p00=p00,p01=p01,p11=p11,p12=p12,p02_0=p02_0,p02_1=p02_1,p02=p02,F01=F01,F0.=p02_0+p01+p02_1, RM=RM)
 }
 
 ## prediction indicators with weibull 
 Predict0.idmWeib <- function(s,t,a01,b01,a02,b02,a12,b12,bZ01=0,bZ02=0,bZ12=0) {
+
+  if(t==Inf){
     p11 = S.weib(s,t,a12,b12,bZ12)
     p12 = 1-p11
     p00 = S.weib(s,t,a01,b01,bZ01)*S.weib(s,t,a02,b02,bZ02)
@@ -664,8 +955,19 @@ Predict0.idmWeib <- function(s,t,a01,b01,a02,b02,a12,b12,bZ01=0,bZ02=0,bZ12=0) {
     p02 = p02_0+p02_1
     RM= integrate(f = function(x) {S.weib(s, x, a01, b01, bZ01) * S.weib(s, x, a02, b02, bZ02)}, lower = s, upper = t)$value
     F01= integrate(f = function(x) {S.weib(s, x, a01, b01, bZ01) * S.weib(s, x, a02, b02, bZ02)*iweibull(x,a01,b01,bZ01)}, lower = s, upper = t)$value
-    ## return(list(p00=p00,p01=p01,p11=p11,p12=p12,p02_0=p02_0,p02_1=p02_1,p02=p02,F01=p01+p02_1,F0.=p02_0+p01+p02_1))
-    list(p00=p00,p01=p01,p11=p11,p12=p12,p02_0=p02_0,p02_1=p02_1,p02=p02,F01=F01,F0.=p02_0+p01+p02_1, RM=RM)
+  }else{
+    p11 = S.weib(s,t,a12,b12,bZ12)
+    p12 = 1-p11
+    p00 = S.weib(s,t,a01,b01,bZ01)*S.weib(s,t,a02,b02,bZ02)
+    p02_0 = sapply(t,function(t) {gauss_kronrod(f=function(x){S.weib(s,x,a01,b01,bZ01)*S.weib(s,x,a02,b02,bZ02)*iweibull(x,a02,b02,bZ02)},a=s,b=t)$value })
+    p01 = sapply(t,function(t) {gauss_kronrod(f=function(x){S.weib(s,x,a01,b01,bZ01)*S.weib(s,x,a02,b02,bZ02)*iweibull(x,a01,b01,bZ01)*S.weib(x,t,a12,b12,bZ12)},a=s,b=t)$value})
+    p02_1 = 1-p00-p02_0-p01
+    p02 = p02_0+p02_1
+    RM= gauss_kronrod(f = function(x) {S.weib(s, x, a01, b01, bZ01) * S.weib(s, x, a02, b02, bZ02)},a=s,b=t)$value
+    F01=  gauss_kronrod(f = function(x) {S.weib(s, x, a01, b01, bZ01) * S.weib(s, x, a02, b02, bZ02)*iweibull(x,a01,b01,bZ01)}, a = s, b = t)$value
+    
+  }
+  list(p00=p00,p01=p01,p11=p11,p12=p12,p02_0=p02_0,p02_1=p02_1,p02=p02,F01=F01,F0.=p02_0+p01+p02_1, RM=RM)
 }
 
 # a = shape parameter
@@ -773,8 +1075,8 @@ S.pl <- function(s,t,zi,nknots,the,bZ=0) {
 
 # Life expectency with weibull 
 lifexpect0.idmWeib <- function(s,a01,b01,a02,b02,a12,b12,bZ01=0,bZ02=0,bZ12=0,max) {
-    ## print("lifexpect0.idmWeib")
-    # max <- 100
+
+  if(max==Inf){
     ET12 = integrate(
         f=function(x) {
             S.weib(s,x,a12,b12,bZ12)
@@ -790,6 +1092,23 @@ lifexpect0.idmWeib <- function(s,a01,b01,a02,b02,a12,b12,bZ01=0,bZ02=0,bZ12=0,ma
                 upper=x)$value})},s,max)
     LTR=integrate(f=function(x){
       S.weib(s,x,a01,b01,bZ01)*S.weib(s,x,a02,b02,bZ02)*iweibull(x,a01,b01,bZ01)},s,max)
+  }else{
+    ET12 = gauss_kronrod(
+      f=function(x) {
+        S.weib(s,x,a12,b12,bZ12)
+      },a=s,b=max)
+    ET0dot = gauss_kronrod(f=function(x) {
+      S.weib(s,x,a01,b01,bZ01)*S.weib(s,x,a02,b02,bZ02)
+    },a=s,b=max)
+    ET01 = gauss_kronrod(f=function(x){
+      sapply(x,function(x){
+        gauss_kronrod(f=function(y){
+          S.weib(s,y,a01,b01,bZ01)*S.weib(s,y,a02,b02,bZ02)*iweibull(y,a01,b01,bZ01)*S.weib(y,x,a12,b12,bZ12)},
+          a=s,
+          b=x)$value})},a=s+0.0001,b=max) # as a < b 
+    LTR=gauss_kronrod(f=function(x){
+      S.weib(s,x,a01,b01,bZ01)*S.weib(s,x,a02,b02,bZ02)*iweibull(x,a01,b01,bZ01)},a=s,b=max)
+  }
     list(LE.00=ET0dot$value,
          LE.0.=ET01$value+ET0dot$value,
          LE.01=ET01$value,
@@ -799,29 +1118,55 @@ lifexpect0.idmWeib <- function(s,a01,b01,a02,b02,a12,b12,bZ01=0,bZ02=0,bZ12=0,ma
 }
 # Life expectency with splines
 lifexpect0.idmPl <- function(s,knots01,nknots01,the01,knots12,nknots12,the12,knots02,nknots02,the02,bZ01=0,bZ12=0,bZ02=0) {
-  ET12 = integrate(f=function(x) {
-    S.pl(s,x,knots12,nknots12,the12,bZ12)},s,knots12[nknots12+6])
-  ET0dot = integrate(f=function(x) {
-    S.pl(s,x,knots01,nknots01,the01,bZ01)*S.pl(s,x,knots02,nknots02,the02,bZ02)  },s,knots02[nknots02+6])
-  ET01 = integrate(f=function(x) {
-    sapply(x,function(x) {integrate(f=function(y){
-      (S.pl(s,y,knots01,nknots01,the01,bZ01)
-       *S.pl(s,y,knots02,nknots02,the02,bZ02)*
-         intensity(times=y,
-                   knots=knots01,
-                   number.knots=nknots01,
-                   theta=the01,
-                   linear.predictor=bZ01,
-                   method="splines")$intensity
-       *S.pl(y,x,knots12,nknots12,the12,bZ12))},
-      lower=s,upper=x)$value})},s,knots01[nknots01+6])
-  LTR=integrate(f = function(x) {S.pl(s, x, knots01, nknots01, the01, bZ01) * S.pl(s, x, knots02, nknots02, the02, bZ02) * intensity(times = x,
-                                                                                                                                     knots = knots01,
-                                                                                                                                     number.knots = nknots01,
-                                                                                                                                     theta = the01,
-                                                                                                                                     linear.predictor = bZ01,
-                                                                                                                                     method="splines")$intensity }, lower = s, upper = knots01[nknots01+6])$value
-  list(LE.00=ET0dot$value,
+  if(any(c(knots12[nknots12+6],knots02[nknots02+6],knots01[nknots01+6])==Inf)){
+    ET12 = integrate(f=function(x) {
+      S.pl(s,x,knots12,nknots12,the12,bZ12)},s,knots12[nknots12+6])
+    ET0dot = integrate(f=function(x) {
+      S.pl(s,x,knots01,nknots01,the01,bZ01)*S.pl(s,x,knots02,nknots02,the02,bZ02)  },s,knots02[nknots02+6])
+    ET01 = integrate(f=function(x) {
+      sapply(x,function(x) {integrate(f=function(y){
+        (S.pl(s,y,knots01,nknots01,the01,bZ01)
+         *S.pl(s,y,knots02,nknots02,the02,bZ02)*
+           intensity(times=y,
+                     knots=knots01,
+                     number.knots=nknots01,
+                     theta=the01,
+                     linear.predictor=bZ01,
+                     method="splines")$intensity
+         *S.pl(y,x,knots12,nknots12,the12,bZ12))},
+        lower=s,upper=x)$value})},s,knots01[nknots01+6])
+    LTR=integrate(f = function(x) {S.pl(s, x, knots01, nknots01, the01, bZ01) * S.pl(s, x, knots02, nknots02, the02, bZ02) * intensity(times = x,
+                                                                                                                                       knots = knots01,
+                                                                                                                                       number.knots = nknots01,
+                                                                                                                                       theta = the01,
+                                                                                                                                       linear.predictor = bZ01,
+                                                                                                                                       method="splines")$intensity }, lower = s, upper = knots01[nknots01+6])$value
+  }else{
+    ET12 = gauss_kronrod(f=function(x) {
+      S.pl(s,x,knots12,nknots12,the12,bZ12)},a=s,b=knots12[nknots12+6])
+    ET0dot = gauss_kronrod(f=function(x) {
+      S.pl(s,x,knots01,nknots01,the01,bZ01)*S.pl(s,x,knots02,nknots02,the02,bZ02)  },a=s,b=knots02[nknots02+6])
+    ET01 = gauss_kronrod(f=function(x) {
+      sapply(x,function(x) {gauss_kronrod(f=function(y){
+        (S.pl(s,y,knots01,nknots01,the01,bZ01)
+         *S.pl(s,y,knots02,nknots02,the02,bZ02)*
+           intensity(times=y,
+                     knots=knots01,
+                     number.knots=nknots01,
+                     theta=the01,
+                     linear.predictor=bZ01,
+                     method="splines")$intensity
+         *S.pl(y,x,knots12,nknots12,the12,bZ12))},
+        a=s,b=x)$value})},a=s+0.0001,b=knots01[nknots01+6])# as a < b 
+    LTR=gauss_kronrod(f = function(x) {S.pl(s, x, knots01, nknots01, the01, bZ01) * S.pl(s, x, knots02, nknots02, the02, bZ02) * intensity(times = x,
+                                                                                                                                       knots = knots01,
+                                                                                                                                       number.knots = nknots01,
+                                                                                                                                       theta = the01,
+                                                                                                                                       linear.predictor = bZ01,
+                                                                                                                                       method="splines")$intensity }, a = s, b = knots01[nknots01+6])$value
+    
+  }
+    list(LE.00=ET0dot$value,
        LE.0.=ET01$value+ET0dot$value,
        LE.01=ET01$value,
        LE.11=ET12$value,
@@ -832,28 +1177,57 @@ lifexpect0.idmPl <- function(s,knots01,nknots01,the01,knots12,nknots12,the12,kno
  data(Paq1000)
 library(prodlim)
  library(SmoothHazardoptim9)
- fit.paq <- SmoothHazardoptim9::idm(formula02=Hist(time=t,event=death,entry=e)~certif,
-                formula01=Hist(time=list(l,r),event=dementia)~certif,data=Paq1000)
+ fit.paq <- SmoothHazardoptim9::idm(formula02=Hist(time=t,event=death,entry=e)~certif:gender,
+                formula01=Hist(time=list(l,r),event=dementia)~certif:gender,data=Paq1000)
  
- p1<-predict(fit.paq,s=70,t=80,lifeExpect=F,conf.int=T,newdata=data.frame(certif=1))
- p1bis<-predict(fit.paq,s=70,t=80,lifeExpect=F,conf.int=T,newdata=data.frame(certif=1),
+ p1<-predict(fit.paq,
+             s=70,t=80,lifeExpect=F,conf.int=T,
+             newdata=data.frame(certif=1,gender=1))
+ p1<-predict(fit.paq,
+             s=70,t=80,lifeExpect=T,conf.int=T,
+             newdata=data.frame(certif=1,gender=0))
+ p1bis<-predict(fit.paq,s=70,t=80,lifeExpect=F,conf.int=T,newdata=data.frame(certif=1,gender=1),
+                nsim = 1)
+ p1bis<-predict(fit.paq,s=70,t=80,lifeExpect=T,conf.int=T,newdata=data.frame(certif=1,gender=1),
                 nsim = 1)
  
  library(SmoothHazardoptim9)
- fit.paq2 <- SmoothHazardoptim9::idm(formula02=Hist(time=t,event=death,entry=e)~certif,
-                formula01=Hist(time=list(l,r),event=dementia)~certif,data=Paq1000,method="Weib")
+ fit.paq2 <- SmoothHazardoptim9::idm(formula02=Hist(time=t,event=death,entry=e)~certif:gender,
+                formula01=Hist(time=list(l,r),event=dementia)~certif,data=Paq1000,method="splines")
  
- p2<-SmoothHazardoptim9::predict.idm(fit.paq2,s=70,t=80,lifeExpect=F,conf.int=T,newdata=data.frame(certif=1))
-
- fit.splines <-  SmoothHazardoptim9::idm(formula02=Hist(time=t,event=death,entry=e)~certif,
-                     formula01=Hist(time=list(l,r),event=dementia)~certif,
-                     formula12=~1,
-                     method="splines",
-                     data=Paq1000)
+ p1<-predict(fit.paq2,s=70,t=80,lifeExpect=F,newdata=data.frame(certif=1,gender=1))
+ p1bis<-predict(fit.paq2,s=70,t=80,lifeExpect=F,newdata=data.frame(certif=1),nsim=1)
  
- plot(fit.splines)
+ p1<-predict(fit.paq2,s=70,t=80,lifeExpect=T,newdata=data.frame(certif=1))
+ p1bis<-predict(fit.paq2,s=70,t=80,lifeExpect=T,newdata=data.frame(certif=1),nsim=1)
+ # pbr with print 
 # 
 # p3<- SmoothHazardoptim9::predict.idm(fit.splines,s=70,t=80,newdata=data.frame(certif=1))
 # predict(fit.splines,s=70,t=80,lifeExpect=TRUE,newdata=data.frame(certif=1),nsim=20)
 # 
+ 
+ pspline<-SmoothHazardoptim9::  idm(formula02 = f02,
+                           formula01 = f01,
+                           formula12 = f12,data=simu,
+                           nproc=1,penalty = penalty,eps=c(7,2,1),
+                           method="splines",scale.X=F,
+                           lambda01 = lambda01,
+                           lambda02=lambda02,
+                           lambda12=lambda12,
+                           alpha=k,maxiter=100,maxiter.pena = 10)
 
+ for(k in 1:dim(simu)[1]){
+ print(k)
+ p1<-predict(fit.idm.C,
+             s=2,t=10,lifeExpect=T,conf.int=T,
+             newdata=simu[k,])
+ p1bis<-predict(fit.idm.C,
+             s=2,t=10,lifeExpect=F,conf.int=T,
+             newdata=simu[k,])
+ p1<-predict( pspline,
+             s=2,t=10,lifeExpect=T,conf.int=T,
+             newdata=simu[k,])
+ p1bis<-predict( pspline,
+                s=2,t=10,lifeExpect=F,conf.int=T,
+                newdata=simu[k,])
+ }

@@ -7,6 +7,7 @@
 #' \code{\link{idm}} function with \code{intensities}="Weib".
 #' @param conf.int The level of confidence for the hazard ratios. The default is \code{0.95}.
 #' @param digits Number of digits to print.
+#' @param coef If true print coefficient and hazard ratio
 #' @param pvalDigits Number of digits to print for p-values.
 #' @param eps Passed to \code{format.pval}.
 #' @param \dots Not used.
@@ -28,7 +29,7 @@
 #' }
 #' @useDynLib SmoothHazardoptim9
 #' @export
-print.idm <- function(x,conf.int=.95,digits=4,pvalDigits=4,eps=0.0001,...){
+print.idm <- function(x,conf.int=.95,digits=4,pvalDigits=4,eps=0.0001,coef=F,...){
     # {{{  call
     cl <- x$call
     if(is.null(x$BIC)){
@@ -58,19 +59,15 @@ print.idm <- function(x,conf.int=.95,digits=4,pvalDigits=4,eps=0.0001,...){
     # {{{ convergence
     # FIXME: what is the difference between maximum number of iterations reached and
     #        model did not converge?
-    
-    if( sum(x$converged!=1)>0 ){
-      if(length(x$converged)==1){
+
+    if( sum(x$converged!=1)>0 & length(x$converged)==1){
         warning("The model did not converge.","\n")
         switch(as.character(x$converged[1]),
-               "2"={ warning("Maximum number of iterations reached.",call.=FALSE)},
-               "3"={ warning("Fisher information matrix non-positive definite.",call.=FALSE)})
-      }else{
-        warning(paste0("Among the ",n_model," models, ",sum(x$converged!=1)," did not converged"),"\n")
-        warning(paste0("Maximum number of iterations reached for ",sum(x$converged==2)," models"))}
+               "2"={ warning("Maximum number of iterations reached. \n",call.=FALSE)},
+               "3"={ warning("Fisher information matrix non-positive definite. \n",call.=FALSE)})
     }else{
         if(length(x$converged)==1 ){
-            warning("The model did converge.","\n")
+            cat("The model did converge. \n")
             cat("Log-likelihood : ",x$loglik[1], "\n")
             cat("----\nModel converged.\n")
             cat("number of iterations: ", x$niter,"\n")
@@ -79,29 +76,29 @@ print.idm <- function(x,conf.int=.95,digits=4,pvalDigits=4,eps=0.0001,...){
             cat("                    : second derivatives=", signif(x$cv$rdm,2), "\n")
   
         }else{
-          warning(paste0("All ",n_model," models did converge."),"\n")
-          cat("Log-likelihood : ",x$loglik[1:n_model], "\n")
-          cat("----\nModel converged.\n")
-          cat("number of iterations: ", x$niter,"\n")
-          if(x$penalty=="none"){
-            
-          cat("convergence criteria: parameters=", signif(x$cv$cb,2), "\n")
-          cat("                    : likelihood=", signif(x$cv$ca,2), "\n") 
-          cat("                    : second derivatives=", signif(x$cv$rdm,2), "\n")
-          }else{
-            ca.beta<-apply(x$cv$ca.beta,MARGIN=2,FUN=function(x){x<-na.omit(x) 
-            return(x[length(x)])})
-            ca.spline<-apply(x$cv$ca.spline,MARGIN=2,FUN=function(x){x<-na.omit(x) 
-            return(x[length(x)])})
-            cb<-apply(x$cv$cb,MARGIN=2,FUN=function(x){x<-na.omit(x) 
-            return(abs(x[length(x)]-x[length(x)-1]))})
-            cat("convergence criteria: parameters beta=", ca.beta, "\n")
-            cat("                    : parameters base risk=", ca.spline, "\n") 
-            cat("                    : likelihood=", cb, "\n")
+          if(sum(x$converged!=1)>0){
+            warning(paste0("Among the ",n_model," models, ",sum(x$converged!=1)," did not converged"),"\n")
+            warning(paste0("Maximum number of iterations reached for ",sum(x$converged==2)," models. \n"))
+          }
+          ca.beta<-apply(x$cv$ca.beta,MARGIN=2,FUN=function(x){x<-na.omit(x) 
+          return(x[length(x)])})
+          ca.spline<-apply(x$cv$ca.spline,MARGIN=2,FUN=function(x){x<-na.omit(x) 
+          return(x[length(x)])})
+          cb<-apply(x$cv$cb,MARGIN=2,FUN=function(x){x<-na.omit(x) 
+          return(abs(x[length(x)]-x[length(x)-1]))})
+          cat("All ",n_model," models did converge. \n")
+          
+          for(k in 1:n_model){
+            cat("------------ Model ",k," ------------ \n")
+            cat("Log-likelihood : ",x$loglik[k], "\n")
+            cat("number of iterations: ", x$niter[k],"\n")
+            cat("convergence criteria: parameters beta=", ca.beta[k], "\n")
+            cat("                    : parameters base risk=", ca.spline[k], "\n") 
+            cat("                    : likelihood=", cb[k], "\n")
           }
         }
           
-          
+
     # }}}
     # {{{ Spline: baseline parameters
     if (method=="splines"){
@@ -146,63 +143,51 @@ print.idm <- function(x,conf.int=.95,digits=4,pvalDigits=4,eps=0.0001,...){
     }
     # }}}
     # {{{  Regression coefficients
-    if(sum(x$NC)>0){
+    if(sum(x$NC)>0 & coef==T){
       
       if(n_model==1){
         
-        se<-sqrt(diag(x$V[(n_spline+1):(dim(x$V)[1]),(n_spline+1):(dim(x$V)[1])]))
+        if(x$converged==1){
+          se<-sqrt(diag(x$V[(n_spline+1):(dim(x$V)[1]),(n_spline+1):(dim(x$V)[1])]))
+          z <- abs(qnorm((1 + conf.int)/2))
+          wald <- (x$coef/se)**2
+        coefmat <- data.frame("coef"=format(round(x$coef,digits)),
+                              "SE coef"=format(round(se,digits)),
+                              "exp(coef)"=format(round(x$HR,digits)),
+                              "CI"=paste0("[",
+                                          format(round(exp(x$coef - z * se),2)),
+                                          ";",
+                                          format(round(exp(x$coef + z * se),2)),
+                                          "]"),
+                              ## "Wald"=format(wald,digits),
+                              "p-value"=format.pval(1 - pchisq(wald, 1),digits=pvalDigits,eps=eps),
+                              
+                              check.names=FALSE)
+        }else{
+          coefmat <- data.frame("coef"=format(round(x$coef,digits)),
+                                "exp(coef)"=format(round(x$HR,digits)),
+                                check.names=FALSE)
+        }
+        coefmat <- cbind(Factor=names(x$coef),coefmat)
+        coeflist <- split(coefmat,rep(c("transition 0 -> 1","transition 0 -> 2","transition 1 -> 2"),x$NC))
+        cat("\n\nRegression coefficients:\n\n")
+        print(coeflist)
         
       }else{
-        se<-matrix(NA,ncol=n_model,nrow=dim(x$V)[1])
+
         for(k in 1:n_model){
-          se[,k]<-sqrt(diag(x$V[1:(dim(x$V)[1]),((k-1)*dim(x$V)[1]+1):(k*dim(x$V)[1])]))
+          cat("------------ Model ",k," ------------ \n")
+          coefmat <- data.frame("coef"=format(round(x$coef[,k],digits)),
+                                "exp(coef)"=format(round(x$HR[,k],digits)))
+          coefmat <- cbind(Factor=rownames(x$coef),coefmat)
+          coeflist <- split(coefmat,rep(c("transition 0 -> 1","transition 0 -> 2","transition 1 -> 2"),x$NC))
+          cat("\n\n Regression coefficients:\n\n")
+          print(coeflist)
         }
       }
-        
-        
-        z <- abs(qnorm((1 + conf.int)/2))
-        
-        for(k in 1:n_model){
-          if(n_model==1){
-            wald <- (x$coef/se)**2
-            coefmat <- data.frame("coef"=format(round(x$coef,digits)),
-                                  "SE coef"=format(round(se,digits)),
-                                  "exp(coef)"=format(round(x$HR,digits)),
-                                  "CI"=paste0("[",
-                                                        format(round(exp(x$coef - z * se),2)),
-                                                        ";",
-                                                        format(round(exp(x$coef + z * se),2)),
-                                                        "]"),
-                                  ## "Wald"=format(wald,digits),
-                                  "p-value"=format.pval(1 - pchisq(wald, 1),digits=pvalDigits,eps=eps),
-                                        
-                                  check.names=FALSE)
-            coefmat <- cbind(Factor=names(x$coef),coefmat)
-            coeflist <- split(coefmat,rep(c("transition 0 -> 1","transition 0 -> 2","transition 1 -> 2"),x$NC))
-            cat("\n\nRegression coefficients:\n\n")
-            print(coeflist)
-            }else{
-              wald <- (x$coef[,k]/se[,k])**2
-                coefmat <- data.frame("coef"=format(round(x$coef[,k],digits)),
-                                "SE coef"=format(round(se[,k],digits)),
-                                "exp(coef)"=format(round(x$HR[,k],digits)),
-                                "CI"=paste0("[",
-                                            format(round(exp(x$coef[,k] - z * se[,k]),2)),
-                                            ";",
-                                            format(round(exp(x$coef[,k] + z * se[,k]),2)),
-                                            "]"),
-                                ## "Wald"=format(wald,digits),
-                                "p-value"=format.pval(1 - pchisq(wald, 1),digits=pvalDigits,eps=eps),
-                                
-                                check.names=FALSE)
-          coefmat <- cbind(Factor=names(x$coef),coefmat)
-          coeflist <- split(coefmat,rep(c("transition 0 -> 1","transition 0 -> 2","transition 1 -> 2"),x$NC))
-          cat(paste0("\n\nRegression coefficients for model",k,":\n\n"))
-          print(coeflist)
-      }
-       
-    }
     }
     }
 }
+        
+        
 

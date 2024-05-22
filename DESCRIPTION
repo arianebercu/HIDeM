@@ -27,7 +27,8 @@ Imports:
     grDevices, 
     stats, 
     utils,
-    ggplot2
+    ggplot2,
+    pracma
 Maintainer: Ariane Bercu <ariane.bercu@gmail.com>
 License: GPL (>= 2)
 RoxygenNote: 7.3.1
