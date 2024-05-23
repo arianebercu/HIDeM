@@ -293,20 +293,20 @@ predict.idm <- function(object,s,
           knots.unique<-unique(object$knots01)
           knots.bound<-knots.unique[c(1,length(knots.unique))]
           knots.int<-knots.unique[-c(1,length(knots.unique))]
-          msplines01<-splinesMI(x=t,knots=knots.int,Boundary.knots=knots.bound)$Mspline
-          isplines01<-(splinesMI(x=t,knots=knots.int,Boundary.knots=knots.bound)$Ispline-splinesMI(x=s,knots=knots.int,Boundary.knots=knots.bound)$Ispline)
+          msplines01<-splinesMI(x=t,knots=sort(knots.int),Boundary.knots=knots.bound)$Mspline
+          isplines01<-(splinesMI(x=t,knots=sort(knots.int),Boundary.knots=knots.bound)$Ispline-splinesMI(x=s,knots=sort(knots.int),Boundary.knots=knots.bound)$Ispline)
           
           knots.unique<-unique(object$knots02)
           knots.bound<-knots.unique[c(1,length(knots.unique))]
           knots.int<-knots.unique[-c(1,length(knots.unique))]
-          msplines02<-splinesMI(x=t,knots=knots.int,Boundary.knots=knots.bound)$Mspline
-          isplines02<-(splinesMI(x=t,knots=knots.int,Boundary.knots=knots.bound)$Ispline-splinesMI(x=s,knots=knots.int,Boundary.knots=knots.bound)$Ispline)
+          msplines02<-splinesMI(x=t,knots=sort(knots.int),Boundary.knots=knots.bound)$Mspline
+          isplines02<-(splinesMI(x=t,knots=sort(knots.int),Boundary.knots=knots.bound)$Ispline-splinesMI(x=s,knots=sort(knots.int),Boundary.knots=knots.bound)$Ispline)
           
           knots.unique<-unique(object$knots12)
           knots.bound<-knots.unique[c(1,length(knots.unique))]
           knots.int<-knots.unique[-c(1,length(knots.unique))]
-          msplines12<-splinesMI(x=t,knots=knots.int,Boundary.knots=knots.bound)$Mspline
-          isplines12<-(splinesMI(x=t,knots=knots.int,Boundary.knots=knots.bound)$Ispline-splinesMI(x=s,knots=knots.int,Boundary.knots=knots.bound)$Ispline)
+          msplines12<-splinesMI(x=t,knots=sort(knots.int),Boundary.knots=knots.bound)$Mspline
+          isplines12<-(splinesMI(x=t,knots=sort(knots.int),Boundary.knots=knots.bound)$Ispline-splinesMI(x=s,knots=sort(knots.int),Boundary.knots=knots.bound)$Ispline)
           
           
           theta.square01<-the01^2
@@ -738,20 +738,20 @@ predict.idm <- function(object,s,
         knots.unique<-unique(object$knots01)
         knots.bound<-knots.unique[c(1,length(knots.unique))]
         knots.int<-knots.unique[-c(1,length(knots.unique))]
-        msplines01<-splinesMI(x=t,knots=knots.int,Boundary.knots=knots.bound)$Mspline
-        isplines01<-(splinesMI(x=t,knots=knots.int,Boundary.knots=knots.bound)$Ispline-splinesMI(x=s,knots=knots.int,Boundary.knots=knots.bound)$Ispline)
+        msplines01<-splinesMI(x=t,knots=sort(knots.int),Boundary.knots=knots.bound)$Mspline
+        isplines01<-(splinesMI(x=t,knots=sort(knots.int),Boundary.knots=knots.bound)$Ispline-splinesMI(x=s,knots=sort(knots.int),Boundary.knots=knots.bound)$Ispline)
         
         knots.unique<-unique(object$knots02)
         knots.bound<-knots.unique[c(1,length(knots.unique))]
         knots.int<-knots.unique[-c(1,length(knots.unique))]
-        msplines02<-splinesMI(x=t,knots=knots.int,Boundary.knots=knots.bound)$Mspline
-        isplines02<-(splinesMI(x=t,knots=knots.int,Boundary.knots=knots.bound)$Ispline-splinesMI(x=s,knots=knots.int,Boundary.knots=knots.bound)$Ispline)
+        msplines02<-splinesMI(x=t,knots=sort(knots.int),Boundary.knots=knots.bound)$Mspline
+        isplines02<-(splinesMI(x=t,knots=sort(knots.int),Boundary.knots=knots.bound)$Ispline-splinesMI(x=s,knots=sort(knots.int),Boundary.knots=knots.bound)$Ispline)
         
         knots.unique<-unique(object$knots12)
         knots.bound<-knots.unique[c(1,length(knots.unique))]
         knots.int<-knots.unique[-c(1,length(knots.unique))]
-        msplines12<-splinesMI(x=t,knots=knots.int,Boundary.knots=knots.bound)$Mspline
-        isplines12<-(splinesMI(x=t,knots=knots.int,Boundary.knots=knots.bound)$Ispline-splinesMI(x=s,knots=knots.int,Boundary.knots=knots.bound)$Ispline)
+        msplines12<-splinesMI(x=t,knots=sort(knots.int),Boundary.knots=knots.bound)$Mspline
+        isplines12<-(splinesMI(x=t,knots=sort(knots.int),Boundary.knots=knots.bound)$Ispline-splinesMI(x=s,knots=sort(knots.int),Boundary.knots=knots.bound)$Ispline)
         
           
         theta.square01<-the01^2

@@ -197,10 +197,16 @@ intensity <- function(times,knots,number.knots,theta,linear.predictor=0,V=NULL,
       knots.int<-knots.unique[-c(1,length(knots.unique))]
 
       if(is.null(times)){
-        times<-seq(from=knots.bound[1],to=knots.bound[2],length.out=100)}
-      
-      msplines<-splinesMI(x=times,knots=knots.int,Boundary.knots=knots.bound)$Mspline
-      isplines<-splinesMI(x=times,knots=knots.int,Boundary.knots=knots.bound)$Ispline
+        times<-seq(from=knots.bound[1],to=knots.bound[2],length.out=100)
+      }else{
+        times<-times[times>=knots.bound[1] & times<=knots.bound[2]]
+        }
+      # need to sort knots.int  to have same as msplines
+      # do not need to sort times not necessary same output 
+      msplines<-splinesMI(x=times,knots=sort(knots.int),Boundary.knots=knots.bound)$Mspline
+      isplines<-splinesMI(x=times,knots=sort(knots.int),Boundary.knots=knots.bound)$Ispline
+      #splines2::iSpline(x=times,knots=knots.int,Boundary.knots=knots.bound,intercept=T)
+      #browser()
       
       intensity<-msplines%*%theta.square
       cumulative.intensity<-isplines%*%theta.square

@@ -6,14 +6,18 @@
 #' @useDynLib SmoothHazardoptim9
 #' @export
 splinesMI<-function(x,knots,Boundary.knots){
+  
   if(any(Boundary.knots%in%knots)){stop("All interval nodes must be different from external nodes")}
-  knots<-c(rep(knots.bound[1],4),knots,rep(knots.bound[2],4))
-  number.knots<-length(knots)-2
-  Mspline<-matrix(0,nrow=length(x),ncol=number.knots-2)
-  Ispline<-matrix(0,nrow=length(x),ncol=number.knots-2)
-  k<-1
+  knots<-c(rep(Boundary.knots[1],4),knots,rep(Boundary.knots[2],4))
+  number.knots<-length(unique(knots))
+  Mspline<-matrix(0,nrow=length(x),ncol=number.knots+2)
+  Ispline<-matrix(0,nrow=length(x),ncol=number.knots+2)
+  TF<-rep(0,length(x))
+
   for (i in 5:(number.knots+3)) {
-    TF = ( (knots[i-1]<=x) & (x<knots[i]) )
+      TF = ( (knots[i-1]<=x) & (x<knots[i]) )
+    
+      
     if (sum(TF) != 0) { 
       ind = which(TF) 
       mm3=rep(0,length(ind))
@@ -25,9 +29,7 @@ splinesMI<-function(x,knots,Boundary.knots){
       im1=rep(0,length(ind))
       im=rep(0,length(ind))
       j = i-1
-      if (j>4) { 
-        som = sum(theta[1:(j-4)])
-      }
+      
       ht = x[ind]-knots[j] #
       htm = x[ind]-knots[j-1] #
       h2t = x[ind]-knots[j+2] #
@@ -52,16 +54,22 @@ splinesMI<-function(x,knots,Boundary.knots){
       im2[ind] = (0.25*hht*mm2[ind])+(h3m*mm1[ind]*0.25)+(h4*mm[ind]*0.25)
       im1[ind] = (htm*mm1[ind]*0.25)+(h4*mm[ind]*0.25)
       im[ind] = ht*mm[ind]*0.25
+
+      
+      Mspline[ind,c((j-3):(j))]<-cbind(mm3[ind],mm2[ind],mm1[ind],mm[ind])
+      if(j>4){Ispline[ind,c(1:(j-4))]<-1}
+      Ispline[ind,c((j-3):(j))]<-cbind(im3[ind],im2[ind],im1[ind],im[ind])
+
       
     } # fin if (sum(TF) != 0)
+
   } # fin for
-  Mspline[,1]<-mm3
-  Mspline[,2]<-mm2
-  Mspline[,3]<-mm1
-  Mspline[,4]<-mm
-  Ispline[,1]<-im3
-  Ispline[,2]<-im2
-  Ispline[,3]<-im1
-  Ispline[,4]<-im
+  
+  Mspline[which(x<knots[4]),]<-0
+  Mspline[which(x>=knots[number.knots+3]),(number.knots+2)]<- 4/(knots[number.knots+3]-knots[number.knots+2])
+  
+  Ispline[which(x<knots[4]),]<-0
+  Ispline[which(x>=knots[number.knots+3]),1:(number.knots+2)]<-1
   return(list(Mspline=Mspline,Ispline=Ispline))
 }
+
