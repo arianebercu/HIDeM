@@ -708,7 +708,7 @@ idm.penalty<-function(b,fix0,size_V,size_spline,
                                  # evaluate CV criterias 
                                  eval.cv.spline[ite]<-sum((snew-s)^2)
                                  eval.cv.beta[ite]<-sum((betanew-beta)^2)
-                                 eval.cv.loglik[ite]<-abs(fn.valuenew-fn.value)
+                                 eval.cv.loglik[ite]<-abs(fn.valuenew-fn.value)/fn.value
                                  eval.loglik[ite]<-fn.valuenew
                                  eval.validity[ite]<-validity
                                  
@@ -1406,7 +1406,7 @@ idm.penalty<-function(b,fix0,size_V,size_spline,
                                  
                                  eval.cv.spline[ite]<-sum((snew-s)^2)
                                  eval.cv.beta[ite]<-sum((betanew-beta)^2)
-                                 eval.cv.loglik[ite]<-abs(fn.valuenew-fn.value)
+                                 eval.cv.loglik[ite]<-abs(fn.valuenew-fn.value)/fn.value
                                  eval.loglik[ite]<-fn.valuenew
                                  eval.validity[ite]<-validity
                                  
