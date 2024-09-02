@@ -642,7 +642,7 @@ idm <- function(formula01,
     if(is.null(penalty)){
       penalty<-"none"}
     if(!penalty%in%c("none","lasso","ridge","elasticnet","mcp","scad")){
-      stop(paste0("Parameter penalty must be either : lasso, ridge, elastic.net, mcp or scad"))}
+      stop(paste0("Parameter penalty must be either : lasso, ridge, elasticnet, mcp or scad"))}
     
     
     if(!is.null(posfix)){
@@ -1134,7 +1134,7 @@ idm <- function(formula01,
                              penalty=penalty)
             
             
-            
+           
             lambda<-out$lambda
             alpha<-out$alpha
             
@@ -1173,7 +1173,7 @@ idm <- function(formula01,
             npm12<-ifelse(nvat12>0,sum(fix0[(size_spline+nvat01+nvat02+1):size_V]==0),0)
             
             V<-matrix(0,ncol=dim(lambda)[2]*npm,nrow=npm)
-            
+          
             for(i in 1:dim(lambda)[2]){
               id.keep<-which(betaCoef[fix0[(size_spline+1):size_V]==0,i]!=0)
               if(length(id.keep)==0){
@@ -1442,8 +1442,6 @@ idm <- function(formula01,
                                penalty=penalty)
               
               
-              
-              
               beta<-out$b
               fix<-fix0
               lambda<-out$lambda
@@ -1488,7 +1486,7 @@ idm <- function(formula01,
               
               V<-matrix(0,ncol=dim(lambda)[2]*npm,nrow=npm)
 
-              
+          
               
               for(i in 1:dim(lambda)[2]){
                 id.keep<-which(betaCoef[fix0[7:size_V]==0,i]!=0)
