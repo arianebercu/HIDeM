@@ -2,7 +2,7 @@ PKG_LIBS = $(BLAS_LIBS) $(FLIBS)
 FCFLAGS = -mtune=native -O3 -Wall -pedantic -flto=10
 
 FMODSRC = commun.f90 
-FSRC = idmlikelihood.f90 vecspli.f90 
+FSRC = idmlikelihood.f90 
 CSRC= init.c
 
 # Define the order of compilation
