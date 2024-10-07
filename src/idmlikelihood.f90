@@ -2253,6 +2253,7 @@ subroutine qgaussPL15weib(a,b,the01,the02,the12,res,v01,v02,v12)
     	wgk(6)=0.190350578064785409913256402421014d0
     	wgk(7)=0.204432940075298892414161999234649d0
     	wgk(8)=0.209482141084727828012999174891714d0
+     
 
         xm = 0.5d+00*(b+a)
         xr = 0.5d+00*(b-a)
@@ -2295,9 +2296,9 @@ subroutine qgaussPL15weib(a,b,the01,the02,the12,res,v01,v02,v12)
                call fonct(xx,the12,ri12,gl12,su12)
                f1 = (su01**v01)*(su02**v02)*ri01*v01/(su12**v12)
                xx = xm-dx
-               call fonct(xx,the01,nz01,su01,ri01,zi01,gl01)
-               call fonct(xx,the02,nz02,su02,ri02,zi02,gl02)
-               call fonct(xx,the12,nz12,su12,ri12,zi12,gl12)
+               call fonct(xx,the01,ri01,gl01,su01)
+               call fonct(xx,the02,ri02,gl02,su02)
+               call fonct(xx,the12,ri12,gl12,su12)
                f2 = (su01**v1)*(su02**v3)*ri01*v1/(su12**v2)
                fv1(jtwm1) = f1   ! svgrd valeurs fct f a gche du centre
                fv2(jtwm1) = f2   ! svgrd valeurs fct f a drte du centre
@@ -2534,9 +2535,9 @@ subroutine qgaussPL21weib(a,b,the01,the02,the12,res,v01,v02,v12)
                call fonct(xx,the12,ri12,gl12,su12)
                f1 = (su01**v01)*(su02**v02)*ri01*v01/(su12**v12)
                xx = xm-dx
-               call fonct(xx,the01,nz01,su01,ri01,zi01,gl01)
-               call fonct(xx,the02,nz02,su02,ri02,zi02,gl02)
-               call fonct(xx,the12,nz12,su12,ri12,zi12,gl12)
+               call fonct(xx,the01,ri01,gl01,su01)
+               call fonct(xx,the02,ri02,gl02,su02)
+               call fonct(xx,the12,ri12,gl12,su12)
                f2 = (su01**v1)*(su02**v3)*ri01*v1/(su12**v2)
                fv1(jtwm1) = f1   ! svgrd valeurs fct f a gche du centre
                fv2(jtwm1) = f2   ! svgrd valeurs fct f a drte du centre
@@ -2684,7 +2685,7 @@ subroutine qgaussPL21weib(a,b,the01,the02,the12,res,v01,v02,v12)
          end subroutine qgaussPL21
 
 !=============================================================================================  
-!=====QGAUS31 out a 21 point Gauss-Kronrod quadrature rule for weib ==========================
+!=====QGAUS31 out a 31 point Gauss-Kronrod quadrature rule for weib ==========================
 !=============================================================================================  
 
 
@@ -2795,9 +2796,9 @@ subroutine qgaussPL31weib(a,b,the01,the02,the12,res,v01,v02,v12)
                call fonct(xx,the12,ri12,gl12,su12)
                f1 = (su01**v01)*(su02**v02)*ri01*v01/(su12**v12)
                xx = xm-dx
-               call fonct(xx,the01,nz01,su01,ri01,zi01,gl01)
-               call fonct(xx,the02,nz02,su02,ri02,zi02,gl02)
-               call fonct(xx,the12,nz12,su12,ri12,zi12,gl12)
+               call fonct(xx,the01,ri01,gl01,su01)
+               call fonct(xx,the02,ri02,gl02,su02)
+               call fonct(xx,the12,ri12,gl12,su12)
                f2 = (su01**v1)*(su02**v3)*ri01*v1/(su12**v2)
                fv1(jtwm1) = f1   ! svgrd valeurs fct f a gche du centre
                fv2(jtwm1) = f2   ! svgrd valeurs fct f a drte du centre
@@ -2818,7 +2819,7 @@ subroutine qgaussPL31weib(a,b,the01,the02,the12,res,v01,v02,v12)
           end subroutine qgaussPL31weib
 
 !=============================================================================================  
-!=====QGAUS31 out a 21 point Gauss-Kronrod quadrature rule for splines =======================
+!=====QGAUS31 out a 31 point Gauss-Kronrod quadrature rule for splines =======================
 !=============================================================================================  
 
       subroutine qgaussPL31(a,b,the01,the12,the02,res,v1,v2,v3)
@@ -2959,7 +2960,7 @@ subroutine qgaussPL31weib(a,b,the01,the02,the12,res,v01,v02,v12)
          end subroutine qgaussPL31
 
 !=============================================================================================  
-!=====QGAUS41 out a 21 point Gauss-Kronrod quadrature rule for weib ==========================
+!=====QGAUS41 out a 41 point Gauss-Kronrod quadrature rule for weib ==========================
 !=============================================================================================  
 
 subroutine qgaussPL41weib(a,b,the01,the02,the12,res,v01,v02,v12)
@@ -3082,9 +3083,9 @@ subroutine qgaussPL41weib(a,b,the01,the02,the12,res,v01,v02,v12)
                call fonct(xx,the12,ri12,gl12,su12)
                f1 = (su01**v01)*(su02**v02)*ri01*v01/(su12**v12)
                xx = xm-dx
-               call fonct(xx,the01,nz01,su01,ri01,zi01,gl01)
-               call fonct(xx,the02,nz02,su02,ri02,zi02,gl02)
-               call fonct(xx,the12,nz12,su12,ri12,zi12,gl12)
+               call fonct(xx,the01,ri01,gl01,su01)
+               call fonct(xx,the02,ri02,gl02,su02)
+               call fonct(xx,the12,ri12,gl12,su12)
                f2 = (su01**v1)*(su02**v3)*ri01*v1/(su12**v2)
                fv1(jtwm1) = f1   ! svgrd valeurs fct f a gche du centre
                fv2(jtwm1) = f2   ! svgrd valeurs fct f a drte du centre
@@ -3105,7 +3106,7 @@ subroutine qgaussPL41weib(a,b,the01,the02,the12,res,v01,v02,v12)
           end subroutine qgaussPL41weib
 
 !=============================================================================================  
-!=====QGAUS41 out a 21 point Gauss-Kronrod quadrature rule for splines =======================
+!=====QGAUS41 out a 41 point Gauss-Kronrod quadrature rule for splines =======================
 !=============================================================================================  
 
       subroutine qgaussPL41(a,b,the01,the12,the02,res,v1,v2,v3)
@@ -3257,7 +3258,7 @@ subroutine qgaussPL41weib(a,b,the01,the02,the12,res,v01,v02,v12)
          end subroutine qgaussPL41
 
 !=============================================================================================  
-!=====QGAUS51 out a 21 point Gauss-Kronrod quadrature rule for weib ==========================
+!=====QGAUS51 out a 51 point Gauss-Kronrod quadrature rule for weib ==========================
 !=============================================================================================  
 
 
@@ -3394,9 +3395,9 @@ subroutine qgaussPL51weib(a,b,the01,the02,the12,res,v01,v02,v12)
                call fonct(xx,the12,ri12,gl12,su12)
                f1 = (su01**v01)*(su02**v02)*ri01*v01/(su12**v12)
                xx = xm-dx
-               call fonct(xx,the01,nz01,su01,ri01,zi01,gl01)
-               call fonct(xx,the02,nz02,su02,ri02,zi02,gl02)
-               call fonct(xx,the12,nz12,su12,ri12,zi12,gl12)
+               call fonct(xx,the01,ri01,gl01,su01)
+               call fonct(xx,the02,ri02,gl02,su02)
+               call fonct(xx,the12,ri12,gl12,su12)
                f2 = (su01**v1)*(su02**v3)*ri01*v1/(su12**v2)
                fv1(jtwm1) = f1   ! svgrd valeurs fct f a gche du centre
                fv2(jtwm1) = f2   ! svgrd valeurs fct f a drte du centre
@@ -3417,7 +3418,7 @@ subroutine qgaussPL51weib(a,b,the01,the02,the12,res,v01,v02,v12)
           end subroutine qgaussPL51weib
 
 !=============================================================================================  
-!=====QGAUS51 out a 21 point Gauss-Kronrod quadrature rule for splines =======================
+!=====QGAUS51 out a 51 point Gauss-Kronrod quadrature rule for splines =======================
 !=============================================================================================  
 
 
@@ -3584,7 +3585,7 @@ subroutine qgaussPL51weib(a,b,the01,the02,the12,res,v01,v02,v12)
          end subroutine qgaussPL51
 
 !=============================================================================================  
-!=====QGAUS61 out a 21 point Gauss-Kronrod quadrature rule for weib ==========================
+!=====QGAUS61 out a 61 point Gauss-Kronrod quadrature rule for weib ==========================
 !=============================================================================================  
 
 
@@ -3733,9 +3734,9 @@ subroutine qgaussPL61weib(a,b,the01,the02,the12,res,v01,v02,v12)
                call fonct(xx,the12,ri12,gl12,su12)
                f1 = (su01**v01)*(su02**v02)*ri01*v01/(su12**v12)
                xx = xm-dx
-               call fonct(xx,the01,nz01,su01,ri01,zi01,gl01)
-               call fonct(xx,the02,nz02,su02,ri02,zi02,gl02)
-               call fonct(xx,the12,nz12,su12,ri12,zi12,gl12)
+               call fonct(xx,the01,ri01,gl01,su01)
+               call fonct(xx,the02,ri02,gl02,su02)
+               call fonct(xx,the12,ri12,gl12,su12)
                f2 = (su01**v1)*(su02**v3)*ri01*v1/(su12**v2)
                fv1(jtwm1) = f1   ! svgrd valeurs fct f a gche du centre
                fv2(jtwm1) = f2   ! svgrd valeurs fct f a drte du centre
@@ -3756,7 +3757,7 @@ subroutine qgaussPL61weib(a,b,the01,the02,the12,res,v01,v02,v12)
           end subroutine qgaussPL61weib
 
 !=============================================================================================  
-!=====QGAUS61 out a 21 point Gauss-Kronrod quadrature rule for splines =======================
+!=====QGAUS61 out a 61 point Gauss-Kronrod quadrature rule for splines =======================
 !=============================================================================================  
 
 
