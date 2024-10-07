@@ -2259,7 +2259,7 @@ subroutine qgaussPL15weib(a,b,the01,the02,the12,res,v01,v02,v12)
         xr = 0.5d+00*(b-a)
         call fonct(xm,the01,ri01,gl01,su01)
         call fonct(xm,the02,ri02,gl02,su02)
-        call fonct(xm,the12,ri12,gl12,qu12)
+        call fonct(xm,the12,ri12,gl12,su12)
         fc = (su01**v01)*(su02**v02)*ri01*v01/(su12**v12)  ! valeur fct f au milieu de intervalle (a,b), cas pnt 0
 
     	resg = fc*wg(4)        ! init res Gauss  ! fc * 4e poids Gauss
@@ -2497,7 +2497,7 @@ subroutine qgaussPL21weib(a,b,the01,the02,the12,res,v01,v02,v12)
         xr = 0.5d+00*(b-a)
         call fonct(xm,the01,ri01,gl01,su01)
         call fonct(xm,the02,ri02,gl02,su02)
-        call fonct(xm,the12,ri12,gl12,qu12)
+        call fonct(xm,the12,ri12,gl12,su12)
         fc = (su01**v01)*(su02**v02)*ri01*v01/(su12**v12)  ! valeur fct f au milieu de intervalle (a,b), cas pnt 0
 
     	resg = 0        ! init 0
@@ -2758,7 +2758,7 @@ subroutine qgaussPL31weib(a,b,the01,the02,the12,res,v01,v02,v12)
         xr = 0.5d+00*(b-a)
         call fonct(xm,the01,ri01,gl01,su01)
         call fonct(xm,the02,ri02,gl02,su02)
-        call fonct(xm,the12,ri12,gl12,qu12)
+        call fonct(xm,the12,ri12,gl12,su12)
         fc = (su01**v01)*(su02**v02)*ri01*v01/(su12**v12)  ! valeur fct f au milieu de intervalle (a,b), cas pnt 0
 
     	resg = wg(8)*fc        ! init at wg(8)
@@ -3045,7 +3045,7 @@ subroutine qgaussPL41weib(a,b,the01,the02,the12,res,v01,v02,v12)
         xr = 0.5d+00*(b-a)
         call fonct(xm,the01,ri01,gl01,su01)
         call fonct(xm,the02,ri02,gl02,su02)
-        call fonct(xm,the12,ri12,gl12,qu12)
+        call fonct(xm,the12,ri12,gl12,su12)
         fc = (su01**v01)*(su02**v02)*ri01*v01/(su12**v12)  ! valeur fct f au milieu de intervalle (a,b), cas pnt 0
 
     	resg = 0        ! init at wg(8)
@@ -3357,7 +3357,7 @@ subroutine qgaussPL51weib(a,b,the01,the02,the12,res,v01,v02,v12)
         xr = 0.5d+00*(b-a)
         call fonct(xm,the01,ri01,gl01,su01)
         call fonct(xm,the02,ri02,gl02,su02)
-        call fonct(xm,the12,ri12,gl12,qu12)
+        call fonct(xm,the12,ri12,gl12,su12)
         fc = (su01**v01)*(su02**v02)*ri01*v01/(su12**v12)  ! valeur fct f au milieu de intervalle (a,b), cas pnt 0
 
     	resg = fc*wgk(13)        ! init at wg(13)
@@ -3696,7 +3696,7 @@ subroutine qgaussPL61weib(a,b,the01,the02,the12,res,v01,v02,v12)
         xr = 0.5d+00*(b-a)
         call fonct(xm,the01,ri01,gl01,su01)
         call fonct(xm,the02,ri02,gl02,su02)
-        call fonct(xm,the12,ri12,gl12,qu12)
+        call fonct(xm,the12,ri12,gl12,su12)
         fc = (su01**v01)*(su02**v02)*ri01*v01/(su12**v12)  ! valeur fct f au milieu de intervalle (a,b), cas pnt 0
 
     	resg = 0       ! init at 0
