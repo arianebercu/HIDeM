@@ -28,7 +28,7 @@
 #'
 
 
-deriva_gradient <- function(nproc=1,b,funcpa,.packages=NULL,...){
+deriva.gradient <- function(nproc=1,b,funcpa,.packages=NULL,...){
   
   m <- length(b)
   bh2 <- bh <- rep(0,m)

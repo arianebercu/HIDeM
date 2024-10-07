@@ -1018,7 +1018,7 @@ idm <- function(formula01,
               }
              # calculate derivatives when all beta=0 to 
              # estimate range of values for lambda
-              output<-deriva_gradient(b=c(b[1:size_spline],rep(0,size_V-size_spline)),
+              output<-deriva.gradient(b=c(b[1:size_spline],rep(0,size_V-size_spline)),
                                   nproc=nproc,
                                   funcpa=idmlLikelihood,
                                   npm=size_V,
@@ -1350,7 +1350,7 @@ idm <- function(formula01,
               }
               # calculate derivatives at beta=0, to have a range of 
               # value for lambda 
-              output<-deriva_gradient(b=c(b[1:6],rep(0,size_V-6)),
+              output<-deriva.gradient(b=c(b[1:6],rep(0,size_V-6)),
                                   nproc=nproc,
                                   funcpa=idmlLikelihoodweib,
                                   npm=size_V,
