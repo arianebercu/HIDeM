@@ -42,8 +42,6 @@
 #' respective values change less then \eqn{10^{-5}} (for regression
 #' parameters and likelihood) and \eqn{10^{-3}} for the second
 #' derivatives between two iterations.
-#' @param eps.spline the power of convergence for splines parameters only
-#' @param eps.eigen the power of convergence for eigen values of covariance matrix only
 #' @param n.knots For \code{method="splines"} only, a vector of length
 #' 3 specifing the number of knots, one for each transition, for the
 #' M-splines estimate of the baseline intensities in the order \code{0
@@ -82,8 +80,6 @@
 #' intensities by M-splines, "Weib" for a parametric approach with a
 #' Weibull distribution on the transition intensities. Default is
 #' "Weib".
-#' @param subset expression indicating the subset of the rows of data
-#' to be used in the fit. All observations are included by default.
 #' @param na.action how NAs are treated. The default is first, any
 #' na.action attribute of data, second a na.action setting of options,
 #' and third 'na.fail' if that is unset. The 'factory-fresh' default
@@ -219,7 +215,7 @@
 #' @importFrom prodlim Hist
 #' @useDynLib SmoothHazardoptim9
 #' @export
-calibrate.penidm <- function(
+bootstrap.idm <- function(
                 K=100, # number of sample,
                 tau = 0.5, #% in each fold
                 seed = 1, # seed
@@ -229,19 +225,14 @@ calibrate.penidm <- function(
                 formula02,
                 formula12,
                 data,
-
                 method="Weib",
                 scale.X=T,
                 maxiter=100,
                 maxiter.pena=10,
-
                 eps=c(5,5,3),
-                eps.spline=3,
-                eps.eigen=2,
                 n.knots=NULL,
                 knots="equidistant",
                 type.quantile=1,
-                subset=NULL,
                 na.action = na.fail,
 
                 B=NULL,
@@ -260,6 +251,11 @@ calibrate.penidm <- function(
                 alpha=ifelse(penalty=="scad",3.7,
                              ifelse(penalty=="mcp",3,
                                     ifelse(penalty%in%c("elasticnet","corrected.elasticnet"),0.5,1))),
+                step.sequential=F,
+                option.sequential=list(cutoff=10^-3,
+                                       min=20,
+                                       step=10),
+                
                 nproc=1,
                 clustertype="FORK"){
   
@@ -300,8 +296,12 @@ calibrate.penidm <- function(
       # if start is specified or first ite 
       if(k>1 & is.null(B)){
         if(method=="Weib"){
-          B<-c(model.idm$modelPar[,1],model.idm$coef[,1])
-        }else{B<-c(model.idm$theta01[,1],model.idm$theta02[,1],model.idm$theta12[,1],model.idm$coef[,1])}
+          B<-ifelse(dim(model.idm$coef)[2]==1,
+                    c(model.idm$modelPar,model.idm$coef[,1]),
+                        c(model.idm$modelPar[,1],model.idm$coef[,1]))
+        }else{B<-ifelse(dim(model.idm$coef)[2]==1,
+                        c(model.idm$theta01,model.idm$theta02,model.idm$theta12,model.idm$coef[,1]),
+                        c(model.idm$theta01[,1],model.idm$theta02[,1],model.idm$theta12[,1],model.idm$coef[,1]))}
       }
       model.idm<-SmoothHazardoptim9::idm(formula01=formula01,
                  formula02=formula02,
@@ -312,12 +312,9 @@ calibrate.penidm <- function(
                  maxiter=maxiter,
                  maxiter.pena=maxiter.pena,
                  eps=eps,
-                 eps.spline=eps.spline,
-                 eps.eigen=eps.eigen,
                  n.knots=n.knots,
                  knots=knots,
                  type.quantile=type.quantile,
-                 subset=subset,
                  na.action =na.action,
                  B=B,
                  posfix=posfix,
@@ -331,11 +328,8 @@ calibrate.penidm <- function(
                  penalty=penalty,
                  penalty.factor=penalty.factor,
                  alpha=alpha,
-                 step.sequential=F,
-                 option.sequential=list(cutoff=10^-3,
-                                             min=20,
-                                             step=10),
-                      
+                 step.sequential=step.sequential,
+                 option.sequential=option.sequential,
                  nproc=nproc,
                  clustertype=clustertype)
       
@@ -348,8 +342,12 @@ calibrate.penidm <- function(
       # if start is specified or first ite 
       if(k>1 & is.null(B)){
         if(method=="Weib"){
-          B<-c(model.idm$modelPar[,1],model.idm$coef[,1])
-        }else{B<-c(model.idm$theta01[,1],model.idm$theta02[,1],model.idm$theta12[,1],model.idm$coef[,1])}
+          B<-ifelse(dim(model.idm$coef)[2]==1,
+                    c(model.idm$modelPar,model.idm$coef[,1]),
+                    c(model.idm$modelPar[,1],model.idm$coef[,1]))
+        }else{B<-ifelse(dim(model.idm$coef)[2]==1,
+                        c(model.idm$theta01,model.idm$theta02,model.idm$theta12,model.idm$coef[,1]),
+                        c(model.idm$theta01[,1],model.idm$theta02[,1],model.idm$theta12[,1],model.idm$coef[,1]))}
       }
       model.idm<-SmoothHazardoptim9::idm(formula01=formula01,
                      formula02=formula02,
@@ -360,12 +358,9 @@ calibrate.penidm <- function(
                      maxiter=maxiter,
                      maxiter.pena=maxiter.pena,
                      eps=eps,
-                     eps.spline=eps.spline,
-                     eps.eigen=eps.eigen,
                      n.knots=n.knots,
                      knots=knots,
                      type.quantile=type.quantile,
-                     subset=subset,
                      na.action =na.action,
                      B=B,
                      posfix=posfix,
@@ -379,11 +374,8 @@ calibrate.penidm <- function(
                      penalty=penalty,
                      penalty.factor=penalty.factor,
                      alpha=alpha,
-                     step.sequential=F,
-                     option.sequential=list(cutoff=10^-3,
-                                            min=20,
-                                            step=10),
-                     
+                     step.sequential=step.sequential,
+                     option.sequential=option.sequential,
                      nproc=nproc,
                      clustertype=clustertype)
     }
@@ -393,101 +385,6 @@ calibrate.penidm <- function(
   }
   
   
-  BIC<-GCV<-CV<-matrix(NA,ncol=K,nrow=length(model[[1]]$BIC))
-  pi<-score<-rep(NA,length(model[[1]]$BIC))
-  
-  for(k in 1:K){
-    BIC[,k]<-model[[k]]$BIC
-    GCV[,k]<-model[[k]]$GCV
-    CV[,k]<-model[[k]]$converged
-  }
-  
-  # same lambda for all
-  lambda01<-model[[1]]$lambda[1,]
-  lambda02<-model[[1]]$lambda[2,]
-  lambda12<-model[[1]]$lambda[3,]
-  
-  meanBIC<-sapply(c(1:dim(BIC)[1]),FUN=function(x){
-    y<-BIC[x,]
-    y<-y[CV[x,]==1]
-    mean(y)
-  })
-  
-  meanGCV<-sapply(c(1:dim(GCV)[1]),FUN=function(x){
-    y<-GCV[x,]
-    y<-y[CV[x,]==1]
-    mean(y)
-  })
-  
-  optBIC<-list(lambda01=lambda01[which.min(meanBIC)],
-               lambda02=lambda02[which.min(meanBIC)],
-               lambda12=lambda12[which.min(meanBIC)],
-               BIC=min(meanBIC))
-  optGCV<-list(lambda01=lambda01[which.min(meanGCV)],
-               lambda02=lambda02[which.min(meanGCV)],
-               lambda12=lambda12[which.min(meanGCV)],
-               GCV=min(meanGCV))
-  
-  init<-0
-  pi_list <-seq(0.6, 0.9, by = 0.01)
-  if(calscore==T){
-    
-    #selprop proportions de fois où le coef est sélectionné
-    # do a loop on lambda
-    for (m in 1:length(lambda01)[1]){
-      coef<-rep(0,length(model[[1]]$coef[,m]))
-      names(coef)<-rownames(model[[1]]$coef)
-      for(k in 1:K){
-        coef<-coef+ifelse(model[[k]]$coef[,m]!=0,1,0)
-      }
-      selprop<-coef/K
-    
-      if(any(selprop!=1)){
-      value<-StabilityScore(selprop, 
-                               pi_list = pi_list,
-                               K=K, 
-                               n_cat = 3)
-      
-      id_NA<-which(!is.na(value))
-      value<-value[id_NA]
-      pi_seq<-pi_list[id_NA]
-      pi[m]<-pi_seq[which.min(value)]
-      score[m]<-min(value)
-      if(init==0){
-        opt<-score[m]
-        prop<-selprop
-        init<-1
-        }else{
-          if(score[m]<opt){
-            opt<-score[m]
-            prop<-selprop
-          }
-        }
-      
-      }else{score[m]<-pi[m]<-NA}
-      
-  
-        
-    }
-      
-    
-    optCal<-list(score=score,
-                 pi=pi,
-                 selprop=prop,
-                 lambda01=lambda01,
-                 lambda02=lambda02,
-                 lambda12=lambda12
-                 )
-    
-  }else{
-    optCal<-NULL
-  }
-  
-
-  
-  return(list(optGCV=optGCV,
-              optBIC=optBIC,
-              optCal=optCal,
-              model=model))
+  return(model)
     # 
 }

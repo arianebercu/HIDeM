@@ -1,4 +1,4 @@
-### intensity.R ---
+## intensity.R ---
 #----------------------------------------------------------------------
 ## author: Thomas Alexander Gerds
 ## created: Feb  6 2016 (08:47)
@@ -79,7 +79,7 @@
 #' @author R: Celia Touraine <Celia.Touraine@@isped.u-bordeaux2.fr> and Thomas Alexander Gerds <tag@@biostat.ku.dk>
 #' Fortran: Pierre Joly <Pierre.Joly@@isped.u-bordeaux2.fr>
 #' 
-intensity <- function(times,knots,number.knots,theta,linear.predictor=0,V=NULL,
+intensity <- function(times,knots,number.knots=NULL,theta,linear.predictor=0,V=NULL,
                       fix=NULL,converged=NULL,conf.int = 0.95,
                       method="weib") {
   
@@ -91,6 +91,7 @@ intensity <- function(times,knots,number.knots,theta,linear.predictor=0,V=NULL,
     if(sum(is.na(theta))>0 | sum(is.na(times))>0)stop("No missing data is allowed in theta and times")
     
   }else{
+    if(is.null(number.knots))stop("Need to specify the number of knots")
     if (length(theta)!= number.knots+2) stop(paste0("For ",
                   number.knots,
                   " knots we need ",
@@ -260,58 +261,54 @@ intensity <- function(times,knots,number.knots,theta,linear.predictor=0,V=NULL,
 #----------------------------------------------------------------------
 ### intensity.R ends here
 # # 
-# library(SmoothHazardoptim9)
-# data(Paq1000)
+#  library(SmoothHazardoptim9)
+#  data(Paq1000)
+#  
+# #  Illness-death model with certif on the 3 transitions
+# #  Weibull parametrization and likelihood maximization
+#  
+#  fit.weib <- SmoothHazardoptim9::idm(formula02=Hist(time=t,event=death,entry=e)~certif,
+#                  formula01=Hist(time=list(l,r),event=dementia)~certif,
+#                  data=Paq1000)
+#  
+#  test<-intensity(times=fit.weib$time,
+#            theta=fit.weib$modelPar[1:2]^2,linear.predictor=0,V=fit.weib$V[1:2,1:2],
+#            fix=rep(0,2),converged=1,conf.int = 0.95,
+#            method="weib")
+#  
+#  round(test$intensity,4)==round(fit.weib$intensity01,4)
+#  test$lowerintensity
+#  fit.weib$lowerIntensity01
+#  
+#  test$upperintensity
+#  fit.weib$upperIntensity01
+#  
+#  fit.s<- SmoothHazardoptim9::idm(formula02=Hist(time=t,event=death,entry=e)~certif,
+#                                        formula01=Hist(time=list(l,r),event=dementia)~certif,
+#                                        data=Paq1000,method = "splines",n.knots = c(3,3,3))
+#  
+#  
+#  
+#  test<-intensity(times=fit.s$time[,1],
+#                  theta=fit.s$theta01,
+#                  knots=fit.s$knots01,
+#                  number.knots=fit.s$nknots01,linear.predictor=0,V=fit.s$V[1:5,1:5],
+#                  fix=rep(0,5),converged=1,conf.int = 0.95,
+#                  method="splines")
+#  
+#  fit.idm <-  SmoothHazardoptim9::idm(formula02 = Hist(time = t, event = death, entry = e) ~ certif,
+#                  formula01 = Hist(time = list(l,r), event = dementia) ~ certif,
+#                  formula12 = ~ certif, method = "Splines", data = Paq1000)
+#  
+#  test<-intensity(times=fit.idm$time[,1],
+#                  theta=fit.idm$theta01,
+#                  knots=fit.idm$knots01,
+#                  number.knots=fit.idm$nknots01,linear.predictor=0,V=fit.idm$V[1:9,1:9],
+#                  fix=rep(0,9),converged=1,conf.int = 0.95,
+#                  method="splines")
+#  test$intensity
+#  fit.idm$intensity01
 # 
-# # Illness-death model with certif on the 3 transitions
-# # Weibull parametrization and likelihood maximization
+#  same function as isplines and msplines from packages splines2 
+#  --> rewrite to use this as internal 
 # 
-# fit.weib <- SmoothHazardpptim9::idm(formula02=Hist(time=t,event=death,entry=e)~certif,
-#                 formula01=Hist(time=list(l,r),event=dementia)~certif,
-#                 data=Paq1000)
-# 
-# 
-# fit.weib.8 <- SmoothHazardoptim9::idm(formula02=Hist(time=t,event=death,entry=e)~certif,
-#                 formula01=Hist(time=list(l,r),event=dementia)~certif,
-#                 data=Paq1000)
-# test<-intensity(times=fit.weib$time,
-#           theta=fit.weib.8$modelPar[1:2]^2,linear.predictor=0,V=fit.weib.8$V[1:2,1:2],
-#           fix=rep(0,2),converged=1,conf.int = 0.95,
-#           method="Weib")
-# 
-# round(test$intensity,4)==round(fit.weib$intensity01,4)
-# test$lowerintensity
-# fit.weib$lowerIntensity01
-# 
-# test$upperintensity
-# fit.weib$upperIntensity01
-# 
-# fit.s<- SmoothHazardoptim9::idm(formula02=Hist(time=t,event=death,entry=e)~certif,
-#                                       formula01=Hist(time=list(l,r),event=dementia)~certif,
-#                                       data=Paq1000,method = "splines",n.knots = c(3,3,3))
-# 
-# 
-# 
-# test<-intensity(times=fit.s$time[,1],
-#                 theta=fit.s$theta01,
-#                 knots=fit.s$knots01,
-#                 number.knots=fit.s$nknots01,linear.predictor=0,V=fit.s$V[1:5,1:5],
-#                 fix=rep(0,5),converged=1,conf.int = 0.95,
-#                 method="splines")
-# 
-# fit.idm <-  SmoothHazardoptim9::idm(formula02 = Hist(time = t, event = death, entry = e) ~ certif,
-#                 formula01 = Hist(time = list(l,r), event = dementia) ~ certif,
-#                 formula12 = ~ certif, method = "Splines", data = Paq1000)
-# 
-# test<-intensity(times=fit.idm$time[,1],
-#                 theta=fit.idm$theta01,
-#                 knots=fit.idm$knots01,
-#                 number.knots=fit.idm$nknots01,linear.predictor=0,V=fit.idm$V[1:9,1:9],
-#                 fix=rep(0,9),converged=1,conf.int = 0.95,
-#                 method="splines")
-# test$intensity
-# fit.idm$intensity01
-
-# same function as isplines and msplines from packages splines2 
-# --> rewrite to use this as internal 
-

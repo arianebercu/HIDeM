@@ -1,4 +1,4 @@
-idm.no.penalty<-function(b,clustertype,epsa,epsb,epsd,nproc,maxiter,size_V,size_spline,noVar,bfix,
+idm.splines<-function(b,clustertype,epsa,epsb,epsd,nproc,maxiter,size_V,size_spline,noVar,bfix,
                          fix0,knots01,knots02,knots12,ctime,N,nknots01,nknots02,nknots12,
                          ve01,ve02,ve12,dimnva01,dimnva02,dimnva12,nvat01,nvat02,nvat12,
                          t0,t1,t2,t3,troncature,gauss.point,step.sequential,option.sequential){

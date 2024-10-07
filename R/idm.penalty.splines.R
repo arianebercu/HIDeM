@@ -24,8 +24,6 @@
 ##' @param nknots01 number of knots for transition 0 -->1 
 ##' @param nknots02 number of knots for transition 0 -->2
 ##' @param nknots12 number of knots for transition 1 -->2
-##' @param step.sequential do we want to fix some splines parameters
-##' @param option.sequential what are the options of we fix somes splines
 ##' @param t0 time entry
 ##' @param t1 time L
 ##' @param t2 time R
@@ -53,14 +51,13 @@
 #' @importFrom foreach "%do%"
 #' @importFrom foreach "%dopar%"
 #' @useDynLib SmoothHazardoptim9
-idm.penalty<-function(b,fix0,size_V,size_spline,
+idm.penalty.splines<-function(b,fix0,size_V,size_spline,
                       clustertype,epsa,epsb,epsd,eps.eigen,nproc,maxiter,maxiter.pena,
                       knots01,knots02,knots12,ctime,N,nknots01,nknots02,nknots12,
                       ve01,ve02,ve12,dimnva01,dimnva02,dimnva12,nvat01,nvat02,nvat12,
                       t0,t1,t2,t3,troncature,gauss.point,
                       nlambda01,lambda01,nlambda02,lambda02,
-                      nlambda12,lambda12,alpha,penalty.factor,
-                      step.sequential,option.sequential,penalty){
+                      nlambda12,lambda12,alpha,penalty.factor,penalty){
   
   
   # need to keep original fix to calculate for beta 

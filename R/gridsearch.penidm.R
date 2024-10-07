@@ -41,8 +41,6 @@
 #' respective values change less then \eqn{10^{-5}} (for regression
 #' parameters and likelihood) and \eqn{10^{-3}} for the second
 #' derivatives between two iterations.
-#' @param eps.spline the power of convergence for splines parameters only
-#' @param eps.eigen the power of convergence for eigen values of covariance matrix only
 #' @param n.knots For \code{method="splines"} only, a vector of length
 #' 3 specifing the number of knots, one for each transition, for the
 #' M-splines estimate of the baseline intensities in the order \code{0
@@ -81,8 +79,6 @@
 #' intensities by M-splines, "Weib" for a parametric approach with a
 #' Weibull distribution on the transition intensities. Default is
 #' "Weib".
-#' @param subset expression indicating the subset of the rows of data
-#' to be used in the fit. All observations are included by default.
 #' @param na.action how NAs are treated. The default is first, any
 #' na.action attribute of data, second a na.action setting of options,
 #' and third 'na.fail' if that is unset. The 'factory-fresh' default
@@ -220,12 +216,9 @@ gridsearch.penidm <- function(
                 maxiter.pena=10,
 
                 eps=c(5,5,3),
-                eps.spline=3,
-                eps.eigen=2,
                 n.knots=NULL,
                 knots="equidistant",
                 type.quantile=1,
-                subset=NULL,
                 na.action = na.fail,
 
                 B=NULL,
@@ -369,12 +362,9 @@ gridsearch.penidm <- function(
                                   alpha=alpha,
                                   maxiter=maxiter,
                                   maxiter.pena = maxiter.pena,
-                                  eps.spline=eps.spline,
-                                  eps.eigen=eps.eigen, 
                                   n.knots=n.knots,
                                   knots=knots,
                                   type.quantile=type.quantile,
-                                  subset=subset,
                                   na.action =na.action,
                                   B=B,
                                   gauss.point=gauss.point,
@@ -409,12 +399,9 @@ gridsearch.penidm <- function(
                                   alpha=alpha,
                                   maxiter=maxiter,
                                   maxiter.pena = maxiter.pena,
-                                  eps.spline=eps.spline,
-                                  eps.eigen=eps.eigen,
                                   n.knots=n.knots,
                                   knots=knots,
                                   type.quantile=type.quantile,
-                                  subset=subset,
                                   na.action =na.action,
                                   B=B,
                                   gauss.point=gauss.point,
@@ -450,12 +437,9 @@ gridsearch.penidm <- function(
                                   alpha=alpha,
                                   maxiter=maxiter,
                                   maxiter.pena = maxiter.pena,
-                                  eps.spline=eps.spline,
-                                  eps.eigen=eps.eigen,
                                   n.knots=n.knots,
                                   knots=knots,
                                   type.quantile=type.quantile,
-                                  subset=subset,
                                   na.action =na.action,
                                   B=B,
                                   gauss.point=gauss.point,
@@ -486,7 +470,7 @@ gridsearch.penidm <- function(
   
   id12<-which(m12$BIC%in%BIC12)
   if(length(id12)==0){
-    warning("No model converged for transition 1-->2, values without convergence will be give.")
+    warning("No model converged for transition 1-->2, values without convergence will be given.")
     BIC12<-sort(m12$BIC)
     BIC12<-na.omit(unique(BIC12))
     sizegrid[3]<-ifelse(length(BIC12)<sizegrid[3],length(BIC12),sizegrid[3])
