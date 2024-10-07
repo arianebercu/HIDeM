@@ -34,7 +34,6 @@
 ##' @param epsb control convergence parameter for loglik
 ##' @param epsd control convergence for distance to minimum rdm
 ##' @param eps.eigen the power of convergence for eigen values of covariance matrix only
-##' @param eps.spline the power of convergence for splines parameters only
 ##' @param clustertype in which cluster to work
 ##' @param nproc number of cluster
 ##' @param maxiter Maximum number of iterations. The default is 200.
@@ -55,7 +54,7 @@
 #' @importFrom foreach "%dopar%"
 #' @useDynLib SmoothHazardoptim9
 idm.penalty<-function(b,fix0,size_V,size_spline,
-                      clustertype,epsa,epsb,epsd,eps.spline,eps.eigen,nproc,maxiter,maxiter.pena,
+                      clustertype,epsa,epsb,epsd,eps.eigen,nproc,maxiter,maxiter.pena,
                       knots01,knots02,knots12,ctime,N,nknots01,nknots02,nknots12,
                       ve01,ve02,ve12,dimnva01,dimnva02,dimnva12,nvat01,nvat02,nvat12,
                       t0,t1,t2,t3,troncature,gauss.point,
@@ -599,7 +598,7 @@ idm.penalty<-function(b,fix0,size_V,size_spline,
                                  ################## update splines parameters ##
                                  output.mla<- marqLevAlg::mla(b=b,
                                                   fn=idmlLikelihood,
-                                                  epsa=eps.spline,
+                                                  epsa=epsa,
                                                   epsb=epsb,
                                                   epsd=epsd,
                                                   maxiter=maxiter.pena,
@@ -708,7 +707,7 @@ idm.penalty<-function(b,fix0,size_V,size_spline,
                                  # evaluate CV criterias 
                                  eval.cv.spline[ite]<-sum((snew-s)^2)
                                  eval.cv.beta[ite]<-sum((betanew-beta)^2)
-                                 eval.cv.loglik[ite]<-abs(fn.valuenew-fn.value)/fn.value
+                                 eval.cv.loglik[ite]<-abs((fn.valuenew-fn.value)/fn.value)
                                  eval.loglik[ite]<-fn.valuenew
                                  eval.validity[ite]<-validity
                                  
@@ -718,7 +717,7 @@ idm.penalty<-function(b,fix0,size_V,size_spline,
                                  fn.value<-fn.valuenew
                                  
                                  # eval.cv beta valid only if validity.param=T
-                                 if(eval.cv.beta[ite]<epsa & eval.cv.spline[ite]<eps.spline & eval.cv.loglik[ite]<epsb & validity==T){
+                                 if(eval.cv.beta[ite]<epsa & eval.cv.spline[ite]<epsa & eval.cv.loglik[ite]<epsb & validity==T){
                                    converged<-T}
                                  
                                }
@@ -1303,7 +1302,7 @@ idm.penalty<-function(b,fix0,size_V,size_spline,
                                  
                                  output.mla<- marqLevAlg::mla(b=b,
                                                   fn=idmlLikelihood,
-                                                  epsa=eps.spline,
+                                                  epsa=epsa,
                                                   epsb=epsb,
                                                   epsd=epsd,
                                                   maxiter=maxiter.pena,
@@ -1406,7 +1405,7 @@ idm.penalty<-function(b,fix0,size_V,size_spline,
                                  
                                  eval.cv.spline[ite]<-sum((snew-s)^2)
                                  eval.cv.beta[ite]<-sum((betanew-beta)^2)
-                                 eval.cv.loglik[ite]<-abs(fn.valuenew-fn.value)/fn.value
+                                 eval.cv.loglik[ite]<-abs((fn.valuenew-fn.value)/fn.value)
                                  eval.loglik[ite]<-fn.valuenew
                                  eval.validity[ite]<-validity
                                  
@@ -1417,7 +1416,7 @@ idm.penalty<-function(b,fix0,size_V,size_spline,
                                  
                                  
                                  # eval.cv beta valid only if validity.param=T
-                                 if(eval.cv.beta[ite]<epsa & eval.cv.spline[ite]<eps.spline & eval.cv.loglik[ite]<epsb & validity==T){
+                                 if(eval.cv.beta[ite]<epsa & eval.cv.spline[ite]<epsa & eval.cv.loglik[ite]<epsb & validity==T){
                                    converged<-T}
                                  
                                }

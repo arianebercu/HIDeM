@@ -669,7 +669,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                  #check cv 
                                  eval.cv.spline[ite]<-sum((snew-s)^2)
                                  eval.cv.beta[ite]<-sum((betanew-beta)^2)
-                                 eval.cv.loglik[ite]<-abs(fn.valuenew-fn.value)/fn.value
+                                 eval.cv.loglik[ite]<-abs((fn.valuenew-fn.value)/fn.value)
                                  eval.loglik[ite]<-fn.valuenew
                                  eval.validity[ite]<-validity
                                  
@@ -1324,7 +1324,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                  
                                  eval.cv.spline[ite]<-sum((snew-s)^2)
                                  eval.cv.beta[ite]<-sum((betanew-beta)^2)
-                                 eval.cv.loglik[ite]<-abs(fn.valuenew-fn.value)/fn.value
+                                 eval.cv.loglik[ite]<-abs((fn.valuenew-fn.value)/fn.value)
                                  eval.loglik[ite]<-fn.valuenew
                                  eval.validity[ite]<-validity
                                  

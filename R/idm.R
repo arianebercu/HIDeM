@@ -37,8 +37,6 @@
 #' respective values change less then \eqn{10^{-5}} (for regression
 #' parameters and likelihood) and \eqn{10^{-3}} for the second
 #' derivatives between two iterations.
-#' @param eps.spline the power of convergence for splines parameters only
-#' @param eps.eigen the power of convergence for eigen values of covariance matrix only
 #' @param n.knots For \code{method="splines"} only, a vector of length
 #' 3 specifing the number of knots, one for each transition, for the
 #' M-splines estimate of the baseline intensities in the order \code{0
@@ -77,8 +75,6 @@
 #' intensities by M-splines, "Weib" for a parametric approach with a
 #' Weibull distribution on the transition intensities. Default is
 #' "Weib".
-#' @param subset expression indicating the subset of the rows of data
-#' to be used in the fit. All observations are included by default.
 #' @param na.action how NAs are treated. The default is first, any
 #' na.action attribute of data, second a na.action setting of options,
 #' and third 'na.fail' if that is unset. The 'factory-fresh' default
@@ -204,26 +200,22 @@ idm <- function(formula01,
                 formula02,
                 formula12,
                 data,
-
                 method="Weib",
                 scale.X=T,
                 maxiter=100,
                 maxiter.pena=10,
-
                 eps=c(5,5,3),
-                eps.spline=3,
-                eps.eigen=2,
                 n.knots=NULL,
                 knots="equidistant",
                 type.quantile=1,
-                subset=NULL,
                 na.action = na.fail,
-
                 B=NULL,
                 posfix=NULL,
-
                 gauss.point=10,
-
+                step.sequential=F,
+                option.sequential=list(cutoff=10^-3,
+                                       min=20,
+                                       step=10),
                 lambda01=NULL,
                 lambda02=NULL,
                 lambda12=NULL,
@@ -235,11 +227,6 @@ idm <- function(formula01,
                 alpha=ifelse(penalty=="scad",3.7,
                              ifelse(penalty=="mcp",3,
                                     ifelse(penalty%in%c("elasticnet"),0.5,1))),
-                step.sequential=F,
-                option.sequential=list(cutoff=10^-3,
-                                    min=20,
-                                    step=10),
-
                 nproc=1,
                 clustertype="FORK",
                 envir=parent.frame()){
@@ -266,7 +253,7 @@ idm <- function(formula01,
  
     ############################### get database defined by formulas ###########
     m <- match.call()
-    m01 <- m02 <- m12 <- m[match(c("","data","subset","na.action"),names(m),nomatch=0)]
+    m01 <- m02 <- m12 <- m[match(c("","data","na.action"),names(m),nomatch=0)]
     m01$formula <- formula01
     m02$formula <- formula02
     m12$formula <- formula12
@@ -436,8 +423,7 @@ idm <- function(formula01,
     epsa<-0.1^eps[1]
     epsb<-0.1^eps[2]
     epsd<-0.1^eps[3]
-    eps.spline<-0.1^eps.spline[1]
-    eps.eigen<-0.1^eps.eigen[1]
+    eps.eigen<-0.1^2
     
     troncature<-ifelse(truncated==T,1,0)
     
@@ -797,7 +783,6 @@ idm <- function(formula01,
                                 epsa=epsa,
                                 epsb=epsb,
                                 epsd=epsd,
-                                eps.eigen=eps.eigen,
                                 nproc=nproc,
                                 maxiter=maxiter,
                                 ctime=ctime,
@@ -1093,7 +1078,6 @@ idm <- function(formula01,
                              epsa=epsa,
                              epsb=epsb,
                              epsd=epsd,
-                             eps.spline=eps.spline,
                              eps.eigen=eps.eigen,
                              nproc=nproc,
                              maxiter=maxiter,

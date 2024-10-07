@@ -20,6 +20,119 @@
 ##' @author Thomas Alexander Gerds
 ##' @importFrom lava sim
 ##' @useDynLib SmoothHazardoptim9
+# CHANGE ALL : 23/09/24
+# sim.idmModel <- function(x,
+#                          n,
+#                          plot,
+#                          pen,
+#                          latent=FALSE,
+#                          keep.inspectiontimes=FALSE,
+#                          ...){
+#     # simulate latent data
+#     #class(x) <- "lvm"
+#     #dat <- lava::sim(x,n=n,...)
+#     # construct illtime and true illness status
+# 
+#     dat<-x
+#     T01<-dat$latent.illtime
+#     T02<-dat$latent.lifetime
+#     T12<-dat$latent.waittime
+#     dat$illtime <- dat$latent.illtime
+#     dat$illstatus <- 1*((dat$illtime<dat$latent.lifetime)& (dat$illtime<dat$censtime))
+#     #dat$illtime[dat$illtime>dat$latent.lifetime] <- 0
+#     # construct lifetime
+#     # for ill subjects as the sum of the time to illness (illtime) and
+#     # the time spent in the illness state (waittime)
+#     dat$lifetime <- dat$latent.lifetime
+#     dat$lifetime[dat$illstatus==1]<-dat$latent.waittime[dat$illstatus==1]
+#     id.nodem.death<-rep(0,n)
+#     
+#     browser()
+# #id<-which(T01<T02 & T01<18 & T12<18 & T01>dat$censtime)
+#     # interval censored illtime
+#     ipos <- grep("inspection[0-9]+",names(dat))
+# 
+#     if (length(ipos)>0) {
+#         # compute inspection times
+#         # make sure all inspection times are in the future
+#         # of the previous inspection time
+#         iframe <- dat[,ipos]
+#         dat <- dat[,-ipos]
+#         
+#         interval <- do.call("rbind",lapply(1:n,function(i){
+#           
+#             ## remove duplicates
+#             itimes <- unique(iframe[i,])
+#             
+#             ## remove inspection times that are 
+#             ## larger than the individual lifetime
+#             itimes <- itimes[itimes<dat$lifetime[i]]
+#             ## and those larger than the right censoring time
+#             itimes <- itimes[itimes<=dat$censtime[i]]
+#             ## if all inspection times are censored
+#             ## set a single one at 0
+#             #if (length(itimes)==0) {
+#             #  itimes <- 0}
+#             
+#             ## mark the last inspection time 
+#             #last.inspection <- itimes[length(itimes)]
+#             ## find the interval where illness happens
+#             
+#             if (dat$illstatus[i]){
+#               
+#               idL<-which(itimes<dat$illtime[i])
+#               idR<-which(itimes>=dat$illtime[i])
+#       
+#               
+#               if(length(idR)==0){ 
+#                 R<-L<-itimes[max(idL)]
+#                 c(L,R,dat$lifetime[i],-1,1)
+#                 
+#               }else{
+#                 L<-itimes[max(idL)]
+#                 R<-itimes[min(idR)]
+#                   ## subject was ill
+#                 if (dat$lifetime[i]>dat$administrative.censoring[i]){
+#                   ## illness observed but not death
+#                      c(L,R,dat$administrative.censoring[i],1,0)
+#                  }else{
+#                    ## death observed all times
+#                    c(L,R,dat$lifetime[i],1,1)
+#                       
+#                  }
+#               }
+#               }else{
+#                 
+#                 # check administrative censoring for death
+#                 if(dat$lifetime[i]<=dat$administrative.censoring[i]){
+#                   
+#                   c(itimes[length(itimes)],itimes[length(itimes)],dat$lifetime[i],0,1)
+#                 }else{
+#                   
+#                   c(itimes[length(itimes)],itimes[length(itimes)],dat$administrative.censoring[i],0,0)}
+#               }
+#           }))
+#         colnames(interval) <- c("L","R","observed.lifetime","seen.ill","seen.exit")
+#         # count illness not observed due to death 
+#         dat <- cbind(dat,interval)
+#         if (latent==FALSE)
+#             dat <- dat[,-grep("latent\\.",names(dat))]
+#         if (keep.inspectiontimes) dat <- cbind(dat,iframe)
+#     }
+#     id.nodem.death[which(dat$seen.ill==-1)]<-1
+#     dat$seen.ill[dat$seen.ill==-1]<-0
+# 
+#     dat$T01<-T01
+#     dat$T02<-T02
+#     dat$T12<-T12
+#     dat$id.nodem.death<-id.nodem.death
+#     return(list(data=dat,
+#                 plot=plot))
+# }
+# 
+
+
+
 sim.idmModel <- function(x,
                          n,
                          plot,
@@ -27,119 +140,115 @@ sim.idmModel <- function(x,
                          latent=FALSE,
                          keep.inspectiontimes=FALSE,
                          ...){
-    # simulate latent data
-    #class(x) <- "lvm"
-    #dat <- lava::sim(x,n=n,...)
-    # construct illtime and true illness status
-
-    dat<-x
-    T01<-dat$latent.illtime
-    T02<-dat$latent.lifetime
-    T12<-dat$latent.waittime
-    dat$illtime <- dat$latent.illtime
-    dat$illstatus <- 1*((dat$illtime<dat$latent.lifetime)& (dat$illtime<dat$censtime))
-    #dat$illtime[dat$illtime>dat$latent.lifetime] <- 0
-    # construct lifetime
-    # for ill subjects as the sum of the time to illness (illtime) and
-    # the time spent in the illness state (waittime)
-    dat$lifetime <- dat$latent.lifetime
-    dat$lifetime[dat$illstatus==1]<-dat$latent.waittime[dat$illstatus==1]
-    id.nodem.death<-rep(0,n)
+  # simulate latent data
+  #class(x) <- "lvm"
+  #dat <- lava::sim(x,n=n,...)
+  # construct illtime and true illness status
+  
+  dat<-x
+  T01<-dat$latent.illtime
+  T02<-dat$latent.lifetime
+  T12<-dat$latent.waittime
+  dat$illtime <- dat$latent.illtime
+  dat$illstatus <- 1*((dat$illtime<dat$latent.lifetime)& (dat$illtime<dat$administrative.censoring))
+  #dat$illtime[dat$illtime>dat$latent.lifetime] <- 0
+  # construct lifetime
+  # for ill subjects as the sum of the time to illness (illtime) and
+  # the time spent in the illness state (waittime)
+  dat$lifetime <- dat$latent.lifetime
+  dat$lifetime[dat$illstatus==1]<-dat$latent.waittime[dat$illstatus==1]
+  id.nodem.death<-rep(0,n)
+  
+  #id<-which(T01<T02 & T01<18 & T12<18 & T01>dat$censtime)
+  # interval censored illtime
+  ipos <- grep("inspection[0-9]+",names(dat))
+  
+  if (length(ipos)>0) {
+    # compute inspection times
+    # make sure all inspection times are in the future
+    # of the previous inspection time
+    iframe <- dat[,ipos]
+    dat <- dat[,-ipos]
     
-    
-
-    # interval censored illtime
-    ipos <- grep("inspection[0-9]+",names(dat))
-
-    if (length(ipos)>0) {
-        # compute inspection times
-        # make sure all inspection times are in the future
-        # of the previous inspection time
-        iframe <- dat[,ipos]
-        dat <- dat[,-ipos]
-        
-        interval <- do.call("rbind",lapply(1:n,function(i){
-          
-            ## remove duplicates
-            itimes <- unique(iframe[i,])
-            
-            ## remove inspection times that are 
-            ## larger than the individual lifetime
-            itimes <- itimes[itimes<dat$lifetime[i]]
-            ## and those larger than the right censoring time
-            itimes <- itimes[itimes<=dat$censtime[i]]
-            ## if all inspection times are censored
-            ## set a single one at 0
-            #if (length(itimes)==0) {
-            #  itimes <- 0}
-            
-            ## mark the last inspection time 
-            #last.inspection <- itimes[length(itimes)]
-            ## find the interval where illness happens
-            
-            if (dat$illstatus[i]){
-              
-              idL<-which(itimes<dat$illtime[i])
-              idR<-which(itimes>=dat$illtime[i])
+    interval <- do.call("rbind",lapply(1:n,function(i){
       
-              
-              if(length(idR)==0){
-                R<-L<-itimes[max(idL)]
-                
-                if(dat$lifetime[i]>dat$administrative.censoring[i]){
-                  # dementia not observed due to censoring 
-                  c(L,R,dat$administrative.censoring[i],0,0)
-                }else{ # dementia not observed due to death 
-                  if(dat$lifetime[i]<=dat$censtime[i]){
-                    c(L,R,dat$lifetime[i],-1,1)
-                  }else{# dementia not observed due to censoring 
-                    c(L,R,dat$lifetime[i],0,1)}
-                }
-              }else{
-                L<-itimes[max(idL)]
-                R<-itimes[min(idR)]
-                  ## subject was ill
-                if (dat$lifetime[i]>dat$administrative.censoring[i]){
-                  ## illness observed but not death
-                     c(L,R,dat$administrative.censoring[i],1,0)
-                 }else{
-                   ## death observed all times
-                   c(L,R,dat$lifetime[i],1,1)
-                      
-                 }
-              }
-              }else{
-                
-                # check administrative censoring for death
-                if(dat$lifetime[i]<=dat$administrative.censoring[i]){
-                  
-                  c(itimes[length(itimes)],itimes[length(itimes)],dat$lifetime[i],0,1)
-                }else{
-                  
-                  c(itimes[length(itimes)],itimes[length(itimes)],dat$administrative.censoring[i],0,0)}
-              }
-          }))
-        colnames(interval) <- c("L","R","observed.lifetime","seen.ill","seen.exit")
-        # count illness not observed due to death 
-        dat <- cbind(dat,interval)
-        if (latent==FALSE)
-            dat <- dat[,-grep("latent\\.",names(dat))]
-        if (keep.inspectiontimes) dat <- cbind(dat,iframe)
-    }
-    id.nodem.death[which(dat$seen.ill==-1)]<-1
-    dat$seen.ill[dat$seen.ill==-1]<-0
-
-    dat$T01<-T01
-    dat$T02<-T02
-    dat$T12<-T12
-    dat$id.nodem.death<-id.nodem.death
-    return(list(data=dat,
-                plot=plot))
+      ## remove duplicates
+      itimes <- unique(iframe[i,])
+      
+      ## remove inspection times that are 
+      ## larger than the individual lifetime
+      itimes <- itimes[itimes<dat$lifetime[i]]
+      ## and those larger than the right censoring time
+      itimes <- itimes[itimes<=dat$censtime[i]]
+      ## if all inspection times are censored
+      ## set a single one at 0
+      #if (length(itimes)==0) {
+      #  itimes <- 0}
+      
+      ## mark the last inspection time 
+      #last.inspection <- itimes[length(itimes)]
+      ## find the interval where illness happens
+      
+      if (dat$illstatus[i]){
+        
+        if(dat$lifetime[i]>=dat$administrative.censoring[i]){
+          if(dat$latent.illtime[i]<dat$censtime[i]){
+            idL<-which(itimes<dat$illtime[i])
+            idR<-which(itimes>=dat$illtime[i])
+            L<-itimes[max(idL)]
+            R<-itimes[min(idR)]
+            c(L,R,dat$administrative.censoring[i],1,0)
+          }else{
+            c(dat$censtime[i],dat$censtime[i],dat$administrative.censoring[i],0,0)
+          }
+        }else{
+          if(dat$latent.illtime[i]<dat$censtime[i]){
+            idL<-which(itimes<dat$illtime[i])
+            idR<-which(itimes>=dat$illtime[i])
+           
+            #dat$lifetime[i]<R is equivalent to length(idR)==0
+            if(length(idR)==0){
+              L<-itimes[max(idL)]
+              c(L,L,dat$lifetime[i],-1,1)
+            }else{
+              R<-itimes[min(idR)]
+              L<-itimes[max(idL)]
+              c(L,R,dat$lifetime[i],1,1)
+            }
+          }else{
+            c(dat$censtime[i],dat$censtime[i],dat$lifetime[i],0,1)
+          }
+        }
+        
+        
+      }else{
+        
+        # check administrative censoring for death
+        if(dat$lifetime[i]<=dat$administrative.censoring[i]){
+          
+          c(itimes[length(itimes)],itimes[length(itimes)],dat$lifetime[i],0,1)
+        }else{
+          
+          c(itimes[length(itimes)],itimes[length(itimes)],dat$administrative.censoring[i],0,0)}
+      }
+    }))
+    colnames(interval) <- c("L","R","observed.lifetime","seen.ill","seen.exit")
+    # count illness not observed due to death 
+    dat <- cbind(dat,interval)
+    if (latent==FALSE)
+      dat <- dat[,-grep("latent\\.",names(dat))]
+    if (keep.inspectiontimes) dat <- cbind(dat,iframe)
+  }
+  id.nodem.death[which(dat$seen.ill==-1)]<-1
+  dat$seen.ill[dat$seen.ill==-1]<-0
+  
+  dat$T01<-T01
+  dat$T02<-T02
+  dat$T12<-T12
+  dat$id.nodem.death<-id.nodem.death
+  return(list(data=dat,
+              plot=plot))
 }
-
-
-
-
 
 ##' Simulate data from an illness-death model with interval censored event times and penalized covariates 
 ##'
@@ -262,8 +371,9 @@ simulatepenIDM <- function(n=100,seed,scale.illtime,shape.illtime,
   e <- exp(X12%*%beta12)
   cumulative.intensity<-cumulative.intensity*e
   S12 <- exp(-cumulative.intensity)
-  illstatus <-1*((latent.illtime<latent.lifetime)&(latent.illtime<censtime))
-  
+  # change 23/09/2024 
+  #illstatus <-1*((latent.illtime<latent.lifetime)&(latent.illtime<censtime))
+  illstatus <-1*((latent.illtime<latent.lifetime)&(latent.illtime<administrative.censoring))
   latent.waittime[illstatus==1]<-(((-log(U12*S12)*exp(-X12%*%beta12))^(1/shape.waittime))/scale.waittime)[illstatus==1]
   latent.waittime[illstatus!=1]<-latent.lifetime[illstatus!=1]
 
