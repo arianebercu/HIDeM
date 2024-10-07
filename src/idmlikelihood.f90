@@ -2299,7 +2299,7 @@ subroutine qgaussPL15weib(a,b,the01,the02,the12,res,v01,v02,v12)
                call fonct(xx,the01,ri01,gl01,su01)
                call fonct(xx,the02,ri02,gl02,su02)
                call fonct(xx,the12,ri12,gl12,su12)
-               f2 = (su01**v1)*(su02**v3)*ri01*v1/(su12**v2)
+               f2 = (su01**v01)*(su02**v02)*ri01*v01/(su12**v12)
                fv1(jtwm1) = f1   ! svgrd valeurs fct f a gche du centre
                fv2(jtwm1) = f2   ! svgrd valeurs fct f a drte du centre
 	       resk = resk + wgk(jtwm1)*(f1+f2)
@@ -2538,7 +2538,7 @@ subroutine qgaussPL21weib(a,b,the01,the02,the12,res,v01,v02,v12)
                call fonct(xx,the01,ri01,gl01,su01)
                call fonct(xx,the02,ri02,gl02,su02)
                call fonct(xx,the12,ri12,gl12,su12)
-               f2 = (su01**v1)*(su02**v3)*ri01*v1/(su12**v2)
+               f2 = (su01**v01)*(su02**v02)*ri01*v01/(su12**v12)
                fv1(jtwm1) = f1   ! svgrd valeurs fct f a gche du centre
                fv2(jtwm1) = f2   ! svgrd valeurs fct f a drte du centre
 	       resk = resk + wgk(jtwm1)*(f1+f2)
@@ -2799,7 +2799,7 @@ subroutine qgaussPL31weib(a,b,the01,the02,the12,res,v01,v02,v12)
                call fonct(xx,the01,ri01,gl01,su01)
                call fonct(xx,the02,ri02,gl02,su02)
                call fonct(xx,the12,ri12,gl12,su12)
-               f2 = (su01**v1)*(su02**v3)*ri01*v1/(su12**v2)
+               f2 = (su01**v01)*(su02**v02)*ri01*v01/(su12**v12)
                fv1(jtwm1) = f1   ! svgrd valeurs fct f a gche du centre
                fv2(jtwm1) = f2   ! svgrd valeurs fct f a drte du centre
 	       resk = resk + wgk(jtwm1)*(f1+f2)
@@ -3086,7 +3086,7 @@ subroutine qgaussPL41weib(a,b,the01,the02,the12,res,v01,v02,v12)
                call fonct(xx,the01,ri01,gl01,su01)
                call fonct(xx,the02,ri02,gl02,su02)
                call fonct(xx,the12,ri12,gl12,su12)
-               f2 = (su01**v1)*(su02**v3)*ri01*v1/(su12**v2)
+               f2 = (su01**v01)*(su02**v02)*ri01*v01/(su12**v12)
                fv1(jtwm1) = f1   ! svgrd valeurs fct f a gche du centre
                fv2(jtwm1) = f2   ! svgrd valeurs fct f a drte du centre
 	       resk = resk + wgk(jtwm1)*(f1+f2)
@@ -3398,7 +3398,7 @@ subroutine qgaussPL51weib(a,b,the01,the02,the12,res,v01,v02,v12)
                call fonct(xx,the01,ri01,gl01,su01)
                call fonct(xx,the02,ri02,gl02,su02)
                call fonct(xx,the12,ri12,gl12,su12)
-               f2 = (su01**v1)*(su02**v3)*ri01*v1/(su12**v2)
+               f2 = (su01**v01)*(su02**v02)*ri01*v01/(su12**v12)
                fv1(jtwm1) = f1   ! svgrd valeurs fct f a gche du centre
                fv2(jtwm1) = f2   ! svgrd valeurs fct f a drte du centre
 	       resk = resk + wgk(jtwm1)*(f1+f2)
@@ -3737,7 +3737,7 @@ subroutine qgaussPL61weib(a,b,the01,the02,the12,res,v01,v02,v12)
                call fonct(xx,the01,ri01,gl01,su01)
                call fonct(xx,the02,ri02,gl02,su02)
                call fonct(xx,the12,ri12,gl12,su12)
-               f2 = (su01**v1)*(su02**v3)*ri01*v1/(su12**v2)
+               f2 = (su01**v01)*(su02**v02)*ri01*v01/(su12**v12)
                fv1(jtwm1) = f1   ! svgrd valeurs fct f a gche du centre
                fv2(jtwm1) = f2   ! svgrd valeurs fct f a drte du centre
 	       resk = resk + wgk(jtwm1)*(f1+f2)
