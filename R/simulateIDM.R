@@ -273,7 +273,6 @@ sim.idmModel <- function(x,
 ##' inspections.
 ##' @param nvar number of variables
 ##' @param mean mean of each explanatory variables
-##' @param sd standard-error of each explanatory variables
 ##' @param cov covariance matrix of explanatory variables
 ##' @param x01 names of variables on transition 0 --> 1
 ##' @param x02 names of variables on transition 0 --> 2
@@ -287,15 +286,59 @@ sim.idmModel <- function(x,
 #' @export
 
 
-simulatepenIDM <- function(n=100,seed,scale.illtime,shape.illtime,
-                           scale.lifetime,shape.lifetime,
-                           scale.waittime,shape.waittime,
-                           #scale.censtime,shape.censtime,
-                           prob.censoring,administrative.censoring,
-                           n.inspections,
-                           schedule,punctuality,nvar,mean,sd,cov,
-                           x01,x02,x12,beta01,beta02,beta12){
+simulateIDM <- function(n=100,
+                        seed=1,
+                        scale.illtime=1,
+                        shape.illtime=1/100,
+                        scale.lifetime=1,
+                        shape.lifetime=1/100,
+                        scale.waittime=1,
+                        shape.waittime=1/100,
+                        prob.censoring=0.05,
+                        administrative.censoring=18,
+                        n.inspections=8,
+                        schedule=2.5,
+                        punctuality=0.5,
+                        nvar=10,
+                        mean=rep(0,10),
+                        cov=matrix(c(1,0,0,0,0,0,0,0,0,0,
+                                     0,1,0,0,0,0,0,0,0,0,
+                                     0,0,1,0,0,0,0,0,0,0,
+                                     0,0,0,1,0,0,0,0,0,0,
+                                     0,0,0,0,1,0,0,0,0,0,
+                                     0,0,0,0,0,1,0,0,0,0,
+                                     0,0,0,0,0,0,1,0,0,0,
+                                     0,0,0,0,0,0,0,1,0,0,
+                                     0,0,0,0,0,0,0,0,1,0,
+                                     0,0,0,0,0,0,0,0,0,1),nrow=10,ncol=10),
+                           x01=paste0("X",1:10),
+                        x02=paste0("X",1:10),
+                        x12=paste0("X",1:10),
+                        beta01=rep(1,10),
+                        beta02=rep(1,10),
+                        beta12=rep(1,10)){
+  
+  ##############################################################################
+  ####################### check entry parameters ###############################
+  ##############################################################################
 
+  if(!inherits(seed,c("numeric","integer")) | length(seed)!=1|seed<=0)stop("The seed has to be a numeric or integer higher than 0.")
+  if(!inherits(n,c("numeric","integer")) | round(n)!=n |length(n)!=1|n<=0)stop("The number of subject has to be an integer higher than 0.")
+  if(!inherits(prob.censoring,c("numeric","integer")) | prob.censoring > 1 |prob.censoring<0 |length(prob.censoring)!=1)stop("The prob.censoring has to a numeric or integer between 0 and 1.")
+  if(!inherits(administrative.censoring,c("numeric","integer")) | administrative.censoring <=0 |length(administrative.censoring)!=1)stop("The administrative.censoring has to be a numeric or integer higher than 0.")
+  if(!inherits(n.inspections,c("numeric","integer")) | round(n.inspections)!=n.inspections |length(n.inspections)!=1 | n.inspections <= 0)stop("The n.inspections has to be an integer higher than 0.")
+  if(!inherits(schedule,c("numeric","integer")) | round(schedule)!=schedule |length(schedule)!=1 | schedule <= 0)stop("The schedule has to be an integer higher than 0.")
+  if(!inherits(punctuality,c("numeric","integer")) | length(punctuality)!=1 | punctuality <= 0)stop("The punctuality has to be an integer or numeric higher than 0.")
+  if(!inherits(nvar,c("numeric","integer")) | round(nvar)!=nvar |length(nvar)!=1|nvar<=0)stop("The number of variables has to be an integer higher than 0.")
+  if(!inherits(mean,c("numeric","integer")) | length(mean)!=nvar)stop("The mean value of variables has to be an integer or numeric of length nvar.")
+  if(!inherits(as.vector(cov),c("numeric","integer")) | dim(cov)[1]!=nvar | dim(cov)[2]!=nvar)stop("The covariance matrix of variables has to contain integer or numeric of dimension nvar*nvar.")
+  if(!inherits(x01,c("character")) | !x01%in%paste0("X",1:nvar) | length(x01)>nvar | length(x01)<=0)stop(paste0("The x01 has to contain either X1, X2, ..., until X",nvar))
+  if(!inherits(x02,c("character")) | !x02%in%paste0("X",1:nvar) | length(x02)>nvar | length(x02)<=0)stop(paste0("The x02 has to contain either X1, X2, ..., until X",nvar))
+  if(!inherits(x12,c("character")) | !x12%in%paste0("X",1:nvar) | length(x12)>nvar | length(x12)<=0)stop(paste0("The x12 has to contain either X1, X2, ..., until X",nvar))
+  if(!inherits(beta01,c("numeric","integer")) |  length(beta01)>nvar | length(beta01)<=0)stop("The effets on transition 0 -> 1 beta01 has to be an integer or numeric of length nvar.")
+  if(!inherits(beta02,c("numeric","integer")) |  length(beta02)>nvar | length(beta02)<=0)stop("The effets on transition 0 -> 2 beta02 has to be an integer or numeric of length nvar.")
+  if(!inherits(beta12,c("numeric","integer")) |  length(beta12)>nvar | length(beta12)<=0)stop("The effets on transition 1 -> 2 beta12 has to be an integer or numeric of length nvar.")
+  
   # Set the seed for reproducibility
   set.seed(seed)
   
