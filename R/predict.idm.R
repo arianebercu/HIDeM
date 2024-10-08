@@ -932,13 +932,13 @@ Predict0.idmPl <- function(s,t,knots01,nknots01,the01,knots12,nknots12,the12,kno
       F01<- integrate(f = function(x) {S.pl(s, x, knots01, nknots01, the01, bZ01) * S.pl(s, x, knots02, nknots02, the02, bZ02) * intensity(times = x, knots = knots01, number.knots = nknots01, theta = the01,linear.predictor = bZ01,method="splines")$intensity }, lower = s, upper = t)$value
 
     }else{
-      p02_0 <- sapply(t,function(t) {gauss_kronrod(f=function(x){
+      p02_0 <- sapply(t,function(t) {pracma::gauss_kronrod(f=function(x){
         S.pl(s,x,knots01,nknots01,the01,bZ01)*S.pl(s,x,knots02,nknots02,the02,bZ02)*intensity(times=x,knots=knots02,number.knots=nknots02,theta=the02,linear.predictor=bZ02,method="splines")$intensity},a=s,b=t)$value})
-      p01 <- sapply(t,function(t) {gauss_kronrod(f=function(x){S.pl(s,x,knots01,nknots01,the01,bZ01)*S.pl(s,x,knots02,nknots02,the02,bZ02)*intensity(times=x,knots=knots01,number.knots=nknots01,theta=the01,linear.predictor=bZ01,method="splines")$intensity*S.pl(x,t,knots12,nknots12,the12,bZ12)},a=s,b=t)$value})
+      p01 <- sapply(t,function(t) {pracma::gauss_kronrod(f=function(x){S.pl(s,x,knots01,nknots01,the01,bZ01)*S.pl(s,x,knots02,nknots02,the02,bZ02)*intensity(times=x,knots=knots01,number.knots=nknots01,theta=the01,linear.predictor=bZ01,method="splines")$intensity*S.pl(x,t,knots12,nknots12,the12,bZ12)},a=s,b=t)$value})
       p02_1 <- 1-p00-p02_0-p01
       p02 <- p02_0+p02_1
-      RM<- gauss_kronrod(f = function(x) {S.pl(s, x, knots01, nknots01, the01, bZ01) * S.pl(s, x, knots02, nknots02, the02, bZ02) }, a = s, b = t)$value
-      F01<- gauss_kronrod(f = function(x) {S.pl(s, x, knots01, nknots01, the01, bZ01) * S.pl(s, x, knots02, nknots02, the02, bZ02) * intensity(times = x, knots = knots01, number.knots = nknots01, theta = the01,linear.predictor = bZ01,method="splines")$intensity }, a = s, b = t)$value
+      RM<- pracma::gauss_kronrod(f = function(x) {S.pl(s, x, knots01, nknots01, the01, bZ01) * S.pl(s, x, knots02, nknots02, the02, bZ02) }, a = s, b = t)$value
+      F01<- pracma::gauss_kronrod(f = function(x) {S.pl(s, x, knots01, nknots01, the01, bZ01) * S.pl(s, x, knots02, nknots02, the02, bZ02) * intensity(times = x, knots = knots01, number.knots = nknots01, theta = the01,linear.predictor = bZ01,method="splines")$intensity }, a = s, b = t)$value
 
     }
     list(p00=p00,p01=p01,p11=p11,p12=p12,p02_0=p02_0,p02_1=p02_1,p02=p02,F01=F01,F0.=p02_0+p01+p02_1, RM=RM)
@@ -961,12 +961,12 @@ Predict0.idmWeib <- function(s,t,a01,b01,a02,b02,a12,b12,bZ01=0,bZ02=0,bZ12=0) {
     p11 = S.weib(s,t,a12,b12,bZ12)
     p12 = 1-p11
     p00 = S.weib(s,t,a01,b01,bZ01)*S.weib(s,t,a02,b02,bZ02)
-    p02_0 = sapply(t,function(t) {gauss_kronrod(f=function(x){S.weib(s,x,a01,b01,bZ01)*S.weib(s,x,a02,b02,bZ02)*iweibull(x,a02,b02,bZ02)},a=s,b=t)$value })
-    p01 = sapply(t,function(t) {gauss_kronrod(f=function(x){S.weib(s,x,a01,b01,bZ01)*S.weib(s,x,a02,b02,bZ02)*iweibull(x,a01,b01,bZ01)*S.weib(x,t,a12,b12,bZ12)},a=s,b=t)$value})
+    p02_0 = sapply(t,function(t) {pracma::gauss_kronrod(f=function(x){S.weib(s,x,a01,b01,bZ01)*S.weib(s,x,a02,b02,bZ02)*iweibull(x,a02,b02,bZ02)},a=s,b=t)$value })
+    p01 = sapply(t,function(t) {pracma::gauss_kronrod(f=function(x){S.weib(s,x,a01,b01,bZ01)*S.weib(s,x,a02,b02,bZ02)*iweibull(x,a01,b01,bZ01)*S.weib(x,t,a12,b12,bZ12)},a=s,b=t)$value})
     p02_1 = 1-p00-p02_0-p01
     p02 = p02_0+p02_1
-    RM= gauss_kronrod(f = function(x) {S.weib(s, x, a01, b01, bZ01) * S.weib(s, x, a02, b02, bZ02)},a=s,b=t)$value
-    F01=  gauss_kronrod(f = function(x) {S.weib(s, x, a01, b01, bZ01) * S.weib(s, x, a02, b02, bZ02)*iweibull(x,a01,b01,bZ01)}, a = s, b = t)$value
+    RM= pracma::gauss_kronrod(f = function(x) {S.weib(s, x, a01, b01, bZ01) * S.weib(s, x, a02, b02, bZ02)},a=s,b=t)$value
+    F01=  pracma::gauss_kronrod(f = function(x) {S.weib(s, x, a01, b01, bZ01) * S.weib(s, x, a02, b02, bZ02)*iweibull(x,a01,b01,bZ01)}, a = s, b = t)$value
     
   }
   list(p00=p00,p01=p01,p11=p11,p12=p12,p02_0=p02_0,p02_1=p02_1,p02=p02,F01=F01,F0.=p02_0+p01+p02_1, RM=RM)
@@ -1095,20 +1095,20 @@ lifexpect0.idmWeib <- function(s,a01,b01,a02,b02,a12,b12,bZ01=0,bZ02=0,bZ12=0,ma
     LTR=integrate(f=function(x){
       S.weib(s,x,a01,b01,bZ01)*S.weib(s,x,a02,b02,bZ02)*iweibull(x,a01,b01,bZ01)},s,max)
   }else{
-    ET12 = gauss_kronrod(
+    ET12 = pracma::gauss_kronrod(
       f=function(x) {
         S.weib(s,x,a12,b12,bZ12)
       },a=s,b=max)
-    ET0dot = gauss_kronrod(f=function(x) {
+    ET0dot = pracma::gauss_kronrod(f=function(x) {
       S.weib(s,x,a01,b01,bZ01)*S.weib(s,x,a02,b02,bZ02)
     },a=s,b=max)
-    ET01 = gauss_kronrod(f=function(x){
+    ET01 = pracma::gauss_kronrod(f=function(x){
       sapply(x,function(x){
-        gauss_kronrod(f=function(y){
+        pracma::gauss_kronrod(f=function(y){
           S.weib(s,y,a01,b01,bZ01)*S.weib(s,y,a02,b02,bZ02)*iweibull(y,a01,b01,bZ01)*S.weib(y,x,a12,b12,bZ12)},
           a=s,
           b=x)$value})},a=s+0.0001,b=max) # as a < b 
-    LTR=gauss_kronrod(f=function(x){
+    LTR=pracma::gauss_kronrod(f=function(x){
       S.weib(s,x,a01,b01,bZ01)*S.weib(s,x,a02,b02,bZ02)*iweibull(x,a01,b01,bZ01)},a=s,b=max)
   }
     list(LE.00=ET0dot$value,
@@ -1144,12 +1144,12 @@ lifexpect0.idmPl <- function(s,knots01,nknots01,the01,knots12,nknots12,the12,kno
                                                                                                                                        linear.predictor = bZ01,
                                                                                                                                        method="splines")$intensity }, lower = s, upper = knots01[nknots01+6])$value
   }else{
-    ET12 = gauss_kronrod(f=function(x) {
+    ET12 = pracma::gauss_kronrod(f=function(x) {
       S.pl(s,x,knots12,nknots12,the12,bZ12)},a=s,b=knots12[nknots12+6])
-    ET0dot = gauss_kronrod(f=function(x) {
+    ET0dot = pracma::gauss_kronrod(f=function(x) {
       S.pl(s,x,knots01,nknots01,the01,bZ01)*S.pl(s,x,knots02,nknots02,the02,bZ02)  },a=s,b=knots02[nknots02+6])
-    ET01 = gauss_kronrod(f=function(x) {
-      sapply(x,function(x) {gauss_kronrod(f=function(y){
+    ET01 = pracma::gauss_kronrod(f=function(x) {
+      sapply(x,function(x) {pracma::gauss_kronrod(f=function(y){
         (S.pl(s,y,knots01,nknots01,the01,bZ01)
          *S.pl(s,y,knots02,nknots02,the02,bZ02)*
            intensity(times=y,
@@ -1160,7 +1160,7 @@ lifexpect0.idmPl <- function(s,knots01,nknots01,the01,knots12,nknots12,the12,kno
                      method="splines")$intensity
          *S.pl(y,x,knots12,nknots12,the12,bZ12))},
         a=s,b=x)$value})},a=s+0.0001,b=knots01[nknots01+6])# as a < b 
-    LTR=gauss_kronrod(f = function(x) {S.pl(s, x, knots01, nknots01, the01, bZ01) * S.pl(s, x, knots02, nknots02, the02, bZ02) * intensity(times = x,
+    LTR=pracma::gauss_kronrod(f = function(x) {S.pl(s, x, knots01, nknots01, the01, bZ01) * S.pl(s, x, knots02, nknots02, the02, bZ02) * intensity(times = x,
                                                                                                                                        knots = knots01,
                                                                                                                                        number.knots = nknots01,
                                                                                                                                        theta = the01,
