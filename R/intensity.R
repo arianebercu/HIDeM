@@ -50,7 +50,7 @@
 ##'   # Same result as:
 ##'   predict(fit.idm, s = 70, t = 80, conf.int = FALSE) # see first element
 ##' }
-##' @importFrom pracma
+##' @importFrom pracma "gauss_kronrod"
 #' @useDynLib SmoothHazardoptim9
 ##' @export
 #' @author R: Ariane Bercu <ariane.bercu@@u-bordeaux.fr> 

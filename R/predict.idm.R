@@ -73,6 +73,7 @@
 #' 
 #' 
 #' }
+##' @importFrom pracma
 #'@useDynLib SmoothHazardoptim9
 #' @export
 #' @author R: Ariane Bercu <ariane.bercu@@u-bordeaux.fr> 
@@ -137,7 +138,7 @@ predict.idm <- function(object,s,
       
       
     }
-    browser()
+    
     #################### prediction if model not from penalty ##################
     if(object$penalty=="none"){
     #update dataset from the formula 
