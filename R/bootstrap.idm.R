@@ -17,7 +17,6 @@
 #' @param tau Percentage of observation to use for resampling can go u
 #' @param seed value of the seed to initialise the random number generator and ensure reproducibility of the results
 #' resampling approach. Possible values are: "subsampling" for sampling without replacement of a proportion tau of the observations, or "bootstrap" for sampling with replacement generating a resampled dataset with as many observations as in the full sample. Alternatively, this argument can be a function to use for resampling. This function must use arguments named data and tau and return the IDs of observations to be included in the resampled dataset.
-#' @param calscore True if we want to calculate the calibration score otherwise BIC and GCV only will be given
 #' @param formula01 A formula specifying a regression model for the
 #' \code{0 --> 1} transition from the initial state to the transient
 #' state of the illness-death model.  The right hand side of the
@@ -103,115 +102,10 @@
 #'  fix splines
 #' @return
 #'
-#' \item{call}{the call that produced the result.} \item{coef}{regression
-#' parameters.} \item{loglik}{vector containing the log-likelihood without and
-#' with covariate.} \item{cv}{vector containing the convergence criteria.}
-#' \item{niter}{number of iterations.} \item{converged}{integer equal to 1 when
-#' the model converged, 2, 3 or 4 otherwise.} \item{modelPar}{Weibull
-#' parameters.} \item{N}{number of subjects.} \item{events1}{number of events 0
-#' --> 1.} \item{events2}{number of events 0 --> 2 or 0 --> 1 --> 2.}
-#' \item{NC}{vector containing the number of covariates on transitions 0 --> 1,
-#' 0 --> 2, 1 --> 2.} \item{responseTrans}{model response for the 0 --> 1
-#' transition. \code{Hist} or \code{Surv} object.} \item{responseAbs}{model
-#' response for the 0 --> 2 transition. \code{Hist} or \code{Surv} object.}
-#' \item{time}{times for which transition intensities have been evaluated for
-#' plotting. Vector in the Weibull approach. Matrix in the penalized likelihhod
-#' approach for which the colums corresponds to the transitions 0 --> 1, 1 -->
-#' 2, 0 --> 2.} \item{intensity01}{matched values of the intensities for
-#' transition 0 --> 1.} \item{lowerIntensity01}{lower confidence intervals for
-#' the values of the intensities for transition 0 --> 1.}
-#' \item{upperIntensity01}{upper confidence intervals for the values of the
-#' intensities for transition 0 --> 1.} \item{intensity02}{matched values of
-#' the intensities for transition 0 --> 2.} \item{lowerIntensity02}{lower
-#' confidence intervals for the values of the intensities for transition 0 -->
-#' 2.} \item{upperIntensity02}{upper confidence intervals for the values of the
-#' intensities for transition 0 --> 2.} \item{intensity12}{matched values of
-#' the intensities for transition 1 --> 2.} \item{lowerIntensity12}{lower
-#' confidence intervals for the values of the intensities for transition 1 -->
-#' 2.} \item{upperIntensity12}{upper confidence intervals for the values of the
-#' intensities for transition 1 --> 2.} \item{RR}{vector of relative risks.}
-#' \item{V}{variance-covariance matrix derived from the Hessian of the log-likelihood
-#' if using method="Weib" or, from the Hessian of the penalized log-likelihood
-#' if using method="Splines".}
-#' \item{se}{standart errors of the
-#' regression parameters.} \item{Xnames01}{names of covariates on 0 --> 1.}
-#' \item{Xnames02}{names of covariates on 0 --> 2.} \item{Xnames12}{names of
-#' covariates on 1 --> 2.} \item{knots01}{knots to approximate by M-splines the
-#' intensity of the 0 --> 1 transition.} \item{knots02}{knots to approximate by
-#' M-splines the intensity of the 0 --> 2 transition.} \item{knots12}{knots to
-#' approximate by M-splines the intensity of the 1 --> 2 transition.}
-#' \item{nknots01}{number of knots on transition 0 --> 1.}
-#' \item{nknots02}{number of knots on transition 0 --> 2.}
-#' \item{nknots12}{number of knots on transition 1 --> 2.}
-#' \item{theta01}{square root of splines coefficients for transition 0 --> 1.}
-#' \item{theta02}{square root of splines coefficients for transition 0 --> 2.}
-#' \item{theta12}{square root of splines coefficients for transition 1 --> 2.}
-#' \item{CV}{a binary variable equals to 1 when search of the smoothing
-#' parameters \link{kappa} by approximated cross-validation, 1 otherwise. The
-#' default is 0.} \item{kappa}{vector containing the smoothing parameters for
-#' transition 0 --> 1, 0 --> 2, 1 --> 2 used to estimate the model by the
-#' penalized likelihood approach.} \item{CVcrit}{cross validation criteria.}
-#' \item{DoF}{degrees of freedom of the model.} \item{na.action}{observations
-#' deleted if missing values.}
-#' @author R: Celia Touraine <Celia.Touraine@@isped.u-bordeaux2.fr> Fortran:
-#' Pierre Joly <Pierre.Joly@@isped.u-bordeaux2.fr>
-#' @seealso \code{\link{print.idm}}
-#' \code{\link{summary.idm}}
-#' \code{\link{predict.idm}}
-#' @references D. Marquardt (1963). An algorithm for least-squares estimation
-#' of nonlinear parameters.  \emph{SIAM Journal of Applied Mathematics},
-#' 431-441.
+#' The boostrap returns a list of K elements of type idm, see idm for more details 
+#' @seealso \code{\link{idm}}
+##' @author R: Ariane Bercu <ariane.bercu@@u-bordeaux.fr> 
 #' @keywords illness-death
-#'
-##' @examples
-##' library(lava)
-##' library(prodlim)
-##' set.seed(17)
-##' d <- simulateIDM(100)$data
-##' # right censored data
-##' fitRC <- idm(formula01=Hist(time=observed.illtime,event=seen.ill)~X1+X2,
-##'              formula02=Hist(time=observed.lifetime,event=seen.exit)~X1+X2,
-##'              formula12=Hist(time=observed.lifetime,event=seen.exit)~X1+X2,data=d,
-##'              conf.int=FALSE)
-##' fitRC
-##'
-##' \dontrun{
-##' set.seed(17)
-##' d <- simulateIDM(300)$data
-##' fitRC.splines <- idm(formula01=Hist(time=observed.illtime,event=seen.ill)~X1+X2,
-##'              formula02=Hist(time=observed.lifetime,event=seen.exit)~X1+X2,
-##'              formula12=Hist(time=observed.lifetime,event=seen.exit)~1,data=d,
-##'              conf.int=FALSE,method="splines")
-##' }
-##' # interval censored data
-##' fitIC <- idm(formula01=Hist(time=list(L,R),event=seen.ill)~X1+X2,
-##'              formula02=Hist(time=observed.lifetime,event=seen.exit)~X1+X2,
-##'              formula12=Hist(time=observed.lifetime,event=seen.exit)~X1+X2,data=d,
-##'              conf.int=FALSE)
-##' fitIC
-##'
-##' \dontrun{
-##'
-##'     data(Paq1000)
-##'
-##'     # Illness-death model with certif on the 3 transitions
-##'     # Weibull parametrization and likelihood maximization
-##'
-##'     fit.weib <- idm(formula02=Hist(time=t,event=death,entry=e)~certif,
-##'                     formula01=Hist(time=list(l,r),event=dementia)~certif,
-##'                     data=Paq1000)
-##'
-##'     # Illness-death model with certif on transitions 01 and 02
-##'     # Splines parametrization and penalized likelihood maximization
-##'     fit.splines <-  idm(formula02=Hist(time=t,event=death,entry=e)~certif,
-##'                         formula01=Hist(time=list(l,r),event=dementia)~certif,
-##'                         formula12=~1,
-##'                         method="splines",
-##'                         data=Paq1000)
-##'     fit.weib
-##'     summary(fit.splines)
-##' }
-##'
 #' @importFrom prodlim Hist
 #' @useDynLib SmoothHazardoptim9
 #' @export
@@ -219,7 +113,6 @@ bootstrap.idm <- function(
                 K=100, # number of sample,
                 tau = 0.5, #% in each fold
                 seed = 1, # seed
-                calscore=T,
                 resampling = "subsampling",
                 formula01,
                 formula02,

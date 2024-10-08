@@ -1,18 +1,3 @@
-### cv.model.R ---
-#----------------------------------------------------------------------
-## author: Ariane Bercu
-## created: Feb  6 2016 (08:47)
-## Version:
-## last-updated: Feb 25 2016 (13:17)
-##           By: Ariane Bercu
-##     Update #: 27
-#----------------------------------------------------------------------
-##
-### Commentary:
-##
-### Change Log:
-#----------------------------------------------------------------------
-##
 ### Code:
 ##' @title idm cv model update of beta in penalised regression
 ##' @param beta  parameters on explanatory variables
@@ -27,9 +12,7 @@
 ##' @param lambda lambda penalised parameter
 ##' @param alpha alpha penalised parameter
 #' @useDynLib SmoothHazardoptim9
-#' @author R: Ariane Bercu, Celia Touraine <Celia.Touraine@@isped.u-bordeaux2.fr> and Thomas Alexander Gerds <tag@@biostat.ku.dk>
-#' Fortran: Pierre Joly <Pierre.Joly@@isped.u-bordeaux2.fr>
-#' 
+#' @author R: Ariane Bercu <ariane.bercu@@u-bordeaux.fr>  
 cv.model<-function(beta,
                    nva01,
                    nva02,

@@ -1036,7 +1036,7 @@
 
       subroutine idmlikelihoodweib(b0,np0,npar0,bfix0,fix0,c0,&
       no0,ve010,ve120,ve020,dimnva01,dimnva12,dimnva02,nva01,&
-      nva12,nva02,t00,t10,t20,t30,troncature0,likelihood_res)
+      nva12,nva02,t00,t10,t20,t30,troncature0,gausspoint0,likelihood_res)
 
 	use commun
         implicit none
@@ -1045,7 +1045,7 @@
         vet01,vet12,vet02
 	double precision, intent(inout)::likelihood_res
         integer::np0,i,j,l,w,k,npar0,nva01,nva12,nva02,no0, &
-	troncature0,dimnva01,dimnva02,dimnva12
+	troncature0,dimnva01,dimnva02,dimnva12,gausspoint0
 
 	double precision,dimension(np0)::b0
         double precision,dimension(npar0)::bh
@@ -1107,6 +1107,7 @@
 
        l=0
        w=0
+       gausspoint=gausspoint0
 
 
        do k=1,(np0+sum(fix))
@@ -4943,7 +4944,7 @@ subroutine derivaweib(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 	res20101num,res20102num,res20112num,res20202num,res20212num,&
 	res21212num,vet01,vet12,vet02,resint,v,u1,u2,u3
         integer::np0,i,j,l,w,k,lfix, kfix,npar0,nva01,nva12,nva02,no0, &
-	nz010,nz020,nz120,troncature0,gausspoint0,dimnva01,dimnva02,dimnva12, & 
+	nz010,nz020,nz120,troncature0,dimnva01,dimnva02,dimnva12, & 
 	nva01nofix,nva12nofix,nva02nofix,nvamax, sizespline,nva0102,&
 	nvamax01,nvamax0102,nvamax0112,nvamax02,nvamax0212,nvamax12
 
@@ -4968,7 +4969,6 @@ subroutine derivaweib(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 	bfix=bfix0
 	fix=fix0
 	troncature=troncature0
-	gausspoint=gausspoint0
 	sizespline=6
 
 
@@ -6087,7 +6087,7 @@ subroutine derivaweib(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 	res20101num,res20102num,res20112num,res20202num,res20212num,&
 	res21212num,vet01,vet12,vet02,resint,v,u1,u2,u3
         integer::np0,i,j,l,w,k,lfix, kfix,npar0,nva01,nva12,nva02,no0, &
-	nz010,nz020,nz120,troncature0,gausspoint0,dimnva01,dimnva02,dimnva12, & 
+	nz010,nz020,nz120,troncature0,dimnva01,dimnva02,dimnva12, & 
 	nva01nofix,nva12nofix,nva02nofix,nvamax, sizespline,nva0102,&
 	nvamax01,nvamax0102,nvamax0112,nvamax02,nvamax0212,nvamax12
 
@@ -6127,7 +6127,6 @@ subroutine derivaweib(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 	nz12=nz120
 	sizespline=nz01+nz02+nz12+6
 	troncature=troncature0
-	gausspoint=gausspoint0
 
 
 	if(nva01.gt.0) then 

@@ -1,7 +1,51 @@
+##' Code:
+##' @title idm penalty weib
+##' @param b  parameters not fixed
+##' @param size_V number of parameters
+##' @param size_spline number of splines parameters
+##' @param fix0 indicators of fixed and unfixed parameters
+##' @param ctime classification of subject according to their observations
+##' @param N number of subjects
+##' @param ve01 variables for transition 0 -->1 
+##' @param ve02 variables for transition 0 -->2
+##' @param ve12 variables for transition 1 -->2
+##' @param dimnva01 number of variables for transition 0 -->1 
+##' @param dimnva02 number of variables for transition 0 -->2
+##' @param dimnva12 number of variables for transition 1 -->2
+##' @param nvat01 number of variables for transition 0 -->1 
+##' @param nvat02 number of variables for transition 0 -->2
+##' @param nvat12 number of variables for transition 1 -->2
+##' @param knots01 knots of transition 0 --> 1
+##' @param knots02 knots of transition 0 --> 2
+##' @param knots12 knots of transition 1 --> 2
+##' @param ctime classification of subject according to their observations
+##' @param N number of subjects
+##' @param nknots01 number of knots for transition 0 -->1 
+##' @param nknots02 number of knots for transition 0 -->2
+##' @param nknots12 number of knots for transition 1 -->2
+##' @param t0 time entry
+##' @param t1 time L
+##' @param t2 time R
+##' @param t3 time of event/out
+##' @param epsa control convergence parameter for beta 
+##' @param epsb control convergence parameter for loglik
+##' @param epsd control convergence for distance to minimum rdm
+##' @param eps.eigen the power of convergence for eigen values of covariance matrix only
+##' @param clustertype in which cluster to work
+##' @param nproc number of cluster
+##' @param maxiter Maximum number of iterations. The default is 200.
+##' @param troncature indicator if troncature or not
+##' @param gausspoint number of points in gauss quadrature
+##' @param step.sequential should we use the optimisation version to fix splines 
+##'  @param option.sequential parameters to give if you want to do the optimisation version to
+##'  fix splines
+#' @author R: Ariane Bercu <ariane.bercu@@u-bordeaux.fr> 
+#' @useDynLib SmoothHazardoptim9
+
 idm.splines<-function(b,clustertype,epsa,epsb,epsd,nproc,maxiter,size_V,size_spline,noVar,bfix,
                          fix0,knots01,knots02,knots12,ctime,N,nknots01,nknots02,nknots12,
                          ve01,ve02,ve12,dimnva01,dimnva02,dimnva12,nvat01,nvat02,nvat12,
-                         t0,t1,t2,t3,troncature,gauss.point,step.sequential,option.sequential){
+                         t0,t1,t2,t3,troncature,gausspoint,step.sequential,option.sequential){
   fix00<-fix0
   
   # if do not fix more splines parameters step.sequential==F
@@ -44,7 +88,7 @@ idm.splines<-function(b,clustertype,epsa,epsb,epsd,nproc,maxiter,size_V,size_spl
              t2=t2,
              t3=t3,
              troncature=troncature,
-             gausspoint=gauss.point
+             gausspoint=gausspoint
     )
     
     
@@ -95,7 +139,7 @@ idm.splines<-function(b,clustertype,epsa,epsb,epsd,nproc,maxiter,size_V,size_spl
                t2=t2,
                t3=t3,
                troncature=troncature,
-               gausspoint=gauss.point
+               gausspoint=gausspoint
       )
       
       
@@ -185,7 +229,7 @@ idm.splines<-function(b,clustertype,epsa,epsb,epsd,nproc,maxiter,size_V,size_spl
                t2=t2,
                t3=t3,
                troncature=troncature,
-               gausspoint=gauss.point
+               gausspoint=gausspoint
       )
       
      

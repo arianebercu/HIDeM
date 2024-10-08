@@ -1,3 +1,29 @@
+### Code:
+##' @title derivaspline obtain first and second order derivatives of the log-likelihood
+##' @param b  parameters on explanatory variables not fixed
+##' @param bfix  parameters on explanatory variables fixed
+##' @param npm  number of parameters not fixed, thus length of b
+##' @param npar  number of parameters
+##' @param fix indicator of length npar, values 1 if parameter fixed
+##' @param ctime profile of patients from 1 to 7
+##' @param no number of subjects 
+##' @param ve01 variables for transition 0 -->1 
+##' @param ve02 variables for transition 0 -->2
+##' @param ve12 variables for transition 1 -->2
+##' @param dimnva01 number of variables for transition 0 -->1, if not variables value 1
+##' @param dimnva02 number of variables for transition 0 -->2, if not variables value 1
+##' @param dimnva12 number of variables for transition 1 -->2, if not variables value 1
+##' @param nva01 number of variables for transition 0 -->1, if not variables value 0
+##' @param nva02 number of variables for transition 0 -->2, if not variables value 0
+##' @param nva12 number of variables for transition 1 -->2, if not variables value 0
+##' @param t0 time of entry
+##' @param t1 time of last visit or last visit without diagnose of illness
+##' @param t2 time of last visit or time diagnose of illness
+##' @param t3 time of last visit or death
+##' @param troncature indicator of troncature, value 1 if there is troncature otherwise 0.
+#' @useDynLib SmoothHazardoptim9
+#' @author R: Ariane Bercu <ariane.bercu@@u-bordeaux.fr> 
+
 derivaweib<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
                      dimnva01,dimnva02,dimnva12,nva01,nva02,nva12,
                      t0,t1,t2,t3,troncature){

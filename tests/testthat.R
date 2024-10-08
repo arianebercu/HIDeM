@@ -15,12 +15,14 @@ test_that("Illness-death model with weibull baseline risk", {
   library(lava)
   library(prodlim)
   set.seed(17)
-  d <- simulateIDM(n=1000)
+  d <- simulateIDM(n=1000)$data
   # right censored data
-  fitRC <- idm(formula01=Hist(time=observed.illtime,event=seen.ill)~X1+X2,
+  fitweib <- idm(formula01=Hist(time=list(L,R),event=seen.ill)~X1+X2,
                formula02=Hist(time=observed.lifetime,event=seen.exit)~X1+X2,
-               formula12=Hist(time=observed.lifetime,event=seen.exit)~X1+X2,data=d,
-               conf.int=FALSE)
-  fitRC
+               formula12=Hist(time=observed.lifetime,event=seen.exit)~X1+X2,data=d)
+  summary(fitweib)
+  int<-intensity(times=fitweib$time[,1],
+            theta = fitweib$modelPar[1:2]^2)
+  predict(fitweib,s=10,t=15)
   
 })

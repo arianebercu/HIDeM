@@ -1,3 +1,4 @@
+### Code:
 # 0 : health state
 # 1 : illness state
 # 2 : death state
@@ -23,6 +24,8 @@
 #' @param lifeExpect Logical. If \code{TRUE} compute life
 #'     expectancies, i.e., \code{t=Inf}.
 #' @param maxtime The upper limit of integration for calculations of life expectancies from Weibull parametrizations.
+#' @param lambda If penalised illness-death model define if prediction need to be performed 
+#' looking at the minimum of BIC or GCV or a vector of three values for each transition 0 -> 1, 0 -> 2 and 1 -> 2.
 #' @param ... other parameters.
 #' @return a list containing the following predictions with pointwise
 #'     confidence intervals: \item{p00}{the transition probability
@@ -37,9 +40,6 @@
 #'     risk of disease. \code{F01}=\code{p01}+\code{p02_1}.}
 #'     \item{F0.}{the probability of exit from state
 #'     0. \code{F0.}=\code{p02_0}+\code{p01}+\code{p02_1}.}
-#' @author R: Celia Touraine <Celia.Touraine@@isped.u-bordeaux2.fr>
-#'     and Thomas Alexander Gerds <tag@@biostat.ku.dk> Fortran: Pierre
-#'     Joly <Pierre.Joly@@isped.u-bordeaux2.fr>
 #' @seealso \code{\link{idm}}
 #' @keywords methods
 #' @examples
@@ -75,6 +75,7 @@
 #' }
 #'@useDynLib SmoothHazardoptim9
 #' @export
+#' @author R: Ariane Bercu <ariane.bercu@@u-bordeaux.fr> 
 predict.idm <- function(object,s,
                         t,newdata,nsim=200,seed=21,conf.int=.95,lifeExpect=FALSE,maxtime,
                         lambda="BIC",...) {
@@ -136,7 +137,7 @@ predict.idm <- function(object,s,
       
       
     }
-    
+    browser()
     #################### prediction if model not from penalty ##################
     if(object$penalty=="none"){
     #update dataset from the formula 
@@ -177,7 +178,7 @@ predict.idm <- function(object,s,
     }
     
     if(nvar01 > 0){
-        beta01 <- object$coef[1:nvar01]
+        beta01 <- object$coef[1:nvar01,]
         names(beta01) <- paste0("beta01.",names(beta01))
         bZ01 <- sum(Z01 * beta01)
     }else{
@@ -185,7 +186,7 @@ predict.idm <- function(object,s,
         beta01 <- NULL
     }
     if (nvar02 != 0) {
-        beta02 <- object$coef[(nvar01+1):(nvar01+nvar02)]
+        beta02 <- object$coef[(nvar01+1):(nvar01+nvar02),]
         names(beta02) <- paste0("beta02.",names(beta02))
         bZ02 <- sum(Z02 * beta02)
     }else{
@@ -193,7 +194,7 @@ predict.idm <- function(object,s,
         bZ02 <- 0
     }
     if (nvar12 != 0) {
-        beta12 <- object$coef[(nvar01+nvar02+1):(nvar01+nvar02+nvar12)]
+        beta12 <- object$coef[(nvar01+nvar02+1):(nvar01+nvar02+nvar12),]
         names(beta12) <- paste0("beta12.",names(beta12))
         bZ12 <- sum(Z12 * beta12)
     }else{

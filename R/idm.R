@@ -1,17 +1,18 @@
-#' Fit an illness-death model
+#' Fit an illness-death model with limited and numerous explanatory variables
 #'
-#' Fit an illness-death model using either a semi-parametric approach
-#' (penalized likelihood with an approximation of the transition intensity
-#' functions by linear combination of M-splines) or a parametric approach
-#' (specifying Weibull distributions on the transition intensities).
+#' Fit an illness-death model with a limited number of explanatory variables
+#'  using semi-parametric approach with a linear combination of M-splines or 
+#'  Weibull distribution on the transition intensities. 
+#' Fit an illness-death model with a large number of explanatory variables 
+#' using regularization approach of the log-likelihood, i.e. lasso, elastic-net,
+#'  MCP or SCAD penalty.
 #' Left-truncated, right-censored, and interval-censored data are allowed.
 #' State 0 corresponds to the initial state, state 1 to the transient one,
 #' state 2 to the absorbant one. The allowed transitions are: 0 --> 1, 0 --> 2
 #' and 1 --> 2.
 #'
 #' The estimated parameters are obtained using the robust Marquardt algorithm
-#' (Marquardt, 1963) which is a combination between a Newton-Raphson algorithm
-#' and a steepest descent algorithm.
+#' (Marquardt, 1963) or a proximal gradient algorithm. 
 #'
 #' @param formula01 A formula specifying a regression model for the
 #' \code{0 --> 1} transition from the initial state to the transient
@@ -81,7 +82,7 @@
 #' is na.omit. Another possible value is NULL.
 #' @param scale.X do you want to center and reduce your explanatory variables
 #' @param posfix index of fixed parameters 
-#' @param gauss.point gauss quadrature points in the approximation of integrals in the likelihood
+#' @param gausspoint gauss quadrature points in the approximation of integrals in the likelihood
 #' @param lambda01 Lambda on transition 0 --> 1
 #' @param lambda02 Lambda on transition 0 --> 2
 #' @param lambda12 Lambda on transition 1 --> 2
@@ -99,8 +100,9 @@
 #' @return
 #'
 #' \item{call}{the call that produced the result.} \item{coef}{regression
-#' parameters.} \item{loglik}{vector containing the log-likelihood without and
-#' with covariate.} \item{cv}{vector containing the convergence criteria.}
+#' parameters.} \item{loglik}{vector containing the log-likelihood and
+#' the penalised log-likelihood} \item{cv}{vector containing the convergence criteria based on 
+#' stability of parameters, log-likelihood (or penalised) and relative distance to minimum/maximum}
 #' \item{niter}{number of iterations.} \item{converged}{integer equal to 1 when
 #' the model converged, 2, 3 or 4 otherwise.} \item{modelPar}{Weibull
 #' parameters.} \item{N}{number of subjects.} \item{events1}{number of events 0
@@ -110,12 +112,10 @@
 #' transition. \code{Hist} or \code{Surv} object.} \item{responseAbs}{model
 #' response for the 0 --> 2 transition. \code{Hist} or \code{Surv} object.}
 #' \item{time}{times for which transition intensities have been evaluated for
-#' plotting. Vector in the Weibull approach. Matrix in the penalized likelihhod
-#' approach for which the colums corresponds to the transitions 0 --> 1, 1 -->
-#' 2, 0 --> 2.} \item{RR}{vector of relative risks.}
-#' \item{V}{variance-covariance matrix derived from the Hessian of the log-likelihood}
-#' \item{se}{standart errors of the
-#' regression parameters.} \item{Xnames01}{names of covariates on 0 --> 1.}
+#' plotting.} \item{maxtime}{times of last follow-up or event} \item{mintime}{times of first follow-up or event}
+#'  \item{HR}{vector of hazard risks.}
+#' \item{V}{variance-covariance matrix derived from the Hessian of the log-likelihood or penalised
+#' log-likelihood}\item{Xnames01}{names of covariates on 0 --> 1.}
 #' \item{Xnames02}{names of covariates on 0 --> 2.} \item{Xnames12}{names of
 #' covariates on 1 --> 2.} \item{knots01}{knots to approximate by M-splines the
 #' intensity of the 0 --> 1 transition.} \item{knots02}{knots to approximate by
@@ -127,11 +127,18 @@
 #' \item{theta01}{square root of splines coefficients for transition 0 --> 1.}
 #' \item{theta02}{square root of splines coefficients for transition 0 --> 2.}
 #' \item{theta12}{square root of splines coefficients for transition 1 --> 2.}
-#' @author R: Celia Touraine <Celia.Touraine@@isped.u-bordeaux2.fr> Fortran:
-#' Pierre Joly <Pierre.Joly@@isped.u-bordeaux2.fr>
+#' \item{alpha} penalty parameter alpha on all transitions 
+#' \item{lambda} matrix of lambda penalty parameters, first line for 0 --> 1, second 
+#' line for 0 --> 2 and third line for 1 --> 2
+#' \item{BIC} Bayesian Information Criterion \item{GCV} Generalised Cross-Validation approximation
+#' \item{levels} a list containing the type of the variable on all transitions and its level, 
+#' useful for prediction on new-dataset.
+#' \item{runtime} running time in seconds of the function.
+
 #' @seealso \code{\link{print.idm}}
 #' \code{\link{summary.idm}}
 #' \code{\link{predict.idm}}
+#' @author R: Ariane Bercu <ariane.bercu@@u-bordeaux.fr> 
 #' @references D. Marquardt (1963). An algorithm for least-squares estimation
 #' of nonlinear parameters.  \emph{SIAM Journal of Applied Mathematics},
 #' 431-441.
@@ -202,7 +209,7 @@ idm <- function(formula01,
                 na.action = na.fail,
                 B=NULL,
                 posfix=NULL,
-                gauss.point=10,
+                gausspoint=10,
                 step.sequential=F,
                 option.sequential=list(cutoff=10^-3,
                                        min=20,
@@ -369,7 +376,7 @@ idm <- function(formula01,
       if(!inherits(nproc,c("numeric","integer"))|(nproc!=floor(nproc)))stop("nproc has to be an integer.")
     
       # nbr of quadrature points for estimating integral in idm without penalisation
-      if(!gauss.point%in%c(10,15,21,31,41,51,61))stop("Argument type.quantile has to a numeric : 10, 15, 21, 31, 51 or 61.")
+      if(!gausspoint%in%c(10,15,21,31,41,51,61))stop("Argument type.quantile has to a numeric : 10, 15, 21, 31, 51 or 61.")
       if(!inherits(step.sequential,"logical"))stop("Argument step.sequential has to be TRUE or FALSE.")
 
     ###########################################################################
@@ -680,10 +687,43 @@ idm <- function(formula01,
         }else{bfix<-1}
         
       
-        out<-idm.splines(b,clustertype,epsa,epsb,epsd,nproc,maxiter,size_V,size_spline,noVar,bfix,
-                            fix0,knots01,knots02,knots12,ctime,N,nknots01,nknots02,nknots12,
-                            ve01,ve02,ve12,dimnva01,dimnva02,dimnva12,nvat01,nvat02,nvat12,
-                            t0,t1,t2,t3,troncature,gauss.point,step.sequential,option.sequential)
+        out<-idm.splines(b=b,
+                         clustertype=clustertype,
+                         epsa=epsa,
+                         epsb=epsb,
+                         epsd=epsd,
+                         nproc=nproc,
+                         maxiter=maxiter,
+                         size_V=size_V,
+                         size_spline=size_spline,
+                         noVar=noVar,
+                         bfix=bfix,
+                         fix0=fix0,
+                         knots01=knots01,
+                         knots02=knots02,
+                         knots12=knots12,
+                         ctime=ctime,
+                         N=N,
+                         nknots01=nknots01,
+                         nknots02=nknots02,
+                         nknots12=nknots12,
+                         ve01=ve01,
+                         ve02=ve02,
+                         ve12=ve12,
+                         dimnva01=dimnva01,
+                         dimnva02=dimnva02,
+                         dimnva12=dimnva12,
+                         nvat01=nvat01,
+                         nvat02=nvat02,
+                         nvat12=nvat12,
+                         t0=t0,
+                         t1=t1,
+                         t2=t2,
+                         t3=t3,
+                         troncature=troncature,
+                         gausspoint=gausspoint,
+                         step.sequential=step.sequential,
+                         option.sequential=option.sequential)
   
       
 ############################## Output   ########################################
@@ -784,34 +824,35 @@ idm <- function(formula01,
       if(method=="Weib"){
         
         out <- idm.weib(b=b,
-                                fix0=fix0,
-                                size_V=size_V,
-                                clustertype=clustertype,
-                                epsa=epsa,
-                                epsb=epsb,
-                                epsd=epsd,
-                                nproc=nproc,
-                                maxiter=maxiter,
-                                ctime=ctime,
-                                N=N,
-                                ve01=ve01,
-                                ve02=ve02,
-                                ve12=ve12,
-                                dimnva01=dimnva01,
-                                dimnva02=dimnva02,
-                                dimnva12=dimnva12,
-                                nvat01=nvat01,
-                                nvat02=nvat02,
-                                nvat12=nvat12,
-                                t0=t0,
-                                t1=t1,
-                                t2=t2,
-                                t3=t3,
-                                idm=idm,
-                                idd=idd,
-                                ts=ts,
-                                troncature=troncature)
-        
+                                    fix0=fix0,
+                                    size_V=size_V,
+                                    clustertype=clustertype,
+                                    epsa=epsa,
+                                    epsb=epsb,
+                                    epsd=epsd,
+                                    nproc=nproc,
+                                    maxiter=maxiter,
+                                    ctime=ctime,
+                                    N=N,
+                                    ve01=ve01,
+                                    ve02=ve02,
+                                    ve12=ve12,
+                                    dimnva01=dimnva01,
+                                    dimnva02=dimnva02,
+                                    dimnva12=dimnva12,
+                                    nvat01=nvat01,
+                                    nvat02=nvat02,
+                                    nvat12=nvat12,
+                                    t0=t0,
+                                    t1=t1,
+                                    t2=t2,
+                                    t3=t3,
+                                    idm=idm,
+                                    idd=idd,
+                                    ts=ts,
+                                    troncature=troncature,
+                                    gausspoint=gausspoint)
+            
         
         
         fix<-out$fix0
@@ -1047,7 +1088,7 @@ idm <- function(formula01,
                                   t2=t2,
                                   t3=t3,
                                   troncature=troncature,
-                                  gausspoint=gauss.point)
+                                  gausspoint=gausspoint)
               
               if(nproc>1){parallel::stopCluster(clustpar)}
               ## what should we do if max(output$v) == 0
@@ -1130,7 +1171,7 @@ idm <- function(formula01,
                              t2=t2,
                              t3=t3,
                              troncature=troncature,
-                             gauss.point=gauss.point,
+                             gausspoint=gausspoint,
                              nlambda01=nlambda01,
                              lambda01=lambda01,
                              nlambda02=nlambda02,
@@ -1328,7 +1369,8 @@ idm <- function(formula01,
                              t1=t1,
                              t2=t2,
                              t3=t3,
-                             troncature=troncature)
+                             troncature=troncature,
+                             gausspoint=gausspoint)
             
             # take thoses values if converged only otherwise thoses
             # by default or by the user
@@ -1372,7 +1414,8 @@ idm <- function(formula01,
                                   t1=t1,
                                   t2=t2,
                                   t3=t3,
-                                  troncature=troncature)
+                                  troncature=troncature,
+                                  gausspoint=gausspoint)
               
               if(nproc>1){parallel::stopCluster(clustpar)}
               
@@ -1456,7 +1499,8 @@ idm <- function(formula01,
                                lambda12=lambda12,
                                alpha=alpha,
                                penalty.factor=penalty.factor,
-                               penalty=penalty)
+                               penalty=penalty,
+                               gausspoint=gausspoint)
               
 ######################### Output ###############################################
 ######################## on beta and HR ########################################

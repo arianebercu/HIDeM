@@ -1,36 +1,12 @@
-## intensity.R ---
-#----------------------------------------------------------------------
-## author: Thomas Alexander Gerds
-## created: Feb  6 2016 (08:47)
-## Version:
-## last-updated: Feb 25 2016 (13:17)
-##           By: Thomas Alexander Gerds
-##     Update #: 27
-#----------------------------------------------------------------------
-##
-### Commentary:
-##
-### Change Log:
-#----------------------------------------------------------------------
-##
 ### Code:
-##'  M-spline estimate of the transition intensity function
+##'  M-spline or Weibull estimate of the transition intensity function
 ##' and the cumulative transition intensity function
 ##' for survival and illness-death models
-##'
-##' The estimate of the transition intensity function is a linear
-##' combination of M-splines and the estimate of the cumulative transition
-##' intensity function is a linear combination of I-splines (the integral of a
-##' M-spline is called I-spline). The coefficients \code{theta} are the same for
-##' the M-splines and I-splines.
 ##'
 ##' Important: the theta parameters returned by \code{idm} are in fact
 ##' the square root of the splines coefficients. See examples.
 ##'
-##' This function is a R-translation of a corresponding Fortran function called \code{susp}. \code{susp} is
-##' used internally by \code{idm}.
-##'
-##' @title M-spline estimate of the transition intensity function
+##' @title M-spline or Weibull estimate of the transition intensity function
 ##' @param times Time points at which to estimate the intensity function
 ##' @param knots Knots for the M-spline
 ##' @param number.knots Number of knots for the M-splines (and I-splines see details)
@@ -74,10 +50,10 @@
 ##'   # Same result as:
 ##'   predict(fit.idm, s = 70, t = 80, conf.int = FALSE) # see first element
 ##' }
+##' @importFrom pracma
 #' @useDynLib SmoothHazardoptim9
 ##' @export
-#' @author R: Celia Touraine <Celia.Touraine@@isped.u-bordeaux2.fr> and Thomas Alexander Gerds <tag@@biostat.ku.dk>
-#' Fortran: Pierre Joly <Pierre.Joly@@isped.u-bordeaux2.fr>
+#' @author R: Ariane Bercu <ariane.bercu@@u-bordeaux.fr> 
 #' 
 intensity <- function(times,knots,number.knots=NULL,theta,linear.predictor=0,V=NULL,
                       fix=NULL,converged=NULL,conf.int = 0.95,

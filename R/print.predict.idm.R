@@ -1,20 +1,9 @@
-### print.predict.idm.R --- 
-#----------------------------------------------------------------------
-## author: Thomas Alexander Gerds
-## created: Feb 16 2016 (09:50) 
-## Version: 
-## last-updated: Feb 27 2016 (09:24) 
-##           By: Thomas Alexander Gerds
-##     Update #: 34
-#----------------------------------------------------------------------
-## 
-### Commentary: 
-## 
-### Change Log:
-#----------------------------------------------------------------------
-## 
+
 ### Code:
+#' @param object an \code{idm} class objects returned by a call to the
+#'     \code{\link{idm}} function
 #' @useDynLib SmoothHazardoptim9
+#' @author R: Ariane Bercu <ariane.bercu@@u-bordeaux.fr> 
 #' @export
 
 print.predict.idm <- function(x,digits=3,...){

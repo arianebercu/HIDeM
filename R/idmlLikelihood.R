@@ -1,20 +1,5 @@
-### idmlLikelihood.R ---
-#----------------------------------------------------------------------
-## author: Thomas Alexander Gerds
-## created: Feb  6 2016 (08:47)
-## Version:
-## last-updated: Feb 25 2016 (13:17)
-##           By: Thomas Alexander Gerds
-##     Update #: 27
-#----------------------------------------------------------------------
-##
-### Commentary:
-##
-### Change Log:
-#----------------------------------------------------------------------
-##
 ### Code:
-##' @title idm log likelihood
+##' @title idm log likelihood with splines baseline risk
 ##' @param b  parameters not fixed
 ##' @param npm  number of parameters not fixed
 ##' @param npar number of parameters
@@ -45,10 +30,7 @@
 ##' @param gausspoint number of gausspoint quadrature
 #' @useDynLib SmoothHazardoptim9
 ##' @export
-#' @author R: Ariane Bercu, Celia Touraine <Celia.Touraine@@isped.u-bordeaux2.fr> and Thomas Alexander Gerds <tag@@biostat.ku.dk>
-#' Fortran: Pierre Joly <Pierre.Joly@@isped.u-bordeaux2.fr>
-#' 
-
+#' @author R: Ariane Bercu <ariane.bercu@@u-bordeaux.fr> 
 idmlLikelihood<-function(b,npm,npar,bfix,fix,zi01,zi02,zi12,ctime,no,nz01,nz02,nz12,ve01,ve02,ve12,
                          dimnva01,dimnva02,dimnva12,nva01,nva02,nva12,
                          t0,t1,t2,t3,troncature,gausspoint){

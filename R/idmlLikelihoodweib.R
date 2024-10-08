@@ -1,20 +1,6 @@
-### idmlLikelihoodweib.R ---
-#----------------------------------------------------------------------
-## author: Thomas Alexander Gerds
-## created: Feb  6 2016 (08:47)
-## Version:
-## last-updated: Feb 25 2016 (13:17)
-##           By: Thomas Alexander Gerds
-##     Update #: 27
-#----------------------------------------------------------------------
-##
-### Commentary:
-##
-### Change Log:
-#----------------------------------------------------------------------
-##
+
 ### Code:
-##' @title idm log likelihood
+##' @title idm log likelihood with weibull baseline risk
 ##' @param b  parameters not fixed
 ##' @param npm  number of parameters not fixed
 ##' @param npar number of parameters
@@ -36,15 +22,14 @@
 ##' @param t2 time R
 ##' @param t3 time of event/out
 ##' @param troncature indicator if troncature or not
+##' @param gausspoint number of gausspoint quadrature
 #' @useDynLib SmoothHazardoptim9
 ##' @export
-#' @author R: Ariane Bercu, Celia Touraine <Celia.Touraine@@isped.u-bordeaux2.fr> and Thomas Alexander Gerds <tag@@biostat.ku.dk>
-#' Fortran: Pierre Joly <Pierre.Joly@@isped.u-bordeaux2.fr>
+#' @author R: Ariane Bercu <ariane.bercu@@u-bordeaux.fr> 
 #' 
-
 idmlLikelihoodweib<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
                          dimnva01,dimnva02,dimnva12,nva01,nva02,nva12,
-                         t0,t1,t2,t3,troncature){
+                         t0,t1,t2,t3,troncature,gausspoint){
   res<-0
 
   .Fortran("idmlikelihoodweib",
@@ -70,6 +55,7 @@ idmlLikelihoodweib<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
            as.double(t2),
            as.double(t3),
            as.integer(troncature),
+           as.integer(gausspoint),
            likelihood_res=as.double(res),
            PACKAGE="SmoothHazardoptim9")$likelihood_res
 }

@@ -1,4 +1,4 @@
-
+### Code:
 ##' Function to simulate illness-death model data
 ##'
 ##' Based on the functionality of the lava PACKAGE 
@@ -11,132 +11,21 @@
 ##' @param latent if TRUE keep the latent event times
 ##' @param keep.inspectiontimes if \code{TRUE} keep the inspection
 ##' times.
-##' @param pen if the simulated data are for a penalised version of illness-death model
 ##' @param plot plot of base survival for all transition
 ##' @param ... Extra arguments given to \code{sim}
 ##' @return A data set with interval censored observations from an illness-death model
 ##' example(idmModel)
 ##' help(idmModel)
-##' @author Thomas Alexander Gerds
+##' @author R: Ariane Bercu <ariane.bercu@@u-bordeaux.fr> 
 ##' @importFrom lava sim
 ##' @useDynLib SmoothHazardoptim9
-# CHANGE ALL : 23/09/24
-# sim.idmModel <- function(x,
-#                          n,
-#                          plot,
-#                          pen,
-#                          latent=FALSE,
-#                          keep.inspectiontimes=FALSE,
-#                          ...){
-#     # simulate latent data
-#     #class(x) <- "lvm"
-#     #dat <- lava::sim(x,n=n,...)
-#     # construct illtime and true illness status
-# 
-#     dat<-x
-#     T01<-dat$latent.illtime
-#     T02<-dat$latent.lifetime
-#     T12<-dat$latent.waittime
-#     dat$illtime <- dat$latent.illtime
-#     dat$illstatus <- 1*((dat$illtime<dat$latent.lifetime)& (dat$illtime<dat$censtime))
-#     #dat$illtime[dat$illtime>dat$latent.lifetime] <- 0
-#     # construct lifetime
-#     # for ill subjects as the sum of the time to illness (illtime) and
-#     # the time spent in the illness state (waittime)
-#     dat$lifetime <- dat$latent.lifetime
-#     dat$lifetime[dat$illstatus==1]<-dat$latent.waittime[dat$illstatus==1]
-#     id.nodem.death<-rep(0,n)
-#     
-#     browser()
-# #id<-which(T01<T02 & T01<18 & T12<18 & T01>dat$censtime)
-#     # interval censored illtime
-#     ipos <- grep("inspection[0-9]+",names(dat))
-# 
-#     if (length(ipos)>0) {
-#         # compute inspection times
-#         # make sure all inspection times are in the future
-#         # of the previous inspection time
-#         iframe <- dat[,ipos]
-#         dat <- dat[,-ipos]
-#         
-#         interval <- do.call("rbind",lapply(1:n,function(i){
-#           
-#             ## remove duplicates
-#             itimes <- unique(iframe[i,])
-#             
-#             ## remove inspection times that are 
-#             ## larger than the individual lifetime
-#             itimes <- itimes[itimes<dat$lifetime[i]]
-#             ## and those larger than the right censoring time
-#             itimes <- itimes[itimes<=dat$censtime[i]]
-#             ## if all inspection times are censored
-#             ## set a single one at 0
-#             #if (length(itimes)==0) {
-#             #  itimes <- 0}
-#             
-#             ## mark the last inspection time 
-#             #last.inspection <- itimes[length(itimes)]
-#             ## find the interval where illness happens
-#             
-#             if (dat$illstatus[i]){
-#               
-#               idL<-which(itimes<dat$illtime[i])
-#               idR<-which(itimes>=dat$illtime[i])
-#       
-#               
-#               if(length(idR)==0){ 
-#                 R<-L<-itimes[max(idL)]
-#                 c(L,R,dat$lifetime[i],-1,1)
-#                 
-#               }else{
-#                 L<-itimes[max(idL)]
-#                 R<-itimes[min(idR)]
-#                   ## subject was ill
-#                 if (dat$lifetime[i]>dat$administrative.censoring[i]){
-#                   ## illness observed but not death
-#                      c(L,R,dat$administrative.censoring[i],1,0)
-#                  }else{
-#                    ## death observed all times
-#                    c(L,R,dat$lifetime[i],1,1)
-#                       
-#                  }
-#               }
-#               }else{
-#                 
-#                 # check administrative censoring for death
-#                 if(dat$lifetime[i]<=dat$administrative.censoring[i]){
-#                   
-#                   c(itimes[length(itimes)],itimes[length(itimes)],dat$lifetime[i],0,1)
-#                 }else{
-#                   
-#                   c(itimes[length(itimes)],itimes[length(itimes)],dat$administrative.censoring[i],0,0)}
-#               }
-#           }))
-#         colnames(interval) <- c("L","R","observed.lifetime","seen.ill","seen.exit")
-#         # count illness not observed due to death 
-#         dat <- cbind(dat,interval)
-#         if (latent==FALSE)
-#             dat <- dat[,-grep("latent\\.",names(dat))]
-#         if (keep.inspectiontimes) dat <- cbind(dat,iframe)
-#     }
-#     id.nodem.death[which(dat$seen.ill==-1)]<-1
-#     dat$seen.ill[dat$seen.ill==-1]<-0
-# 
-#     dat$T01<-T01
-#     dat$T02<-T02
-#     dat$T12<-T12
-#     dat$id.nodem.death<-id.nodem.death
-#     return(list(data=dat,
-#                 plot=plot))
-# }
-# 
+
 
 
 
 sim.idmModel <- function(x,
                          n,
                          plot,
-                         pen,
                          latent=FALSE,
                          keep.inspectiontimes=FALSE,
                          ...){
@@ -288,12 +177,12 @@ sim.idmModel <- function(x,
 
 simulateIDM <- function(n=100,
                         seed=1,
-                        scale.illtime=1,
-                        shape.illtime=1/100,
-                        scale.lifetime=1,
-                        shape.lifetime=1/100,
-                        scale.waittime=1,
-                        shape.waittime=1/100,
+                        scale.illtime=2.5,
+                        shape.illtime=8/100,
+                        scale.lifetime=2.5,
+                        shape.lifetime=8/100,
+                        scale.waittime=2.5,
+                        shape.waittime=8/100,
                         prob.censoring=0.05,
                         administrative.censoring=18,
                         n.inspections=8,
@@ -314,9 +203,9 @@ simulateIDM <- function(n=100,
                            x01=paste0("X",1:10),
                         x02=paste0("X",1:10),
                         x12=paste0("X",1:10),
-                        beta01=rep(1,10),
-                        beta02=rep(1,10),
-                        beta12=rep(1,10)){
+                        beta01=rep(0.5,10),
+                        beta02=rep(0.5,10),
+                        beta12=rep(0.5,10)){
   
   ##############################################################################
   ####################### check entry parameters ###############################
@@ -503,7 +392,7 @@ simulateIDM <- function(n=100,
     theme_classic()+ylab("Survival")
   
   
-  sim.idmModel(x=fit,n=n,plot=list(p2,surv01,p01,surv02,p02,surv12,p12),pen=T)
+  sim.idmModel(x=fit,n=n,plot=list(p2,surv01,p01,surv02,p02,surv12,p12))
   
 }
 

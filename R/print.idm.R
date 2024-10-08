@@ -11,7 +11,7 @@
 #' @param pvalDigits Number of digits to print for p-values.
 #' @param eps Passed to \code{format.pval}.
 #' @param \dots Not used.
-#' @author Celia Touraine <Celia.Touraine@@isped.u-bordeaux2.fr>, Thomas A. Gerds <tag@@biostat.ku.dk> 
+#' @author R: Ariane Bercu <ariane.bercu@@u-bordeaux.fr> 
 #' @seealso \code{\link{summary.idm}}, \code{\link{plot.idm}}
 #' @keywords methods
 #' @examples

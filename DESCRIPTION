@@ -2,16 +2,17 @@ Package: SmoothHazardoptim9
 Title: Estimation of Smooth Hazard Models for Interval-Censored Data with
     Applications to Survival and Illness-Death Models
 Version: 1.4.1
-Author: Ariane Bercu, Celia Touraine, Pierre Joly and Thomas A. Gerds
-Description: Estimation of two-state (survival) models and irreversible illness-
-    death models with possibly interval-censored,left-truncated and right-censored
-    data. Proportional intensities regression models can be specified to allow for
-    covariates effects separately for each transition. We use either a parametric
-    approach with Weibull baseline intensities or a semi-parametric approach with
-    M-splines approximation of baseline intensities in order to obtain smooth
-    estimates of the hazard functions. Parameter estimates are obtained by maximum
-    likelihood in the parametric approach and by penalized maximum likelihood in the
-    semi-parametric approach.
+Author: Ariane Bercu, Agathe Guilloux, Helene Jacqmin-Gadda and Cecile Proust-Lima
+Description: Estimation irreversible illness-death models with possibly interval-censored,
+    left-truncated and right-censored data. 
+    Proportional intensities regression models can be specified to allow for
+    covariates effects separately for each transition. With a limited number of covariates,
+    we use either a parametric approach with Weibull or M-spline for baseline intensities.
+    Parameter estimates are obtained by maximum likelihood using Marquardt-Levenberg algorithm.
+    With a large number of covariates, we apply a regularization on the likelihood, such as 
+    lasso, elastic-net, Minimax Concave Penalty or Smoothly clipped absolute deviation. Parameter
+    estimation and selection are obtained by maximising the penalised log-likelihood using 
+    a proximal gradient algorithm.
 Depends:
     R (>= 1.9.1),
     prodlim (>= 1.4.9)
@@ -28,7 +29,7 @@ Imports:
     utils,
     ggplot2,
     pracma
-Maintainer: Ariane Bercu <ariane.bercu@gmail.com>
+Maintainer: Ariane Bercu <ariane.bercu@u-bordeaux.fr>
 License: GPL (>= 2)
 RoxygenNote: 7.3.2
 Encoding: UTF-8

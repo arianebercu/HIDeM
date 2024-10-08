@@ -1,4 +1,3 @@
-##' programmation for penalised idm with splines as risk bases 
 ##' Code:
 ##' @title idm penalty weib
 ##' @param b  parameters not fixed
@@ -46,16 +45,16 @@
 ##' @param alpha alpha on all transitions 
 ##' @param penalty which penalty to consider
 ##' @param penalty.factor which variable should be penalised
-##' @param troncature indicator if troncature or not
-##' @param gauss.point number of points in gauss quadrature
+##' @param gausspoint number of points in gauss quadrature
 #' @importFrom foreach "%do%"
 #' @importFrom foreach "%dopar%"
+#' @author R: Ariane Bercu <ariane.bercu@@u-bordeaux.fr> 
 #' @useDynLib SmoothHazardoptim9
 idm.penalty.splines<-function(b,fix0,size_V,size_spline,
                       clustertype,epsa,epsb,epsd,eps.eigen,nproc,maxiter,maxiter.pena,
                       knots01,knots02,knots12,ctime,N,nknots01,nknots02,nknots12,
                       ve01,ve02,ve12,dimnva01,dimnva02,dimnva12,nvat01,nvat02,nvat12,
-                      t0,t1,t2,t3,troncature,gauss.point,
+                      t0,t1,t2,t3,troncature,gausspoint,
                       nlambda01,lambda01,nlambda02,lambda02,
                       nlambda12,lambda12,alpha,penalty.factor,penalty){
   
@@ -234,7 +233,7 @@ idm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                                                 t2=t2,
                                                                 t3=t3,
                                                                 troncature=troncature,
-                                                                gausspoint=gauss.point,
+                                                                gausspoint=gausspoint,
                                                                 lambda=lambda[id.lambda,],
                                                                 alpha=alpha,
                                                                 penalty.factor=penalty.factor,
@@ -468,7 +467,7 @@ idm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                                          t2=t2,
                                                          t3=t3,
                                                          troncature=troncature,
-                                                         gausspoint=gauss.point,
+                                                         gausspoint=gausspoint,
                                                          lambda=lambda[id.lambda,],
                                                          alpha=alpha,
                                                          penalty.factor=penalty.factor,
@@ -532,7 +531,7 @@ idm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                                   t2=t2,
                                                   t3=t3,
                                                   troncature=troncature,
-                                                  gausspoint=gauss.point,
+                                                  gausspoint=gausspoint,
                                                   lambda=lambda[id.lambda,],
                                                   alpha=alpha,
                                                   penalty.factor=penalty.factor,
@@ -569,7 +568,7 @@ idm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                                            t2=t2,
                                                            t3=t3,
                                                            troncature=troncature,
-                                                           gausspoint=gauss.point,
+                                                           gausspoint=gausspoint,
                                                            lambda=lambda[id.lambda,],
                                                            alpha=alpha,
                                                            penalty.factor=penalty.factor,
@@ -626,7 +625,7 @@ idm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                                   t2=t2,
                                                   t3=t3,
                                                   troncature=troncature,
-                                                  gausspoint=gauss.point)
+                                                  gausspoint=gausspoint)
                                  
                                  
                                  # look at convergence for each lambda :
@@ -937,7 +936,7 @@ idm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                                                 t2=t2,
                                                                 t3=t3,
                                                                 troncature=troncature,
-                                                                gausspoint=gauss.point,
+                                                                gausspoint=gausspoint,
                                                                 lambda=lambda[id.lambda,],
                                                                 alpha=alpha,
                                                                 penalty.factor=penalty.factor,
@@ -1172,7 +1171,7 @@ idm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                                          t2=t2,
                                                          t3=t3,
                                                          troncature=troncature,
-                                                         gausspoint=gauss.point,
+                                                         gausspoint=gausspoint,
                                                          lambda=lambda[id.lambda,],
                                                          alpha=alpha,
                                                          penalty.factor=penalty.factor,
@@ -1236,7 +1235,7 @@ idm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                                   t2=t2,
                                                   t3=t3,
                                                   troncature=troncature,
-                                                  gausspoint=gauss.point,
+                                                  gausspoint=gausspoint,
                                                   lambda=lambda[id.lambda,],
                                                   alpha=alpha,
                                                   penalty.factor=penalty.factor,
@@ -1273,7 +1272,7 @@ idm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                                            t2=t2,
                                                            t3=t3,
                                                            troncature=troncature,
-                                                           gausspoint=gauss.point,
+                                                           gausspoint=gausspoint,
                                                            lambda=lambda[id.lambda,],
                                                            alpha=alpha,
                                                            penalty.factor=penalty.factor,
@@ -1330,7 +1329,7 @@ idm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                                   t2=t2,
                                                   t3=t3,
                                                   troncature=troncature,
-                                                  gausspoint=gauss.point)
+                                                  gausspoint=gausspoint)
                                  
                                  
                                  # look at convergence for each lambda :
