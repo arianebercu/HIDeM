@@ -15,7 +15,7 @@ test_that("Illness-death model with weibull baseline risk", {
   library(lava)
   library(prodlim)
   set.seed(17)
-  d <- SmoothHazardoptim9::simulatepenIDM$data
+  d <- simulateIDM(n=1000)
   # right censored data
   fitRC <- idm(formula01=Hist(time=observed.illtime,event=seen.ill)~X1+X2,
                formula02=Hist(time=observed.lifetime,event=seen.exit)~X1+X2,

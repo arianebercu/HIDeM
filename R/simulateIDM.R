@@ -327,7 +327,7 @@ simulateIDM <- function(n=100,
   if(!inherits(prob.censoring,c("numeric","integer")) | prob.censoring > 1 |prob.censoring<0 |length(prob.censoring)!=1)stop("The prob.censoring has to a numeric or integer between 0 and 1.")
   if(!inherits(administrative.censoring,c("numeric","integer")) | administrative.censoring <=0 |length(administrative.censoring)!=1)stop("The administrative.censoring has to be a numeric or integer higher than 0.")
   if(!inherits(n.inspections,c("numeric","integer")) | round(n.inspections)!=n.inspections |length(n.inspections)!=1 | n.inspections <= 0)stop("The n.inspections has to be an integer higher than 0.")
-  if(!inherits(schedule,c("numeric","integer")) | round(schedule)!=schedule |length(schedule)!=1 | schedule <= 0)stop("The schedule has to be an integer higher than 0.")
+  if(!inherits(schedule,c("numeric","integer")) |length(schedule)!=1 | schedule <= 0)stop("The schedule has to be an integer higher than 0.")
   if(!inherits(punctuality,c("numeric","integer")) | length(punctuality)!=1 | punctuality <= 0)stop("The punctuality has to be an integer or numeric higher than 0.")
   if(!inherits(nvar,c("numeric","integer")) | round(nvar)!=nvar |length(nvar)!=1|nvar<=0)stop("The number of variables has to be an integer higher than 0.")
   if(!inherits(mean,c("numeric","integer")) | length(mean)!=nvar)stop("The mean value of variables has to be an integer or numeric of length nvar.")
