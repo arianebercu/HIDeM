@@ -649,11 +649,11 @@ predict.idm <- function(object,s,
       }
       if(length(lambda)==1){
         if(lambda=="BIC"){
-          BIC<-min(x$BIC[x$converged==1])
-          id<-which(x$BIC==BIC)[1]
+          BIC<-min(object$BIC[object$converged==1])
+          id<-which(object$BIC==BIC)[1]
         }else{
-          GCV<-min(x$GCV[x$converged==1])
-          id<-which(x$GCV==GCV)[1]}
+          GCV<-min(object$GCV[object$converged==1])
+          id<-which(object$GCV==GCV)[1]}
       }
       #update dataset from the formula 
       if (!missing(newdata)){

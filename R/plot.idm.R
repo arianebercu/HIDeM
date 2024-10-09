@@ -189,8 +189,8 @@ plot.idm <- function(x,
     if(!length(lambda)%in%c(1,3)){stop("Lambda need to be either a vector of three values (01,02 and 12) or BIC or GCV")}
     
     if(length(lambda)==3){
-      if(!any(apply(object$lambda,FUN=function(x){sum(x==lambda)},MARGIN=2)==3)){stop("Lambda need to be either a vector of three values (01,02 and 12) from object$lambda")}
-      id<-which(apply(object$lambda,FUN=function(x){sum(x==lambda)},MARGIN=2)==3)[1]
+      if(!any(apply(x$lambda,FUN=function(x){sum(x==lambda)},MARGIN=2)==3)){stop("Lambda need to be either a vector of three values (01,02 and 12) from x$lambda")}
+      id<-which(apply(x$lambda,FUN=function(x){sum(x==lambda)},MARGIN=2)==3)[1]
     }
     if(length(lambda)==1){
       if(lambda=="BIC"){

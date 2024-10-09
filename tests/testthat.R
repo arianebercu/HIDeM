@@ -77,7 +77,7 @@ test_that("Penalised illness-death model with weibull baseline risk", {
   int<-intensity(times=fitpenweib$time[,1],
                  theta = fitpenweib$modelPar[1:2]^2)
   int
-  plot(fitpenweib,lambda="BIC")
+  plot(fitpenweib,lambda=c(10,10,10))
   predict(fitpenweib,s=10,t=15,lambda = c(10,10,100))
   
 })
