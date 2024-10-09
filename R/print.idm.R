@@ -71,9 +71,9 @@ print.idm <- function(x,conf.int=.95,digits=4,pvalDigits=4,eps=0.0001,coef=F,...
             cat("Log-likelihood : ",x$loglik[1], "\n")
             cat("----\nModel converged.\n")
             cat("number of iterations: ", x$niter,"\n")
-            cat("convergence criteria: parameters=", signif(x$cv$cb,2), "\n")
-            cat("                    : likelihood=", signif(x$cv$ca,2), "\n") 
-            cat("                    : second derivatives=", signif(x$cv$rdm,2), "\n")
+            cat("convergence criteria: parameters=", signif(na.omit(x$cv$cb),2), "\n")
+            cat("                    : likelihood=", signif(na.omit(x$cv$ca,2)), "\n") 
+            cat("                    : second derivatives=", signif(na.omit(x$cv$rdm,2)), "\n")
   
         }else{
           if(sum(x$converged!=1)>0){
@@ -85,7 +85,7 @@ print.idm <- function(x,conf.int=.95,digits=4,pvalDigits=4,eps=0.0001,coef=F,...
           ca.spline<-apply(x$cv$ca.spline,MARGIN=2,FUN=function(x){x<-na.omit(x) 
           return(x[length(x)])})
           cb<-apply(x$cv$cb,MARGIN=2,FUN=function(x){x<-na.omit(x) 
-          return(abs(x[length(x)]-x[length(x)-1]))})
+          return(abs(x[length(x)]-x[length(x)-1])/abs(x[length(x)-1]))})
           cat("All ",n_model," models did converge. \n")
           
           for(k in 1:n_model){
