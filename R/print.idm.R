@@ -13,19 +13,23 @@
 #' @param \dots Not used.
 #' @author R: Ariane Bercu <ariane.bercu@@u-bordeaux.fr> 
 #' @seealso \code{\link{summary.idm}}, \code{\link{plot.idm}}
-#' @keywords methods
 #' @examples
-#' 
+#'
 #' \dontrun{
-#' data(Paq1000)
+#' library(lava)
 #' library(prodlim)
-#' fit.splines <-  idm(formula02=Hist(time=t,event=death,entry=t0)~certif,
-#' 		formula01=Hist(time=list(l,r),event=dementia)~certif,
-#'                 formula12=~1,
-#'                 method="Splines",
-#' 		data=Paq1000)
-#' print(fit.splines)
-#' 
+#' set.seed(17)
+#' d <- simulateIDM(n=1000,
+#'                  beta01=c(1,1,0,0.5,0.5,rep(0,5)),
+#'                  beta02=c(1,0,0,0,0.5,rep(0,5)),
+#'                  beta12=c(1,0,0,0,0.5,rep(0,5)))$data
+#'                  
+#' fitpenweib <- idm(formula01=Hist(time=list(L,R),event=seen.ill)~X1+X2+X3+X4+X5+X6+X7+X8+X9+X10,
+#'                   formula02=Hist(time=observed.lifetime,event=seen.exit)~X1+X2+X3+X4+X5+X6+X7+X8+X9+X10,
+#'                   formula12=~X1+X2+X3+X4+X5+X6+X7+X8+X9+X10,
+#'                   data=d,penalty="lasso",lambda01 = c(10,20),lambda02 = 10, lambda12 = 10)
+#' pp<-predict(fitpenweib,s=10,t=15,lambda = "BIC") 
+#' print(pp)
 #' }
 #' @useDynLib SmoothHazardoptim9
 #' @export
@@ -67,13 +71,30 @@ print.idm <- function(x,conf.int=.95,digits=4,pvalDigits=4,eps=0.0001,coef=F,...
                "3"={ warning("Fisher information matrix non-positive definite. \n",call.=FALSE)})
     }else{
         if(length(x$converged)==1 ){
-            cat("The model did converge. \n")
-            cat("Log-likelihood : ",x$loglik[1], "\n")
-            cat("----\nModel converged.\n")
-            cat("number of iterations: ", x$niter,"\n")
-            cat("convergence criteria: parameters=", signif(na.omit(x$cv$cb),2), "\n")
-            cat("                    : likelihood=", signif(na.omit(x$cv$ca),2), "\n") 
+            
+            if(x$penalty=="none"){
+              cat("The model did converge. \n")
+              cat("Log-likelihood : ",x$loglik[1], "\n")
+              cat("----\nModel converged.\n")
+              cat("number of iterations: ", x$niter,"\n")
+            cat("convergence criteria: parameters=", signif(na.omit(x$cv$ca),2), "\n")
+            cat("                    : likelihood=", signif(na.omit(x$cv$cb),2), "\n") 
             cat("                    : second derivatives=", signif(na.omit(x$cv$rdm),2), "\n")
+            }else{
+              cat("The model did converge. \n")
+              cat("Penalised log-likelihood : ",x$loglik[2], "\n")
+              cat("----\nModel converged.\n")
+              cat("number of iterations: ", x$niter,"\n")
+              ca<-na.omit(x$cv$ca.beta)
+              ca<-ca[length(ca)]
+              caspline<-na.omit(x$cv$ca.spline)
+              caspline<-caspline[length(caspline)]
+              cb<-na.omit(x$cv$cb)
+              cb<-abs(cb[length(cb)]-cb[length(cb)-1])/abs(cb[length(cb)-1])
+              cat("convergence criteria: parameters beta=", signif(ca,2), "\n")
+              cat("                    : parameters base risk=", signif(caspline,2), "\n") 
+              cat("                    : penalised-likelihood=", signif(cb,2), "\n")
+            }
   
         }else{
           if(sum(x$converged!=1)>0){
@@ -90,11 +111,11 @@ print.idm <- function(x,conf.int=.95,digits=4,pvalDigits=4,eps=0.0001,coef=F,...
           
           for(k in 1:n_model){
             cat("------------ Model ",k," ------------ \n")
-            cat("Log-likelihood : ",x$loglik[k], "\n")
+            cat("Penalised log-likelihood : ",x$loglik[2*k], "\n")
             cat("number of iterations: ", x$niter[k],"\n")
             cat("convergence criteria: parameters beta=", ca.beta[k], "\n")
             cat("                    : parameters base risk=", ca.spline[k], "\n") 
-            cat("                    : likelihood=", cb[k], "\n")
+            cat("                    : penalised-likelihood=", cb[k], "\n")
           }
         }
           

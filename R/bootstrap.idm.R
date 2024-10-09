@@ -85,7 +85,7 @@
 #' is na.omit. Another possible value is NULL.
 #' @param scale.X do you want to center and reduce your explanatory variables
 #' @param posfix index of fixed parameters 
-#' @param gauss.point gauss quadrature points in the approximation of integrals
+#' @param gausspoint gauss quadrature points in the approximation of integrals
 #' @param lambda01 Lambda on transition 0 --> 1
 #' @param lambda02 Lambda on transition 0 --> 2
 #' @param lambda12 Lambda on transition 1 --> 2
@@ -104,6 +104,19 @@
 #'
 #' The boostrap returns a list of K elements of type idm, see idm for more details 
 #' @seealso \code{\link{idm}}
+#' @examples
+#' 
+#' \dontrun{
+#'  library(lava)
+#'  library(prodlim)
+#'  set.seed(17)
+#'  d <- simulateIDM(n=1000)$data
+#'  fitweib <- bootstrap.idm(formula01=Hist(time=list(L,R),event=seen.ill)~X1+X2,
+#'  formula02=Hist(time=observed.lifetime,event=seen.exit)~X1+X2,
+#'  formula12=Hist(time=observed.lifetime,event=seen.exit)~X1+X2,data=d,penalty="none",K=3)
+#'  print(fitweib)
+#' 
+#' }
 ##' @author R: Ariane Bercu <ariane.bercu@@u-bordeaux.fr> 
 #' @keywords illness-death
 #' @importFrom prodlim Hist
@@ -131,7 +144,7 @@ bootstrap.idm <- function(
                 B=NULL,
                 posfix=NULL,
 
-                gauss.point=10,
+                gausspoint=10,
 
                 lambda01=NULL,
                 lambda02=NULL,
@@ -159,8 +172,8 @@ bootstrap.idm <- function(
   
   if(!inherits(data,"data.frame"))stop("Argument 'data' must be a data.frame")
   
-  if(!penalty%in%c("lasso","ridge","elasticnet","corrected.elasticnet","mcp","scad")){
-    stop(paste0("Parameter penalty must be either : lasso, ridge, elastic.net, corrected.elasticnet, mcp or scad"))}
+  if(!penalty%in%c("lasso","ridge","elasticnet","corrected.elasticnet","mcp","scad","none")){
+    stop(paste0("Parameter penalty must be either : none, lasso, ridge, elastic.net, corrected.elasticnet, mcp or scad"))}
   # resampling check value 
   
   if(!resampling%in%c("subsampling","bootstrap")){
@@ -169,7 +182,7 @@ bootstrap.idm <- function(
   # if we do resampling and calculate calibration we need to have same 
   # lambda for each K thus : 
   
-  if(is.null(lambda01)|is.null(lambda02)|is.null(lambda12)){
+  if(penalty!="none" & (is.null(lambda01)|is.null(lambda02)|is.null(lambda12))){
     stop("You need to specify lambda on all transition")}
   
   # keep in list
@@ -188,13 +201,19 @@ bootstrap.idm <- function(
       #run idm 
       # if start is specified or first ite 
       if(k>1 & is.null(B)){
-        if(method=="Weib"){
-          B<-ifelse(dim(model.idm$coef)[2]==1,
-                    c(model.idm$modelPar,model.idm$coef[,1]),
-                        c(model.idm$modelPar[,1],model.idm$coef[,1]))
-        }else{B<-ifelse(dim(model.idm$coef)[2]==1,
-                        c(model.idm$theta01,model.idm$theta02,model.idm$theta12,model.idm$coef[,1]),
-                        c(model.idm$theta01[,1],model.idm$theta02[,1],model.idm$theta12[,1],model.idm$coef[,1]))}
+        if(penalty!="none"){
+          if(method=="Weib"){
+            B<-ifelse(dim(model.idm$coef)[2]==1,
+                      c(model.idm$modelPar,model.idm$coef[,1]),
+                          c(model.idm$modelPar[,1],model.idm$coef[,1]))
+          }else{B<-ifelse(dim(model.idm$coef)[2]==1,
+                          c(model.idm$theta01,model.idm$theta02,model.idm$theta12,model.idm$coef[,1]),
+                          c(model.idm$theta01[,1],model.idm$theta02[,1],model.idm$theta12[,1],model.idm$coef[,1]))}
+        }else{
+          if(method=="Weib"){
+            B<-c(model.idm$modelPar,model.idm$coef)
+          }else{B<-c(model.idm$theta01,model.idm$theta02,model.idm$theta12,model.idm$coef)}
+        }
       }
       model.idm<-SmoothHazardoptim9::idm(formula01=formula01,
                  formula02=formula02,
@@ -211,7 +230,7 @@ bootstrap.idm <- function(
                  na.action =na.action,
                  B=B,
                  posfix=posfix,
-                 gauss.point=gauss.point,
+                 gausspoint=gausspoint,
                  lambda01=lambda01,
                  lambda02=lambda02,
                  lambda12=lambda12,
@@ -257,7 +276,7 @@ bootstrap.idm <- function(
                      na.action =na.action,
                      B=B,
                      posfix=posfix,
-                     gauss.point=gauss.point,
+                     gausspoint=gausspoint,
                      lambda01=lambda01,
                      lambda02=lambda02,
                      lambda12=lambda12,

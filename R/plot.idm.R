@@ -32,20 +32,22 @@
 #' \dontrun{
 #' library(lava)
 #' library(prodlim)
-#' m <- idmModel(scale.lifetime=1/10,scale.illtime=1/8)
-#' distribution(m,"X") <- binomial.lvm()
-#' regression(m,latent.lifetime~X) <- 0.7
-#' set.seed(30)
-#' d <- sim(m,100)
-#' fit.weib <- idm(formula02=Hist(observed.lifetime,event=seen.exit)~1,
-#' formula01=Hist(time=list(L,R),event=seen.ill)~1,data=d,conf.int=FALSE)
-#' plot(fit.weib)
-#'
-#' ## FIXME: the limits for the 01 transition are a bit wide!?
-#' ## with bootstrap confidence limits
-#' fit.weib <- idm(formula02=Hist(observed.lifetime,event=seen.exit)~1,
-#' formula01=Hist(time=list(L,R),event=seen.ill)~1,data=d,conf.int=TRUE)
-#' plot(fit.weib)
+#' set.seed(17)
+#' d <- simulateIDM(n=1000,
+#'                  beta01=c(1,1,0,0.5,0.5,rep(0,5)),
+#'                  beta02=c(1,0,0,0,0.5,rep(0,5)),
+#'                  beta12=c(1,0,0,0,0.5,rep(0,5)))$data
+#'                  
+#' fitsplines <- idm(formula01=Hist(time=list(L,R),event=seen.ill)~X1+X2,
+#' formula02=Hist(time=observed.lifetime,event=seen.exit)~X1+X2,
+#' formula12=Hist(time=observed.lifetime,event=seen.exit)~X1+X2,data=d,method="splines")
+#' plot(fitsplines)
+#' 
+#' fitpenspline <- idm(formula01=Hist(time=list(L,R),event=seen.ill)~X1+X2+X3+X4+X5+X6+X7+X8+X9+X10,
+#'                     formula02=Hist(time=observed.lifetime,event=seen.exit)~X1+X2+X3+X4+X5+X6+X7+X8+X9+X10,
+#'                     formula12=~X1+X2+X3+X4+X5+X6+X7+X8+X9+X10,method="splines",
+#'                     data=d,penalty="lasso",lambda01 = c(10,20),lambda02 = 10, lambda12 = 10)
+#' plot(fitpenspline,lambda=c(10,10,10))
 #' }
 #'  
 #'@useDynLib SmoothHazardoptim9

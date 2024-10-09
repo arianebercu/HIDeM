@@ -72,7 +72,7 @@
 #' is na.omit. Another possible value is NULL.
 #' @param scale.X do you want to center and reduce your explanatory variables
 #' @param posfix index of fixed parameters 
-#' @param gauss.point gauss quadrature points in the approximation of integrals
+#' @param gausspoint gauss quadrature points in the approximation of integrals
 #' @param lambda01 Lambda on transition 0 --> 1
 #' @param lambda02 Lambda on transition 0 --> 2
 #' @param lambda12 Lambda on transition 1 --> 2
@@ -98,6 +98,19 @@
 #' \item{gridmethod}{On which indicator the grid should be based, either BIC or GCV}
 #' @author R: Ariane Bercu <ariane.bercu@@u-bordeaux.fr> 
 #' @seealso \code{\link{print.idm}}
+#' @examples
+#' 
+#' \dontrun{
+#' library(lava)
+#' library(prodlim)
+#' set.seed(17)
+#' d <- simulateIDM(n=1000,beta01=c(1,1,0,0.5,0.5,rep(0,5)),
+#' beta02=c(1,0,0,0,0.5,rep(0,5)),beta12=c(1,0,0,0,0.5,rep(0,5)))$data
+#' fitgrid<- gridsearch.penidm(formula01=Hist(time=list(L,R),event=seen.ill)~X1+X2+X3+X4+X5+X6+X7+X8+X9+X10,
+#' formula02=Hist(time=observed.lifetime,event=seen.exit)~X1+X2+X3+X4+X5+X6+X7+X8+X9+X10,
+#' formula12=~X1+X2+X3+X4+X5+X6+X7+X8+X9+X10,
+#' data=d,penalty="lasso")
+#' }
 #' \code{\link{summary.idm}}
 #' \code{\link{predict.idm}}
 #' @references D. Marquardt (1963). An algorithm for least-squares estimation
@@ -128,7 +141,7 @@ gridsearch.penidm <- function(
                 B=NULL,
                 posfix=NULL,
 
-                gauss.point=10,
+                gausspoint=10,
 
                 lambda01=NULL,
                 lambda02=NULL,
@@ -271,7 +284,7 @@ gridsearch.penidm <- function(
                                   type.quantile=type.quantile,
                                   na.action =na.action,
                                   B=B,
-                                  gauss.point=gauss.point,
+                                  gausspoint=gausspoint,
                                   clustertype=clustertype)
   
   
@@ -308,7 +321,7 @@ gridsearch.penidm <- function(
                                   type.quantile=type.quantile,
                                   na.action =na.action,
                                   B=B,
-                                  gauss.point=gauss.point,
+                                  gausspoint=gausspoint,
                                   clustertype=clustertype)
  
   
@@ -346,7 +359,7 @@ gridsearch.penidm <- function(
                                   type.quantile=type.quantile,
                                   na.action =na.action,
                                   B=B,
-                                  gauss.point=gauss.point,
+                                  gausspoint=gausspoint,
                                   clustertype=clustertype)
   
   

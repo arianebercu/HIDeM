@@ -16,6 +16,16 @@
 ##' @return A data set with interval censored observations from an illness-death model
 ##' example(idmModel)
 ##' help(idmModel)
+##' @examples
+##'  \dontrun{
+#' library(lava)
+#' library(prodlim)
+#' set.seed(17)
+#' d <- simulateIDM(n=1000,
+#'                  beta01=c(1,1,0,0.5,0.5,rep(0,5)),
+#'                  beta02=c(1,0,0,0,0.5,rep(0,5)),
+#'                  beta12=c(1,0,0,0,0.5,rep(0,5)))$data
+#' }
 ##' @author R: Ariane Bercu <ariane.bercu@@u-bordeaux.fr> 
 ##' @importFrom lava sim
 ##' @useDynLib SmoothHazardoptim9
