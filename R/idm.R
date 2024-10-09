@@ -774,7 +774,7 @@ idm <- function(formula01,
           
           betaCoef <- beta[(size_spline+1):size_V]
           names(betaCoef) <- c(Xnames01,Xnames02,Xnames12)
-          fit$coef <- as.matrix(betaCoef)
+          fit$coef <- betaCoef
           fit$HR <- exp(betaCoef)
           
         }
@@ -900,7 +900,7 @@ idm <- function(formula01,
           
           betaCoef <- beta[(6+1):size_V]
           names(betaCoef) <- c(Xnames01,Xnames02,Xnames12)
-          fit$coef <- as.matrix(betaCoef)
+          fit$coef <- betaCoef
           fit$HR <- exp(betaCoef)
           
         }
@@ -966,19 +966,23 @@ idm <- function(formula01,
  ############################# scale explanatory variables #####################
           if(scale.X==T){
             # to know which variable to center and reduces : 
+            
+            if(nvat01>0){
             names<-as.vector(unlist(lapply(m01, class)))[-1]
             
             # standardize variable : 
             
             # we need to center and reduce variables when penalty is done 
-            namesx01<-as.vector(unlist(lapply(m01, class)))[-1]
+            namesx01<-as.vector(unlist(lapply(m01[,colnames(m01)%in%Xnames01], class)))[-1]
             scaledx01<-scale(x01[,which(namesx01=="numeric")])
             # keep center and reduces parameters 
             xm01<-attr(scaledx01,"scaled:center")
             xs01<-attr(scaledx01,"scaled:scale")
             x01[,which(namesx01=="numeric")]<-scaledx01
             
+            }
             
+            if(nvat02>0){
             
             # to know wich variable to center and reduces : 
             names<-as.vector(unlist(lapply(m02, class)))[-1]
@@ -986,13 +990,15 @@ idm <- function(formula01,
             # standardize variable : 
             
             # we need to center and reduce variables when penalty is done 
-            namesx02<-as.vector(unlist(lapply(m02, class)))[-1]
+            namesx02<-as.vector(unlist(lapply(m02[,colnames(m02)%in%Xnames02], class)))[-1]
             scaledx02<-scale(x02[,which(namesx02=="numeric")])
             # keep center and reduces parameters 
             xm02<-attr(scaledx02,"scaled:center")
             xs02<-attr(scaledx02,"scaled:scale")
             x02[,which(namesx02=="numeric")]<-scaledx02
+            }
             
+            if(nvat12>0){
             
             # to know wich variable to center and reduces : 
             # no need [-1] as no element before ~
@@ -1001,12 +1007,13 @@ idm <- function(formula01,
             # standardize variable : 
             
             # we need to center and reduce variables when penalty is done 
-            namesx12<-as.vector(unlist(lapply(m12, class)))
+            namesx12<-as.vector(unlist(lapply(m12[,colnames(m12)%in%Xnames12], class)))
             scaledx12<-scale(x12[,which(namesx12=="numeric")])
             # keep center and reduces parameters 
             xm12<-attr(scaledx12,"scaled:center")
             xs12<-attr(scaledx12,"scaled:scale")
             x12[,which(namesx12=="numeric")]<-scaledx12
+            }
             
             if(noVar[1]==1){ve01<-as.double(rep(0,N))}else{ve01<-as.double(x01)}
             if(noVar[2]==1){ve02<-as.double(rep(0,N))}else{ve02<-as.double(x02)}
@@ -1321,9 +1328,9 @@ idm <- function(formula01,
             fit$nknots01 <- nknots01
             fit$nknots02 <- nknots02
             fit$nknots12 <- nknots12
-            fit$theta01 <- theta01
-            fit$theta02 <- theta02
-            fit$theta12 <- theta12
+            fit$theta01 <- as.matrix(theta01)
+            fit$theta02 <- as.matrix(theta02)
+            fit$theta12 <- as.matrix(theta12)
 
 ############# on times to do prediction on #################################
             fit$time <- matrix(NA,ncol=3,nrow=100)
@@ -1644,7 +1651,7 @@ idm <- function(formula01,
                        cb=out$cb,rdm=NULL)
               
              
-              fit$modelPar<-modelPar
+              fit$modelPar<-as.matrix(modelPar)
               
 ############# on times to do prediction on #################################
               fit$time <- matrix(NA,ncol=3,nrow=100)

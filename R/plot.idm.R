@@ -183,6 +183,24 @@ plot.idm <- function(x,
       BIC<-min(x$BIC[x$converged==1])
       lambda<-x$lambda[which(x$BIC%in%BIC)[1]]
     }
+    
+    if(is.null(lambda)){lambda<-"BIC"}
+    if(length(lambda)==1){if(!lambda%in%c("GCV","BIC")){stop("Lambda need to be either a vector of three values (01,02 and 12) or BIC or GCV")}}
+    if(!length(lambda)%in%c(1,3)){stop("Lambda need to be either a vector of three values (01,02 and 12) or BIC or GCV")}
+    
+    if(length(lambda)==3){
+      if(!any(apply(object$lambda,FUN=function(x){sum(x==lambda)},MARGIN=2)==3)){stop("Lambda need to be either a vector of three values (01,02 and 12) from object$lambda")}
+      id<-which(apply(object$lambda,FUN=function(x){sum(x==lambda)},MARGIN=2)==3)[1]
+    }
+    if(length(lambda)==1){
+      if(lambda=="BIC"){
+        BIC<-min(x$BIC[x$converged==1])
+        id<-which(x$BIC==BIC)[1]
+      }else{
+        GCV<-min(x$GCV[x$converged==1])
+        id<-which(x$GCV==GCV)[1]}
+    }
+    
     if(!is.null(x$modelPar)){
       
       x$method<-"weib"
@@ -190,7 +208,7 @@ plot.idm <- function(x,
       X<-X01 <- X02 <- X12 <- seq(x$mintime,x$maxtime,length.out=100)
       
       
-      id<-which(x$lambda%in%lambda)[1]
+      
       intensity01<-intensity(times=X01,theta=x$modelPar[1:2,id]^2,
                              fix=x$fix[1:2],
                              conf.int=F,
@@ -231,7 +249,6 @@ plot.idm <- function(x,
       
       n_spline<-x$nknots01+2+x$nknots02+2+x$nknots12+2
       
-      id<-which(x$lambda%in%lambda)[1]
       
       intensity01<-intensity(times=X01,theta=x$theta01[,id],
                              knots=x$knots01,

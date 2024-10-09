@@ -179,7 +179,7 @@ predict.idm <- function(object,s,
     }
     
     if(nvar01 > 0){
-        beta01 <- object$coef[1:nvar01,]
+        beta01 <- object$coef[1:nvar01]
         names(beta01) <- paste0("beta01.",names(beta01))
         bZ01 <- sum(Z01 * beta01)
     }else{
@@ -187,7 +187,7 @@ predict.idm <- function(object,s,
         beta01 <- NULL
     }
     if (nvar02 != 0) {
-        beta02 <- object$coef[(nvar01+1):(nvar01+nvar02),]
+        beta02 <- object$coef[(nvar01+1):(nvar01+nvar02)]
         names(beta02) <- paste0("beta02.",names(beta02))
         bZ02 <- sum(Z02 * beta02)
     }else{
@@ -195,7 +195,7 @@ predict.idm <- function(object,s,
         bZ02 <- 0
     }
     if (nvar12 != 0) {
-        beta12 <- object$coef[(nvar01+nvar02+1):(nvar01+nvar02+nvar12),]
+        beta12 <- object$coef[(nvar01+nvar02+1):(nvar01+nvar02+nvar12)]
         names(beta12) <- paste0("beta12.",names(beta12))
         bZ12 <- sum(Z12 * beta12)
     }else{
@@ -640,16 +640,20 @@ predict.idm <- function(object,s,
     # lambda need to be either a vector of three values (01,02,12) or BIC or GCV
 
       if(is.null(lambda)){lambda<-"BIC"}
-      if(length(lambda)==1 & (!lambda%in%c("GCV","BIC"))){stop("Lambda need to be either a vector of three values (01,02 and 12) or BIC or GCV")}
+      if(length(lambda)==1){if(!lambda%in%c("GCV","BIC")){stop("Lambda need to be either a vector of three values (01,02 and 12) or BIC or GCV")}}
       if(!length(lambda)%in%c(1,3)){stop("Lambda need to be either a vector of three values (01,02 and 12) or BIC or GCV")}
 
       if(length(lambda)==3){
-        if(any(sapply(object$lambda,FUN=function(x){sum(x==lambda)})==3)){stop("Lambda need to be either a vector of three values (01,02 and 12) from object$lambda")}
-        id<-which(any(sapply(object$lambda,FUN=function(x){sum(x==lambda)})==3))[1]
+        if(!any(apply(object$lambda,FUN=function(x){sum(x==lambda)},MARGIN=2)==3)){stop("Lambda need to be either a vector of three values (01,02 and 12) from object$lambda")}
+        id<-which(apply(object$lambda,FUN=function(x){sum(x==lambda)},MARGIN=2)==3)[1]
       }
       if(length(lambda)==1){
-        if(lambda=="BIC"){id<-which.min(object$BIC)[1]
-        }else{id<-which.min(object$GCV)[1]}
+        if(lambda=="BIC"){
+          BIC<-min(x$BIC[x$converged==1])
+          id<-which(x$BIC==BIC)[1]
+        }else{
+          GCV<-min(x$GCV[x$converged==1])
+          id<-which(x$GCV==GCV)[1]}
       }
       #update dataset from the formula 
       if (!missing(newdata)){
