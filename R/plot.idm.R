@@ -179,10 +179,7 @@ plot.idm <- function(x,
     if(sum(x$converged==1)==0){
       stop("None of the model converged, no plot can be displayed")
     }
-    if(is.null(lambda)){
-      BIC<-min(x$BIC[x$converged==1])
-      lambda<-x$lambda[which(x$BIC%in%BIC)[1]]
-    }
+
     
     if(is.null(lambda)){lambda<-"BIC"}
     if(length(lambda)==1){if(!lambda%in%c("GCV","BIC")){stop("Lambda need to be either a vector of three values (01,02 and 12) or BIC or GCV")}}
