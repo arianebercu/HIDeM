@@ -26,6 +26,7 @@ test_that("Illness-death model with weibull baseline risk", {
             theta = fitweib$modelPar[1:2]^2)
   int
   predict(fitweib,s=10,t=15)
+  plot(fitweib)
   
 })
 
@@ -39,6 +40,7 @@ test_that("Illness-death model with M-spline baseline risk", {
                  formula02=Hist(time=observed.lifetime,event=seen.exit)~X1+X2,
                  formula12=Hist(time=observed.lifetime,event=seen.exit)~X1+X2,data=d,
                  method="splines")
+  fitsplines
   summary(fitsplines)
   int<-intensity(times=fitsplines$time[,1],
                  theta = fitsplines$theta01^2,
@@ -47,6 +49,7 @@ test_that("Illness-death model with M-spline baseline risk", {
                  method = "splines")
   int
   predict(fitsplines,s=10,t=15)
+  plot(fitsplines)
   
 })
 #here
@@ -64,7 +67,7 @@ test_that("Penalised illness-death model with weibull baseline risk", {
   fitpenweib <- idm(formula01=Hist(time=list(L,R),event=seen.ill)~X1+X2+X3+X4+X5+X6+X7+X8+X9+X10,
                     formula02=Hist(time=observed.lifetime,event=seen.exit)~X1+X2+X3+X4+X5+X6+X7+X8+X9+X10,
                     formula12=~X1+X2+X3+X4+X5+X6+X7+X8+X9+X10,
-                    data=d,penalty="lasso",lambda01 = c(10,1),lambda02 = 10, lambda12 = 10)
+                    data=d,penalty="lasso",lambda01 = c(10,20),lambda02 = 10, lambda12 = 10)
   fitpenweib
   summary(fitpenweib)
   int<-intensity(times=fitpenweib$time[,1],

@@ -72,8 +72,8 @@ print.idm <- function(x,conf.int=.95,digits=4,pvalDigits=4,eps=0.0001,coef=F,...
             cat("----\nModel converged.\n")
             cat("number of iterations: ", x$niter,"\n")
             cat("convergence criteria: parameters=", signif(na.omit(x$cv$cb),2), "\n")
-            cat("                    : likelihood=", signif(na.omit(x$cv$ca,2)), "\n") 
-            cat("                    : second derivatives=", signif(na.omit(x$cv$rdm,2)), "\n")
+            cat("                    : likelihood=", signif(na.omit(x$cv$ca),2), "\n") 
+            cat("                    : second derivatives=", signif(na.omit(x$cv$rdm),2), "\n")
   
         }else{
           if(sum(x$converged!=1)>0){
