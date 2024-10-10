@@ -1,5 +1,5 @@
-##' Code:
-##' @title idm penalty weib
+### Code:
+##' @title Illness-death model algorithm with weibull baseline risk
 ##' @param b  parameters not fixed
 ##' @param size_V number of parameters
 ##' @param fix0 indicators of fixed and unfixed parameters

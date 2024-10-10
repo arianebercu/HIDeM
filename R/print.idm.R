@@ -1,8 +1,6 @@
 #' Print method for \code{idm} objects
-#' 
-#' Print a summary of a fitted illness-death model 
-#' 
-#' 
+### Code:
+#' @title Print a summary of a fitted illness-death model 
 #' @param x Class \code{idm} object, i.e. the result of a call to the
 #' \code{\link{idm}} function with \code{intensities}="Weib".
 #' @param conf.int The level of confidence for the hazard ratios. The default is \code{0.95}.
@@ -32,6 +30,7 @@
 #' print(pp)
 #' }
 #' @useDynLib SmoothHazardoptim9
+#' @author R: Ariane Bercu <ariane.bercu@@u-bordeaux.fr> 
 #' @export
 print.idm <- function(x,conf.int=.95,digits=4,pvalDigits=4,eps=0.0001,coef=F,...){
     # {{{  call

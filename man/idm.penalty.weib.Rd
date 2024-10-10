@@ -2,7 +2,7 @@
 % Please edit documentation in R/idm.penalty.weib.R
 \name{idm.penalty.weib}
 \alias{idm.penalty.weib}
-\title{idm penalty weib}
+\title{Penalised Illness-death model algorithm with weibull baseline risk}
 \usage{
 idm.penalty.weib(
   b,
@@ -120,7 +120,7 @@ idm.penalty.weib(
 \item{gausspoint}{number of points in gauss quadrature}
 }
 \description{
-Code:
+Penalised Illness-death model algorithm with weibull baseline risk
 }
 \author{
 R: Ariane Bercu <ariane.bercu@u-bordeaux.fr>

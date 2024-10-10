@@ -2,7 +2,7 @@
 % Please edit documentation in R/simulateIDM.R
 \name{simulateIDM}
 \alias{simulateIDM}
-\title{Sample illness-death model data for penalised regression}
+\title{Sample illness-death model data}
 \usage{
 simulateIDM(
   n = 100,
@@ -80,13 +80,10 @@ inspections.}
 \item{beta12}{value of beta on transition 1 --> 2}
 }
 \description{
-Simulate data from an illness-death model with interval censored event times and penalized covariates
-}
-\details{
 Simulate data from an illness-death model with interval censored event times
 and covariates for the purpose of illustrating the help pages of the SmoothHazard package.
 See the body of the function for details, i.e., evaluate simulateIDM
 }
-\seealso{
-idmModel sim.idmModel simulateIDM
+\author{
+R: Ariane Bercu <ariane.bercu@u-bordeaux.fr>
 }

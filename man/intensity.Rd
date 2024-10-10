@@ -49,8 +49,6 @@ transition and cumulative transition are multiplied by \code{exp(linear.predicto
 M-spline or Weibull estimate of the transition intensity function
 and the cumulative transition intensity function
 for survival and illness-death models
-}
-\details{
 Important: the theta parameters returned by \code{idm} are in fact
 the square root of the splines coefficients. See examples.
 }

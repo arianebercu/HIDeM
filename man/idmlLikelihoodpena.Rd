@@ -2,7 +2,7 @@
 % Please edit documentation in R/idmlLikelihoodpena.R
 \name{idmlLikelihoodpena}
 \alias{idmlLikelihoodpena}
-\title{idm penalised log likelihood with splines baseline risk}
+\title{Penalised log likelihood with M-splines baseline risk}
 \usage{
 idmlLikelihoodpena(
   b,
@@ -106,7 +106,7 @@ idmlLikelihoodpena(
 \item{penalty}{which penalty to consider}
 }
 \description{
-idm penalised log likelihood with splines baseline risk
+Penalised log likelihood with M-splines baseline risk
 }
 \author{
 R: Ariane Bercu <ariane.bercu@u-bordeaux.fr>

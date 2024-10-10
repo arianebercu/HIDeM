@@ -2,7 +2,7 @@
 % Please edit documentation in R/splinesMI.R
 \name{splinesMI}
 \alias{splinesMI}
-\title{M-spline extracted from fortran coding in package}
+\title{@title M-spline extracted from fortran coding in package}
 \usage{
 splinesMI(x, knots, Boundary.knots)
 }
@@ -14,11 +14,14 @@ splinesMI(x, knots, Boundary.knots)
 \item{Boundary.knots}{external nodes values}
 }
 \description{
-M-spline extracted from fortran coding in package
+@title M-spline extracted from fortran coding in package
 }
 \examples{
 \dontrun{
 splinesMI(x=seq(0.01,10,length.out=20),knots=c(2,5,8),Boundary.knots=c(0.01,10))$Mspline
 }
+}
+\author{
+R: Ariane Bercu <ariane.bercu@u-bordeaux.fr>
 }
 \keyword{methods}

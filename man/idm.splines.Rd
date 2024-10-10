@@ -2,7 +2,7 @@
 % Please edit documentation in R/idm.splines.R
 \name{idm.splines}
 \alias{idm.splines}
-\title{idm penalty weib}
+\title{Illness-death model algorithm with M-splines baseline risk}
 \usage{
 idm.splines(
   b,
@@ -118,7 +118,7 @@ fix splines}
 \item{eps.eigen}{the power of convergence for eigen values of covariance matrix only}
 }
 \description{
-Code:
+Illness-death model algorithm with M-splines baseline risk
 }
 \author{
 R: Ariane Bercu <ariane.bercu@u-bordeaux.fr>

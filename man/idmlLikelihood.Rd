@@ -2,7 +2,7 @@
 % Please edit documentation in R/idmlLikelihood.R
 \name{idmlLikelihood}
 \alias{idmlLikelihood}
-\title{idm log likelihood with splines baseline risk}
+\title{Log likelihood with M-splines baseline risk}
 \usage{
 idmlLikelihood(
   b,
@@ -93,7 +93,7 @@ idmlLikelihood(
 \item{gausspoint}{number of gausspoint quadrature}
 }
 \description{
-idm log likelihood with splines baseline risk
+Log likelihood with M-splines baseline risk
 }
 \author{
 R: Ariane Bercu <ariane.bercu@u-bordeaux.fr>

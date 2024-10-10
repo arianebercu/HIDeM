@@ -1,5 +1,5 @@
 ### Code:
-##' @title idm penalised log likelihood with splines baseline risk
+##' @title Penalised log likelihood with M-splines baseline risk
 ##' @param b  parameters not fixed
 ##' @param npm  number of parameters not fixed
 ##' @param npar number of parameters

@@ -2,7 +2,7 @@
 % Please edit documentation in R/gridsearch.penidm.R
 \name{gridsearch.penidm}
 \alias{gridsearch.penidm}
-\title{Code :}
+\title{Grid-search for lambda penalty parameters in illness-death model}
 \usage{
 gridsearch.penidm(
   gridmethod = "BIC",
@@ -106,13 +106,13 @@ The algorithm needs at least 3 knots in spline and allows no more than 20 knots.
 \item{type.quantile}{Argument only active for the likelihood approach \code{method="splines"}.
 There are three ways to control the placement of the knots  according to the time considered between states :=
 \itemize{
-#'  \item{\code{type.quantile=1}}{Time for \code{0 --> 1} is the imputed to the middle of the interval left and right for demence . Time for \code{0 --> 2}
+ \item{\code{type.quantile=1}}{Time for \code{0 --> 1} is the imputed to the middle of the interval left and right for demence . Time for \code{0 --> 2}
  and \code{1 --> 2} is the same t, time of news. }
  \item{\code{type.quantile=2}}{Time for \code{0 --> 1} is the imputed to the middle of the interval left and right. Time for \code{0 --> 2}
  and \code{1 --> 2} is the same t, time of news. }
 \item{\code{type.quantile=3}}{Time for \code{0 --> 1} is the imputed to the middle of the interval left and right. Time for \code{0 --> 2}
  is time of death for non demented sujects only. Time for \code{1 --> 2} is time of death for suject diagnose with dementia. }
- #' \item{\code{type.quantile=4}}{Time for \code{0 --> 1} is left and right. Time for \code{0 --> 2}
+ \item{\code{type.quantile=4}}{Time for \code{0 --> 1} is left and right. Time for \code{0 --> 2}
  is time of death for non demented sujects only. Time for \code{1 --> 2} is time of death for suject diagnose with dementia. }
 }}
 
@@ -167,7 +167,7 @@ on transition 1 --> 2 minimising the BIC or GCV in model m12}
 \item{gridmethod}{On which indicator the grid should be based, either BIC or GCV}
 }
 \description{
-Code :
+Grid-search for lambda penalty parameters in illness-death model
 }
 \examples{
 

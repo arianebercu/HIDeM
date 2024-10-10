@@ -1,5 +1,5 @@
-
-###' Code : 
+### Code:
+##' @title Grid-search for lambda penalty parameters in illness-death model 
 #' @param gridmethod On which indicator the grid should be based, either BIC or GCV
 #' @param sizegrid The number of values that we want for each lambda, its a vector 
 #' of three elements, \code{0 --> 1}, \code{0 --> 2} and \code{1 --> 2}. The size of each
@@ -50,13 +50,13 @@
 #' @param type.quantile Argument only active for the likelihood approach \code{method="splines"}.
 #' There are three ways to control the placement of the knots  according to the time considered between states :=
 #' \itemize{
-#' #'  \item{\code{type.quantile=1}}{Time for \code{0 --> 1} is the imputed to the middle of the interval left and right for demence . Time for \code{0 --> 2}
+#'  \item{\code{type.quantile=1}}{Time for \code{0 --> 1} is the imputed to the middle of the interval left and right for demence . Time for \code{0 --> 2}
 #'  and \code{1 --> 2} is the same t, time of news. }
 #'  \item{\code{type.quantile=2}}{Time for \code{0 --> 1} is the imputed to the middle of the interval left and right. Time for \code{0 --> 2}
 #'  and \code{1 --> 2} is the same t, time of news. }
 #' \item{\code{type.quantile=3}}{Time for \code{0 --> 1} is the imputed to the middle of the interval left and right. Time for \code{0 --> 2}
 #'  is time of death for non demented sujects only. Time for \code{1 --> 2} is time of death for suject diagnose with dementia. }
-#'  #' \item{\code{type.quantile=4}}{Time for \code{0 --> 1} is left and right. Time for \code{0 --> 2}
+#'  \item{\code{type.quantile=4}}{Time for \code{0 --> 1} is left and right. Time for \code{0 --> 2}
 #'  is time of death for non demented sujects only. Time for \code{1 --> 2} is time of death for suject diagnose with dementia. }
 #' }
 #' @param B vector of size the number of parameters, in the following order, first the parameters of splines \code{0 --> 1}, \code{0 --> 2}, \code{1 --> 2},

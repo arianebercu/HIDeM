@@ -1,6 +1,5 @@
-
-#' Print prediction of illness-death model 
-#' 
+### Code:
+#' @title Print prediction of illness-death model 
 #' @param object an \code{idm} class objects returned by a call to the
 #'     \code{\link{idm}} function
 #' @useDynLib SmoothHazardoptim9

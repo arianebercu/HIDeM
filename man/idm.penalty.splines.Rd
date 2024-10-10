@@ -2,7 +2,7 @@
 % Please edit documentation in R/idm.penalty.splines.R
 \name{idm.penalty.splines}
 \alias{idm.penalty.splines}
-\title{idm penalty weib}
+\title{Penalised Illness-death model algorithm with M-splines baseline risk}
 \usage{
 idm.penalty.splines(
   b,
@@ -141,7 +141,7 @@ idm.penalty.splines(
 \item{penalty}{which penalty to consider}
 }
 \description{
-Code:
+Penalised Illness-death model algorithm with M-splines baseline risk
 }
 \author{
 R: Ariane Bercu <ariane.bercu@u-bordeaux.fr>

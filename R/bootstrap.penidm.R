@@ -1,18 +1,5 @@
-#' Fit an illness-death model using sampling or boostrap
-#'
-#' Fit an illness-death model using either a semi-parametric approach
-#' (penalized likelihood with an approximation of the transition intensity
-#' functions by linear combination of M-splines) or a parametric approach
-#' (specifying Weibull distributions on the transition intensities).
-#' Left-truncated, right-censored, and interval-censored data are allowed.
-#' State 0 corresponds to the initial state, state 1 to the transient one,
-#' state 2 to the absorbant one. The allowed transitions are: 0 --> 1, 0 --> 2
-#' and 1 --> 2.
-#'
-#' The estimated parameters are obtained using the robust Marquardt algorithm
-#' (Marquardt, 1963) which is a combination between a Newton-Raphson algorithm
-#' and a steepest descent algorithm.
-#'
+### Code:
+#' @title Fit an illness-death model using sampling or boostrap
 #' @param K number of repetitions of sampling or boostrap, by default values 100 
 #' @param tau Percentage of observation to use for resampling can go u
 #' @param seed value of the seed to initialise the random number generator and ensure reproducibility of the results

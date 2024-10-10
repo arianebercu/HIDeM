@@ -2,7 +2,7 @@
 % Please edit documentation in R/derivaweib.R
 \name{derivaweib}
 \alias{derivaweib}
-\title{derivaspline obtain first and second order derivatives of the log-likelihood}
+\title{First and second order derivatives of the log-likelihood with weibull baseline risk}
 \usage{
 derivaweib(
   b,
@@ -72,7 +72,7 @@ derivaweib(
 \item{troncature}{indicator of troncature, value 1 if there is troncature otherwise 0.}
 }
 \description{
-derivaspline obtain first and second order derivatives of the log-likelihood
+First and second order derivatives of the log-likelihood with weibull baseline risk
 }
 \author{
 R: Ariane Bercu <ariane.bercu@u-bordeaux.fr>

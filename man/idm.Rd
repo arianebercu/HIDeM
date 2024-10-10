@@ -101,13 +101,13 @@ The algorithm needs at least 3 knots in spline and allows no more than 20 knots.
 \item{type.quantile}{Argument only active for the likelihood approach \code{method="splines"}.
 There are three ways to control the placement of the knots  according to the time considered between states :=
 \itemize{
-#'  \item{\code{type.quantile=1}}{Time for \code{0 --> 1} is the imputed to the middle of the interval left and right for demence . Time for \code{0 --> 2}
+ \item{\code{type.quantile=1}}{Time for \code{0 --> 1} is the imputed to the middle of the interval left and right for demence . Time for \code{0 --> 2}
  and \code{1 --> 2} is the same t, time of news. }
  \item{\code{type.quantile=2}}{Time for \code{0 --> 1} is the imputed to the middle of the interval left and right. Time for \code{0 --> 2}
  and \code{1 --> 2} is the same t, time of news. }
 \item{\code{type.quantile=3}}{Time for \code{0 --> 1} is the imputed to the middle of the interval left and right. Time for \code{0 --> 2}
  is time of death for non demented sujects only. Time for \code{1 --> 2} is time of death for suject diagnose with dementia. }
- #' \item{\code{type.quantile=4}}{Time for \code{0 --> 1} is left and right. Time for \code{0 --> 2}
+\item{\code{type.quantile=4}}{Time for \code{0 --> 1} is left and right. Time for \code{0 --> 2}
  is time of death for non demented sujects only. Time for \code{1 --> 2} is time of death for suject diagnose with dementia. }
 }}
 
@@ -180,13 +180,14 @@ approximate by M-splines the intensity of the 1 --> 2 transition.}
 \item{theta01}{square root of splines coefficients for transition 0 --> 1.}
 \item{theta02}{square root of splines coefficients for transition 0 --> 2.}
 \item{theta12}{square root of splines coefficients for transition 1 --> 2.}
-\item{alpha} penalty parameter alpha on all transitions 
-\item{lambda} matrix of lambda penalty parameters, first line for 0 --> 1, second 
-line for 0 --> 2 and third line for 1 --> 2
-\item{BIC} Bayesian Information Criterion \item{GCV} Generalised Cross-Validation approximation
-\item{levels} a list containing the type of the variable on all transitions and its level, 
-useful for prediction on new-dataset.
-\item{runtime} running time in seconds of the function.
+\item{alpha}{penalty parameter alpha on all transitions}
+\item{lambda}{matrix of lambda penalty parameters, first line for 0 --> 1, second 
+line for 0 --> 2 and third line for 1 --> 2}
+\item{BIC}{Bayesian Information Criterion} 
+\item{GCV}{Generalised Cross-Validation approximation}
+\item{levels}{a list containing the type of the variable on all transitions and its level, 
+useful for prediction on new-dataset.}
+\item{runtime}{running time in seconds of the function.}
 }
 \description{
 Fit an illness-death model with a limited number of explanatory variables
@@ -199,56 +200,31 @@ Left-truncated, right-censored, and interval-censored data are allowed.
 State 0 corresponds to the initial state, state 1 to the transient one,
 state 2 to the absorbant one. The allowed transitions are: 0 --> 1, 0 --> 2
 and 1 --> 2.
-}
-\details{
+
 The estimated parameters are obtained using the robust Marquardt algorithm
 (Marquardt, 1963) or a proximal gradient algorithm.
 }
 \examples{
+{
+\dontrun{
 library(lava)
 library(prodlim)
 set.seed(17)
-d <- simulateIDM(100)$data
-# right censored data
-fitRC <- idm(formula01=Hist(time=observed.illtime,event=seen.ill)~X1+X2,
-             formula02=Hist(time=observed.lifetime,event=seen.exit)~X1+X2,
-             formula12=Hist(time=observed.lifetime,event=seen.exit)~X1+X2,data=d)
-fitRC
-
-\dontrun{
-set.seed(17)
-d <- simulateIDM(300)$data
-fitRC.splines <- idm(formula01=Hist(time=observed.illtime,event=seen.ill)~X1+X2,
-             formula02=Hist(time=observed.lifetime,event=seen.exit)~X1+X2,
-             formula12=Hist(time=observed.lifetime,event=seen.exit)~1,data=d,
-             method="splines")
+d <- simulateIDM(n=1000)$data
+fitweib <- idm(formula01=Hist(time=list(L,R),event=seen.ill)~X1+X2,
+              formula02=Hist(time=observed.lifetime,event=seen.exit)~X1+X2,
+              formula12=Hist(time=observed.lifetime,event=seen.exit)~X1+X2,data=d)
+              
+d <- simulateIDM(n=1000,
+                 beta01=c(1,1,0,0.5,0.5,rep(0,5)),
+                 beta02=c(1,0,0,0,0.5,rep(0,5)),
+                 beta12=c(1,0,0,0,0.5,rep(0,5)))$data
+                 
+fitpenweib <- idm(formula01=Hist(time=list(L,R),event=seen.ill)~X1+X2+X3+X4+X5+X6+X7+X8+X9+X10,
+                  formula02=Hist(time=observed.lifetime,event=seen.exit)~X1+X2+X3+X4+X5+X6+X7+X8+X9+X10,
+                  formula12=~X1+X2+X3+X4+X5+X6+X7+X8+X9+X10,
+                  data=d,penalty="lasso",lambda01 = c(10,20),lambda02 = 10, lambda12 = 10)
 }
-# interval censored data
-fitIC <- idm(formula01=Hist(time=list(L,R),event=seen.ill)~X1+X2,
-             formula02=Hist(time=observed.lifetime,event=seen.exit)~X1+X2,
-             formula12=Hist(time=observed.lifetime,event=seen.exit)~X1+X2,data=d)
-fitIC
-
-\dontrun{
-
-    data(Paq1000)
-
-    # Illness-death model with certif on the 3 transitions
-    # Weibull parametrization and likelihood maximization
-
-    fit.weib <- idm(formula02=Hist(time=t,event=death,entry=e)~certif,
-                    formula01=Hist(time=list(l,r),event=dementia)~certif,
-                    data=Paq1000)
-
-    # Illness-death model with certif on transitions 01 and 02
-    # Splines parametrization and penalized likelihood maximization
-    fit.splines <-  idm(formula02=Hist(time=t,event=death,entry=e)~certif,
-                        formula01=Hist(time=list(l,r),event=dementia)~certif,
-                        formula12=~1,
-                        method="splines",
-                        data=Paq1000)
-    fit.weib
-    summary(fit.splines)
 }
 
 }

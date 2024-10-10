@@ -1,6 +1,6 @@
 
 ### Code:
-##' @title idm log likelihood with weibull baseline risk
+##' @title Log likelihood with weibull baseline risk
 ##' @param b  parameters not fixed
 ##' @param npm  number of parameters not fixed
 ##' @param npar number of parameters

@@ -2,7 +2,7 @@
 % Please edit documentation in R/idmlLikelihoodweib.R
 \name{idmlLikelihoodweib}
 \alias{idmlLikelihoodweib}
-\title{idm log likelihood with weibull baseline risk}
+\title{Log likelihood with weibull baseline risk}
 \usage{
 idmlLikelihoodweib(
   b,
@@ -75,7 +75,7 @@ idmlLikelihoodweib(
 \item{gausspoint}{number of gausspoint quadrature}
 }
 \description{
-idm log likelihood with weibull baseline risk
+Log likelihood with weibull baseline risk
 }
 \author{
 R: Ariane Bercu <ariane.bercu@u-bordeaux.fr>

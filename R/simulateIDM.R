@@ -1,8 +1,9 @@
 ### Code:
-##' Function to simulate illness-death model data
-##'
-##' Based on the functionality of the lava PACKAGE 
-##' @title Simulate illness-death model data
+##' @title Sample illness-death model data 
+##' @description
+##'  Simulate data from an illness-death model with interval censored event times
+##' and covariates for the purpose of illustrating the help pages of the SmoothHazard package.
+##' See the body of the function for details, i.e., evaluate simulateIDM
 ##' @param x An \code{idmModel} object as obtained with
 ##' \code{idmModel}
 ##' @param n Number of observations
@@ -149,13 +150,11 @@ sim.idmModel <- function(x,
               plot=plot))
 }
 
-##' Simulate data from an illness-death model with interval censored event times and penalized covariates 
-##'
-##' Simulate data from an illness-death model with interval censored event times
+##' @title Sample illness-death model data 
+##' @description
+##'  Simulate data from an illness-death model with interval censored event times
 ##' and covariates for the purpose of illustrating the help pages of the SmoothHazard package.
 ##' See the body of the function for details, i.e., evaluate simulateIDM
-##' @seealso idmModel sim.idmModel simulateIDM
-##' @title Sample illness-death model data for penalised regression
 ##' @param scale.illtime Weilbull scale for latent illness time
 ##' @param shape.illtime Weilbull shape for latent illness time
 ##' @param scale.lifetime Weilbull scale for latent life time
@@ -182,6 +181,7 @@ sim.idmModel <- function(x,
 ##' @param n number of observations
 #' @importFrom ggplot2 ggplot geom_line geom_point theme_classic ylab aes_string aes facet_grid
 #' @useDynLib SmoothHazardoptim9
+#' @author R: Ariane Bercu <ariane.bercu@@u-bordeaux.fr> 
 #' @export
 
 

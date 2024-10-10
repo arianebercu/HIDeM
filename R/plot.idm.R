@@ -1,9 +1,8 @@
-#' Plot method for an illness-death model 
-#' 
+### Code:
+#' @title Plot method for an illness-death model 
+#' @description
 #' Plot estimated baseline transition intensities from an object of class
 #' \code{idm} optionally with confidence limits.
-#' 
-#' 
 #' @param x a \code{idmWeib} class object (output from calling
 #' \code{idm} with the (default) option \code{intensities}="Weib".
 #' @param conf.int If TRUE show confidence limits

@@ -1,5 +1,5 @@
 ### Code:
-##' @title derivaspline obtain first and second order derivatives of the log-likelihood
+##' @title First and second order derivatives of the log-likelihood with M-splines baseline risk
 ##' @param b  parameters on explanatory variables not fixed
 ##' @param bfix  parameters on explanatory variables fixed
 ##' @param npm  number of parameters not fixed, thus length of b

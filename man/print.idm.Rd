@@ -2,7 +2,7 @@
 % Please edit documentation in R/print.idm.R
 \name{print.idm}
 \alias{print.idm}
-\title{Print method for \code{idm} objects}
+\title{Print a summary of a fitted illness-death model}
 \usage{
 \method{print}{idm}(
   x,
@@ -31,7 +31,7 @@
 \item{\dots}{Not used.}
 }
 \description{
-Print a summary of a fitted illness-death model
+Print method for \code{idm} objects
 }
 \examples{
 

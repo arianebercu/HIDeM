@@ -2,7 +2,7 @@
 % Please edit documentation in R/simulateIDM.R
 \name{sim.idmModel}
 \alias{sim.idmModel}
-\title{Simulate illness-death model data}
+\title{Sample illness-death model data}
 \usage{
 \method{sim}{idmModel}(x, n, plot, latent = FALSE, keep.inspectiontimes = FALSE, ...)
 }
@@ -30,10 +30,9 @@ example(idmModel)
 help(idmModel)
 }
 \description{
-Function to simulate illness-death model data
-}
-\details{
-Based on the functionality of the lava PACKAGE
+Simulate data from an illness-death model with interval censored event times
+and covariates for the purpose of illustrating the help pages of the SmoothHazard package.
+See the body of the function for details, i.e., evaluate simulateIDM
 }
 \examples{
  \dontrun{

@@ -1,12 +1,9 @@
 ### Code:
-# 0 : health state
-# 1 : illness state
-# 2 : death state
-#' Predictions for an illness-death model using either a penalized likelihood
-#' approach or a Weibull parametrization.
-#' 
-#' Predict transition probabilities and cumulative probabilities from an object
+#' @title Predict transition probabilities and cumulative probabilities from an object
 #' of class \code{idmSplines} with confidence intervals are calculated.
+#' @description 
+#'  Predictions for an illness-death model using either a penalized likelihood
+#' approach or a Weibull parametrization.
 #' 
 #' @param object an \code{idm} class objects returned by a call to the
 #'     \code{\link{idm}} function
@@ -59,7 +56,7 @@
 #'                   data=d,penalty="lasso",lambda01 = c(10,20),lambda02 = 10, lambda12 = 10)
 #' predict(fitpenweib,s=10,t=15,lambda = "BIC") 
 #' }
-##'  @importFrom pracma "gauss_kronrod"
+#' @importFrom pracma "gauss_kronrod"
 #'@useDynLib SmoothHazardoptim9
 #' @export
 #' @author R: Ariane Bercu <ariane.bercu@@u-bordeaux.fr> 

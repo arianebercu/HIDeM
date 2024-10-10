@@ -2,7 +2,7 @@
 % Please edit documentation in R/derivaspline.R
 \name{derivaspline}
 \alias{derivaspline}
-\title{derivaspline obtain first and second order derivatives of the log-likelihood}
+\title{First and second order derivatives of the log-likelihood with M-splines baseline risk}
 \usage{
 derivaspline(
   b,
@@ -90,7 +90,7 @@ derivaspline(
 \item{troncature}{indicator of troncature, value 1 if there is troncature otherwise 0.}
 }
 \description{
-derivaspline obtain first and second order derivatives of the log-likelihood
+First and second order derivatives of the log-likelihood with M-splines baseline risk
 }
 \author{
 R: Ariane Bercu <ariane.bercu@u-bordeaux.fr>

@@ -1,5 +1,5 @@
-##' Code:
-##' @title idm penalty weib
+### Code:
+##' @title Illness-death model algorithm with M-splines baseline risk
 ##' @param b  parameters not fixed
 ##' @param size_V number of parameters
 ##' @param size_spline number of splines parameters

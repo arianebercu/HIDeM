@@ -2,8 +2,8 @@
 % Please edit documentation in R/predict.idm.R
 \name{predict.idm}
 \alias{predict.idm}
-\title{Predictions for an illness-death model using either a penalized likelihood
-approach or a Weibull parametrization.}
+\title{Predict transition probabilities and cumulative probabilities from an object
+of class \code{idmSplines} with confidence intervals are calculated.}
 \usage{
 \method{predict}{idm}(
   object,
@@ -66,8 +66,8 @@ a list containing the following predictions with pointwise
     0. \code{F0.}=\code{p02_0}+\code{p01}+\code{p02_1}.}
 }
 \description{
-Predict transition probabilities and cumulative probabilities from an object
-of class \code{idmSplines} with confidence intervals are calculated.
+Predictions for an illness-death model using either a penalized likelihood
+approach or a Weibull parametrization.
 }
 \examples{
 
@@ -86,7 +86,6 @@ fitpenweib <- idm(formula01=Hist(time=list(L,R),event=seen.ill)~X1+X2+X3+X4+X5+X
                   data=d,penalty="lasso",lambda01 = c(10,20),lambda02 = 10, lambda12 = 10)
 predict(fitpenweib,s=10,t=15,lambda = "BIC") 
 }
- @importFrom pracma "gauss_kronrod"
 }
 \seealso{
 \code{\link{idm}}

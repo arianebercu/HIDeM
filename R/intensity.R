@@ -1,12 +1,11 @@
 ### Code:
-##'  M-spline or Weibull estimate of the transition intensity function
+##' @title M-spline or Weibull estimate of the transition intensity function
+##' @description 
+##' M-spline or Weibull estimate of the transition intensity function
 ##' and the cumulative transition intensity function
 ##' for survival and illness-death models
-##'
 ##' Important: the theta parameters returned by \code{idm} are in fact
 ##' the square root of the splines coefficients. See examples.
-##'
-##' @title M-spline or Weibull estimate of the transition intensity function
 ##' @param times Time points at which to estimate the intensity function
 ##' @param knots Knots for the M-spline
 ##' @param number.knots Number of knots for the M-splines (and I-splines see details)

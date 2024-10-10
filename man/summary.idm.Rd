@@ -47,7 +47,6 @@ summary(fitpenweib)
 \code{\link{plot.idm}}
 }
 \author{
-R: Celia Touraine <Celia.Touraine@isped.u-bordeaux2.fr> Fortran:
-Pierre Joly <Pierre.Joly@isped.u-bordeaux2.fr>
+R: Ariane Bercu <ariane.bercu@u-bordeaux.fr>
 }
 \keyword{methods}
