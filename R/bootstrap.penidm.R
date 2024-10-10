@@ -122,7 +122,7 @@
 #' @importFrom prodlim Hist
 #' @useDynLib SmoothHazardoptim9
 #' @export
-bootstrap.idm <- function(
+bootstrap.penidm <- function(
                 K=100, # number of sample,
                 tau = 0.5, #% in each fold
                 seed = 1, # seed
