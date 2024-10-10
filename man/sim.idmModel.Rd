@@ -4,7 +4,7 @@
 \alias{sim.idmModel}
 \title{Simulate illness-death model data}
 \usage{
-\method{sim}{idmModel}(x, n, plot, pen, latent = FALSE, keep.inspectiontimes = FALSE, ...)
+\method{sim}{idmModel}(x, n, plot, latent = FALSE, keep.inspectiontimes = FALSE, ...)
 }
 \arguments{
 \item{x}{An \code{idmModel} object as obtained with
@@ -14,8 +14,6 @@
 seen.ill}
 
 \item{plot}{plot of base survival for all transition}
-
-\item{pen}{if the simulated data are for a penalised version of illness-death model}
 
 \item{latent}{if TRUE keep the latent event times}
 
@@ -37,6 +35,17 @@ Function to simulate illness-death model data
 \details{
 Based on the functionality of the lava PACKAGE
 }
+\examples{
+ \dontrun{
+library(lava)
+library(prodlim)
+set.seed(17)
+d <- simulateIDM(n=1000,
+                 beta01=c(1,1,0,0.5,0.5,rep(0,5)),
+                 beta02=c(1,0,0,0,0.5,rep(0,5)),
+                 beta12=c(1,0,0,0,0.5,rep(0,5)))$data
+}
+}
 \author{
-Thomas Alexander Gerds
+R: Ariane Bercu <ariane.bercu@u-bordeaux.fr>
 }

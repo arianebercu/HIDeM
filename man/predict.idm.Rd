@@ -45,6 +45,9 @@ expectancies, i.e., \code{t=Inf}.}
 
 \item{maxtime}{The upper limit of integration for calculations of life expectancies from Weibull parametrizations.}
 
+\item{lambda}{If penalised illness-death model define if prediction need to be performed 
+looking at the minimum of BIC or GCV or a vector of three values for each transition 0 -> 1, 0 -> 2 and 1 -> 2.}
+
 \item{...}{other parameters.}
 }
 \value{
@@ -69,41 +72,26 @@ of class \code{idmSplines} with confidence intervals are calculated.
 \examples{
 
 \dontrun{
-set.seed(100)
-d=simulateIDM(n = 100)$data
-fit <- idm(formula01=Hist(time=list(L,R),event=seen.ill)~X1+X2+X3,
-               formula02=Hist(time=observed.lifetime,event=seen.exit)~X1+X2+X3,
-               data=d,conf.int=FALSE)
-predict(fit,s=0,t=80,conf.int=FALSE,lifeExpect=FALSE)
-predict(fit,s=0,t=80,nsim=4,conf.int=TRUE,lifeExpect=FALSE)
-predict(fit,s=0,t=80,nsim=4,conf.int=FALSE,lifeExpect=TRUE)
-
-data(Paq1000)
+library(lava)
 library(prodlim)
-fit.paq <- idm(formula02=Hist(time=t,event=death,entry=e)~certif,
-formula01=Hist(time=list(l,r),event=dementia)~certif,data=Paq1000)
-
-predict(fit.paq,s=70,t=80,newdata=data.frame(certif=1))
-predict(fit.paq,s=70,lifeExpect=TRUE,newdata=data.frame(certif=1))
-
-fit.splines <-  idm(formula02=Hist(time=t,event=death,entry=e)~certif,
-		formula01=Hist(time=list(l,r),event=dementia)~certif,
-                formula12=~1,
-                method="Splines",
-		data=Paq1000)
-
-predict(fit.splines,s=70,t=80,newdata=data.frame(certif=1))
-predict(fit.splines,s=70,t=80,lifeExpect=TRUE,newdata=data.frame(certif=1),nsim=20)
-
-
+set.seed(17)
+d <- simulateIDM(n=1000,
+                 beta01=c(1,1,0,0.5,0.5,rep(0,5)),
+                 beta02=c(1,0,0,0,0.5,rep(0,5)),
+                 beta12=c(1,0,0,0,0.5,rep(0,5)))$data
+                 
+fitpenweib <- idm(formula01=Hist(time=list(L,R),event=seen.ill)~X1+X2+X3+X4+X5+X6+X7+X8+X9+X10,
+                  formula02=Hist(time=observed.lifetime,event=seen.exit)~X1+X2+X3+X4+X5+X6+X7+X8+X9+X10,
+                  formula12=~X1+X2+X3+X4+X5+X6+X7+X8+X9+X10,
+                  data=d,penalty="lasso",lambda01 = c(10,20),lambda02 = 10, lambda12 = 10)
+predict(fitpenweib,s=10,t=15,lambda = "BIC") 
 }
+ @importFrom pracma "gauss_kronrod"
 }
 \seealso{
 \code{\link{idm}}
 }
 \author{
-R: Celia Touraine <Celia.Touraine@isped.u-bordeaux2.fr>
-    and Thomas Alexander Gerds <tag@biostat.ku.dk> Fortran: Pierre
-    Joly <Pierre.Joly@isped.u-bordeaux2.fr>
+R: Ariane Bercu <ariane.bercu@u-bordeaux.fr>
 }
 \keyword{methods}

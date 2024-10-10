@@ -29,7 +29,7 @@
 \item{x}{a \code{idmWeib} class object (output from calling
 \code{idm} with the (default) option \code{intensities}="Weib".}
 
-\item{lambda}{give the lambda for which you want to plot the penalised model}
+\item{lambda}{give the lambda for which you want to plot the penalised illness-death model}
 
 \item{conf.int}{If TRUE show confidence limits}
 
@@ -72,20 +72,22 @@ Plot estimated baseline transition intensities from an object of class
 \dontrun{
 library(lava)
 library(prodlim)
-m <- idmModel(scale.lifetime=1/10,scale.illtime=1/8)
-distribution(m,"X") <- binomial.lvm()
-regression(m,latent.lifetime~X) <- 0.7
-set.seed(30)
-d <- sim(m,100)
-fit.weib <- idm(formula02=Hist(observed.lifetime,event=seen.exit)~1,
-formula01=Hist(time=list(L,R),event=seen.ill)~1,data=d,conf.int=FALSE)
-plot(fit.weib)
+set.seed(17)
+d <- simulateIDM(n=1000,
+                 beta01=c(1,1,0,0.5,0.5,rep(0,5)),
+                 beta02=c(1,0,0,0,0.5,rep(0,5)),
+                 beta12=c(1,0,0,0,0.5,rep(0,5)))$data
+                 
+fitsplines <- idm(formula01=Hist(time=list(L,R),event=seen.ill)~X1+X2,
+formula02=Hist(time=observed.lifetime,event=seen.exit)~X1+X2,
+formula12=Hist(time=observed.lifetime,event=seen.exit)~X1+X2,data=d,method="splines")
+plot(fitsplines)
 
-## FIXME: the limits for the 01 transition are a bit wide!?
-## with bootstrap confidence limits
-fit.weib <- idm(formula02=Hist(observed.lifetime,event=seen.exit)~1,
-formula01=Hist(time=list(L,R),event=seen.ill)~1,data=d,conf.int=TRUE)
-plot(fit.weib)
+fitpenspline <- idm(formula01=Hist(time=list(L,R),event=seen.ill)~X1+X2+X3+X4+X5+X6+X7+X8+X9+X10,
+                    formula02=Hist(time=observed.lifetime,event=seen.exit)~X1+X2+X3+X4+X5+X6+X7+X8+X9+X10,
+                    formula12=~X1+X2+X3+X4+X5+X6+X7+X8+X9+X10,method="splines",
+                    data=d,penalty="lasso",lambda01 = c(10,20),lambda02 = 10, lambda12 = 10)
+plot(fitpenspline,lambda=c(10,10,10))
 }
  
 }
@@ -93,5 +95,8 @@ plot(fit.weib)
 \code{\link{print.idm}},\code{\link{summary.idm}},\code{\link{idm}},
 
 \code{\link{idm}}
+}
+\author{
+R: Ariane Bercu <ariane.bercu@u-bordeaux.fr>
 }
 \keyword{methods}

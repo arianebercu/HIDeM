@@ -2,12 +2,12 @@
 % Please edit documentation in R/intensity.R
 \name{intensity}
 \alias{intensity}
-\title{M-spline estimate of the transition intensity function}
+\title{M-spline or Weibull estimate of the transition intensity function}
 \usage{
 intensity(
   times,
   knots,
-  number.knots,
+  number.knots = NULL,
   theta,
   linear.predictor = 0,
   V = NULL,
@@ -46,51 +46,39 @@ transition and cumulative transition are multiplied by \code{exp(linear.predicto
 \item{survival}{The "survival" function, i.e., exp(-cumulative.intensity)}
 }
 \description{
-M-spline estimate of the transition intensity function
+M-spline or Weibull estimate of the transition intensity function
 and the cumulative transition intensity function
 for survival and illness-death models
 }
 \details{
-The estimate of the transition intensity function is a linear
-combination of M-splines and the estimate of the cumulative transition
-intensity function is a linear combination of I-splines (the integral of a
-M-spline is called I-spline). The coefficients \code{theta} are the same for
-the M-splines and I-splines.
-
 Important: the theta parameters returned by \code{idm} are in fact
 the square root of the splines coefficients. See examples.
-
-This function is a R-translation of a corresponding Fortran function called \code{susp}. \code{susp} is
-used internally by \code{idm}.
 }
 \examples{
 
 
 \dontrun{
            
-  data(Paq1000)
-  fit.idm <-  idm(formula02 = Hist(time = t, event = death, entry = e) ~ certif,
-                  formula01 = Hist(time = list(l,r), event = dementia) ~ certif,
-                  formula12 = ~ certif, method = "Splines", data = Paq1000)
-  # Probability of survival in state 0 at age 80 for a subject with no cep given
-    that he is in state 0 at 70
-  su0 <- (intensity(times = 80, knots = fit.idm$knots01,
-                   number.knots = fit.idm$nknots01,
-                   theta = fit.idm$theta01^2)$survival
-         *intensity(times = 80, knots = fit.idm$knots02,
-                   number.knots = fit.idm$nknots02,
-                   theta = fit.idm$theta02^2)$survival)/
-        (intensity(times = 70, knots = fit.idm$knots01,
-                   number.knots = fit.idm$nknots01,
-                   theta = fit.idm$theta01^2)$survival
-        *intensity(times = 70, knots = fit.idm$knots02,
-                   number.knots = fit.idm$nknots02,
-                   theta = fit.idm$theta02^2)$survival)
-  # Same result as:
-  predict(fit.idm, s = 70, t = 80, conf.int = FALSE) # see first element
+  library(lava)
+library(prodlim)
+set.seed(17)
+d <- simulateIDM(n=1000)$data
+fitweib <- idm(formula01=Hist(time=list(L,R),event=seen.ill)~X1+X2,
+               formula02=Hist(time=observed.lifetime,event=seen.exit)~X1+X2,
+               formula12=Hist(time=observed.lifetime,event=seen.exit)~X1+X2,data=d)
+intensity(times=fitweib$time[,1],
+               theta = fitweib$modelPar[1:2]^2)
+fitsplines <- idm(formula01=Hist(time=list(L,R),event=seen.ill)~X1+X2,
+                  formula02=Hist(time=observed.lifetime,event=seen.exit)~X1+X2,
+                  formula12=Hist(time=observed.lifetime,event=seen.exit)~X1+X2,data=d,
+                  method="splines")
+intensity(times=fitsplines$time[,1],
+               theta = fitsplines$theta01^2,
+               knots = fitsplines$knots01,
+               number.knots = fitsplines$nknots01,
+               method = "splines")
 }
 }
 \author{
-R: Celia Touraine <Celia.Touraine@isped.u-bordeaux2.fr> and Thomas Alexander Gerds <tag@biostat.ku.dk>
-Fortran: Pierre Joly <Pierre.Joly@isped.u-bordeaux2.fr>
+R: Ariane Bercu <ariane.bercu@u-bordeaux.fr>
 }

@@ -40,7 +40,8 @@ idm.penalty.weib(
   lambda12,
   alpha,
   penalty.factor,
-  penalty
+  penalty,
+  gausspoint
 )
 }
 \arguments{
@@ -115,8 +116,12 @@ idm.penalty.weib(
 \item{penalty.factor}{which variable should be penalised}
 
 \item{penalty}{which penalty to consider}
+
+\item{gausspoint}{number of points in gauss quadrature}
 }
 \description{
-programmation for penalised idm with weibull as risk bases 
 Code:
+}
+\author{
+R: Ariane Bercu <ariane.bercu@u-bordeaux.fr>
 }

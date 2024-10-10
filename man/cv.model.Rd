@@ -45,6 +45,5 @@ cv.model(
 idm cv model update of beta in penalised regression
 }
 \author{
-R: Ariane Bercu, Celia Touraine <Celia.Touraine@isped.u-bordeaux2.fr> and Thomas Alexander Gerds <tag@biostat.ku.dk>
-Fortran: Pierre Joly <Pierre.Joly@isped.u-bordeaux2.fr>
+R: Ariane Bercu <ariane.bercu@u-bordeaux.fr>
 }

@@ -1,8 +1,13 @@
+#' M-spline extracted from fortran coding in package 
+#' 
 #' @param x vector in which splines will be evaluated
 #' @param knots internal nodes values
 #' @param Boundary.knots external nodes values
 #' @keywords methods
 #' @examples
+#' \dontrun{
+#' splinesMI(x=seq(0.01,10,length.out=20),knots=c(2,5,8),Boundary.knots=c(0.01,10))$Mspline
+#' }
 #' @useDynLib SmoothHazardoptim9
 #' @export
 splinesMI<-function(x,knots,Boundary.knots){

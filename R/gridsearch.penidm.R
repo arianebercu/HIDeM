@@ -108,7 +108,7 @@
 #' beta02=c(1,0,0,0,0.5,rep(0,5)),beta12=c(1,0,0,0,0.5,rep(0,5)))$data
 #' fitgrid<- gridsearch.penidm(formula01=Hist(time=list(L,R),event=seen.ill)~X1+X2+X3+X4+X5+X6+X7+X8+X9+X10,
 #' formula02=Hist(time=observed.lifetime,event=seen.exit)~X1+X2+X3+X4+X5+X6+X7+X8+X9+X10,
-#' formula12=~X1+X2+X3+X4+X5+X6+X7+X8+X9+X10,
+#' formula12=~X1+X2+X3+X4+X5+X6+X7+X8+X9+X10, nlambda01=20, nlambda02=20, nlambda12=20,
 #' data=d,penalty="lasso")
 #' }
 #' \code{\link{summary.idm}}

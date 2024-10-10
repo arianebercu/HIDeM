@@ -48,7 +48,7 @@
 ##'                number.knots = fitsplines$nknots01,
 ##'                method = "splines")
 ##' }
-##' @importFrom pracma 
+##' @importFrom pracma gauss_kronrod
 #' @useDynLib SmoothHazardoptim9
 ##' @export
 #' @author R: Ariane Bercu <ariane.bercu@@u-bordeaux.fr> 

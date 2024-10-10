@@ -2,7 +2,7 @@
 % Please edit documentation in R/idmlLikelihoodweib.R
 \name{idmlLikelihoodweib}
 \alias{idmlLikelihoodweib}
-\title{idm log likelihood}
+\title{idm log likelihood with weibull baseline risk}
 \usage{
 idmlLikelihoodweib(
   b,
@@ -25,7 +25,8 @@ idmlLikelihoodweib(
   t1,
   t2,
   t3,
-  troncature
+  troncature,
+  gausspoint
 )
 }
 \arguments{
@@ -70,11 +71,12 @@ idmlLikelihoodweib(
 \item{t3}{time of event/out}
 
 \item{troncature}{indicator if troncature or not}
+
+\item{gausspoint}{number of gausspoint quadrature}
 }
 \description{
-idm log likelihood
+idm log likelihood with weibull baseline risk
 }
 \author{
-R: Ariane Bercu, Celia Touraine <Celia.Touraine@isped.u-bordeaux2.fr> and Thomas Alexander Gerds <tag@biostat.ku.dk>
-Fortran: Pierre Joly <Pierre.Joly@isped.u-bordeaux2.fr>
+R: Ariane Bercu <ariane.bercu@u-bordeaux.fr>
 }

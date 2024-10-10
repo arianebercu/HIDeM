@@ -36,21 +36,25 @@ Print a summary of a fitted illness-death model
 \examples{
 
 \dontrun{
-data(Paq1000)
+library(lava)
 library(prodlim)
-fit.splines <-  idm(formula02=Hist(time=t,event=death,entry=t0)~certif,
-		formula01=Hist(time=list(l,r),event=dementia)~certif,
-                formula12=~1,
-                method="Splines",
-		data=Paq1000)
-print(fit.splines)
-
+set.seed(17)
+d <- simulateIDM(n=1000,
+                 beta01=c(1,1,0,0.5,0.5,rep(0,5)),
+                 beta02=c(1,0,0,0,0.5,rep(0,5)),
+                 beta12=c(1,0,0,0,0.5,rep(0,5)))$data
+                 
+fitpenweib <- idm(formula01=Hist(time=list(L,R),event=seen.ill)~X1+X2+X3+X4+X5+X6+X7+X8+X9+X10,
+                  formula02=Hist(time=observed.lifetime,event=seen.exit)~X1+X2+X3+X4+X5+X6+X7+X8+X9+X10,
+                  formula12=~X1+X2+X3+X4+X5+X6+X7+X8+X9+X10,
+                  data=d,penalty="lasso",lambda01 = c(10,20),lambda02 = 10, lambda12 = 10)
+pp<-predict(fitpenweib,s=10,t=15,lambda = "BIC") 
+print(pp)
 }
 }
 \seealso{
 \code{\link{summary.idm}}, \code{\link{plot.idm}}
 }
 \author{
-Celia Touraine <Celia.Touraine@isped.u-bordeaux2.fr>, Thomas A. Gerds <tag@biostat.ku.dk>
+R: Ariane Bercu <ariane.bercu@u-bordeaux.fr>
 }
-\keyword{methods}

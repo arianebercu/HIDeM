@@ -2,7 +2,7 @@
 % Please edit documentation in R/gridsearch.penidm.R
 \name{gridsearch.penidm}
 \alias{gridsearch.penidm}
-\title{Fit an illness-death model using sampling or boostrap}
+\title{Code :}
 \usage{
 gridsearch.penidm(
   gridmethod = "BIC",
@@ -16,16 +16,13 @@ gridsearch.penidm(
   maxiter = 100,
   maxiter.pena = 10,
   eps = c(5, 5, 3),
-  eps.spline = 3,
-  eps.eigen = 2,
   n.knots = NULL,
   knots = "equidistant",
   type.quantile = 1,
-  subset = NULL,
   na.action = na.fail,
   B = NULL,
   posfix = NULL,
-  gauss.point = 10,
+  gausspoint = 10,
   lambda01 = NULL,
   lambda02 = NULL,
   lambda12 = NULL,
@@ -85,10 +82,6 @@ respective values change less then \eqn{10^{-5}} (for regression
 parameters and likelihood) and \eqn{10^{-3}} for the second
 derivatives between two iterations.}
 
-\item{eps.spline}{the power of convergence for splines parameters only}
-
-\item{eps.eigen}{the power of convergence for eigen values of covariance matrix only}
-
 \item{n.knots}{For \code{method="splines"} only, a vector of length
 3 specifing the number of knots, one for each transition, for the
 M-splines estimate of the baseline intensities in the order \code{0
@@ -123,9 +116,6 @@ There are three ways to control the placement of the knots  according to the tim
  is time of death for non demented sujects only. Time for \code{1 --> 2} is time of death for suject diagnose with dementia. }
 }}
 
-\item{subset}{expression indicating the subset of the rows of data
-to be used in the fit. All observations are included by default.}
-
 \item{na.action}{how NAs are treated. The default is first, any
 na.action attribute of data, second a na.action setting of options,
 and third 'na.fail' if that is unset. The 'factory-fresh' default
@@ -137,7 +127,7 @@ This argument is only used for models with M-splines.}
 
 \item{posfix}{index of fixed parameters}
 
-\item{gauss.point}{gauss quadrature points in the approximation of integrals}
+\item{gausspoint}{gauss quadrature points in the approximation of integrals}
 
 \item{lambda01}{Lambda on transition 0 --> 1}
 
@@ -167,109 +157,33 @@ This argument is only used for models with M-splines.}
 fix splines}
 }
 \value{
-\item{call}{the call that produced the result.} \item{coef}{regression
-parameters.} \item{loglik}{vector containing the log-likelihood without and
-with covariate.} \item{cv}{vector containing the convergence criteria.}
-\item{niter}{number of iterations.} \item{converged}{integer equal to 1 when
-the model converged, 2, 3 or 4 otherwise.} \item{modelPar}{Weibull
-parameters.} \item{N}{number of subjects.} \item{events1}{number of events 0
---> 1.} \item{events2}{number of events 0 --> 2 or 0 --> 1 --> 2.}
-\item{NC}{vector containing the number of covariates on transitions 0 --> 1,
-0 --> 2, 1 --> 2.} \item{responseTrans}{model response for the 0 --> 1
-transition. \code{Hist} or \code{Surv} object.} \item{responseAbs}{model
-response for the 0 --> 2 transition. \code{Hist} or \code{Surv} object.}
-\item{time}{times for which transition intensities have been evaluated for
-plotting. Vector in the Weibull approach. Matrix in the penalized likelihhod
-approach for which the colums corresponds to the transitions 0 --> 1, 1 -->
-2, 0 --> 2.} 
-\item{V}{variance-covariance matrix derived from the Hessian of the log-likelihood
-if using method="Weib" or, from the Hessian of the penalized log-likelihood
-if using method="Splines".}
-\item{se}{standart errors of the
-regression parameters.} \item{Xnames01}{names of covariates on 0 --> 1.}
-\item{Xnames02}{names of covariates on 0 --> 2.} \item{Xnames12}{names of
-covariates on 1 --> 2.} \item{knots01}{knots to approximate by M-splines the
-intensity of the 0 --> 1 transition.} \item{knots02}{knots to approximate by
-M-splines the intensity of the 0 --> 2 transition.} \item{knots12}{knots to
-approximate by M-splines the intensity of the 1 --> 2 transition.}
-\item{nknots01}{number of knots on transition 0 --> 1.}
-\item{nknots02}{number of knots on transition 0 --> 2.}
-\item{nknots12}{number of knots on transition 1 --> 2.}
-\item{theta01}{square root of splines coefficients for transition 0 --> 1.}
-\item{theta02}{square root of splines coefficients for transition 0 --> 2.}
-\item{theta12}{square root of splines coefficients for transition 1 --> 2.}
-\item{CV}{a binary variable equals to 1 when search of the smoothing
-parameters \link{kappa} by approximated cross-validation, 1 otherwise. The
-default is 0.} \item{kappa}{vector containing the smoothing parameters for
-transition 0 --> 1, 0 --> 2, 1 --> 2 used to estimate the model by the
-penalized likelihood approach.} \item{CVcrit}{cross validation criteria.}
-\item{DoF}{degrees of freedom of the model.} \item{na.action}{observations
-deleted if missing values.}
+\item{m01}{Model estimated on 0 --> 1} \item{m02}{Model estimated on 0 --> 2} 
+\item{m12}{Model estimated on 1 --> 2} \item{lambda01}{vector of lambda penalty parameters
+on transition 0 --> 1 minimising the BIC or GCV in model m01} \item{lambda02}{vector of lambda penalty parameters
+on transition 0 --> 2 minimising the BIC or GCV in model m02} \item{lambda12}{vector of lambda penalty parameters
+on transition 1 --> 2 minimising the BIC or GCV in model m12}
+\item{alpha}{the penalty parameter alpha} 
+\item{sizegrid}{the size of lambda penalty parameters for each transition 0 -->1, 0 -->2 and 1 -->2}
+\item{gridmethod}{On which indicator the grid should be based, either BIC or GCV}
 }
 \description{
-Fit an illness-death model using either a semi-parametric approach
-(penalized likelihood with an approximation of the transition intensity
-functions by linear combination of M-splines) or a parametric approach
-(specifying Weibull distributions on the transition intensities).
-Left-truncated, right-censored, and interval-censored data are allowed.
-State 0 corresponds to the initial state, state 1 to the transient one,
-state 2 to the absorbant one. The allowed transitions are: 0 --> 1, 0 --> 2
-and 1 --> 2.
-}
-\details{
-The estimated parameters are obtained using the robust Marquardt algorithm
-(Marquardt, 1963) which is a combination between a Newton-Raphson algorithm
-and a steepest descent algorithm.
+Code :
 }
 \examples{
+
+\dontrun{
 library(lava)
 library(prodlim)
 set.seed(17)
-d <- simulateIDM(100)$data
-# right censored data
-fitRC <- idm(formula01=Hist(time=observed.illtime,event=seen.ill)~X1+X2,
-             formula02=Hist(time=observed.lifetime,event=seen.exit)~X1+X2,
-             formula12=Hist(time=observed.lifetime,event=seen.exit)~X1+X2,data=d,
-             conf.int=FALSE)
-fitRC
-
-\dontrun{
-set.seed(17)
-d <- simulateIDM(300)$data
-fitRC.splines <- idm(formula01=Hist(time=observed.illtime,event=seen.ill)~X1+X2,
-             formula02=Hist(time=observed.lifetime,event=seen.exit)~X1+X2,
-             formula12=Hist(time=observed.lifetime,event=seen.exit)~1,data=d,
-             conf.int=FALSE,method="splines")
+d <- simulateIDM(n=1000,beta01=c(1,1,0,0.5,0.5,rep(0,5)),
+beta02=c(1,0,0,0,0.5,rep(0,5)),beta12=c(1,0,0,0,0.5,rep(0,5)))$data
+fitgrid<- gridsearch.penidm(formula01=Hist(time=list(L,R),event=seen.ill)~X1+X2+X3+X4+X5+X6+X7+X8+X9+X10,
+formula02=Hist(time=observed.lifetime,event=seen.exit)~X1+X2+X3+X4+X5+X6+X7+X8+X9+X10,
+formula12=~X1+X2+X3+X4+X5+X6+X7+X8+X9+X10, nlambda01=20, nlambda02=20, nlambda12=20,
+data=d,penalty="lasso")
 }
-# interval censored data
-fitIC <- idm(formula01=Hist(time=list(L,R),event=seen.ill)~X1+X2,
-             formula02=Hist(time=observed.lifetime,event=seen.exit)~X1+X2,
-             formula12=Hist(time=observed.lifetime,event=seen.exit)~X1+X2,data=d,
-             conf.int=FALSE)
-fitIC
-
-\dontrun{
-
-    data(Paq1000)
-
-    # Illness-death model with certif on the 3 transitions
-    # Weibull parametrization and likelihood maximization
-
-    fit.weib <- idm(formula02=Hist(time=t,event=death,entry=e)~certif,
-                    formula01=Hist(time=list(l,r),event=dementia)~certif,
-                    data=Paq1000)
-
-    # Illness-death model with certif on transitions 01 and 02
-    # Splines parametrization and penalized likelihood maximization
-    fit.splines <-  idm(formula02=Hist(time=t,event=death,entry=e)~certif,
-                        formula01=Hist(time=list(l,r),event=dementia)~certif,
-                        formula12=~1,
-                        method="splines",
-                        data=Paq1000)
-    fit.weib
-    summary(fit.splines)
-}
-
+\code{\link{summary.idm}}
+\code{\link{predict.idm}}
 }
 \references{
 D. Marquardt (1963). An algorithm for least-squares estimation
@@ -278,11 +192,7 @@ of nonlinear parameters.  \emph{SIAM Journal of Applied Mathematics},
 }
 \seealso{
 \code{\link{print.idm}}
-\code{\link{summary.idm}}
-\code{\link{predict.idm}}
 }
 \author{
-R: Celia Touraine <Celia.Touraine@isped.u-bordeaux2.fr> Fortran:
-Pierre Joly <Pierre.Joly@isped.u-bordeaux2.fr>
+R: Ariane Bercu <ariane.bercu@u-bordeaux.fr>
 }
-\keyword{illness-death}
