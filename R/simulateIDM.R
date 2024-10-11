@@ -8,7 +8,6 @@
 ##' \code{idmModel}
 ##' @param n Number of observations
 ##' seen.ill
-##' @param compliance Probability of missing an inspection time.
 ##' @param latent if TRUE keep the latent event times
 ##' @param keep.inspectiontimes if \code{TRUE} keep the inspection
 ##' times.

@@ -48,7 +48,7 @@
 #' @param knots Argument only active for the penalized likelihood approach \code{method="Splines"}.
 #' There are three ways to control the placement of the knots between the smallest and the largest
 #' of all time points:
-#' \itemize{
+#' \describe{
 #'  \item{\code{knots="equidistant"}}{Knots are placed with same distance on the time scale.}
 #'  \item{\code{knots="quantile"}}{Knots are placed such that the number of observations is roughly the same between knots.}
 #' \item{knots=list()}{List of 1 or 2 or three vectors. The list elements are the actual placements
@@ -60,7 +60,7 @@
 #' The algorithm needs at least 3 knots in spline and allows no more than 20 knots.
 #' @param type.quantile Argument only active for the likelihood approach \code{method="splines"}.
 #' There are three ways to control the placement of the knots  according to the time considered between states :=
-#' \itemize{
+#' \describe{
 #'  \item{\code{type.quantile=1}}{Time for \code{0 --> 1} is the imputed to the middle of the interval left and right for demence . Time for \code{0 --> 2}
 #'  and \code{1 --> 2} is the same t, time of news. }
 #'  \item{\code{type.quantile=2}}{Time for \code{0 --> 1} is the imputed to the middle of the interval left and right. Time for \code{0 --> 2}
@@ -166,8 +166,11 @@
 ##'                   data=d,penalty="lasso",lambda01 = c(10,20),lambda02 = 10, lambda12 = 10)
 ##' }
 ##' }
-##'
-#' @importFrom prodlim Hist
+##'@importFrom grDevices col2rgb
+##'@importFrom graphics lines
+##'@importFrom graphics par
+##'@importFrom graphics polygon segments
+##'@importFrom stats as.formula formula integrate model.frame model.matrix na.fail na.omit pchisq pweibull qnorm quantile terms update.formula
 #' @useDynLib SmoothHazardoptim9
 #' @export
 idm <- function(formula01,

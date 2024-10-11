@@ -16,6 +16,8 @@
 #' @param ylim Limits for y-axis
 #' @param xlab Label for x-axis
 #' @param ylab Label for y-axis
+#' @param cex character expansion factor relative to current par("cex"). Used for text, and provides the default for pt.cex. 
+#' @param y.intersp vertical (y) distances (in lines of text shared above/below each legend entry). A vector with one element for each row of the legend can be used.
 #' @param lambda give the lambda for which you want to plot the penalised illness-death model
 #' @param legend If TRUE a legend is drawn, which can be further controlled via \code{\link{SmartControl}}.
 #' @param transition Choose one of the transition intensities: \code{c("01","02","12")}.

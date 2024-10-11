@@ -1,7 +1,8 @@
 ### Code:
 #' @title Print prediction of illness-death model 
-#' @param object an \code{idm} class objects returned by a call to the
-#'     \code{\link{idm}} function
+#' @param x an \code{idm} class objects returned by a call to the \code{\link{idm}} function
+#' @param digits number of digits to be printed
+#' @param ... other parameters link to function \code{idm} 
 #' @useDynLib SmoothHazardoptim9
 #' @author R: Ariane Bercu <ariane.bercu@@u-bordeaux.fr> 
 #' @export

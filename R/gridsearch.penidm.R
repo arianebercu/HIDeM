@@ -37,7 +37,7 @@
 #' @param knots Argument only active for the penalized likelihood approach \code{method="Splines"}.
 #' There are three ways to control the placement of the knots between the smallest and the largest
 #' of all time points:
-#' \itemize{
+#' \describe{
 #'  \item{\code{knots="equidistant"}}{Knots are placed with same distance on the time scale.}
 #'  \item{\code{knots="quantile"}}{Knots are placed such that the number of observations is roughly the same between knots.}
 #' \item{knots=list()}{List of 1 or 2 or three vectors. The list elements are the actual placements
@@ -49,7 +49,7 @@
 #' The algorithm needs at least 3 knots in spline and allows no more than 20 knots.
 #' @param type.quantile Argument only active for the likelihood approach \code{method="splines"}.
 #' There are three ways to control the placement of the knots  according to the time considered between states :=
-#' \itemize{
+#' \describe{
 #'  \item{\code{type.quantile=1}}{Time for \code{0 --> 1} is the imputed to the middle of the interval left and right for demence . Time for \code{0 --> 2}
 #'  and \code{1 --> 2} is the same t, time of news. }
 #'  \item{\code{type.quantile=2}}{Time for \code{0 --> 1} is the imputed to the middle of the interval left and right. Time for \code{0 --> 2}
@@ -82,11 +82,8 @@
 #' @param alpha alpha on all transitions 
 #' @param penalty which penalty to consider
 #' @param penalty.factor which variable should be penalised
-#' @param step.sequential should we use the optimisation version to fix splines 
 #' @param clustertype in which cluster to work
 #' @param nproc number of cluster
-#' @param option.sequential parameters to give if you want to do the optimisation version to
-#'  fix splines
 #' @return
 #' \item{m01}{Model estimated on 0 --> 1} \item{m02}{Model estimated on 0 --> 2} 
 #' \item{m12}{Model estimated on 1 --> 2} \item{lambda01}{vector of lambda penalty parameters
@@ -98,8 +95,7 @@
 #' \item{gridmethod}{On which indicator the grid should be based, either BIC or GCV}
 #' @author R: Ariane Bercu <ariane.bercu@@u-bordeaux.fr> 
 #' @seealso \code{\link{print.idm}}
-#' @examples
-#' 
+#' @examples {
 #' \dontrun{
 #' library(lava)
 #' library(prodlim)
@@ -110,7 +106,7 @@
 #' formula02=Hist(time=observed.lifetime,event=seen.exit)~X1+X2+X3+X4+X5+X6+X7+X8+X9+X10,
 #' formula12=~X1+X2+X3+X4+X5+X6+X7+X8+X9+X10, nlambda01=20, nlambda02=20, nlambda12=20,
 #' data=d,penalty="lasso")
-#' }
+#' }}
 #' \code{\link{summary.idm}}
 #' \code{\link{predict.idm}}
 #' @references D. Marquardt (1963). An algorithm for least-squares estimation
@@ -189,7 +185,145 @@ gridsearch.penidm <- function(
   if(sizegrid[2]<=1){sizegrid[1]<-1}
   if(sizegrid[3]<=1){sizegrid[3]<-1}
   
-
+  if(missing(formula01))stop("Argument formula01 is missing.")
+  if(missing(formula02))stop("Argument formula02 is missing.")
+  if(!inherits(formula01,"formula"))stop("The argument formula01 must be a class 'formula'.")
+  if(!inherits(formula02,"formula"))stop("The argument formula02 must be a class 'formula'.")
+  
+  if(!method%in%c("Weib","splines"))stop("The argument method needs to be either splines or Weib")
+  ## if(missing(formula02)) formula02 <- formula01
+  if(missing(formula12)) formula12 <- formula02
+  # }}}
+  # {{{ evaluate formula in data
+  if(missing(data)) stop("Need a data frame.")
+  if(sum(is.na(data))>0)stop("Need a data frame with no missing data.")
+  
+  if(!inherits(data,"data.frame"))stop("Argument 'data' must be a data.frame")
+  
+  ############################################################################
+  ############################### get database defined by formulas ###########
+  ############################################################################
+  m <- match.call()
+  m01 <- m02 <- m12 <- m[match(c("","data","na.action"),names(m),nomatch=0)]
+  m01$formula <- formula01
+  m02$formula <- formula02
+  m12$formula <- formula12
+  m01[[1]] <- m02[[1]] <- m12[[1]] <- as.name("model.frame")
+  
+  #################################################################################
+  #################### dealing with missing data ##################################
+  #################################################################################
+  
+  if(anyNA(data)){
+    variables=unique(c(all.vars(formula01),all.vars(formula02),all.vars(formula12)))
+    data=data[,variables]
+    data=na.omit(data)
+    m01[[2]] <- m02[[2]] <- m12[[2]] <- data
+  }
+  
+  m01 <- eval(m01,parent.frame())
+  m02 <- eval(m02,parent.frame())
+  m12 <- eval(m12,parent.frame())
+  
+  
+  responseTrans <- stats::model.response(m01)
+  responseAbs <- stats::model.response(m02)
+  
+  #################################################################################
+  #####################   extract covariates   ####################################
+  #################################################################################
+  
+  x01 <- model.matrix(formula01,data=m01)[, -1, drop = FALSE]
+  NC01 <- NCOL(x01)
+  
+  if (NC01>0)
+    Xnames01 <- colnames(x01)
+  else
+    Xnames01 <- NULL
+  ## formula02
+  x02 <- model.matrix(formula02,data=m02)[, -1, drop = FALSE]
+  NC02 <- NCOL(x02)
+  
+  
+  if (NC02>0)
+    Xnames02 <- colnames(x02)
+  else
+    Xnames02 <- NULL
+  ## formula12
+  x12 <- model.matrix(formula12,data=m12)[, -1, drop = FALSE]
+  NC12 <- NCOL(x12)
+  
+  
+  if (NC12>0)
+    Xnames12 <- colnames(x12)
+  else
+    Xnames12 <- NULL
+  
+  
+  #################################################################################
+  ####################  prepare censored event times  #############################
+  #################################################################################
+  
+  isIntervalCensored <- attr(responseTrans,"cens.type")=="intervalCensored"
+  truncated <- nchar(attr(responseAbs,"entry.type"))>1
+  abstime <- as.double(responseAbs[,"time"])
+  ## It may happen that the illness time is observed exactly, in which case
+  ## the status is 1, thus we need two criteria to declare illness status:
+  ## 1. exact observations with illness status ==1
+  ## 2. interval censored with any illness status. FIXME: check the corresponding likelihood
+  
+  idm <- responseTrans[,"status"]==(as.integer(isIntervalCensored)+1)
+  if (isIntervalCensored)
+    idm[(responseTrans[,"status"]==1 & (responseTrans[,"L"]==responseTrans[,"R"]))] <- 1
+  ## exit status
+  idd <- responseAbs[,"status"]==1
+  
+  
+  N <- length(abstime)
+  if (truncated==0){
+    entrytime <- as.double(NULL)
+  }else{
+    entrytime <- as.double(responseAbs[,"entry"])
+  }
+  if (isIntervalCensored){
+    Ltime <- as.double(responseTrans[,"L",drop=TRUE])
+    Rtime <- as.double(responseTrans[,"R",drop=TRUE])
+    ## if (any(Rtime<abstime & idm ==0))
+    ## warning(paste("For ",
+    ## sum(Rtime<abstime & idm ==0),
+    ## " cases where the ill status is not observed\n and the last inspection time (R) is smaller than the right censored time (T)\n the time R is set to T."))
+  }else{# exactly observed transition times
+    Ltime <- as.double(responseTrans[,"time",drop=TRUE])
+    Rtime <- as.double(responseTrans[,"time",drop=TRUE])
+    Ltime[idm==0] <- abstime[idm==0]
+    Rtime[idm==0] <- abstime[idm==0]
+  }
+  ## find time boundaries 
+  if (length(entrytime)>0){
+    alltimes <- sort(unique(c(Ltime, Rtime,entrytime,abstime)))
+    amax <- max(alltimes)
+    amin <- min(alltimes)
+  }
+  else{
+    alltimes <- sort(unique(c(Ltime, Rtime,abstime)))
+    amax <- max(alltimes)
+    amin <- 0
+  }
+  
+  
+  if (attr(responseAbs,"cens.type")=="intervalCensored") stop("No method available when the transtion to the absorbing state is interval censored.")
+  if (isIntervalCensored && any(Rtime<Ltime)) stop("Misspecified transitition times:\nSome left interval limits are greater than the corresponding right limits.")
+  
+  #################################################################################
+  ####################### check entry parameters ##################################
+  #################################################################################
+  
+  
+  if(!inherits(maxiter,c("numeric","integer"))|(maxiter!=floor(maxiter)))stop("Maxiter has to be an integer.")
+  if(!inherits(nproc,c("numeric","integer"))|(nproc!=floor(nproc)))stop("nproc has to be an integer.")
+  
+  # nbr of quadrature points for estimating integral in idm without penalisation
+  if(!gausspoint%in%c(10,15,21,31,41,51,61))stop("Argument type.quantile has to a numeric : 10, 15, 21, 31, 51 or 61.")
   
     if(method=="Weib"){
     posfix01<-c(posfix,3:6)

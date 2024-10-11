@@ -56,7 +56,6 @@
 #'                   data=d,penalty="lasso",lambda01 = c(10,20),lambda02 = 10, lambda12 = 10)
 #' predict(fitpenweib,s=10,t=15,lambda = "BIC") 
 #' }
-#' @importFrom pracma "gauss_kronrod"
 #'@useDynLib SmoothHazardoptim9
 #' @export
 #' @author R: Ariane Bercu <ariane.bercu@@u-bordeaux.fr> 
@@ -901,6 +900,8 @@ predict.idm <- function(object,s,
 }
 
 ## prediction indicators with splines 
+#' @useDynLib SmoothHazardoptim9
+#' @author R: Ariane Bercu <ariane.bercu@@u-bordeaux.fr> 
 Predict0.idmPl <- function(s,t,knots01,nknots01,the01,knots12,nknots12,the12,knots02,nknots02,the02,bZ01=0,bZ12=0,bZ02=0) {
     if (s>(min(knots01[nknots01+6],knots02[nknots02+6],knots12[nknots12+6]))) {stop("argument s is off")}    
     if (any(t>knots12[nknots12+6])) {stop("argument t is off")}
@@ -932,6 +933,8 @@ Predict0.idmPl <- function(s,t,knots01,nknots01,the01,knots12,nknots12,the12,kno
 }
 
 ## prediction indicators with weibull 
+#' @useDynLib SmoothHazardoptim9
+#' @author R: Ariane Bercu <ariane.bercu@@u-bordeaux.fr> 
 Predict0.idmWeib <- function(s,t,a01,b01,a02,b02,a12,b12,bZ01=0,bZ02=0,bZ12=0) {
 
   if(t==Inf){
@@ -1063,6 +1066,8 @@ S.pl <- function(s,t,zi,nknots,the,bZ=0) {
 
 
 # Life expectency with weibull 
+#' @useDynLib SmoothHazardoptim9
+#' @author R: Ariane Bercu <ariane.bercu@@u-bordeaux.fr> 
 lifexpect0.idmWeib <- function(s,a01,b01,a02,b02,a12,b12,bZ01=0,bZ02=0,bZ12=0,max) {
 
   if(max==Inf){
@@ -1106,6 +1111,8 @@ lifexpect0.idmWeib <- function(s,a01,b01,a02,b02,a12,b12,bZ01=0,bZ02=0,bZ12=0,ma
 
 }
 # Life expectency with splines
+#' @useDynLib SmoothHazardoptim9
+#' @author R: Ariane Bercu <ariane.bercu@@u-bordeaux.fr> 
 lifexpect0.idmPl <- function(s,knots01,nknots01,the01,knots12,nknots12,the12,knots02,nknots02,the02,bZ01=0,bZ12=0,bZ02=0) {
   if(any(c(knots12[nknots12+6],knots02[nknots02+6],knots01[nknots01+6])==Inf)){
     ET12 = integrate(f=function(x) {
@@ -1162,61 +1169,3 @@ lifexpect0.idmPl <- function(s,knots01,nknots01,the01,knots12,nknots12,the12,kno
        LTR=LTR)
 }
 
-# 
-#  data(Paq1000)
-# library(prodlim)
-#  library(SmoothHazardoptim9)
-#  fit.paq <- SmoothHazardoptim9::idm(formula02=Hist(time=t,event=death,entry=e)~certif:gender,
-#                 formula01=Hist(time=list(l,r),event=dementia)~certif:gender,data=Paq1000)
-# 
-#  p1<-predict(fit.paq,
-#              s=70,t=80,lifeExpect=F,conf.int=T,
-#              newdata=data.frame(certif=1,gender=1),nsim=2)
-#  p1<-predict(fit.paq,
-#              s=70,t=80,lifeExpect=T,conf.int=T,
-#              newdata=data.frame(certif=1,gender=0))
-#  p1bis<-predict(fit.paq,s=70,t=80,lifeExpect=F,conf.int=T,newdata=data.frame(certif=1,gender=1),
-#                 nsim = 1)
-#  p1bis<-predict(fit.paq,s=70,t=80,lifeExpect=T,conf.int=T,newdata=data.frame(certif=1,gender=1),
-#                 nsim = 1)
-# 
-#  library(SmoothHazardoptim9)
-#  fit.paq2 <- SmoothHazardoptim9::idm(formula02=Hist(time=t,event=death,entry=e)~certif:gender,
-#                 formula01=Hist(time=list(l,r),event=dementia)~certif,data=Paq1000,method="splines")
-# 
-#  p1<-predict(fit.paq2,s=70,t=80,lifeExpect=F,newdata=data.frame(certif=1,gender=1))
-#  p1bis<-predict(fit.paq2,s=70,t=80,lifeExpect=F,newdata=data.frame(certif=1),nsim=1)
-
-#  p1<-predict(fit.paq2,s=70,t=80,lifeExpect=T,newdata=data.frame(certif=1))
-#  p1bis<-predict(fit.paq2,s=70,t=80,lifeExpect=T,newdata=data.frame(certif=1),nsim=1)
- # pbr with print 
-# 
-# p3<- SmoothHazardoptim9::predict.idm(fit.splines,s=70,t=80,newdata=data.frame(certif=1))
-# predict(fit.splines,s=70,t=80,lifeExpect=TRUE,newdata=data.frame(certif=1),nsim=20)
-# 
- 
- # pspline<-SmoothHazardoptim9::  idm(formula02 = f02,
- #                           formula01 = f01,
- #                           formula12 = f12,data=simu,
- #                           nproc=1,penalty = penalty,eps=c(7,2,1),
- #                           method="splines",scale.X=F,
- #                           lambda01 = lambda01,
- #                           lambda02=lambda02,
- #                           lambda12=lambda12,
- #                           alpha=k,maxiter=100,maxiter.pena = 10)
- # 
- # for(k in 1:dim(simu)[1]){
- # print(k)
- # p1<-predict(fit.idm.C,
- #             s=2,t=10,lifeExpect=T,conf.int=T,
- #             newdata=simu[k,])
- # p1bis<-predict(fit.idm.C,
- #             s=2,t=10,lifeExpect=F,conf.int=T,
- #             newdata=simu[k,])
- # p1<-predict( pspline,
- #             s=2,t=10,lifeExpect=T,conf.int=T,
- #             newdata=simu[k,])
- # p1bis<-predict( pspline,
- #                s=2,t=10,lifeExpect=F,conf.int=T,
- #                newdata=simu[k,])
- # }

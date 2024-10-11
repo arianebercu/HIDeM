@@ -3,7 +3,7 @@
 #' @param K number of repetitions of sampling or boostrap, by default values 100 
 #' @param tau Percentage of observation to use for resampling can go u
 #' @param seed value of the seed to initialise the random number generator and ensure reproducibility of the results
-#' resampling approach. Possible values are: "subsampling" for sampling without replacement of a proportion tau of the observations, or "bootstrap" for sampling with replacement generating a resampled dataset with as many observations as in the full sample. Alternatively, this argument can be a function to use for resampling. This function must use arguments named data and tau and return the IDs of observations to be included in the resampled dataset.
+#' @param resampling approach. Possible values are: "subsampling" for sampling without replacement of a proportion tau of the observations, or "bootstrap" for sampling with replacement generating a resampled dataset with as many observations as in the full sample. Alternatively, this argument can be a function to use for resampling. This function must use arguments named data and tau and return the IDs of observations to be included in the resampled dataset.
 #' @param formula01 A formula specifying a regression model for the
 #' \code{0 --> 1} transition from the initial state to the transient
 #' state of the illness-death model.  The right hand side of the
@@ -37,7 +37,7 @@
 #' @param knots Argument only active for the penalized likelihood approach \code{method="Splines"}.
 #' There are three ways to control the placement of the knots between the smallest and the largest
 #' of all time points:
-#' \itemize{
+#' \describe{
 #'  \item{\code{knots="equidistant"}}{Knots are placed with same distance on the time scale.}
 #'  \item{\code{knots="quantile"}}{Knots are placed such that the number of observations is roughly the same between knots.}
 #' \item{knots=list()}{List of 1 or 2 or three vectors. The list elements are the actual placements
@@ -49,7 +49,7 @@
 #' The algorithm needs at least 3 knots in spline and allows no more than 20 knots.
 #' @param type.quantile Argument only active for the likelihood approach \code{method="splines"}.
 #' There are three ways to control the placement of the knots  according to the time considered between states :=
-#' \itemize{
+#' \describe{
 #' #'  \item{\code{type.quantile=1}}{Time for \code{0 --> 1} is the imputed to the middle of the interval left and right for demence . Time for \code{0 --> 2}
 #'  and \code{1 --> 2} is the same t, time of news. }
 #'  \item{\code{type.quantile=2}}{Time for \code{0 --> 1} is the imputed to the middle of the interval left and right. Time for \code{0 --> 2}

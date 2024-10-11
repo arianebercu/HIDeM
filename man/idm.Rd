@@ -226,7 +226,6 @@ fitpenweib <- idm(formula01=Hist(time=list(L,R),event=seen.ill)~X1+X2+X3+X4+X5+X
                   data=d,penalty="lasso",lambda01 = c(10,20),lambda02 = 10, lambda12 = 10)
 }
 }
-
 }
 \references{
 D. Marquardt (1963). An algorithm for least-squares estimation

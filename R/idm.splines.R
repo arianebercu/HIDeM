@@ -1,6 +1,7 @@
 ### Code:
 ##' @title Illness-death model algorithm with M-splines baseline risk
 ##' @param b  parameters not fixed
+##' @param bfix  parameters fixed
 ##' @param size_V number of parameters
 ##' @param size_spline number of splines parameters
 ##' @param fix0 indicators of fixed and unfixed parameters
@@ -12,6 +13,7 @@
 ##' @param dimnva01 number of variables for transition 0 -->1 
 ##' @param dimnva02 number of variables for transition 0 -->2
 ##' @param dimnva12 number of variables for transition 1 -->2
+##' @param noVar indicator of variables on each transition
 ##' @param nvat01 number of variables for transition 0 -->1 
 ##' @param nvat02 number of variables for transition 0 -->2
 ##' @param nvat12 number of variables for transition 1 -->2
@@ -30,14 +32,13 @@
 ##' @param epsa control convergence parameter for beta 
 ##' @param epsb control convergence parameter for loglik
 ##' @param epsd control convergence for distance to minimum rdm
-##' @param eps.eigen the power of convergence for eigen values of covariance matrix only
 ##' @param clustertype in which cluster to work
 ##' @param nproc number of cluster
 ##' @param maxiter Maximum number of iterations. The default is 200.
 ##' @param troncature indicator if troncature or not
 ##' @param gausspoint number of points in gauss quadrature
 ##' @param step.sequential should we use the optimisation version to fix splines 
-##'  @param option.sequential parameters to give if you want to do the optimisation version to
+##' @param option.sequential parameters to give if you want to do the optimisation version to
 ##'  fix splines
 #' @author R: Ariane Bercu <ariane.bercu@@u-bordeaux.fr> 
 #' @useDynLib SmoothHazardoptim9
