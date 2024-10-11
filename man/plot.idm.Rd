@@ -53,6 +53,10 @@
 
 \item{ylab}{Label for y-axis}
 
+\item{cex}{character expansion factor relative to current par("cex"). Used for text, and provides the default for pt.cex.}
+
+\item{y.intersp}{vertical (y) distances (in lines of text shared above/below each legend entry). A vector with one element for each row of the legend can be used.}
+
 \item{legend}{If TRUE a legend is drawn, which can be further controlled via \code{\link{SmartControl}}.}
 
 \item{transition}{Choose one of the transition intensities: \code{c("01","02","12")}.}
@@ -80,13 +84,19 @@ d <- simulateIDM(n=1000,
                  
 fitsplines <- idm(formula01=Hist(time=list(L,R),event=seen.ill)~X1+X2,
 formula02=Hist(time=observed.lifetime,event=seen.exit)~X1+X2,
-formula12=Hist(time=observed.lifetime,event=seen.exit)~X1+X2,data=d,method="splines")
+formula12=Hist(time=observed.lifetime,event=seen.exit)~X1+X2,
+data=d,method="splines")
 plot(fitsplines)
 
-fitpenspline <- idm(formula01=Hist(time=list(L,R),event=seen.ill)~X1+X2+X3+X4+X5+X6+X7+X8+X9+X10,
-                    formula02=Hist(time=observed.lifetime,event=seen.exit)~X1+X2+X3+X4+X5+X6+X7+X8+X9+X10,
-                    formula12=~X1+X2+X3+X4+X5+X6+X7+X8+X9+X10,method="splines",
-                    data=d,penalty="lasso",lambda01 = c(10,20),lambda02 = 10, lambda12 = 10)
+fitpenspline <- idm(formula01=Hist(time=list(L,R),
+event=seen.ill)~X1+X2+X3+X4+X5+X6+X7+X8+X9+X10,
+                    formula02=Hist(time=observed.lifetime,
+                    event=seen.exit)~X1+X2+X3+X4+X5+X6+X7+X8+X9+X10,
+                    formula12=~X1+X2+X3+X4+X5+X6+X7+X8+X9+X10,
+                    method="splines",
+                    data=d,penalty="lasso",
+                    lambda01 = c(10,20),
+                    lambda02 = 10, lambda12 = 10)
 plot(fitpenspline,lambda=c(10,10,10))
 }
  

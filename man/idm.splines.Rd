@@ -63,6 +63,10 @@ idm.splines(
 
 \item{size_spline}{number of splines parameters}
 
+\item{noVar}{indicator of variables on each transition}
+
+\item{bfix}{parameters fixed}
+
 \item{fix0}{indicators of fixed and unfixed parameters}
 
 \item{knots01}{knots of transition 0 --> 1}
@@ -111,11 +115,10 @@ idm.splines(
 
 \item{gausspoint}{number of points in gauss quadrature}
 
-\item{step.sequential}{should we use the optimisation version to fix splines 
-@param option.sequential parameters to give if you want to do the optimisation version to
-fix splines}
+\item{step.sequential}{should we use the optimisation version to fix splines}
 
-\item{eps.eigen}{the power of convergence for eigen values of covariance matrix only}
+\item{option.sequential}{parameters to give if you want to do the optimisation version to
+fix splines}
 }
 \description{
 Illness-death model algorithm with M-splines baseline risk

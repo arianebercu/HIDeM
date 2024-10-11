@@ -21,8 +21,6 @@ seen.ill}
 times.}
 
 \item{...}{Extra arguments given to \code{sim}}
-
-\item{compliance}{Probability of missing an inspection time.}
 }
 \value{
 A data set with interval censored observations from an illness-death model

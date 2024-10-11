@@ -41,13 +41,19 @@
 #'                  
 #' fitsplines <- idm(formula01=Hist(time=list(L,R),event=seen.ill)~X1+X2,
 #' formula02=Hist(time=observed.lifetime,event=seen.exit)~X1+X2,
-#' formula12=Hist(time=observed.lifetime,event=seen.exit)~X1+X2,data=d,method="splines")
+#' formula12=Hist(time=observed.lifetime,event=seen.exit)~X1+X2,
+#' data=d,method="splines")
 #' plot(fitsplines)
 #' 
-#' fitpenspline <- idm(formula01=Hist(time=list(L,R),event=seen.ill)~X1+X2+X3+X4+X5+X6+X7+X8+X9+X10,
-#'                     formula02=Hist(time=observed.lifetime,event=seen.exit)~X1+X2+X3+X4+X5+X6+X7+X8+X9+X10,
-#'                     formula12=~X1+X2+X3+X4+X5+X6+X7+X8+X9+X10,method="splines",
-#'                     data=d,penalty="lasso",lambda01 = c(10,20),lambda02 = 10, lambda12 = 10)
+#' fitpenspline <- idm(formula01=Hist(time=list(L,R),
+#' event=seen.ill)~X1+X2+X3+X4+X5+X6+X7+X8+X9+X10,
+#'                     formula02=Hist(time=observed.lifetime,
+#'                     event=seen.exit)~X1+X2+X3+X4+X5+X6+X7+X8+X9+X10,
+#'                     formula12=~X1+X2+X3+X4+X5+X6+X7+X8+X9+X10,
+#'                     method="splines",
+#'                     data=d,penalty="lasso",
+#'                     lambda01 = c(10,20),
+#'                     lambda02 = 10, lambda12 = 10)
 #' plot(fitpenspline,lambda=c(10,10,10))
 #' }
 #'  

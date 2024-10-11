@@ -26,7 +26,6 @@ Imports:
     MASS,graphics, 
     grDevices, 
     stats, 
-    utils,
     ggplot2,
     pracma
 Maintainer: Ariane Bercu <ariane.bercu@u-bordeaux.fr>

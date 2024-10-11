@@ -7,8 +7,11 @@
 \method{print}{predict.idm}(x, digits = 3, ...)
 }
 \arguments{
-\item{object}{an \code{idm} class objects returned by a call to the
-\code{\link{idm}} function}
+\item{x}{an \code{idm} class objects returned by a call to the \code{\link{idm}} function}
+
+\item{digits}{number of digits to be printed}
+
+\item{...}{other parameters link to function \code{idm}}
 }
 \description{
 Print prediction of illness-death model

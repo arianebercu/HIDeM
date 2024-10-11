@@ -354,6 +354,7 @@ simulateIDM <- function(n=100,
   cumulative.intensity<-cumulative.intensity%*%t(e)
   survival12 <- exp(-cumulative.intensity)
   
+  surv<-id<-NULL
   surv01<-data.frame(time=rep(time,n),
              surv=as.vector(survival01),
              id=sort(rep(c(1:(n)),length(time))))

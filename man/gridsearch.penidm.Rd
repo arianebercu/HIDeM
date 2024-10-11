@@ -92,7 +92,7 @@ The algorithm needs least 5 knots and at most 20 knots.}
 \item{knots}{Argument only active for the penalized likelihood approach \code{method="Splines"}.
 There are three ways to control the placement of the knots between the smallest and the largest
 of all time points:
-\itemize{
+\describe{
  \item{\code{knots="equidistant"}}{Knots are placed with same distance on the time scale.}
  \item{\code{knots="quantile"}}{Knots are placed such that the number of observations is roughly the same between knots.}
 \item{knots=list()}{List of 1 or 2 or three vectors. The list elements are the actual placements
@@ -105,7 +105,7 @@ The algorithm needs at least 3 knots in spline and allows no more than 20 knots.
 
 \item{type.quantile}{Argument only active for the likelihood approach \code{method="splines"}.
 There are three ways to control the placement of the knots  according to the time considered between states :=
-\itemize{
+\describe{
  \item{\code{type.quantile=1}}{Time for \code{0 --> 1} is the imputed to the middle of the interval left and right for demence . Time for \code{0 --> 2}
  and \code{1 --> 2} is the same t, time of news. }
  \item{\code{type.quantile=2}}{Time for \code{0 --> 1} is the imputed to the middle of the interval left and right. Time for \code{0 --> 2}
@@ -150,11 +150,6 @@ This argument is only used for models with M-splines.}
 \item{nproc}{number of cluster}
 
 \item{clustertype}{in which cluster to work}
-
-\item{step.sequential}{should we use the optimisation version to fix splines}
-
-\item{option.sequential}{parameters to give if you want to do the optimisation version to
-fix splines}
 }
 \value{
 \item{m01}{Model estimated on 0 --> 1} \item{m02}{Model estimated on 0 --> 2} 
@@ -170,20 +165,21 @@ on transition 1 --> 2 minimising the BIC or GCV in model m12}
 Grid-search for lambda penalty parameters in illness-death model
 }
 \examples{
-
+{
 \dontrun{
 library(lava)
 library(prodlim)
 set.seed(17)
 d <- simulateIDM(n=1000,beta01=c(1,1,0,0.5,0.5,rep(0,5)),
 beta02=c(1,0,0,0,0.5,rep(0,5)),beta12=c(1,0,0,0,0.5,rep(0,5)))$data
-fitgrid<- gridsearch.penidm(formula01=Hist(time=list(L,R),event=seen.ill)~X1+X2+X3+X4+X5+X6+X7+X8+X9+X10,
-formula02=Hist(time=observed.lifetime,event=seen.exit)~X1+X2+X3+X4+X5+X6+X7+X8+X9+X10,
-formula12=~X1+X2+X3+X4+X5+X6+X7+X8+X9+X10, nlambda01=20, nlambda02=20, nlambda12=20,
+fitgrid<- gridsearch.penidm(formula01=Hist(time=list(L,R),
+event=seen.ill)~X1+X2+X3+X4+X5+X6+X7+X8+X9+X10,
+formula02=Hist(time=observed.lifetime,
+event=seen.exit)~X1+X2+X3+X4+X5+X6+X7+X8+X9+X10,
+formula12=~X1+X2+X3+X4+X5+X6+X7+X8+X9+X10,
+ nlambda01=20, nlambda02=20, nlambda12=20,
 data=d,penalty="lasso")
-}
-\code{\link{summary.idm}}
-\code{\link{predict.idm}}
+}}
 }
 \references{
 D. Marquardt (1963). An algorithm for least-squares estimation
@@ -191,7 +187,7 @@ of nonlinear parameters.  \emph{SIAM Journal of Applied Mathematics},
 431-441.
 }
 \seealso{
-\code{\link{print.idm}}
+\code{\link{print.idm}}\code{\link{summary.idm}} \code{\link{predict.idm}}
 }
 \author{
 R: Ariane Bercu <ariane.bercu@u-bordeaux.fr>
