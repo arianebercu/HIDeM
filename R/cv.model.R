@@ -25,6 +25,8 @@ cv.model<-function(beta,
                    lambda,
                    alpha){
   
+  #browser()
+  
 # add to do base::which for CRAN check 
   BETA<-beta[fix==0]
   NEW.BETA.all<-beta
@@ -73,10 +75,7 @@ cv.model<-function(beta,
   
   NEWBETA<-rep(NA,length(num))
   idbeta<-NULL
-  idbeta<-base::which(penalty.factor==0)
-  # if no penalty on parameter, beta_k=A_k/-x_kk
-  NEWBETA[idbeta]<-sign[idbeta]*num[idbeta]/denum[idbeta]
-
+  
   # if penalty update beta all at once 
   if(penalty%in%c("lasso","ridge","elasticnet")){
     # 0 -> 1
@@ -192,6 +191,9 @@ cv.model<-function(beta,
     NEWBETA[idbeta+nva01+nva02]<-0
     }
 
+  idbeta<-base::which(penalty.factor==0)
+  # if no penalty on parameter, beta_k=A_k/-x_kk
+  NEWBETA[idbeta]<-sign[idbeta]*num[idbeta]/denum[idbeta]
   
   NEW.BETA.all[fix==0]<-NEWBETA
   

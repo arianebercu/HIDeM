@@ -943,7 +943,7 @@ idm <- function(formula01,
           if(is.null(penalty.factor)){
             penalty.factor<-rep(1, nvat01+nvat02+nvat12)
           }else{
-            if(min(penalty.factor)<0 | max(penalty.factor)>1 | round(penalty.factor)!=penalty.factor | length(penalty.factor)!=(nvat01+nvat02+nvat12)){
+            if(any(min(penalty.factor)<0) | any(max(penalty.factor)>1) | any(round(penalty.factor)!=penalty.factor) | length(penalty.factor)!=(nvat01+nvat02+nvat12)){
               stop(paste0("Penalty.factor need to be a vector of 0 and 1 of length : ",nvat01+nvat02+nvat12))
             }
           }
@@ -1455,7 +1455,7 @@ idm <- function(formula01,
               lambda12<-lambda.max*((pace.lambda)^(c(1:nlambda12)/nlambda12))
             }
             }else{lambda12<-0.0001}
-           
+            
               out <- idm.penalty.weib(b=b,
                                fix0=fix0,
                                size_V=size_V,
@@ -1493,6 +1493,7 @@ idm <- function(formula01,
                                penalty.factor=penalty.factor,
                                penalty=penalty,
                                gausspoint=gausspoint)
+              
               
 ######################### Output ###############################################
 ######################## on beta and HR ########################################

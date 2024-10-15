@@ -38,6 +38,7 @@ idm.weib<-function(b,fix0,size_V,
                    ve01,ve02,ve12,dimnva01,dimnva02,dimnva12,nvat01,nvat02,nvat12,
                    t0,t1,t2,t3,idd,idm,ts,troncature,gausspoint){
 
+
   # initiate parameters values 
   if(!is.null(b)){
   

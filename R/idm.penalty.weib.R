@@ -813,6 +813,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                              .combine = combine_lambda,
                              .errorhandling = "remove")%do%{
                                
+                               
                                # computation pbr 
                                
                                pbr_compu<-0
@@ -1072,8 +1073,8 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                    ite<-ite+1
                                    break
                                  }
-                                 
                                  # update beta 
+                                 #browser()
                                  output.cv<-cv.model(beta=beta,
                                                     nva01=npm01,
                                                     nva02=npm02,
@@ -1086,6 +1087,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                                      lambda=lambda[id.lambda,],
                                                      alpha=alpha
                                  )
+                                 #browser()
                                  
                                  # verify validity of parameters update 
                                  # and that we are better than previous estimates 
@@ -1150,10 +1152,13 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                                            "old.ca"=round(1),
                                                            "old.cb"=round(1))
                                    }
+                                   m<-1
+                                   betanew<-beta
                                    # from mla package
+                                   
                                    sears<-searpas(vw=vw,
                                                    step=step,
-                                                   b=beta,
+                                                   b=betanew,
                                                    delta=delta,
                                                    funcpa=idmlLikelihoodweibpena,
                                                    res.out.error=res.out.error,
@@ -1214,6 +1219,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                                                penalty.factor=penalty.factor,
                                                                penalty=penalty,
                                                                gausspoint=gausspoint)
+                                   
                                  }
                                  # if not better or do not exist need to readjust
                                  # value of beta 
