@@ -53,7 +53,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
   
   
   # need to keep original fix to calculate for beta 
-  weib<-ifelse(weib=="square",1,0)
+  
   V0<-NA
   fix00<-fix0
   

@@ -184,6 +184,7 @@ idm <- function(formula01,
                 formula12,
                 data,
                 method="Weib",
+                methodCV="mla",
                 weib="square",
                 scale.X=T,
                 maxiter=100,
@@ -229,7 +230,12 @@ idm <- function(formula01,
     if(!inherits(formula02,"formula"))stop("The argument formula02 must be a class 'formula'.")
     
     if(!method%in%c("Weib","splines"))stop("The argument method needs to be either splines or Weib")
-    if(method=="Weib" & !weib%in%c("square","logexp"))stop("The argument weib needs to be either square or logexp")
+    if(method=="Weib" & !weib%in%c("square","logexp")){
+      stop("The argument weib needs to be either square or logexp")
+    }else{weib<-ifelse(weib=="square",1,0)}
+    if(length(methodCV)!=1)stop("The argument methodCV must be either Nelder-Mead, BFGS, CG, L-BFGS-B, SANN, Brent or mla")
+    if(!methodCV%in%c("Nelder-Mead", "BFGS", "CG", "L-BFGS-B", "SANN",
+                     "Brent","mla"))stop("The argument methodCV must be either Nelder-Mead, BFGS, CG, L-BFGS-B, SANN, Brent or mla")
     ## if(missing(formula02)) formula02 <- formula01
     if(missing(formula12)) formula12 <- formula02
     # }}}
@@ -710,7 +716,8 @@ idm <- function(formula01,
                          troncature=troncature,
                          gausspoint=gausspoint,
                          step.sequential=step.sequential,
-                         option.sequential=option.sequential)
+                         option.sequential=option.sequential,
+                         methodCV=methodCV)
   
       
 ############################## Output   ########################################
@@ -809,7 +816,7 @@ idm <- function(formula01,
 ######################### with weibull baseline risk ###########################
       
       if(method=="Weib"){
-        
+
         out <- idm.weib(b=b,
                                     fix0=fix0,
                                     size_V=size_V,
@@ -839,7 +846,8 @@ idm <- function(formula01,
                                     ts=ts,
                                     troncature=troncature,
                                     gausspoint=gausspoint,
-                        weib=weib)
+                        weib=weib,
+                        methodCV=methodCV)
             
         
         
@@ -1334,6 +1342,7 @@ idm <- function(formula01,
           ################################################################################
           
           if(method=="Weib"){
+            browser()
               #	cat("------ Program Weibull ------ \n")
 ############### some initial steps to have values for weibull parameters #########
             output.mla<- marqLevAlg::mla(b=b[1:6],

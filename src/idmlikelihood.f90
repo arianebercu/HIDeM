@@ -1124,17 +1124,14 @@
 	if(weib.eq.1)then
          do i=1,2
             the01(i)=(bh(i))*(bh(i))
-!       the01(i)=dexp(bh(i))
          end do
          do i=1,2
             j = 2+i
             the02(i)=(bh(j))*(bh(j))
-!       the12(i)=dexp(bh(j))
          end do
          do i=1,2
             j = 4+i
             the12(i)=(bh(j))*(bh(j))
-!       the02(i)=dexp(bh(j))
          end do
 	else 
 	 do i=1,2
@@ -1142,11 +1139,11 @@
          end do
          do i=1,2
             j = 2+i
-            the12(i)=dexp(bh(j))
+            the02(i)=dexp(bh(j))
          end do
          do i=1,2
             j = 4+i
-            the02(i)=dexp(bh(j))
+            the12(i)=dexp(bh(j))
          end do
 	endif
 	
