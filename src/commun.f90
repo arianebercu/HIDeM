@@ -41,7 +41,8 @@ module commun
         double precision,dimension(:),allocatable,save::eta
 !-------------------- gausspoints ------------------------------
 	integer::gausspoint
-
+!-------------------- weibullpara ------------------------------
+	integer::weib
 
 
 end module commun

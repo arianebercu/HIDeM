@@ -36,9 +36,9 @@ idm.weib<-function(b,fix0,size_V,
                    clustertype,epsa,epsb,epsd,nproc,maxiter,
                    ctime,N,
                    ve01,ve02,ve12,dimnva01,dimnva02,dimnva12,nvat01,nvat02,nvat12,
-                   t0,t1,t2,t3,idd,idm,ts,troncature,gausspoint){
+                   t0,t1,t2,t3,idd,idm,ts,troncature,gausspoint,weib=weib){
 
-
+  weib<-ifelse(weib=="square",1,0)
   # initiate parameters values 
   if(!is.null(b)){
   
@@ -91,7 +91,8 @@ idm.weib<-function(b,fix0,size_V,
                        t2=t2,
                        t3=t3,
                        troncature=troncature,
-                       gausspoint=gausspoint)
+                       gausspoint=gausspoint,
+                       weib=weib)
 
       if(output.mla$istop==1){
         s.start<-output.mla$b}
@@ -132,7 +133,7 @@ idm.weib<-function(b,fix0,size_V,
                     t2=t2,
                     t3=t3,
                     troncature=troncature,
-                    gausspoint=gausspoint)
+                    gausspoint=gausspoint,weib=weib)
 
   if(out$istop==4){
     stop("Problem in the loglikelihood computation.")

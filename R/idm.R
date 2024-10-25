@@ -184,6 +184,7 @@ idm <- function(formula01,
                 formula12,
                 data,
                 method="Weib",
+                weib="square",
                 scale.X=T,
                 maxiter=100,
                 maxiter.pena=10,
@@ -228,6 +229,7 @@ idm <- function(formula01,
     if(!inherits(formula02,"formula"))stop("The argument formula02 must be a class 'formula'.")
     
     if(!method%in%c("Weib","splines"))stop("The argument method needs to be either splines or Weib")
+    if(method=="Weib" & !weib%in%c("square","logexp")stop("The argument weib needs to be either square or logexp")
     ## if(missing(formula02)) formula02 <- formula01
     if(missing(formula12)) formula12 <- formula02
     # }}}
@@ -836,7 +838,8 @@ idm <- function(formula01,
                                     idd=idd,
                                     ts=ts,
                                     troncature=troncature,
-                                    gausspoint=gausspoint)
+                                    gausspoint=gausspoint,
+                        weib=weib)
             
         
         
@@ -1362,7 +1365,8 @@ idm <- function(formula01,
                              t2=t2,
                              t3=t3,
                              troncature=troncature,
-                             gausspoint=gausspoint)
+                             gausspoint=gausspoint,
+                             weib=weib)
             
             # take thoses values if converged only otherwise thoses
             # by default or by the user
@@ -1407,7 +1411,7 @@ idm <- function(formula01,
                                   t2=t2,
                                   t3=t3,
                                   troncature=troncature,
-                                  gausspoint=gausspoint)
+                                  gausspoint=gausspoint,weib=weib)
               
               if(nproc>1){parallel::stopCluster(clustpar)}
               
@@ -1455,7 +1459,7 @@ idm <- function(formula01,
               lambda12<-lambda.max*((pace.lambda)^(c(1:nlambda12)/nlambda12))
             }
             }else{lambda12<-0.0001}
-            
+            browser()
               out <- idm.penalty.weib(b=b,
                                fix0=fix0,
                                size_V=size_V,
@@ -1492,7 +1496,8 @@ idm <- function(formula01,
                                alpha=alpha,
                                penalty.factor=penalty.factor,
                                penalty=penalty,
-                               gausspoint=gausspoint)
+                               gausspoint=gausspoint,
+                               weib=weib)
               
               
 ######################### Output ###############################################

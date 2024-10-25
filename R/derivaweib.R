@@ -26,7 +26,7 @@
 
 derivaweib<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
                      dimnva01,dimnva02,dimnva12,nva01,nva02,nva12,
-                     t0,t1,t2,t3,troncature){
+                     t0,t1,t2,t3,troncature,weib){
   res<-rep(0,(npm*(npm+1)/2)+npm)
   # return first and second derivatives of the loglik
   .Fortran("derivaweib",
@@ -52,6 +52,7 @@ derivaweib<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
            as.double(t2),
            as.double(t3),
            as.integer(troncature),
+           as.integer(weib),
            likelihood_deriv=as.double(res),
            PACKAGE="SmoothHazardoptim9")$likelihood_deriv
 }
