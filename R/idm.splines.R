@@ -296,7 +296,7 @@ idm.splines<-function(b,clustertype,epsa,epsb,epsd,nproc,maxiter,size_V,size_spl
               bfix=bfix,
               fix0=fix0))
   }else{
-    if(step.sequential==F){
+
       
       
       out<-optim(par=b,
@@ -337,131 +337,12 @@ idm.splines<-function(b,clustertype,epsa,epsb,epsd,nproc,maxiter,size_V,size_spl
             gausspoint=gausspoint)
       
       
-      if(out$convergence==4){
+      if(out$convergence!=0){
         stop("Problem in the loglikelihood computation.")
       }
       
       ni<-out$counts[1]
-      #simplifier modele ou two step
-      
-    }else{
-      
-      if(option.sequential$min>0){
-        
-        out<-optim(par=b,
-              method=methodCV,
-              hessian = T,
-              control=list(maxit=option.sequential$min,
-                           fnscale=-1, #to maximise function
-                           abstol=epsb,
-                           parscale=rep(1,length(b))),
-              
-              fn=idmlLikelihood,
-              npm=length(b),
-              npar=size_V,
-              bfix=bfix,
-              fix=fix0,
-              zi01=knots01,
-              zi02=knots02,
-              zi12=knots12,
-              ctime=ctime,
-              no=N,
-              nz01=nknots01,
-              nz02=nknots02,
-              nz12=nknots12,
-              ve01=ve01,
-              ve02=ve02,
-              ve12=ve12,
-              dimnva01=dimnva01,
-              dimnva02=dimnva02,
-              dimnva12=dimnva12,
-              nva01=nvat01,
-              nva02=nvat02,
-              nva12=nvat12,
-              t0=t0,
-              t1=t1,
-              t2=t2,
-              t3=t3,
-              troncature=troncature,
-              gausspoint=gausspoint)
-        
-        
-        if(out$convergence==4){
-          stop("Problem in the loglikelihood computation.")
-        }
-        
-        maxstep<-out$count[1]
-        ni<-maxstep
-        b<-out$b
-        out_first_mla<-out$convergence
-        # change condition from : out$ca<=epsa & out$cb<=epsb & out$rdm>epsd
-        # to : 
-        
-      }else{
-        
-        maxstep<-0
-        ni<-maxstep
-        out_first_mla<-2
-      }
-      
-      # verify maxiter still not reach and first mla did not CV
-      while(maxstep<maxiter & out_first_mla!=1){
-        
-        # calculate updates
-        out<-optim(par=b,
-                   method=methodCV,
-                   hessian = T,
-                   control=list(maxit=option.sequential$step,
-                                fnscale=-1, #to maximise function
-                                abstol=epsb,
-                                parscale=rep(1,length(b))),
-                   
-                   fn=idmlLikelihood,
-                   npm=length(b),
-                   npar=size_V,
-                   bfix=bfix,
-                   fix=fix0,
-                   zi01=knots01,
-                   zi02=knots02,
-                   zi12=knots12,
-                   ctime=ctime,
-                   no=N,
-                   nz01=nknots01,
-                   nz02=nknots02,
-                   nz12=nknots12,
-                   ve01=ve01,
-                   ve02=ve02,
-                   ve12=ve12,
-                   dimnva01=dimnva01,
-                   dimnva02=dimnva02,
-                   dimnva12=dimnva12,
-                   nva01=nvat01,
-                   nva02=nvat02,
-                   nva12=nvat12,
-                   t0=t0,
-                   t1=t1,
-                   t2=t2,
-                   t3=t3,
-                   troncature=troncature,
-                   gausspoint=gausspoint)
-        
-        
-        
-        if(out$convergence==4){
-          stop("Problem in the loglikelihood computation.")
-        }
-        
-        maxstep<-maxstep+out$count[1]
-        b<-out$b
-        
-        if(maxstep>=maxiter){break}
-        
-        
-        if(out$convergence==1){break}
-        
-      }
-      ni<-maxstep
-    }
+
     
     V<-solve(-out$hessian)
     return(list(b=out$par,

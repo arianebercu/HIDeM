@@ -730,7 +730,9 @@ idm <- function(formula01,
         
 ######################### on covariance matrix #################################
 ### if CV is true keep V and solve V to have inverse for confidence intervals###
-        if(out$istop==1){
+        CV<-ifelse(methodCV=="mla",out$istop,
+                   ifelse(out$istop==0,1,0))
+        if(CV==1){
           
           
           Vr <- matrix(0,npm,npm)
@@ -858,8 +860,9 @@ idm <- function(formula01,
         npm<-sum(fix==0)
         
 ### if CV is true keep V and solve V to have inverse for confidence intervals###
-        
-        if(out$istop==1){
+        CV<-ifelse(methodCV=="mla",out$istop,
+                   ifelse(out$istop==0,1,0))
+        if(CV==1){
           
           
           Vr <- matrix(0,npm,npm)
@@ -939,6 +942,7 @@ idm <- function(formula01,
       # No value given by BIC as no penalty
       lambda<-alpha<-fit$BIC<-fit$GCV<-NULL
       fit$loglik <- c(out$fn.value,NULL)
+      fit$methodCV<-methodCV
       
     }else{
 

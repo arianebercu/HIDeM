@@ -98,7 +98,7 @@ idm.weib<-function(b,fix0,size_V,
             troncature=troncature,
             gausspoint=gausspoint,weib=weib)
       
-      if(out.optim$convergence==1){
+      if(out.optim$convergence==0){
         s.start<-out.optim$par}
     }                           
     beta<-beta.start

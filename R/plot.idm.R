@@ -82,9 +82,15 @@ plot.idm <- function(x,
     # {{{ collecting the (X, Y)-values of the lines
   
   
-  
+  if(x$methodCV=="mla"){
   if(any(x$converged!=1)){
     conf.int<-F
+  }
+  }else{
+    if(any(x$converged!=0)){
+      conf.int<-F
+    }
+    x$converged<-ifelse(x$converged==0,1,2)
   }
   
   if(conf.int==T){
@@ -96,7 +102,6 @@ plot.idm <- function(x,
     if(x$converged!=1){
       stop("The model did not converged, plot can not be displayed")
     }
-    
     if(!is.null(x$modelPar)){
       
       x$method<-"weib"
