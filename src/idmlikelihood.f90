@@ -5181,7 +5181,7 @@ subroutine derivaweib(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
             j = 4+i
             the12(i)=dexp(bh(j))
          end do
-	enif
+	endif
 
 	
 !---------- calcul des derivees premiere ------------------   

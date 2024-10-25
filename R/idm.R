@@ -229,7 +229,7 @@ idm <- function(formula01,
     if(!inherits(formula02,"formula"))stop("The argument formula02 must be a class 'formula'.")
     
     if(!method%in%c("Weib","splines"))stop("The argument method needs to be either splines or Weib")
-    if(method=="Weib" & !weib%in%c("square","logexp")stop("The argument weib needs to be either square or logexp")
+    if(method=="Weib" & !weib%in%c("square","logexp"))stop("The argument weib needs to be either square or logexp")
     ## if(missing(formula02)) formula02 <- formula01
     if(missing(formula12)) formula12 <- formula02
     # }}}
