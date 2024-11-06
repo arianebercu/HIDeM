@@ -1121,7 +1121,7 @@
  
 	
 
-	if(weib.eq.1)then
+	if((weib.eq.1).OR.(weib.eq.3))then
          do i=1,2
             the01(i)=(bh(i))*(bh(i))
          end do
@@ -1192,8 +1192,8 @@
                         if(t0(i).eq.0.d0)then
                                 tronc = 0.d0
                         else 
-                                call fonct(t0(i),the01,ri01,gl01,su01) 
-                                call fonct(t0(i),the02,ri02,gl02,su02) 
+                                call fonct(t0(i),the01,ri01,gl01,su01,weib) 
+                                call fonct(t0(i),the02,ri02,gl02,su02,weib) 
                                 tronc=(gl01*vet01)+(gl02*vet02)
                         end if
                 else
@@ -1203,58 +1203,58 @@
 		
                 if(c(i).eq.1)then ! cad 0-->1 et 0-->2
 
-			call fonct(t1(i),the01,ri01,gl01,su01)
-                        call fonct(t3(i),the02,ri02,gl02,su02)
+			call fonct(t1(i),the01,ri01,gl01,su01,weib)
+                        call fonct(t3(i),the02,ri02,gl02,su02,weib)
                         res1 = -(gl01*vet01)-(gl02*vet02)
                 else
                 if(c(i).eq.2)then ! cpi 0-->1
-			call fonct(t3(i),the12,ri12,gl12,su12)
+			call fonct(t3(i),the12,ri12,gl12,su12,weib)
                          call  qgaussPLweib(t1(i),t2(i),the01,the02,&
-                         the12,res2,vet01,vet02,vet12)
+                         the12,res2,vet01,vet02,vet12,weib)
                         res1=dlog(res2*(su12**vet12))
 
                 else  
                     if(c(i).eq.3)then ! obs 0-->1
-			call fonct(t1(i),the01,ri01,gl01,su01)
-                        call fonct(t1(i),the02,ri02,gl02,su02)
-                        call fonct(t1(i),the12,ri12,gl12,su12)
+			call fonct(t1(i),the01,ri01,gl01,su01,weib)
+                        call fonct(t1(i),the02,ri02,gl02,su02,weib)
+                        call fonct(t1(i),the12,ri12,gl12,su12,weib)
                         res1 = -(gl01*vet01)-(gl02*vet02)+&
                         dlog(ri01*vet01)+(gl12*vet12)
-                        call fonct(t3(i),the12,ri12,gl12,su12)
+                        call fonct(t3(i),the12,ri12,gl12,su12,weib)
                         res1 = res1 -(gl12*vet12)
                     else   
                        if(c(i).eq.4)then ! cpi 0-->1 et obs 1-->2
-			call fonct(t3(i),the12,ri12,gl12,su12)
+			call fonct(t3(i),the12,ri12,gl12,su12,weib)
                         call  qgaussPLweib(t1(i),t2(i),the01,the02,the12,&
-                        res2,vet01,vet02,vet12)
+                        res2,vet01,vet02,vet12,weib)
                         res1=dlog(res2*(su12**vet12)*ri12*vet12)
                        else
                          if(c(i).eq.5)then ! obs 0-->1 et obs 1-->2
-				call fonct(t1(i),the01,ri01,gl01,su01)
-                                call fonct(t1(i),the02,ri02,gl02,su02)
-                                call fonct(t1(i),the12,ri12,gl12,su12)
+				call fonct(t1(i),the01,ri01,gl01,su01,weib)
+                                call fonct(t1(i),the02,ri02,gl02,su02,weib)
+                                call fonct(t1(i),the12,ri12,gl12,su12,weib)
                                 res1 = -(gl01*vet01)-(gl02*vet02)+&
                                 dlog(ri01*vet01)+(gl12*vet12)
-                                call fonct(t3(i),the12,ri12,gl12,su12)
+                                call fonct(t3(i),the12,ri12,gl12,su12,weib)
                                 res1 = res1 -(gl12*vet12) + dlog(ri12*vet12)
                          else
                             if(c(i).eq.6)then ! vivant ???
-				 call fonct(t3(i),the01,ri01,gl01,su01)
-                                call fonct(t3(i),the02,ri02,gl02,su02)
-                                call fonct(t3(i),the12,ri12,gl12,su12)
+				 call fonct(t3(i),the01,ri01,gl01,su01,weib)
+                                call fonct(t3(i),the02,ri02,gl02,su02,weib)
+                                call fonct(t3(i),the12,ri12,gl12,su12,weib)
                                 call  qgaussPLweib(t1(i),t3(i),the01,the02,&
-                                the12,res2,vet01,vet02,vet12)
+                                the12,res2,vet01,vet02,vet12,weib)
                                 res1 = (res2*(su12**vet12))+&
                                 ((su01**vet01)*(su02**vet02))
                                 res1 = dlog(res1)
 
                             else ! passage 0-->2  
 
-				call fonct(t3(i),the01,ri01,gl01,su01)
-                                call fonct(t3(i),the02,ri02,gl02,su02)
-                                call fonct(t3(i),the12,ri12,gl12,su12)
+				call fonct(t3(i),the01,ri01,gl01,su01,weib)
+                                call fonct(t3(i),the02,ri02,gl02,su02,weib)
+                                call fonct(t3(i),the12,ri12,gl12,su12,weib)
                                 call  qgaussPLweib(t1(i),t3(i),the01,the02,&
-                                the12,res2,vet01,vet02,vet12)
+                                the12,res2,vet01,vet02,vet12,weib)
                                 res1 = (res2*(su12**vet12)*ri12*vet12)+&
                                 ((su01**vet01)*(su02**vet02)*ri02*vet02)
                                 res1 = dlog(res1)
@@ -1314,8 +1314,8 @@
                         if(t0(i).eq.0.d0)then
                                 tronc = 0.d0
                         else 
-                                call fonct(t0(i),the01,ri01,gl01,su01) 
-                                call fonct(t0(i),the02,ri02,gl02,su02) 
+                                call fonct(t0(i),the01,ri01,gl01,su01,weib) 
+                                call fonct(t0(i),the02,ri02,gl02,su02,weib) 
                                 tronc=(gl01*vet01)+(gl02*vet02)
                         end if
                 else
@@ -1325,58 +1325,58 @@
 		
                 if(c(i).eq.1)then ! cad 0-->1 et 0-->2
 
-			call fonct(t1(i),the01,ri01,gl01,su01)
-                        call fonct(t3(i),the02,ri02,gl02,su02)
+			call fonct(t1(i),the01,ri01,gl01,su01,weib)
+                        call fonct(t3(i),the02,ri02,gl02,su02,weib)
                         res1 = -(gl01*vet01)-(gl02*vet02)
                 else
                 if(c(i).eq.2)then ! cpi 0-->1
-			call fonct(t3(i),the12,ri12,gl12,su12)
+			call fonct(t3(i),the12,ri12,gl12,su12,weib)
                          call  qgaussPL15weib(t1(i),t2(i),the01,the02,&
-                         the12,res2,vet01,vet02,vet12)
+                         the12,res2,vet01,vet02,vet12,weib)
                         res1=dlog(res2*(su12**vet12))
 
                 else  
                     if(c(i).eq.3)then ! obs 0-->1
-			call fonct(t1(i),the01,ri01,gl01,su01)
-                        call fonct(t1(i),the02,ri02,gl02,su02)
-                        call fonct(t1(i),the12,ri12,gl12,su12)
+			call fonct(t1(i),the01,ri01,gl01,su01,weib)
+                        call fonct(t1(i),the02,ri02,gl02,su02,weib)
+                        call fonct(t1(i),the12,ri12,gl12,su12,weib)
                         res1 = -(gl01*vet01)-(gl02*vet02)+&
                         dlog(ri01*vet01)+(gl12*vet12)
-                        call fonct(t3(i),the12,ri12,gl12,su12)
+                        call fonct(t3(i),the12,ri12,gl12,su12,weib)
                         res1 = res1 -(gl12*vet12)
                     else   
                        if(c(i).eq.4)then ! cpi 0-->1 et obs 1-->2
-			call fonct(t3(i),the12,ri12,gl12,su12)
+			call fonct(t3(i),the12,ri12,gl12,su12,weib)
                         call  qgaussPL15weib(t1(i),t2(i),the01,the02,the12,&
-                        res2,vet01,vet02,vet12)
+                        res2,vet01,vet02,vet12,weib)
                         res1=dlog(res2*(su12**vet12)*ri12*vet12)
                        else
                          if(c(i).eq.5)then ! obs 0-->1 et obs 1-->2
-				call fonct(t1(i),the01,ri01,gl01,su01)
-                                call fonct(t1(i),the02,ri02,gl02,su02)
-                                call fonct(t1(i),the12,ri12,gl12,su12)
+				call fonct(t1(i),the01,ri01,gl01,su01,weib)
+                                call fonct(t1(i),the02,ri02,gl02,su02,weib)
+                                call fonct(t1(i),the12,ri12,gl12,su12,weib)
                                 res1 = -(gl01*vet01)-(gl02*vet02)+&
                                 dlog(ri01*vet01)+(gl12*vet12)
-                                call fonct(t3(i),the12,ri12,gl12,su12)
+                                call fonct(t3(i),the12,ri12,gl12,su12,weib)
                                 res1 = res1 -(gl12*vet12) + dlog(ri12*vet12)
                          else
                             if(c(i).eq.6)then ! vivant ???
-				 call fonct(t3(i),the01,ri01,gl01,su01)
-                                call fonct(t3(i),the02,ri02,gl02,su02)
-                                call fonct(t3(i),the12,ri12,gl12,su12)
+				 call fonct(t3(i),the01,ri01,gl01,su01,weib)
+                                call fonct(t3(i),the02,ri02,gl02,su02,weib)
+                                call fonct(t3(i),the12,ri12,gl12,su12,weib)
                                 call  qgaussPL15weib(t1(i),t3(i),the01,the02,&
-                                the12,res2,vet01,vet02,vet12)
+                                the12,res2,vet01,vet02,vet12,weib)
                                 res1 = (res2*(su12**vet12))+&
                                 ((su01**vet01)*(su02**vet02))
                                 res1 = dlog(res1)
 
                             else ! passage 0-->2  
 
-				call fonct(t3(i),the01,ri01,gl01,su01)
-                                call fonct(t3(i),the02,ri02,gl02,su02)
-                                call fonct(t3(i),the12,ri12,gl12,su12)
+				call fonct(t3(i),the01,ri01,gl01,su01,weib)
+                                call fonct(t3(i),the02,ri02,gl02,su02,weib)
+                                call fonct(t3(i),the12,ri12,gl12,su12,weib)
                                 call  qgaussPL15weib(t1(i),t3(i),the01,the02,&
-                                the12,res2,vet01,vet02,vet12)
+                                the12,res2,vet01,vet02,vet12,weib)
                                 res1 = (res2*(su12**vet12)*ri12*vet12)+&
                                 ((su01**vet01)*(su02**vet02)*ri02*vet02)
                                 res1 = dlog(res1)
@@ -1437,8 +1437,8 @@
                         if(t0(i).eq.0.d0)then
                                 tronc = 0.d0
                         else 
-                                call fonct(t0(i),the01,ri01,gl01,su01) 
-                                call fonct(t0(i),the02,ri02,gl02,su02) 
+                                call fonct(t0(i),the01,ri01,gl01,su01,weib) 
+                                call fonct(t0(i),the02,ri02,gl02,su02,weib) 
                                 tronc=(gl01*vet01)+(gl02*vet02)
                         end if
                 else
@@ -1448,58 +1448,58 @@
 		
                 if(c(i).eq.1)then ! cad 0-->1 et 0-->2
 
-			call fonct(t1(i),the01,ri01,gl01,su01)
-                        call fonct(t3(i),the02,ri02,gl02,su02)
+			call fonct(t1(i),the01,ri01,gl01,su01,weib)
+                        call fonct(t3(i),the02,ri02,gl02,su02,weib)
                         res1 = -(gl01*vet01)-(gl02*vet02)
                 else
                 if(c(i).eq.2)then ! cpi 0-->1
-			call fonct(t3(i),the12,ri12,gl12,su12)
+			call fonct(t3(i),the12,ri12,gl12,su12,weib)
                          call  qgaussPL21weib(t1(i),t2(i),the01,the02,&
-                         the12,res2,vet01,vet02,vet12)
+                         the12,res2,vet01,vet02,vet12,weib)
                         res1=dlog(res2*(su12**vet12))
 
                 else  
                     if(c(i).eq.3)then ! obs 0-->1
-			call fonct(t1(i),the01,ri01,gl01,su01)
-                        call fonct(t1(i),the02,ri02,gl02,su02)
-                        call fonct(t1(i),the12,ri12,gl12,su12)
+			call fonct(t1(i),the01,ri01,gl01,su01,weib)
+                        call fonct(t1(i),the02,ri02,gl02,su02,weib)
+                        call fonct(t1(i),the12,ri12,gl12,su12,weib)
                         res1 = -(gl01*vet01)-(gl02*vet02)+&
                         dlog(ri01*vet01)+(gl12*vet12)
-                        call fonct(t3(i),the12,ri12,gl12,su12)
+                        call fonct(t3(i),the12,ri12,gl12,su12,weib)
                         res1 = res1 -(gl12*vet12)
                     else   
                        if(c(i).eq.4)then ! cpi 0-->1 et obs 1-->2
-			call fonct(t3(i),the12,ri12,gl12,su12)
+			call fonct(t3(i),the12,ri12,gl12,su12,weib)
                         call  qgaussPL21weib(t1(i),t2(i),the01,the02,the12,&
-                        res2,vet01,vet02,vet12)
+                        res2,vet01,vet02,vet12,weib)
                         res1=dlog(res2*(su12**vet12)*ri12*vet12)
                        else
                          if(c(i).eq.5)then ! obs 0-->1 et obs 1-->2
-				call fonct(t1(i),the01,ri01,gl01,su01)
-                                call fonct(t1(i),the02,ri02,gl02,su02)
-                                call fonct(t1(i),the12,ri12,gl12,su12)
+				call fonct(t1(i),the01,ri01,gl01,su01,weib)
+                                call fonct(t1(i),the02,ri02,gl02,su02,weib)
+                                call fonct(t1(i),the12,ri12,gl12,su12,weib)
                                 res1 = -(gl01*vet01)-(gl02*vet02)+&
                                 dlog(ri01*vet01)+(gl12*vet12)
-                                call fonct(t3(i),the12,ri12,gl12,su12)
+                                call fonct(t3(i),the12,ri12,gl12,su12,weib)
                                 res1 = res1 -(gl12*vet12) + dlog(ri12*vet12)
                          else
                             if(c(i).eq.6)then ! vivant ???
-				 call fonct(t3(i),the01,ri01,gl01,su01)
-                                call fonct(t3(i),the02,ri02,gl02,su02)
-                                call fonct(t3(i),the12,ri12,gl12,su12)
+				 call fonct(t3(i),the01,ri01,gl01,su01,weib)
+                                call fonct(t3(i),the02,ri02,gl02,su02,weib)
+                                call fonct(t3(i),the12,ri12,gl12,su12,weib)
                                 call  qgaussPL21weib(t1(i),t3(i),the01,the02,&
-                                the12,res2,vet01,vet02,vet12)
+                                the12,res2,vet01,vet02,vet12,weib)
                                 res1 = (res2*(su12**vet12))+&
                                 ((su01**vet01)*(su02**vet02))
                                 res1 = dlog(res1)
 
                             else ! passage 0-->2  
 
-				call fonct(t3(i),the01,ri01,gl01,su01)
-                                call fonct(t3(i),the02,ri02,gl02,su02)
-                                call fonct(t3(i),the12,ri12,gl12,su12)
+				call fonct(t3(i),the01,ri01,gl01,su01,weib)
+                                call fonct(t3(i),the02,ri02,gl02,su02,weib)
+                                call fonct(t3(i),the12,ri12,gl12,su12,weib)
                                 call  qgaussPL21weib(t1(i),t3(i),the01,the02,&
-                                the12,res2,vet01,vet02,vet12)
+                                the12,res2,vet01,vet02,vet12,weib)
                                 res1 = (res2*(su12**vet12)*ri12*vet12)+&
                                 ((su01**vet01)*(su02**vet02)*ri02*vet02)
                                 res1 = dlog(res1)
@@ -1560,8 +1560,8 @@
                         if(t0(i).eq.0.d0)then
                                 tronc = 0.d0
                         else 
-                                call fonct(t0(i),the01,ri01,gl01,su01) 
-                                call fonct(t0(i),the02,ri02,gl02,su02) 
+                                call fonct(t0(i),the01,ri01,gl01,su01,weib) 
+                                call fonct(t0(i),the02,ri02,gl02,su02,weib) 
                                 tronc=(gl01*vet01)+(gl02*vet02)
                         end if
                 else
@@ -1571,58 +1571,58 @@
 		
                 if(c(i).eq.1)then ! cad 0-->1 et 0-->2
 
-			call fonct(t1(i),the01,ri01,gl01,su01)
-                        call fonct(t3(i),the02,ri02,gl02,su02)
+			call fonct(t1(i),the01,ri01,gl01,su01,weib)
+                        call fonct(t3(i),the02,ri02,gl02,su02,weib)
                         res1 = -(gl01*vet01)-(gl02*vet02)
                 else
                 if(c(i).eq.2)then ! cpi 0-->1
-			call fonct(t3(i),the12,ri12,gl12,su12)
+			call fonct(t3(i),the12,ri12,gl12,su12,weib)
                          call  qgaussPL31weib(t1(i),t2(i),the01,the02,&
-                         the12,res2,vet01,vet02,vet12)
+                         the12,res2,vet01,vet02,vet12,weib)
                         res1=dlog(res2*(su12**vet12))
 
                 else  
                     if(c(i).eq.3)then ! obs 0-->1
-			call fonct(t1(i),the01,ri01,gl01,su01)
-                        call fonct(t1(i),the02,ri02,gl02,su02)
-                        call fonct(t1(i),the12,ri12,gl12,su12)
+			call fonct(t1(i),the01,ri01,gl01,su01,weib)
+                        call fonct(t1(i),the02,ri02,gl02,su02,weib)
+                        call fonct(t1(i),the12,ri12,gl12,su12,weib)
                         res1 = -(gl01*vet01)-(gl02*vet02)+&
                         dlog(ri01*vet01)+(gl12*vet12)
-                        call fonct(t3(i),the12,ri12,gl12,su12)
+                        call fonct(t3(i),the12,ri12,gl12,su12,weib)
                         res1 = res1 -(gl12*vet12)
                     else   
                        if(c(i).eq.4)then ! cpi 0-->1 et obs 1-->2
-			call fonct(t3(i),the12,ri12,gl12,su12)
+			call fonct(t3(i),the12,ri12,gl12,su12,weib)
                         call  qgaussPL31weib(t1(i),t2(i),the01,the02,the12,&
-                        res2,vet01,vet02,vet12)
+                        res2,vet01,vet02,vet12,weib)
                         res1=dlog(res2*(su12**vet12)*ri12*vet12)
                        else
                          if(c(i).eq.5)then ! obs 0-->1 et obs 1-->2
-				call fonct(t1(i),the01,ri01,gl01,su01)
-                                call fonct(t1(i),the02,ri02,gl02,su02)
-                                call fonct(t1(i),the12,ri12,gl12,su12)
+				call fonct(t1(i),the01,ri01,gl01,su01,weib)
+                                call fonct(t1(i),the02,ri02,gl02,su02,weib)
+                                call fonct(t1(i),the12,ri12,gl12,su12,weib)
                                 res1 = -(gl01*vet01)-(gl02*vet02)+&
                                 dlog(ri01*vet01)+(gl12*vet12)
-                                call fonct(t3(i),the12,ri12,gl12,su12)
+                                call fonct(t3(i),the12,ri12,gl12,su12,weib)
                                 res1 = res1 -(gl12*vet12) + dlog(ri12*vet12)
                          else
                             if(c(i).eq.6)then ! vivant ???
-				 call fonct(t3(i),the01,ri01,gl01,su01)
-                                call fonct(t3(i),the02,ri02,gl02,su02)
-                                call fonct(t3(i),the12,ri12,gl12,su12)
+				 call fonct(t3(i),the01,ri01,gl01,su01,weib)
+                                call fonct(t3(i),the02,ri02,gl02,su02,weib)
+                                call fonct(t3(i),the12,ri12,gl12,su12,weib)
                                 call  qgaussPL31weib(t1(i),t3(i),the01,the02,&
-                                the12,res2,vet01,vet02,vet12)
+                                the12,res2,vet01,vet02,vet12,weib)
                                 res1 = (res2*(su12**vet12))+&
                                 ((su01**vet01)*(su02**vet02))
                                 res1 = dlog(res1)
 
                             else ! passage 0-->2  
 
-				call fonct(t3(i),the01,ri01,gl01,su01)
-                                call fonct(t3(i),the02,ri02,gl02,su02)
-                                call fonct(t3(i),the12,ri12,gl12,su12)
+				call fonct(t3(i),the01,ri01,gl01,su01,weib)
+                                call fonct(t3(i),the02,ri02,gl02,su02,weib)
+                                call fonct(t3(i),the12,ri12,gl12,su12,weib)
                                 call  qgaussPL31weib(t1(i),t3(i),the01,the02,&
-                                the12,res2,vet01,vet02,vet12)
+                                the12,res2,vet01,vet02,vet12,weib)
                                 res1 = (res2*(su12**vet12)*ri12*vet12)+&
                                 ((su01**vet01)*(su02**vet02)*ri02*vet02)
                                 res1 = dlog(res1)
@@ -1683,8 +1683,8 @@
                         if(t0(i).eq.0.d0)then
                                 tronc = 0.d0
                         else 
-                                call fonct(t0(i),the01,ri01,gl01,su01) 
-                                call fonct(t0(i),the02,ri02,gl02,su02) 
+                                call fonct(t0(i),the01,ri01,gl01,su01,weib) 
+                                call fonct(t0(i),the02,ri02,gl02,su02,weib) 
                                 tronc=(gl01*vet01)+(gl02*vet02)
                         end if
                 else
@@ -1694,58 +1694,58 @@
 		
                 if(c(i).eq.1)then ! cad 0-->1 et 0-->2
 
-			call fonct(t1(i),the01,ri01,gl01,su01)
-                        call fonct(t3(i),the02,ri02,gl02,su02)
+			call fonct(t1(i),the01,ri01,gl01,su01,weib)
+                        call fonct(t3(i),the02,ri02,gl02,su02,weib)
                         res1 = -(gl01*vet01)-(gl02*vet02)
                 else
                 if(c(i).eq.2)then ! cpi 0-->1
-			call fonct(t3(i),the12,ri12,gl12,su12)
+			call fonct(t3(i),the12,ri12,gl12,su12,weib)
                          call  qgaussPL41weib(t1(i),t2(i),the01,the02,&
-                         the12,res2,vet01,vet02,vet12)
+                         the12,res2,vet01,vet02,vet12,weib)
                         res1=dlog(res2*(su12**vet12))
 
                 else  
                     if(c(i).eq.3)then ! obs 0-->1
-			call fonct(t1(i),the01,ri01,gl01,su01)
-                        call fonct(t1(i),the02,ri02,gl02,su02)
-                        call fonct(t1(i),the12,ri12,gl12,su12)
+			call fonct(t1(i),the01,ri01,gl01,su01,weib)
+                        call fonct(t1(i),the02,ri02,gl02,su02,weib)
+                        call fonct(t1(i),the12,ri12,gl12,su12,weib)
                         res1 = -(gl01*vet01)-(gl02*vet02)+&
                         dlog(ri01*vet01)+(gl12*vet12)
-                        call fonct(t3(i),the12,ri12,gl12,su12)
+                        call fonct(t3(i),the12,ri12,gl12,su12,weib)
                         res1 = res1 -(gl12*vet12)
                     else   
                        if(c(i).eq.4)then ! cpi 0-->1 et obs 1-->2
-			call fonct(t3(i),the12,ri12,gl12,su12)
+			call fonct(t3(i),the12,ri12,gl12,su12,weib)
                         call  qgaussPL41weib(t1(i),t2(i),the01,the02,the12,&
-                        res2,vet01,vet02,vet12)
+                        res2,vet01,vet02,vet12,weib)
                         res1=dlog(res2*(su12**vet12)*ri12*vet12)
                        else
                          if(c(i).eq.5)then ! obs 0-->1 et obs 1-->2
-				call fonct(t1(i),the01,ri01,gl01,su01)
-                                call fonct(t1(i),the02,ri02,gl02,su02)
-                                call fonct(t1(i),the12,ri12,gl12,su12)
+				call fonct(t1(i),the01,ri01,gl01,su01,weib)
+                                call fonct(t1(i),the02,ri02,gl02,su02,weib)
+                                call fonct(t1(i),the12,ri12,gl12,su12,weib)
                                 res1 = -(gl01*vet01)-(gl02*vet02)+&
                                 dlog(ri01*vet01)+(gl12*vet12)
-                                call fonct(t3(i),the12,ri12,gl12,su12)
+                                call fonct(t3(i),the12,ri12,gl12,su12,weib)
                                 res1 = res1 -(gl12*vet12) + dlog(ri12*vet12)
                          else
                             if(c(i).eq.6)then ! vivant ???
-				 call fonct(t3(i),the01,ri01,gl01,su01)
-                                call fonct(t3(i),the02,ri02,gl02,su02)
-                                call fonct(t3(i),the12,ri12,gl12,su12)
+				 call fonct(t3(i),the01,ri01,gl01,su01,weib)
+                                call fonct(t3(i),the02,ri02,gl02,su02,weib)
+                                call fonct(t3(i),the12,ri12,gl12,su12,weib)
                                 call  qgaussPL41weib(t1(i),t3(i),the01,the02,&
-                                the12,res2,vet01,vet02,vet12)
+                                the12,res2,vet01,vet02,vet12,weib)
                                 res1 = (res2*(su12**vet12))+&
                                 ((su01**vet01)*(su02**vet02))
                                 res1 = dlog(res1)
 
                             else ! passage 0-->2  
 
-				call fonct(t3(i),the01,ri01,gl01,su01)
-                                call fonct(t3(i),the02,ri02,gl02,su02)
-                                call fonct(t3(i),the12,ri12,gl12,su12)
+				call fonct(t3(i),the01,ri01,gl01,su01,weib)
+                                call fonct(t3(i),the02,ri02,gl02,su02,weib)
+                                call fonct(t3(i),the12,ri12,gl12,su12,weib)
                                 call  qgaussPL41weib(t1(i),t3(i),the01,the02,&
-                                the12,res2,vet01,vet02,vet12)
+                                the12,res2,vet01,vet02,vet12,weib)
                                 res1 = (res2*(su12**vet12)*ri12*vet12)+&
                                 ((su01**vet01)*(su02**vet02)*ri02*vet02)
                                 res1 = dlog(res1)
@@ -1806,8 +1806,8 @@ else
                         if(t0(i).eq.0.d0)then
                                 tronc = 0.d0
                         else 
-                                call fonct(t0(i),the01,ri01,gl01,su01) 
-                                call fonct(t0(i),the02,ri02,gl02,su02) 
+                                call fonct(t0(i),the01,ri01,gl01,su01,weib) 
+                                call fonct(t0(i),the02,ri02,gl02,su02,weib) 
                                 tronc=(gl01*vet01)+(gl02*vet02)
                         end if
                 else
@@ -1817,58 +1817,58 @@ else
 		
                 if(c(i).eq.1)then ! cad 0-->1 et 0-->2
 
-			call fonct(t1(i),the01,ri01,gl01,su01)
-                        call fonct(t3(i),the02,ri02,gl02,su02)
+			call fonct(t1(i),the01,ri01,gl01,su01,weib)
+                        call fonct(t3(i),the02,ri02,gl02,su02,weib)
                         res1 = -(gl01*vet01)-(gl02*vet02)
                 else
                 if(c(i).eq.2)then ! cpi 0-->1
-			call fonct(t3(i),the12,ri12,gl12,su12)
+			call fonct(t3(i),the12,ri12,gl12,su12,weib)
                          call  qgaussPL51weib(t1(i),t2(i),the01,the02,&
-                         the12,res2,vet01,vet02,vet12)
+                         the12,res2,vet01,vet02,vet12,weib)
                         res1=dlog(res2*(su12**vet12))
 
                 else  
                     if(c(i).eq.3)then ! obs 0-->1
-			call fonct(t1(i),the01,ri01,gl01,su01)
-                        call fonct(t1(i),the02,ri02,gl02,su02)
-                        call fonct(t1(i),the12,ri12,gl12,su12)
+			call fonct(t1(i),the01,ri01,gl01,su01,weib)
+                        call fonct(t1(i),the02,ri02,gl02,su02,weib)
+                        call fonct(t1(i),the12,ri12,gl12,su12,weib)
                         res1 = -(gl01*vet01)-(gl02*vet02)+&
                         dlog(ri01*vet01)+(gl12*vet12)
-                        call fonct(t3(i),the12,ri12,gl12,su12)
+                        call fonct(t3(i),the12,ri12,gl12,su12,weib)
                         res1 = res1 -(gl12*vet12)
                     else   
                        if(c(i).eq.4)then ! cpi 0-->1 et obs 1-->2
-			call fonct(t3(i),the12,ri12,gl12,su12)
+			call fonct(t3(i),the12,ri12,gl12,su12,weib)
                         call  qgaussPL51weib(t1(i),t2(i),the01,the02,the12,&
-                        res2,vet01,vet02,vet12)
+                        res2,vet01,vet02,vet12,weib)
                         res1=dlog(res2*(su12**vet12)*ri12*vet12)
                        else
                          if(c(i).eq.5)then ! obs 0-->1 et obs 1-->2
-				call fonct(t1(i),the01,ri01,gl01,su01)
-                                call fonct(t1(i),the02,ri02,gl02,su02)
-                                call fonct(t1(i),the12,ri12,gl12,su12)
+				call fonct(t1(i),the01,ri01,gl01,su01,weib)
+                                call fonct(t1(i),the02,ri02,gl02,su02,weib)
+                                call fonct(t1(i),the12,ri12,gl12,su12,weib)
                                 res1 = -(gl01*vet01)-(gl02*vet02)+&
                                 dlog(ri01*vet01)+(gl12*vet12)
-                                call fonct(t3(i),the12,ri12,gl12,su12)
+                                call fonct(t3(i),the12,ri12,gl12,su12,weib)
                                 res1 = res1 -(gl12*vet12) + dlog(ri12*vet12)
                          else
                             if(c(i).eq.6)then ! vivant ???
-				 call fonct(t3(i),the01,ri01,gl01,su01)
-                                call fonct(t3(i),the02,ri02,gl02,su02)
-                                call fonct(t3(i),the12,ri12,gl12,su12)
+				 call fonct(t3(i),the01,ri01,gl01,su01,weib)
+                                call fonct(t3(i),the02,ri02,gl02,su02,weib)
+                                call fonct(t3(i),the12,ri12,gl12,su12,weib)
                                 call  qgaussPL51weib(t1(i),t3(i),the01,the02,&
-                                the12,res2,vet01,vet02,vet12)
+                                the12,res2,vet01,vet02,vet12,weib)
                                 res1 = (res2*(su12**vet12))+&
                                 ((su01**vet01)*(su02**vet02))
                                 res1 = dlog(res1)
 
                             else ! passage 0-->2  
 
-				call fonct(t3(i),the01,ri01,gl01,su01)
-                                call fonct(t3(i),the02,ri02,gl02,su02)
-                                call fonct(t3(i),the12,ri12,gl12,su12)
+				call fonct(t3(i),the01,ri01,gl01,su01,weib)
+                                call fonct(t3(i),the02,ri02,gl02,su02,weib)
+                                call fonct(t3(i),the12,ri12,gl12,su12,weib)
                                 call  qgaussPL51weib(t1(i),t3(i),the01,the02,&
-                                the12,res2,vet01,vet02,vet12)
+                                the12,res2,vet01,vet02,vet12,weib)
                                 res1 = (res2*(su12**vet12)*ri12*vet12)+&
                                 ((su01**vet01)*(su02**vet02)*ri02*vet02)
                                 res1 = dlog(res1)
@@ -1928,8 +1928,8 @@ else
                         if(t0(i).eq.0.d0)then
                                 tronc = 0.d0
                         else 
-                                call fonct(t0(i),the01,ri01,gl01,su01) 
-                                call fonct(t0(i),the02,ri02,gl02,su02) 
+                                call fonct(t0(i),the01,ri01,gl01,su01,weib) 
+                                call fonct(t0(i),the02,ri02,gl02,su02,weib) 
                                 tronc=(gl01*vet01)+(gl02*vet02)
                         end if
                 else
@@ -1939,58 +1939,58 @@ else
 		
                 if(c(i).eq.1)then ! cad 0-->1 et 0-->2
 
-			call fonct(t1(i),the01,ri01,gl01,su01)
-                        call fonct(t3(i),the02,ri02,gl02,su02)
+			call fonct(t1(i),the01,ri01,gl01,su01,weib)
+                        call fonct(t3(i),the02,ri02,gl02,su02,weib)
                         res1 = -(gl01*vet01)-(gl02*vet02)
                 else
                 if(c(i).eq.2)then ! cpi 0-->1
-			call fonct(t3(i),the12,ri12,gl12,su12)
+			call fonct(t3(i),the12,ri12,gl12,su12,weib)
                          call  qgaussPL61weib(t1(i),t2(i),the01,the02,&
-                         the12,res2,vet01,vet02,vet12)
+                         the12,res2,vet01,vet02,vet12,weib)
                         res1=dlog(res2*(su12**vet12))
 
                 else  
                     if(c(i).eq.3)then ! obs 0-->1
-			call fonct(t1(i),the01,ri01,gl01,su01)
-                        call fonct(t1(i),the02,ri02,gl02,su02)
-                        call fonct(t1(i),the12,ri12,gl12,su12)
+			call fonct(t1(i),the01,ri01,gl01,su01,weib)
+                        call fonct(t1(i),the02,ri02,gl02,su02,weib)
+                        call fonct(t1(i),the12,ri12,gl12,su12,weib)
                         res1 = -(gl01*vet01)-(gl02*vet02)+&
                         dlog(ri01*vet01)+(gl12*vet12)
-                        call fonct(t3(i),the12,ri12,gl12,su12)
+                        call fonct(t3(i),the12,ri12,gl12,su12,weib)
                         res1 = res1 -(gl12*vet12)
                     else   
                        if(c(i).eq.4)then ! cpi 0-->1 et obs 1-->2
-			call fonct(t3(i),the12,ri12,gl12,su12)
+			call fonct(t3(i),the12,ri12,gl12,su12,weib)
                         call  qgaussPL61weib(t1(i),t2(i),the01,the02,the12,&
-                        res2,vet01,vet02,vet12)
+                        res2,vet01,vet02,vet12,weib)
                         res1=dlog(res2*(su12**vet12)*ri12*vet12)
                        else
                          if(c(i).eq.5)then ! obs 0-->1 et obs 1-->2
-				call fonct(t1(i),the01,ri01,gl01,su01)
-                                call fonct(t1(i),the02,ri02,gl02,su02)
-                                call fonct(t1(i),the12,ri12,gl12,su12)
+				call fonct(t1(i),the01,ri01,gl01,su01,weib)
+                                call fonct(t1(i),the02,ri02,gl02,su02,weib)
+                                call fonct(t1(i),the12,ri12,gl12,su12,weib)
                                 res1 = -(gl01*vet01)-(gl02*vet02)+&
                                 dlog(ri01*vet01)+(gl12*vet12)
-                                call fonct(t3(i),the12,ri12,gl12,su12)
+                                call fonct(t3(i),the12,ri12,gl12,su12,weib)
                                 res1 = res1 -(gl12*vet12) + dlog(ri12*vet12)
                          else
                             if(c(i).eq.6)then ! vivant ???
-				 call fonct(t3(i),the01,ri01,gl01,su01)
-                                call fonct(t3(i),the02,ri02,gl02,su02)
-                                call fonct(t3(i),the12,ri12,gl12,su12)
+				 call fonct(t3(i),the01,ri01,gl01,su01,weib)
+                                call fonct(t3(i),the02,ri02,gl02,su02,weib)
+                                call fonct(t3(i),the12,ri12,gl12,su12,weib)
                                 call  qgaussPL61weib(t1(i),t3(i),the01,the02,&
-                                the12,res2,vet01,vet02,vet12)
+                                the12,res2,vet01,vet02,vet12,weib)
                                 res1 = (res2*(su12**vet12))+&
                                 ((su01**vet01)*(su02**vet02))
                                 res1 = dlog(res1)
 
                             else ! passage 0-->2  
 
-				call fonct(t3(i),the01,ri01,gl01,su01)
-                                call fonct(t3(i),the02,ri02,gl02,su02)
-                                call fonct(t3(i),the12,ri12,gl12,su12)
+				call fonct(t3(i),the01,ri01,gl01,su01,weib)
+                                call fonct(t3(i),the02,ri02,gl02,su02,weib)
+                                call fonct(t3(i),the12,ri12,gl12,su12,weib)
                                 call  qgaussPL61weib(t1(i),t3(i),the01,the02,&
-                                the12,res2,vet01,vet02,vet12)
+                                the12,res2,vet01,vet02,vet12,weib)
                                 res1 = (res2*(su12**vet12)*ri12*vet12)+&
                                 ((su01**vet01)*(su02**vet02)*ri02*vet02)
                                 res1 = dlog(res1)
@@ -2107,16 +2107,23 @@ else
 !======================= calculate weibull distribution  =====================================
 !============================================================================================= 
 
-subroutine fonct(x,p,risq,glam,surv)
+subroutine fonct(x,p,risq,glam,surv,weib)
 
         implicit none
 
         double precision,dimension(2)::p
         double precision::x,surv,risq,glam
+	integer::weib
 
-        surv = dexp(-(p(2)*x)**p(1)) !exponential of - integral over 0 to x of base risk
-        glam = (p(2)*x)**p(1) !integral over 0 to x of base risk
-        risq = p(1)*(p(2)**p(1))*(x**(p(1)-1.d0)) ! base risk 
+	if((weib.eq.1).OR.(weib.eq.2)) then
+        	surv = dexp(-(p(2)*x)**p(1)) !exponential of - integral over 0 to x of base risk
+        	glam = (p(2)*x)**p(1) !integral over 0 to x of base risk
+        	risq = p(1)*(p(2)**p(1))*(x**(p(1)-1.d0)) ! base risk 
+	else 
+		surv = dexp(-(x/p(2))**p(1)) !exponential of - integral over 0 to x of base risk
+        	glam = (x/p(2))**p(1) !integral over 0 to x of base risk
+        	risq = p(1)*((1/p(2))**p(1))*(x**(p(1)-1.d0)) ! base risk 
+	endif
 
         if (x.le.0.d0) then
                 surv = 1.d0
@@ -2132,13 +2139,13 @@ end subroutine fonct
 !================================   QGAUS for weib : CHEBYCHEV   =============================
 !============================================================================================= 
 
-subroutine qgaussPLweib(a,b,the01,the02,the12,res,v01,v02,v12)
+subroutine qgaussPLweib(a,b,the01,the02,the12,res,v01,v02,v12,weib)
         implicit none
          double precision a,b,the01(2),the02(2),the12(2)
          double precision dx,xm,xr,w(5),x(5),res,v01,v02,v12
          double precision xx,f1,su01,ri01,ri12,f2,su12,su02,ri02
          double precision gl01,gl12,gl02
-         integer j
+         integer j,weib
          save w,x
          data w/0.2955242247d0,0.2692667193d0,0.2190863625d0,0.1494513491d0,0.0666713443d0/
          data x/0.1488743389d0,0.4333953941d0,0.6794095682d0,0.8650633666d0,0.9739065285d0/
@@ -2153,14 +2160,14 @@ subroutine qgaussPLweib(a,b,the01,the02,the12,res,v01,v02,v12)
                do 11 j=1,5
                   dx=xr*x(j)
                   xx = xm+dx
-                  call fonct(xx,the01,ri01,gl01,su01)
-                  call fonct(xx,the02,ri02,gl02,su02)
-                  call fonct(xx,the12,ri12,gl12,su12)
+                  call fonct(xx,the01,ri01,gl01,su01,weib)
+                  call fonct(xx,the02,ri02,gl02,su02,weib)
+                  call fonct(xx,the12,ri12,gl12,su12,weib)
                   f1 = (su01**v01)*(su02**v02)*ri01*v01/(su12**v12)
                   xx = xm-dx
-                  call fonct(xx,the01,ri01,gl01,su01)
-                  call fonct(xx,the02,ri02,gl02,su02)
-                  call fonct(xx,the12,ri12,gl12,su12)
+                  call fonct(xx,the01,ri01,gl01,su01,weib)
+                  call fonct(xx,the02,ri02,gl02,su02,weib)
+                  call fonct(xx,the12,ri12,gl12,su12,weib)
                   f2 = ((su01**v01)*(su02**v02)*ri01*v01)/(su12**v12)
                   res = res + w(j)*(f1+f2)
  11            continue
@@ -2218,10 +2225,10 @@ subroutine qgaussPLweib(a,b,the01,the02,the12,res,v01,v02,v12)
 !=============================================================================================  
 !==== QGAUS15 out a 15 point Gauss-Kronrod quadrature rule for weib  =========================
 !=============================================================================================  
-subroutine qgaussPL15weib(a,b,the01,the02,the12,res,v01,v02,v12)
+subroutine qgaussPL15weib(a,b,the01,the02,the12,res,v01,v02,v12,weib)
          implicit none
          
-         integer::j,jtw,jtwm1
+         integer::j,jtw,jtwm1,weib
          double precision::a,b,dx,xm,xr,res,resabs,resk,reskh,resasc,resg,v01,v02,v12,&
          fv1,fv2,d1mach(5),epmach,uflow,the01(2),the12(2),the02(2)
          double precision,dimension(8)::xgk,wgk
@@ -2265,9 +2272,9 @@ subroutine qgaussPL15weib(a,b,the01,the02,the12,res,v01,v02,v12)
 
         xm = 0.5d+00*(b+a)
         xr = 0.5d+00*(b-a)
-        call fonct(xm,the01,ri01,gl01,su01)
-        call fonct(xm,the02,ri02,gl02,su02)
-        call fonct(xm,the12,ri12,gl12,su12)
+        call fonct(xm,the01,ri01,gl01,su01,weib)
+        call fonct(xm,the02,ri02,gl02,su02,weib)
+        call fonct(xm,the12,ri12,gl12,su12,weib)
         fc = (su01**v01)*(su02**v02)*ri01*v01/(su12**v12)  ! valeur fct f au milieu de intervalle (a,b), cas pnt 0
 
     	resg = fc*wg(4)        ! init res Gauss  ! fc * 4e poids Gauss
@@ -2280,14 +2287,14 @@ subroutine qgaussPL15weib(a,b,the01,the02,the12,res,v01,v02,v12)
                do j=1,3
                	dx=xr*xgk(jtw)
                	xx = xm+dx
-               	call fonct(xx,the01,ri01,gl01,su01)
-               	call fonct(xx,the02,ri02,gl02,su02)
-               	call fonct(xx,the12,ri12,gl12,su12)
+               	call fonct(xx,the01,ri01,gl01,su01,weib)
+               	call fonct(xx,the02,ri02,gl02,su02,weib)
+               	call fonct(xx,the12,ri12,gl12,su12,weib)
                	f1 = (su01**v01)*(su02**v02)*ri01*v01/(su12**v12)
                	xx = xm-dx
-               	call fonct(xx,the01,ri01,gl01,su01)
-               	call fonct(xx,the02,ri02,gl02,su02)
-               	call fonct(xx,the12,ri12,gl12,su12)
+               	call fonct(xx,the01,ri01,gl01,su01,weib)
+               	call fonct(xx,the02,ri02,gl02,su02,weib)
+               	call fonct(xx,the12,ri12,gl12,su12,weib)
                	f2 = (su01**v01)*(su02**v02)*ri01*v01/(su12**v12)
                	fv1(jtw) = f1   ! svgrd valeurs fct f a gche du centre
                	fv2(jtw) = f2   ! svgrd valeurs fct f a drte du centre
@@ -2299,14 +2306,14 @@ subroutine qgaussPL15weib(a,b,the01,the02,the12,res,v01,v02,v12)
 	       jtwm1 = j*2-1
                dx=xr*xgk(jtwm1)
                xx = xm+dx
-               call fonct(xx,the01,ri01,gl01,su01)
-               call fonct(xx,the02,ri02,gl02,su02)
-               call fonct(xx,the12,ri12,gl12,su12)
+               call fonct(xx,the01,ri01,gl01,su01,weib)
+               call fonct(xx,the02,ri02,gl02,su02,weib)
+               call fonct(xx,the12,ri12,gl12,su12,weib)
                f1 = (su01**v01)*(su02**v02)*ri01*v01/(su12**v12)
                xx = xm-dx
-               call fonct(xx,the01,ri01,gl01,su01)
-               call fonct(xx,the02,ri02,gl02,su02)
-               call fonct(xx,the12,ri12,gl12,su12)
+               call fonct(xx,the01,ri01,gl01,su01,weib)
+               call fonct(xx,the02,ri02,gl02,su02,weib)
+               call fonct(xx,the12,ri12,gl12,su12,weib)
                f2 = (su01**v01)*(su02**v02)*ri01*v01/(su12**v12)
                fv1(jtwm1) = f1   ! svgrd valeurs fct f a gche du centre
                fv2(jtwm1) = f2   ! svgrd valeurs fct f a drte du centre
@@ -2450,10 +2457,10 @@ subroutine qgaussPL15weib(a,b,the01,the02,the12,res,v01,v02,v12)
 !=====QGAUS21 out a 21 point Gauss-Kronrod quadrature rule for weib ==========================
 !=============================================================================================  
 
-subroutine qgaussPL21weib(a,b,the01,the02,the12,res,v01,v02,v12)
+subroutine qgaussPL21weib(a,b,the01,the02,the12,res,v01,v02,v12,weib)
          implicit none
          
-         integer::j,jtw,jtwm1
+         integer::j,jtw,jtwm1,weib
          double precision::a,b,dx,xm,xr,res,resabs,resk,reskh,resasc,resg,v01,v02,v12,&
          fv1,fv2,d1mach(5),epmach,uflow,the01(2),the12(2),the02(2)
          double precision,dimension(11)::xgk,wgk
@@ -2503,9 +2510,9 @@ subroutine qgaussPL21weib(a,b,the01,the02,the12,res,v01,v02,v12)
 
         xm = 0.5d+00*(b+a)
         xr = 0.5d+00*(b-a)
-        call fonct(xm,the01,ri01,gl01,su01)
-        call fonct(xm,the02,ri02,gl02,su02)
-        call fonct(xm,the12,ri12,gl12,su12)
+        call fonct(xm,the01,ri01,gl01,su01,weib)
+        call fonct(xm,the02,ri02,gl02,su02,weib)
+        call fonct(xm,the12,ri12,gl12,su12,weib)
         fc = (su01**v01)*(su02**v02)*ri01*v01/(su12**v12)  ! valeur fct f au milieu de intervalle (a,b), cas pnt 0
 
     	resg = 0        ! init 0
@@ -2519,14 +2526,14 @@ subroutine qgaussPL21weib(a,b,the01,the02,the12,res,v01,v02,v12)
                	jtw = j*2
                	dx=xr*xgk(jtw)
                	xx = xm+dx
-               	call fonct(xx,the01,ri01,gl01,su01)
-               	call fonct(xx,the02,ri02,gl02,su02)
-               	call fonct(xx,the12,ri12,gl12,su12)
+               	call fonct(xx,the01,ri01,gl01,su01,weib)
+               	call fonct(xx,the02,ri02,gl02,su02,weib)
+               	call fonct(xx,the12,ri12,gl12,su12,weib)
                	f1 = (su01**v01)*(su02**v02)*ri01*v01/(su12**v12)
                	xx = xm-dx
-               	call fonct(xx,the01,ri01,gl01,su01)
-               	call fonct(xx,the02,ri02,gl02,su02)
-               	call fonct(xx,the12,ri12,gl12,su12)
+               	call fonct(xx,the01,ri01,gl01,su01,weib)
+               	call fonct(xx,the02,ri02,gl02,su02,weib)
+               	call fonct(xx,the12,ri12,gl12,su12,weib)
                	f2 = (su01**v01)*(su02**v02)*ri01*v01/(su12**v12)
                	fv1(jtw) = f1   ! svgrd valeurs fct f a gche du centre
                	fv2(jtw) = f2   ! svgrd valeurs fct f a drte du centre
@@ -2538,14 +2545,14 @@ subroutine qgaussPL21weib(a,b,the01,the02,the12,res,v01,v02,v12)
 	       jtwm1 = j*2-1
                dx=xr*xgk(jtwm1)
                xx = xm+dx
-               call fonct(xx,the01,ri01,gl01,su01)
-               call fonct(xx,the02,ri02,gl02,su02)
-               call fonct(xx,the12,ri12,gl12,su12)
+               call fonct(xx,the01,ri01,gl01,su01,weib)
+               call fonct(xx,the02,ri02,gl02,su02,weib)
+               call fonct(xx,the12,ri12,gl12,su12,weib)
                f1 = (su01**v01)*(su02**v02)*ri01*v01/(su12**v12)
                xx = xm-dx
-               call fonct(xx,the01,ri01,gl01,su01)
-               call fonct(xx,the02,ri02,gl02,su02)
-               call fonct(xx,the12,ri12,gl12,su12)
+               call fonct(xx,the01,ri01,gl01,su01,weib)
+               call fonct(xx,the02,ri02,gl02,su02,weib)
+               call fonct(xx,the12,ri12,gl12,su12,weib)
                f2 = (su01**v01)*(su02**v02)*ri01*v01/(su12**v12)
                fv1(jtwm1) = f1   ! svgrd valeurs fct f a gche du centre
                fv2(jtwm1) = f2   ! svgrd valeurs fct f a drte du centre
@@ -2697,10 +2704,10 @@ subroutine qgaussPL21weib(a,b,the01,the02,the12,res,v01,v02,v12)
 !=============================================================================================  
 
 
-subroutine qgaussPL31weib(a,b,the01,the02,the12,res,v01,v02,v12)
+subroutine qgaussPL31weib(a,b,the01,the02,the12,res,v01,v02,v12,weib)
          implicit none
          
-         integer::j,jtw,jtwm1
+         integer::j,jtw,jtwm1,weib
          double precision::a,b,dx,xm,xr,res,resabs,resk,reskh,resasc,resg,v01,v02,v12,&
          fv1,fv2,d1mach(5),epmach,uflow,the01(2),the12(2),the02(2)
          double precision,dimension(16)::xgk,wgk
@@ -2764,9 +2771,9 @@ subroutine qgaussPL31weib(a,b,the01,the02,the12,res,v01,v02,v12)
 
         xm = 0.5d+00*(b+a)
         xr = 0.5d+00*(b-a)
-        call fonct(xm,the01,ri01,gl01,su01)
-        call fonct(xm,the02,ri02,gl02,su02)
-        call fonct(xm,the12,ri12,gl12,su12)
+        call fonct(xm,the01,ri01,gl01,su01,weib)
+        call fonct(xm,the02,ri02,gl02,su02,weib)
+        call fonct(xm,the12,ri12,gl12,su12,weib)
         fc = (su01**v01)*(su02**v02)*ri01*v01/(su12**v12)  ! valeur fct f au milieu de intervalle (a,b), cas pnt 0
 
     	resg = wg(8)*fc        ! init at wg(8)
@@ -2780,14 +2787,14 @@ subroutine qgaussPL31weib(a,b,the01,the02,the12,res,v01,v02,v12)
                	jtw = j*2
                	dx=xr*xgk(jtw)
                	xx = xm+dx
-               	call fonct(xx,the01,ri01,gl01,su01)
-               	call fonct(xx,the02,ri02,gl02,su02)
-               	call fonct(xx,the12,ri12,gl12,su12)
+               	call fonct(xx,the01,ri01,gl01,su01,weib)
+               	call fonct(xx,the02,ri02,gl02,su02,weib)
+               	call fonct(xx,the12,ri12,gl12,su12,weib)
                	f1 = (su01**v01)*(su02**v02)*ri01*v01/(su12**v12)
                	xx = xm-dx
-               	call fonct(xx,the01,ri01,gl01,su01)
-               	call fonct(xx,the02,ri02,gl02,su02)
-               	call fonct(xx,the12,ri12,gl12,su12)
+               	call fonct(xx,the01,ri01,gl01,su01,weib)
+               	call fonct(xx,the02,ri02,gl02,su02,weib)
+               	call fonct(xx,the12,ri12,gl12,su12,weib)
                	f2 = (su01**v01)*(su02**v02)*ri01*v01/(su12**v12)
                	fv1(jtw) = f1   ! svgrd valeurs fct f a gche du centre
                	fv2(jtw) = f2   ! svgrd valeurs fct f a drte du centre
@@ -2799,14 +2806,14 @@ subroutine qgaussPL31weib(a,b,the01,the02,the12,res,v01,v02,v12)
 	       jtwm1 = j*2-1
                dx=xr*xgk(jtwm1)
                xx = xm+dx
-               call fonct(xx,the01,ri01,gl01,su01)
-               call fonct(xx,the02,ri02,gl02,su02)
-               call fonct(xx,the12,ri12,gl12,su12)
+               call fonct(xx,the01,ri01,gl01,su01,weib)
+               call fonct(xx,the02,ri02,gl02,su02,weib)
+               call fonct(xx,the12,ri12,gl12,su12,weib)
                f1 = (su01**v01)*(su02**v02)*ri01*v01/(su12**v12)
                xx = xm-dx
-               call fonct(xx,the01,ri01,gl01,su01)
-               call fonct(xx,the02,ri02,gl02,su02)
-               call fonct(xx,the12,ri12,gl12,su12)
+               call fonct(xx,the01,ri01,gl01,su01,weib)
+               call fonct(xx,the02,ri02,gl02,su02,weib)
+               call fonct(xx,the12,ri12,gl12,su12,weib)
                f2 = (su01**v01)*(su02**v02)*ri01*v01/(su12**v12)
                fv1(jtwm1) = f1   ! svgrd valeurs fct f a gche du centre
                fv2(jtwm1) = f2   ! svgrd valeurs fct f a drte du centre
@@ -2971,10 +2978,10 @@ subroutine qgaussPL31weib(a,b,the01,the02,the12,res,v01,v02,v12)
 !=====QGAUS41 out a 41 point Gauss-Kronrod quadrature rule for weib ==========================
 !=============================================================================================  
 
-subroutine qgaussPL41weib(a,b,the01,the02,the12,res,v01,v02,v12)
+subroutine qgaussPL41weib(a,b,the01,the02,the12,res,v01,v02,v12,weib)
          implicit none
          
-         integer::j,jtw,jtwm1
+         integer::j,jtw,jtwm1,weib
          double precision::a,b,dx,xm,xr,res,resabs,resk,reskh,resasc,resg,v01,v02,v12,&
          fv1,fv2,d1mach(5),epmach,uflow,the01(2),the12(2),the02(2)
          double precision,dimension(21)::xgk,wgk
@@ -3051,9 +3058,9 @@ subroutine qgaussPL41weib(a,b,the01,the02,the12,res,v01,v02,v12)
 
         xm = 0.5d+00*(b+a)
         xr = 0.5d+00*(b-a)
-        call fonct(xm,the01,ri01,gl01,su01)
-        call fonct(xm,the02,ri02,gl02,su02)
-        call fonct(xm,the12,ri12,gl12,su12)
+        call fonct(xm,the01,ri01,gl01,su01,weib)
+        call fonct(xm,the02,ri02,gl02,su02,weib)
+        call fonct(xm,the12,ri12,gl12,su12,weib)
         fc = (su01**v01)*(su02**v02)*ri01*v01/(su12**v12)  ! valeur fct f au milieu de intervalle (a,b), cas pnt 0
 
     	resg = 0        ! init at wg(8)
@@ -3067,14 +3074,14 @@ subroutine qgaussPL41weib(a,b,the01,the02,the12,res,v01,v02,v12)
                	jtw = j*2
                	dx=xr*xgk(jtw)
                	xx = xm+dx
-               	call fonct(xx,the01,ri01,gl01,su01)
-               	call fonct(xx,the02,ri02,gl02,su02)
-               	call fonct(xx,the12,ri12,gl12,su12)
+               	call fonct(xx,the01,ri01,gl01,su01,weib)
+               	call fonct(xx,the02,ri02,gl02,su02,weib)
+               	call fonct(xx,the12,ri12,gl12,su12,weib)
                	f1 = (su01**v01)*(su02**v02)*ri01*v01/(su12**v12)
                	xx = xm-dx
-               	call fonct(xx,the01,ri01,gl01,su01)
-               	call fonct(xx,the02,ri02,gl02,su02)
-               	call fonct(xx,the12,ri12,gl12,su12)
+               	call fonct(xx,the01,ri01,gl01,su01,weib)
+               	call fonct(xx,the02,ri02,gl02,su02,weib)
+               	call fonct(xx,the12,ri12,gl12,su12,weib)
                	f2 = (su01**v01)*(su02**v02)*ri01*v01/(su12**v12)
                	fv1(jtw) = f1   ! svgrd valeurs fct f a gche du centre
                	fv2(jtw) = f2   ! svgrd valeurs fct f a drte du centre
@@ -3086,14 +3093,14 @@ subroutine qgaussPL41weib(a,b,the01,the02,the12,res,v01,v02,v12)
 	       jtwm1 = j*2-1
                dx=xr*xgk(jtwm1)
                xx = xm+dx
-               call fonct(xx,the01,ri01,gl01,su01)
-               call fonct(xx,the02,ri02,gl02,su02)
-               call fonct(xx,the12,ri12,gl12,su12)
+               call fonct(xx,the01,ri01,gl01,su01,weib)
+               call fonct(xx,the02,ri02,gl02,su02,weib)
+               call fonct(xx,the12,ri12,gl12,su12,weib)
                f1 = (su01**v01)*(su02**v02)*ri01*v01/(su12**v12)
                xx = xm-dx
-               call fonct(xx,the01,ri01,gl01,su01)
-               call fonct(xx,the02,ri02,gl02,su02)
-               call fonct(xx,the12,ri12,gl12,su12)
+               call fonct(xx,the01,ri01,gl01,su01,weib)
+               call fonct(xx,the02,ri02,gl02,su02,weib)
+               call fonct(xx,the12,ri12,gl12,su12,weib)
                f2 = (su01**v01)*(su02**v02)*ri01*v01/(su12**v12)
                fv1(jtwm1) = f1   ! svgrd valeurs fct f a gche du centre
                fv2(jtwm1) = f2   ! svgrd valeurs fct f a drte du centre
@@ -3270,10 +3277,10 @@ subroutine qgaussPL41weib(a,b,the01,the02,the12,res,v01,v02,v12)
 !=============================================================================================  
 
 
-subroutine qgaussPL51weib(a,b,the01,the02,the12,res,v01,v02,v12)
+subroutine qgaussPL51weib(a,b,the01,the02,the12,res,v01,v02,v12,weib)
          implicit none
          
-         integer::j,jtw,jtwm1
+         integer::j,jtw,jtwm1,weib
          double precision::a,b,dx,xm,xr,res,resabs,resk,reskh,resasc,resg,v01,v02,v12,&
          fv1,fv2,d1mach(5),epmach,uflow,the01(2),the12(2),the02(2)
          double precision,dimension(26)::xgk,wgk
@@ -3363,9 +3370,9 @@ subroutine qgaussPL51weib(a,b,the01,the02,the12,res,v01,v02,v12)
 
         xm = 0.5d+00*(b+a)
         xr = 0.5d+00*(b-a)
-        call fonct(xm,the01,ri01,gl01,su01)
-        call fonct(xm,the02,ri02,gl02,su02)
-        call fonct(xm,the12,ri12,gl12,su12)
+        call fonct(xm,the01,ri01,gl01,su01,weib)
+        call fonct(xm,the02,ri02,gl02,su02,weib)
+        call fonct(xm,the12,ri12,gl12,su12,weib)
         fc = (su01**v01)*(su02**v02)*ri01*v01/(su12**v12)  ! valeur fct f au milieu de intervalle (a,b), cas pnt 0
 
     	resg = fc*wgk(13)        ! init at wg(13)
@@ -3379,14 +3386,14 @@ subroutine qgaussPL51weib(a,b,the01,the02,the12,res,v01,v02,v12)
                	jtw = j*2
                	dx=xr*xgk(jtw)
                	xx = xm+dx
-               	call fonct(xx,the01,ri01,gl01,su01)
-               	call fonct(xx,the02,ri02,gl02,su02)
-               	call fonct(xx,the12,ri12,gl12,su12)
+               	call fonct(xx,the01,ri01,gl01,su01,weib)
+               	call fonct(xx,the02,ri02,gl02,su02,weib)
+               	call fonct(xx,the12,ri12,gl12,su12,weib)
                	f1 = (su01**v01)*(su02**v02)*ri01*v01/(su12**v12)
                	xx = xm-dx
-               	call fonct(xx,the01,ri01,gl01,su01)
-               	call fonct(xx,the02,ri02,gl02,su02)
-               	call fonct(xx,the12,ri12,gl12,su12)
+               	call fonct(xx,the01,ri01,gl01,su01,weib)
+               	call fonct(xx,the02,ri02,gl02,su02,weib)
+               	call fonct(xx,the12,ri12,gl12,su12,weib)
                	f2 = (su01**v01)*(su02**v02)*ri01*v01/(su12**v12)
                	fv1(jtw) = f1   ! svgrd valeurs fct f a gche du centre
                	fv2(jtw) = f2   ! svgrd valeurs fct f a drte du centre
@@ -3398,14 +3405,14 @@ subroutine qgaussPL51weib(a,b,the01,the02,the12,res,v01,v02,v12)
 	       jtwm1 = j*2-1
                dx=xr*xgk(jtwm1)
                xx = xm+dx
-               call fonct(xx,the01,ri01,gl01,su01)
-               call fonct(xx,the02,ri02,gl02,su02)
-               call fonct(xx,the12,ri12,gl12,su12)
+               call fonct(xx,the01,ri01,gl01,su01,weib)
+               call fonct(xx,the02,ri02,gl02,su02,weib)
+               call fonct(xx,the12,ri12,gl12,su12,weib)
                f1 = (su01**v01)*(su02**v02)*ri01*v01/(su12**v12)
                xx = xm-dx
-               call fonct(xx,the01,ri01,gl01,su01)
-               call fonct(xx,the02,ri02,gl02,su02)
-               call fonct(xx,the12,ri12,gl12,su12)
+               call fonct(xx,the01,ri01,gl01,su01,weib)
+               call fonct(xx,the02,ri02,gl02,su02,weib)
+               call fonct(xx,the12,ri12,gl12,su12,weib)
                f2 = (su01**v01)*(su02**v02)*ri01*v01/(su12**v12)
                fv1(jtwm1) = f1   ! svgrd valeurs fct f a gche du centre
                fv2(jtwm1) = f2   ! svgrd valeurs fct f a drte du centre
@@ -3597,10 +3604,10 @@ subroutine qgaussPL51weib(a,b,the01,the02,the12,res,v01,v02,v12)
 !=============================================================================================  
 
 
-subroutine qgaussPL61weib(a,b,the01,the02,the12,res,v01,v02,v12)
+subroutine qgaussPL61weib(a,b,the01,the02,the12,res,v01,v02,v12,weib)
          implicit none
          
-         integer::j,jtw,jtwm1
+         integer::j,jtw,jtwm1,weib
          double precision::a,b,dx,xm,xr,res,resabs,resk,reskh,resasc,resg,v01,v02,v12,&
          fv1,fv2,d1mach(5),epmach,uflow,the01(2),the12(2),the02(2)
          double precision,dimension(31)::xgk,wgk
@@ -3702,9 +3709,9 @@ subroutine qgaussPL61weib(a,b,the01,the02,the12,res,v01,v02,v12)
 
         xm = 0.5d+00*(b+a)
         xr = 0.5d+00*(b-a)
-        call fonct(xm,the01,ri01,gl01,su01)
-        call fonct(xm,the02,ri02,gl02,su02)
-        call fonct(xm,the12,ri12,gl12,su12)
+        call fonct(xm,the01,ri01,gl01,su01,weib)
+        call fonct(xm,the02,ri02,gl02,su02,weib)
+        call fonct(xm,the12,ri12,gl12,su12,weib)
         fc = (su01**v01)*(su02**v02)*ri01*v01/(su12**v12)  ! valeur fct f au milieu de intervalle (a,b), cas pnt 0
 
     	resg = 0       ! init at 0
@@ -3718,14 +3725,14 @@ subroutine qgaussPL61weib(a,b,the01,the02,the12,res,v01,v02,v12)
                	jtw = j*2
                	dx=xr*xgk(jtw)
                	xx = xm+dx
-               	call fonct(xx,the01,ri01,gl01,su01)
-               	call fonct(xx,the02,ri02,gl02,su02)
-               	call fonct(xx,the12,ri12,gl12,su12)
+               	call fonct(xx,the01,ri01,gl01,su01,weib)
+               	call fonct(xx,the02,ri02,gl02,su02,weib)
+               	call fonct(xx,the12,ri12,gl12,su12,weib)
                	f1 = (su01**v01)*(su02**v02)*ri01*v01/(su12**v12)
                	xx = xm-dx
-               	call fonct(xx,the01,ri01,gl01,su01)
-               	call fonct(xx,the02,ri02,gl02,su02)
-               	call fonct(xx,the12,ri12,gl12,su12)
+               	call fonct(xx,the01,ri01,gl01,su01,weib)
+               	call fonct(xx,the02,ri02,gl02,su02,weib)
+               	call fonct(xx,the12,ri12,gl12,su12,weib)
                	f2 = (su01**v01)*(su02**v02)*ri01*v01/(su12**v12)
                	fv1(jtw) = f1   ! svgrd valeurs fct f a gche du centre
                	fv2(jtw) = f2   ! svgrd valeurs fct f a drte du centre
@@ -3737,14 +3744,14 @@ subroutine qgaussPL61weib(a,b,the01,the02,the12,res,v01,v02,v12)
 	       jtwm1 = j*2-1
                dx=xr*xgk(jtwm1)
                xx = xm+dx
-               call fonct(xx,the01,ri01,gl01,su01)
-               call fonct(xx,the02,ri02,gl02,su02)
-               call fonct(xx,the12,ri12,gl12,su12)
+               call fonct(xx,the01,ri01,gl01,su01,weib)
+               call fonct(xx,the02,ri02,gl02,su02,weib)
+               call fonct(xx,the12,ri12,gl12,su12,weib)
                f1 = (su01**v01)*(su02**v02)*ri01*v01/(su12**v12)
                xx = xm-dx
-               call fonct(xx,the01,ri01,gl01,su01)
-               call fonct(xx,the02,ri02,gl02,su02)
-               call fonct(xx,the12,ri12,gl12,su12)
+               call fonct(xx,the01,ri01,gl01,su01,weib)
+               call fonct(xx,the02,ri02,gl02,su02,weib)
+               call fonct(xx,the12,ri12,gl12,su12,weib)
                f2 = (su01**v01)*(su02**v02)*ri01*v01/(su12**v12)
                fv1(jtwm1) = f1   ! svgrd valeurs fct f a gche du centre
                fv2(jtwm1) = f2   ! svgrd valeurs fct f a drte du centre
@@ -3951,7 +3958,7 @@ subroutine qgaussPL61weib(a,b,the01,the02,the12,res,v01,v02,v12)
 
 subroutine qgaussweibderiv(a,b,the01,the02,the12,resdenum,&
 res01num,res02num,res12num,res0101num,res0102num,res0112num,&
-res0202num,res0212num,res1212num,v01,v02,v12)
+res0202num,res0212num,res1212num,v01,v02,v12,weib)
 
         implicit none
          double precision a,b,the01(2),the02(2),the12(2)
@@ -3980,7 +3987,7 @@ res0202num,res0212num,res1212num,v01,v02,v12)
 	fc0101num,fc0102num,fc0112num,fc0202num,fc0212num,fc1212num
 
          double precision gl01,gl12,gl02
-         integer::j,jtw,jtwm1
+         integer::j,jtw,jtwm1,weib
          double precision,dimension(8)::xgk,wgk
 	 double precision,dimension(4)::wg
 	save wgk,xgk
@@ -4038,9 +4045,9 @@ res0202num,res0212num,res1212num,v01,v02,v12)
 	    res0212num = 0.d0
 	    res1212num = 0.d0
         
-    	    	call fonct(xm,the01,ri01,gl01,su01)
-    		call fonct(xm,the02,ri02,gl02,su02)
-   		call fonct(xm,the12,ri12,gl12,su12)
+    	    	call fonct(xm,the01,ri01,gl01,su01,weib)
+    		call fonct(xm,the02,ri02,gl02,su02,weib)
+   		call fonct(xm,the12,ri12,gl12,su12,weib)
     		fcdenum =(su01**v01)*(su02**v02)*ri01*v01/(su12**v12)  ! valeur fct f au milieu de intervalle (a,b), cas pnt 0
     		fc01num=(su01**v01)*(su02**v02)*ri01*v01*(1-(gl01*v01))/(su12**v12)
 		fc02num=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02/(su12**v12) 
@@ -4105,9 +4112,9 @@ res0202num,res0212num,res1212num,v01,v02,v12)
 	       		jtw = j*2
                		dx=xr*xgk(jtw)
                		xx = xm+dx
-               		call fonct(xx,the01,ri01,gl01,su01)
-               		call fonct(xx,the02,ri02,gl02,su02)
-	       		call fonct(xx,the12,ri12,gl12,su12)
+               		call fonct(xx,the01,ri01,gl01,su01,weib)
+               		call fonct(xx,the02,ri02,gl02,su02,weib)
+	       		call fonct(xx,the12,ri12,gl12,su12,weib)
                         f1denum =(su01**v01)*(su02**v02)*ri01*v01/(su12**v12)
 			f101num=(su01**v01)*(su02**v02)*ri01*v01*(1-(gl01*v01))/(su12**v12)
 			f102num=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02/(su12**v12) 
@@ -4123,9 +4130,9 @@ res0202num,res0212num,res1212num,v01,v02,v12)
 
 			
                		xx = xm-dx
-               		call fonct(xx,the01,ri01,gl01,su01)
-               		call fonct(xx,the02,ri02,gl02,su02)
-	       		call fonct(xx,the12,ri12,gl12,su12)
+               		call fonct(xx,the01,ri01,gl01,su01,weib)
+               		call fonct(xx,the02,ri02,gl02,su02,weib)
+	       		call fonct(xx,the12,ri12,gl12,su12,weib)
                         f2denum =(su01**v01)*(su02**v02)*ri01*v01/(su12**v12)
 			f201num=(su01**v01)*(su02**v02)*ri01*v01*(1-(gl01*v01))/(su12**v12)
 			f202num=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02/(su12**v12) 
@@ -4226,9 +4233,9 @@ res0202num,res0212num,res1212num,v01,v02,v12)
 			jtwm1 = j*2-1
                		dx=xr*xgk(jtwm1)
                		xx = xm+dx
-               		call fonct(xx,the01,ri01,gl01,su01)
-               		call fonct(xx,the02,ri02,gl02,su02)
-	       		call fonct(xx,the12,ri12,gl12,su12)
+               		call fonct(xx,the01,ri01,gl01,su01,weib)
+               		call fonct(xx,the02,ri02,gl02,su02,weib)
+	       		call fonct(xx,the12,ri12,gl12,su12,weib)
       			f1denum =(su01**v01)*(su02**v02)*ri01*v01/(su12**v12)
 			f101num=(su01**v01)*(su02**v02)*ri01*v01*(1-(gl01*v01))/(su12**v12)
 			f102num=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02/(su12**v12) 
@@ -4245,9 +4252,9 @@ res0202num,res0212num,res1212num,v01,v02,v12)
 
 
                		xx = xm-dx
-               		call fonct(xx,the01,ri01,gl01,su01)
-               		call fonct(xx,the02,ri02,gl02,su02)
-	       		call fonct(xx,the12,ri12,gl12,su12)
+               		call fonct(xx,the01,ri01,gl01,su01,weib)
+               		call fonct(xx,the02,ri02,gl02,su02,weib)
+	       		call fonct(xx,the12,ri12,gl12,su12,weib)
       			f2denum =(su01**v01)*(su02**v02)*ri01*v01/(su12**v12)
 			f201num=(su01**v01)*(su02**v02)*ri01*v01*(1-(gl01*v01))/(su12**v12)
 			f202num=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02/(su12**v12) 
@@ -5154,7 +5161,7 @@ subroutine derivaweib(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 	
 
 
-	if(weib.eq.1)then
+	if((weib.eq.1).OR.(weib.eq.3))then
          do i=1,2
             the01(i)=(bh(i))*(bh(i))
          end do
@@ -5227,8 +5234,8 @@ subroutine derivaweib(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
                         	tronc01square= 0
                         	tronc02square=0
                         else 
-				call fonct(t0(i),the01,ri01,gl01,su01)
-				call fonct(t0(i),the02,ri02,gl02,su02)
+				call fonct(t0(i),the01,ri01,gl01,su01,weib)
+				call fonct(t0(i),the02,ri02,gl02,su02,weib)
                                 tronc01=ve01nofix(i,:)*gl01*vet01
                         	tronc02=ve02nofix(i,:)*gl02*vet02
                         	tronc01square=ve01square(i,:)*gl01*vet01
@@ -5242,8 +5249,8 @@ subroutine derivaweib(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
                 end if
 		
                 if(c(i).eq.1)then ! cad 0-->1 et 0-->2
-			call fonct(t1(i),the01,ri01,gl01,su01)
-			call fonct(t1(i),the02,ri02,gl02,su02)
+			call fonct(t1(i),the01,ri01,gl01,su01,weib)
+			call fonct(t1(i),the02,ri02,gl02,su02,weib)
 
 			if(nva01nofix.gt.0) then 
 			
@@ -5285,13 +5292,13 @@ subroutine derivaweib(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
                 if(c(i).eq.2)then ! cpi 0-->1
 
 
-			call fonct(t3(i),the12,ri12,gl12,su12)
+			call fonct(t3(i),the12,ri12,gl12,su12,weib)
 			call qgaussweibderiv(t1(i),t2(i),the01,&
 			the02,the12,res2denum,res201num,&
 			res202num,res212num,res20101num,&
 			res20102num,res20112num,res20202num,&
 			res20212num,res21212num,&
-			vet01,vet02,vet12)
+			vet01,vet02,vet12,weib)
                         
 			v=res2denum*(su12**vet12)
 
@@ -5436,9 +5443,9 @@ subroutine derivaweib(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
                 else  
                     if(c(i).eq.3)then ! obs 0-->1
 
-			call fonct(t1(i),the01,ri01,gl01,su01)
-			call fonct(t1(i),the02,ri02,gl02,su02)
-			call fonct(t1(i),the12,ri12,gl12,su12)
+			call fonct(t1(i),the01,ri01,gl01,su01,weib)
+			call fonct(t1(i),the02,ri02,gl02,su02,weib)
+			call fonct(t1(i),the12,ri12,gl12,su12,weib)
 
 			if(nva01nofix.gt.0) then 
 
@@ -5497,12 +5504,12 @@ subroutine derivaweib(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
                     else   
                        if(c(i).eq.4)then ! cpi 0-->1 et obs 1-->2
 			
-			call fonct(t3(i),the12,ri12,gl12,su12)
+			call fonct(t3(i),the12,ri12,gl12,su12,weib)
 			call qgaussweibderiv(t1(i),t2(i),the01,the02,the12,&
 			res2denum,res201num,res202num,res212num,&
 			res20101num,res20102num,&
 			res20112num,res20202num,res20212num,&
-			res21212num,vet01,vet02,vet12)
+			res21212num,vet01,vet02,vet12,weib)
 
 			v=res2denum*(su12**vet12)*ri12*vet12
 
@@ -5650,9 +5657,9 @@ subroutine derivaweib(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
                        else
                          if(c(i).eq.5)then ! obs 0-->1 et obs 1-->2
 				
-				call fonct(t1(i),the01,ri01,gl01,su01)
-				call fonct(t1(i),the02,ri02,gl02,su02)
-				call fonct(t1(i),the12,ri12,gl12,su12)
+				call fonct(t1(i),the01,ri01,gl01,su01,weib)
+				call fonct(t1(i),the02,ri02,gl02,su02,weib)
+				call fonct(t1(i),the12,ri12,gl12,su12,weib)
 				
 				if(nva01nofix.gt.0) then 
 
@@ -5715,13 +5722,13 @@ subroutine derivaweib(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
                             if(c(i).eq.6)then ! vivant ???
 
 
-				call fonct(t3(i),the01,ri01,gl01,su01)
-				call fonct(t3(i),the02,ri02,gl02,su02)
-				call fonct(t3(i),the12,ri12,gl12,su12)
+				call fonct(t3(i),the01,ri01,gl01,su01,weib)
+				call fonct(t3(i),the02,ri02,gl02,su02,weib)
+				call fonct(t3(i),the12,ri12,gl12,su12,weib)
 				call qgaussweibderiv(t1(i),t3(i),the01,the02,the12,&
 				res2denum,res201num,res202num,res212num,res20101num,&
 				res20102num,res20112num,res20202num,res20212num,&
-				res21212num,vet01,vet02,vet12)
+				res21212num,vet01,vet02,vet12,weib)
 
 				
 				v=(su12**vet12)*res2denum+&
@@ -5881,14 +5888,14 @@ subroutine derivaweib(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 				
                             else ! passage 0-->2  
 				
-				call fonct(t3(i),the01,ri01,gl01,su01)
-				call fonct(t3(i),the02,ri02,gl02,su02)
-				call fonct(t3(i),the12,ri12,gl12,su12)
+				call fonct(t3(i),the01,ri01,gl01,su01,weib)
+				call fonct(t3(i),the02,ri02,gl02,su02,weib)
+				call fonct(t3(i),the12,ri12,gl12,su12,weib)
         			call qgaussweibderiv(t1(i),t3(i),the01,the02,&
         			the12,res2denum,res201num,res202num,res212num,&
         			res20101num,res20102num,&
 			  	res20112num,res20202num,res20212num,res21212num,&
-        			vet01,vet02,vet12)
+        			vet01,vet02,vet12,weib)
 				
 				
 				v=(su12**vet12)*ri12*vet12*res2denum+&

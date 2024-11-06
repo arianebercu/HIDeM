@@ -1082,8 +1082,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                    ite<-ite+1
                                    break
                                  }
-                                 # update beta 
-                                 browser()
+                                 # update beta
                                  output.cv<-cv.model(beta=beta,
                                                     nva01=npm01,
                                                     nva02=npm02,
@@ -1096,7 +1095,6 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                                      lambda=lambda[id.lambda,],
                                                      alpha=alpha
                                  )
-                                 browser()
                                  
                                  # verify validity of parameters update 
                                  # and that we are better than previous estimates 
@@ -1367,7 +1365,6 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                  
                                  
                                }
-                               browser()
                                if(maxiter<=ite & converged==F){
                                  istop<-2
                                }else{
