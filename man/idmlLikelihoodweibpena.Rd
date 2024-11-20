@@ -30,7 +30,8 @@ idmlLikelihoodweibpena(
   alpha,
   penalty.factor,
   penalty,
-  gausspoint
+  gausspoint,
+  weib
 )
 }
 \arguments{

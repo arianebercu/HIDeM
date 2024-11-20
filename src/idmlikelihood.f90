@@ -5485,7 +5485,7 @@ subroutine derivaweib(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 			res1((nva0102+1):nvamax)=gl12*vet12
 			res1((nvamax0212+1):nvamax12)=gl12*vet12
 
-			call fonct(t3(i),the12,ri12,gl12,su12)
+			call fonct(t3(i),the12,ri12,gl12,su12,weib)
 			res1((nva0102+1):nvamax)=&
 			res1((nva0102+1):nvamax)-gl12*vet12
 			res1((nva0102+1):nvamax)=&
@@ -5705,7 +5705,7 @@ subroutine derivaweib(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 				ve12nofix(i,:)*gl12*vet12+&
 				ve12nofix(i,:)
 
-				call fonct(t3(i),the12,ri12,gl12,su12)
+				call fonct(t3(i),the12,ri12,gl12,su12,weib)
 				res1((nva0102+1):nvamax)=&
 				res1((nva0102+1):nvamax)-ve12nofix(i,:)*gl12*vet12
 				res1((nvamax0212+1):nvamax12)=&

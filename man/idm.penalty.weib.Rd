@@ -41,7 +41,8 @@ idm.penalty.weib(
   alpha,
   penalty.factor,
   penalty,
-  gausspoint
+  gausspoint,
+  weib
 )
 }
 \arguments{

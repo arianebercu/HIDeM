@@ -631,7 +631,11 @@ idm <- function(formula01,
         # if(any(B[1:size_spline]<0)){stop(paste0("B need to be positive for spline parameters"))}
         if(length(B)!=(size_V)){stop(paste0("The length of the initialization must be : ",size_V))}
         b<-B}else{
+          if(weib%in%c(1,2)){
           b<-c(1,sqrt(sum(idm)/ts),1,sqrt(sum(idd)/ts),1,sqrt(sum(idd)/ts),rep(0,size_V-6))
+          }else{
+            b<-c(1,1/sqrt(sum(idm)/ts),1,1/sqrt(sum(idd)/ts),1,1/sqrt(sum(idd)/ts),rep(0,size_V-6))
+          }
         }
     }
     
@@ -1348,7 +1352,7 @@ idm <- function(formula01,
           ################################################################################
           
           if(method=="Weib"){
-            browser()
+            
               #	cat("------ Program Weibull ------ \n")
 ############### some initial steps to have values for weibull parameters #########
             output.mla<- marqLevAlg::mla(b=b[1:6],
@@ -1474,7 +1478,7 @@ idm <- function(formula01,
               lambda12<-lambda.max*((pace.lambda)^(c(1:nlambda12)/nlambda12))
             }
             }else{lambda12<-0.0001}
-            browser()
+            
               out <- idm.penalty.weib(b=b,
                                fix0=fix0,
                                size_V=size_V,
@@ -1512,7 +1516,8 @@ idm <- function(formula01,
                                penalty.factor=penalty.factor,
                                penalty=penalty,
                                gausspoint=gausspoint,
-                               weib=weib)
+                               weib=weib,
+                               methodCV=methodCV)
               
               
 ######################### Output ###############################################

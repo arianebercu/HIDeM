@@ -49,7 +49,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                    ve01,ve02,ve12,dimnva01,dimnva02,dimnva12,nvat01,nvat02,nvat12,
                    t0,t1,t2,t3,troncature,
                    nlambda01,lambda01,nlambda02,lambda02,nlambda12,lambda12,
-                   alpha,penalty.factor,penalty,gausspoint,weib){
+                   alpha,penalty.factor,penalty,gausspoint,weib,methodCV){
   
   
   # need to keep original fix to calculate for beta 
@@ -122,7 +122,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
   fix0.beta[(6+1):size_V]<-rep(1,size_V-6)
   
                 
-
+  if(methodCV=="mla"){
   
   if(nproc >1){
     
@@ -1478,9 +1478,109 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                            combine=combine))
                              }
   }
-  
-  
-  
+  }else{
+    beta<-beta.start[fix00[7:length(fix00)]==0]
+    b_positive<-pmax(beta,0)
+    b_negative<--pmin(beta,0)
+
+    if(!penalty%in%c("lasso","ridge","elasticnet")){
+      stop("To do L-BFGS penalty need to be either lasso, ridge or elasticnet")
+    }
+    par<-c(s.start[fix00[1:6]==0],b_positive,b_negative)
+    bfix<-c(s.start,beta.start)
+    bfix<-bfix[fix00==1]
+    browser()
+    
+    id.lambda<-NULL # for cran check 
+    npm<-sum(fix00==0)
+    
+    output<-foreach::foreach(id.lambda=1:nlambda,
+                             .combine = combine_lambda,
+                             .errorhandling = "remove")%do%{
+                               
+    res<-optim(par=par,
+          fn=idmlLikelihoodweiboptim,
+          method="L-BFGS",
+          control=list(maxit=maxiter,
+                       pgtol=epsb),
+          npm=npm,
+          lower=rep(0,sum(fix00[7:length(fix00)]==0)*2+sum(fix00[1:6]==0)),
+          npar=size_V,
+          bfix=bfix,
+          fix=fix00,
+          ctime=ctime,
+          no=N,
+          ve01=ve01,
+          ve02=ve02,
+          ve12=ve12,
+          dimnva01=dimnva01,
+          dimnva02=dimnva02,
+          dimnva12=dimnva12,
+          nva01=nvat01,
+          nva02=nvat02,
+          nva12=nvat12,
+          t0=t0,
+          t1=t1,
+          t2=t2,
+          t3=t3,
+          troncature=troncature,
+          lambda=lambda[id.lambda,],
+          alpha=alpha,
+          penalty.factor=penalty.factor,
+          penalty=penalty,
+          gausspoint=gausspoint,
+          weib=weib)
+    
+    fn<--res$value
+
+    
+    start<-sum(fix00[1:6]==1)
+    if(start==6){
+      b0<-res$par[1:npm]-res$par[(1+npm):(2*npm)]
+    }else{
+      b0<-c(res$par[1:(6-start)],res$par[(6-start+1):(npm)]-res$par[(npm+1):(2*(npm-6+start)+6-start)])
+    }
+    b<-rep(NA,size_V)
+    b[fix00==1]<-bfix
+    b[fix00==0]<-b0
+      
+      if(nvat01>0){
+        b01<-b[(6+1):(6+nvat01)][penalty.factor[1:nvat01]==1]
+      }else{b01<-0}
+    
+    if(nvat02>0){
+      b02<-b[(6+1+nvat01):(6+nvat01+nvat02)][penalty.factor[(nvat01+1):(nvat01+nvat02)]==1]
+    }else{b02<-0}
+    
+    if(nvat12>0){
+      b12<-b[(6+1+nvat01+nvat02):size_V][penalty.factor[(nvat01+nvat02+1):(nvat01+nvat02+nvat12)]==1]
+    }else{b12<-0}
+    # lpen = l-pen
+    fn<-fn+lambda[id.lambda,1]*(1-alpha)*sum(b01*b01)
+    fn<-fn+lambda[id.lambda,2]*(1-alpha)*sum(b02*b02)
+    fn<-fn+lambda[id.lambda,3]*(1-alpha)*sum(b12*b12)
+    
+    fn.pena<--res$value
+    fn.pena<- fn.pena-lambda[id.lambda,1]*alpha*sum(abs(b01))
+    fn.pena<- fn.pena-lambda[id.lambda,2]*alpha*sum(abs(b02))
+    fn.pena<- fn.pena-lambda[id.lambda,3]*alpha*sum(abs(b12))
+    combine<-combine+1
+    
+    return(list(b=c(s,beta),
+                H=NA,
+                lambda=as.double(lambda[id.lambda,]),
+                alpha=alpha,
+                fn.value=fn, # loglik
+                fn.value.pena=fn.pena, # penalised loglik
+                ni=res$counts,
+                ca.beta=NA,
+                ca.spline=NA,
+                ca.validity=NA,
+                cb=NA,
+                istop=res$convergence,
+                combine=combine))
+    
+    }
   
   
   

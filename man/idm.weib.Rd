@@ -33,7 +33,9 @@ idm.weib(
   idm,
   ts,
   troncature,
-  gausspoint
+  gausspoint,
+  weib,
+  methodCV
 )
 }
 \arguments{

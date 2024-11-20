@@ -38,76 +38,13 @@ idm.weib<-function(b,fix0,size_V,
                    ve01,ve02,ve12,dimnva01,dimnva02,dimnva12,nvat01,nvat02,nvat12,
                    t0,t1,t2,t3,idd,idm,ts,troncature,gausspoint,weib,methodCV){
 
- 
-  # initiate parameters values 
-  if(!is.null(b)){
-  
-   s.start<-b[1:6]
-  
-  if(size_V>6){
-  beta.start<-b[(6+1):(size_V)]
-  }else{beta.start<-NULL}}
-  
-
+  bfix<-b[fix0==1]
+  b<-b[fix0==0]
 
   if(methodCV%in%c("Nelder-Mead", "BFGS", "CG", "L-BFGS-B", "SANN",
                  "Brent")){
     
-    # if no intial values for beta do some iterations with mla 
-    if(is.null(b)){
-      
-      s.start<-c(1,sqrt(sum(idm)/ts),1,sqrt(sum(idd)/ts),1,sqrt(sum(idd)/ts))
-      beta.start<-rep(0,size_V-6)
-      # initialise parameters of weib without any variables of interest
-      start.weib<-c(s.start)
-      bfix.weib<-c(start.weib[fix0[1:6]==1],beta.start)
-      start.weib<-start.weib[fix0[1:6]==0]
-      fix.weib<-fix0
-      if(size_V>6){
-        fix.weib[(6+1):size_V]<-1}
-      
 
-     out.optim<- optim(par=start.weib,
-            method=methodCV,
-            hessian = T,
-            control=list(maxit=maxiter,
-                         fnscale=-1, #to maximise function
-                         abstol=epsb,
-                         parscale=rep(1,length(start.weib))),
-            
-            fn=idmlLikelihoodweib,
-            npm=length(start.weib),
-            npar=size_V,
-            bfix=bfix.weib,
-            fix=fix.weib,
-            ctime=ctime,
-            no=N,
-            ve01=ve01,
-            ve02=ve02,
-            ve12=ve12,
-            dimnva01=dimnva01,
-            dimnva02=dimnva02,
-            dimnva12=dimnva12,
-            nva01=nvat01,
-            nva02=nvat02,
-            nva12=nvat12,
-            t0=t0,
-            t1=t1,
-            t2=t2,
-            t3=t3,
-            troncature=troncature,
-            gausspoint=gausspoint,weib=weib)
-      
-      if(out.optim$convergence==0){
-        s.start<-out.optim$par}
-    }                           
-    beta<-beta.start
-    s<-s.start
-    b<-c(s,beta)
-    bfix<-b[fix0==1]
-    b<-b[fix0==0]
-    
-    
   out<- optim(par=b,
               method=methodCV,
               hessian = T,
@@ -153,59 +90,8 @@ idm.weib<-function(b,fix0,size_V,
               fix0=fix0))
   }else{
     
-    # if no intial values for beta do some iterations with mla 
-    if(is.null(b)){
-      
-      s.start<-c(1,sqrt(sum(idm)/ts),1,sqrt(sum(idd)/ts),1,sqrt(sum(idd)/ts))
-      beta.start<-rep(0,size_V-6)
-      # initialise parameters of weib without any variables of interest
-      start.weib<-c(s.start)
-      bfix.weib<-c(start.weib[fix0[1:6]==1],beta.start)
-      start.weib<-start.weib[fix0[1:6]==0]
-      fix.weib<-fix0
-      if(size_V>6){
-        fix.weib[(6+1):size_V]<-1}
-      
-      output.mla<- marqLevAlg::mla(b=start.weib,
-                                   fn=idmlLikelihoodweib,
-                                   epsa=epsa,
-                                   epsb=epsb,
-                                   epsd=epsd,
-                                   nproc=nproc,
-                                   clustertype = clustertype,
-                                   maxiter=maxiter,
-                                   minimize=F,
-                                   npm=length(start.weib),
-                                   npar=size_V,
-                                   bfix=bfix.weib,
-                                   fix=fix.weib,
-                                   ctime=ctime,
-                                   no=N,
-                                   ve01=ve01,
-                                   ve02=ve02,
-                                   ve12=ve12,
-                                   dimnva01=dimnva01,
-                                   dimnva02=dimnva02,
-                                   dimnva12=dimnva12,
-                                   nva01=nvat01,
-                                   nva02=nvat02,
-                                   nva12=nvat12,
-                                   t0=t0,
-                                   t1=t1,
-                                   t2=t2,
-                                   t3=t3,
-                                   troncature=troncature,
-                                   gausspoint=gausspoint,
-                                   weib=weib)
-      
-      if(output.mla$istop==1){
-        s.start<-output.mla$b}
-    }                           
-    beta<-beta.start
-    s<-s.start
-    b<-c(s,beta)
-    bfix<-b[fix0==1]
-    b<-b[fix0==0]
+
+  
     
   
   # maximise loglik 

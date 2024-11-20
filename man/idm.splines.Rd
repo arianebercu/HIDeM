@@ -41,7 +41,8 @@ idm.splines(
   troncature,
   gausspoint,
   step.sequential,
-  option.sequential
+  option.sequential,
+  methodCV
 )
 }
 \arguments{
