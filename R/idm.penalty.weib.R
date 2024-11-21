@@ -1489,7 +1489,6 @@ idm.penalty.weib<-function(b,fix0,size_V,
     par<-c(s.start[fix00[1:6]==0],b_positive,b_negative)
     bfix<-c(s.start,beta.start)
     bfix<-bfix[fix00==1]
-    browser()
     
     id.lambda<-NULL # for cran check 
     npm<-sum(fix00==0)
@@ -1505,6 +1504,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                        pgtol=epsb),
           npm=npm,
           lower=rep(0,sum(fix00[7:length(fix00)]==0)*2+sum(fix00[1:6]==0)),
+          hessian=T,
           npar=size_V,
           bfix=bfix,
           fix=fix00,
@@ -1567,7 +1567,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
     combine<-combine+1
     
     return(list(b=c(s,beta),
-                H=NA,
+                H=res$hessian,
                 lambda=as.double(lambda[id.lambda,]),
                 alpha=alpha,
                 fn.value=fn, # loglik
@@ -1577,12 +1577,13 @@ idm.penalty.weib<-function(b,fix0,size_V,
                 ca.spline=NA,
                 ca.validity=NA,
                 cb=NA,
-                istop=res$convergence,
+                istop=ifelse(res$convergence==0,1,
+                             ifelse(res$convergence==1,2,res$convergence)),
                 combine=combine))
     
     }
   
-  
+  }
   
   return(output=output)
 }
