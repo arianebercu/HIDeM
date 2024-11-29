@@ -40,6 +40,7 @@
 ##' @param step.sequential should we use the optimisation version to fix splines 
 ##' @param option.sequential parameters to give if you want to do the optimisation version to
 ##'  fix splines
+##' @param methodCV methodolgy to optimise penalised parameters 
 #' @author R: Ariane Bercu <ariane.bercu@@u-bordeaux.fr> 
 #' @useDynLib SmoothHazardoptim9
 

@@ -2229,7 +2229,7 @@ subroutine qgaussPL15weib(a,b,the01,the02,the12,res,v01,v02,v12,weib)
          implicit none
          
          integer::j,jtw,jtwm1,weib
-         double precision::a,b,dx,xm,xr,res,resabs,resk,reskh,resasc,resg,v01,v02,v12,&
+         double precision::a,b,dx,xm,xr,res,resk,v01,v02,v12,&
          fv1,fv2,d1mach(5),epmach,uflow,the01(2),the12(2),the02(2)
          double precision,dimension(8)::xgk,wgk
 	 double precision,dimension(4)::wg
@@ -2277,9 +2277,8 @@ subroutine qgaussPL15weib(a,b,the01,the02,the12,res,v01,v02,v12,weib)
         call fonct(xm,the12,ri12,gl12,su12,weib)
         fc = (su01**v01)*(su02**v02)*ri01*v01/(su12**v12)  ! valeur fct f au milieu de intervalle (a,b), cas pnt 0
 
-    	resg = fc*wg(4)        ! init res Gauss  ! fc * 4e poids Gauss
+    	
         resk = fc*wgk(8)       ! init res Kronrod   ! fc * 8e poids Kronrod
-        resabs = dabs(resk)    ! init res absolue Kronrod   
          
             if(a.eq.b)then
                res = 0.d0
@@ -2298,9 +2297,9 @@ subroutine qgaussPL15weib(a,b,the01,the02,the12,res,v01,v02,v12,weib)
                	f2 = (su01**v01)*(su02**v02)*ri01*v01/(su12**v12)
                	fv1(jtw) = f1   ! svgrd valeurs fct f a gche du centre
                	fv2(jtw) = f2   ! svgrd valeurs fct f a drte du centre
-	       	resg = resg+wg(j)*(f1+f2)
+	       	
                	resk = resk + wgk(jtw)*(f1+f2)
-               	resabs = resabs + wgk(jtw)*(dabs(f1)+dabs(f2))
+
               end do
 	      do j=1,4
 	       jtwm1 = j*2-1
@@ -2318,17 +2317,9 @@ subroutine qgaussPL15weib(a,b,the01,the02,the12,res,v01,v02,v12,weib)
                fv1(jtwm1) = f1   ! svgrd valeurs fct f a gche du centre
                fv2(jtwm1) = f2   ! svgrd valeurs fct f a drte du centre
 	       resk = resk + wgk(jtwm1)*(f1+f2)
-               resabs = resabs + wgk(jtwm1)*(dabs(f1)+dabs(f2))
               end do
 	    
-
-	reskh = resk*0.5d+00         ! res Kronrod / 2
-        resasc = wgk(8)*dabs(fc-reskh)  ! init  ! w8 * abs(fc - res Kronrod / 2 )
-         do j=1,7
-        	resasc = resasc+wgk(j)*(dabs(fv1(j)-reskh)+dabs(fv2(j)-reskh))  ! ite
-    	 end do
-    
-    	res = resk*xr
+    	res = xr*resk
 	endif
     
           end subroutine qgaussPL15weib
@@ -2345,7 +2336,7 @@ subroutine qgaussPL15weib(a,b,the01,the02,the12,res,v01,v02,v12,weib)
          implicit none
          
          integer::j,jtw,jtwm1
-         double precision::a,b,dx,xm,xr,res,resabs,resk,reskh,resasc,resg,v1,v2,v3,&
+         double precision::a,b,dx,xm,xr,res,resk,v1,v2,v3,&
          fv1,fv2,d1mach(5),epmach,uflow
          double precision,dimension(-2:(nz01-1))::the01
          double precision,dimension(-2:(nz12-1))::the12
@@ -2395,10 +2386,8 @@ subroutine qgaussPL15weib(a,b,the01,the02,the12,res,v01,v02,v12,weib)
         call susp(xm,the12,nz12,su12,ri12,zi12,gl12)
         fc = (su01**v1)*(su02**v3)*ri01*v1/(su12**v2)  ! valeur fct f au milieu de intervalle (a,b), cas pnt 0
 
-    	resg = fc*wg(4)        ! init res Gauss  ! fc * 4e poids Gauss
         resk = fc*wgk(8)       ! init res Kronrod   ! fc * 8e poids Kronrod
-        resabs = dabs(resk)    ! init res absolue Kronrod   
-         
+        
 
          do j=1,3
 	       jtw = j*2
@@ -2415,9 +2404,7 @@ subroutine qgaussPL15weib(a,b,the01,the02,the12,res,v01,v02,v12,weib)
                f2 = (su01**v1)*(su02**v3)*ri01*v1/(su12**v2)
                fv1(jtw) = f1   ! svgrd valeurs fct f a gche du centre
                fv2(jtw) = f2   ! svgrd valeurs fct f a drte du centre
-	       resg = resg+wg(j)*(f1+f2)
                resk = resk + wgk(jtw)*(f1+f2)
-               resabs = resabs + wgk(jtw)*(dabs(f1)+dabs(f2))
          end do
 	 do j=1,4
 	       jtwm1 = j*2-1
@@ -2435,22 +2422,10 @@ subroutine qgaussPL15weib(a,b,the01,the02,the12,res,v01,v02,v12,weib)
                fv1(jtwm1) = f1   ! svgrd valeurs fct f a gche du centre
                fv2(jtwm1) = f2   ! svgrd valeurs fct f a drte du centre
 	       resk = resk + wgk(jtwm1)*(f1+f2)
-               resabs = resabs + wgk(jtwm1)*(dabs(f1)+dabs(f2))
          end do
-     ! pr calcul erreur 
-         reskh = resk*0.5d+00         ! res Kronrod / 2
-         resasc = wgk(8)*dabs(fc-reskh)  ! init  ! w8 * abs(fc - res Kronrod / 2 )
-         do j=1,7
-        	resasc = resasc+wgk(j)*(dabs(fv1(j)-reskh)+dabs(fv2(j)-reskh))  ! ite
-    	 end do
     
-    res = resk*xr
-    !resabs = resabs*dabs(xr)
-    !resasc = resasc*dabs(xr)
-    !abserr = dabs((resk-resg)*xr)   ! estimation erreur Kronrod pra Gauss
-    !if(resasc.ne.0.0d+00.and.abserr.ne.0.0d+00) abserr = resasc*dmin1(0.1d+01,(0.2d+03*abserr/resasc)**1.5d+00) ! si erreurs non nulles
-    !if(resabs.gt.uflow/(0.5d+02*epmach)) abserr = dmax1((epmach*0.5d+02)*resabs,abserr)
-
+    res = xr*resk
+  
          end subroutine qgaussPL15
 
 !=============================================================================================  
@@ -2461,7 +2436,7 @@ subroutine qgaussPL21weib(a,b,the01,the02,the12,res,v01,v02,v12,weib)
          implicit none
          
          integer::j,jtw,jtwm1,weib
-         double precision::a,b,dx,xm,xr,res,resabs,resk,reskh,resasc,resg,v01,v02,v12,&
+         double precision::a,b,dx,xm,xr,res,resk,v01,v02,v12,&
          fv1,fv2,d1mach(5),epmach,uflow,the01(2),the12(2),the02(2)
          double precision,dimension(11)::xgk,wgk
 	 double precision,dimension(5)::wg
@@ -2515,10 +2490,8 @@ subroutine qgaussPL21weib(a,b,the01,the02,the12,res,v01,v02,v12,weib)
         call fonct(xm,the12,ri12,gl12,su12,weib)
         fc = (su01**v01)*(su02**v02)*ri01*v01/(su12**v12)  ! valeur fct f au milieu de intervalle (a,b), cas pnt 0
 
-    	resg = 0        ! init 0
-        resk = fc*wgk(11)       ! init res Kronrod   ! fc * 8e poids Kronrod
-        resabs = dabs(resk)    ! init res absolue Kronrod   
-         
+    	resk = fc*wgk(11)       ! init res Kronrod   ! fc * 8e poids Kronrod
+        
             if(a.eq.b)then
                res = 0.d0
             else
@@ -2537,9 +2510,8 @@ subroutine qgaussPL21weib(a,b,the01,the02,the12,res,v01,v02,v12,weib)
                	f2 = (su01**v01)*(su02**v02)*ri01*v01/(su12**v12)
                	fv1(jtw) = f1   ! svgrd valeurs fct f a gche du centre
                	fv2(jtw) = f2   ! svgrd valeurs fct f a drte du centre
-	       	resg = resg+wg(j)*(f1+f2)
-                resk = resk + wgk(jtw)*(f1+f2)
-                resabs = resabs + wgk(jtw)*(dabs(f1)+dabs(f2))
+	       	resk = resk + wgk(jtw)*(f1+f2)
+                
               end do
 	      do j=1,5
 	       jtwm1 = j*2-1
@@ -2557,17 +2529,10 @@ subroutine qgaussPL21weib(a,b,the01,the02,the12,res,v01,v02,v12,weib)
                fv1(jtwm1) = f1   ! svgrd valeurs fct f a gche du centre
                fv2(jtwm1) = f2   ! svgrd valeurs fct f a drte du centre
 	       resk = resk + wgk(jtwm1)*(f1+f2)
-               resabs = resabs + wgk(jtwm1)*(dabs(f1)+dabs(f2))
               end do
 	    
 
-	 reskh = resk*0.5d+00         ! res Kronrod / 2
-         resasc = wgk(11)*dabs(fc-reskh)  ! init  ! w8 * abs(fc - res Kronrod / 2 )
-         do j=1,10
-        	resasc = resasc+wgk(j)*(dabs(fv1(j)-reskh)+dabs(fv2(j)-reskh))  ! ite
-    	 end do
-    
-    	res = resk*xr
+    	res = xr*resk
 	endif
     
           end subroutine qgaussPL21weib
@@ -2584,7 +2549,7 @@ subroutine qgaussPL21weib(a,b,the01,the02,the12,res,v01,v02,v12,weib)
          implicit none
          
          integer::j,jtw,jtwm1
-         double precision::a,b,dx,xm,xr,res,resabs,resk,reskh,resasc,resg,v1,v2,v3,&
+         double precision::a,b,dx,xm,xr,res,resk,v1,v2,v3,&
          fv1,fv2,d1mach(5),epmach,uflow
          double precision,dimension(-2:(nz01-1))::the01
          double precision,dimension(-2:(nz12-1))::the12
@@ -2641,9 +2606,7 @@ subroutine qgaussPL21weib(a,b,the01,the02,the12,res,v01,v02,v12,weib)
         call susp(xm,the12,nz12,su12,ri12,zi12,gl12)
         fc = (su01**v1)*(su02**v3)*ri01*v1/(su12**v2)  ! valeur fct f au milieu de intervalle (a,b), cas pnt 0
 
-    	resg = 0        ! init 0
-        resk = fc*wgk(11)       ! init res Kronrod   ! fc * 8e poids Kronrod
-        resabs = dabs(resk)    ! init res absolue Kronrod   
+    	resk = fc*wgk(11)       ! init res Kronrod   ! fc * 8e poids Kronrod
          
 
          do j=1,5
@@ -2661,9 +2624,8 @@ subroutine qgaussPL21weib(a,b,the01,the02,the12,res,v01,v02,v12,weib)
                f2 = (su01**v1)*(su02**v3)*ri01*v1/(su12**v2)
                fv1(jtw) = f1   ! svgrd valeurs fct f a gche du centre
                fv2(jtw) = f2   ! svgrd valeurs fct f a drte du centre
-	       resg = resg+wg(j)*(f1+f2)
-               resk = resk + wgk(jtw)*(f1+f2)
-               resabs = resabs + wgk(jtw)*(dabs(f1)+dabs(f2))
+	       resk = resk + wgk(jtw)*(f1+f2)
+               
          end do
 	 do j=1,5
 	       jtwm1 = j*2-1
@@ -2681,22 +2643,11 @@ subroutine qgaussPL21weib(a,b,the01,the02,the12,res,v01,v02,v12,weib)
                fv1(jtwm1) = f1   ! svgrd valeurs fct f a gche du centre
                fv2(jtwm1) = f2   ! svgrd valeurs fct f a drte du centre
 	       resk = resk + wgk(jtwm1)*(f1+f2)
-               resabs = resabs + wgk(jtwm1)*(dabs(f1)+dabs(f2))
+               
          end do
-     ! pr calcul erreur 
-         reskh = resk*0.5d+00         ! res Kronrod / 2
-         resasc = wgk(11)*dabs(fc-reskh)  ! init  ! w8 * abs(fc - res Kronrod / 2 )
-         do j=1,10
-        	resasc = resasc+wgk(j)*(dabs(fv1(j)-reskh)+dabs(fv2(j)-reskh))  ! ite
-    	 end do
-    
-    res = resk*xr
-    !resabs = resabs*dabs(xr)
-    !resasc = resasc*dabs(xr)
-    !abserr = dabs((resk-resg)*xr)   ! estimation erreur Kronrod pra Gauss
-    !if(resasc.ne.0.0d+00.and.abserr.ne.0.0d+00) abserr = resasc*dmin1(0.1d+01,(0.2d+03*abserr/resasc)**1.5d+00) ! si erreurs non nulles
-    !if(resabs.gt.uflow/(0.5d+02*epmach)) abserr = dmax1((epmach*0.5d+02)*resabs,abserr)
 
+    res = xr*resk
+    
          end subroutine qgaussPL21
 
 !=============================================================================================  
@@ -2708,7 +2659,7 @@ subroutine qgaussPL31weib(a,b,the01,the02,the12,res,v01,v02,v12,weib)
          implicit none
          
          integer::j,jtw,jtwm1,weib
-         double precision::a,b,dx,xm,xr,res,resabs,resk,reskh,resasc,resg,v01,v02,v12,&
+         double precision::a,b,dx,xm,xr,res,resk,v01,v02,v12,&
          fv1,fv2,d1mach(5),epmach,uflow,the01(2),the12(2),the02(2)
          double precision,dimension(16)::xgk,wgk
 	 double precision,dimension(8)::wg
@@ -2776,9 +2727,7 @@ subroutine qgaussPL31weib(a,b,the01,the02,the12,res,v01,v02,v12,weib)
         call fonct(xm,the12,ri12,gl12,su12,weib)
         fc = (su01**v01)*(su02**v02)*ri01*v01/(su12**v12)  ! valeur fct f au milieu de intervalle (a,b), cas pnt 0
 
-    	resg = wg(8)*fc        ! init at wg(8)
-        resk = fc*wgk(16)       ! init res Kronrod   ! fc * 8e poids Kronrod
-        resabs = dabs(resk)    ! init res absolue Kronrod   
+    	resk = fc*wgk(16)       ! init res Kronrod   ! fc * 8e poids Kronrod
          
             if(a.eq.b)then
                res = 0.d0
@@ -2798,9 +2747,7 @@ subroutine qgaussPL31weib(a,b,the01,the02,the12,res,v01,v02,v12,weib)
                	f2 = (su01**v01)*(su02**v02)*ri01*v01/(su12**v12)
                	fv1(jtw) = f1   ! svgrd valeurs fct f a gche du centre
                	fv2(jtw) = f2   ! svgrd valeurs fct f a drte du centre
-	       	resg = resg+wg(j)*(f1+f2)
-                resk = resk + wgk(jtw)*(f1+f2)
-                resabs = resabs + wgk(jtw)*(dabs(f1)+dabs(f2))
+	       	resk = resk + wgk(jtw)*(f1+f2)
               end do
 	      do j=1,8
 	       jtwm1 = j*2-1
@@ -2818,19 +2765,12 @@ subroutine qgaussPL31weib(a,b,the01,the02,the12,res,v01,v02,v12,weib)
                fv1(jtwm1) = f1   ! svgrd valeurs fct f a gche du centre
                fv2(jtwm1) = f2   ! svgrd valeurs fct f a drte du centre
 	       resk = resk + wgk(jtwm1)*(f1+f2)
-               resabs = resabs + wgk(jtwm1)*(dabs(f1)+dabs(f2))
+               
               end do
 	    
-
-	 reskh = resk*0.5d+00         ! res Kronrod / 2
-         resasc = wgk(16)*dabs(fc-reskh)  ! init  ! w8 * abs(fc - res Kronrod / 2 )
-         do j=1,15
-        	resasc = resasc+wgk(j)*(dabs(fv1(j)-reskh)+dabs(fv2(j)-reskh))  ! ite
-    	 end do
-    
     	res = resk*xr
 	endif
-    
+	
           end subroutine qgaussPL31weib
 
 !=============================================================================================  
@@ -2845,7 +2785,7 @@ subroutine qgaussPL31weib(a,b,the01,the02,the12,res,v01,v02,v12,weib)
          implicit none
          
          integer::j,jtw,jtwm1
-         double precision::a,b,dx,xm,xr,res,resabs,resk,reskh,resasc,resg,v1,v2,v3,&
+         double precision::a,b,dx,xm,xr,res,resk,v1,v2,v3,&
          fv1,fv2,d1mach(5),epmach,uflow
          double precision,dimension(-2:(nz01-1))::the01
          double precision,dimension(-2:(nz12-1))::the12
@@ -2916,9 +2856,7 @@ subroutine qgaussPL31weib(a,b,the01,the02,the12,res,v01,v02,v12,weib)
         call susp(xm,the12,nz12,su12,ri12,zi12,gl12)
         fc = (su01**v1)*(su02**v3)*ri01*v1/(su12**v2)  ! valeur fct f au milieu de intervalle (a,b), cas pnt 0
 
-    	resg = wg(8)*fc        ! init at wg(8)
-        resk = fc*wgk(16)       ! init res Kronrod   ! fc * 8e poids Kronrod
-        resabs = dabs(resk)    ! init res absolue Kronrod   
+    	resk = fc*wgk(16)       ! init res Kronrod   ! fc * 8e poids Kronrod
          
 
          do j=1,7
@@ -2936,9 +2874,8 @@ subroutine qgaussPL31weib(a,b,the01,the02,the12,res,v01,v02,v12,weib)
                f2 = (su01**v1)*(su02**v3)*ri01*v1/(su12**v2)
                fv1(jtw) = f1   ! svgrd valeurs fct f a gche du centre
                fv2(jtw) = f2   ! svgrd valeurs fct f a drte du centre
-	       resg = resg+wg(j)*(f1+f2)
-               resk = resk + wgk(jtw)*(f1+f2)
-               resabs = resabs + wgk(jtw)*(dabs(f1)+dabs(f2))
+	       resk = resk + wgk(jtw)*(f1+f2)
+               
          end do
 	 do j=1,8
 	       jtwm1 = j*2-1
@@ -2956,22 +2893,12 @@ subroutine qgaussPL31weib(a,b,the01,the02,the12,res,v01,v02,v12,weib)
                fv1(jtwm1) = f1   ! svgrd valeurs fct f a gche du centre
                fv2(jtwm1) = f2   ! svgrd valeurs fct f a drte du centre
 	       resk = resk + wgk(jtwm1)*(f1+f2)
-               resabs = resabs + wgk(jtwm1)*(dabs(f1)+dabs(f2))
+               
          end do
-     ! pr calcul erreur 
-         reskh = resk*0.5d+00         ! res Kronrod / 2
-         resasc = wgk(16)*dabs(fc-reskh)  ! init  ! w8 * abs(fc - res Kronrod / 2 )
-         do j=1,15
-        	resasc = resasc+wgk(j)*(dabs(fv1(j)-reskh)+dabs(fv2(j)-reskh))  ! ite
-    	 end do
+    
     
     res = resk*xr
-    !resabs = resabs*dabs(xr)
-    !resasc = resasc*dabs(xr)
-    !abserr = dabs((resk-resg)*xr)   ! estimation erreur Kronrod pra Gauss
-    !if(resasc.ne.0.0d+00.and.abserr.ne.0.0d+00) abserr = resasc*dmin1(0.1d+01,(0.2d+03*abserr/resasc)**1.5d+00) ! si erreurs non nulles
-    !if(resabs.gt.uflow/(0.5d+02*epmach)) abserr = dmax1((epmach*0.5d+02)*resabs,abserr)
-
+    
          end subroutine qgaussPL31
 
 !=============================================================================================  
@@ -2982,7 +2909,7 @@ subroutine qgaussPL41weib(a,b,the01,the02,the12,res,v01,v02,v12,weib)
          implicit none
          
          integer::j,jtw,jtwm1,weib
-         double precision::a,b,dx,xm,xr,res,resabs,resk,reskh,resasc,resg,v01,v02,v12,&
+         double precision::a,b,dx,xm,xr,res,resk,v01,v02,v12,&
          fv1,fv2,d1mach(5),epmach,uflow,the01(2),the12(2),the02(2)
          double precision,dimension(21)::xgk,wgk
 	 double precision,dimension(10)::wg
@@ -3063,10 +2990,8 @@ subroutine qgaussPL41weib(a,b,the01,the02,the12,res,v01,v02,v12,weib)
         call fonct(xm,the12,ri12,gl12,su12,weib)
         fc = (su01**v01)*(su02**v02)*ri01*v01/(su12**v12)  ! valeur fct f au milieu de intervalle (a,b), cas pnt 0
 
-    	resg = 0        ! init at wg(8)
         resk = fc*wgk(21)       ! init res Kronrod   ! fc * 8e poids Kronrod
-        resabs = dabs(resk)    ! init res absolue Kronrod   
-         
+        
             if(a.eq.b)then
                res = 0.d0
             else
@@ -3085,9 +3010,8 @@ subroutine qgaussPL41weib(a,b,the01,the02,the12,res,v01,v02,v12,weib)
                	f2 = (su01**v01)*(su02**v02)*ri01*v01/(su12**v12)
                	fv1(jtw) = f1   ! svgrd valeurs fct f a gche du centre
                	fv2(jtw) = f2   ! svgrd valeurs fct f a drte du centre
-	       	resg = resg+wg(j)*(f1+f2)
-                resk = resk + wgk(jtw)*(f1+f2)
-                resabs = resabs + wgk(jtw)*(dabs(f1)+dabs(f2))
+	       	resk = resk + wgk(jtw)*(f1+f2)
+                
               end do
 	      do j=1,10
 	       jtwm1 = j*2-1
@@ -3105,16 +3029,9 @@ subroutine qgaussPL41weib(a,b,the01,the02,the12,res,v01,v02,v12,weib)
                fv1(jtwm1) = f1   ! svgrd valeurs fct f a gche du centre
                fv2(jtwm1) = f2   ! svgrd valeurs fct f a drte du centre
 	       resk = resk + wgk(jtwm1)*(f1+f2)
-               resabs = resabs + wgk(jtwm1)*(dabs(f1)+dabs(f2))
+               
               end do
 	    
-
-	  reskh = resk*0.5d+00         ! res Kronrod / 2
-         resasc = wgk(21)*dabs(fc-reskh)  ! init  ! w8 * abs(fc - res Kronrod / 2 )
-         do j=1,20
-        	resasc = resasc+wgk(j)*(dabs(fv1(j)-reskh)+dabs(fv2(j)-reskh))  ! ite
-    	 end do
-    
     	res = resk*xr
 	endif
     
@@ -3130,7 +3047,7 @@ subroutine qgaussPL41weib(a,b,the01,the02,the12,res,v01,v02,v12,weib)
          implicit none
          
          integer::j,jtw,jtwm1
-         double precision::a,b,dx,xm,xr,res,resabs,resk,reskh,resasc,resg,v1,v2,v3,&
+         double precision::a,b,dx,xm,xr,res,resk,v1,v2,v3,&
          fv1,fv2,d1mach(5),epmach,uflow
          double precision,dimension(-2:(nz01-1))::the01
          double precision,dimension(-2:(nz12-1))::the12
@@ -3214,11 +3131,8 @@ subroutine qgaussPL41weib(a,b,the01,the02,the12,res,v01,v02,v12,weib)
         call susp(xm,the12,nz12,su12,ri12,zi12,gl12)
         fc = (su01**v1)*(su02**v3)*ri01*v1/(su12**v2)  ! valeur fct f au milieu de intervalle (a,b), cas pnt 0
 
-    	resg = 0        ! init at 0
-        resk = fc*wgk(21)       ! init res Kronrod   ! fc * 8e poids Kronrod
-        resabs = dabs(resk)    ! init res absolue Kronrod   
-         
-
+    	resk = fc*wgk(21)       ! init res Kronrod   ! fc * 8e poids Kronrod
+        
          do j=1,10
 	       jtw = j*2
                dx=xr*xgk(jtw)
@@ -3234,9 +3148,8 @@ subroutine qgaussPL41weib(a,b,the01,the02,the12,res,v01,v02,v12,weib)
                f2 = (su01**v1)*(su02**v3)*ri01*v1/(su12**v2)
                fv1(jtw) = f1   ! svgrd valeurs fct f a gche du centre
                fv2(jtw) = f2   ! svgrd valeurs fct f a drte du centre
-	       resg = resg+wg(j)*(f1+f2)
-               resk = resk + wgk(jtw)*(f1+f2)
-               resabs = resabs + wgk(jtw)*(dabs(f1)+dabs(f2))
+	       resk = resk + wgk(jtw)*(f1+f2)
+              
          end do
 	 do j=1,10
 	       jtwm1 = j*2-1
@@ -3254,22 +3167,10 @@ subroutine qgaussPL41weib(a,b,the01,the02,the12,res,v01,v02,v12,weib)
                fv1(jtwm1) = f1   ! svgrd valeurs fct f a gche du centre
                fv2(jtwm1) = f2   ! svgrd valeurs fct f a drte du centre
 	       resk = resk + wgk(jtwm1)*(f1+f2)
-               resabs = resabs + wgk(jtwm1)*(dabs(f1)+dabs(f2))
+               
          end do
-     ! pr calcul erreur 
-         reskh = resk*0.5d+00         ! res Kronrod / 2
-         resasc = wgk(21)*dabs(fc-reskh)  ! init  ! w8 * abs(fc - res Kronrod / 2 )
-         do j=1,20
-        	resasc = resasc+wgk(j)*(dabs(fv1(j)-reskh)+dabs(fv2(j)-reskh))  ! ite
-    	 end do
-    
+     
     res = resk*xr
-    !resabs = resabs*dabs(xr)
-    !resasc = resasc*dabs(xr)
-    !abserr = dabs((resk-resg)*xr)   ! estimation erreur Kronrod pra Gauss
-    !if(resasc.ne.0.0d+00.and.abserr.ne.0.0d+00) abserr = resasc*dmin1(0.1d+01,(0.2d+03*abserr/resasc)**1.5d+00) ! si erreurs non nulles
-    !if(resabs.gt.uflow/(0.5d+02*epmach)) abserr = dmax1((epmach*0.5d+02)*resabs,abserr)
-
          end subroutine qgaussPL41
 
 !=============================================================================================  
@@ -3281,7 +3182,7 @@ subroutine qgaussPL51weib(a,b,the01,the02,the12,res,v01,v02,v12,weib)
          implicit none
          
          integer::j,jtw,jtwm1,weib
-         double precision::a,b,dx,xm,xr,res,resabs,resk,reskh,resasc,resg,v01,v02,v12,&
+         double precision::a,b,dx,xm,xr,res,resk,v01,v02,v12,&
          fv1,fv2,d1mach(5),epmach,uflow,the01(2),the12(2),the02(2)
          double precision,dimension(26)::xgk,wgk
 	 double precision,dimension(13)::wg
@@ -3375,9 +3276,7 @@ subroutine qgaussPL51weib(a,b,the01,the02,the12,res,v01,v02,v12,weib)
         call fonct(xm,the12,ri12,gl12,su12,weib)
         fc = (su01**v01)*(su02**v02)*ri01*v01/(su12**v12)  ! valeur fct f au milieu de intervalle (a,b), cas pnt 0
 
-    	resg = fc*wgk(13)        ! init at wg(13)
-        resk = fc*wgk(26)       ! init res Kronrod   ! fc * 8e poids Kronrod
-        resabs = dabs(resk)    ! init res absolue Kronrod   
+    	resk = fc*wgk(26)       ! init res Kronrod   ! fc * 8e poids Kronrod
          
             if(a.eq.b)then
                res = 0.d0
@@ -3397,9 +3296,8 @@ subroutine qgaussPL51weib(a,b,the01,the02,the12,res,v01,v02,v12,weib)
                	f2 = (su01**v01)*(su02**v02)*ri01*v01/(su12**v12)
                	fv1(jtw) = f1   ! svgrd valeurs fct f a gche du centre
                	fv2(jtw) = f2   ! svgrd valeurs fct f a drte du centre
-	       	resg = resg+wg(j)*(f1+f2)
-                resk = resk + wgk(jtw)*(f1+f2)
-                resabs = resabs + wgk(jtw)*(dabs(f1)+dabs(f2))
+	       	resk = resk + wgk(jtw)*(f1+f2)
+                
               end do
 	      do j=1,13
 	       jtwm1 = j*2-1
@@ -3417,15 +3315,8 @@ subroutine qgaussPL51weib(a,b,the01,the02,the12,res,v01,v02,v12,weib)
                fv1(jtwm1) = f1   ! svgrd valeurs fct f a gche du centre
                fv2(jtwm1) = f2   ! svgrd valeurs fct f a drte du centre
 	       resk = resk + wgk(jtwm1)*(f1+f2)
-               resabs = resabs + wgk(jtwm1)*(dabs(f1)+dabs(f2))
+               
               end do
-	    
-
-	  reskh = resk*0.5d+00         ! res Kronrod / 2
-         resasc = wgk(21)*dabs(fc-reskh)  ! init  ! w8 * abs(fc - res Kronrod / 2 )
-         do j=1,25
-        	resasc = resasc+wgk(j)*(dabs(fv1(j)-reskh)+dabs(fv2(j)-reskh))  ! ite
-    	 end do
     
     	res = resk*xr
 	endif
@@ -3444,7 +3335,7 @@ subroutine qgaussPL51weib(a,b,the01,the02,the12,res,v01,v02,v12,weib)
          implicit none
          
          integer::j,jtw,jtwm1
-         double precision::a,b,dx,xm,xr,res,resabs,resk,reskh,resasc,resg,v1,v2,v3,&
+         double precision::a,b,dx,xm,xr,res,resk,v1,v2,v3,&
          fv1,fv2,d1mach(5),epmach,uflow
          double precision,dimension(-2:(nz01-1))::the01
          double precision,dimension(-2:(nz12-1))::the12
@@ -3541,11 +3432,8 @@ subroutine qgaussPL51weib(a,b,the01,the02,the12,res,v01,v02,v12,weib)
         call susp(xm,the12,nz12,su12,ri12,zi12,gl12)
         fc = (su01**v1)*(su02**v3)*ri01*v1/(su12**v2)  ! valeur fct f au milieu de intervalle (a,b), cas pnt 0
 
-    	resg = fc*wgk(13)        ! init at wg(13)
-        resk = fc*wgk(26)       ! init res Kronrod   ! fc * 8e poids Kronrod
-        resabs = dabs(resk)    ! init res absolue Kronrod   
-         
-
+    	resk = fc*wgk(26)       ! init res Kronrod   ! fc * 8e poids Kronrod
+        
          do j=1,12
 	       jtw = j*2
                dx=xr*xgk(jtw)
@@ -3561,9 +3449,8 @@ subroutine qgaussPL51weib(a,b,the01,the02,the12,res,v01,v02,v12,weib)
                f2 = (su01**v1)*(su02**v3)*ri01*v1/(su12**v2)
                fv1(jtw) = f1   ! svgrd valeurs fct f a gche du centre
                fv2(jtw) = f2   ! svgrd valeurs fct f a drte du centre
-	       resg = resg+wg(j)*(f1+f2)
-               resk = resk + wgk(jtw)*(f1+f2)
-               resabs = resabs + wgk(jtw)*(dabs(f1)+dabs(f2))
+	       resk = resk + wgk(jtw)*(f1+f2)
+               
          end do
 	 do j=1,13
 	       jtwm1 = j*2-1
@@ -3581,23 +3468,12 @@ subroutine qgaussPL51weib(a,b,the01,the02,the12,res,v01,v02,v12,weib)
                fv1(jtwm1) = f1   ! svgrd valeurs fct f a gche du centre
                fv2(jtwm1) = f2   ! svgrd valeurs fct f a drte du centre
 	       resk = resk + wgk(jtwm1)*(f1+f2)
-               resabs = resabs + wgk(jtwm1)*(dabs(f1)+dabs(f2))
+               
          end do
-     ! pr calcul erreur 
-         reskh = resk*0.5d+00         ! res Kronrod / 2
-         resasc = wgk(21)*dabs(fc-reskh)  ! init  ! w8 * abs(fc - res Kronrod / 2 )
-         do j=1,25
-        	resasc = resasc+wgk(j)*(dabs(fv1(j)-reskh)+dabs(fv2(j)-reskh))  ! ite
-    	 end do
+  
     
     res = resk*xr
-    !resabs = resabs*dabs(xr)
-    !resasc = resasc*dabs(xr)
-    !abserr = dabs((resk-resg)*xr)   ! estimation erreur Kronrod pra Gauss
-    !if(resasc.ne.0.0d+00.and.abserr.ne.0.0d+00) abserr = resasc*dmin1(0.1d+01,(0.2d+03*abserr/resasc)**1.5d+00) ! si erreurs non nulles
-    !if(resabs.gt.uflow/(0.5d+02*epmach)) abserr = dmax1((epmach*0.5d+02)*resabs,abserr)
-
-         end subroutine qgaussPL51
+      end subroutine qgaussPL51
 
 !=============================================================================================  
 !=====QGAUS61 out a 61 point Gauss-Kronrod quadrature rule for weib ==========================
@@ -3608,7 +3484,7 @@ subroutine qgaussPL61weib(a,b,the01,the02,the12,res,v01,v02,v12,weib)
          implicit none
          
          integer::j,jtw,jtwm1,weib
-         double precision::a,b,dx,xm,xr,res,resabs,resk,reskh,resasc,resg,v01,v02,v12,&
+         double precision::a,b,dx,xm,xr,res,resk,v01,v02,v12,&
          fv1,fv2,d1mach(5),epmach,uflow,the01(2),the12(2),the02(2)
          double precision,dimension(31)::xgk,wgk
 	 double precision,dimension(15)::wg
@@ -3714,10 +3590,8 @@ subroutine qgaussPL61weib(a,b,the01,the02,the12,res,v01,v02,v12,weib)
         call fonct(xm,the12,ri12,gl12,su12,weib)
         fc = (su01**v01)*(su02**v02)*ri01*v01/(su12**v12)  ! valeur fct f au milieu de intervalle (a,b), cas pnt 0
 
-    	resg = 0       ! init at 0
-        resk = fc*wgk(31)       ! init res Kronrod   ! fc * 8e poids Kronrod
-        resabs = dabs(resk)    ! init res absolue Kronrod   
-         
+    	resk = fc*wgk(31)       ! init res Kronrod   ! fc * 8e poids Kronrod
+        
             if(a.eq.b)then
                res = 0.d0
             else
@@ -3736,9 +3610,7 @@ subroutine qgaussPL61weib(a,b,the01,the02,the12,res,v01,v02,v12,weib)
                	f2 = (su01**v01)*(su02**v02)*ri01*v01/(su12**v12)
                	fv1(jtw) = f1   ! svgrd valeurs fct f a gche du centre
                	fv2(jtw) = f2   ! svgrd valeurs fct f a drte du centre
-	       	resg = resg+wg(j)*(f1+f2)
-                resk = resk + wgk(jtw)*(f1+f2)
-                resabs = resabs + wgk(jtw)*(dabs(f1)+dabs(f2))
+	       	resk = resk + wgk(jtw)*(f1+f2)
               end do
 	      do j=1,15
 	       jtwm1 = j*2-1
@@ -3756,15 +3628,7 @@ subroutine qgaussPL61weib(a,b,the01,the02,the12,res,v01,v02,v12,weib)
                fv1(jtwm1) = f1   ! svgrd valeurs fct f a gche du centre
                fv2(jtwm1) = f2   ! svgrd valeurs fct f a drte du centre
 	       resk = resk + wgk(jtwm1)*(f1+f2)
-               resabs = resabs + wgk(jtwm1)*(dabs(f1)+dabs(f2))
               end do
-	    
-
-	  reskh = resk*0.5d+00         ! res Kronrod / 2
-         resasc = wgk(31)*dabs(fc-reskh)  ! init  ! w8 * abs(fc - res Kronrod / 2 )
-         do j=1,30
-        	resasc = resasc+wgk(j)*(dabs(fv1(j)-reskh)+dabs(fv2(j)-reskh))  ! ite
-    	 end do
 
     	res = resk*xr
 	endif
@@ -3783,7 +3647,7 @@ subroutine qgaussPL61weib(a,b,the01,the02,the12,res,v01,v02,v12,weib)
          implicit none
          
          integer::j,jtw,jtwm1
-         double precision::a,b,dx,xm,xr,res,resabs,resk,reskh,resasc,resg,v1,v2,v3,&
+         double precision::a,b,dx,xm,xr,res,resk,v1,v2,v3,&
          fv1,fv2,d1mach(5),epmach,uflow
          double precision,dimension(-2:(nz01-1))::the01
          double precision,dimension(-2:(nz12-1))::the12
@@ -3892,9 +3756,7 @@ subroutine qgaussPL61weib(a,b,the01,the02,the12,res,v01,v02,v12,weib)
         call susp(xm,the12,nz12,su12,ri12,zi12,gl12)
         fc = (su01**v1)*(su02**v3)*ri01*v1/(su12**v2)  ! valeur fct f au milieu de intervalle (a,b), cas pnt 0
 
-    	resg = 0        ! init at 0
-        resk = fc*wgk(31)       ! init res Kronrod   ! fc * 8e poids Kronrod
-        resabs = dabs(resk)    ! init res absolue Kronrod   
+    	 resk = fc*wgk(31)       ! init res Kronrod   ! fc * 8e poids Kronrod
          
 
          do j=1,15
@@ -3912,9 +3774,8 @@ subroutine qgaussPL61weib(a,b,the01,the02,the12,res,v01,v02,v12,weib)
                f2 = (su01**v1)*(su02**v3)*ri01*v1/(su12**v2)
                fv1(jtw) = f1   ! svgrd valeurs fct f a gche du centre
                fv2(jtw) = f2   ! svgrd valeurs fct f a drte du centre
-	       resg = resg+wg(j)*(f1+f2)
-               resk = resk + wgk(jtw)*(f1+f2)
-               resabs = resabs + wgk(jtw)*(dabs(f1)+dabs(f2))
+	       resk = resk + wgk(jtw)*(f1+f2)
+               
          end do
 	 do j=1,15
 	       jtwm1 = j*2-1
@@ -3932,22 +3793,12 @@ subroutine qgaussPL61weib(a,b,the01,the02,the12,res,v01,v02,v12,weib)
                fv1(jtwm1) = f1   ! svgrd valeurs fct f a gche du centre
                fv2(jtwm1) = f2   ! svgrd valeurs fct f a drte du centre
 	       resk = resk + wgk(jtwm1)*(f1+f2)
-               resabs = resabs + wgk(jtwm1)*(dabs(f1)+dabs(f2))
+              
          end do
-     ! pr calcul erreur 
-         reskh = resk*0.5d+00         ! res Kronrod / 2
-         resasc = wgk(31)*dabs(fc-reskh)  ! init  ! w8 * abs(fc - res Kronrod / 2 )
-         do j=1,30
-        	resasc = resasc+wgk(j)*(dabs(fv1(j)-reskh)+dabs(fv2(j)-reskh))  ! ite
-    	 end do
+    
     
     res = resk*xr
-    !resabs = resabs*dabs(xr)
-    !resasc = resasc*dabs(xr)
-    !abserr = dabs((resk-resg)*xr)   ! estimation erreur Kronrod pra Gauss
-    !if(resasc.ne.0.0d+00.and.abserr.ne.0.0d+00) abserr = resasc*dmin1(0.1d+01,(0.2d+03*abserr/resasc)**1.5d+00) ! si erreurs non nulles
-    !if(resabs.gt.uflow/(0.5d+02*epmach)) abserr = dmax1((epmach*0.5d+02)*resabs,abserr)
-
+    
          end subroutine qgaussPL61
          
 !=============================================================================================        
@@ -3962,17 +3813,11 @@ res0202num,res0212num,res1212num,v01,v02,v12,weib)
 
         implicit none
          double precision a,b,the01(2),the02(2),the12(2)
-         double precision dx,xm,xr,resabsdenum,reskdenum,&
-         reskhdenum,resascdenum,resgdenum,resdenum, & 
-	resabs01num,resk01num,reskh01num,resasc01num,resg01num,res01num, & 
-	resabs02num,resk02num,reskh02num,resasc02num,resg02num,res02num, & 
-	resabs12num,resk12num,reskh12num,resasc12num,resg12num,res12num, & 
-	resabs0101num,resk0101num,reskh0101num,resasc0101num,resg0101num,res0101num, &
-	resabs0102num,resk0102num,reskh0102num,resasc0102num,resg0102num,res0102num, &
-	resabs0112num,resk0112num,reskh0112num,resasc0112num,resg0112num,res0112num, &
-	resabs0202num,resk0202num,reskh0202num,resasc0202num,resg0202num,res0202num, &
-	resabs0212num,resk0212num,reskh0212num,resasc0212num,resg0212num,res0212num, &
-	resabs1212num,resk1212num,reskh1212num,resasc1212num,resg1212num,res1212num, &
+         double precision dx,xm,xr,reskdenum,&
+         resdenum,resk01num,res01num,resk02num,res02num, & 
+	resk12num,res12num,resk0101num,res0101num,resk0102num,res0102num, &
+	resk0112num,res0112num,resk0202num,res0202num, &
+	resk0212num,res0212num,resk1212num,res1212num, &
 	v01,v02,v12
          double precision xx,f1denum,f2denum, f101num, f102num, f112num, & 
 	f10101num,f10102num,f10112num,f10202num,f10212num,f11212num,&
@@ -4062,48 +3907,17 @@ res0202num,res0212num,res1212num,v01,v02,v12,weib)
 		fc0212num=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02*gl12*v12/(su12**v12)
 		fc1212num=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12*gl12*v12/(su12**v12)
 
-    		resgdenum = fcdenum*wg(4)        ! init res Gauss  ! fc * 4e poids Gauss
-        	reskdenum = fcdenum*wgk(8)       ! init res Kronrod   ! fc * 8e poids Kronrod
-        	resabsdenum = dabs(reskdenum)    ! init res absolue Kronrod  
-
-		resg01num = fc01num*wg(4)        ! init res Gauss  ! fc * 4e poids Gauss
+    		reskdenum = fcdenum*wgk(8)       ! init res Kronrod   ! fc * 8e poids Kronrod
         	resk01num = fc01num*wgk(8)       ! init res Kronrod   ! fc * 8e poids Kronrod
-        	resabs01num = dabs(resk01num)    ! init res absolue Kronrod   
-
-		resg02num = fc02num*wg(4)        ! init res Gauss  ! fc * 4e poids Gauss
         	resk02num = fc02num*wgk(8)       ! init res Kronrod   ! fc * 8e poids Kronrod
-        	resabs02num = dabs(resk02num)    ! init res absolue Kronrod   
-
-		resg12num = fc12num*wg(4)        ! init res Gauss  ! fc * 4e poids Gauss
         	resk12num = fc12num*wgk(8)       ! init res Kronrod   ! fc * 8e poids Kronrod
-        	resabs12num = dabs(resk12num)    ! init res absolue Kronrod  
-
-		resg0101num = fc0101num*wg(4)        ! init res Gauss  ! fc * 4e poids Gauss
         	resk0101num = fc0101num*wgk(8)       ! init res Kronrod   ! fc * 8e poids Kronrod
-        	resabs0101num = dabs(resk0101num)    ! init res absolue Kronrod   
-		
-		resg0102num = fc0102num*wg(4)        ! init res Gauss  ! fc * 4e poids Gauss
         	resk0102num = fc0102num*wgk(8)       ! init res Kronrod   ! fc * 8e poids Kronrod
-        	resabs0102num = dabs(resk0102num)    ! init res absolue Kronrod   
-
-		resg0112num = fc0112num*wg(4)        ! init res Gauss  ! fc * 4e poids Gauss
         	resk0112num = fc0112num*wgk(8)       ! init res Kronrod   ! fc * 8e poids Kronrod
-        	resabs0112num = dabs(resk0112num)    ! init res absolue Kronrod   
-
-		resg0202num = fc0202num*wg(4)        ! init res Gauss  ! fc * 4e poids Gauss
         	resk0202num = fc0202num*wgk(8)       ! init res Kronrod   ! fc * 8e poids Kronrod
-        	resabs0202num = dabs(resk0202num)    ! init res absolue Kronrod   
-
-		resg0212num = fc0212num*wg(4)        ! init res Gauss  ! fc * 4e poids Gauss
         	resk0212num = fc0212num*wgk(8)       ! init res Kronrod   ! fc * 8e poids Kronrod
-        	resabs0212num = dabs(resk0212num)    ! init res absolue Kronrod   
-
-
-		resg1212num = fc1212num*wg(4)        ! init res Gauss  ! fc * 4e poids Gauss
         	resk1212num = fc1212num*wgk(8)       ! init res Kronrod   ! fc * 8e poids Kronrod
-        	resabs1212num = dabs(resk1212num)    ! init res absolue Kronrod   
-
-
+        	
 
 
 
@@ -4149,83 +3963,51 @@ res0202num,res0212num,res1212num,v01,v02,v12,weib)
 			
                		fv1denum(jtw) = f1denum   ! svgrd valeurs fct f a gche du centre
                		fv2denum(jtw) = f2denum   ! svgrd valeurs fct f a drte du centre
-
-	       		resgdenum = resgdenum+wg(j)*(f1denum+f2denum)
-               		reskdenum = reskdenum + wgk(jtw)*(f1denum+f2denum)
-               		resabsdenum = resabsdenum + wgk(jtw)*(dabs(f1denum)+&
-               		dabs(f2denum))
+			reskdenum = reskdenum + wgk(jtw)*(f1denum+f2denum)
+               		
 
 			fv101num(jtw) = f101num   ! svgrd valeurs fct f a gche du centre
                		fv201num(jtw) = f201num   ! svgrd valeurs fct f a drte du centre
+			resk01num = resk01num + wgk(jtw)*(f101num+f201num)
 
-	       		resg01num = resg01num+wg(j)*(f101num+f201num)
-               		resk01num = resk01num + wgk(jtw)*(f101num+f201num)
-               		resabs01num = resabs01num + wgk(jtw)*(dabs(f101num)+&
-               		dabs(f201num))
 
 			fv102num(jtw) = f102num   ! svgrd valeurs fct f a gche du centre
                		fv202num(jtw) = f202num   ! svgrd valeurs fct f a drte du centre
-
-	       		resg02num = resg02num+wg(j)*(f102num+f202num)
-               		resk02num = resk02num + wgk(jtw)*(f102num+f202num)
-               		resabs02num = resabs02num + wgk(jtw)*(dabs(f102num)+&
-               		dabs(f202num))
+			resk02num = resk02num + wgk(jtw)*(f102num+f202num)
+               		
 
 			fv112num(jtw) = f112num   ! svgrd valeurs fct f a gche du centre
                		fv212num(jtw) = f212num   ! svgrd valeurs fct f a drte du centre
-
-	       		resg12num = resg12num+wg(j)*(f112num+f212num)
-               		resk12num = resk12num + wgk(jtw)*(f112num+f212num)
-               		resabs12num = resabs12num + wgk(jtw)*(dabs(f112num)+&
-               		dabs(f212num))
+			resk12num = resk12num + wgk(jtw)*(f112num+f212num)
 
 			fv10101num(jtw) = f10101num   ! svgrd valeurs fct f a gche du centre
                		fv20101num(jtw) = f20101num   ! svgrd valeurs fct f a drte du centre
-
-	       		resg0101num = resg0101num+wg(j)*(f10101num+f20101num)
-               		resk0101num = resk0101num + wgk(jtw)*(f10101num+f20101num)
-               		resabs0101num = resabs0101num + wgk(jtw)*(dabs(f10101num)+&
-               		dabs(f20101num))
+			resk0101num = resk0101num + wgk(jtw)*(f10101num+f20101num)
+               		
 
 			fv10102num(jtw) = f10102num   ! svgrd valeurs fct f a gche du centre
                		fv20102num(jtw) = f20102num   ! svgrd valeurs fct f a drte du centre
-
-	       		resg0102num = resg0102num+wg(j)*(f10102num+f20102num)
-               		resk0102num = resk0102num + wgk(jtw)*(f10102num+f20102num)
-               		resabs0102num = resabs0102num + wgk(jtw)*(dabs(f10102num)+&
-               		dabs(f20102num))
+			resk0102num = resk0102num + wgk(jtw)*(f10102num+f20102num)
+               		
 
 			fv10112num(jtw) = f10112num   ! svgrd valeurs fct f a gche du centre
                		fv20112num(jtw) = f20112num   ! svgrd valeurs fct f a drte du centre
-
-	       		resg0112num = resg0112num+wg(j)*(f10112num+f20112num)
                		resk0112num = resk0112num + wgk(jtw)*(f10112num+f20112num)
-               		resabs0112num = resabs0112num + wgk(jtw)*(dabs(f10112num)+&
-               		dabs(f20112num))
+               		
 
 			fv10202num(jtw) = f10202num   ! svgrd valeurs fct f a gche du centre
                		fv20202num(jtw) = f20202num   ! svgrd valeurs fct f a drte du centre
-
-	       		resg0202num = resg0202num+wg(j)*(f10202num+f20202num)
                		resk0202num = resk0202num + wgk(jtw)*(f10202num+f20202num)
-               		resabs0202num = resabs0202num + wgk(jtw)*(dabs(f10202num)+&
-               		dabs(f20202num))
-
+               		
 			fv10212num(jtw) = f10212num   ! svgrd valeurs fct f a gche du centre
                		fv20212num(jtw) = f20212num   ! svgrd valeurs fct f a drte du centre
-
-	       		resg0212num = resg0212num+wg(j)*(f10212num+f20212num)
                		resk0212num = resk0212num + wgk(jtw)*(f10212num+f20212num)
-               		resabs0212num = resabs0212num + wgk(jtw)*(dabs(f10212num)+&
-               		dabs(f20212num))
+               		
 
 			fv11212num(jtw) = f11212num   ! svgrd valeurs fct f a gche du centre
                		fv21212num(jtw) = f21212num   ! svgrd valeurs fct f a drte du centre
-
-	       		resg1212num = resg1212num+wg(j)*(f11212num+f21212num)
                		resk1212num = resk1212num + wgk(jtw)*(f11212num+f21212num)
-               		resabs1212num = resabs1212num + wgk(jtw)*(dabs(f11212num)+&
-               		dabs(f21212num))
+               		
 
 			
          	end do
@@ -4262,8 +4044,6 @@ res0202num,res0212num,res1212num,v01,v02,v12,weib)
 
 			f20101num=(su01**v01)*(su02**v02)*ri01*v01*(((1-gl01*v01)**2)-&
 			gl01*v01)/(su12**v12)
-			f20101num=(su01**v01)*(su02**v02)*ri01*v01*(((1-gl01*v01)**2)-&
-			gl01*v01)/(su12**v12)
 			f20102num=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02*gl01*v01/(su12**v12)
 			f20112num=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12*gl01*v01/(su12**v12)
 			f20202num=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02*gl02*v02/(su12**v12)
@@ -4274,156 +4054,56 @@ res0202num,res0212num,res1212num,v01,v02,v12,weib)
                		fv1denum(jtwm1) = f1denum   ! svgrd valeurs fct f a gche du centre
                		fv2denum(jtwm1) = f2denum   ! svgrd valeurs fct f a drte du centre
 	       		reskdenum = reskdenum + wgk(jtwm1)*(f1denum+f2denum)
-               		resabsdenum = resabsdenum + wgk(jtwm1)*(dabs(f1denum)+&
-               		dabs(f2denum))
+               		
 
 			fv101num(jtwm1) = f101num   ! svgrd valeurs fct f a gche du centre
                		fv201num(jtwm1) = f201num   ! svgrd valeurs fct f a drte du centre
 	       		resk01num = resk01num + wgk(jtwm1)*(f101num+f201num)
-               		resabs01num = resabs01num + wgk(jtwm1)*(dabs(f101num)+&
-               		dabs(f201num))
-
+               		
 			fv102num(jtwm1) = f102num   ! svgrd valeurs fct f a gche du centre
                		fv202num(jtwm1) = f202num   ! svgrd valeurs fct f a drte du centre
 	       		resk02num = resk02num + wgk(jtwm1)*(f102num+f202num)
-               		resabs02num = resabs02num + wgk(jtwm1)*(dabs(f102num)+&
-               		dabs(f202num))
+               		
 
 			fv112num(jtwm1) = f112num   ! svgrd valeurs fct f a gche du centre
                		fv212num(jtwm1) = f212num   ! svgrd valeurs fct f a drte du centre
 	       		resk12num = resk12num + wgk(jtwm1)*(f112num+f212num)
-               		resabs12num = resabs12num + wgk(jtwm1)*(dabs(f112num)+&
-               		dabs(f212num))
+               		
 
 			fv10101num(jtwm1) = f10101num   ! svgrd valeurs fct f a gche du centre
                		fv20101num(jtwm1) = f20101num   ! svgrd valeurs fct f a drte du centre
                		resk0101num = resk0101num + wgk(jtwm1)*(f10101num+f20101num)
-               		resabs0101num = resabs0101num + wgk(jtwm1)*(dabs(f10101num)+&
-               		dabs(f20101num))
-
+               		
 
 			fv10102num(jtwm1) = f10102num   ! svgrd valeurs fct f a gche du centre
                		fv20102num(jtwm1) = f20102num   ! svgrd valeurs fct f a drte du centre
                		resk0102num = resk0102num + wgk(jtwm1)*(f10102num+f20102num)
-               		resabs0102num = resabs0102num + wgk(jtwm1)*(dabs(f10102num)+&
-               		dabs(f20102num))
+               		
 
 			fv10112num(jtwm1) = f10112num   ! svgrd valeurs fct f a gche du centre
                		fv20112num(jtwm1) = f20112num   ! svgrd valeurs fct f a drte du centre
                		resk0112num = resk0112num + wgk(jtwm1)*(f10112num+f20112num)
-               		resabs0112num = resabs0112num + wgk(jtwm1)*(dabs(f10112num)+&
-               		dabs(f20112num))
-
+               		
 			fv10202num(jtwm1) = f10202num   ! svgrd valeurs fct f a gche du centre
                		fv20202num(jtwm1) = f20202num   ! svgrd valeurs fct f a drte du centre
                		resk0202num = resk0202num + wgk(jtwm1)*(f10202num+f20202num)
-               		resabs0202num = resabs0202num + wgk(jtwm1)*(dabs(f10202num)+&
-               		dabs(f20202num))
+               		
 
 			fv10212num(jtwm1) = f10212num   ! svgrd valeurs fct f a gche du centre
                		fv20212num(jtwm1) = f20212num   ! svgrd valeurs fct f a drte du centre
                		resk0212num = resk0212num + wgk(jtwm1)*(f10212num+f20212num)
-               		resabs0212num = resabs0212num + wgk(jtwm1)*(dabs(f10212num)+&
-               		dabs(f20212num))
+               		
 
 			fv11212num(jtwm1) = f11212num   ! svgrd valeurs fct f a gche du centre
                		fv21212num(jtwm1) = f21212num   ! svgrd valeurs fct f a drte du centre
                		resk1212num = resk1212num + wgk(jtwm1)*(f11212num+f21212num)
-               		resabs1212num = resabs1212num + wgk(jtwm1)*(dabs(f11212num)+&
-               		dabs(f21212num))
-
+               		
 
 
 
 			
          	end do
-     ! pr calcul erreur 
-         	reskhdenum = reskdenum*0.5d+00         ! res Kronrod / 2
-         	resascdenum = wgk(8)*dabs(fcdenum-reskhdenum)  ! init  ! w8 * abs(fc - res Kronrod / 2 )
-
-     ! pr calcul erreur 
-         	reskh01num = resk01num*0.5d+00         ! res Kronrod / 2
-         	resasc01num = wgk(8)*dabs(fc01num-reskh01num)  ! init  ! w8 * abs(fc - res Kronrod / 2 )
-
-		     ! pr calcul erreur 
-         	reskh02num = resk02num*0.5d+00         ! res Kronrod / 2
-         	resasc02num = wgk(8)*dabs(fc02num-reskh02num)  ! init  ! w8 * abs(fc - res Kronrod / 2 )
-
-    ! pr calcul erreur 
-         	reskh12num = resk12num*0.5d+00         ! res Kronrod / 2
-         	resasc12num = wgk(8)*dabs(fc12num-reskh12num)  ! init  ! w8 * abs(fc - res Kronrod / 2 )
-
-		reskh0101num = resk0101num*0.5d+00         ! res Kronrod / 2
-         	resasc0101num = wgk(8)*dabs(fc0101num-reskh0101num)  ! init  ! w8 * abs(fc - res Kronrod / 2 )
-
-		reskh0102num = resk0102num*0.5d+00         ! res Kronrod / 2
-         	resasc0102num = wgk(8)*dabs(fc0102num-reskh0102num)  ! init  ! w8 * abs(fc - res Kronrod / 2 )
-
-		reskh0112num = resk0112num*0.5d+00         ! res Kronrod / 2
-         	resasc0112num = wgk(8)*dabs(fc0112num-reskh0112num)  ! init  ! w8 * abs(fc - res Kronrod / 2 )
-
-		reskh0202num = resk0202num*0.5d+00         ! res Kronrod / 2
-         	resasc0202num = wgk(8)*dabs(fc0202num-reskh0202num)  ! init  ! w8 * abs(fc - res Kronrod / 2 )
-
-		reskh0212num = resk0212num*0.5d+00         ! res Kronrod / 2
-         	resasc0212num = wgk(8)*dabs(fc0212num-reskh0212num)  ! init  ! w8 * abs(fc - res Kronrod / 2 )
-
-
-		reskh1212num = resk1212num*0.5d+00         ! res Kronrod / 2
-         	resasc1212num = wgk(8)*dabs(fc1212num-reskh1212num)  ! init  ! w8 * abs(fc - res Kronrod / 2 )
-
-		
-		do j=1,7
-        		resascdenum = resascdenum+wgk(j)*(dabs(fv1denum(j)-&
-        		reskhdenum)+dabs(fv2denum(j)-reskhdenum))  ! ite
-			resascdenum = resascdenum+wgk(j)*(dabs(fv1denum(j)-&
-			reskhdenum)+dabs(fv2denum(j)-reskhdenum))  ! ite
-
-        		resasc01num = resasc01num+wgk(j)*(dabs(fv101num(j)-&
-        		reskh01num)+dabs(fv201num(j)-reskh01num))  ! ite
-			resasc01num = resasc01num+wgk(j)*(dabs(fv101num(j)-&
-			reskh01num)+dabs(fv201num(j)-reskh01num))  ! ite
-
-        		resasc02num = resasc02num+wgk(j)*(dabs(fv102num(j)-&
-        		reskh02num)+dabs(fv202num(j)-reskh02num))  ! ite
-			resasc02num = resasc02num+wgk(j)*(dabs(fv102num(j)-&
-			reskh02num)+dabs(fv202num(j)-reskh02num))  ! ite
-
-        		resasc12num = resasc12num+wgk(j)*(dabs(fv112num(j)-&
-        		reskh12num)+dabs(fv212num(j)-reskh12num))  ! ite
-			resasc12num = resasc12num+wgk(j)*(dabs(fv112num(j)-&
-			reskh12num)+dabs(fv212num(j)-reskh12num))  ! ite
-
-			resasc0101num = resasc0101num+wgk(j)*(dabs(fv10101num(j)-&
-        		reskh0101num)+dabs(fv20101num(j)-reskh0101num))  ! ite
-			resasc0101num = resasc0101num+wgk(j)*(dabs(fv10101num(j)-&
-			reskh0101num)+dabs(fv20101num(j)-reskh0101num))  ! ite
-
-			resasc0102num = resasc0102num+wgk(j)*(dabs(fv10102num(j)-&
-        		reskh0102num)+dabs(fv20102num(j)-reskh0102num))  ! ite
-			resasc0102num = resasc0102num+wgk(j)*(dabs(fv10102num(j)-&
-			reskh0102num)+dabs(fv20102num(j)-reskh0102num))  ! ite
-
-			resasc0112num = resasc0112num+wgk(j)*(dabs(fv10112num(j)-&
-        		reskh0112num)+dabs(fv20112num(j)-reskh0112num))  ! ite
-			resasc0112num = resasc0112num+wgk(j)*(dabs(fv10112num(j)-&
-			reskh0112num)+dabs(fv20112num(j)-reskh0112num))  ! ite
-
-
-			resasc0202num = resasc0202num+wgk(j)*(dabs(fv10202num(j)-&
-        		reskh0202num)+dabs(fv20202num(j)-reskh0202num))  ! ite
-			resasc0202num = resasc0202num+wgk(j)*(dabs(fv10202num(j)-&
-			reskh0202num)+dabs(fv20202num(j)-reskh0202num))  ! ite
-
-
-			resasc0212num = resasc0212num+wgk(j)*(dabs(fv10212num(j)-&
-        		reskh0212num)+dabs(fv20212num(j)-reskh0212num))  ! ite
-			resasc0212num = resasc0212num+wgk(j)*(dabs(fv10212num(j)-&
-			reskh0212num)+dabs(fv20212num(j)-reskh0212num))  ! ite
-
-
-        		
-    	 	end do
+	
     
     		resdenum = reskdenum*xr
     		res01num = resk01num*xr
@@ -4439,9 +4119,454 @@ res0202num,res0212num,res1212num,v01,v02,v12,weib)
          
               
           end subroutine qgaussweibderiv
+!=============================================================================================        
+!================================  qgaussweibderiv  ==========================================
+!=== for derivatives approximation out a 15 point Gauss-Kronrod quadrature rule for weib =====
+!========================= looking only at diag hessian ======================================
+!=============================================================================================  
 
+
+subroutine qgaussweibfirstderiv(a,b,the01,the02,the12,resdenum,&
+res01num,res02num,res12num,v01,v02,v12,weib)
+
+        implicit none
+         double precision a,b,the01(2),the02(2),the12(2)
+         double precision dx,xm,xr,reskdenum,&
+         reskhdenum,resdenum,resk01num,res01num, & 
+	resk02num,res02num,resk12num,res12num,v01,v02,v12
+         double precision xx,f1denum,f2denum, f101num, f102num, f112num, & 
+	f201num, f202num, f212num, &
+	su01,ri01,ri12,su12,su02,ri02,fv1denum,fv2denum, &
+	fv101num,fv102num,fv112num,fv201num,fv202num,fv212num, &  
+	d1mach(5),epmach,uflow,fcdenum,fc01num,fc02num,fc12num
+
+         double precision gl01,gl12,gl02
+         integer::j,jtw,jtwm1,weib
+         double precision,dimension(8)::xgk,wgk
+	 double precision,dimension(4)::wg
+	save wgk,xgk
+
+	 dimension fv1denum(7),fv2denum(7),fv101num(7),fv201num(7), &
+	fv102num(7),fv202num(7), fv112num(7),fv212num(7)
+
+   	D1MACH(1)=2.23D-308
+    	D1MACH(2)=1.79D+308
+    	D1MACH(3)=1.11D-16
+    	D1MACH(4)=2.22D-16
+    	D1MACH(5)=0.301029995663981195D0
+
+    	epmach = d1mach(4)
+    	uflow = d1mach(1)
+
+	wg(1)=0.129484966168869693270611432679082d0
+   	wg(2)=0.279705391489276667901467771423780d0
+    	wg(3)=0.381830050505118944950369775488975d0
+    	wg(4)=0.417959183673469387755102040816327d0
+
+    	xgk(1)=0.991455371120812639206854697526329d0
+    	xgk(2)=0.949107912342758524526189684047851d0
+    	xgk(3)=0.864864423359769072789712788640926d0
+    	xgk(4)=0.741531185599394439863864773280788d0
+    	xgk(5)=0.586087235467691130294144838258730d0
+    	xgk(6)=0.405845151377397166906606412076961d0
+    	xgk(7)=0.207784955007898467600689403773245d0
+    	xgk(8)=0.000000000000000000000000000000000d0
+
+    	wgk(1)=0.022935322010529224963732008058970d0
+    	wgk(2)=0.063092092629978553290700663189204d0
+    	wgk(3)=0.104790010322250183839876322541518d0
+    	wgk(4)=0.140653259715525918745189590510238d0
+    	wgk(5)=0.169004726639267902826583426598550d0
+    	wgk(6)=0.190350578064785409913256402421014d0
+    	wgk(7)=0.204432940075298892414161999234649d0
+    	wgk(8)=0.209482141084727828012999174891714d0
+
+	xm = 0.5d+00*(b+a)
+        xr = 0.5d+00*(b-a)
+
+            resdenum = 0.d0
+	    res01num = 0.d0
+	    res02num = 0.d0
+	    res12num = 0.d0
+	
+
+        
+    	    	call fonct(xm,the01,ri01,gl01,su01,weib)
+    		call fonct(xm,the02,ri02,gl02,su02,weib)
+   		call fonct(xm,the12,ri12,gl12,su12,weib)
+
+    		fcdenum =(su01**v01)*(su02**v02)*ri01*v01/(su12**v12)  ! valeur fct f au milieu de intervalle (a,b), cas pnt 0
+    		fc01num=(su01**v01)*(su02**v02)*ri01*v01*(1-(gl01*v01))/(su12**v12)
+		fc02num=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02/(su12**v12) 
+		fc12num=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12/(su12**v12) 
+		
+        	reskdenum = fcdenum*wgk(8)       ! init res Kronrod   ! fc * 8e poids Kronrod
+        	resk01num = fc01num*wgk(8)       ! init res Kronrod   ! fc * 8e poids Kronrod
+        	resk02num = fc02num*wgk(8)       ! init res Kronrod   ! fc * 8e poids Kronrod
+        	resk12num = fc12num*wgk(8)       ! init res Kronrod   ! fc * 8e poids Kronrod
+        	
+		do j=1,3
+	       		jtw = j*2
+               		dx=xr*xgk(jtw)
+               		xx = xm+dx
+               		call fonct(xx,the01,ri01,gl01,su01,weib)
+               		call fonct(xx,the02,ri02,gl02,su02,weib)
+	       		call fonct(xx,the12,ri12,gl12,su12,weib)
+                        
+			f1denum =(su01**v01)*(su02**v02)*ri01*v01/(su12**v12)
+			f101num=(su01**v01)*(su02**v02)*ri01*v01*(1-(gl01*v01))/(su12**v12)
+			f102num=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02/(su12**v12) 
+			f112num=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12/(su12**v12) 
+			
+               		xx = xm-dx
+               		call fonct(xx,the01,ri01,gl01,su01,weib)
+               		call fonct(xx,the02,ri02,gl02,su02,weib)
+	       		call fonct(xx,the12,ri12,gl12,su12,weib)
+                        f2denum =(su01**v01)*(su02**v02)*ri01*v01/(su12**v12)
+			f201num=(su01**v01)*(su02**v02)*ri01*v01*(1-(gl01*v01))/(su12**v12)
+			f202num=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02/(su12**v12) 
+			f212num=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12/(su12**v12) 
+
+               		fv1denum(jtw) = f1denum   ! svgrd valeurs fct f a gche du centre
+               		fv2denum(jtw) = f2denum   ! svgrd valeurs fct f a drte du centre
+
+               		reskdenum = reskdenum + wgk(jtw)*(f1denum+f2denum)
+               		
+			fv101num(jtw) = f101num   ! svgrd valeurs fct f a gche du centre
+               		fv201num(jtw) = f201num   ! svgrd valeurs fct f a drte du centre
+
+               		resk01num = resk01num + wgk(jtw)*(f101num+f201num)
+               		
+			fv102num(jtw) = f102num   ! svgrd valeurs fct f a gche du centre
+               		fv202num(jtw) = f202num   ! svgrd valeurs fct f a drte du centre
+
+               		resk02num = resk02num + wgk(jtw)*(f102num+f202num)
+               		
+			fv112num(jtw) = f112num   ! svgrd valeurs fct f a gche du centre
+               		fv212num(jtw) = f212num   ! svgrd valeurs fct f a drte du centre
+
+               		resk12num = resk12num + wgk(jtw)*(f112num+f212num)
+               		
+
+			
+         	end do
+	 	do j=1,4
+			jtwm1 = j*2-1
+               		dx=xr*xgk(jtwm1)
+               		xx = xm+dx
+               		call fonct(xx,the01,ri01,gl01,su01,weib)
+               		call fonct(xx,the02,ri02,gl02,su02,weib)
+	       		call fonct(xx,the12,ri12,gl12,su12,weib)
+      			
+			f1denum =(su01**v01)*(su02**v02)*ri01*v01/(su12**v12)
+			f101num=(su01**v01)*(su02**v02)*ri01*v01*(1-(gl01*v01))/(su12**v12)
+			f102num=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02/(su12**v12) 
+			f112num=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12/(su12**v12) 
+			
+               		xx = xm-dx
+               		call fonct(xx,the01,ri01,gl01,su01,weib)
+               		call fonct(xx,the02,ri02,gl02,su02,weib)
+	       		call fonct(xx,the12,ri12,gl12,su12,weib)
+
+      			f2denum =(su01**v01)*(su02**v02)*ri01*v01/(su12**v12)
+			f201num=(su01**v01)*(su02**v02)*ri01*v01*(1-(gl01*v01))/(su12**v12)
+			f202num=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02/(su12**v12) 
+			f212num=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12/(su12**v12) 
+			
+
+               		fv1denum(jtwm1) = f1denum   ! svgrd valeurs fct f a gche du centre
+               		fv2denum(jtwm1) = f2denum   ! svgrd valeurs fct f a drte du centre
+	       		reskdenum = reskdenum + wgk(jtwm1)*(f1denum+f2denum)
+               		
+			fv101num(jtwm1) = f101num   ! svgrd valeurs fct f a gche du centre
+               		fv201num(jtwm1) = f201num   ! svgrd valeurs fct f a drte du centre
+	       		resk01num = resk01num + wgk(jtwm1)*(f101num+f201num)
+               		
+
+			fv102num(jtwm1) = f102num   ! svgrd valeurs fct f a gche du centre
+               		fv202num(jtwm1) = f202num   ! svgrd valeurs fct f a drte du centre
+	       		resk02num = resk02num + wgk(jtwm1)*(f102num+f202num)
+               		
+
+			fv112num(jtwm1) = f112num   ! svgrd valeurs fct f a gche du centre
+               		fv212num(jtwm1) = f212num   ! svgrd valeurs fct f a drte du centre
+	       		resk12num = resk12num + wgk(jtwm1)*(f112num+f212num)
+               		
+
+         	end do
+
+    		resdenum = xr*reskdenum
+    		res01num = xr*resk01num 
+    		res02num = xr*resk02num
+    		res12num = xr*resk12num 
+	
+         
+              
+          end subroutine qgaussweibfirstderiv
+!=============================================================================================        
+!================================  qgaussweibderiv  ==========================================
+!=== for derivatives approximation out a 15 point Gauss-Kronrod quadrature rule for weib =====
+!========================= looking only at diag hessian ======================================
+!=============================================================================================  
+
+
+subroutine qgaussweibderivdiag(a,b,the01,the02,the12,resdenum,&
+res01num,res02num,res12num,res0101num,&
+res0202num,res1212num,v01,v02,v12,weib)
+
+        implicit none
+         double precision a,b,the01(2),the02(2),the12(2)
+         double precision dx,xm,xr,reskdenum,&
+         reskhdenum,resdenum,resk01num,res01num, & 
+	resk02num,res02num,resk12num,res12num, & 
+	resk0101num,res0101num,resk0202num,res0202num, &
+	resk1212num,res1212num,v01,v02,v12
+         double precision xx,f1denum,f2denum, f101num, f102num, f112num, & 
+	f10101num,f10202num,f11212num,&
+	f201num, f202num, f212num, f20101num,f20202num,f21212num,&
+	su01,ri01,ri12,su12,su02,ri02,fv1denum,fv2denum, &
+	fv101num,fv102num,fv112num,fv201num,fv202num,fv212num, & 
+	fv10101num,fv20101num, fv10202num,fv20202num, & 
+	fv11212num,fv21212num, &  
+	d1mach(5),epmach,uflow,fcdenum,fc01num,fc02num,fc12num, & 
+	fc0101num,fc0102num,fc0112num,fc0202num,fc0212num,fc1212num
+
+         double precision gl01,gl12,gl02
+         integer::j,jtw,jtwm1,weib
+         double precision,dimension(8)::xgk,wgk
+	 double precision,dimension(4)::wg
+	save wgk,xgk
+
+	 dimension fv1denum(7),fv2denum(7),fv101num(7),fv201num(7), &
+	fv102num(7),fv202num(7), fv112num(7),fv212num(7), & 
+	fv10101num(7),fv20101num(7),fv10202num(7),fv20202num(7),&
+	fv11212num(7),fv21212num(7)
+
+   	D1MACH(1)=2.23D-308
+    	D1MACH(2)=1.79D+308
+    	D1MACH(3)=1.11D-16
+    	D1MACH(4)=2.22D-16
+    	D1MACH(5)=0.301029995663981195D0
+
+    	epmach = d1mach(4)
+    	uflow = d1mach(1)
+
+	wg(1)=0.129484966168869693270611432679082d0
+   	wg(2)=0.279705391489276667901467771423780d0
+    	wg(3)=0.381830050505118944950369775488975d0
+    	wg(4)=0.417959183673469387755102040816327d0
+
+    	xgk(1)=0.991455371120812639206854697526329d0
+    	xgk(2)=0.949107912342758524526189684047851d0
+    	xgk(3)=0.864864423359769072789712788640926d0
+    	xgk(4)=0.741531185599394439863864773280788d0
+    	xgk(5)=0.586087235467691130294144838258730d0
+    	xgk(6)=0.405845151377397166906606412076961d0
+    	xgk(7)=0.207784955007898467600689403773245d0
+    	xgk(8)=0.000000000000000000000000000000000d0
+
+    	wgk(1)=0.022935322010529224963732008058970d0
+    	wgk(2)=0.063092092629978553290700663189204d0
+    	wgk(3)=0.104790010322250183839876322541518d0
+    	wgk(4)=0.140653259715525918745189590510238d0
+    	wgk(5)=0.169004726639267902826583426598550d0
+    	wgk(6)=0.190350578064785409913256402421014d0
+    	wgk(7)=0.204432940075298892414161999234649d0
+    	wgk(8)=0.209482141084727828012999174891714d0
+
+	xm = 0.5d+00*(b+a)
+        xr = 0.5d+00*(b-a)
+
+            resdenum = 0.d0
+	    res01num = 0.d0
+	    res02num = 0.d0
+	    res12num = 0.d0
+	
+	    res0101num = 0.d0
+	    res0202num = 0.d0
+	    res1212num = 0.d0
+        
+    	    	call fonct(xm,the01,ri01,gl01,su01,weib)
+    		call fonct(xm,the02,ri02,gl02,su02,weib)
+   		call fonct(xm,the12,ri12,gl12,su12,weib)
+
+    		fcdenum =(su01**v01)*(su02**v02)*ri01*v01/(su12**v12)  ! valeur fct f au milieu de intervalle (a,b), cas pnt 0
+    		fc01num=(su01**v01)*(su02**v02)*ri01*v01*(1-(gl01*v01))/(su12**v12)
+		fc02num=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02/(su12**v12) 
+		fc12num=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12/(su12**v12) 
+		fc0101num=(su01**v01)*(su02**v02)*ri01*v01*(((1-gl01*v01)**2)-&
+			gl01*v01)/(su12**v12)
+		fc0202num=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02*gl02*v02/(su12**v12)
+		fc1212num=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12*gl12*v12/(su12**v12)
+
+        	reskdenum = fcdenum*wgk(8)       ! init res Kronrod   ! fc * 8e poids Kronrod
+        	resk01num = fc01num*wgk(8)       ! init res Kronrod   ! fc * 8e poids Kronrod
+        	resk02num = fc02num*wgk(8)       ! init res Kronrod   ! fc * 8e poids Kronrod
+        	resk12num = fc12num*wgk(8)       ! init res Kronrod   ! fc * 8e poids Kronrod
+        	resk0101num = fc0101num*wgk(8)      ! init res Kronrod   ! fc * 8e poids Kronrod
+        	resk0202num = fc0202num*wgk(8)       ! init res Kronrod   ! fc * 8e poids Kronrod
+        	resk1212num = fc1212num*wgk(8)       ! init res Kronrod   ! fc * 8e poids Kronrod
+        	
+
+
+		do j=1,3
+	       		jtw = j*2
+               		dx=xr*xgk(jtw)
+               		xx = xm+dx
+               		call fonct(xx,the01,ri01,gl01,su01,weib)
+               		call fonct(xx,the02,ri02,gl02,su02,weib)
+	       		call fonct(xx,the12,ri12,gl12,su12,weib)
+                        
+			f1denum =(su01**v01)*(su02**v02)*ri01*v01/(su12**v12)
+			f101num=(su01**v01)*(su02**v02)*ri01*v01*(1-(gl01*v01))/(su12**v12)
+			f102num=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02/(su12**v12) 
+			f112num=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12/(su12**v12) 
+
+			f10101num=(su01**v01)*(su02**v02)*ri01*v01*(((1-gl01*v01)**2)-&
+			gl01*v01)/(su12**v12)
+			f10202num=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02*gl02*v02/(su12**v12)
+			f11212num=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12*gl12*v12/(su12**v12)
+
+			
+               		xx = xm-dx
+               		call fonct(xx,the01,ri01,gl01,su01,weib)
+               		call fonct(xx,the02,ri02,gl02,su02,weib)
+	       		call fonct(xx,the12,ri12,gl12,su12,weib)
+                        f2denum =(su01**v01)*(su02**v02)*ri01*v01/(su12**v12)
+			f201num=(su01**v01)*(su02**v02)*ri01*v01*(1-(gl01*v01))/(su12**v12)
+			f202num=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02/(su12**v12) 
+			f212num=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12/(su12**v12) 
+
+			f20101num=(su01**v01)*(su02**v02)*ri01*v01*(((1-gl01*v01)**2)-&
+			gl01*v01)/(su12**v12)
+			f20202num=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02*gl02*v02/(su12**v12)
+			f21212num=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12*gl12*v12/(su12**v12)
+
+			
+               		fv1denum(jtw) = f1denum   ! svgrd valeurs fct f a gche du centre
+               		fv2denum(jtw) = f2denum   ! svgrd valeurs fct f a drte du centre
+
+               		reskdenum = reskdenum + wgk(jtw)*(f1denum+f2denum)
+               		
+			fv101num(jtw) = f101num   ! svgrd valeurs fct f a gche du centre
+               		fv201num(jtw) = f201num   ! svgrd valeurs fct f a drte du centre
+
+               		resk01num = resk01num + wgk(jtw)*(f101num+f201num)
+               		
+			fv102num(jtw) = f102num   ! svgrd valeurs fct f a gche du centre
+               		fv202num(jtw) = f202num   ! svgrd valeurs fct f a drte du centre
+
+               		resk02num = resk02num + wgk(jtw)*(f102num+f202num)
+               		
+			fv112num(jtw) = f112num   ! svgrd valeurs fct f a gche du centre
+               		fv212num(jtw) = f212num   ! svgrd valeurs fct f a drte du centre
+
+               		resk12num = resk12num + wgk(jtw)*(f112num+f212num)
+               		
+			fv10101num(jtw) = f10101num   ! svgrd valeurs fct f a gche du centre
+               		fv20101num(jtw) = f20101num   ! svgrd valeurs fct f a drte du centre
+
+               		resk0101num = resk0101num + wgk(jtw)*(f10101num+f20101num)
+               		
+			fv10202num(jtw) = f10202num   ! svgrd valeurs fct f a gche du centre
+               		fv20202num(jtw) = f20202num   ! svgrd valeurs fct f a drte du centre
+
+               		resk0202num = resk0202num + wgk(jtw)*(f10202num+f20202num)
+               		
+			fv11212num(jtw) = f11212num   ! svgrd valeurs fct f a gche du centre
+               		fv21212num(jtw) = f21212num   ! svgrd valeurs fct f a drte du centre
+
+               		resk1212num = resk1212num + wgk(jtw)*(f11212num+f21212num)
+               		
+
+			
+         	end do
+	 	do j=1,4
+			jtwm1 = j*2-1
+               		dx=xr*xgk(jtwm1)
+               		xx = xm+dx
+               		call fonct(xx,the01,ri01,gl01,su01,weib)
+               		call fonct(xx,the02,ri02,gl02,su02,weib)
+	       		call fonct(xx,the12,ri12,gl12,su12,weib)
+      			
+			f1denum =(su01**v01)*(su02**v02)*ri01*v01/(su12**v12)
+			f101num=(su01**v01)*(su02**v02)*ri01*v01*(1-(gl01*v01))/(su12**v12)
+			f102num=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02/(su12**v12) 
+			f112num=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12/(su12**v12) 
+			f10101num=(su01**v01)*(su02**v02)*ri01*v01*(((1-gl01*v01)**2)-&
+			gl01*v01)/(su12**v12)
+			f10202num=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02*gl02*v02/(su12**v12)
+			f11212num=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12*gl12*v12/(su12**v12)
+
+
+               		xx = xm-dx
+               		call fonct(xx,the01,ri01,gl01,su01,weib)
+               		call fonct(xx,the02,ri02,gl02,su02,weib)
+	       		call fonct(xx,the12,ri12,gl12,su12,weib)
+
+      			f2denum =(su01**v01)*(su02**v02)*ri01*v01/(su12**v12)
+			f201num=(su01**v01)*(su02**v02)*ri01*v01*(1-(gl01*v01))/(su12**v12)
+			f202num=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02/(su12**v12) 
+			f212num=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12/(su12**v12) 
+			f20101num=(su01**v01)*(su02**v02)*ri01*v01*(((1-gl01*v01)**2)-&
+			gl01*v01)/(su12**v12)
+			f20202num=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02*gl02*v02/(su12**v12)
+			f21212num=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12*gl12*v12/(su12**v12)
+
+
+               		fv1denum(jtwm1) = f1denum   ! svgrd valeurs fct f a gche du centre
+               		fv2denum(jtwm1) = f2denum   ! svgrd valeurs fct f a drte du centre
+	       		reskdenum = reskdenum + wgk(jtwm1)*(f1denum+f2denum)
+               		
+			fv101num(jtwm1) = f101num   ! svgrd valeurs fct f a gche du centre
+               		fv201num(jtwm1) = f201num   ! svgrd valeurs fct f a drte du centre
+	       		resk01num = resk01num + wgk(jtwm1)*(f101num+f201num)
+               		
+
+			fv102num(jtwm1) = f102num   ! svgrd valeurs fct f a gche du centre
+               		fv202num(jtwm1) = f202num   ! svgrd valeurs fct f a drte du centre
+	       		resk02num = resk02num + wgk(jtwm1)*(f102num+f202num)
+               		
+
+			fv112num(jtwm1) = f112num   ! svgrd valeurs fct f a gche du centre
+               		fv212num(jtwm1) = f212num   ! svgrd valeurs fct f a drte du centre
+	       		resk12num = resk12num + wgk(jtwm1)*(f112num+f212num)
+               		
+
+			fv10101num(jtwm1) = f10101num   ! svgrd valeurs fct f a gche du centre
+               		fv20101num(jtwm1) = f20101num   ! svgrd valeurs fct f a drte du centre
+               		resk0101num = resk0101num + wgk(jtwm1)*(f10101num+f20101num)
+               		
+			fv10202num(jtwm1) = f10202num   ! svgrd valeurs fct f a gche du centre
+               		fv20202num(jtwm1) = f20202num   ! svgrd valeurs fct f a drte du centre
+               		resk0202num = resk0202num + wgk(jtwm1)*(f10202num+f20202num)
+               		
+			fv11212num(jtwm1) = f11212num   ! svgrd valeurs fct f a gche du centre
+               		fv21212num(jtwm1) = f21212num   ! svgrd valeurs fct f a drte du centre
+               		resk1212num = resk1212num + wgk(jtwm1)*(f11212num+f21212num)
+               		
+
+
+
+
+			
+         	end do
+
+    		resdenum = xr*reskdenum
+    		res01num = xr*resk01num 
+    		res02num = xr*resk02num
+    		res12num = xr*resk12num 
+		res0101num = xr*resk0101num
+		res0202num = xr*resk0202num
+		res1212num = xr*resk1212num  
+	
+         
+              
+          end subroutine qgaussweibderivdiag
 
 !================================  QGAUS : 1  15  ==========================
+!================================ complete hessian =========================
+!================================ M-spline baseline risk ===================
 
 
 subroutine qgausssplinederiv(a,b,the01,the02,the12,resdenum,&
@@ -4451,17 +4576,11 @@ subroutine qgausssplinederiv(a,b,the01,the02,the12,resdenum,&
    use commun,only:zi01,zi12,zi02,nz01,nz12,nz02
 
         double precision a,b
-         double precision dx,xm,xr,resabsdenum,reskdenum,&
-         reskhdenum,resascdenum,resgdenum,resdenum, & 
-	resabs01num,resk01num,reskh01num,resasc01num,resg01num,res01num, & 
-	resabs02num,resk02num,reskh02num,resasc02num,resg02num,res02num, & 
-	resabs12num,resk12num,reskh12num,resasc12num,resg12num,res12num, & 
-	resabs0101num,resk0101num,reskh0101num,resasc0101num,resg0101num,res0101num, &
-	resabs0102num,resk0102num,reskh0102num,resasc0102num,resg0102num,res0102num, &
-	resabs0112num,resk0112num,reskh0112num,resasc0112num,resg0112num,res0112num, &
-	resabs0202num,resk0202num,reskh0202num,resasc0202num,resg0202num,res0202num, &
-	resabs0212num,resk0212num,reskh0212num,resasc0212num,resg0212num,res0212num, &
-	resabs1212num,resk1212num,reskh1212num,resasc1212num,resg1212num,res1212num, &
+         double precision dx,xm,xr,reskdenum,resdenum, & 
+	resk01num,res01num,resk02num,res02num,resk12num,res12num, & 
+	resk0101num,res0101num,resk0102num,res0102num, &
+	resk0112num,res0112num,resk0202num,res0202num, &
+	resk0212num,res0212num,resk1212num,res1212num, &
 	v01,v02,v12
          double precision xx,f1denum,f2denum, f101num, f102num, f112num, & 
 	f10101num,f10102num,f10112num,f10202num,f10212num,f11212num,&
@@ -4562,52 +4681,17 @@ subroutine qgausssplinederiv(a,b,the01,the02,the12,resdenum,&
 		fc0212num=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02*gl12*v12/(su12**v12)
 		fc1212num=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12*gl12*v12/(su12**v12)
 
-    		resgdenum = fcdenum*wg(4)        ! init res Gauss  ! fc * 4e poids Gauss
-        	reskdenum = fcdenum*wgk(8)       ! init res Kronrod   ! fc * 8e poids Kronrod
-        	resabsdenum = dabs(reskdenum)    ! init res absolue Kronrod  
-
-		resg01num = fc01num*wg(4)        ! init res Gauss  ! fc * 4e poids Gauss
+    		reskdenum = fcdenum*wgk(8)       ! init res Kronrod   ! fc * 8e poids Kronrod
         	resk01num = fc01num*wgk(8)       ! init res Kronrod   ! fc * 8e poids Kronrod
-        	resabs01num = dabs(resk01num)    ! init res absolue Kronrod   
-
-		resg02num = fc02num*wg(4)        ! init res Gauss  ! fc * 4e poids Gauss
         	resk02num = fc02num*wgk(8)       ! init res Kronrod   ! fc * 8e poids Kronrod
-        	resabs02num = dabs(resk02num)    ! init res absolue Kronrod   
-
-		resg12num = fc12num*wg(4)        ! init res Gauss  ! fc * 4e poids Gauss
         	resk12num = fc12num*wgk(8)       ! init res Kronrod   ! fc * 8e poids Kronrod
-        	resabs12num = dabs(resk12num)    ! init res absolue Kronrod  
-
-		resg0101num = fc0101num*wg(4)        ! init res Gauss  ! fc * 4e poids Gauss
         	resk0101num = fc0101num*wgk(8)       ! init res Kronrod   ! fc * 8e poids Kronrod
-        	resabs0101num = dabs(resk0101num)    ! init res absolue Kronrod   
-		
-		resg0102num = fc0102num*wg(4)        ! init res Gauss  ! fc * 4e poids Gauss
         	resk0102num = fc0102num*wgk(8)       ! init res Kronrod   ! fc * 8e poids Kronrod
-        	resabs0102num = dabs(resk0102num)    ! init res absolue Kronrod   
-
-		resg0112num = fc0112num*wg(4)        ! init res Gauss  ! fc * 4e poids Gauss
         	resk0112num = fc0112num*wgk(8)       ! init res Kronrod   ! fc * 8e poids Kronrod
-        	resabs0112num = dabs(resk0112num)    ! init res absolue Kronrod   
-
-		resg0202num = fc0202num*wg(4)        ! init res Gauss  ! fc * 4e poids Gauss
         	resk0202num = fc0202num*wgk(8)       ! init res Kronrod   ! fc * 8e poids Kronrod
-        	resabs0202num = dabs(resk0202num)    ! init res absolue Kronrod   
-
-		resg0212num = fc0212num*wg(4)        ! init res Gauss  ! fc * 4e poids Gauss
         	resk0212num = fc0212num*wgk(8)       ! init res Kronrod   ! fc * 8e poids Kronrod
-        	resabs0212num = dabs(resk0212num)    ! init res absolue Kronrod   
-
-
-		resg1212num = fc1212num*wg(4)        ! init res Gauss  ! fc * 4e poids Gauss
         	resk1212num = fc1212num*wgk(8)       ! init res Kronrod   ! fc * 8e poids Kronrod
-        	resabs1212num = dabs(resk1212num)    ! init res absolue Kronrod   
-
-
-
-
-
-
+        	
 		do j=1,3
 	       		jtw = j*2
                		dx=xr*xgk(jtw)
@@ -4652,82 +4736,53 @@ subroutine qgausssplinederiv(a,b,the01,the02,the12,resdenum,&
                		fv1denum(jtw) = f1denum   ! svgrd valeurs fct f a gche du centre
                		fv2denum(jtw) = f2denum   ! svgrd valeurs fct f a drte du centre
 
-	       		resgdenum = resgdenum+wg(j)*(f1denum+f2denum)
-               		reskdenum = reskdenum + wgk(jtw)*(f1denum+f2denum)
-               		resabsdenum = resabsdenum + wgk(jtw)*(dabs(f1denum)+&
-               		dabs(f2denum))
-
+	       		reskdenum = reskdenum + wgk(jtw)*(f1denum+f2denum)
+               		
 			fv101num(jtw) = f101num   ! svgrd valeurs fct f a gche du centre
                		fv201num(jtw) = f201num   ! svgrd valeurs fct f a drte du centre
 
-	       		resg01num = resg01num+wg(j)*(f101num+f201num)
-               		resk01num = resk01num + wgk(jtw)*(f101num+f201num)
-               		resabs01num = resabs01num + wgk(jtw)*(dabs(f101num)+&
-               		dabs(f201num))
-
+	       		resk01num = resk01num + wgk(jtw)*(f101num+f201num)
+               		
 			fv102num(jtw) = f102num   ! svgrd valeurs fct f a gche du centre
                		fv202num(jtw) = f202num   ! svgrd valeurs fct f a drte du centre
 
-	       		resg02num = resg02num+wg(j)*(f102num+f202num)
-               		resk02num = resk02num + wgk(jtw)*(f102num+f202num)
-               		resabs02num = resabs02num + wgk(jtw)*(dabs(f102num)+&
-               		dabs(f202num))
-
+	       		resk02num = resk02num + wgk(jtw)*(f102num+f202num)
+               		
 			fv112num(jtw) = f112num   ! svgrd valeurs fct f a gche du centre
                		fv212num(jtw) = f212num   ! svgrd valeurs fct f a drte du centre
 
-	       		resg12num = resg12num+wg(j)*(f112num+f212num)
-               		resk12num = resk12num + wgk(jtw)*(f112num+f212num)
-               		resabs12num = resabs12num + wgk(jtw)*(dabs(f112num)+&
-               		dabs(f212num))
-
+	       		resk12num = resk12num + wgk(jtw)*(f112num+f212num)
+               		
 			fv10101num(jtw) = f10101num   ! svgrd valeurs fct f a gche du centre
                		fv20101num(jtw) = f20101num   ! svgrd valeurs fct f a drte du centre
 
-	       		resg0101num = resg0101num+wg(j)*(f10101num+f20101num)
-               		resk0101num = resk0101num + wgk(jtw)*(f10101num+f20101num)
-               		resabs0101num = resabs0101num + wgk(jtw)*(dabs(f10101num)+&
-               		dabs(f20101num))
-
+	       		resk0101num = resk0101num + wgk(jtw)*(f10101num+f20101num)
+               		
 			fv10102num(jtw) = f10102num   ! svgrd valeurs fct f a gche du centre
                		fv20102num(jtw) = f20102num   ! svgrd valeurs fct f a drte du centre
 
-	       		resg0102num = resg0102num+wg(j)*(f10102num+f20102num)
-               		resk0102num = resk0102num + wgk(jtw)*(f10102num+f20102num)
-               		resabs0102num = resabs0102num + wgk(jtw)*(dabs(f10102num)+&
-               		dabs(f20102num))
-
+	       		resk0102num = resk0102num + wgk(jtw)*(f10102num+f20102num)
+               		
 			fv10112num(jtw) = f10112num   ! svgrd valeurs fct f a gche du centre
                		fv20112num(jtw) = f20112num   ! svgrd valeurs fct f a drte du centre
 
-	       		resg0112num = resg0112num+wg(j)*(f10112num+f20112num)
-               		resk0112num = resk0112num + wgk(jtw)*(f10112num+f20112num)
-               		resabs0112num = resabs0112num + wgk(jtw)*(dabs(f10112num)+&
-               		dabs(f20112num))
-
+	       		resk0112num = resk0112num + wgk(jtw)*(f10112num+f20112num)
+               		
 			fv10202num(jtw) = f10202num   ! svgrd valeurs fct f a gche du centre
                		fv20202num(jtw) = f20202num   ! svgrd valeurs fct f a drte du centre
 
-	       		resg0202num = resg0202num+wg(j)*(f10202num+f20202num)
-               		resk0202num = resk0202num + wgk(jtw)*(f10202num+f20202num)
-               		resabs0202num = resabs0202num + wgk(jtw)*(dabs(f10202num)+&
-               		dabs(f20202num))
-
+	       		resk0202num = resk0202num + wgk(jtw)*(f10202num+f20202num)
+               		
 			fv10212num(jtw) = f10212num   ! svgrd valeurs fct f a gche du centre
                		fv20212num(jtw) = f20212num   ! svgrd valeurs fct f a drte du centre
 
-	       		resg0212num = resg0212num+wg(j)*(f10212num+f20212num)
-               		resk0212num = resk0212num + wgk(jtw)*(f10212num+f20212num)
-               		resabs0212num = resabs0212num + wgk(jtw)*(dabs(f10212num)+&
-               		dabs(f20212num))
-
+	       		resk0212num = resk0212num + wgk(jtw)*(f10212num+f20212num)
+               		
 			fv11212num(jtw) = f11212num   ! svgrd valeurs fct f a gche du centre
                		fv21212num(jtw) = f21212num   ! svgrd valeurs fct f a drte du centre
 
-	       		resg1212num = resg1212num+wg(j)*(f11212num+f21212num)
-               		resk1212num = resk1212num + wgk(jtw)*(f11212num+f21212num)
-               		resabs1212num = resabs1212num + wgk(jtw)*(dabs(f11212num)+&
-               		dabs(f21212num))
+	       		resk1212num = resk1212num + wgk(jtw)*(f11212num+f21212num)
+               		
 
 			
          	end do
@@ -4773,156 +4828,46 @@ subroutine qgausssplinederiv(a,b,the01,the02,the12,resdenum,&
                		fv1denum(jtwm1) = f1denum   ! svgrd valeurs fct f a gche du centre
                		fv2denum(jtwm1) = f2denum   ! svgrd valeurs fct f a drte du centre
 	       		reskdenum = reskdenum + wgk(jtwm1)*(f1denum+f2denum)
-               		resabsdenum = resabsdenum + wgk(jtwm1)*(dabs(f1denum)+&
-               		dabs(f2denum))
-
+               		
 			fv101num(jtwm1) = f101num   ! svgrd valeurs fct f a gche du centre
                		fv201num(jtwm1) = f201num   ! svgrd valeurs fct f a drte du centre
 	       		resk01num = resk01num + wgk(jtwm1)*(f101num+f201num)
-               		resabs01num = resabs01num + wgk(jtwm1)*(dabs(f101num)+&
-               		dabs(f201num))
-
+               		
 			fv102num(jtwm1) = f102num   ! svgrd valeurs fct f a gche du centre
                		fv202num(jtwm1) = f202num   ! svgrd valeurs fct f a drte du centre
 	       		resk02num = resk02num + wgk(jtwm1)*(f102num+f202num)
-               		resabs02num = resabs02num + wgk(jtwm1)*(dabs(f102num)+&
-               		dabs(f202num))
-
+               		
 			fv112num(jtwm1) = f112num   ! svgrd valeurs fct f a gche du centre
                		fv212num(jtwm1) = f212num   ! svgrd valeurs fct f a drte du centre
 	       		resk12num = resk12num + wgk(jtwm1)*(f112num+f212num)
-               		resabs12num = resabs12num + wgk(jtwm1)*(dabs(f112num)+&
-               		dabs(f212num))
-
+               		
 			fv10101num(jtwm1) = f10101num   ! svgrd valeurs fct f a gche du centre
                		fv20101num(jtwm1) = f20101num   ! svgrd valeurs fct f a drte du centre
                		resk0101num = resk0101num + wgk(jtwm1)*(f10101num+f20101num)
-               		resabs0101num = resabs0101num + wgk(jtwm1)*(dabs(f10101num)+&
-               		dabs(f20101num))
-
 
 			fv10102num(jtwm1) = f10102num   ! svgrd valeurs fct f a gche du centre
                		fv20102num(jtwm1) = f20102num   ! svgrd valeurs fct f a drte du centre
                		resk0102num = resk0102num + wgk(jtwm1)*(f10102num+f20102num)
-               		resabs0102num = resabs0102num + wgk(jtwm1)*(dabs(f10102num)+&
-               		dabs(f20102num))
-
+               		
 			fv10112num(jtwm1) = f10112num   ! svgrd valeurs fct f a gche du centre
                		fv20112num(jtwm1) = f20112num   ! svgrd valeurs fct f a drte du centre
                		resk0112num = resk0112num + wgk(jtwm1)*(f10112num+f20112num)
-               		resabs0112num = resabs0112num + wgk(jtwm1)*(dabs(f10112num)+&
-               		dabs(f20112num))
-
+               		
 			fv10202num(jtwm1) = f10202num   ! svgrd valeurs fct f a gche du centre
                		fv20202num(jtwm1) = f20202num   ! svgrd valeurs fct f a drte du centre
                		resk0202num = resk0202num + wgk(jtwm1)*(f10202num+f20202num)
-               		resabs0202num = resabs0202num + wgk(jtwm1)*(dabs(f10202num)+&
-               		dabs(f20202num))
-
+               		
 			fv10212num(jtwm1) = f10212num   ! svgrd valeurs fct f a gche du centre
                		fv20212num(jtwm1) = f20212num   ! svgrd valeurs fct f a drte du centre
                		resk0212num = resk0212num + wgk(jtwm1)*(f10212num+f20212num)
-               		resabs0212num = resabs0212num + wgk(jtwm1)*(dabs(f10212num)+&
-               		dabs(f20212num))
-
+               		
 			fv11212num(jtwm1) = f11212num   ! svgrd valeurs fct f a gche du centre
                		fv21212num(jtwm1) = f21212num   ! svgrd valeurs fct f a drte du centre
                		resk1212num = resk1212num + wgk(jtwm1)*(f11212num+f21212num)
-               		resabs1212num = resabs1212num + wgk(jtwm1)*(dabs(f11212num)+&
-               		dabs(f21212num))
-
-
-
-
+               		
 			
          	end do
-     ! pr calcul erreur 
-         	reskhdenum = reskdenum*0.5d+00         ! res Kronrod / 2
-         	resascdenum = wgk(8)*dabs(fcdenum-reskhdenum)  ! init  ! w8 * abs(fc - res Kronrod / 2 )
-
-     ! pr calcul erreur 
-         	reskh01num = resk01num*0.5d+00         ! res Kronrod / 2
-         	resasc01num = wgk(8)*dabs(fc01num-reskh01num)  ! init  ! w8 * abs(fc - res Kronrod / 2 )
-
-		     ! pr calcul erreur 
-         	reskh02num = resk02num*0.5d+00         ! res Kronrod / 2
-         	resasc02num = wgk(8)*dabs(fc02num-reskh02num)  ! init  ! w8 * abs(fc - res Kronrod / 2 )
-
-    ! pr calcul erreur 
-         	reskh12num = resk12num*0.5d+00         ! res Kronrod / 2
-         	resasc12num = wgk(8)*dabs(fc12num-reskh12num)  ! init  ! w8 * abs(fc - res Kronrod / 2 )
-
-		reskh0101num = resk0101num*0.5d+00         ! res Kronrod / 2
-         	resasc0101num = wgk(8)*dabs(fc0101num-reskh0101num)  ! init  ! w8 * abs(fc - res Kronrod / 2 )
-
-		reskh0102num = resk0102num*0.5d+00         ! res Kronrod / 2
-         	resasc0102num = wgk(8)*dabs(fc0102num-reskh0102num)  ! init  ! w8 * abs(fc - res Kronrod / 2 )
-
-		reskh0112num = resk0112num*0.5d+00         ! res Kronrod / 2
-         	resasc0112num = wgk(8)*dabs(fc0112num-reskh0112num)  ! init  ! w8 * abs(fc - res Kronrod / 2 )
-
-		reskh0202num = resk0202num*0.5d+00         ! res Kronrod / 2
-         	resasc0202num = wgk(8)*dabs(fc0202num-reskh0202num)  ! init  ! w8 * abs(fc - res Kronrod / 2 )
-
-		reskh0212num = resk0212num*0.5d+00         ! res Kronrod / 2
-         	resasc0212num = wgk(8)*dabs(fc0212num-reskh0212num)  ! init  ! w8 * abs(fc - res Kronrod / 2 )
-
-
-		reskh1212num = resk1212num*0.5d+00         ! res Kronrod / 2
-         	resasc1212num = wgk(8)*dabs(fc1212num-reskh1212num)  ! init  ! w8 * abs(fc - res Kronrod / 2 )
-
-		
-		do j=1,7
-        		resascdenum = resascdenum+wgk(j)*(dabs(fv1denum(j)-&
-        		reskhdenum)+dabs(fv2denum(j)-reskhdenum))  ! ite
-			resascdenum = resascdenum+wgk(j)*(dabs(fv1denum(j)-&
-			reskhdenum)+dabs(fv2denum(j)-reskhdenum))  ! ite
-
-        		resasc01num = resasc01num+wgk(j)*(dabs(fv101num(j)-&
-        		reskh01num)+dabs(fv201num(j)-reskh01num))  ! ite
-			resasc01num = resasc01num+wgk(j)*(dabs(fv101num(j)-&
-			reskh01num)+dabs(fv201num(j)-reskh01num))  ! ite
-
-        		resasc02num = resasc02num+wgk(j)*(dabs(fv102num(j)-&
-        		reskh02num)+dabs(fv202num(j)-reskh02num))  ! ite
-			resasc02num = resasc02num+wgk(j)*(dabs(fv102num(j)-&
-			reskh02num)+dabs(fv202num(j)-reskh02num))  ! ite
-
-        		resasc12num = resasc12num+wgk(j)*(dabs(fv112num(j)-&
-        		reskh12num)+dabs(fv212num(j)-reskh12num))  ! ite
-			resasc12num = resasc12num+wgk(j)*(dabs(fv112num(j)-&
-			reskh12num)+dabs(fv212num(j)-reskh12num))  ! ite
-
-			resasc0101num = resasc0101num+wgk(j)*(dabs(fv10101num(j)-&
-        		reskh0101num)+dabs(fv20101num(j)-reskh0101num))  ! ite
-			resasc0101num = resasc0101num+wgk(j)*(dabs(fv10101num(j)-&
-			reskh0101num)+dabs(fv20101num(j)-reskh0101num))  ! ite
-
-			resasc0102num = resasc0102num+wgk(j)*(dabs(fv10102num(j)-&
-        		reskh0102num)+dabs(fv20102num(j)-reskh0102num))  ! ite
-			resasc0102num = resasc0102num+wgk(j)*(dabs(fv10102num(j)-&
-			reskh0102num)+dabs(fv20102num(j)-reskh0102num))  ! ite
-
-			resasc0112num = resasc0112num+wgk(j)*(dabs(fv10112num(j)-&
-        		reskh0112num)+dabs(fv20112num(j)-reskh0112num))  ! ite
-			resasc0112num = resasc0112num+wgk(j)*(dabs(fv10112num(j)-&
-			reskh0112num)+dabs(fv20112num(j)-reskh0112num))  ! ite
-
-
-			resasc0202num = resasc0202num+wgk(j)*(dabs(fv10202num(j)-&
-        		reskh0202num)+dabs(fv20202num(j)-reskh0202num))  ! ite
-			resasc0202num = resasc0202num+wgk(j)*(dabs(fv10202num(j)-&
-			reskh0202num)+dabs(fv20202num(j)-reskh0202num))  ! ite
-
-
-			resasc0212num = resasc0212num+wgk(j)*(dabs(fv10212num(j)-&
-        		reskh0212num)+dabs(fv20212num(j)-reskh0212num))  ! ite
-			resasc0212num = resasc0212num+wgk(j)*(dabs(fv10212num(j)-&
-			reskh0212num)+dabs(fv20212num(j)-reskh0212num))  ! ite
-
-
-        		
-    	 	end do
+     
     
     		resdenum = reskdenum*xr
     		res01num = resk01num*xr
@@ -4940,8 +4885,457 @@ subroutine qgausssplinederiv(a,b,the01,the02,the12,resdenum,&
 	
           end subroutine qgausssplinederiv
 
+!================================  QGAUS : 1  15  ==========================
+!================================ only first derivatives  ===================
+!================================ M-spline baseline risk ===================
+
+subroutine qgausssplinefirstderiv(a,b,the01,the02,the12,resdenum,&
+		res01num,res02num,res12num,v01,v02,v12)
+
+   use commun,only:zi01,zi12,zi02,nz01,nz12,nz02
+
+        double precision a,b
+         double precision dx,xm,xr,reskdenum,resdenum, & 
+	resk01num,res01num,resk02num,res02num,resk12num,res12num, & 
+	v01,v02,v12
+         double precision xx,f1denum,f2denum, f101num, f102num, f112num, & 
+	f201num, f202num, f212num, &
+	su01,ri01,ri12,su12,su02,ri02,fv1denum,fv2denum, &
+	fv101num,fv102num,fv112num,fv201num,fv202num,fv212num, &  
+	d1mach(5),epmach,uflow,fcdenum,fc01num,fc02num,fc12num
+
+         double precision gl01,gl12,gl02
+         integer::j,jtw,jtwm1
+         double precision,dimension(8)::xgk,wgk
+	 double precision,dimension(4)::wg
+	save wgk,xgk
+
+	 dimension fv1denum(7),fv2denum(7),fv101num(7),fv201num(7), &
+	fv102num(7),fv202num(7), fv112num(7),fv212num(7)
+
+	
+         double precision,dimension(-2:(nz01-1))::the01
+         double precision,dimension(-2:(nz12-1))::the12
+         double precision,dimension(-2:(nz02-1))::the02
+
+         
+
+   	D1MACH(1)=2.23D-308
+    	D1MACH(2)=1.79D+308
+    	D1MACH(3)=1.11D-16
+    	D1MACH(4)=2.22D-16
+    	D1MACH(5)=0.301029995663981195D0
+
+    	epmach = d1mach(4)
+    	uflow = d1mach(1)
+
+	wg(1)=0.129484966168869693270611432679082d0
+   	wg(2)=0.279705391489276667901467771423780d0
+    	wg(3)=0.381830050505118944950369775488975d0
+    	wg(4)=0.417959183673469387755102040816327d0
+
+    	xgk(1)=0.991455371120812639206854697526329d0
+    	xgk(2)=0.949107912342758524526189684047851d0
+    	xgk(3)=0.864864423359769072789712788640926d0
+    	xgk(4)=0.741531185599394439863864773280788d0
+    	xgk(5)=0.586087235467691130294144838258730d0
+    	xgk(6)=0.405845151377397166906606412076961d0
+    	xgk(7)=0.207784955007898467600689403773245d0
+    	xgk(8)=0.000000000000000000000000000000000d0
+
+    	wgk(1)=0.022935322010529224963732008058970d0
+    	wgk(2)=0.063092092629978553290700663189204d0
+    	wgk(3)=0.104790010322250183839876322541518d0
+    	wgk(4)=0.140653259715525918745189590510238d0
+    	wgk(5)=0.169004726639267902826583426598550d0
+    	wgk(6)=0.190350578064785409913256402421014d0
+    	wgk(7)=0.204432940075298892414161999234649d0
+    	wgk(8)=0.209482141084727828012999174891714d0
+
+              
+
+	
+	xm = 0.5d+00*(b+a)
+        xr = 0.5d+00*(b-a)
+
+            resdenum = 0.d0
+	    res01num = 0.d0
+	    res02num = 0.d0
+	    res12num = 0.d0
+	
+        
+    	    	call susp(xm,the01,nz01,su01,ri01,zi01,gl01)
+        	call susp(xm,the02,nz02,su02,ri02,zi02,gl02)
+        	call susp(xm,the12,nz12,su12,ri12,zi12,gl12)
+        
+    		fcdenum =(su01**v01)*(su02**v02)*ri01*v01/(su12**v12)  ! valeur fct f au milieu de intervalle (a,b), cas pnt 0
+    		fc01num=(su01**v01)*(su02**v02)*ri01*v01*(1-(gl01*v01))/(su12**v12)
+		fc02num=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02/(su12**v12) 
+		fc12num=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12/(su12**v12) 
+
+    		reskdenum = fcdenum*wgk(8)       ! init res Kronrod   ! fc * 8e poids Kronrod
+        	resk01num = fc01num*wgk(8)       ! init res Kronrod   ! fc * 8e poids Kronrod
+        	resk02num = fc02num*wgk(8)       ! init res Kronrod   ! fc * 8e poids Kronrod
+        	resk12num = fc12num*wgk(8)       ! init res Kronrod   ! fc * 8e poids Kronrod
+        	
+		do j=1,3
+	       		jtw = j*2
+               		dx=xr*xgk(jtw)
+               		xx = xm+dx
+               		
+    	    		call susp(xx,the01,nz01,su01,ri01,zi01,gl01)
+        		call susp(xx,the02,nz02,su02,ri02,zi02,gl02)
+        		call susp(xx,the12,nz12,su12,ri12,zi12,gl12)
+                        f1denum =(su01**v01)*(su02**v02)*ri01*v01/(su12**v12)
+			f101num=(su01**v01)*(su02**v02)*ri01*v01*(1-gl01*v01)/(su12**v12)
+			f102num=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02/(su12**v12) 
+			f112num=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12/(su12**v12) 
+			
+               		xx = xm-dx
+               		call susp(xx,the01,nz01,su01,ri01,zi01,gl01)
+        		call susp(xx,the02,nz02,su02,ri02,zi02,gl02)
+        		call susp(xx,the12,nz12,su12,ri12,zi12,gl12)
+                        
+			f2denum =(su01**v01)*(su02**v02)*ri01*v01/(su12**v12)
+			f201num=(su01**v01)*(su02**v02)*ri01*v01*(1-gl01*v01)/(su12**v12)
+			f202num=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02/(su12**v12) 
+			f212num=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12/(su12**v12) 
+
+               		fv1denum(jtw) = f1denum   ! svgrd valeurs fct f a gche du centre
+               		fv2denum(jtw) = f2denum   ! svgrd valeurs fct f a drte du centre
+
+	       		reskdenum = reskdenum + wgk(jtw)*(f1denum+f2denum)
+               		
+			fv101num(jtw) = f101num   ! svgrd valeurs fct f a gche du centre
+               		fv201num(jtw) = f201num   ! svgrd valeurs fct f a drte du centre
+
+	       		resk01num = resk01num + wgk(jtw)*(f101num+f201num)
+               		
+			fv102num(jtw) = f102num   ! svgrd valeurs fct f a gche du centre
+               		fv202num(jtw) = f202num   ! svgrd valeurs fct f a drte du centre
+
+	       		resk02num = resk02num + wgk(jtw)*(f102num+f202num)
+               		
+			fv112num(jtw) = f112num   ! svgrd valeurs fct f a gche du centre
+               		fv212num(jtw) = f212num   ! svgrd valeurs fct f a drte du centre
+
+	       		resk12num = resk12num + wgk(jtw)*(f112num+f212num)
+
+         	end do
+	 	do j=1,4
+			jtwm1 = j*2-1
+               		dx=xr*xgk(jtwm1)
+               		xx = xm+dx
+               		call susp(xx,the01,nz01,su01,ri01,zi01,gl01)
+        		call susp(xx,the02,nz02,su02,ri02,zi02,gl02)
+        		call susp(xx,the12,nz12,su12,ri12,zi12,gl12)
+      			f1denum =(su01**v01)*(su02**v02)*ri01*v01/(su12**v12)
+			f101num=(su01**v01)*(su02**v02)*ri01*v01*(1-gl01*v01)/(su12**v12)
+			f102num=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02/(su12**v12) 
+			f112num=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12/(su12**v12) 
+
+               		xx = xm-dx
+               		call susp(xx,the01,nz01,su01,ri01,zi01,gl01)
+        		call susp(xx,the02,nz02,su02,ri02,zi02,gl02)
+        		call susp(xx,the12,nz12,su12,ri12,zi12,gl12)
+                        f2denum =(su01**v01)*(su02**v02)*ri01*v01/(su12**v12)
+			f201num=(su01**v01)*(su02**v02)*ri01*v01*(1-gl01*v01)/(su12**v12)
+			f202num=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02/(su12**v12) 
+			f212num=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12/(su12**v12) 
+
+               		fv1denum(jtwm1) = f1denum   ! svgrd valeurs fct f a gche du centre
+               		fv2denum(jtwm1) = f2denum   ! svgrd valeurs fct f a drte du centre
+	       		reskdenum = reskdenum + wgk(jtwm1)*(f1denum+f2denum)
+               		
+			fv101num(jtwm1) = f101num   ! svgrd valeurs fct f a gche du centre
+               		fv201num(jtwm1) = f201num   ! svgrd valeurs fct f a drte du centre
+	       		resk01num = resk01num + wgk(jtwm1)*(f101num+f201num)
+               		
+			fv102num(jtwm1) = f102num   ! svgrd valeurs fct f a gche du centre
+               		fv202num(jtwm1) = f202num   ! svgrd valeurs fct f a drte du centre
+	       		resk02num = resk02num + wgk(jtwm1)*(f102num+f202num)
+               		
+			fv112num(jtwm1) = f112num   ! svgrd valeurs fct f a gche du centre
+               		fv212num(jtwm1) = f212num   ! svgrd valeurs fct f a drte du centre
+	       		resk12num = resk12num + wgk(jtwm1)*(f112num+f212num)
+               		
+			
+         	end do
+     
+    
+    		resdenum = reskdenum*xr
+    		res01num = resk01num*xr
+    		res02num = resk02num*xr
+    		res12num = resk12num*xr
+	
+	
+          end subroutine qgausssplinefirstderiv
+
+!================================  QGAUS : 1  15  ==========================
+!================================ only diagonal terms of hessian ===========
+!================================ M-spline baseline risk ===================
 
 
+subroutine qgausssplinederivdiag(a,b,the01,the02,the12,resdenum,&
+		res01num,res02num,res12num,res0101num,&
+		res0202num,res1212num,v01,v02,v12)
+
+   use commun,only:zi01,zi12,zi02,nz01,nz12,nz02
+
+        double precision a,b
+         double precision dx,xm,xr,reskdenum,resdenum, & 
+	resk01num,res01num,resk02num,res02num,resk12num,res12num, & 
+	resk0101num,res0101num,resk0202num,res0202num, &
+	resk1212num,res1212num,v01,v02,v12
+         double precision xx,f1denum,f2denum, f101num, f102num, f112num, & 
+	f10101num,f10202num,f11212num,&
+	f201num, f202num, f212num, f20101num,&
+	f20202num,f21212num,&
+	su01,ri01,ri12,su12,su02,ri02,fv1denum,fv2denum, &
+	fv101num,fv102num,fv112num,fv201num,fv202num,fv212num, & 
+	fv10101num,fv20101num,fv10202num,fv20202num, & 
+	fv11212num,fv21212num, &  
+	d1mach(5),epmach,uflow,fcdenum,fc01num,fc02num,fc12num, & 
+	fc0101num,fc0202num,fc1212num
+
+         double precision gl01,gl12,gl02
+         integer::j,jtw,jtwm1
+         double precision,dimension(8)::xgk,wgk
+	 double precision,dimension(4)::wg
+	save wgk,xgk
+
+	 dimension fv1denum(7),fv2denum(7),fv101num(7),fv201num(7), &
+	fv102num(7),fv202num(7), fv112num(7),fv212num(7), & 
+	fv10101num(7),fv20101num(7),fv10202num(7),fv20202num(7),&
+	fv11212num(7),fv21212num(7)
+
+	
+         double precision,dimension(-2:(nz01-1))::the01
+         double precision,dimension(-2:(nz12-1))::the12
+         double precision,dimension(-2:(nz02-1))::the02
+
+         
+
+   	D1MACH(1)=2.23D-308
+    	D1MACH(2)=1.79D+308
+    	D1MACH(3)=1.11D-16
+    	D1MACH(4)=2.22D-16
+    	D1MACH(5)=0.301029995663981195D0
+
+    	epmach = d1mach(4)
+    	uflow = d1mach(1)
+
+	wg(1)=0.129484966168869693270611432679082d0
+   	wg(2)=0.279705391489276667901467771423780d0
+    	wg(3)=0.381830050505118944950369775488975d0
+    	wg(4)=0.417959183673469387755102040816327d0
+
+    	xgk(1)=0.991455371120812639206854697526329d0
+    	xgk(2)=0.949107912342758524526189684047851d0
+    	xgk(3)=0.864864423359769072789712788640926d0
+    	xgk(4)=0.741531185599394439863864773280788d0
+    	xgk(5)=0.586087235467691130294144838258730d0
+    	xgk(6)=0.405845151377397166906606412076961d0
+    	xgk(7)=0.207784955007898467600689403773245d0
+    	xgk(8)=0.000000000000000000000000000000000d0
+
+    	wgk(1)=0.022935322010529224963732008058970d0
+    	wgk(2)=0.063092092629978553290700663189204d0
+    	wgk(3)=0.104790010322250183839876322541518d0
+    	wgk(4)=0.140653259715525918745189590510238d0
+    	wgk(5)=0.169004726639267902826583426598550d0
+    	wgk(6)=0.190350578064785409913256402421014d0
+    	wgk(7)=0.204432940075298892414161999234649d0
+    	wgk(8)=0.209482141084727828012999174891714d0
+
+              
+
+	
+	xm = 0.5d+00*(b+a)
+        xr = 0.5d+00*(b-a)
+
+            resdenum = 0.d0
+	    res01num = 0.d0
+	    res02num = 0.d0
+	    res12num = 0.d0
+	
+	    res0101num = 0.d0
+	    res0202num = 0.d0
+	    res1212num = 0.d0
+        
+    	    	call susp(xm,the01,nz01,su01,ri01,zi01,gl01)
+        	call susp(xm,the02,nz02,su02,ri02,zi02,gl02)
+        	call susp(xm,the12,nz12,su12,ri12,zi12,gl12)
+        
+    		fcdenum =(su01**v01)*(su02**v02)*ri01*v01/(su12**v12)  ! valeur fct f au milieu de intervalle (a,b), cas pnt 0
+    		fc01num=(su01**v01)*(su02**v02)*ri01*v01*(1-(gl01*v01))/(su12**v12)
+		fc02num=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02/(su12**v12) 
+		fc12num=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12/(su12**v12) 
+
+		
+		fc0101num=(su01**v01)*(su02**v02)*ri01*v01*(((1-gl01*v01)**2)-&
+			gl01*v01)/(su12**v12)
+		fc0202num=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02*gl02*v02/(su12**v12)
+		fc1212num=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12*gl12*v12/(su12**v12)
+
+    		reskdenum = fcdenum*wgk(8)       ! init res Kronrod   ! fc * 8e poids Kronrod
+        	resk01num = fc01num*wgk(8)       ! init res Kronrod   ! fc * 8e poids Kronrod
+        	resk02num = fc02num*wgk(8)       ! init res Kronrod   ! fc * 8e poids Kronrod
+        	resk12num = fc12num*wgk(8)       ! init res Kronrod   ! fc * 8e poids Kronrod
+        	resk0101num = fc0101num*wgk(8)       ! init res Kronrod   ! fc * 8e poids Kronrod
+        	resk0202num = fc0202num*wgk(8)       ! init res Kronrod   ! fc * 8e poids Kronrod
+        	resk1212num = fc1212num*wgk(8)       ! init res Kronrod   ! fc * 8e poids Kronrod
+        	
+		do j=1,3
+	       		jtw = j*2
+               		dx=xr*xgk(jtw)
+               		xx = xm+dx
+               		
+    	    		call susp(xx,the01,nz01,su01,ri01,zi01,gl01)
+        		call susp(xx,the02,nz02,su02,ri02,zi02,gl02)
+        		call susp(xx,the12,nz12,su12,ri12,zi12,gl12)
+                        f1denum =(su01**v01)*(su02**v02)*ri01*v01/(su12**v12)
+			f101num=(su01**v01)*(su02**v02)*ri01*v01*(1-gl01*v01)/(su12**v12)
+			f102num=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02/(su12**v12) 
+			f112num=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12/(su12**v12) 
+
+			f10101num=(su01**v01)*(su02**v02)*ri01*v01*(((1-gl01*v01)**2)-&
+			gl01*v01)/(su12**v12)
+			f10202num=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02*gl02*v02/(su12**v12)
+			f11212num=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12*gl12*v12/(su12**v12)
+
+			
+               		xx = xm-dx
+               		call susp(xx,the01,nz01,su01,ri01,zi01,gl01)
+        		call susp(xx,the02,nz02,su02,ri02,zi02,gl02)
+        		call susp(xx,the12,nz12,su12,ri12,zi12,gl12)
+                        
+			f2denum =(su01**v01)*(su02**v02)*ri01*v01/(su12**v12)
+			f201num=(su01**v01)*(su02**v02)*ri01*v01*(1-gl01*v01)/(su12**v12)
+			f202num=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02/(su12**v12) 
+			f212num=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12/(su12**v12) 
+
+			f20101num=(su01**v01)*(su02**v02)*ri01*v01*(((1-gl01*v01)**2)-&
+			gl01*v01)/(su12**v12)
+			f20202num=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02*gl02*v02/(su12**v12)
+			f21212num=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12*gl12*v12/(su12**v12)
+
+			
+               		fv1denum(jtw) = f1denum   ! svgrd valeurs fct f a gche du centre
+               		fv2denum(jtw) = f2denum   ! svgrd valeurs fct f a drte du centre
+
+	       		reskdenum = reskdenum + wgk(jtw)*(f1denum+f2denum)
+               		
+			fv101num(jtw) = f101num   ! svgrd valeurs fct f a gche du centre
+               		fv201num(jtw) = f201num   ! svgrd valeurs fct f a drte du centre
+
+	       		resk01num = resk01num + wgk(jtw)*(f101num+f201num)
+               		
+			fv102num(jtw) = f102num   ! svgrd valeurs fct f a gche du centre
+               		fv202num(jtw) = f202num   ! svgrd valeurs fct f a drte du centre
+
+	       		resk02num = resk02num + wgk(jtw)*(f102num+f202num)
+               		
+			fv112num(jtw) = f112num   ! svgrd valeurs fct f a gche du centre
+               		fv212num(jtw) = f212num   ! svgrd valeurs fct f a drte du centre
+
+	       		resk12num = resk12num + wgk(jtw)*(f112num+f212num)
+               		
+			fv10101num(jtw) = f10101num   ! svgrd valeurs fct f a gche du centre
+               		fv20101num(jtw) = f20101num   ! svgrd valeurs fct f a drte du centre
+
+	       		resk0101num = resk0101num + wgk(jtw)*(f10101num+f20101num)
+               		
+			fv10202num(jtw) = f10202num   ! svgrd valeurs fct f a gche du centre
+               		fv20202num(jtw) = f20202num   ! svgrd valeurs fct f a drte du centre
+
+	       		resk0202num = resk0202num + wgk(jtw)*(f10202num+f20202num)
+               		
+			fv11212num(jtw) = f11212num   ! svgrd valeurs fct f a gche du centre
+               		fv21212num(jtw) = f21212num   ! svgrd valeurs fct f a drte du centre
+
+	       		resk1212num = resk1212num + wgk(jtw)*(f11212num+f21212num)
+               		
+
+			
+         	end do
+	 	do j=1,4
+			jtwm1 = j*2-1
+               		dx=xr*xgk(jtwm1)
+               		xx = xm+dx
+               		call susp(xx,the01,nz01,su01,ri01,zi01,gl01)
+        		call susp(xx,the02,nz02,su02,ri02,zi02,gl02)
+        		call susp(xx,the12,nz12,su12,ri12,zi12,gl12)
+      			f1denum =(su01**v01)*(su02**v02)*ri01*v01/(su12**v12)
+			f101num=(su01**v01)*(su02**v02)*ri01*v01*(1-gl01*v01)/(su12**v12)
+			f102num=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02/(su12**v12) 
+			f112num=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12/(su12**v12) 
+
+			f10101num=(su01**v01)*(su02**v02)*ri01*v01*(((1-gl01*v01)**2)-&
+			gl01*v01)/(su12**v12)
+			f10202num=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02*gl02*v02/(su12**v12)
+			f11212num=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12*gl12*v12/(su12**v12)
+
+			
+               		xx = xm-dx
+               		call susp(xx,the01,nz01,su01,ri01,zi01,gl01)
+        		call susp(xx,the02,nz02,su02,ri02,zi02,gl02)
+        		call susp(xx,the12,nz12,su12,ri12,zi12,gl12)
+                        f2denum =(su01**v01)*(su02**v02)*ri01*v01/(su12**v12)
+			f201num=(su01**v01)*(su02**v02)*ri01*v01*(1-gl01*v01)/(su12**v12)
+			f202num=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02/(su12**v12) 
+			f212num=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12/(su12**v12) 
+
+			f20101num=(su01**v01)*(su02**v02)*ri01*v01*(((1-gl01*v01)**2)-&
+			gl01*v01)/(su12**v12)
+			f20202num=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02*gl02*v02/(su12**v12)
+			f21212num=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12*gl12*v12/(su12**v12)
+
+
+               		fv1denum(jtwm1) = f1denum   ! svgrd valeurs fct f a gche du centre
+               		fv2denum(jtwm1) = f2denum   ! svgrd valeurs fct f a drte du centre
+	       		reskdenum = reskdenum + wgk(jtwm1)*(f1denum+f2denum)
+               		
+			fv101num(jtwm1) = f101num   ! svgrd valeurs fct f a gche du centre
+               		fv201num(jtwm1) = f201num   ! svgrd valeurs fct f a drte du centre
+	       		resk01num = resk01num + wgk(jtwm1)*(f101num+f201num)
+               		
+			fv102num(jtwm1) = f102num   ! svgrd valeurs fct f a gche du centre
+               		fv202num(jtwm1) = f202num   ! svgrd valeurs fct f a drte du centre
+	       		resk02num = resk02num + wgk(jtwm1)*(f102num+f202num)
+               		
+			fv112num(jtwm1) = f112num   ! svgrd valeurs fct f a gche du centre
+               		fv212num(jtwm1) = f212num   ! svgrd valeurs fct f a drte du centre
+	       		resk12num = resk12num + wgk(jtwm1)*(f112num+f212num)
+               		
+			fv10101num(jtwm1) = f10101num   ! svgrd valeurs fct f a gche du centre
+               		fv20101num(jtwm1) = f20101num   ! svgrd valeurs fct f a drte du centre
+               		resk0101num = resk0101num + wgk(jtwm1)*(f10101num+f20101num)
+
+			fv10202num(jtwm1) = f10202num   ! svgrd valeurs fct f a gche du centre
+               		fv20202num(jtwm1) = f20202num   ! svgrd valeurs fct f a drte du centre
+               		resk0202num = resk0202num + wgk(jtwm1)*(f10202num+f20202num)
+			
+			fv11212num(jtwm1) = f11212num   ! svgrd valeurs fct f a gche du centre
+               		fv21212num(jtwm1) = f21212num   ! svgrd valeurs fct f a drte du centre
+               		resk1212num = resk1212num + wgk(jtwm1)*(f11212num+f21212num)
+               		
+			
+         	end do
+     
+    
+    		resdenum = reskdenum*xr
+    		res01num = resk01num*xr
+    		res02num = resk02num*xr
+    		res12num = resk12num*xr
+		res0101num = resk0101num*xr
+		res0202num = resk0202num*xr
+		res1212num = resk1212num*xr
+	
+         
+     
+	
+          end subroutine qgausssplinederivdiag
 !=============================================================================================  
 !======================= Calculate derivatives of loglik with weibull baseline risk ==========
 !=============================================================================================  
@@ -6095,6 +6489,1337 @@ subroutine derivaweib(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 	tronc01square,tronc02square)     
 
     end subroutine derivaweib
+
+!=============================================================================================  
+!======================= Calculate first derivatives of loglik with weibull baseline risk ==========
+!=============================================================================================  
+
+
+subroutine firstderivaweib(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
+        dimnva01,dimnva12,dimnva02,nva01,nva12,nva02,t00,&
+        t10,t20,t30,troncature0,weib0,likelihood_deriv)
+	
+	use commun
+        implicit none
+         
+        double precision::res2denum,res201num,res202num,res212num,&
+	vet01,vet12,vet02,resint,v,u1,u2,u3
+        integer::np0,i,j,l,w,k,lfix, kfix,npar0,nva01,nva12,nva02,no0, &
+	weib0,nz010,nz020,nz120,troncature0,dimnva01,dimnva02,dimnva12, & 
+	nva01nofix,nva12nofix,nva02nofix,nvamax,sizespline,nva0102
+
+	double precision,dimension(np0),intent(inout)::likelihood_deriv
+	double precision,dimension(np0)::b0
+	double precision,dimension(np0)::res,res1
+        double precision,dimension(npar0)::bh
+	double precision,dimension(npar0-np0)::bfix0
+	integer,dimension(npar0)::fix0
+	double precision,dimension(2)::the01,the12,the02
+        double precision,dimension(no0,dimnva01)::ve010
+	double precision,dimension(no0,dimnva02)::ve020
+	double precision,dimension(no0,dimnva12)::ve120
+	
+	
+        double precision::su01,ri01,su12,ri12,su02,ri02,gl01,gl02,gl12
+	double precision,dimension(no0)::t00,t10,t20,t30
+	integer,dimension(no0)::c0
+
+	allocate(b(np0),bfix(npar0-np0),fix(npar0))
+	b=b0
+	bfix=bfix0
+	fix=fix0
+	troncature=troncature0
+	weib=weib0
+	sizespline=6
+
+
+	if(nva01.gt.0) then 
+	  nva01nofix=nva01-sum(fix((sizespline+1):(nva01+sizespline)))
+	else 
+	  nva01nofix=0
+	end if 
+
+	if(nva02.gt.0) then 
+          nva02nofix=nva02-sum(fix((nva01+sizespline+1):(nva02+nva01+sizespline)))
+	else 
+	   nva02nofix=0
+	end if 
+
+	if(nva12.gt.0) then 
+	  nva12nofix=nva12-sum(fix((nva01+nva02+sizespline+1):npar0))
+	else 
+	  nva12nofix=0
+	end if 
+
+	nva0102=nva01nofix+nva02nofix
+	nvamax=nva01nofix+nva02nofix+nva12nofix
+	
+
+	if(nva01.gt.0) then 
+		allocate(ve01(no0,nva01))
+		allocate(ve01nofix(no0,nva01nofix))
+		allocate(tronc01(nva01nofix))
+		
+	else 
+		allocate(ve01(no0,1))
+		allocate(ve01nofix(no0,1))
+		ve01nofix=0
+		allocate(tronc01(1))
+	end if 
+	
+	if(nva02.gt.0) then 
+		allocate(ve02(no0,nva02))
+		allocate(ve02nofix(no0,nva02nofix))
+		allocate(tronc02(nva02nofix))
+		
+	else 
+		allocate(ve02(no0,1))
+		allocate(ve02nofix(no0,1))
+		ve02nofix=0
+		allocate(tronc02(1))
+	end if 
+
+	if(nva12.gt.0) then 
+		allocate(ve12(no0,nva12))
+		allocate(ve12nofix(no0,nva12nofix))
+		
+	else 
+		allocate(ve12(no0,1))
+		allocate(ve12nofix(no0,1))
+		ve12nofix=0
+	end if 
+
+
+
+	ve01=ve010
+	ve02=ve020
+	ve12=ve120
+
+	allocate(t0(no0),t1(no0),t2(no0),t3(no0),c(no0))
+	c=c0
+	t0=t00
+	t1=t10
+	t2=t20
+	t3=t30
+
+         
+        ! we need to put bh at its original values if in posfix 
+
+
+       l=0
+       lfix=0
+       w=0
+
+	if(nva01.gt.0) then
+	do k=1,nva01
+	   if(fix((sizespline+k)).eq.0) then 
+		lfix=lfix+1
+		ve01nofix(:,lfix)=ve01(:,k)
+	   end if 
+	end do
+	end if 
+
+	lfix=0
+
+	if(nva02.gt.0) then 
+	do k=1,nva02
+	   if(fix((sizespline+nva01+k)).eq.0) then 
+		lfix=lfix+1
+		ve02nofix(:,lfix)=ve02(:,k)
+	   end if 
+	end do
+	end if 
+	
+	lfix=0
+
+	if(nva12.gt.0) then 
+	do k=1,nva12
+	   if(fix((sizespline+nva01+nva02+k)).eq.0) then 
+		lfix=lfix+1
+		ve12nofix(:,lfix)=ve12(:,k)
+	   end if 
+	end do
+	end if
+	
+	l=0
+       lfix=0
+       w=0
+
+     do k=1,npar0 
+         if(fix(k).eq.0) then
+            l=l+1
+            bh(k)=b(l)
+	 end if 
+         if(fix(k).eq.1) then
+            w=w+1
+            bh(k)=bfix(w)
+         end if
+      end do
+
+   
+	
+
+
+	if((weib.eq.1).OR.(weib.eq.3))then
+         do i=1,2
+            the01(i)=(bh(i))*(bh(i))
+         end do
+         do i=1,2
+            j = 2+i
+            the02(i)=(bh(j))*(bh(j))
+         end do
+         do i=1,2
+            j = 4+i
+            the12(i)=(bh(j))*(bh(j))
+         end do
+	else 
+	do i=1,2
+            the01(i)=dexp(bh(i))
+         end do
+         do i=1,2
+            j = 2+i
+            the02(i)=dexp(bh(j))
+         end do
+         do i=1,2
+            j = 4+i
+            the12(i)=dexp(bh(j))
+         end do
+	endif
+
+	
+!---------- calcul des derivees premiere ------------------   
+
+	res = 0
+        do i=1,no0
+
+
+                vet01 = 0.d0
+                vet12 = 0.d0
+                vet02 = 0.d0
+
+
+                if(nva01.gt.0)then
+                        do j=1,nva01
+				vet01 =vet01 +&
+                                bh(npar0-nva01-nva12-nva02+j)*dble(ve01(i,j))
+                        end do
+                endif  
+ 
+                if(nva02.gt.0)then
+                        do j=1,nva02
+				vet02 =vet02 +&
+                                bh(npar0-nva02-nva12+j)*dble(ve02(i,j))
+                        end do
+                endif
+
+                if(nva12.gt.0)then
+                        do j=1,nva12
+				vet12 =vet12 +&
+                                bh(npar0-nva12+j)*dble(ve12(i,j))
+                        end do
+                endif
+
+		
+                vet01 = dexp(vet01)
+                vet12 = dexp(vet12)
+                vet02 = dexp(vet02)
+
+                res1 = 0
+                
+                if(troncature.eq.1)then
+                        if(t0(i).eq.0.d0)then
+                                tronc01 = 0
+				tronc02 =  0
+                        else 
+				call fonct(t0(i),the01,ri01,gl01,su01,weib)
+				call fonct(t0(i),the02,ri02,gl02,su02,weib)
+                                tronc01=ve01nofix(i,:)*gl01*vet01
+                        	tronc02=ve02nofix(i,:)*gl02*vet02
+                        end if
+                else
+                        tronc01 = 0
+                  	tronc02 = 0
+                end if
+		
+                if(c(i).eq.1)then ! cad 0-->1 et 0-->2
+			call fonct(t1(i),the01,ri01,gl01,su01,weib)
+			call fonct(t1(i),the02,ri02,gl02,su02,weib)
+
+			if(nva01nofix.gt.0) then 
+			
+			res1(1:nva01nofix)=&
+			-ve01nofix(i,:)*gl01*vet01+tronc01
+			end if 
+
+			if(nva02nofix.gt.0) then
+			res1((nva01nofix+1):nva0102)=&
+			-ve02nofix(i,:)*gl02*vet02+&
+			tronc02
+			end if 
+
+			if(nva12nofix.gt.0) then 
+			res1((nva0102+1):nvamax)=0
+			end if 
+			
+
+                else
+                if(c(i).eq.2)then ! cpi 0-->1
+
+
+			call fonct(t3(i),the12,ri12,gl12,su12,weib)
+			call qgaussweibfirstderiv(t1(i),t2(i),the01,&
+			the02,the12,res2denum,res201num,&
+			res202num,res212num,&
+			vet01,vet02,vet12,weib)
+                        
+			v=res2denum*(su12**vet12)
+
+			if(nva01nofix.gt.0) then
+
+			u1=res201num*(su12**vet12)
+			
+      			res1(1:nva01nofix)=&
+			ve01nofix(i,:)*u1/v
+			res1(1:nva01nofix)=res1(1:nva01nofix)+tronc01
+			end if 
+
+			
+			if(nva02nofix.gt.0) then
+
+			u2=-res202num*(su12**vet12)
+			res1((nva01nofix+1):nva0102)=&
+			ve02nofix(i,:)*u2/v
+			res1((nva01nofix+1):nva0102)=&
+			res1((nva01nofix+1):nva0102)+&
+			tronc02
+			end if 
+
+			
+			if(nva12nofix.gt.0) then 
+
+			u3=res212num-gl12*vet12*res2denum
+			u3=u3*(su12**vet12)
+
+			res1((nva0102+1):nvamax)=&
+			ve12nofix(i,:)*u3/v
+			end if 
+			
+			
+                else  
+                    if(c(i).eq.3)then ! obs 0-->1
+
+			call fonct(t1(i),the01,ri01,gl01,su01,weib)
+			call fonct(t1(i),the02,ri02,gl02,su02,weib)
+			call fonct(t1(i),the12,ri12,gl12,su12,weib)
+
+			if(nva01nofix.gt.0) then 
+
+			res1(1:nva01nofix)=-ve01nofix(i,:)*gl01*vet01+&
+			tronc01+ve01nofix(i,:)
+			end if 
+
+			if(nva02nofix.gt.0) then 
+
+			res1((nva01nofix+1):nva0102)=&
+			-ve02nofix(i,:)*gl02*vet02+&
+			tronc02
+			end if 
+
+			if(nva12nofix.gt.0) then 
+
+			res1((nva0102+1):nvamax)=gl12*vet12
+			call fonct(t3(i),the12,ri12,gl12,su12,weib)
+			res1((nva0102+1):nvamax)=&
+			res1((nva0102+1):nvamax)-gl12*vet12
+			res1((nva0102+1):nvamax)=&
+			res1((nva0102+1):nvamax)*ve12nofix(i,:)
+
+			end if 
+			
+			
+
+                    else   
+                       if(c(i).eq.4)then ! cpi 0-->1 et obs 1-->2
+			
+			call fonct(t3(i),the12,ri12,gl12,su12,weib)
+			call qgaussweibfirstderiv(t1(i),t2(i),the01,the02,the12,&
+			res2denum,res201num,res202num,res212num,&
+			vet01,vet02,vet12,weib)
+
+			v=res2denum*(su12**vet12)*ri12*vet12
+
+			if(nva01nofix.gt.0) then 
+			u1=res201num*(su12**vet12)*ri12*vet12
+			
+			res1(1:nva01nofix)=&
+			ve01nofix(i,:)*u1/v
+			res1(1:nva01nofix)=res1(1:nva01nofix)+tronc01
+			end if 
+
+			
+			if(nva02nofix.gt.0) then 
+
+			u2=-res202num*(su12**vet12)*ri12*vet12
+			
+			res1((nva01nofix+1):(nva01nofix+nva02nofix))=&
+			ve02nofix(i,:)*u2/v
+			res1((nva01nofix+1):nva0102)=&
+			res1((nva01nofix+1):nva0102)+&
+			tronc02
+			end if 
+
+
+			
+			if(nva12nofix.gt.0) then 
+
+			u3=res212num+&
+			(1-gl12*vet12)*res2denum
+			u3=u3*(su12**vet12)*ri12*vet12
+			
+			res1((nva0102+1):nvamax)=&
+			ve12nofix(i,:)*u3/v
+
+			end if 
+
+                       else
+                         if(c(i).eq.5)then ! obs 0-->1 et obs 1-->2
+				
+				call fonct(t1(i),the01,ri01,gl01,su01,weib)
+				call fonct(t1(i),the02,ri02,gl02,su02,weib)
+				call fonct(t1(i),the12,ri12,gl12,su12,weib)
+				
+				if(nva01nofix.gt.0) then 
+
+				res1(1:nva01nofix)=&
+				-ve01nofix(i,:)*gl01*vet01+&
+				ve01nofix(i,:)+&
+				tronc01
+				end if 
+
+				if(nva02nofix.gt.0) then 
+
+				res1((nva01nofix+1):nva0102)=&
+				-ve02nofix(i,:)*gl02*vet02+tronc02
+				end if 
+			
+				if(nva12nofix.gt.0) then 
+				res1((nva0102+1):nvamax)=&
+				ve12nofix(i,:)*gl12*vet12+&
+				ve12nofix(i,:)
+
+				call fonct(t3(i),the12,ri12,gl12,su12,weib)
+				res1((nva0102+1):nvamax)=&
+				res1((nva0102+1):nvamax)-ve12nofix(i,:)*gl12*vet12
+				end if 
+				
+				
+				
+                         else
+                            if(c(i).eq.6)then ! vivant ???
+
+
+				call fonct(t3(i),the01,ri01,gl01,su01,weib)
+				call fonct(t3(i),the02,ri02,gl02,su02,weib)
+				call fonct(t3(i),the12,ri12,gl12,su12,weib)
+				call qgaussweibfirstderiv(t1(i),t3(i),the01,the02,the12,&
+				res2denum,res201num,res202num,res212num,&
+				vet01,vet02,vet12,weib)
+
+				
+				v=(su12**vet12)*res2denum+&
+				(su01**vet01)*(su02**vet02)
+
+				if(nva01nofix.gt.0) then 
+
+				u1=(-gl01*vet01)*(su01**vet01)*(su02**vet02)+&
+				(su12**vet12)*res201num
+			        res1(1:nva01nofix)=&
+				ve01nofix(i,:)*u1/v
+				res1(1:nva01nofix)=&
+				res1(1:nva01nofix)+tronc01
+				end if 
+				
+				if(nva02nofix.gt.0) then 
+
+				u2=-gl02*vet02*(su01**vet01)*(su02**vet02)
+				u2=u2-(su12**vet12)*res202num
+				res1((nva01nofix+1):nva0102)=&
+				ve02nofix(i,:)*u2/v
+				res1((nva01nofix+1):nva0102)=&
+				res1((nva01nofix+1):nva0102)+&
+				tronc02
+				end if 
+
+				if(nva12nofix.gt.0) then 
+				
+				u3=-gl12*vet12*(su12**vet12)*res2denum+&
+				(su12**vet12)*res212num
+				res1((nva0102+1):nvamax)=&
+				ve12nofix(i,:)*u3/v
+				end if 
+                        	
+
+				
+                            else ! passage 0-->2  
+				
+				call fonct(t3(i),the01,ri01,gl01,su01,weib)
+				call fonct(t3(i),the02,ri02,gl02,su02,weib)
+				call fonct(t3(i),the12,ri12,gl12,su12,weib)
+        			call qgaussweibfirstderiv(t1(i),t3(i),the01,the02,&
+        			the12,res2denum,res201num,res202num,res212num,&
+        			vet01,vet02,vet12,weib)
+				
+				v=(su12**vet12)*ri12*vet12*res2denum+&
+				(su01**vet01)*(su02**vet02)*ri02*vet02
+
+				if(nva01nofix.gt.0) then 
+
+				u1=-gl01*vet01*(su01**vet01)
+				u1=u1*(su02**vet02)*ri02*vet02
+				u1=u1+(su12**vet12)*ri12*vet12*res201num
+
+				
+				res1(1:nva01nofix)=&
+				ve01nofix(i,:)*u1/v
+				res1(1:nva01nofix)=res1(1:nva01nofix)+tronc01
+				end if 
+
+				if(nva02nofix.gt.0) then 
+
+				u2=-(su12**vet12)*ri12*vet12*res202num+&
+				(1-gl02*vet02)*(su01**vet01)*(su02**vet02)*ri02*vet02
+
+				res1((nva01nofix+1):nva0102)=&
+				ve02nofix(i,:)*u2/v
+				res1((nva01nofix+1):nva0102)=&
+				res1((nva01nofix+1):nva0102)+&
+				tronc02
+
+				end if 
+
+				if(nva12nofix.gt.0) then 
+
+				u3=res212num+(1-gl12*vet12)*res2denum
+				u3=u3*(su12**vet12)*ri12*vet12
+
+				res1((nva0102+1):nvamax)=&
+				ve12nofix(i,:)*u3/v
+
+				end if 
+
+                            endif
+                         endif                        
+                      endif
+                   endif  
+                endif   
+                endif   
+
+                res = res + res1 
+
+
+		
+
+
+        end do   
+
+
+        likelihood_deriv = res
+
+
+
+
+123     continue 
+	 
+	deallocate(b,bfix,fix,ve01,ve02,ve12,ve01nofix,&
+	ve02nofix,ve12nofix,tronc01,tronc02,t0,t1,t2,t3,c)    
+
+    end subroutine firstderivaweib
+
+!=============================================================================================  
+!======================= Calculate derivatives of loglik with weibull baseline risk ==========
+!======================= only diagnola terms for second derivatives                 ==========
+!=============================================================================================  
+
+
+subroutine derivaweibdiag(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
+        dimnva01,dimnva12,dimnva02,nva01,nva12,nva02,t00,&
+        t10,t20,t30,troncature0,weib0,likelihood_deriv)
+	
+	use commun
+        implicit none
+         
+        double precision::res2denum,res201num,res202num,res212num, &
+	res20101num,res20202num,&
+	res21212num,vet01,vet12,vet02,resint,v,u1,u2,u3
+        integer::np0,i,j,l,w,k,lfix, kfix,npar0,nva01,nva12,nva02,no0, &
+	weib0,nz010,nz020,nz120,troncature0,dimnva01,dimnva02,dimnva12, & 
+	nva01nofix,nva12nofix,nva02nofix,nvamax, sizespline,nva0102,&
+	nvamax01,nvamax02,nvamax12
+
+	double precision,dimension(np0+np0),intent(inout)::likelihood_deriv
+	double precision,dimension(np0)::b0
+	double precision,dimension(np0+np0)::res,res1
+        double precision,dimension(npar0)::bh
+	double precision,dimension(npar0-np0)::bfix0
+	integer,dimension(npar0)::fix0
+	double precision,dimension(2)::the01,the12,the02
+        double precision,dimension(no0,dimnva01)::ve010
+	double precision,dimension(no0,dimnva02)::ve020
+	double precision,dimension(no0,dimnva12)::ve120
+	
+	
+        double precision::su01,ri01,su12,ri12,su02,ri02,gl01,gl02,gl12
+	double precision,dimension(no0)::t00,t10,t20,t30
+	integer,dimension(no0)::c0
+
+	allocate(b(np0),bfix(npar0-np0),fix(npar0))
+	b=b0
+	bfix=bfix0
+	fix=fix0
+	troncature=troncature0
+	weib=weib0
+	sizespline=6
+
+
+	if(nva01.gt.0) then 
+	  nva01nofix=nva01-sum(fix((sizespline+1):(nva01+sizespline)))
+	else 
+	  nva01nofix=0
+	end if 
+
+	if(nva02.gt.0) then 
+          nva02nofix=nva02-sum(fix((nva01+sizespline+1):(nva02+nva01+sizespline)))
+	else 
+	   nva02nofix=0
+	end if 
+
+	if(nva12.gt.0) then 
+	  nva12nofix=nva12-sum(fix((nva01+nva02+sizespline+1):npar0))
+	else 
+	  nva12nofix=0
+	end if 
+
+	nva0102=nva01nofix+nva02nofix
+	nvamax=nva01nofix+nva02nofix+nva12nofix
+	nvamax01=nvamax+nva01nofix
+	nvamax02=nvamax01+nva02nofix
+	nvamax12=nvamax02+nva12nofix+1
+
+
+	if(nva01.gt.0) then 
+		allocate(ve01(no0,nva01))
+		allocate(ve01nofix(no0,nva01nofix))
+		allocate(ve01square(no0,nva01nofix))
+		allocate(tronc01(nva01nofix))
+		allocate(tronc01square(nva01nofix))
+	else 
+		allocate(ve01(no0,1))
+		allocate(ve01nofix(no0,1))
+		ve01nofix=0
+		allocate(ve01square(no0,1))
+		ve01square=0
+		allocate(tronc01(1))
+		allocate(tronc01square(1))
+	end if 
+	
+	if(nva02.gt.0) then 
+		allocate(ve02(no0,nva02))
+		allocate(ve02nofix(no0,nva02nofix))
+		allocate(ve02square(no0,nva02nofix))
+		allocate(tronc02(nva02nofix))
+		allocate(tronc02square(nva02nofix))
+	else 
+		allocate(ve02(no0,1))
+		allocate(ve02nofix(no0,1))
+		ve02nofix=0
+		allocate(ve02square(no0,1))
+		ve02square=0
+		allocate(tronc02(1))
+		allocate(tronc02square(1))
+	end if 
+
+	if(nva12.gt.0) then 
+		allocate(ve12(no0,nva12))
+		allocate(ve12nofix(no0,nva12nofix))
+		allocate(ve12square(no0,nva12nofix))
+	else 
+		allocate(ve12(no0,1))
+		allocate(ve12nofix(no0,1))
+		ve12nofix=0
+		allocate(ve12square(no0,1))
+		ve12square=0
+	end if 
+
+
+
+	ve01=ve010
+	ve02=ve020
+	ve12=ve120
+
+	allocate(t0(no0),t1(no0),t2(no0),t3(no0),c(no0))
+	c=c0
+	t0=t00
+	t1=t10
+	t2=t20
+	t3=t30
+
+         
+        ! we need to put bh at its original values if in posfix 
+
+
+       l=0
+       lfix=0
+       w=0
+
+	if(nva01.gt.0) then
+	do k=1,nva01
+	   if(fix((sizespline+k)).eq.0) then 
+		lfix=lfix+1
+		ve01nofix(:,lfix)=ve01(:,k)
+		ve01square(:,lfix)=ve01nofix(:,lfix)*ve01nofix(:,lfix)
+	   end if 
+	end do
+	end if 
+
+	lfix=0
+
+	if(nva02.gt.0) then 
+	do k=1,nva02
+	   if(fix((sizespline+nva01+k)).eq.0) then 
+		lfix=lfix+1
+		ve02nofix(:,lfix)=ve02(:,k)
+		ve02square(:,lfix)=ve02nofix(:,lfix)*ve02nofix(:,lfix)
+	   end if 
+	end do
+	end if 
+	
+	lfix=0
+
+	if(nva12.gt.0) then 
+	do k=1,nva12
+	   if(fix((sizespline+nva01+nva02+k)).eq.0) then 
+		lfix=lfix+1
+		ve12nofix(:,lfix)=ve12(:,k)
+		ve12square(:,lfix)=ve12nofix(:,lfix)*ve12nofix(:,lfix)
+	   end if 
+	end do
+	end if
+	
+	l=0
+       lfix=0
+       w=0
+
+     do k=1,npar0 
+         if(fix(k).eq.0) then
+            l=l+1
+            bh(k)=b(l)
+	 end if 
+         if(fix(k).eq.1) then
+            w=w+1
+            bh(k)=bfix(w)
+         end if
+      end do
+
+   
+	
+
+
+	if((weib.eq.1).OR.(weib.eq.3))then
+         do i=1,2
+            the01(i)=(bh(i))*(bh(i))
+         end do
+         do i=1,2
+            j = 2+i
+            the02(i)=(bh(j))*(bh(j))
+         end do
+         do i=1,2
+            j = 4+i
+            the12(i)=(bh(j))*(bh(j))
+         end do
+	else 
+	do i=1,2
+            the01(i)=dexp(bh(i))
+         end do
+         do i=1,2
+            j = 2+i
+            the02(i)=dexp(bh(j))
+         end do
+         do i=1,2
+            j = 4+i
+            the12(i)=dexp(bh(j))
+         end do
+	endif
+
+	
+!---------- calcul des derivees premiere ------------------   
+
+	res = 0
+        do i=1,no0
+
+
+                vet01 = 0.d0
+                vet12 = 0.d0
+                vet02 = 0.d0
+
+
+                if(nva01.gt.0)then
+                        do j=1,nva01
+				vet01 =vet01 +&
+                                bh(npar0-nva01-nva12-nva02+j)*dble(ve01(i,j))
+                        end do
+                endif  
+ 
+                if(nva02.gt.0)then
+                        do j=1,nva02
+				vet02 =vet02 +&
+                                bh(npar0-nva02-nva12+j)*dble(ve02(i,j))
+                        end do
+                endif
+
+                if(nva12.gt.0)then
+                        do j=1,nva12
+				vet12 =vet12 +&
+                                bh(npar0-nva12+j)*dble(ve12(i,j))
+                        end do
+                endif
+
+		
+                vet01 = dexp(vet01)
+                vet12 = dexp(vet12)
+                vet02 = dexp(vet02)
+
+                res1 = 0
+                
+                if(troncature.eq.1)then
+                        if(t0(i).eq.0.d0)then
+                                tronc01 = 0
+				tronc02 =  0
+                        	tronc01square= 0
+                        	tronc02square=0
+                        else 
+				call fonct(t0(i),the01,ri01,gl01,su01,weib)
+				call fonct(t0(i),the02,ri02,gl02,su02,weib)
+                                tronc01=ve01nofix(i,:)*gl01*vet01
+                        	tronc02=ve02nofix(i,:)*gl02*vet02
+                        	tronc01square=ve01square(i,:)*gl01*vet01
+                        	tronc02square=ve02square(i,:)*gl02*vet02
+                        end if
+                else
+                        tronc01 = 0
+                  	tronc02 = 0
+                  	tronc01square=0
+                  	tronc02square=0
+                end if
+		
+                if(c(i).eq.1)then ! cad 0-->1 et 0-->2
+			call fonct(t1(i),the01,ri01,gl01,su01,weib)
+			call fonct(t1(i),the02,ri02,gl02,su02,weib)
+
+			if(nva01nofix.gt.0) then 
+			
+			res1(1:nva01nofix)=&
+			-ve01nofix(i,:)*gl01*vet01+tronc01
+			res1((nvamax+1):nvamax01)=&
+			-ve01square(i,:)*gl01*vet01+&
+			tronc01square
+
+			end if 
+
+			if(nva02nofix.gt.0) then
+			res1((nva01nofix+1):nva0102)=&
+			-ve02nofix(i,:)*gl02*vet02+&
+			tronc02
+
+			res1((nvamax01+1):nvamax02)=&
+			-ve02square(i,:)*gl02*vet02+&
+			tronc02square
+			end if 
+
+			if(nva12nofix.gt.0) then 
+			res1((nva0102+1):nvamax)=0
+			res1((nvamax02+1):nvamax12)=0
+			end if 
+			
+
+                else
+                if(c(i).eq.2)then ! cpi 0-->1
+
+
+			call fonct(t3(i),the12,ri12,gl12,su12,weib)
+			call qgaussweibderivdiag(t1(i),t2(i),the01,&
+			the02,the12,res2denum,res201num,&
+			res202num,res212num,res20101num,&
+			res20202num,res21212num,&
+			vet01,vet02,vet12,weib)
+                        
+			v=res2denum*(su12**vet12)
+
+			if(nva01nofix.gt.0) then
+
+			u1=res201num*(su12**vet12)
+			
+      			res1(1:nva01nofix)=&
+			ve01nofix(i,:)*u1/v
+			res1(1:nva01nofix)=res1(1:nva01nofix)+tronc01
+
+			res1((nvamax+1):nvamax01)=&
+			ve01square(i,:)*res20101num*(su12**vet12)
+			res1((nvamax+1):nvamax01)=&
+			res1((nvamax+1):nvamax01)/v
+			res1((nvamax+1):nvamax01)=&
+			res1((nvamax+1):nvamax01)-ve01square(i,:)*((u1/v)**2)
+			res1((nvamax+1):nvamax01)=&
+			res1((nvamax+1):nvamax01)+&
+			tronc01square
+
+			end if 
+
+			
+			if(nva02nofix.gt.0) then
+
+			u2=-res202num*(su12**vet12)
+			res1((nva01nofix+1):nva0102)=&
+			ve02nofix(i,:)*u2/v
+			res1((nva01nofix+1):nva0102)=&
+			res1((nva01nofix+1):nva0102)+&
+			tronc02
+
+			res1((nvamax01+1):nvamax02)=&
+			-ve02square(i,:)*(su12**vet12)*(-res20202num+res202num)
+			res1((nvamax01+1):nvamax02)=&
+			res1((nvamax01+1):nvamax02)/v
+			res1((nvamax01+1):nvamax02)=&
+			res1((nvamax01+1):nvamax02)-ve02square(i,:)*((u2/v)**2)
+			res1((nvamax01+1):nvamax02)=&
+			res1((nvamax01+1):nvamax02)+tronc02square
+
+
+			end if 
+
+			
+			if(nva12nofix.gt.0) then 
+
+			u3=res212num-gl12*vet12*res2denum
+			u3=u3*(su12**vet12)
+
+			res1((nva0102+1):nvamax)=&
+			ve12nofix(i,:)*u3/v
+			res1((nvamax02+1):nvamax12)=&
+			-2*gl12*vet12*res212num+res212num+&
+			res21212num-gl12*vet12*(1-gl12*vet12)*res2denum
+			res1((nvamax02+1):nvamax12)=&
+			res1((nvamax02+1):nvamax12)*(su12**vet12)*ve12square(i,:)
+			res1((nvamax02+1):nvamax12)=&
+			res1((nvamax02+1):nvamax12)/v
+			res1((nvamax02+1):nvamax12)=&
+			res1((nvamax02+1):nvamax12)-ve12square(i,:)*((u3/v)**2)
+
+			
+			end if 
+			
+                else  
+                    if(c(i).eq.3)then ! obs 0-->1
+
+			call fonct(t1(i),the01,ri01,gl01,su01,weib)
+			call fonct(t1(i),the02,ri02,gl02,su02,weib)
+			call fonct(t1(i),the12,ri12,gl12,su12,weib)
+
+			if(nva01nofix.gt.0) then 
+
+			res1(1:nva01nofix)=-ve01nofix(i,:)*gl01*vet01+&
+			tronc01+ve01nofix(i,:)
+			res1((nvamax+1):nvamax01)=&
+			-ve01square(i,:)*gl01*vet01+&
+			tronc01square
+
+			end if 
+
+			if(nva02nofix.gt.0) then 
+
+			res1((nva01nofix+1):nva0102)=&
+			-ve02nofix(i,:)*gl02*vet02+&
+			tronc02
+			res1((nvamax01+1):nvamax02)=&
+			-ve02square(i,:)*gl02*vet02+&
+			tronc02square
+
+			end if 
+
+			if(nva12nofix.gt.0) then 
+
+			res1((nva0102+1):nvamax)=gl12*vet12
+			res1((nvamax02+1):nvamax12)=gl12*vet12
+
+			call fonct(t3(i),the12,ri12,gl12,su12,weib)
+			res1((nva0102+1):nvamax)=&
+			res1((nva0102+1):nvamax)-gl12*vet12
+			res1((nva0102+1):nvamax)=&
+			res1((nva0102+1):nvamax)*ve12nofix(i,:)
+
+			res1((nvamax02+1):nvamax12)=&
+			res1((nvamax02+1):nvamax12)-gl12*vet12
+			res1((nvamax02+1):nvamax12)=&
+			res1((nvamax02+1):nvamax12)*ve12square(i,:)
+			
+
+			end if 
+			
+			
+
+                    else   
+                       if(c(i).eq.4)then ! cpi 0-->1 et obs 1-->2
+			
+			call fonct(t3(i),the12,ri12,gl12,su12,weib)
+			call qgaussweibderivdiag(t1(i),t2(i),the01,the02,the12,&
+			res2denum,res201num,res202num,res212num,&
+			res20101num,res20202num,&
+			res21212num,vet01,vet02,vet12,weib)
+
+			v=res2denum*(su12**vet12)*ri12*vet12
+
+			if(nva01nofix.gt.0) then 
+			u1=res201num*(su12**vet12)*ri12*vet12
+			
+			res1(1:nva01nofix)=&
+			ve01nofix(i,:)*u1/v
+			res1(1:nva01nofix)=res1(1:nva01nofix)+tronc01
+
+			res1((nvamax+1):nvamax01)=&
+			res20101num*(su12**vet12)*ri12*vet12*ve01square(i,:)
+			res1((nvamax+1):nvamax01)=&
+			res1((nvamax+1):nvamax01)/v
+			res1((nvamax+1):nvamax01)=&
+			res1((nvamax+1):nvamax01)-ve01square(i,:)*((u1/v)**2)
+			res1((nvamax+1):nvamax01)=&
+			res1((nvamax+1):nvamax01)+tronc01square
+
+			end if 
+
+			
+			if(nva02nofix.gt.0) then 
+
+			u2=-res202num*(su12**vet12)*ri12*vet12
+			
+			res1((nva01nofix+1):(nva01nofix+nva02nofix))=&
+			ve02nofix(i,:)*u2/v
+			res1((nva01nofix+1):nva0102)=&
+			res1((nva01nofix+1):nva0102)+&
+			tronc02
+			
+			res1((nvamax01+1):nvamax02)=&
+			(res20202num-res202num)*ri12*vet12*(su12**vet12)
+			res1((nvamax01+1):nvamax02)=&
+			res1((nvamax01+1):nvamax02)*ve02square(i,:)	
+			res1((nvamax01+1):nvamax02)=&
+			res1((nvamax01+1):nvamax02)/v
+			res1((nvamax01+1):nvamax02)=&
+			res1((nvamax01+1):nvamax02)-ve02square(i,:)*((u2/v)**2)
+			res1((nvamax01+1):nvamax02)=&
+			res1((nvamax01+1):nvamax02)+tronc02square
+
+			end if 
+
+
+			
+			if(nva12nofix.gt.0) then 
+
+			u3=res212num+&
+			(1-gl12*vet12)*res2denum
+			u3=u3*(su12**vet12)*ri12*vet12
+			
+			res1((nva0102+1):nvamax)=&
+			ve12nofix(i,:)*u3/v
+			
+			res1((nvamax02+1):nvamax12)=&
+			(1-gl12*vet12)*res212num+res21212num+&
+			((1-gl12*vet12)**2)*res2denum+&
+			(2-gl12*vet12)*res212num-gl12*vet12*res2denum
+			res1((nvamax02+1):nvamax12)=&
+			res1((nvamax02+1):nvamax12)*(su12**vet12)*ri12*vet12
+			res1((nvamax02+1):nvamax12)=&
+			res1((nvamax02+1):nvamax12)*ve12square(i,:)
+			res1((nvamax02+1):nvamax12)=&
+			res1((nvamax02+1):nvamax12)/v
+			res1((nvamax02+1):nvamax12)=&
+			res1((nvamax02+1):nvamax12)-ve12square(i,:)*((u3/v)**2)			
+
+
+			end if 
+
+
+                       else
+                         if(c(i).eq.5)then ! obs 0-->1 et obs 1-->2
+				
+				call fonct(t1(i),the01,ri01,gl01,su01,weib)
+				call fonct(t1(i),the02,ri02,gl02,su02,weib)
+				call fonct(t1(i),the12,ri12,gl12,su12,weib)
+				
+				if(nva01nofix.gt.0) then 
+
+				res1(1:nva01nofix)=&
+				-ve01nofix(i,:)*gl01*vet01+&
+				ve01nofix(i,:)+&
+				tronc01
+				res1((nvamax+1):nvamax01)=&
+				-ve01square(i,:)*gl01*vet01+&
+				tronc01square
+
+				end if 
+
+				if(nva02nofix.gt.0) then 
+
+				res1((nva01nofix+1):nva0102)=&
+				-ve02nofix(i,:)*gl02*vet02+tronc02
+
+				res1((nvamax01+1):nvamax02)=&
+				-ve02square(i,:)*gl02*vet02+&
+				tronc02square
+
+				end if 
+			
+				if(nva12nofix.gt.0) then 
+
+				res1((nvamax02+1):nvamax12)=&
+				gl12*vet12
+				res1((nva0102+1):nvamax)=&
+				ve12nofix(i,:)*gl12*vet12+&
+				ve12nofix(i,:)
+
+				call fonct(t3(i),the12,ri12,gl12,su12,weib)
+				res1((nva0102+1):nvamax)=&
+				res1((nva0102+1):nvamax)-ve12nofix(i,:)*gl12*vet12
+				res1((nvamax02+1):nvamax12)=&
+				res1((nvamax02+1):nvamax12)-gl12*vet12
+				res1((nvamax02+1):nvamax12)=&
+				res1((nvamax02+1):nvamax12)*ve12square(i,:)
+				
+
+				end if 
+				
+				
+				
+                         else
+                            if(c(i).eq.6)then ! vivant ???
+
+
+				call fonct(t3(i),the01,ri01,gl01,su01,weib)
+				call fonct(t3(i),the02,ri02,gl02,su02,weib)
+				call fonct(t3(i),the12,ri12,gl12,su12,weib)
+				call qgaussweibderivdiag(t1(i),t3(i),the01,the02,the12,&
+				res2denum,res201num,res202num,res212num,res20101num,&
+				res20202num,res21212num,vet01,vet02,vet12,weib)
+
+				
+				v=(su12**vet12)*res2denum+&
+				(su01**vet01)*(su02**vet02)
+
+				if(nva01nofix.gt.0) then 
+
+				u1=(-gl01*vet01)*(su01**vet01)*(su02**vet02)+&
+				(su12**vet12)*res201num
+			        res1(1:nva01nofix)=&
+				ve01nofix(i,:)*u1/v
+				res1(1:nva01nofix)=&
+				res1(1:nva01nofix)+tronc01
+
+				res1((nvamax+1):nvamax01)=&
+				res20101num*(su12**vet12)
+				resint=(su01**vet01)*(su02**vet02)
+				resint=resint*gl01*vet01*(1-gl01*vet01)
+				res1((nvamax+1):nvamax01)=&
+				res1((nvamax+1):nvamax01)-resint
+				
+				res1((nvamax+1):nvamax01)=&
+				res1((nvamax+1):nvamax01)*ve01square(i,:)
+				res1((nvamax+1):nvamax01)=&
+				res1((nvamax+1):nvamax01)/v
+
+				res1((nvamax+1):nvamax01)=&
+				res1((nvamax+1):nvamax01)-ve01square(i,:)*((u1/v)**2)
+				res1((nvamax+1):nvamax01)=&
+				res1((nvamax+1):nvamax01)+tronc01square
+
+				end if 
+				
+				if(nva02nofix.gt.0) then 
+
+				u2=-gl02*vet02*(su01**vet01)*(su02**vet02)
+				u2=u2-(su12**vet12)*res202num
+				res1((nva01nofix+1):nva0102)=&
+				ve02nofix(i,:)*u2/v
+				res1((nva01nofix+1):nva0102)=&
+				res1((nva01nofix+1):nva0102)+&
+				tronc02
+
+				res1((nvamax01+1):nvamax02)=&
+				(su12**vet12)*(res20202num-res202num)-&
+				gl02*vet02*(su01**vet01)*(su02**vet02)*(1-gl02*vet02)
+				res1((nvamax01+1):nvamax02)=&
+				res1((nvamax01+1):nvamax02)*ve02square(i,:)
+				res1((nvamax01+1):nvamax02)=&
+				res1((nvamax01+1):nvamax02)/v
+
+				res1((nvamax01+1):nvamax02)=&
+				res1((nvamax01+1):nvamax02)-ve02square(i,:)*((u2/v)**2)
+				res1((nvamax01+1):nvamax02)=&
+				res1((nvamax01+1):nvamax02)+tronc02square
+
+				
+				end if 
+
+				if(nva12nofix.gt.0) then 
+				
+				u3=-gl12*vet12*(su12**vet12)*res2denum+&
+				(su12**vet12)*res212num
+				res1((nva0102+1):nvamax)=&
+				ve12nofix(i,:)*u3/v
+
+				res1((nvamax02+1):nvamax12)=&
+				res21212num+(1-gl12*vet12)*res212num-&
+				gl12*vet12*(1-gl12*vet12)*res2denum-&
+				gl12*vet12*res212num
+				resint=(su12**vet12)
+				res1((nvamax02+1):nvamax12)=&
+				res1((nvamax02+1):nvamax12)*resint*ve12square(i,:)
+				res1((nvamax02+1):nvamax12)=&
+				res1((nvamax02+1):nvamax12)/v
+				res1((nvamax02+1):nvamax12)=&
+				res1((nvamax02+1):nvamax12)-ve12square(i,:)*((u3/v)**2)
+
+
+				end if 
+                        	
+				
+                            else ! passage 0-->2  
+				
+				call fonct(t3(i),the01,ri01,gl01,su01,weib)
+				call fonct(t3(i),the02,ri02,gl02,su02,weib)
+				call fonct(t3(i),the12,ri12,gl12,su12,weib)
+        			call qgaussweibderivdiag(t1(i),t3(i),the01,the02,&
+        			the12,res2denum,res201num,res202num,res212num,&
+        			res20101num,res20202num,res21212num,&
+        			vet01,vet02,vet12,weib)
+				
+				
+				v=(su12**vet12)*ri12*vet12*res2denum+&
+				(su01**vet01)*(su02**vet02)*ri02*vet02
+
+				if(nva01nofix.gt.0) then 
+
+				u1=-gl01*vet01*(su01**vet01)
+				u1=u1*(su02**vet02)*ri02*vet02
+				u1=u1+(su12**vet12)*ri12*vet12*res201num
+
+				
+				res1(1:nva01nofix)=&
+				ve01nofix(i,:)*u1/v
+				res1(1:nva01nofix)=res1(1:nva01nofix)+tronc01
+
+				res1((nvamax+1):nvamax01)=&
+				res20101num*(su12**vet12)*ri12*vet12
+				resint=(su01**vet01)*(su02**vet02)*gl01*vet01
+				resint=resint*(1-gl01*vet01)*ri02*vet02
+				res1((nvamax+1):nvamax01)=&
+				res1((nvamax+1):nvamax01)-resint
+				res1((nvamax+1):nvamax01)=&
+				res1((nvamax+1):nvamax01)*ve01square(i,:)
+				res1((nvamax+1):nvamax01)=&
+				res1((nvamax+1):nvamax01)/v
+				res1((nvamax+1):nvamax01)=&
+				res1((nvamax+1):nvamax01)-ve01square(i,:)*((u1/v)**2)
+				res1((nvamax+1):nvamax01)=&
+				res1((nvamax+1):nvamax01)+tronc01square
+
+
+				end if 
+
+				if(nva02nofix.gt.0) then 
+
+				u2=-(su12**vet12)*ri12*vet12*res202num+&
+				(1-gl02*vet02)*(su01**vet01)*(su02**vet02)*ri02*vet02
+
+				res1((nva01nofix+1):nva0102)=&
+				ve02nofix(i,:)*u2/v
+				res1((nva01nofix+1):nva0102)=&
+				res1((nva01nofix+1):nva0102)+&
+				tronc02
+
+				res1((nvamax01+1):nvamax02)=&
+				-gl02*vet02*(su01**vet01)*(su02**vet02)*ri02*vet02
+				res1((nvamax01+1):nvamax02)=&
+				res1((nvamax01+1):nvamax02)+&
+				(su12**vet12)*ri12*vet12*(res20202num-res202num)+&
+				((1-gl02*vet02)**2)*ri02*vet02*(su01**vet01)*(su02**vet02)
+
+
+				res1((nvamax01+1):nvamax02)=&
+				res1((nvamax01+1):nvamax02)*ve02square(i,:)
+				res1((nvamax01+1):nvamax02)=&
+				res1((nvamax01+1):nvamax02)/v
+				res1((nvamax01+1):nvamax02)=&
+				res1((nvamax01+1):nvamax02)-ve02square(i,:)*((u2/v)**2)
+				res1((nvamax01+1):nvamax02)=&
+				res1((nvamax01+1):nvamax02)+tronc02square
+
+
+				end if 
+
+				if(nva12nofix.gt.0) then 
+
+				u3=res212num+(1-gl12*vet12)*res2denum
+				u3=u3*(su12**vet12)*ri12*vet12
+
+				res1((nva0102+1):nvamax)=&
+				ve12nofix(i,:)*u3/v
+
+				res1((nvamax02+1):nvamax12)=&
+				-gl12*vet12*res2denum+((1-gl12*vet12)**2)*res2denum+&
+				2*(1-gl12*vet12)*res212num+res212num+&
+				res21212num
+
+				resint=ri12*vet12*(su12**vet12)
+				res1((nvamax02+1):nvamax12)=&
+				res1((nvamax02+1):nvamax12)*resint*ve12square(i,:)
+				res1((nvamax02+1):nvamax12)=&
+				res1((nvamax02+1):nvamax12)/v
+				
+				res1((nvamax02+1):nvamax12)=&
+				res1((nvamax02+1):nvamax12)-ve12square(i,:)*((u3/v)**2)
+
+
+				end if 
+
+				
+				
+                            endif
+                         endif                        
+                      endif
+                   endif  
+                endif   
+                endif   
+
+                res = res + res1 
+
+
+		
+
+
+        end do   
+
+
+        likelihood_deriv = res
+
+
+
+
+123     continue 
+	 
+	deallocate(b,bfix,fix,ve01,ve02,ve12,ve01nofix,&
+	ve02nofix,ve12nofix,tronc01,tronc02,t0,t1,t2,t3,c,&
+	ve01square,ve02square,ve12square,&
+	tronc01square,tronc02square)     
+
+    end subroutine derivaweibdiag
 
 
 !=============================================================================================  
@@ -7252,8 +8977,1330 @@ subroutine derivaweib(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 
 
 
+!=============================================================================================  
+!======================= Calculate first derivatives of loglik with M-splines baseline risk ==
+!============================================================================================= 
 
 
+ subroutine firstderivaspline(b0,np0,npar0,bfix0,fix0,zi010,zi120,&
+      zi020,c0,no0,nz010,nz120,nz020,ve010,ve120,ve020,&
+        dimnva01,dimnva12,dimnva02,nva01,nva12,nva02,t00,&
+        t10,t20,t30,troncature0,likelihood_deriv)
+	
+	use commun
+        implicit none
+         
+        double precision::res2denum,res201num,res202num,res212num,&
+	vet01,vet12,vet02,resint,v,u1,u2,u3
+        integer::np0,i,j,l,w,k,lfix, kfix,npar0,nva01,nva12,nva02,no0, &
+	nz010,nz020,nz120,troncature0,dimnva01,dimnva02,dimnva12, & 
+	nva01nofix,nva12nofix,nva02nofix,nvamax,sizespline,nva0102
+
+	double precision,dimension(np0),intent(inout)::likelihood_deriv
+	double precision,dimension(np0)::b0
+	double precision,dimension(np0)::res,res1
+        double precision,dimension(npar0)::bh
+	double precision,dimension(npar0-np0)::bfix0
+	integer,dimension(npar0)::fix0
+	double precision,dimension(-2:(nz010+3))::zi010
+	double precision,dimension(-2:(nz020+3))::zi020
+	double precision,dimension(-2:(nz120+3))::zi120
+	double precision,dimension(-2:(nz010-1))::the01
+	double precision,dimension(-2:(nz120-1))::the12
+	double precision,dimension(-2:(nz020-1))::the02
+        double precision,dimension(no0,dimnva01)::ve010
+	double precision,dimension(no0,dimnva02)::ve020
+	double precision,dimension(no0,dimnva12)::ve120
+	
+	
+        double precision::su01,ri01,su12,ri12,su02,ri02,gl01,gl02,gl12
+	double precision,dimension(no0)::t00,t10,t20,t30
+	integer,dimension(no0)::c0
+
+	allocate(b(np0),bfix(npar0-np0),fix(npar0))
+	b=b0
+	bfix=bfix0
+	fix=fix0
+	allocate(zi01(-2:(nz01+3)),zi12(-2:(nz12+3)),zi02(-2:(nz02+3)))
+	zi01=zi010
+	zi02=zi020
+	zi12=zi120
+
+	
+	nz01=nz010
+	nz02=nz020
+	nz12=nz120
+	sizespline=nz01+nz02+nz12+6
+	troncature=troncature0
+
+
+	if(nva01.gt.0) then 
+	  nva01nofix=nva01-sum(fix((sizespline+1):(nva01+sizespline)))
+	else 
+	  nva01nofix=0
+	end if 
+
+	if(nva02.gt.0) then 
+          nva02nofix=nva02-sum(fix((nva01+sizespline+1):(nva02+nva01+sizespline)))
+	else 
+	   nva02nofix=0
+	end if 
+
+	if(nva12.gt.0) then 
+	  nva12nofix=nva12-sum(fix((nva01+nva02+sizespline+1):npar0))
+	else 
+	  nva12nofix=0
+	end if 
+
+	nva0102=nva01nofix+nva02nofix
+	nvamax=nva01nofix+nva02nofix+nva12nofix
+	
+
+	if(nva01.gt.0) then 
+		allocate(ve01(no0,nva01))
+		allocate(ve01nofix(no0,nva01nofix))
+		allocate(tronc01(nva01nofix))
+	else 
+		allocate(ve01(no0,1))
+		allocate(ve01nofix(no0,1))
+		ve01nofix=0
+		allocate(tronc01(1))
+	end if 
+	
+	if(nva02.gt.0) then 
+		allocate(ve02(no0,nva02))
+		allocate(ve02nofix(no0,nva02nofix))
+		allocate(tronc02(nva02nofix))
+	else 
+		allocate(ve02(no0,1))
+		allocate(ve02nofix(no0,1))
+		ve02nofix=0
+		allocate(tronc02(1))
+	end if 
+
+	if(nva12.gt.0) then 
+		allocate(ve12(no0,nva12))
+		allocate(ve12nofix(no0,nva12nofix))
+	else 
+		allocate(ve12(no0,1))
+		allocate(ve12nofix(no0,1))
+	end if 
+
+
+	ve01=ve010
+	ve02=ve020
+	ve12=ve120
+
+	allocate(t0(no0),t1(no0),t2(no0),t3(no0),c(no0))
+	c=c0
+	t0=t00
+	t1=t10
+	t2=t20
+	t3=t30
+
+         
+        ! we need to put bh at its original values if in posfix 
+
+
+       l=0
+       lfix=0
+       w=0
+
+
+	if(nva01.gt.0) then 
+	do k=1,nva01
+	   if(fix((sizespline+k)).eq.0) then 
+		lfix=lfix+1
+		ve01nofix(:,lfix)=ve01(:,k)
+	   end if 
+	end do
+	 
+	end if 
+
+
+	lfix=0
+	if(nva02.gt.0) then 
+
+	do k=1,nva02
+	   if(fix((sizespline+nva01+k)).eq.0) then 
+		lfix=lfix+1
+		ve02nofix(:,lfix)=ve02(:,k)
+	   end if 
+	end do
+	end if 
+
+	
+	lfix=0
+
+	if(nva12.gt.0) then 
+	do k=1,nva12
+	   if(fix((sizespline+nva01+nva02+k)).eq.0) then 
+		lfix=lfix+1
+		ve12nofix(:,lfix)=ve12(:,k)
+	   end if 
+	end do
+
+	end if 
+	
+	l=0
+       lfix=0
+       w=0
+
+     do k=1,npar0 
+         if(fix(k).eq.0) then
+            l=l+1
+            bh(k)=b(l)
+	 end if 
+         if(fix(k).eq.1) then
+            w=w+1
+            bh(k)=bfix(w)
+         end if
+      end do
+   
+	
+
+
+
+         do i=1,nz01+2
+            the01(i-3)=(bh(i))*(bh(i))
+!       the01(i-3)=dexp(bh(i))
+         end do
+         do i=1,nz02+2
+            j = nz01+2+i
+            the02(i-3)=(bh(j))*(bh(j))
+!       the12(i-3)=dexp(bh(j))
+         end do
+         do i=1,nz12+2
+            j = nz02+2+nz01+2+i
+            the12(i-3)=(bh(j))*(bh(j))
+!       the02(i-3)=dexp(bh(j))
+         end do
+
+
+	
+!---------- calcul des derivees premiere ------------------   
+
+	res = 0
+        do i=1,no0
+
+
+                vet01 = 0.d0
+                vet12 = 0.d0
+                vet02 = 0.d0
+
+
+                if(nva01.gt.0)then
+                        do j=1,nva01
+				vet01 =vet01 +&
+                                bh(npar0-nva01-nva12-nva02+j)*dble(ve01(i,j))
+                        end do
+                endif  
+ 
+                if(nva02.gt.0)then
+                        do j=1,nva02
+				vet02 =vet02 +&
+                                bh(npar0-nva02-nva12+j)*dble(ve02(i,j))
+                        end do
+                endif
+
+                if(nva12.gt.0)then
+                        do j=1,nva12
+				vet12 =vet12 +&
+                                bh(npar0-nva12+j)*dble(ve12(i,j))
+                        end do
+                endif
+
+		
+                vet01 = dexp(vet01)
+                vet12 = dexp(vet12)
+                vet02 = dexp(vet02)
+
+                res1 = 0
+                
+                if(troncature.eq.1)then
+                        if(t0(i).eq.0.d0)then
+                                tronc01 = 0
+				tronc02 =  0
+                        else 
+				
+				call susp(t0(i),the01,nz01,su01,ri01,zi01,gl01)
+				call susp(t0(i),the02,nz02,su02,ri02,zi02,gl02)
+                                tronc01=ve01nofix(i,:)*(gl01*vet01)
+                        	tronc02=ve02nofix(i,:)*(gl02*vet02)
+                        end if
+                else
+                        tronc01 = 0
+                  	tronc02 = 0
+                end if
+		
+                if(c(i).eq.1)then ! cad 0-->1 et 0-->2
+			call susp(t1(i),the01,nz01,su01,ri01,zi01,gl01)
+			call susp(t1(i),the02,nz02,su02,ri02,zi02,gl02)
+
+			if(nva01nofix.gt.0) then 
+
+			res1(1:nva01nofix)=&
+			-ve01nofix(i,:)*gl01*vet01+tronc01
+
+			end if
+
+			if(nva02nofix.gt.0) then 
+
+			res1((nva01nofix+1):nva0102)=&
+			-ve02nofix(i,:)*gl02*vet02+&
+			tronc02
+			
+			end if 
+
+			if(nva12nofix.gt.0) then 
+
+			res1((nva0102+1):nvamax)=0
+
+			end if 
+
+		
+			
+
+                else
+                if(c(i).eq.2)then ! cpi 0-->1
+			call susp(t3(i),the12,nz12,su12,ri12,zi12,gl12)
+			call qgausssplinefirstderiv(t1(i),t2(i),the01,&
+			the02,the12,res2denum,res201num,&
+			res202num,res212num,&
+			vet01,vet02,vet12)
+                        
+			
+			v=res2denum*(su12**vet12)
+
+			if(nva01nofix.gt.0) then 
+
+			u1=res201num*(su12**vet12)
+      			res1(1:nva01nofix)=&
+			ve01nofix(i,:)*u1/v
+			res1(1:nva01nofix)=res1(1:nva01nofix)+tronc01
+			end if 
+
+			if(nva02nofix.gt.0) then 
+
+			u2=-res202num*(su12**vet12)
+			res1((nva01nofix+1):nva0102)=&
+			ve02nofix(i,:)*u2/v
+			res1((nva01nofix+1):nva0102)=&
+			res1((nva01nofix+1):nva0102)+&
+			tronc02
+			end if 
+
+			if(nva12nofix.gt.0) then
+
+			u3=res212num-gl12*vet12*res2denum
+			u3=u3*(su12**vet12)
+			res1((nva0102+1):nvamax)=&
+			ve12nofix(i,:)*u3/v
+			end if 
+			
+
+			
+                else  
+                    if(c(i).eq.3)then ! obs 0-->1
+
+			call susp(t1(i),the01,nz01,su01,ri01,zi01,gl01)
+			call susp(t1(i),the02,nz02,su02,ri02,zi02,gl02)
+			call susp(t1(i),the12,nz12,su12,ri12,zi12,gl12)
+
+
+			if(nva01nofix.gt.0) then 
+
+			res1(1:nva01nofix)=-ve01nofix(i,:)*gl01*vet01+&
+			tronc01+ve01nofix(i,:)
+			end if 
+
+			if(nva02nofix.gt.0) then 
+
+			res1((nva01nofix+1):nva0102)=&
+			-ve02nofix(i,:)*gl02*vet02+&
+			tronc02
+			end if 
+
+			if(nva12nofix.gt.0) then 
+
+			res1((nva0102+1):nvamax)=gl12*vet12
+			call susp(t3(i),the12,nz12,su12,ri12,zi12,gl12)
+			res1((nva0102+1):nvamax)=&
+			res1((nva0102+1):nvamax)-gl12*vet12
+			res1((nva0102+1):nvamax)=&
+			res1((nva0102+1):nvamax)*ve12nofix(i,:)
+			end if 
+
+			
+
+                    else   
+                       if(c(i).eq.4)then ! cpi 0-->1 et obs 1-->2
+			
+			call susp(t3(i),the12,nz12,su12,ri12,zi12,gl12)
+			call qgausssplinefirstderiv(t1(i),t2(i),the01,the02,the12,&
+			res2denum,res201num,res202num,res212num,&
+			vet01,vet02,vet12)
+
+			
+			v=res2denum*(su12**vet12)*ri12*vet12
+
+			if(nva01nofix.gt.0) then 
+
+			u1=res201num*(su12**vet12)*ri12*vet12
+			res1(1:nva01nofix)=&
+			ve01nofix(i,:)*u1/v
+			res1(1:nva01nofix)=res1(1:nva01nofix)+tronc01
+			end if 
+
+			if(nva02nofix.gt.0) then
+
+			u2=-res202num*(su12**vet12)*ri12*vet12
+			res1((nva01nofix+1):(nva01nofix+nva02nofix))=&
+			ve02nofix(i,:)*u2/v
+			res1((nva01nofix+1):nva0102)=&
+			res1((nva01nofix+1):nva0102)+&
+			tronc02
+			end if 
+
+			if(nva12nofix.gt.0) then
+
+			u3=res212num+&
+			(1-gl12*vet12)*res2denum
+			u3=u3*(su12**vet12)*ri12*vet12
+			res1((nva0102+1):nvamax)=&
+			ve12nofix(i,:)*u3/v
+			end if 
+
+                        
+                       else
+                         if(c(i).eq.5)then ! obs 0-->1 et obs 1-->2
+				
+				
+			         call susp(t1(i),the01,nz01,su01,ri01,zi01,gl01)
+			         call susp(t1(i),the02,nz02,su02,ri02,zi02,gl02)
+			         call susp(t1(i),the12,nz12,su12,ri12,zi12,gl12)
+
+				if(nva01nofix.gt.0) then 
+
+				res1(1:nva01nofix)=&
+				-ve01nofix(i,:)*gl01*vet01+&
+				ve01nofix(i,:)+&
+				tronc01
+				end if 
+
+				if(nva02nofix.gt.0) then 
+
+				res1((nva01nofix+1):nva0102)=&
+				-ve02nofix(i,:)*gl02*vet02+tronc02
+				end if 
+
+				if(nva12nofix.gt.0) then
+
+				res1((nva0102+1):nvamax)=&
+				ve12nofix(i,:)*gl12*vet12+&
+				ve12nofix(i,:)
+				call susp(t3(i),the12,nz12,su12,ri12,zi12,gl12)
+                                res1((nva0102+1):nvamax)=&
+				res1((nva0102+1):nvamax)-ve12nofix(i,:)*gl12*vet12
+				end if 
+				
+                         else
+                            if(c(i).eq.6)then ! vivant ???
+				
+				call susp(t3(i),the01,nz01,su01,ri01,zi01,gl01)
+				call susp(t3(i),the02,nz02,su02,ri02,zi02,gl02)
+			        call susp(t3(i),the12,nz12,su12,ri12,zi12,gl12)
+				call qgausssplinefirstderiv(t1(i),t3(i),the01,the02,the12,&
+				res2denum,res201num,res202num,res212num,&
+				vet01,vet02,vet12)
+
+				
+				v=(su12**vet12)*res2denum+&
+				(su01**vet01)*(su02**vet02)
+			
+				if(nva01nofix.gt.0) then 
+
+				u1=(-gl01*vet01)*(su01**vet01)*(su02**vet02)+&
+				(su12**vet12)*res201num
+			        res1(1:nva01nofix)=&
+				ve01nofix(i,:)*u1/v
+				res1(1:nva01nofix)=&
+				res1(1:nva01nofix)+tronc01
+
+				end if 
+
+
+				if(nva02nofix.gt.0) then 
+
+				u2=-gl02*vet02*(su01**vet01)*(su02**vet02)
+				u2=u2-(su12**vet12)*res202num
+				res1((nva01nofix+1):nva0102)=&
+				ve02nofix(i,:)*u2/v
+				res1((nva01nofix+1):nva0102)=&
+				res1((nva01nofix+1):nva0102)+&
+				tronc02
+
+				end if 
+
+				if(nva12nofix.gt.0) then 
+				
+				u3=-gl12*vet12*(su12**vet12)*res2denum+&
+				(su12**vet12)*res212num
+				res1((nva0102+1):nvamax)=&
+				ve12nofix(i,:)*u3/v
+
+				end if 
+                        	
+                            else ! passage 0-->2  
+				
+				call susp(t3(i),the01,nz01,su01,ri01,zi01,gl01)
+				call susp(t3(i),the02,nz02,su02,ri02,zi02,gl02)
+			        call susp(t3(i),the12,nz12,su12,ri12,zi12,gl12)
+        			call qgausssplinefirstderiv(t1(i),t3(i),the01,the02,&
+        			the12,res2denum,res201num,res202num,res212num,&
+        			vet01,vet02,vet12)
+
+				v=(su12**vet12)*ri12*vet12*res2denum+&
+				(su01**vet01)*(su02**vet02)*ri02*vet02
+
+
+				if(nva01nofix.gt.0) then 
+
+				u1=-gl01*vet01*(su01**vet01)
+				u1=u1*(su02**vet02)*ri02*vet02
+				u1=u1+(su12**vet12)*ri12*vet12*res201num
+
+				res1(1:nva01nofix)=&
+				ve01nofix(i,:)*u1/v
+				res1(1:nva01nofix)=res1(1:nva01nofix)+tronc01
+
+				end if 
+
+
+				if(nva02nofix.gt.0) then 
+
+				u2=-(su12**vet12)*ri12*vet12*res202num+&
+				(1-gl02*vet02)*(su01**vet01)*(su02**vet02)*ri02*vet02
+
+				res1((nva01nofix+1):nva0102)=&
+				ve02nofix(i,:)*u2/v
+				res1((nva01nofix+1):nva0102)=&
+				res1((nva01nofix+1):nva0102)+&
+				tronc02
+				end if 
+
+				if(nva12nofix.gt.0) then 
+
+				u3=res212num+(1-gl12*vet12)*res2denum
+				u3=u3*(su12**vet12)*ri12*vet12
+
+				res1((nva0102+1):nvamax)=&
+				ve12nofix(i,:)*u3/v
+				end if 
+
+
+                            endif
+                         endif                        
+                      endif
+                   endif  
+                endif   
+                endif   
+
+                res = res + res1 
+
+        end do   
+
+        likelihood_deriv = res
+
+
+
+
+123     continue 
+	 
+	deallocate(b,bfix,fix,zi01,zi02,zi12,ve01,ve02,ve12,ve01nofix,&
+	ve02nofix,ve12nofix,tronc01,tronc02,t0,t1,t2,t3,c)     
+
+    end subroutine firstderivaspline
+
+
+
+!=============================================================================================  
+!======================= Calculate derivatives of loglik with M-splines baseline risk ========
+!======================= only diagonal terms of hessian ======================================
+!============================================================================================= 
+
+
+ subroutine derivasplinediag(b0,np0,npar0,bfix0,fix0,zi010,zi120,&
+      zi020,c0,no0,nz010,nz120,nz020,ve010,ve120,ve020,&
+        dimnva01,dimnva12,dimnva02,nva01,nva12,nva02,t00,&
+        t10,t20,t30,troncature0,likelihood_deriv)
+	
+	use commun
+        implicit none
+         
+        double precision::res2denum,res201num,res202num,res212num, &
+	res20101num,res20202num,res21212num,vet01,vet12,vet02,resint,v,u1,u2,u3
+        integer::np0,i,j,l,w,k,lfix, kfix,npar0,nva01,nva12,nva02,no0, &
+	nz010,nz020,nz120,troncature0,dimnva01,dimnva02,dimnva12, & 
+	nva01nofix,nva12nofix,nva02nofix,nvamax, sizespline,nva0102,&
+	nvamax01,nvamax0102,nvamax0112,nvamax02,nvamax0212,nvamax12
+
+	double precision,dimension(np0+np0),intent(inout)::likelihood_deriv
+	double precision,dimension(np0)::b0
+	double precision,dimension(np0+np0)::res,res1
+        double precision,dimension(npar0)::bh
+	double precision,dimension(npar0-np0)::bfix0
+	integer,dimension(npar0)::fix0
+	double precision,dimension(-2:(nz010+3))::zi010
+	double precision,dimension(-2:(nz020+3))::zi020
+	double precision,dimension(-2:(nz120+3))::zi120
+	double precision,dimension(-2:(nz010-1))::the01
+	double precision,dimension(-2:(nz120-1))::the12
+	double precision,dimension(-2:(nz020-1))::the02
+        double precision,dimension(no0,dimnva01)::ve010
+	double precision,dimension(no0,dimnva02)::ve020
+	double precision,dimension(no0,dimnva12)::ve120
+	
+	
+        double precision::su01,ri01,su12,ri12,su02,ri02,gl01,gl02,gl12
+	double precision,dimension(no0)::t00,t10,t20,t30
+	integer,dimension(no0)::c0
+
+	allocate(b(np0),bfix(npar0-np0),fix(npar0))
+	b=b0
+	bfix=bfix0
+	fix=fix0
+	allocate(zi01(-2:(nz01+3)),zi12(-2:(nz12+3)),zi02(-2:(nz02+3)))
+	zi01=zi010
+	zi02=zi020
+	zi12=zi120
+
+	
+	nz01=nz010
+	nz02=nz020
+	nz12=nz120
+	sizespline=nz01+nz02+nz12+6
+	troncature=troncature0
+
+
+	if(nva01.gt.0) then 
+	  nva01nofix=nva01-sum(fix((sizespline+1):(nva01+sizespline)))
+	else 
+	  nva01nofix=0
+	end if 
+
+	if(nva02.gt.0) then 
+          nva02nofix=nva02-sum(fix((nva01+sizespline+1):(nva02+nva01+sizespline)))
+	else 
+	   nva02nofix=0
+	end if 
+
+	if(nva12.gt.0) then 
+	  nva12nofix=nva12-sum(fix((nva01+nva02+sizespline+1):npar0))
+	else 
+	  nva12nofix=0
+	end if 
+
+	nva0102=nva01nofix+nva02nofix
+	nvamax=nva01nofix+nva02nofix+nva12nofix
+	nvamax01=nvamax+nva01nofix
+	nvamax02=nvamax01+nva02nofix
+	nvamax12=nvamax02+nva12nofix
+
+
+	if(nva01.gt.0) then 
+		allocate(ve01(no0,nva01))
+		allocate(ve01nofix(no0,nva01nofix))
+		allocate(ve01square(no0,nva01nofix))
+		allocate(tronc01(nva01nofix))
+		allocate(tronc01square(nva01nofix))
+	else 
+		allocate(ve01(no0,1))
+		allocate(ve01nofix(no0,1))
+		allocate(ve01square(no0,1))
+		ve01square=0
+		ve01nofix=0
+		allocate(tronc01(1))
+		allocate(tronc01square(1))
+	end if 
+	
+	if(nva02.gt.0) then 
+		allocate(ve02(no0,nva02))
+		allocate(ve02nofix(no0,nva02nofix))
+		allocate(ve02square(no0,nva02nofix))
+		allocate(tronc02(nva02nofix))
+		allocate(tronc02square(nva02nofix))
+	else 
+		allocate(ve02(no0,1))
+		allocate(ve02nofix(no0,1))
+		allocate(ve02square(no0,1))
+		ve02square=0
+		ve02nofix=0
+		allocate(tronc02(1))
+		allocate(tronc02square(1))
+	end if 
+
+	if(nva12.gt.0) then 
+		allocate(ve12(no0,nva12))
+		allocate(ve12nofix(no0,nva12nofix))
+		allocate(ve12square(no0,nva12nofix))
+	else 
+		allocate(ve12(no0,1))
+		allocate(ve12nofix(no0,1))
+		allocate(ve12square(no0,1))
+	end if 
+
+
+	ve01=ve010
+	ve02=ve020
+	ve12=ve120
+
+	allocate(t0(no0),t1(no0),t2(no0),t3(no0),c(no0))
+	c=c0
+	t0=t00
+	t1=t10
+	t2=t20
+	t3=t30
+
+         
+        ! we need to put bh at its original values if in posfix 
+
+
+       l=0
+       lfix=0
+       w=0
+
+
+	if(nva01.gt.0) then 
+	do k=1,nva01
+	   if(fix((sizespline+k)).eq.0) then 
+		lfix=lfix+1
+		ve01nofix(:,lfix)=ve01(:,k)
+		ve01square(:,lfix)=ve01nofix(:,lfix)*ve01nofix(:,lfix)
+	   end if 
+	end do
+	 
+	end if 
+
+
+	lfix=0
+	if(nva02.gt.0) then 
+
+	do k=1,nva02
+	   if(fix((sizespline+nva01+k)).eq.0) then 
+		lfix=lfix+1
+		ve02nofix(:,lfix)=ve02(:,k)
+		ve02square(:,lfix)=ve02nofix(:,lfix)*ve02nofix(:,lfix)
+	   end if 
+	end do
+	end if 
+
+	
+	lfix=0
+
+	if(nva12.gt.0) then 
+	do k=1,nva12
+	   if(fix((sizespline+nva01+nva02+k)).eq.0) then 
+		lfix=lfix+1
+		ve12nofix(:,lfix)=ve12(:,k)
+		ve12square(:,lfix)=ve12nofix(:,lfix)*ve12nofix(:,lfix)
+	   end if 
+	end do
+	end if 
+	
+	l=0
+       lfix=0
+       w=0
+
+     do k=1,npar0 
+         if(fix(k).eq.0) then
+            l=l+1
+            bh(k)=b(l)
+	 end if 
+         if(fix(k).eq.1) then
+            w=w+1
+            bh(k)=bfix(w)
+         end if
+      end do
+   
+	
+
+
+
+         do i=1,nz01+2
+            the01(i-3)=(bh(i))*(bh(i))
+!       the01(i-3)=dexp(bh(i))
+         end do
+         do i=1,nz02+2
+            j = nz01+2+i
+            the02(i-3)=(bh(j))*(bh(j))
+!       the12(i-3)=dexp(bh(j))
+         end do
+         do i=1,nz12+2
+            j = nz02+2+nz01+2+i
+            the12(i-3)=(bh(j))*(bh(j))
+!       the02(i-3)=dexp(bh(j))
+         end do
+
+
+	
+!---------- calcul des derivees premiere ------------------   
+
+	res = 0
+        do i=1,no0
+
+
+                vet01 = 0.d0
+                vet12 = 0.d0
+                vet02 = 0.d0
+
+
+                if(nva01.gt.0)then
+                        do j=1,nva01
+				vet01 =vet01 +&
+                                bh(npar0-nva01-nva12-nva02+j)*dble(ve01(i,j))
+                        end do
+                endif  
+ 
+                if(nva02.gt.0)then
+                        do j=1,nva02
+				vet02 =vet02 +&
+                                bh(npar0-nva02-nva12+j)*dble(ve02(i,j))
+                        end do
+                endif
+
+                if(nva12.gt.0)then
+                        do j=1,nva12
+				vet12 =vet12 +&
+                                bh(npar0-nva12+j)*dble(ve12(i,j))
+                        end do
+                endif
+
+		
+                vet01 = dexp(vet01)
+                vet12 = dexp(vet12)
+                vet02 = dexp(vet02)
+
+                res1 = 0
+                
+                if(troncature.eq.1)then
+                        if(t0(i).eq.0.d0)then
+                                tronc01 = 0
+				tronc02 =  0
+                        	tronc01square= 0
+                        	tronc02square=0
+                        else 
+				
+				call susp(t0(i),the01,nz01,su01,ri01,zi01,gl01)
+				call susp(t0(i),the02,nz02,su02,ri02,zi02,gl02)
+                                tronc01=ve01nofix(i,:)*(gl01*vet01)
+                        	tronc02=ve02nofix(i,:)*(gl02*vet02)
+                        	tronc01square=ve01square(i,:)*(gl01*vet01)
+                        	tronc02square=ve02square(i,:)*(gl02*vet02)
+                        end if
+                else
+                        tronc01 = 0
+                  	tronc02 = 0
+                  	tronc01square=0
+                  	tronc02square=0
+                end if
+		
+                if(c(i).eq.1)then ! cad 0-->1 et 0-->2
+			call susp(t1(i),the01,nz01,su01,ri01,zi01,gl01)
+			call susp(t1(i),the02,nz02,su02,ri02,zi02,gl02)
+
+			if(nva01nofix.gt.0) then 
+
+			res1(1:nva01nofix)=&
+			-ve01nofix(i,:)*gl01*vet01+tronc01
+			res1((nvamax+1):nvamax01)=&
+			-ve01square(i,:)*gl01*vet01+&
+			tronc01square
+
+
+			end if
+
+			if(nva02nofix.gt.0) then 
+
+			res1((nva01nofix+1):nva0102)=&
+			-ve02nofix(i,:)*gl02*vet02+&
+			tronc02
+			res1((nvamax01+1):nvamax02)=&
+			-ve02square(i,:)*gl02*vet02+&
+			tronc02square
+			
+
+			end if 
+
+			if(nva12nofix.gt.0) then 
+
+			res1((nva0102+1):nvamax)=0
+			res1((nvamax02+1):nvamax12)=0
+
+			end if 
+
+		
+			
+
+                else
+                if(c(i).eq.2)then ! cpi 0-->1
+			call susp(t3(i),the12,nz12,su12,ri12,zi12,gl12)
+			call qgausssplinederivdiag(t1(i),t2(i),the01,&
+			the02,the12,res2denum,res201num,&
+			res202num,res212num,res20101num,&
+			res20202num,res21212num,&
+			vet01,vet02,vet12)
+                        
+			
+			v=res2denum*(su12**vet12)
+
+			if(nva01nofix.gt.0) then 
+
+			u1=res201num*(su12**vet12)
+      			res1(1:nva01nofix)=&
+			ve01nofix(i,:)*u1/v
+			res1(1:nva01nofix)=res1(1:nva01nofix)+tronc01
+			res1((nvamax+1):nvamax01)=&
+			ve01square(i,:)*res20101num*(su12**vet12)
+			res1((nvamax+1):nvamax01)=&
+			res1((nvamax+1):nvamax01)/v
+			res1((nvamax+1):nvamax01)=&
+			res1((nvamax+1):nvamax01)-ve01square(i,:)*((u1/v)**2)
+			res1((nvamax+1):nvamax01)=&
+			res1((nvamax+1):nvamax01)+&
+			tronc01square
+
+			end if 
+
+			if(nva02nofix.gt.0) then 
+
+			u2=-res202num*(su12**vet12)
+			res1((nva01nofix+1):nva0102)=&
+			ve02nofix(i,:)*u2/v
+			res1((nva01nofix+1):nva0102)=&
+			res1((nva01nofix+1):nva0102)+&
+			tronc02
+
+			res1((nvamax01+1):nvamax02)=&
+			-ve02square(i,:)*(su12**vet12)*(-res20202num+res202num)
+			res1((nvamax01+1):nvamax02)=&
+			res1((nvamax01+1):nvamax02)/v
+			res1((nvamax01+1):nvamax02)=&
+			res1((nvamax01+1):nvamax02)-ve02square(i,:)*((u2/v)**2)
+			res1((nvamax01+1):nvamax02)=&
+			res1((nvamax01+1):nvamax02)+tronc02square
+
+			end if 
+
+			if(nva12nofix.gt.0) then
+
+			u3=res212num-gl12*vet12*res2denum
+			u3=u3*(su12**vet12)
+			res1((nva0102+1):nvamax)=&
+			ve12nofix(i,:)*u3/v
+
+			res1((nvamax02+1):nvamax12)=&
+			-2*gl12*vet12*res212num+res212num+&
+			res21212num-gl12*vet12*(1-gl12*vet12)*res2denum
+			res1((nvamax02+1):nvamax12)=&
+			res1((nvamax02+1):nvamax12)*(su12**vet12)*ve12square(i,:)
+			res1((nvamax02+1):nvamax12)=&
+			res1((nvamax02+1):nvamax12)/v
+			res1((nvamax02+1):nvamax12)=&
+			res1((nvamax02+1):nvamax12)-ve12square(i,:)*((u3/v)**2)
+
+			end if 
+			
+			
+                else  
+                    if(c(i).eq.3)then ! obs 0-->1
+
+			call susp(t1(i),the01,nz01,su01,ri01,zi01,gl01)
+			call susp(t1(i),the02,nz02,su02,ri02,zi02,gl02)
+			call susp(t1(i),the12,nz12,su12,ri12,zi12,gl12)
+
+
+			if(nva01nofix.gt.0) then 
+
+			res1(1:nva01nofix)=-ve01nofix(i,:)*gl01*vet01+&
+			tronc01+ve01nofix(i,:)
+			res1((nvamax+1):nvamax01)=&
+			-ve01square(i,:)*gl01*vet01+&
+			tronc01square
+
+			end if 
+
+			if(nva02nofix.gt.0) then 
+
+			res1((nva01nofix+1):nva0102)=&
+			-ve02nofix(i,:)*gl02*vet02+&
+			tronc02
+			res1((nvamax01+1):nvamax02)=&
+			-ve02square(i,:)*gl02*vet02+&
+			tronc02square
+
+			end if 
+
+			if(nva12nofix.gt.0) then 
+
+			res1((nva0102+1):nvamax)=gl12*vet12
+			res1((nvamax02+1):nvamax12)=gl12*vet12
+			call susp(t3(i),the12,nz12,su12,ri12,zi12,gl12)
+			res1((nva0102+1):nvamax)=&
+			res1((nva0102+1):nvamax)-gl12*vet12
+			res1((nva0102+1):nvamax)=&
+			res1((nva0102+1):nvamax)*ve12nofix(i,:)
+			res1((nvamax02+1):nvamax12)=&
+			res1((nvamax02+1):nvamax12)-gl12*vet12
+			res1((nvamax02+1):nvamax12)=&
+			res1((nvamax02+1):nvamax12)*ve12square(i,:)
+			
+
+			end if 
+
+			
+
+                    else   
+                       if(c(i).eq.4)then ! cpi 0-->1 et obs 1-->2
+			
+			call susp(t3(i),the12,nz12,su12,ri12,zi12,gl12)
+			call qgausssplinederivdiag(t1(i),t2(i),the01,the02,the12,&
+			res2denum,res201num,res202num,res212num,&
+			res20101num,res20202num,&
+			res21212num,vet01,vet02,vet12)
+
+			
+			v=res2denum*(su12**vet12)*ri12*vet12
+
+			if(nva01nofix.gt.0) then 
+
+			u1=res201num*(su12**vet12)*ri12*vet12
+			res1(1:nva01nofix)=&
+			ve01nofix(i,:)*u1/v
+			res1(1:nva01nofix)=res1(1:nva01nofix)+tronc01
+
+			res1((nvamax+1):nvamax01)=&
+			res20101num*(su12**vet12)*ri12*vet12*ve01square(i,:)
+			res1((nvamax+1):nvamax01)=&
+			res1((nvamax+1):nvamax01)/v
+			res1((nvamax+1):nvamax01)=&
+			res1((nvamax+1):nvamax01)-ve01square(i,:)*((u1/v)**2)
+			res1((nvamax+1):nvamax01)=&
+			res1((nvamax+1):nvamax01)+tronc01square
+			
+
+			end if 
+
+			if(nva02nofix.gt.0) then
+
+			u2=-res202num*(su12**vet12)*ri12*vet12
+			res1((nva01nofix+1):(nva01nofix+nva02nofix))=&
+			ve02nofix(i,:)*u2/v
+			res1((nva01nofix+1):nva0102)=&
+			res1((nva01nofix+1):nva0102)+&
+			tronc02
+
+			res1((nvamax01+1):nvamax02)=&
+			(res20202num-res202num)*ri12*vet12*(su12**vet12)
+			res1((nvamax01+1):nvamax02)=&
+			res1((nvamax01+1):nvamax02)*ve02square(i,:)	
+			res1((nvamax01+1):nvamax02)=&
+			res1((nvamax01+1):nvamax02)/v
+			res1((nvamax01+1):nvamax02)=&
+			res1((nvamax01+1):nvamax02)-ve02square(i,:)*((u2/v)**2)
+			res1((nvamax01+1):nvamax02)=&
+			res1((nvamax01+1):nvamax02)+tronc02square
+
+
+			end if 
+
+			if(nva12nofix.gt.0) then
+
+			u3=res212num+&
+			(1-gl12*vet12)*res2denum
+			u3=u3*(su12**vet12)*ri12*vet12
+			res1((nva0102+1):nvamax)=&
+			ve12nofix(i,:)*u3/v
+
+			res1((nvamax02+1):nvamax12)=&
+			(1-gl12*vet12)*res212num+res21212num+&
+			((1-gl12*vet12)**2)*res2denum+&
+			(2-gl12*vet12)*res212num-gl12*vet12*res2denum
+			res1((nvamax02+1):nvamax12)=&
+			res1((nvamax02+1):nvamax12)*(su12**vet12)*ri12*vet12
+			res1((nvamax02+1):nvamax12)=&
+			res1((nvamax02+1):nvamax12)*ve12square(i,:)
+			res1((nvamax02+1):nvamax12)=&
+			res1((nvamax02+1):nvamax12)/v
+			res1((nvamax02+1):nvamax12)=&
+			res1((nvamax02+1):nvamax12)-ve12square(i,:)*((u3/v)**2)			
+
+
+			end if 
+
+			
+                        
+                       else
+                         if(c(i).eq.5)then ! obs 0-->1 et obs 1-->2
+				
+				
+			         call susp(t1(i),the01,nz01,su01,ri01,zi01,gl01)
+			         call susp(t1(i),the02,nz02,su02,ri02,zi02,gl02)
+			         call susp(t1(i),the12,nz12,su12,ri12,zi12,gl12)
+
+				if(nva01nofix.gt.0) then 
+
+				res1(1:nva01nofix)=&
+				-ve01nofix(i,:)*gl01*vet01+&
+				ve01nofix(i,:)+&
+				tronc01
+				res1((nvamax+1):nvamax01)=&
+				-ve01square(i,:)*gl01*vet01+&
+				tronc01square
+
+				end if 
+
+				if(nva02nofix.gt.0) then 
+
+				res1((nva01nofix+1):nva0102)=&
+				-ve02nofix(i,:)*gl02*vet02+tronc02
+				res1((nvamax01+1):nvamax02)=&
+				-ve02square(i,:)*gl02*vet02+&
+				tronc02square
+				
+
+				end if 
+
+				if(nva12nofix.gt.0) then
+
+				res1((nva0102+1):nvamax)=&
+				ve12nofix(i,:)*gl12*vet12+&
+				ve12nofix(i,:)
+				res1((nvamax02+1):nvamax12)=&
+				gl12*vet12
+				call susp(t3(i),the12,nz12,su12,ri12,zi12,gl12)
+                                res1((nva0102+1):nvamax)=&
+				res1((nva0102+1):nvamax)-ve12nofix(i,:)*gl12*vet12
+				res1((nvamax02+1):nvamax12)=&
+				res1((nvamax02+1):nvamax12)-gl12*vet12
+				res1((nvamax02+1):nvamax12)=&
+				res1((nvamax02+1):nvamax12)*ve12square(i,:)
+
+				end if 
+				
+                         else
+                            if(c(i).eq.6)then ! vivant ???
+				
+				call susp(t3(i),the01,nz01,su01,ri01,zi01,gl01)
+				call susp(t3(i),the02,nz02,su02,ri02,zi02,gl02)
+			        call susp(t3(i),the12,nz12,su12,ri12,zi12,gl12)
+				call qgausssplinederivdiag(t1(i),t3(i),the01,the02,the12,&
+				res2denum,res201num,res202num,res212num,res20101num,&
+				res20202num,res21212num,vet01,vet02,vet12)
+
+				
+				v=(su12**vet12)*res2denum+&
+				(su01**vet01)*(su02**vet02)
+			
+				if(nva01nofix.gt.0) then 
+
+				u1=(-gl01*vet01)*(su01**vet01)*(su02**vet02)+&
+				(su12**vet12)*res201num
+			        res1(1:nva01nofix)=&
+				ve01nofix(i,:)*u1/v
+				res1(1:nva01nofix)=&
+				res1(1:nva01nofix)+tronc01
+
+				res1((nvamax+1):nvamax01)=&
+				res20101num*(su12**vet12)
+				resint=(su01**vet01)*(su02**vet02)
+				resint=resint*gl01*vet01*(1-gl01*vet01)
+				res1((nvamax+1):nvamax01)=&
+				res1((nvamax+1):nvamax01)-resint
+				
+				res1((nvamax+1):nvamax01)=&
+				res1((nvamax+1):nvamax01)*ve01square(i,:)
+				res1((nvamax+1):nvamax01)=&
+				res1((nvamax+1):nvamax01)/v
+
+				res1((nvamax+1):nvamax01)=&
+				res1((nvamax+1):nvamax01)-ve01square(i,:)*((u1/v)**2)
+				res1((nvamax+1):nvamax01)=&
+				res1((nvamax+1):nvamax01)+tronc01square
+
+				end if 
+
+
+				if(nva02nofix.gt.0) then 
+
+				u2=-gl02*vet02*(su01**vet01)*(su02**vet02)
+				u2=u2-(su12**vet12)*res202num
+				res1((nva01nofix+1):nva0102)=&
+				ve02nofix(i,:)*u2/v
+				res1((nva01nofix+1):nva0102)=&
+				res1((nva01nofix+1):nva0102)+&
+				tronc02
+
+				res1((nvamax01+1):nvamax02)=&
+				(su12**vet12)*(res20202num-res202num)-&
+				gl02*vet02*(su01**vet01)*(su02**vet02)*(1-gl02*vet02)
+				res1((nvamax01+1):nvamax02)=&
+				res1((nvamax01+1):nvamax02)*ve02square(i,:)
+				res1((nvamax01+1):nvamax02)=&
+				res1((nvamax01+1):nvamax02)/v
+
+				res1((nvamax01+1):nvamax02)=&
+				res1((nvamax01+1):nvamax02)-ve02square(i,:)*((u2/v)**2)
+				res1((nvamax01+1):nvamax02)=&
+				res1((nvamax01+1):nvamax02)+tronc02square
+
+				end if 
+
+				if(nva12nofix.gt.0) then 
+				
+				u3=-gl12*vet12*(su12**vet12)*res2denum+&
+				(su12**vet12)*res212num
+				res1((nva0102+1):nvamax)=&
+				ve12nofix(i,:)*u3/v
+
+				res1((nvamax02+1):nvamax12)=&
+				res21212num+(1-gl12*vet12)*res212num-&
+				gl12*vet12*(1-gl12*vet12)*res2denum-&
+				gl12*vet12*res212num
+				resint=(su12**vet12)
+				res1((nvamax02+1):nvamax12)=&
+				res1((nvamax02+1):nvamax12)*resint*ve12square(i,:)
+				res1((nvamax02+1):nvamax12)=&
+				res1((nvamax02+1):nvamax12)/v
+				res1((nvamax02+1):nvamax12)=&
+				res1((nvamax02+1):nvamax12)-ve12square(i,:)*((u3/v)**2)
+			
+				end if 
+                        	
+
+                            else ! passage 0-->2  
+				
+				call susp(t3(i),the01,nz01,su01,ri01,zi01,gl01)
+				call susp(t3(i),the02,nz02,su02,ri02,zi02,gl02)
+			        call susp(t3(i),the12,nz12,su12,ri12,zi12,gl12)
+        			call qgausssplinederivdiag(t1(i),t3(i),the01,the02,&
+        			the12,res2denum,res201num,res202num,res212num,&
+        			res20101num,res20202num,res21212num,&
+        			vet01,vet02,vet12)
+
+		
+				v=(su12**vet12)*ri12*vet12*res2denum+&
+				(su01**vet01)*(su02**vet02)*ri02*vet02
+
+
+				if(nva01nofix.gt.0) then 
+
+				u1=-gl01*vet01*(su01**vet01)
+				u1=u1*(su02**vet02)*ri02*vet02
+				u1=u1+(su12**vet12)*ri12*vet12*res201num
+
+				res1(1:nva01nofix)=&
+				ve01nofix(i,:)*u1/v
+				res1(1:nva01nofix)=res1(1:nva01nofix)+tronc01
+
+				res1((nvamax+1):nvamax01)=&
+				res20101num*(su12**vet12)*ri12*vet12
+				resint=(su01**vet01)*(su02**vet02)*gl01*vet01
+				resint=resint*(1-gl01*vet01)*ri02*vet02
+				res1((nvamax+1):nvamax01)=&
+				res1((nvamax+1):nvamax01)-resint
+				res1((nvamax+1):nvamax01)=&
+				res1((nvamax+1):nvamax01)*ve01square(i,:)
+				res1((nvamax+1):nvamax01)=&
+				res1((nvamax+1):nvamax01)/v
+				res1((nvamax+1):nvamax01)=&
+				res1((nvamax+1):nvamax01)-ve01square(i,:)*((u1/v)**2)
+				res1((nvamax+1):nvamax01)=&
+				res1((nvamax+1):nvamax01)+tronc01square
+
+				end if 
+
+
+				if(nva02nofix.gt.0) then 
+
+				u2=-(su12**vet12)*ri12*vet12*res202num+&
+				(1-gl02*vet02)*(su01**vet01)*(su02**vet02)*ri02*vet02
+
+				res1((nva01nofix+1):nva0102)=&
+				ve02nofix(i,:)*u2/v
+				res1((nva01nofix+1):nva0102)=&
+				res1((nva01nofix+1):nva0102)+&
+				tronc02
+
+				res1((nvamax01+1):nvamax02)=&
+				-gl02*vet02*(su01**vet01)*(su02**vet02)*ri02*vet02
+				res1((nvamax01+1):nvamax02)=&
+				res1((nvamax01+1):nvamax02)+&
+				(su12**vet12)*ri12*vet12*(res20202num-res202num)+&
+				((1-gl02*vet02)**2)*ri02*vet02*(su01**vet01)*(su02**vet02)
+
+
+				res1((nvamax01+1):nvamax02)=&
+				res1((nvamax01+1):nvamax02)*ve02square(i,:)
+				res1((nvamax01+1):nvamax02)=&
+				res1((nvamax01+1):nvamax02)/v
+				res1((nvamax01+1):nvamax02)=&
+				res1((nvamax01+1):nvamax02)-ve02square(i,:)*((u2/v)**2)
+				res1((nvamax01+1):nvamax02)=&
+				res1((nvamax01+1):nvamax02)+tronc02square
+
+				end if 
+
+				if(nva12nofix.gt.0) then 
+
+				u3=res212num+(1-gl12*vet12)*res2denum
+				u3=u3*(su12**vet12)*ri12*vet12
+
+				res1((nva0102+1):nvamax)=&
+				ve12nofix(i,:)*u3/v
+
+				res1((nvamax02+1):nvamax12)=&
+				-gl12*vet12*res2denum+((1-gl12*vet12)**2)*res2denum+&
+				2*(1-gl12*vet12)*res212num+res212num+&
+				res21212num
+
+				resint=ri12*vet12*(su12**vet12)
+				res1((nvamax02+1):nvamax12)=&
+				res1((nvamax02+1):nvamax12)*resint*ve12square(i,:)
+				res1((nvamax02+1):nvamax12)=&
+				res1((nvamax02+1):nvamax12)/v
+				
+				res1((nvamax02+1):nvamax12)=&
+				res1((nvamax02+1):nvamax12)-ve12square(i,:)*((u3/v)**2)
+
+				end if 
+
+
+				
+                            endif
+                         endif                        
+                      endif
+                   endif  
+                endif   
+                endif   
+
+                res = res + res1 
+
+        end do   
+
+        likelihood_deriv = res
+
+
+
+
+123     continue 
+	 
+	deallocate(b,bfix,fix,zi01,zi02,zi12,ve01,ve02,ve12,ve01nofix,&
+	ve02nofix,ve12nofix,tronc01,tronc02,t0,t1,t2,t3,c,&
+	ve01square,ve02square,ve12square,&
+	tronc01square,tronc02square)     
+
+    end subroutine derivasplinediag
 
 
 

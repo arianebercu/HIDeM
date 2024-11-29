@@ -93,6 +93,9 @@
 #' @param alpha alpha on all transitions 
 #' @param penalty which penalty to consider
 #' @param penalty.factor which variable should be penalised
+#' @param partialH default FALSE, if TRUE only the diagonal terms of the hessian will be 
+#' computed for the Newton-Raphson path for the penalised regression parameter. If FALSE, the 
+#' complete hessian is computed.
 #' @param step.sequential should we use the optimisation version to fix splines 
 #' @param clustertype in which cluster to work
 #' @param nproc number of cluster
@@ -212,6 +215,7 @@ idm <- function(formula01,
                 alpha=ifelse(penalty=="scad",3.7,
                              ifelse(penalty=="mcp",3,
                                     ifelse(penalty%in%c("elasticnet"),0.5,1))),
+                partialH=F,
                 nproc=1,
                 clustertype="FORK",
                 envir=parent.frame()){
@@ -646,7 +650,8 @@ idm <- function(formula01,
     
     fix0<-rep(0,size_V)
     if(is.null(penalty)){
-      penalty<-"none"}
+      penalty<-"none"
+      partialH<-F}
     if(!penalty%in%c("none","lasso","ridge","elasticnet","mcp","scad")){
       stop(paste0("Parameter penalty must be either : lasso, ridge, elasticnet, mcp or scad"))}
     
@@ -1193,7 +1198,9 @@ idm <- function(formula01,
                              lambda12=lambda12,
                              alpha=alpha,
                              penalty.factor=penalty.factor,
-                             penalty=penalty)
+                             penalty=penalty,
+                             methodCV=methodCV,
+                             partialH=partialH)
             
 ############################## Output   ########################################
 ############################## on beta and HR   ################################
@@ -1432,6 +1439,7 @@ idm <- function(formula01,
                                   troncature=troncature,
                                   gausspoint=gausspoint,weib=weib)
               
+             
               if(nproc>1){parallel::stopCluster(clustpar)}
               
               
@@ -1517,7 +1525,8 @@ idm <- function(formula01,
                                penalty=penalty,
                                gausspoint=gausspoint,
                                weib=weib,
-                               methodCV=methodCV)
+                               methodCV=methodCV,
+                               partialH=partialH)
               
               
 ######################### Output ###############################################
@@ -1649,8 +1658,14 @@ idm <- function(formula01,
                       V[id.keep,id.keepV]<-solve(H_spec)
                       # maximisation issue thus : 10/04/24
                       # as mla in maximisation return -second derivatives 
+                      if(methodCV=="mla"){
                       H_pl<-H_spec+lambda.matrix
                       trace_model<-lava::tr(solve(H_pl)%*%H_spec)
+                      }else{
+                        H_pl<-H_spec
+                        H_spec<-H_spec-lambda.matrix
+                        trace_model<-lava::tr(solve(H_pl)%*%H_spec)
+                      }
                       fit$GCV[i]<--1/N*(out$fn.value[i]-trace_model)}
                     }
                   }
@@ -1700,6 +1715,7 @@ idm <- function(formula01,
         fit$responseTrans <- responseTrans
 
 
+        fit$partialH<-partialH
         fit$V <- V
         fit$H <- H
         fit$fix<-fix

@@ -37,6 +37,9 @@
 ##' @param penalty which penalty to consider
 ##' @param penalty.factor which variable should be penalised
 ##' @param gausspoint number of points in gauss quadrature
+##' @param weib the form of the weibull parameters 
+##' @param methodCV methodolgy to optimise penalised parameters 
+##' @param partialH which hessian is computed for Newton-Raphson path of penalised parameters
 #' @author R: Ariane Bercu <ariane.bercu@@u-bordeaux.fr> 
 #' @importFrom foreach "%do%"
 #' @importFrom foreach "%dopar%"
@@ -49,7 +52,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                    ve01,ve02,ve12,dimnva01,dimnva02,dimnva12,nvat01,nvat02,nvat12,
                    t0,t1,t2,t3,troncature,
                    nlambda01,lambda01,nlambda02,lambda02,nlambda12,lambda12,
-                   alpha,penalty.factor,penalty,gausspoint,weib,methodCV){
+                   alpha,penalty.factor,penalty,gausspoint,weib,methodCV,partialH){
   
   
   # need to keep original fix to calculate for beta 
@@ -140,6 +143,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
     
     
     id.lambda<-NULL # for cran check 
+    if(partialH==F){
     output<-foreach::foreach(id.lambda=1:nlambda,
                              .combine = combine_lambda,
                              .errorhandling = "remove")%dopar%{
@@ -176,6 +180,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                  bfix<-b[fix0==1]
                                  b<-b[fix0==0]
                                  # derivative of loglik
+                                 
                                  output<-derivaweib(b=b,
                                                     npm=length(b),
                                                     npar=size_V,
@@ -810,12 +815,586 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                            istop=istop,
                                            combine=combine))
                              }
+    }else{
+      output<-foreach::foreach(id.lambda=1:nlambda,
+                               .combine = combine_lambda,
+                               .errorhandling = "remove")%dopar%{
+                                 
+                                 # computation pbr 
+                                 
+                                 pbr_compu<-0
+                                 
+                                 beta<-beta.start
+                                 s<-s.start
+                                 
+                                 converged<-F
+                                 ite<-0
+                                 # if beta not change do not need to recalculate weights 
+                                 H<-T
+                                 
+                                 eval.cv.spline<-rep(NA,maxiter+1)
+                                 eval.cv.beta<-rep(NA,maxiter+1)
+                                 eval.cv.loglik<-rep(NA,maxiter+1)
+                                 eval.loglik<-rep(NA,maxiter+1)
+                                 eval.validity<-rep(NA,maxiter+1)
+                                 
+                                 npm<-sum(fix0==0)
+                                 
+                                 npm01<-ifelse(nvat01>0,sum(fix0[7:(7+nvat01-1)]==0),0)
+                                 npm02<-ifelse(nvat02>0,sum(fix0[(7+nvat01):(6+nvat01+nvat02)]==0),0)
+                                 npm12<-ifelse(nvat12>0,sum(fix0[(7+nvat01+nvat02):size_V]==0),0)
+                                 
+                                 
+                                 while(converged==F & ite<=maxiter){
+                                   
+                                   
+                                   b<-c(s,beta)
+                                   bfix<-b[fix0==1]
+                                   b<-b[fix0==0]
+                                   # derivative of loglik
+                                   
+                                     
+                                     output<-derivaweibdiag(b=b,
+                                                            npm=length(b),
+                                                            npar=size_V,
+                                                            bfix=bfix,
+                                                            fix=fix0,
+                                                            ctime=ctime,
+                                                            no=N,
+                                                            ve01=ve01,
+                                                            ve02=ve02,
+                                                            ve12=ve12,
+                                                            dimnva01=dimnva01,
+                                                            dimnva02=dimnva02,
+                                                            dimnva12=dimnva12,
+                                                            nva01=nvat01,
+                                                            nva02=nvat02,
+                                                            nva12=nvat12,
+                                                            t0=t0,
+                                                            t1=t1,
+                                                            t2=t2,
+                                                            t3=t3,
+                                                            troncature=troncature,
+                                                            weib=weib)
+                                     
+                                     if(ite==0){# loglik penalised
+                                       fn.value<-idmlLikelihoodweibpena(b=b,
+                                                                        npm=length(b),
+                                                                        npar=size_V,
+                                                                        bfix=bfix,
+                                                                        fix=fix0,
+                                                                        ctime=ctime,
+                                                                        no=N,
+                                                                        ve01=ve01,
+                                                                        ve02=ve02,
+                                                                        ve12=ve12,
+                                                                        dimnva01=dimnva01,
+                                                                        dimnva02=dimnva02,
+                                                                        dimnva12=dimnva12,
+                                                                        nva01=nvat01,
+                                                                        nva02=nvat02,
+                                                                        nva12=nvat12,
+                                                                        t0=t0,
+                                                                        t1=t1,
+                                                                        t2=t2,
+                                                                        t3=t3,
+                                                                        troncature=troncature,
+                                                                        lambda=lambda[id.lambda,],
+                                                                        alpha=alpha,
+                                                                        penalty.factor=penalty.factor,
+                                                                        penalty=penalty,
+                                                                        gausspoint=gausspoint,
+                                                                        weib=weib)
+                                     }
+                                     
+                                     if(any(is.na(output))|any(output==Inf) |any(output==-Inf)){
+                                       warning("Computational error for calculation of the hessian : division by 0 or Infinite value")
+                                       if(ite==0){
+                                         fu <- output[1:npm]
+                                         V<- matrix(0,npm,npm)
+                                         diag(V) <- output[(npm+1):(2*npm)]
+                                         # hessian is - second derivatives of loglik
+                                         V<--V
+                                         tr <- sum(diag(V))/npm
+                                         V0<-V}
+                                       ite<-ite+1
+                                       pbr_compu<-1
+                                       break
+                                     }
+                                     
+                                     fu <- output[1:npm]
+                                     V<- matrix(0,npm,npm)
+                                     diag(V) <- output[(npm+1):(2*npm)]
+                                     # hessian is - second derivatives of loglik
+                                     V<--V
+                                     tr <- sum(diag(V))/npm
+                                     V0<-V
+                                     
+                                     eigen.values<-eigen(V,symmetric=T,only.values=T)$values
+                                     
+                                     idpos<-ifelse(any(eigen.values<=eps.eigen),1,0)
+                                     
+                                     
+                                     idpos0<-idpos
+                                     
+                                     ncount<-0
+                                     
+                                     while(idpos != 0){
+                                       
+                                       if(ncount==0){ 
+                                         ga <- 0.01
+                                         da <- 1E-2
+                                       }else{
+                                         if(((ncount <= 3) | (ga >= 1)) ){
+                                           da <- da * 5
+                                         }else{# if ncount > 10 only update ga 
+                                           ga <- ga * 5
+                                           # do not put ga at 1 as no countmax otherwise infinite while 
+                                           if(ga > 1) ga <- 1
+                                         }
+                                       }
+                                       
+                                       ncount <- ncount + 1
+                                       
+                                       diagV <- diag(V)
+                                       # put abs (1-ga) better than 1-ga cause ga can now be >1
+                                       diagV<-ifelse(diagV!=0,diagV+da*(abs((1.e0-ga))*abs(diagV)+ga*tr),
+                                                     da*ga*tr)
+                                       
+                                       diag(V)<-diagV
+                                       # if we have a convex log-vraisemblance in eta then :
+                                       # all eigen  values of the hessienne are >0.
+                                       
+                                       if(sum(V==Inf)>0|sum(V==-Inf)>0){break}
+                                       eigen.values<-eigen(V,symmetric=T,only.values=T)$values
+                                       # check if hessienne defined positive
+                                       
+                                       idpos<-ifelse(any(eigen.values<=eps.eigen),1,0)
+                                       
+                                       # if(def.positive==T){
+                                       #   idpos<-ifelse(any(eigen.values<=0),1,0)
+                                       # }else{idpos<-ifelse(any(abs(eigen.values)==0),1,0)}
+                                       
+                                     }
+                                     
+                                     if(idpos!=0){
+                                       
+                                       warning("Hessian not defined positive")
+                                       pbr_compu<-2
+                                       ite<-ite+1
+                                       break
+                                     }
+                                     
+                                     
+                                   
+                                   
+                                   
+                                   # update for beta 
+                                   output.cv<-cv.model(beta=beta,
+                                                       nva01=npm01,
+                                                       nva02=npm02,
+                                                       nva12=npm12,
+                                                       fix=fix0[7:size_V],
+                                                       penalty.factor=penalty.factor,
+                                                       penalty=penalty,
+                                                       v=V,
+                                                       fu=fu,
+                                                       lambda=lambda[id.lambda,],
+                                                       alpha=alpha
+                                   )
+                                   
+                                   # verify validity of parameters update 
+                                   # and that we are better than previous estimates 
+                                   
+                                   b<-c(s,output.cv$b)
+                                   
+                                   betanew<-b[(6+1):size_V]
+                                   
+                                   # penalised loglik see if inferior to previous
+                                   res<-idmlLikelihoodweibpena(b=b,
+                                                               npm=length(b),
+                                                               npar=size_V,
+                                                               bfix=1,
+                                                               fix=rep(0,size_V),
+                                                               ctime=ctime,
+                                                               no=N,
+                                                               ve01=ve01,
+                                                               ve02=ve02,
+                                                               ve12=ve12,
+                                                               dimnva01=dimnva01,
+                                                               dimnva02=dimnva02,
+                                                               dimnva12=dimnva12,
+                                                               nva01=nvat01,
+                                                               nva02=nvat02,
+                                                               nva12=nvat12,
+                                                               t0=t0,
+                                                               t1=t1,
+                                                               t2=t2,
+                                                               t3=t3,
+                                                               troncature=troncature,
+                                                               lambda=lambda[id.lambda,],
+                                                               alpha=alpha,
+                                                               penalty.factor=penalty.factor,
+                                                               penalty=penalty,
+                                                               gausspoint=gausspoint,
+                                                               weib=weib)
+                                   
+                                   
+                                   # we want to maximise the loglik thus : 
+                                   # we have issue if res is NA or if not higher than previous one 
+                                   # if not better or do not exist need to readjust
+                                   # value of beta 
+                                   if(res %in%c(-1e9,1e9) | res < fn.value){
+                                     
+                                     th<-1e-5
+                                     step<-log(1.5)
+                                     delta<-output.cv$b-c(beta)
+                                     
+                                     maxt <- max(abs(delta)) 
+                                     
+                                     if(maxt == 0){
+                                       vw <- th
+                                     }else{
+                                       vw <- th/maxt
+                                     }
+                                     if(ite>0){
+                                       res.out.error <- list("old.b"=round(c(s,beta)),
+                                                             "old.rl"=round(fn.value),
+                                                             "old.ca"=round(eval.cv.beta[ite]),
+                                                             "old.cb"=round(eval.cv.loglik[ite]))
+                                     }else{
+                                       res.out.error <- list("old.b"=round(c(s,beta)),
+                                                             "old.rl"=round(fn.value),
+                                                             "old.ca"=round(1),
+                                                             "old.cb"=round(1))
+                                     }
+                                     # from mla package 
+                                     sears<-searpas(vw=vw,
+                                                    step=step,
+                                                    b=beta,
+                                                    delta=delta,
+                                                    funcpa=idmlLikelihoodweibpena,
+                                                    res.out.error=res.out.error,
+                                                    npm=length(beta),
+                                                    npar=size_V,
+                                                    bfix=s,
+                                                    fix=fix0,
+                                                    ctime=ctime,
+                                                    no=N,
+                                                    ve01=ve01,
+                                                    ve02=ve02,
+                                                    ve12=ve12,
+                                                    dimnva01=dimnva01,
+                                                    dimnva02=dimnva02,
+                                                    dimnva12=dimnva12,
+                                                    nva01=nvat01,
+                                                    nva02=nvat02,
+                                                    nva12=nvat12,
+                                                    t0=t0,
+                                                    t1=t1,
+                                                    t2=t2,
+                                                    t3=t3,
+                                                    troncature=troncature,
+                                                    lambda=lambda[id.lambda,],
+                                                    alpha=alpha,
+                                                    penalty.factor=penalty.factor,
+                                                    penalty=penalty,
+                                                    gausspoint=gausspoint,
+                                                    weib=weib)
+                                     
+                                     
+                                     betanew<-beta+delta*sears$vw
+                                     b<-c(s,betanew)
+                                     
+                                     
+                                     res<-idmlLikelihoodweibpena(b=b,
+                                                                 npm=length(b),
+                                                                 npar=size_V,
+                                                                 bfix=1,
+                                                                 fix=rep(0,size_V),
+                                                                 ctime=ctime,
+                                                                 no=N,
+                                                                 ve01=ve01,
+                                                                 ve02=ve02,
+                                                                 ve12=ve12,
+                                                                 dimnva01=dimnva01,
+                                                                 dimnva02=dimnva02,
+                                                                 dimnva12=dimnva12,
+                                                                 nva01=nvat01,
+                                                                 nva02=nvat02,
+                                                                 nva12=nvat12,
+                                                                 t0=t0,
+                                                                 t1=t1,
+                                                                 t2=t2,
+                                                                 t3=t3,
+                                                                 troncature=troncature,
+                                                                 lambda=lambda[id.lambda,],
+                                                                 alpha=alpha,
+                                                                 penalty.factor=penalty.factor,
+                                                                 penalty=penalty,
+                                                                 gausspoint=gausspoint,
+                                                                 weib=weib)
+                                   }
+                                   # if not better or do not exist need to readjust
+                                   # value of beta 
+                                   if(res %in%c(-1e9,1e9) | any(is.infinite(c(s,betanew)))){
+                                     
+                                     ite<-ite+1
+                                     validity<-F
+                                     eval.cv.beta[ite]<-sum((betanew-beta)^2)
+                                     eval.validity[ite]<-validity
+                                     # save output over iterations 
+                                     
+                                     pbr_compu<-3
+                                     break
+                                   }else{validity<-T}
+                                   
+                                   
+                                   # betanew already include s
+                                   b<-c(s,betanew)
+                                   
+                                   bfix<-b[fix0.beta==1]
+                                   b<-b[fix0.beta==0]
+                                   # update for modelPar
+                                   output.mla<- marqLevAlg::mla(b=b,
+                                                                fn=idmlLikelihoodweib,
+                                                                epsa=epsa,
+                                                                epsb=epsb,
+                                                                epsd=epsd,
+                                                                maxiter=maxiter.pena,
+                                                                minimize=F,
+                                                                npm=length(b),
+                                                                npar=size_V,
+                                                                bfix=bfix,
+                                                                fix=fix0.beta,
+                                                                ctime=ctime,
+                                                                no=N,
+                                                                ve01=ve01,
+                                                                ve02=ve02,
+                                                                ve12=ve12,
+                                                                dimnva01=dimnva01,
+                                                                dimnva02=dimnva02,
+                                                                dimnva12=dimnva12,
+                                                                nva01=nvat01,
+                                                                nva02=nvat02,
+                                                                nva12=nvat12,
+                                                                t0=t0,
+                                                                t1=t1,
+                                                                t2=t2,
+                                                                t3=t3,
+                                                                troncature=troncature,
+                                                                gausspoint=gausspoint,
+                                                                weib=weib)
+                                   
+                                   # look at convergence for each lambda :
+                                   # mla output is loglik
+                                   # new values for splines:
+                                   snew<-s
+                                   snew[fix00[1:6]==0]<-output.mla$b
+                                   if(nvat01>0){
+                                     b01<-betanew[1:nvat01][penalty.factor[1:nvat01]==1]
+                                   }else{b01<-0}
+                                   if(nvat02>0){
+                                     b02<-betanew[(nvat01+1):(nvat01+nvat02)][penalty.factor[(nvat01+1):(nvat01+nvat02)]==1]
+                                   }else{b02<-0}
+                                   if(nvat12>0){
+                                     b12<-betanew[(nvat01+nvat02+1):length(betanew)][penalty.factor[(nvat01+nvat02+1):length(betanew)]==1]
+                                   }else{b12<-0}
+                                   
+                                   # calculate loglik pen 
+                                   if(penalty%in%c("lasso","ridge","elasticnet","corrected.elasticnet")){
+                                     fn.valuenew<-output.mla$fn.value-lambda[id.lambda,1]*alpha*sum(abs(b01))-lambda[id.lambda,1]*(1-alpha)*sum(b01*b01)
+                                     fn.valuenew<-fn.valuenew-lambda[id.lambda,2]*alpha*sum(abs(b02))-lambda[id.lambda,2]*(1-alpha)*sum(b02*b02)
+                                     fn.valuenew<-fn.valuenew-lambda[id.lambda,3]*alpha*sum(abs(b12))-lambda[id.lambda,3]*(1-alpha)*sum(b12*b12)
+                                   }
+                                   
+                                   
+                                   if(penalty=="mcp"){
+                                     
+                                     p01<-rep(alpha*lambda[id.lambda,1]*lambda[id.lambda,1]/2,length(b01))
+                                     idbeta<-which(b01<=alpha*lambda[id.lambda,1])
+                                     p01[idbeta]<-lambda[id.lambda,1]*abs(b01[idbeta])-((b01[idbeta]*b01[idbeta])/2*alpha)
+                                     
+                                     p02<-rep(alpha*lambda[id.lambda,2]*lambda[id.lambda,2]/2,length(b02))
+                                     idbeta<-which(b02<=alpha*lambda[id.lambda,2])
+                                     p02[idbeta]<-lambda[id.lambda,2]*abs(b02[idbeta])-((b02[idbeta]*b02[idbeta])/2*alpha)
+                                     
+                                     p12<-rep(alpha*lambda[id.lambda,3]*lambda[id.lambda,3]/2,length(b12))
+                                     idbeta<-which(b12<=alpha*lambda[id.lambda,3])
+                                     p12[idbeta]<-lambda[id.lambda,3]*abs(b12[idbeta])-((b12[idbeta]*b12[idbeta])/2*alpha)
+                                     
+                                     fn.valuenew<-output.mla$fn.value-sum(p01)-sum(p02)-sum(p12)
+                                     
+                                   }
+                                   
+                                   if(penalty=="scad"){
+                                     
+                                     p01<-rep((lambda[id.lambda,1]^2)*(alpha+1)/2,length(b01))
+                                     idbeta<-which(b01<=lambda[id.lambda,1])
+                                     p01[idbeta]<-lambda[id.lambda,1]*abs(b01[idbeta])
+                                     idbeta<-which(abs(b01)<lambda[id.lambda,1]*alpha)
+                                     p01[idbeta]<-(2*alpha*lambda[id.lambda,1]*abs(b01[idbeta])-b01[idbeta]^2-lambda[id.lambda,1]^2)/(2*(alpha-1))
+                                     
+                                     p02<-rep((lambda[id.lambda,2]^2)*(alpha+1)/2,length(b02))
+                                     idbeta<-which(b02<=lambda[id.lambda,2])
+                                     p02[idbeta]<-lambda[id.lambda,2]*abs(b02[idbeta])
+                                     idbeta<-which(abs(b02)<lambda[id.lambda,2]*alpha)
+                                     p02[idbeta]<-(2*alpha*lambda[id.lambda,2]*abs(b02[idbeta])-b02[idbeta]^2-lambda[id.lambda,2]^2)/(2*(alpha-1))
+                                     
+                                     p12<-rep((lambda[id.lambda,3]^2)*(alpha+1)/2,length(b12))
+                                     idbeta<-which(b12<=lambda[id.lambda,3])
+                                     p12[idbeta]<-lambda[id.lambda,3]*abs(b12[idbeta])
+                                     idbeta<-which(abs(b12)<lambda[id.lambda,3]*alpha)
+                                     p12[idbeta]<-(2*alpha*lambda[id.lambda,3]*abs(b12[idbeta])-b12[idbeta]^2-lambda[id.lambda,3]^2)/(2*(alpha-1))
+                                     
+                                     fn.valuenew<-output.mla$fn.value-sum(p01)-sum(p02)-sum(p12)
+                                     
+                                   }
+                                   
+                                   ite<-ite+1
+                                   
+                                   #check cv 
+                                   eval.cv.spline[ite]<-sum((snew-s)^2)
+                                   eval.cv.beta[ite]<-sum((betanew-beta)^2)
+                                   eval.cv.loglik[ite]<-abs((fn.valuenew-fn.value)/fn.value)
+                                   eval.loglik[ite]<-fn.valuenew
+                                   eval.validity[ite]<-validity
+                                   
+                                   s<-snew
+                                   beta<-betanew
+                                   fn.value<-fn.valuenew
+                                   
+                                   # eval.cv beta valid only if validity.param=T
+                                   if(eval.cv.beta[ite]<epsa & eval.cv.spline[ite]<epsa & eval.cv.loglik[ite]<epsb & validity==T){
+                                     converged<-T}
+                                   
+                                   
+                                 }
+                                 
+                                 if(maxiter<=ite & converged==F){
+                                   istop<-2
+                                 }else{
+                                   if(ite<=maxiter & converged==T){
+                                     istop<-1 
+                                     
+                                     # need to recalculate second derivatives 
+                                     # if converged 
+                                     
+                                     b<-c(s,beta)
+                                     bfix<-b[fix0==1]
+                                     b<-b[fix0==0]
+                                     
+                                     output<-derivaweib(b=b,
+                                                        npm=length(b),
+                                                        npar=size_V,
+                                                        bfix=bfix,
+                                                        fix=fix0,
+                                                        ctime=ctime,
+                                                        no=N,
+                                                        ve01=ve01,
+                                                        ve02=ve02,
+                                                        ve12=ve12,
+                                                        dimnva01=dimnva01,
+                                                        dimnva02=dimnva02,
+                                                        dimnva12=dimnva12,
+                                                        nva01=nvat01,
+                                                        nva02=nvat02,
+                                                        nva12=nvat12,
+                                                        t0=t0,
+                                                        t1=t1,
+                                                        t2=t2,
+                                                        t3=t3,
+                                                        troncature=troncature,
+                                                        weib=weib)
+                                     min<-npm
+                                     V01<- matrix(0,npm01,npm01)
+                                     V01[lower.tri(V01,diag=TRUE)] <- output[(min+1):(min+npm01*(npm01+1)/2)]
+                                     
+                                     
+                                     min<-min+(npm01*(npm01+1)/2)
+                                     if(npm01>0&npm02>0){
+                                       V0102<- matrix(data=output[(min+1):(min+npm02*npm01)],
+                                                      nrow=npm02,ncol=npm01)
+                                     }
+                                     
+                                     min<-min+npm02*npm01
+                                     
+                                     if(npm01>0&npm12>0){
+                                       V0112<- matrix(data=output[(min+1):(min+npm12*npm01)],
+                                                      nrow=npm12,ncol=npm01)
+                                     }
+                                     
+                                     
+                                     min<-min+npm12*npm01
+                                     V02<- matrix(0,npm02,npm02)
+                                     V02[lower.tri(V02,diag=TRUE)] <- output[(min+1):(min+npm02*(npm02+1)/2)]
+                                     
+                                     
+                                     min<-min+(npm02*(npm02+1)/2)
+                                     
+                                     if(npm02>0&npm12>0){
+                                       V0212<- matrix(data=output[(min+1):(min+npm12*npm02)],
+                                                      nrow=npm12,ncol=npm02)}
+                                     
+                                     
+                                     min<-min+npm12*npm02
+                                     V12<- matrix(0,npm12,npm12)
+                                     V12[lower.tri(V12,diag=TRUE)] <- output[(min+1):length(output)]
+                                     
+                                     
+                                     V<- matrix(0,npm,npm)
+                                     if(npm01>0){
+                                       V[1:npm01,1:npm01]<-V01
+                                       if(npm02>0){V[(npm01+1):(npm01+npm02),1:npm01]<-V0102}
+                                       if(npm12>0){V[(npm01+npm02+1):npm,1:npm01]<-V0112}
+                                     }
+                                     if(npm02>0){
+                                       V[(npm01+1):(npm01+npm02),(npm01+1):(npm01+npm02)]<-V02
+                                       if(npm12>0){V[(npm01+npm02+1):npm,(npm01+1):(npm01+npm02)]<-V0212}
+                                     }
+                                     
+                                     if(npm12>0){
+                                       V[(npm01+npm02+1):npm,(npm01+npm02+1):(npm)]<-V12}
+                                     
+                                     V<-V+t(V)
+                                     diag(V)<-diag(V)/2
+                                     # hessian is - second derivatives 
+                                     V<--V
+                                     V0<-V
+                                   }else{
+                                     if(pbr_compu==1){istop<-3}
+                                     if(pbr_compu==2){istop<-4}
+                                     if(pbr_compu==3){istop<-5}
+                                   }
+                                 }
+                                 
+                                 # if stop==1 we can give matrix of second derivatives 
+                                 
+                                 
+                                 combine<-combine+1
+                                 return(list(b=c(s,beta),
+                                             H=V0,
+                                             lambda=as.double(lambda[id.lambda,]),
+                                             alpha=alpha,
+                                             fn.value=ifelse(!exists("output.mla"),NA,output.mla$fn.value), # loglik
+                                             fn.value.pena=fn.value, # penalised loglik
+                                             ni=ite,
+                                             ca.beta=eval.cv.beta,
+                                             ca.spline=eval.cv.spline,
+                                             ca.validity=eval.validity,
+                                             cb=eval.loglik,
+                                             istop=istop,
+                                             combine=combine))
+                               }
+    }
+    
     parallel::stopCluster(clustpar)
     
   }else{
     
     
     id.lambda<-NULL # for cran check 
+    if(partialH==F){
     output<-foreach::foreach(id.lambda=1:nlambda,
                              .combine = combine_lambda,
                              .errorhandling = "remove")%do%{
@@ -852,6 +1431,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                  bfix<-b[fix0==1]
                                  b<-b[fix0==0]
                                  
+                                
                                  output<-derivaweib(b=b,
                                                     npm=length(b),
                                                     npar=size_V,
@@ -1082,6 +1662,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                    ite<-ite+1
                                    break
                                  }
+                                 
                                  # update beta
                                  output.cv<-cv.model(beta=beta,
                                                     nva01=npm01,
@@ -1477,11 +2058,575 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                            istop=istop,
                                            combine=combine))
                              }
+    }else{output<-foreach::foreach(id.lambda=1:nlambda,
+                                   .combine = combine_lambda,
+                                   .errorhandling = "remove")%do%{
+                                     
+                                     
+                                     # computation pbr 
+                                     
+                                     pbr_compu<-0
+                                     
+                                     beta<-beta.start
+                                     s<-s.start
+                                     
+                                     converged<-F
+                                     ite<-0
+                                     # if beta not change do not need to recalculate weights 
+                                     H<-T
+                                     
+                                     eval.cv.spline<-rep(NA,maxiter+1)
+                                     eval.cv.beta<-rep(NA,maxiter+1)
+                                     eval.cv.loglik<-rep(NA,maxiter+1)
+                                     eval.loglik<-rep(NA,maxiter+1)
+                                     eval.validity<-rep(NA,maxiter+1)
+                                     
+                                     npm<-sum(fix0==0)
+                                     
+                                     npm01<-ifelse(nvat01>0,sum(fix0[7:(7+nvat01-1)]==0),0)
+                                     npm02<-ifelse(nvat02>0,sum(fix0[(7+nvat01):(6+nvat01+nvat02)]==0),0)
+                                     npm12<-ifelse(nvat12>0,sum(fix0[(7+nvat01+nvat02):size_V]==0),0)
+                                     
+                                     
+                                     while(converged==F & ite<=maxiter){
+                                       
+                                       b<-c(s,beta)
+                                       bfix<-b[fix0==1]
+                                       b<-b[fix0==0]
+                                       
+                                      
+                                         
+                                         output<-derivaweibdiag(b=b,
+                                                                npm=length(b),
+                                                                npar=size_V,
+                                                                bfix=bfix,
+                                                                fix=fix0,
+                                                                ctime=ctime,
+                                                                no=N,
+                                                                ve01=ve01,
+                                                                ve02=ve02,
+                                                                ve12=ve12,
+                                                                dimnva01=dimnva01,
+                                                                dimnva02=dimnva02,
+                                                                dimnva12=dimnva12,
+                                                                nva01=nvat01,
+                                                                nva02=nvat02,
+                                                                nva12=nvat12,
+                                                                t0=t0,
+                                                                t1=t1,
+                                                                t2=t2,
+                                                                t3=t3,
+                                                                troncature=troncature,
+                                                                weib=weib)
+                                         
+                                         if(ite==0){
+                                           fn.value<-idmlLikelihoodweibpena(b=b,
+                                                                            npm=length(b),
+                                                                            npar=size_V,
+                                                                            bfix=bfix,
+                                                                            fix=fix0,
+                                                                            ctime=ctime,
+                                                                            no=N,
+                                                                            ve01=ve01,
+                                                                            ve02=ve02,
+                                                                            ve12=ve12,
+                                                                            dimnva01=dimnva01,
+                                                                            dimnva02=dimnva02,
+                                                                            dimnva12=dimnva12,
+                                                                            nva01=nvat01,
+                                                                            nva02=nvat02,
+                                                                            nva12=nvat12,
+                                                                            t0=t0,
+                                                                            t1=t1,
+                                                                            t2=t2,
+                                                                            t3=t3,
+                                                                            troncature=troncature,
+                                                                            lambda=lambda[id.lambda,],
+                                                                            alpha=alpha,
+                                                                            penalty.factor=penalty.factor,
+                                                                            penalty=penalty,
+                                                                            gausspoint=gausspoint,
+                                                                            weib=weib)
+                                         }
+                                         
+                                         if(any(is.na(output))|any(output==Inf) |any(output==-Inf)){
+                                           warning("Computational error for calculation of the hessian : division by 0 or Infinite value")
+                                           if(ite==0){
+                                             fu <- output[1:npm]
+                                             V<- matrix(0,npm,npm)
+                                             diag(V) <- output[(npm+1):(2*npm)]
+                                             # hessian is - second derivatives 
+                                             V<--V
+                                             tr <- sum(diag(V))/npm
+                                             V0<-V}
+                                           ite<-ite+1
+                                           pbr_compu<-1
+                                           break
+                                         }
+                                         
+                                         fu <- output[1:npm]
+                                         
+                                         V<- matrix(0,npm,npm)
+                                         diag(V) <- output[(npm+1):(2*npm)]
+                                         # hessian is - second derivatives 
+                                         V<--V
+                                         
+                                         tr <- sum(diag(V))/npm
+                                         V0<-V
+                                         
+                                         eigen.values<-eigen(V,symmetric=T,only.values=T)$values
+                                         
+                                         idpos<-ifelse(any(eigen.values<=eps.eigen),1,0)
+                                         
+                                         
+                                         idpos0<-idpos
+                                         
+                                         ncount<-0
+                                         
+                                         while(idpos != 0){
+                                           
+                                           if(ncount==0){ 
+                                             ga <- 0.01
+                                             da <- 1E-2
+                                           }else{
+                                             if(((ncount <= 3) | (ga >= 1)) ){
+                                               da <- da * 5
+                                             }else{# if ncount > 10 only update ga 
+                                               ga <- ga * 5
+                                               # do not put ga at 1 as no countmax otherwise infinite while 
+                                               if(ga > 1) ga <- 1
+                                             }
+                                           }
+                                           
+                                           ncount <- ncount + 1
+                                           
+                                           diagV <- diag(V)
+                                           # put abs (1-ga) better than 1-ga cause ga can now be >1
+                                           diagV<-ifelse(diagV!=0,diagV+da*(abs((1.e0-ga))*abs(diagV)+ga*tr),
+                                                         da*ga*tr)
+                                           
+                                           diag(V)<-diagV
+                                           # if we have a convex log-vraisemblance in eta then :
+                                           # all eigen  values of the hessienne are >0.
+                                           
+                                           if(sum(V==Inf)>0|sum(V==-Inf)>0){break}
+                                           eigen.values<-eigen(V,symmetric=T,only.values=T)$values
+                                           # check if hessienne defined positive
+                                           idpos<-ifelse(any(eigen.values<=eps.eigen),1,0)
+                                           
+                                           
+                                           
+                                         }
+                                         
+                                         if(idpos!=0){
+                                           
+                                           warning("Hessian not defined positive")
+                                           pbr_compu<-2
+                                           ite<-ite+1
+                                           break
+                                         }
+                                         
+                                       
+                                       # update beta
+                                       output.cv<-cv.model(beta=beta,
+                                                           nva01=npm01,
+                                                           nva02=npm02,
+                                                           nva12=npm12,
+                                                           fix=fix0[7:size_V],
+                                                           penalty.factor=penalty.factor,
+                                                           penalty=penalty,
+                                                           v=V,
+                                                           fu=fu,
+                                                           lambda=lambda[id.lambda,],
+                                                           alpha=alpha
+                                       )
+                                       
+                                       # verify validity of parameters update 
+                                       # and that we are better than previous estimates 
+                                       
+                                       b<-c(s,output.cv$b)
+                                       
+                                       betanew<-b[(6+1):size_V]
+                                       
+                                       res<-idmlLikelihoodweibpena(b=b,
+                                                                   npm=length(b),
+                                                                   npar=size_V,
+                                                                   bfix=1,
+                                                                   fix=rep(0,size_V),
+                                                                   ctime=ctime,
+                                                                   no=N,
+                                                                   ve01=ve01,
+                                                                   ve02=ve02,
+                                                                   ve12=ve12,
+                                                                   dimnva01=dimnva01,
+                                                                   dimnva02=dimnva02,
+                                                                   dimnva12=dimnva12,
+                                                                   nva01=nvat01,
+                                                                   nva02=nvat02,
+                                                                   nva12=nvat12,
+                                                                   t0=t0,
+                                                                   t1=t1,
+                                                                   t2=t2,
+                                                                   t3=t3,
+                                                                   troncature=troncature,
+                                                                   lambda=lambda[id.lambda,],
+                                                                   alpha=alpha,
+                                                                   penalty.factor=penalty.factor,
+                                                                   penalty=penalty,
+                                                                   gausspoint=gausspoint,
+                                                                   weib=weib)
+                                       
+                                       
+                                       # we want to maximise the loglik thus : 
+                                       # we have issue if res is NA or if not higher than previous one 
+                                       # if not better or do not exist need to readjust
+                                       # value of beta 
+                                       if(res %in%c(-1e9,1e9) | res < fn.value){
+                                         
+                                         th<-1e-5
+                                         step<-log(1.5)
+                                         delta<-output.cv$b-c(beta)
+                                         
+                                         maxt <- max(abs(delta)) 
+                                         
+                                         if(maxt == 0){
+                                           vw <- th
+                                         }else{
+                                           vw <- th/maxt
+                                         }
+                                         if(ite>0){
+                                           res.out.error <- list("old.b"=round(c(s,beta)),
+                                                                 "old.rl"=round(fn.value),
+                                                                 "old.ca"=round(eval.cv.beta[ite]),
+                                                                 "old.cb"=round(eval.cv.loglik[ite]))
+                                         }else{
+                                           res.out.error <- list("old.b"=round(c(s,beta)),
+                                                                 "old.rl"=round(fn.value),
+                                                                 "old.ca"=round(1),
+                                                                 "old.cb"=round(1))
+                                         }
+                                         m<-1
+                                         betanew<-beta
+                                         # from mla package
+                                         
+                                         sears<-searpas(vw=vw,
+                                                        step=step,
+                                                        b=betanew,
+                                                        delta=delta,
+                                                        funcpa=idmlLikelihoodweibpena,
+                                                        res.out.error=res.out.error,
+                                                        npm=length(beta),
+                                                        npar=size_V,
+                                                        bfix=s,
+                                                        fix=fix0,
+                                                        ctime=ctime,
+                                                        no=N,
+                                                        ve01=ve01,
+                                                        ve02=ve02,
+                                                        ve12=ve12,
+                                                        dimnva01=dimnva01,
+                                                        dimnva02=dimnva02,
+                                                        dimnva12=dimnva12,
+                                                        nva01=nvat01,
+                                                        nva02=nvat02,
+                                                        nva12=nvat12,
+                                                        t0=t0,
+                                                        t1=t1,
+                                                        t2=t2,
+                                                        t3=t3,
+                                                        troncature=troncature,
+                                                        lambda=lambda[id.lambda,],
+                                                        alpha=alpha,
+                                                        penalty.factor=penalty.factor,
+                                                        penalty=penalty,
+                                                        gausspoint=gausspoint,
+                                                        weib=weib)
+                                         
+                                         
+                                         betanew<-beta+delta*sears$vw
+                                         b<-c(s,betanew)
+                                         
+                                         
+                                         res<-idmlLikelihoodweibpena(b=b,
+                                                                     npm=length(b),
+                                                                     npar=size_V,
+                                                                     bfix=1,
+                                                                     fix=rep(0,size_V),
+                                                                     ctime=ctime,
+                                                                     no=N,
+                                                                     ve01=ve01,
+                                                                     ve02=ve02,
+                                                                     ve12=ve12,
+                                                                     dimnva01=dimnva01,
+                                                                     dimnva02=dimnva02,
+                                                                     dimnva12=dimnva12,
+                                                                     nva01=nvat01,
+                                                                     nva02=nvat02,
+                                                                     nva12=nvat12,
+                                                                     t0=t0,
+                                                                     t1=t1,
+                                                                     t2=t2,
+                                                                     t3=t3,
+                                                                     troncature=troncature,
+                                                                     lambda=lambda[id.lambda,],
+                                                                     alpha=alpha,
+                                                                     penalty.factor=penalty.factor,
+                                                                     penalty=penalty,
+                                                                     gausspoint=gausspoint,
+                                                                     weib=weib)
+                                         
+                                       }
+                                       # if not better or do not exist need to readjust
+                                       # value of beta 
+                                       if(res %in%c(-1e9,1e9) | any(is.infinite(c(s,betanew)))){
+                                         
+                                         ite<-ite+1
+                                         validity<-F
+                                         eval.cv.beta[ite]<-sum((betanew-beta)^2)
+                                         eval.validity[ite]<-validity
+                                         # save output over iterations 
+                                         pbr_compu<-3
+                                         break
+                                       }else{validity<-T}
+                                       
+                                       
+                                       # betanew already include s
+                                       b<-c(s,betanew)
+                                       
+                                       bfix<-b[fix0.beta==1]
+                                       b<-b[fix0.beta==0]
+                                       # update modelPar
+                                       output.mla<- marqLevAlg::mla(b=b,
+                                                                    fn=idmlLikelihoodweib,
+                                                                    epsa=epsa,
+                                                                    epsb=epsb,
+                                                                    epsd=epsd,
+                                                                    maxiter=maxiter.pena,
+                                                                    minimize=F,
+                                                                    npm=length(b),
+                                                                    npar=size_V,
+                                                                    bfix=bfix,
+                                                                    fix=fix0.beta,
+                                                                    ctime=ctime,
+                                                                    no=N,
+                                                                    ve01=ve01,
+                                                                    ve02=ve02,
+                                                                    ve12=ve12,
+                                                                    dimnva01=dimnva01,
+                                                                    dimnva02=dimnva02,
+                                                                    dimnva12=dimnva12,
+                                                                    nva01=nvat01,
+                                                                    nva02=nvat02,
+                                                                    nva12=nvat12,
+                                                                    t0=t0,
+                                                                    t1=t1,
+                                                                    t2=t2,
+                                                                    t3=t3,
+                                                                    troncature=troncature,
+                                                                    gausspoint=gausspoint,
+                                                                    weib=weib)
+                                       
+                                       # look at convergence for each lambda :
+                                       
+                                       # new values for splines:
+                                       snew<-s
+                                       snew[fix00[1:6]==0]<-output.mla$b
+                                       if(nvat01>0){
+                                         b01<-betanew[1:nvat01][penalty.factor[1:nvat01]==1]
+                                       }else{b01<-0}
+                                       if(nvat02>0){
+                                         b02<-betanew[(nvat01+1):(nvat01+nvat02)][penalty.factor[(nvat01+1):(nvat01+nvat02)]==1]
+                                       }else{b02<-0}
+                                       if(nvat12>0){
+                                         b12<-betanew[(nvat01+nvat02+1):length(betanew)][penalty.factor[(nvat01+nvat02+1):length(betanew)]==1]
+                                       }else{b12<-0}
+                                       # maximisation issue : lpen =l - pen
+                                       if(penalty%in%c("lasso","ridge","elasticnet","corrected.elasticnet")){
+                                         fn.valuenew<-output.mla$fn.value-lambda[id.lambda,1]*alpha*sum(abs(b01))-lambda[id.lambda,1]*(1-alpha)*sum(b01*b01)
+                                         fn.valuenew<-fn.valuenew-lambda[id.lambda,2]*alpha*sum(abs(b02))-lambda[id.lambda,2]*(1-alpha)*sum(b02*b02)
+                                         fn.valuenew<-fn.valuenew-lambda[id.lambda,3]*alpha*sum(abs(b12))-lambda[id.lambda,3]*(1-alpha)*sum(b12*b12)
+                                         
+                                       }
+                                       
+                                       if(penalty=="mcp"){
+                                         
+                                         p01<-rep(alpha*lambda[id.lambda,1]*lambda[id.lambda,1]/2,length(b01))
+                                         idbeta<-which(b01<=alpha*lambda[id.lambda,1])
+                                         p01[idbeta]<-lambda[id.lambda,1]*abs(b01[idbeta])-((b01[idbeta]*b01[idbeta])/2*alpha)
+                                         
+                                         p02<-rep(alpha*lambda[id.lambda,2]*lambda[id.lambda,2]/2,length(b02))
+                                         idbeta<-which(b02<=alpha*lambda[id.lambda,2])
+                                         p02[idbeta]<-lambda[id.lambda,2]*abs(b02[idbeta])-((b02[idbeta]*b02[idbeta])/2*alpha)
+                                         
+                                         p12<-rep(alpha*lambda[id.lambda,3]*lambda[id.lambda,3]/2,length(b12))
+                                         idbeta<-which(b12<=alpha*lambda[id.lambda,3])
+                                         p12[idbeta]<-lambda[id.lambda,3]*abs(b12[idbeta])-((b12[idbeta]*b12[idbeta])/2*alpha)
+                                         
+                                         fn.valuenew<-output.mla$fn.value-sum(p01)-sum(p02)-sum(p12)
+                                         
+                                       }
+                                       
+                                       if(penalty=="scad"){
+                                         
+                                         p01<-rep((lambda[id.lambda,1]^2)*(alpha+1)/2,length(b01))
+                                         idbeta<-which(b01<=lambda[id.lambda,1])
+                                         p01[idbeta]<-lambda[id.lambda,1]*abs(b01[idbeta])
+                                         idbeta<-which(abs(b01)<lambda[id.lambda,1]*alpha)
+                                         p01[idbeta]<-(2*alpha*lambda[id.lambda,1]*abs(b01[idbeta])-b01[idbeta]^2-lambda[id.lambda,1]^2)/(2*(alpha-1))
+                                         
+                                         p02<-rep((lambda[id.lambda,2]^2)*(alpha+1)/2,length(b02))
+                                         idbeta<-which(b02<=lambda[id.lambda,2])
+                                         p02[idbeta]<-lambda[id.lambda,2]*abs(b02[idbeta])
+                                         idbeta<-which(abs(b02)<lambda[id.lambda,2]*alpha)
+                                         p02[idbeta]<-(2*alpha*lambda[id.lambda,2]*abs(b02[idbeta])-b02[idbeta]^2-lambda[id.lambda,2]^2)/(2*(alpha-1))
+                                         
+                                         p12<-rep((lambda[id.lambda,3]^2)*(alpha+1)/2,length(b12))
+                                         idbeta<-which(b12<=lambda[id.lambda,3])
+                                         p12[idbeta]<-lambda[id.lambda,3]*abs(b12[idbeta])
+                                         idbeta<-which(abs(b12)<lambda[id.lambda,3]*alpha)
+                                         p12[idbeta]<-(2*alpha*lambda[id.lambda,3]*abs(b12[idbeta])-b12[idbeta]^2-lambda[id.lambda,3]^2)/(2*(alpha-1))
+                                         
+                                         fn.valuenew<-output.mla$fn.value-sum(p01)-sum(p02)-sum(p12)
+                                         
+                                       }
+                                       
+                                       ite<-ite+1
+                                       
+                                       # check cv criterias 
+                                       
+                                       eval.cv.spline[ite]<-sum((snew-s)^2)
+                                       eval.cv.beta[ite]<-sum((betanew-beta)^2)
+                                       eval.cv.loglik[ite]<-abs((fn.valuenew-fn.value)/fn.value)
+                                       eval.loglik[ite]<-fn.valuenew
+                                       eval.validity[ite]<-validity
+                                       
+                                       s<-snew
+                                       beta<-betanew
+                                       fn.value<-fn.valuenew
+                                       
+                                       # eval.cv beta valid only if validity.param=T
+                                       if(eval.cv.beta[ite]<epsa & eval.cv.spline[ite]<epsa & eval.cv.loglik[ite]<epsb & validity==T){
+                                         converged<-T}
+                                       
+                                       
+                                     }
+                                     if(maxiter<=ite & converged==F){
+                                       istop<-2
+                                     }else{
+                                       if(ite<=maxiter & converged==T){
+                                         istop<-1
+                                         # need to recalculate second derivatives 
+                                         
+                                         b<-c(s,beta)
+                                         bfix<-b[fix0==1]
+                                         b<-b[fix0==0]
+                                         
+                                         output<-derivaweib(b=b,
+                                                            npm=length(b),
+                                                            npar=size_V,
+                                                            bfix=bfix,
+                                                            fix=fix0,
+                                                            ctime=ctime,
+                                                            no=N,
+                                                            ve01=ve01,
+                                                            ve02=ve02,
+                                                            ve12=ve12,
+                                                            dimnva01=dimnva01,
+                                                            dimnva02=dimnva02,
+                                                            dimnva12=dimnva12,
+                                                            nva01=nvat01,
+                                                            nva02=nvat02,
+                                                            nva12=nvat12,
+                                                            t0=t0,
+                                                            t1=t1,
+                                                            t2=t2,
+                                                            t3=t3,
+                                                            troncature=troncature,
+                                                            weib=weib)
+                                         min<-npm
+                                         V01<- matrix(0,npm01,npm01)
+                                         V01[lower.tri(V01,diag=TRUE)] <- output[(min+1):(min+npm01*(npm01+1)/2)]
+                                         
+                                         
+                                         min<-min+(npm01*(npm01+1)/2)
+                                         if(npm01>0&npm02>0){
+                                           V0102<- matrix(data=output[(min+1):(min+npm02*npm01)],
+                                                          nrow=npm02,ncol=npm01)
+                                         }
+                                         
+                                         min<-min+npm02*npm01
+                                         
+                                         if(npm01>0&npm12>0){
+                                           V0112<- matrix(data=output[(min+1):(min+npm12*npm01)],
+                                                          nrow=npm12,ncol=npm01)
+                                         }
+                                         
+                                         
+                                         min<-min+npm12*npm01
+                                         V02<- matrix(0,npm02,npm02)
+                                         V02[lower.tri(V02,diag=TRUE)] <- output[(min+1):(min+npm02*(npm02+1)/2)]
+                                         
+                                         
+                                         min<-min+(npm02*(npm02+1)/2)
+                                         
+                                         if(npm02>0&npm12>0){
+                                           V0212<- matrix(data=output[(min+1):(min+npm12*npm02)],
+                                                          nrow=npm12,ncol=npm02)}
+                                         
+                                         
+                                         min<-min+npm12*npm02
+                                         V12<- matrix(0,npm12,npm12)
+                                         V12[lower.tri(V12,diag=TRUE)] <- output[(min+1):length(output)]
+                                         
+                                         
+                                         V<- matrix(0,npm,npm)
+                                         if(npm01>0){
+                                           V[1:npm01,1:npm01]<-V01
+                                           if(npm02>0){V[(npm01+1):(npm01+npm02),1:npm01]<-V0102}
+                                           if(npm12>0){V[(npm01+npm02+1):npm,1:npm01]<-V0112}
+                                         }
+                                         if(npm02>0){
+                                           V[(npm01+1):(npm01+npm02),(npm01+1):(npm01+npm02)]<-V02
+                                           if(npm12>0){V[(npm01+npm02+1):npm,(npm01+1):(npm01+npm02)]<-V0212}
+                                         }
+                                         
+                                         if(npm12>0){
+                                           V[(npm01+npm02+1):npm,(npm01+npm02+1):(npm)]<-V12}
+                                         
+                                         V<-V+t(V)
+                                         diag(V)<-diag(V)/2
+                                         # hessian is - second derivatives 
+                                         V<--V
+                                         V0<-V
+                                       }else{
+                                         if(pbr_compu==1){istop<-3}
+                                         if(pbr_compu==2){istop<-4}
+                                         if(pbr_compu==3){istop<-5}
+                                       }
+                                     }
+                                     
+                                     # if stop==1 we can give matrix of second derivatives 
+                                     
+                                     combine<-combine+1
+                                     return(list(b=c(s,beta),
+                                                 H=V0,
+                                                 lambda=as.double(lambda[id.lambda,]),
+                                                 alpha=alpha,
+                                                 fn.value=ifelse(!exists("output.mla"),NA,output.mla$fn.value),
+                                                 fn.value.pena=fn.value,
+                                                 ni=ite,
+                                                 ca.beta=eval.cv.beta,
+                                                 ca.spline=eval.cv.spline,
+                                                 ca.validity=eval.validity,
+                                                 cb=eval.loglik,
+                                                 istop=istop,
+                                                 combine=combine))
+                                   }}
   }
   }else{
     beta<-beta.start[fix00[7:length(fix00)]==0]
     b_positive<-pmax(beta,0)
-    b_negative<--pmin(beta,0)
+    b_negative<-pmax(-beta,0)
 
     if(!penalty%in%c("lasso","ridge","elasticnet")){
       stop("To do L-BFGS penalty need to be either lasso, ridge or elasticnet")
@@ -1493,48 +2638,55 @@ idm.penalty.weib<-function(b,fix0,size_V,
     id.lambda<-NULL # for cran check 
     npm<-sum(fix00==0)
     
+    if(nproc==1){
     output<-foreach::foreach(id.lambda=1:nlambda,
                              .combine = combine_lambda,
                              .errorhandling = "remove")%do%{
-                               
-    res<-optim(par=par,
-          fn=idmlLikelihoodweiboptim,
-          method="L-BFGS",
-          control=list(maxit=maxiter,
-                       pgtol=epsb),
-          npm=npm,
-          lower=rep(0,sum(fix00[7:length(fix00)]==0)*2+sum(fix00[1:6]==0)),
-          hessian=T,
-          npar=size_V,
-          bfix=bfix,
-          fix=fix00,
-          ctime=ctime,
-          no=N,
-          ve01=ve01,
-          ve02=ve02,
-          ve12=ve12,
-          dimnva01=dimnva01,
-          dimnva02=dimnva02,
-          dimnva12=dimnva12,
-          nva01=nvat01,
-          nva02=nvat02,
-          nva12=nvat12,
-          t0=t0,
-          t1=t1,
-          t2=t2,
-          t3=t3,
-          troncature=troncature,
-          lambda=lambda[id.lambda,],
-          alpha=alpha,
-          penalty.factor=penalty.factor,
-          penalty=penalty,
-          gausspoint=gausspoint,
-          weib=weib)
+     
+                            
+                               res<-optim(par=par,
+                                          fn=idmlLikelihoodweiboptim,
+                                          method="L-BFGS-B",
+                                          control=list(maxit=maxiter,
+                                                       pgtol=epsa,
+                                                       #factr=1/(epsb*10),
+                                                       fnscale=-1,trace=2
+                                                       ),
+                                          npm=npm,
+                                          lower=c(rep(0,sum(fix00[1:6]==0)),rep(0,sum(fix00[7:length(fix00)]==0)*2)),
+                                          gr=groptimweib,
+                                          hessian=T,
+                                          npar=size_V,
+                                          bfix=bfix,
+                                          fix=fix00,
+                                          ctime=ctime,
+                                          no=N,
+                                          ve01=ve01,
+                                          ve02=ve02,
+                                          ve12=ve12,
+                                          dimnva01=dimnva01,
+                                          dimnva02=dimnva02,
+                                          dimnva12=dimnva12,
+                                          nva01=nvat01,
+                                          nva02=nvat02,
+                                          nva12=nvat12,
+                                          t0=t0,
+                                          t1=t1,
+                                          t2=t2,
+                                          t3=t3,
+                                          troncature=troncature,
+                                          lambda=lambda[id.lambda,],
+                                          alpha=alpha,
+                                          penalty.factor=penalty.factor,
+                                          penalty=penalty,
+                                          gausspoint=gausspoint,
+                                          weib=weib)
     
-    fn<--res$value
-
-    
+                          
+    fn<-res$value
     start<-sum(fix00[1:6]==1)
+    H<-res$hessian[(6-start+1):(npm),(6-start+1):(npm)]
+    
     if(start==6){
       b0<-res$par[1:npm]-res$par[(1+npm):(2*npm)]
     }else{
@@ -1556,23 +2708,20 @@ idm.penalty.weib<-function(b,fix0,size_V,
       b12<-b[(6+1+nvat01+nvat02):size_V][penalty.factor[(nvat01+nvat02+1):(nvat01+nvat02+nvat12)]==1]
     }else{b12<-0}
     # lpen = l-pen
-    fn<-fn+lambda[id.lambda,1]*(1-alpha)*sum(b01*b01)
-    fn<-fn+lambda[id.lambda,2]*(1-alpha)*sum(b02*b02)
-    fn<-fn+lambda[id.lambda,3]*(1-alpha)*sum(b12*b12)
+    fn<-fn+lambda[id.lambda,1]*(1-alpha)*sum(b01*b01)+lambda[id.lambda,1]*(alpha)*sum(abs(b01))
+    fn<-fn+lambda[id.lambda,2]*(1-alpha)*sum(b02*b02)+lambda[id.lambda,2]*(alpha)*sum(abs(b02))
+    fn<-fn+lambda[id.lambda,3]*(1-alpha)*sum(b12*b12)+lambda[id.lambda,3]*(alpha)*sum(abs(b12))
     
-    fn.pena<--res$value
-    fn.pena<- fn.pena-lambda[id.lambda,1]*alpha*sum(abs(b01))
-    fn.pena<- fn.pena-lambda[id.lambda,2]*alpha*sum(abs(b02))
-    fn.pena<- fn.pena-lambda[id.lambda,3]*alpha*sum(abs(b12))
+    fn.pena<-res$value
     combine<-combine+1
     
-    return(list(b=c(s,beta),
-                H=res$hessian,
+    return(list(b=b,
+                H=H,
                 lambda=as.double(lambda[id.lambda,]),
                 alpha=alpha,
                 fn.value=fn, # loglik
                 fn.value.pena=fn.pena, # penalised loglik
-                ni=res$counts,
+                ni=res$counts[1],
                 ca.beta=NA,
                 ca.spline=NA,
                 ca.validity=NA,
@@ -1581,6 +2730,111 @@ idm.penalty.weib<-function(b,fix0,size_V,
                              ifelse(res$convergence==1,2,res$convergence)),
                 combine=combine))
     
+                             }
+    }else{
+      if(is.null(clustertype)){
+        clustpar <- parallel::makeCluster(nproc)#, outfile="")
+      }
+      else{
+        clustpar <- parallel::makeCluster(nproc, type=clustertype)#, outfile="")
+      }
+      
+      doParallel::registerDoParallel(clustpar)
+      
+      output<-foreach::foreach(id.lambda=1:nlambda,
+                               .combine = combine_lambda,
+                               .errorhandling = "remove")%dopar%{
+                                 
+                                 
+                                 
+                                 res<-optim(par=par,
+                                            fn=idmlLikelihoodweiboptim,
+                                            method="L-BFGS-B",
+                                            control=list(maxit=maxiter,
+                                                         factr=epsb,
+                                                         pgtol=epsa,
+                                                         fnscale=-1),
+                                            npm=npm,
+                                            lower=c(rep(0,sum(fix00[1:6]==0)),rep(0,sum(fix00[7:length(fix00)]==0)*2)),
+                                            gr=groptimweib,
+                                            hessian=T,
+                                            npar=size_V,
+                                            bfix=bfix,
+                                            fix=fix00,
+                                            ctime=ctime,
+                                            no=N,
+                                            ve01=ve01,
+                                            ve02=ve02,
+                                            ve12=ve12,
+                                            dimnva01=dimnva01,
+                                            dimnva02=dimnva02,
+                                            dimnva12=dimnva12,
+                                            nva01=nvat01,
+                                            nva02=nvat02,
+                                            nva12=nvat12,
+                                            t0=t0,
+                                            t1=t1,
+                                            t2=t2,
+                                            t3=t3,
+                                            troncature=troncature,
+                                            lambda=lambda[id.lambda,],
+                                            alpha=alpha,
+                                            penalty.factor=penalty.factor,
+                                            penalty=penalty,
+                                            gausspoint=gausspoint,
+                                            weib=weib)
+                                 
+                                 
+                                 
+                                 fn<-res$value
+                                 start<-sum(fix00[1:6]==1)
+                                 H<-res$hessian[(6-start+1):(npm),(6-start+1):(npm)]
+                                 
+                                 if(start==6){
+                                   b0<-res$par[1:npm]-res$par[(1+npm):(2*npm)]
+                                 }else{
+                                   b0<-c(res$par[1:(6-start)],res$par[(6-start+1):(npm)]-res$par[(npm+1):(2*(npm-6+start)+6-start)])
+                                 }
+                                 b<-rep(NA,size_V)
+                                 b[fix00==1]<-bfix
+                                 b[fix00==0]<-b0
+                                 
+                                 if(nvat01>0){
+                                   b01<-b[(6+1):(6+nvat01)][penalty.factor[1:nvat01]==1]
+                                 }else{b01<-0}
+                                 
+                                 if(nvat02>0){
+                                   b02<-b[(6+1+nvat01):(6+nvat01+nvat02)][penalty.factor[(nvat01+1):(nvat01+nvat02)]==1]
+                                 }else{b02<-0}
+                                 
+                                 if(nvat12>0){
+                                   b12<-b[(6+1+nvat01+nvat02):size_V][penalty.factor[(nvat01+nvat02+1):(nvat01+nvat02+nvat12)]==1]
+                                 }else{b12<-0}
+                                 # lpen = l-pen
+                                 fn<-fn+lambda[id.lambda,1]*(1-alpha)*sum(b01*b01)+lambda[id.lambda,1]*(alpha)*sum(abs(b01))
+                                 fn<-fn+lambda[id.lambda,2]*(1-alpha)*sum(b02*b02)+lambda[id.lambda,2]*(alpha)*sum(abs(b02))
+                                 fn<-fn+lambda[id.lambda,3]*(1-alpha)*sum(b12*b12)+lambda[id.lambda,3]*(alpha)*sum(abs(b12))
+                                 
+                                 fn.pena<-res$value
+                                 combine<-combine+1
+                                 
+                                 return(list(b=b,
+                                             H=H,
+                                             lambda=as.double(lambda[id.lambda,]),
+                                             alpha=alpha,
+                                             fn.value=fn, # loglik
+                                             fn.value.pena=fn.pena, # penalised loglik
+                                             ni=res$counts[1],
+                                             ca.beta=NA,
+                                             ca.spline=NA,
+                                             ca.validity=NA,
+                                             cb=NA,
+                                             istop=ifelse(res$convergence==0,1,
+                                                          ifelse(res$convergence==1,2,res$convergence)),
+                                             combine=combine))
+                                 
+                               }
+      parallel::stopCluster(clustpar)
     }
   
   }

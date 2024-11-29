@@ -29,6 +29,8 @@
 ##' @param idm number of subjects that had illness
 ##' @param ts delay in the study
 ##' @param gausspoint number of points in gauss quadrature
+##' @param methodCV methodolgy to optimise penalised parameters 
+##' @param weib the form of the weibull parameters 
 #' @author R: Ariane Bercu <ariane.bercu@@u-bordeaux.fr> 
 #' @useDynLib SmoothHazardoptim9
 

@@ -28,7 +28,7 @@
 ##' @param penalty which penalty to consider
 ##' @param penalty.factor which variable should be penalised
 ##' @param gausspoint number of points in gauss quadrature
-##' @param gausspoint number of gausspoint quadrature
+##' @param weib the form of the weibull parameters 
 #' @useDynLib SmoothHazardoptim9
 ##' @export
 #' @author R: Ariane Bercu <ariane.bercu@@u-bordeaux.fr> 

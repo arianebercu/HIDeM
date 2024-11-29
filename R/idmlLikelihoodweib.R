@@ -23,6 +23,7 @@
 ##' @param t3 time of event/out
 ##' @param troncature indicator if troncature or not
 ##' @param gausspoint number of gausspoint quadrature
+##' @param weib the form of the weibull parameters 
 #' @useDynLib SmoothHazardoptim9
 ##' @export
 #' @author R: Ariane Bercu <ariane.bercu@@u-bordeaux.fr> 
