@@ -78,13 +78,13 @@ idmlLikelihoodoptim<-function(b,npm,npar,bfix,fix,zi01,zi02,zi12,ctime,no,nz01,n
   res<-res-lambda[,3]*(1-alpha)*sum(b12*b12)-lambda[,3]*alpha*sum(abs(b12))
   
   
-  return(as.double(res))
+  return(as.double(-res))
 }
 
 groptim<-function(b,npm,npar,bfix,fix,zi01,zi02,zi12,ctime,no,nz01,nz02,nz12,ve01,ve02,ve12,
                   dimnva01,dimnva02,dimnva12,nva01,nva02,nva12,
                   t0,t1,t2,t3,troncature,gausspoint,lambda,alpha,penalty.factor,penalty){
-  
+ 
   size_spline<-nz01+nz02+nz12+6
   start<-sum(fix[1:size_spline]==1)
   svar<-b[1:(size_spline-start)]
@@ -150,7 +150,7 @@ groptim<-function(b,npm,npar,bfix,fix,zi01,zi02,zi12,ctime,no,nz01,nz02,nz12,ve0
   }
   
   npm_all<-length(ball)
-  grbeta<-rep(0,(npm_all*(npm_all+1)/2)+npm_all)
+  grbeta<-rep(0,npm_all)
   
   
   fixbeta<-fix
@@ -190,7 +190,7 @@ groptim<-function(b,npm,npar,bfix,fix,zi01,zi02,zi12,ctime,no,nz01,nz02,nz12,ve0
                    as.double(t3),
                    as.integer(troncature),
                    likelihood_deriv=as.double(grbeta),
-                   PACKAGE="SmoothHazardoptim9")$likelihood_deriv[1:npm_all]
+                   PACKAGE="SmoothHazardoptim9")$likelihood_deriv
   
 
   bb<-rep(NA,npar)
@@ -262,5 +262,5 @@ groptim<-function(b,npm,npar,bfix,fix,zi01,zi02,zi12,ctime,no,nz01,nz02,nz12,ve0
   #browser()
   sol<-c(-grs$v,grbeta,-grbeta)
   #<-c(-grs$v,-grbeta,grbeta)
-  return(as.double(sol))
+  return(as.double(-sol))
 }

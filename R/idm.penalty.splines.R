@@ -2772,14 +2772,13 @@ idm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                             fn=idmlLikelihoodoptim,
                                             method="L-BFGS-B",
                                             control=list(maxit=maxiter,
-                                                         pgtol=epsa,
-                                                         #factr=1/(epsb*10),
-                                                         fnscale=-1,trace=2
+                                                         #pgtol=epsa,
+                                                         #factr=epsb,
                                             ),
                                             npm=npm,
                                             lower=c(rep(0,sum(fix000[1:(size_spline)]==0)),rep(0,sum(fix000[(size_spline+1):length(fix000)]==0)*2)),
-                                            gr=groptim,
-                                            hessian=T,
+                                            #gr=groptim,
+                                            hessian=F,
                                             npar=size_V,
                                             bfix=bfix,
                                             fix=fix000,
@@ -2812,15 +2811,56 @@ idm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                             gausspoint=gausspoint)
                                  
                                  
-                                 fn<-res$value
+                                 fn<--res$value
                                  start<-sum(fix000[1:(size_spline)]==1)
-                                 H<-res$hessian[(size_spline-start+1):(npm),(size_spline-start+1):(npm)]
                                  
                                  if(start==size_spline){
                                    b0<-res$par[1:npm]-res$par[(1+npm):(2*npm)]
                                  }else{
                                    b0<-c(res$par[1:(size_spline-start)],res$par[(size_spline-start+1):(npm)]-res$par[(npm+1):(2*(npm-size_spline+start)+size_spline-start)])
                                  }
+                                 
+                                 #b0<-ifelse(abs(b0)<=.Machine$double.eps,0,b0)
+                                 
+                                 Hderia<-deriva(b=b0,
+                                                nproc=1,
+                                                funcpa=idmlLikelihood,
+                                                npm=length(b),
+                                                      npar=size_V,
+                                                      bfix=bfix,
+                                                      fix=fix000,
+                                                      zi01=knots01,
+                                                      zi02=knots02,
+                                                      zi12=knots12,
+                                                      ctime=ctime,
+                                                      no=N,
+                                                      nz01=nknots01,
+                                                      nz02=nknots02,
+                                                      nz12=nknots12,
+                                                      ve01=ve01,
+                                                      ve02=ve02,
+                                                      ve12=ve12,
+                                                      dimnva01=dimnva01,
+                                                      dimnva02=dimnva02,
+                                                      dimnva12=dimnva12,
+                                                      nva01=nvat01,
+                                                      nva02=nvat02,
+                                                      nva12=nvat12,
+                                                      t0=t0,
+                                                      t1=t1,
+                                                      t2=t2,
+                                                      t3=t3,
+                                                      troncature=troncature)
+                                                
+                                                
+                                 
+                                 H<- matrix(0,length(b0),length(b0))
+                                 H[lower.tri(H,diag=TRUE)] <- Hderia$v[(length(b0)+1):(length(Hderia$v))]
+                                 
+                                 H<-H+t(H)
+                                 diag(H)<-diag(H)/2
+                                 H<--H
+                                 
                                  b<-rep(NA,size_V)
                                  b[fix000==1]<-bfix
                                  b[fix000==0]<-b0
@@ -2841,7 +2881,7 @@ idm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                  fn<-fn+lambda[id.lambda,2]*(1-alpha)*sum(b02*b02)+lambda[id.lambda,2]*(alpha)*sum(abs(b02))
                                  fn<-fn+lambda[id.lambda,3]*(1-alpha)*sum(b12*b12)+lambda[id.lambda,3]*(alpha)*sum(abs(b12))
                                  
-                                 fn.pena<-res$value
+                                 fn.pena<--res$value
                                  combine<-combine+1
                                  
                                  return(list(b=b,
@@ -2879,14 +2919,13 @@ idm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                             fn=idmlLikelihoodoptim,
                                             method="L-BFGS-B",
                                             control=list(maxit=maxiter,
-                                                         pgtol=epsa,
-                                                         #factr=1/(epsb*10),
-                                                         fnscale=-1,trace=2
+                                                         #pgtol=epsa,
+                                                         #factr=epsb,
                                             ),
                                             npm=npm,
                                             lower=c(rep(0,sum(fix000[1:(size_spline)]==0)),rep(0,sum(fix000[(size_spline+1):length(fix000)]==0)*2)),
-                                            gr=groptim,
-                                            hessian=T,
+                                            #gr=groptim,
+                                            hessian=F,
                                             npar=size_V,
                                             bfix=bfix,
                                             fix=fix000,
@@ -2919,15 +2958,54 @@ idm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                             gausspoint=gausspoint)
                                  
                                  
-                                 fn<-res$value
+                                 fn<--res$value
                                  start<-sum(fix000[1:(size_spline)]==1)
-                                 H<-res$hessian[(size_spline-start+1):(npm),(size_spline-start+1):(npm)]
                                  
                                  if(start==size_spline){
                                    b0<-res$par[1:npm]-res$par[(1+npm):(2*npm)]
                                  }else{
                                    b0<-c(res$par[1:(size_spline-start)],res$par[(size_spline-start+1):(npm)]-res$par[(npm+1):(2*(npm-size_spline+start)+size_spline-start)])
                                  }
+                                 #b0<-ifelse(abs(b0)<=.Machine$double.eps,0,b0)
+                                 Hderia<-deriva(b=b0,
+                                                nproc=1,
+                                                funcpa=idmlLikelihood,
+                                                npm=length(b),
+                                                npar=size_V,
+                                                bfix=bfix,
+                                                fix=fix000,
+                                                zi01=knots01,
+                                                zi02=knots02,
+                                                zi12=knots12,
+                                                ctime=ctime,
+                                                no=N,
+                                                nz01=nknots01,
+                                                nz02=nknots02,
+                                                nz12=nknots12,
+                                                ve01=ve01,
+                                                ve02=ve02,
+                                                ve12=ve12,
+                                                dimnva01=dimnva01,
+                                                dimnva02=dimnva02,
+                                                dimnva12=dimnva12,
+                                                nva01=nvat01,
+                                                nva02=nvat02,
+                                                nva12=nvat12,
+                                                t0=t0,
+                                                t1=t1,
+                                                t2=t2,
+                                                t3=t3,
+                                                troncature=troncature)
+                                 
+                                 
+                                 
+                                 H<- matrix(0,length(b0),length(b0))
+                                 H[lower.tri(H,diag=TRUE)] <- Hderia$v[(length(b0)+1):(length(Hderia$v))]
+                                 
+                                 H<-H+t(H)
+                                 diag(H)<-diag(H)/2
+                                 H<--H
+                                 
                                  b<-rep(NA,size_V)
                                  b[fix000==1]<-bfix
                                  b[fix000==0]<-b0
@@ -2948,7 +3026,7 @@ idm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                  fn<-fn+lambda[id.lambda,2]*(1-alpha)*sum(b02*b02)+lambda[id.lambda,2]*(alpha)*sum(abs(b02))
                                  fn<-fn+lambda[id.lambda,3]*(1-alpha)*sum(b12*b12)+lambda[id.lambda,3]*(alpha)*sum(abs(b12))
                                  
-                                 fn.pena<-res$value
+                                 fn.pena<--res$value
                                  combine<-combine+1
                                  
                                  return(list(b=b,

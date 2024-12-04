@@ -96,6 +96,10 @@ idm.weib(
 \item{troncature}{indicator if troncature or not}
 
 \item{gausspoint}{number of points in gauss quadrature}
+
+\item{weib}{the form of the weibull parameters}
+
+\item{methodCV}{methodolgy to optimise penalised parameters}
 }
 \description{
 Illness-death model algorithm with weibull baseline risk

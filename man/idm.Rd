@@ -35,6 +35,7 @@ idm(
   penalty.factor = NULL,
   alpha = ifelse(penalty == "scad", 3.7, ifelse(penalty == "mcp", 3, ifelse(penalty
     \%in\% c("elasticnet"), 0.5, 1))),
+  partialH = F,
   nproc = 1,
   clustertype = "FORK",
   envir = parent.frame()
@@ -148,6 +149,10 @@ fix splines}
 \item{penalty.factor}{which variable should be penalised}
 
 \item{alpha}{alpha on all transitions}
+
+\item{partialH}{default FALSE, if TRUE only the diagonal terms of the hessian will be 
+computed for the Newton-Raphson path for the penalised regression parameter. If FALSE, the 
+complete hessian is computed.}
 
 \item{nproc}{number of cluster}
 

@@ -4316,9 +4316,8 @@ res0202num,res1212num,v01,v02,v12,weib)
 
         implicit none
          double precision a,b,the01(2),the02(2),the12(2)
-         double precision dx,xm,xr,reskdenum,&
-         reskhdenum,resdenum,resk01num,res01num, & 
-	resk02num,res02num,resk12num,res12num, & 
+         double precision dx,xm,xr,reskdenum,resdenum,&
+	resk01num,res01num,resk02num,res02num,resk12num,res12num, & 
 	resk0101num,res0101num,resk0202num,res0202num, &
 	resk1212num,res1212num,v01,v02,v12
          double precision xx,f1denum,f2denum, f101num, f102num, f112num, & 
@@ -4329,7 +4328,7 @@ res0202num,res1212num,v01,v02,v12,weib)
 	fv10101num,fv20101num, fv10202num,fv20202num, & 
 	fv11212num,fv21212num, &  
 	d1mach(5),epmach,uflow,fcdenum,fc01num,fc02num,fc12num, & 
-	fc0101num,fc0102num,fc0112num,fc0202num,fc0212num,fc1212num
+	fc0101num,fc0202num,fc1212num
 
          double precision gl01,gl12,gl02
          integer::j,jtw,jtwm1,weib
@@ -7049,16 +7048,16 @@ subroutine derivaweibdiag(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
         implicit none
          
         double precision::res2denum,res201num,res202num,res212num, &
-	res20101num,res20202num,&
-	res21212num,vet01,vet12,vet02,resint,v,u1,u2,u3
+	res20101num,res20202num,res21212num,vet01,vet12,vet02, & 
+	resint,v,u1,u2,u3
         integer::np0,i,j,l,w,k,lfix, kfix,npar0,nva01,nva12,nva02,no0, &
 	weib0,nz010,nz020,nz120,troncature0,dimnva01,dimnva02,dimnva12, & 
 	nva01nofix,nva12nofix,nva02nofix,nvamax, sizespline,nva0102,&
 	nvamax01,nvamax02,nvamax12
 
-	double precision,dimension(np0+np0),intent(inout)::likelihood_deriv
+	double precision,dimension(2*np0),intent(inout)::likelihood_deriv
 	double precision,dimension(np0)::b0
-	double precision,dimension(np0+np0)::res,res1
+	double precision,dimension(2*np0)::res,res1
         double precision,dimension(npar0)::bh
 	double precision,dimension(npar0-np0)::bfix0
 	integer,dimension(npar0)::fix0
@@ -7072,6 +7071,7 @@ subroutine derivaweibdiag(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 	double precision,dimension(no0)::t00,t10,t20,t30
 	integer,dimension(no0)::c0
 
+!	PRINT *,'allocate'
 	allocate(b(np0),bfix(npar0-np0),fix(npar0))
 	b=b0
 	bfix=bfix0
@@ -7080,7 +7080,8 @@ subroutine derivaweibdiag(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 	weib=weib0
 	sizespline=6
 
-
+    
+!	 PRINT *,'start'
 	if(nva01.gt.0) then 
 	  nva01nofix=nva01-sum(fix((sizespline+1):(nva01+sizespline)))
 	else 
@@ -7103,7 +7104,7 @@ subroutine derivaweibdiag(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 	nvamax=nva01nofix+nva02nofix+nva12nofix
 	nvamax01=nvamax+nva01nofix
 	nvamax02=nvamax01+nva02nofix
-	nvamax12=nvamax02+nva12nofix+1
+	nvamax12=nvamax02+nva12nofix
 
 
 	if(nva01.gt.0) then 
@@ -7176,9 +7177,9 @@ subroutine derivaweibdiag(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 	   if(fix((sizespline+k)).eq.0) then 
 		lfix=lfix+1
 		ve01nofix(:,lfix)=ve01(:,k)
-		ve01square(:,lfix)=ve01nofix(:,lfix)*ve01nofix(:,lfix)
 	   end if 
 	end do
+	ve01square=ve01nofix*ve01nofix
 	end if 
 
 	lfix=0
@@ -7188,9 +7189,9 @@ subroutine derivaweibdiag(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 	   if(fix((sizespline+nva01+k)).eq.0) then 
 		lfix=lfix+1
 		ve02nofix(:,lfix)=ve02(:,k)
-		ve02square(:,lfix)=ve02nofix(:,lfix)*ve02nofix(:,lfix)
 	   end if 
 	end do
+	ve02square=ve02nofix*ve02nofix
 	end if 
 	
 	lfix=0
@@ -7200,9 +7201,9 @@ subroutine derivaweibdiag(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 	   if(fix((sizespline+nva01+nva02+k)).eq.0) then 
 		lfix=lfix+1
 		ve12nofix(:,lfix)=ve12(:,k)
-		ve12square(:,lfix)=ve12nofix(:,lfix)*ve12nofix(:,lfix)
 	   end if 
 	end do
+	ve12square=ve12nofix*ve12nofix
 	end if
 	
 	l=0
@@ -7220,7 +7221,7 @@ subroutine derivaweibdiag(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
          end if
       end do
 
-   
+!   PRINT *,'update ve'
 	
 
 
@@ -7250,6 +7251,7 @@ subroutine derivaweibdiag(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
          end do
 	endif
 
+ !	PRINT *,'start loop'
 	
 !---------- calcul des derivees premiere ------------------   
 
@@ -7312,6 +7314,7 @@ subroutine derivaweibdiag(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
                 end if
 		
                 if(c(i).eq.1)then ! cad 0-->1 et 0-->2
+!			 PRINT *,'profile 1'
 			call fonct(t1(i),the01,ri01,gl01,su01,weib)
 			call fonct(t1(i),the02,ri02,gl02,su02,weib)
 
@@ -7344,7 +7347,7 @@ subroutine derivaweibdiag(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
                 else
                 if(c(i).eq.2)then ! cpi 0-->1
 
-
+!			PRINT *,'profile 2'
 			call fonct(t3(i),the12,ri12,gl12,su12,weib)
 			call qgaussweibderivdiag(t1(i),t2(i),the01,&
 			the02,the12,res2denum,res201num,&
@@ -7419,7 +7422,7 @@ subroutine derivaweibdiag(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 			
                 else  
                     if(c(i).eq.3)then ! obs 0-->1
-
+!			 PRINT *,'profile 3'
 			call fonct(t1(i),the01,ri01,gl01,su01,weib)
 			call fonct(t1(i),the02,ri02,gl02,su02,weib)
 			call fonct(t1(i),the12,ri12,gl12,su12,weib)
@@ -7468,10 +7471,11 @@ subroutine derivaweibdiag(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 
                     else   
                        if(c(i).eq.4)then ! cpi 0-->1 et obs 1-->2
-			
+!			PRINT *,'profile 4'
 			call fonct(t3(i),the12,ri12,gl12,su12,weib)
-			call qgaussweibderivdiag(t1(i),t2(i),the01,the02,the12,&
-			res2denum,res201num,res202num,res212num,&
+			call qgaussweibderivdiag(t1(i),t2(i),the01,&
+			the02,the12,res2denum,res201num,&
+			res202num,res212num,&
 			res20101num,res20202num,&
 			res21212num,vet01,vet02,vet12,weib)
 
@@ -7549,7 +7553,7 @@ subroutine derivaweibdiag(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 
                        else
                          if(c(i).eq.5)then ! obs 0-->1 et obs 1-->2
-				
+!				PRINT *,'profile 5'
 				call fonct(t1(i),the01,ri01,gl01,su01,weib)
 				call fonct(t1(i),the02,ri02,gl02,su02,weib)
 				call fonct(t1(i),the12,ri12,gl12,su12,weib)
@@ -7601,13 +7605,14 @@ subroutine derivaweibdiag(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
                          else
                             if(c(i).eq.6)then ! vivant ???
 
-
+				write(6,*)'profile 6'
 				call fonct(t3(i),the01,ri01,gl01,su01,weib)
 				call fonct(t3(i),the02,ri02,gl02,su02,weib)
 				call fonct(t3(i),the12,ri12,gl12,su12,weib)
-				call qgaussweibderivdiag(t1(i),t3(i),the01,the02,the12,&
-				res2denum,res201num,res202num,res212num,res20101num,&
-				res20202num,res21212num,vet01,vet02,vet12,weib)
+				call qgaussweibderivdiag(t1(i),t3(i),the01,&
+				the02,the12,res2denum,res201num,res202num,&
+				res212num,res20101num,res20202num,&
+				res21212num,vet01,vet02,vet12,weib)
 
 				
 				v=(su12**vet12)*res2denum+&
@@ -7691,11 +7696,12 @@ subroutine derivaweibdiag(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
                         	
 				
                             else ! passage 0-->2  
-				
+!				PRINT *,'profile 7'
 				call fonct(t3(i),the01,ri01,gl01,su01,weib)
 				call fonct(t3(i),the02,ri02,gl02,su02,weib)
 				call fonct(t3(i),the12,ri12,gl12,su12,weib)
-        			call qgaussweibderivdiag(t1(i),t3(i),the01,the02,&
+        			call qgaussweibderivdiag(t1(i),t3(i),&
+				the01,the02,&
         			the12,res2denum,res201num,res202num,res212num,&
         			res20101num,res20202num,res21212num,&
         			vet01,vet02,vet12,weib)
@@ -7820,6 +7826,7 @@ subroutine derivaweibdiag(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 	tronc01square,tronc02square)     
 
     end subroutine derivaweibdiag
+
 
 
 !=============================================================================================  

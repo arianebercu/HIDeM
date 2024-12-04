@@ -2094,7 +2094,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                        bfix<-b[fix0==1]
                                        b<-b[fix0==0]
                                        
-                                      
+                                 
                                          
                                          output<-derivaweibdiag(b=b,
                                                                 npm=length(b),
@@ -2118,6 +2118,8 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                                                 t3=t3,
                                                                 troncature=troncature,
                                                                 weib=weib)
+                                         
+                                       
                                          
                                          if(ite==0){
                                            fn.value<-idmlLikelihoodweibpena(b=b,
@@ -2593,6 +2595,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                          if(npm12>0){
                                            V[(npm01+npm02+1):npm,(npm01+npm02+1):(npm)]<-V12}
                                          
+                                         
                                          V<-V+t(V)
                                          diag(V)<-diag(V)/2
                                          # hessian is - second derivatives 
@@ -2642,20 +2645,96 @@ idm.penalty.weib<-function(b,fix0,size_V,
     output<-foreach::foreach(id.lambda=1:nlambda,
                              .combine = combine_lambda,
                              .errorhandling = "remove")%do%{
-     
+                            #   browser()
+                           # browser()
+                           #   resbis<-lbfgsb3(par=par,
+                           #                     fn=idmlLikelihoodweiboptim,
+                           #                     #method="L-BFGS-B",
+                           #                     control=list(maxit=maxiter,trace=2,
+                           #                                  reltol=sqrt(.Machine$double.eps)),
+                           #                     #pgtol=epsa,
+                           #                     #factr=epsb,
+                           #                     #fnscale=-1,trace=3),
+                           #                     npm=npm,
+                           #                     
+                           #                     lower=c(rep(0,sum(fix00[1:6]==0)),rep(0,sum(fix00[7:length(fix00)]==0)*2)),
+                           #                     #hessian=F,
+                           #                     gr=groptimweib,
+                           #                     npar=size_V,
+                           #                     bfix=bfix,
+                           #                     fix=fix00,
+                           #                     ctime=ctime,
+                           #                     no=N,
+                           #                     ve01=ve01,
+                           #                     ve02=ve02,
+                           #                     ve12=ve12,
+                           #                     dimnva01=dimnva01,
+                           #                     dimnva02=dimnva02,
+                           #                     dimnva12=dimnva12,
+                           #                     nva01=nvat01,
+                           #                     nva02=nvat02,
+                           #                     nva12=nvat12,
+                           #                     t0=t0,
+                           #                     t1=t1,
+                           #                     t2=t2,
+                           #                     t3=t3,
+                           #                     troncature=troncature,
+                           #                     lambda=lambda[id.lambda,],
+                           #                     alpha=alpha,
+                           #                     penalty.factor=penalty.factor,
+                           #                     penalty=penalty,
+                           #                     gausspoint=gausspoint,
+                           #                     weib=weib)
+
+                               
+                               # with true gradient --> 0 does not exist 
+                               # set to .Machine$double.eps as used in fortran after
+                               # res<-optim(par=par,
+                               #            fn=idmlLikelihoodweiboptim,
+                               #            method="L-BFGS-B",
+                               #            control=list(maxit=maxiter,trace=2,
+                               #                         reltol=sqrt(.Machine$double.eps)),
+                               #            npm=npm,
+                               #            lower=c(rep(0,sum(fix00[1:6]==0)),rep(0,sum(fix00[7:length(fix00)]==0)*2)),gr=groptimweib,
+                               #            hessian=F,
+                               #            npar=size_V,
+                               #            bfix=bfix,
+                               #            fix=fix00,
+                               #            ctime=ctime,
+                               #            no=N,
+                               #            ve01=ve01,
+                               #            ve02=ve02,
+                               #            ve12=ve12,
+                               #            dimnva01=dimnva01,
+                               #            dimnva02=dimnva02,
+                               #            dimnva12=dimnva12,
+                               #            nva01=nvat01,
+                               #            nva02=nvat02,
+                               #            nva12=nvat12,
+                               #            t0=t0,
+                               #            t1=t1,
+                               #            t2=t2,
+                               #            t3=t3,
+                               #            troncature=troncature,
+                               #            lambda=lambda[id.lambda,],
+                               #            alpha=alpha,
+                               #            penalty.factor=penalty.factor,
+                               #            penalty=penalty,
+                               #            gausspoint=gausspoint,
+                               #            weib=weib)
+                               # 
                             
+    
                                res<-optim(par=par,
                                           fn=idmlLikelihoodweiboptim,
                                           method="L-BFGS-B",
                                           control=list(maxit=maxiter,
                                                        pgtol=epsa,
-                                                       #factr=1/(epsb*10),
-                                                       fnscale=-1,trace=2
-                                                       ),
+                                                       factr=epsb),
                                           npm=npm,
                                           lower=c(rep(0,sum(fix00[1:6]==0)),rep(0,sum(fix00[7:length(fix00)]==0)*2)),
-                                          gr=groptimweib,
-                                          hessian=T,
+                                          #gr=groptimweib,
+                                          hessian=F,
                                           npar=size_V,
                                           bfix=bfix,
                                           fix=fix00,
@@ -2681,21 +2760,56 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                           penalty=penalty,
                                           gausspoint=gausspoint,
                                           weib=weib)
-    
+                               
                           
-    fn<-res$value
+    fn<--res$value
     start<-sum(fix00[1:6]==1)
-    H<-res$hessian[(6-start+1):(npm),(6-start+1):(npm)]
     
     if(start==6){
       b0<-res$par[1:npm]-res$par[(1+npm):(2*npm)]
     }else{
-      b0<-c(res$par[1:(6-start)],res$par[(6-start+1):(npm)]-res$par[(npm+1):(2*(npm-6+start)+6-start)])
+      b0<-c(rester$par[1:(6-start)],rester$par[(6-start+1):(npm)]-rester$par[(npm+1):(2*(npm-6+start)+6-start)])
     }
+    #b0<-ifelse(abs(b0)<=sqrt(.Machine$double.eps),0,b0)
+    
+   
+    Hderia<-deriva(b=b0,
+                   nproc=1,
+                   funcpa=idmlLikelihoodweib,
+                   npm=length(b0),
+                   npar=size_V,
+                   bfix=bfix,
+                   fix=fix00,
+                   ctime=ctime,
+                   no=N,
+                   ve01=ve01,
+                   ve02=ve02,
+                   ve12=ve12,
+                   dimnva01=dimnva01,
+                   dimnva02=dimnva02,
+                   dimnva12=dimnva12,
+                   nva01=nvat01,
+                   nva02=nvat02,
+                   nva12=nvat12,
+                   t0=t0,
+                   t1=t1,
+                   t2=t2,
+                   t3=t3,
+                   troncature=troncature,
+                   gausspoint=gausspoint,
+                   weib=weib)
+    
+    H<- matrix(0,length(b0),length(b0))
+    H[lower.tri(H,diag=TRUE)] <- Hderia$v[(length(b0)+1):(length(Hderia$v))]
+    
+    H<-H+t(H)
+    diag(H)<-diag(H)/2
+    H<--H
+    
     b<-rep(NA,size_V)
     b[fix00==1]<-bfix
     b[fix00==0]<-b0
-      
+    
       if(nvat01>0){
         b01<-b[(6+1):(6+nvat01)][penalty.factor[1:nvat01]==1]
       }else{b01<-0}
@@ -2707,14 +2821,15 @@ idm.penalty.weib<-function(b,fix0,size_V,
     if(nvat12>0){
       b12<-b[(6+1+nvat01+nvat02):size_V][penalty.factor[(nvat01+nvat02+1):(nvat01+nvat02+nvat12)]==1]
     }else{b12<-0}
+    
     # lpen = l-pen
     fn<-fn+lambda[id.lambda,1]*(1-alpha)*sum(b01*b01)+lambda[id.lambda,1]*(alpha)*sum(abs(b01))
     fn<-fn+lambda[id.lambda,2]*(1-alpha)*sum(b02*b02)+lambda[id.lambda,2]*(alpha)*sum(abs(b02))
     fn<-fn+lambda[id.lambda,3]*(1-alpha)*sum(b12*b12)+lambda[id.lambda,3]*(alpha)*sum(abs(b12))
     
-    fn.pena<-res$value
+    fn.pena<--res$value
     combine<-combine+1
-    
+   
     return(list(b=b,
                 H=H,
                 lambda=as.double(lambda[id.lambda,]),
@@ -2751,13 +2866,12 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                             fn=idmlLikelihoodweiboptim,
                                             method="L-BFGS-B",
                                             control=list(maxit=maxiter,
-                                                         factr=epsb,
                                                          pgtol=epsa,
-                                                         fnscale=-1),
+                                                         factr=epsb),
                                             npm=npm,
                                             lower=c(rep(0,sum(fix00[1:6]==0)),rep(0,sum(fix00[7:length(fix00)]==0)*2)),
-                                            gr=groptimweib,
-                                            hessian=T,
+                                            #gr=groptimweib,
+                                            hessian=F,
                                             npar=size_V,
                                             bfix=bfix,
                                             fix=fix00,
@@ -2786,18 +2900,54 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                  
                                  
                                  
-                                 fn<-res$value
+                                 fn<--res$value
                                  start<-sum(fix00[1:6]==1)
-                                 H<-res$hessian[(6-start+1):(npm),(6-start+1):(npm)]
-                                 
+                                
                                  if(start==6){
                                    b0<-res$par[1:npm]-res$par[(1+npm):(2*npm)]
                                  }else{
                                    b0<-c(res$par[1:(6-start)],res$par[(6-start+1):(npm)]-res$par[(npm+1):(2*(npm-6+start)+6-start)])
                                  }
+                                 
+                                 #b0<-ifelse(abs(b0)<=.Machine$double.eps,0,b0)
+                                 
+                                 Hderia<-deriva(b=b0,
+                                                nproc=1,
+                                                funcpa=idmlLikelihoodweib,
+                                                npm=length(b0),
+                                                npar=size_V,
+                                                bfix=bfix,
+                                                fix=fix00,
+                                                ctime=ctime,
+                                                no=N,
+                                                ve01=ve01,
+                                                ve02=ve02,
+                                                ve12=ve12,
+                                                dimnva01=dimnva01,
+                                                dimnva02=dimnva02,
+                                                dimnva12=dimnva12,
+                                                nva01=nvat01,
+                                                nva02=nvat02,
+                                                nva12=nvat12,
+                                                t0=t0,
+                                                t1=t1,
+                                                t2=t2,
+                                                t3=t3,
+                                                troncature=troncature,
+                                                gausspoint=gausspoint,
+                                                weib=weib)
+                                 
+                                 H<- matrix(0,length(b0),length(b0))
+                                 H[lower.tri(H,diag=TRUE)] <- Hderia$v[(length(b0)+1):(length(Hderia$v))]
+                                 
+                                 H<-H+t(H)
+                                 diag(H)<-diag(H)/2
+                                 H<--H
+                                 
                                  b<-rep(NA,size_V)
                                  b[fix00==1]<-bfix
                                  b[fix00==0]<-b0
+                                 
                                  
                                  if(nvat01>0){
                                    b01<-b[(6+1):(6+nvat01)][penalty.factor[1:nvat01]==1]
@@ -2815,7 +2965,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                  fn<-fn+lambda[id.lambda,2]*(1-alpha)*sum(b02*b02)+lambda[id.lambda,2]*(alpha)*sum(abs(b02))
                                  fn<-fn+lambda[id.lambda,3]*(1-alpha)*sum(b12*b12)+lambda[id.lambda,3]*(alpha)*sum(abs(b12))
                                  
-                                 fn.pena<-res$value
+                                 fn.pena<--res$value
                                  combine<-combine+1
                                  
                                  return(list(b=b,

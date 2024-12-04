@@ -120,6 +120,8 @@ idm.splines(
 
 \item{option.sequential}{parameters to give if you want to do the optimisation version to
 fix splines}
+
+\item{methodCV}{methodolgy to optimise penalised parameters}
 }
 \description{
 Illness-death model algorithm with M-splines baseline risk

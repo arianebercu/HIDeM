@@ -62,7 +62,7 @@ derivaweibdiag<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
                      t0,t1,t2,t3,troncature,weib){
   res<-rep(0,2*npm)
   # return first and second derivatives of the loglik
-  .Fortran("derivaweibdiag",
+ .Fortran("derivaweibdiag",
            ## input
            as.double(b),
            as.integer(npm),

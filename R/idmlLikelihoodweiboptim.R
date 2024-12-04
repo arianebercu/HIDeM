@@ -31,15 +31,17 @@ idmlLikelihoodweiboptim<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
                                    dimnva01,dimnva02,dimnva12,nva01,nva02,nva12,
                                    t0,t1,t2,t3,troncature,lambda,alpha,penalty.factor,penalty,gausspoint,weib){
   
-#browser()
+#in b we have b=c(weibull para, b+, b-)
+  # should do pmax ?? 
   start<-sum(fix[1:6]==1)
   if(start==6){
   b0<-b[1:npm]-b[(1+npm):(2*npm)]
   }else{
+    #b0<-c(b[1:(6-start)],b[(6-start+1):(npm)]-b[(npm+1):(length(b))])
     b0<-c(b[1:(6-start)],b[(6-start+1):(npm)]-b[(npm+1):(length(b))])
   }
 
-
+  
   res<-idmlLikelihoodweib(b0,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
                           dimnva01,dimnva02,dimnva12,nva01,nva02,nva12,
                           t0,t1,t2,t3,troncature,gausspoint,weib)
@@ -68,7 +70,7 @@ idmlLikelihoodweiboptim<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
     res<-res-lambda[,3]*(1-alpha)*sum(b12*b12)-lambda[,3]*alpha*sum(abs(b12))
   
   
-  return(as.double(res))
+  return(as.double(-res))
 }
 
 groptimweib<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
@@ -77,33 +79,34 @@ groptimweib<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
 
   start<-sum(fix[1:6]==1)
   svar<-b[1:(6-start)]
-  test<-grad(x=b,
-                                     f=idmlLikelihoodweiboptim,
-                                     npm=sum(fix==0),
-                                     npar=length(fix),
-                                     bfix=bfix,
-                                     fix=fix,
-                                     ctime=ctime,
-                                     no=no,
-                                     ve01=ve01,
-                                     ve02=ve02,
-                                     ve12=ve12,
-                                     dimnva01=dimnva01,
-                                     dimnva02=dimnva02,
-                                     dimnva12=dimnva12,
-                                     nva01=nva01,
-                                     nva02=nva02,
-                                     nva12=nva12,
-                                     t0=t0,
-                                     t1=t1,
-                                     t2=t2,
-                                     t3=t3,
-                                     troncature=troncature,
-                                     lambda=lambda,
-                                     alpha=alpha,
-                                     penalty.factor=penalty.factor,
-                                     penalty=penalty,
-                                     gausspoint=gausspoint,weib=weib)
+  
+  # test<-grad(x=b,
+  #                                    f=idmlLikelihoodweiboptim,
+  #                                    npm=sum(fix==0),
+  #                                    npar=length(fix),
+  #                                    bfix=bfix,
+  #                                    fix=fix,
+  #                                    ctime=ctime,
+  #                                    no=no,
+  #                                    ve01=ve01,
+  #                                    ve02=ve02,
+  #                                    ve12=ve12,
+  #                                    dimnva01=dimnva01,
+  #                                    dimnva02=dimnva02,
+  #                                    dimnva12=dimnva12,
+  #                                    nva01=nva01,
+  #                                    nva02=nva02,
+  #                                    nva12=nva12,
+  #                                    t0=t0,
+  #                                    t1=t1,
+  #                                    t2=t2,
+  #                                    t3=t3,
+  #                                    troncature=troncature,
+  #                                    lambda=lambda,
+  #                                    alpha=alpha,
+  #                                    penalty.factor=penalty.factor,
+  #                                    penalty=penalty,
+  #                                    gausspoint=gausspoint,weib=weib)
   # testbis<-deriva.gradient(b=b,
   #                       nproc=1,
   #                       funcpa=idmlLikelihoodweiboptim,
@@ -132,14 +135,20 @@ groptimweib<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
   #                       penalty.factor=penalty.factor,
   #                       penalty=penalty,
   #                       gausspoint=gausspoint,weib=weib)
+  
+  # should do p max ???
   if(start==6){
     ball<-b[1:npm]-b[(1+npm):(2*npm)]
   }else{
     ball<-b[(6-start+1):(npm)]-b[(npm+1):(length(b))]
   }
   
+ 
+  #if(any(pmax(ball,0)!=b[(6-start+1):(npm)])){browser()}
+  #if(any(pmax(-ball,0)!=b[(npm+1):(length(b))])){browser()}
+  
   npm_all<-length(ball)
-  grbeta<-rep(0,(npm_all*(npm_all+1)/2)+npm_all)
+  grbeta<-rep(0,npm_all)
  
   
   fixbeta<-fix
@@ -148,6 +157,7 @@ groptimweib<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
   bb[which(fix==1)]<-bfix
   bb[which(fixbeta==1 & fix==0)]<-svar
   bb<-na.omit(bb)
+ # b_positive<-pmax(ball,0)
     # return first and second derivatives of the loglik
   grbeta<-.Fortran("firstderivaweib",
              ## input
@@ -174,14 +184,16 @@ groptimweib<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
              as.integer(troncature),
              as.integer(weib),
              likelihood_deriv=as.double(grbeta),
-             PACKAGE="SmoothHazardoptim9")$likelihood_deriv[1:npm_all]
-  
+             PACKAGE="SmoothHazardoptim9")$likelihood_deriv
   
   
   bb<-rep(NA,npar)
   bb[fix==0]<-c(svar,ball)
   bb[fix==1]<-bfix
-
+  
+  #grpositive<-grbeta
+  #grnegative<--grebta
+  
   if(nva01>0){
     b01<-bb[(6+1):(6+nva01)][penalty.factor[1:nva01]==1]
 
@@ -239,9 +251,25 @@ groptimweib<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
   
 
   #browser()
+ #grpositive<-rep(0,length(grbeta))
+  #grpositive[b_positive!=0]<-grbeta[b_positive!=0]
+  #grnegative<-rep(0,length(grbeta))
+  #grnegative[b_positive==0]<--grbeta[b_positive==0]
+  #sol<--c(grs$v,grbeta,-grbeta) did not work in coef update not relevant
+  #sol<-c(-grs$v,-grpositive,grnegative) #did not work update not relevant
+  #sol<-c(-grs$v,grpositive,grnegative) #did not work update not relevant
+  #sol<-c(-grs$v,grpositive,-grnegative) #did not work update not relevant
+  #sol<-c(-grs$v,-grpositive,-grnegative) #did not work update not relevant
+  # sol<-c(grs$v,grpositive,grnegative) # no CV
+  # sol<--c(grs$v,grpositive,grnegative)  #no CV
+  #sol<-c(-grs$v,grbeta,-grbeta) #, all parameters at once to 0 otherwise values okk
+  #sol<--c(-grs$v,grbeta,-grbeta) #no cv 
+  #sol<-c(grs$v,grbeta,-grbeta) #no CV
+  
   sol<-c(-grs$v,grbeta,-grbeta)
-  #<-c(-grs$v,-grbeta,grbeta)
-  return(as.double(sol))
+  # goes into fortran after thus do not handle small values 
+  #sol<-ifelse(abs(sol)<=.Machine$double.eps,0,sol)
+  return(as.double(-sol))
 }
 
 

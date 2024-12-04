@@ -48,7 +48,9 @@ idm.penalty.splines(
   lambda12,
   alpha,
   penalty.factor,
-  penalty
+  penalty,
+  methodCV,
+  partialH
 )
 }
 \arguments{
@@ -139,6 +141,10 @@ idm.penalty.splines(
 \item{penalty.factor}{which variable should be penalised}
 
 \item{penalty}{which penalty to consider}
+
+\item{methodCV}{methodolgy to optimise penalised parameters}
+
+\item{partialH}{which hessian is computed for Newton-Raphson path of penalised parameters}
 }
 \description{
 Penalised Illness-death model algorithm with M-splines baseline risk

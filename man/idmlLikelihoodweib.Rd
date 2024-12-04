@@ -74,6 +74,8 @@ idmlLikelihoodweib(
 \item{troncature}{indicator if troncature or not}
 
 \item{gausspoint}{number of gausspoint quadrature}
+
+\item{weib}{the form of the weibull parameters}
 }
 \description{
 Log likelihood with weibull baseline risk

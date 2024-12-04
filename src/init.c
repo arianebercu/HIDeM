@@ -53,11 +53,11 @@ static const R_FortranMethodDef FortranEntries[] = {
     {"idmlikelihood",(DL_FUNC) &F77_NAME(idmlikelihood),    29},
     {"idmlikelihoodweib",(DL_FUNC) &F77_NAME(idmlikelihoodweib),    24},
     {"derivaweib",(DL_FUNC) &F77_NAME(derivaweib),    23},
-    {"derivaweibdiag",(DL_FUNC) &F77_NAME(derivaweib),    23},
-    {"firstderivaweib",(DL_FUNC) &F77_NAME(derivaweib),    23},
+    {"derivaweibdiag",(DL_FUNC) &F77_NAME(derivaweibdiag),    23},
+    {"firstderivaweib",(DL_FUNC) &F77_NAME(firstderivaweib),    23},
     {"derivaspline",(DL_FUNC) &F77_NAME(derivaspline),    28},
-    {"derivasplinediag",(DL_FUNC) &F77_NAME(derivaspline),    28},
-    {"firstderivaspline",(DL_FUNC) &F77_NAME(derivaspline),    28},
+    {"derivasplinediag",(DL_FUNC) &F77_NAME(derivasplinediag),    28},
+    {"firstderivaspline",(DL_FUNC) &F77_NAME(firstderivaspline),    28},
     {NULL, NULL, 0}
 };
 
