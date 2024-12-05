@@ -1557,7 +1557,8 @@ idm <- function(formula01,
               betaCoef<-as.matrix(betaCoef)
               fit$coef <- betaCoef
               fit$HR <- exp(betaCoef)
-              
+              fit$ga<-out$gapath
+              fit$da<-out$dapath
               
 ####################   calculate BIC    #######################################
               if(dim(beta)[2]>1){

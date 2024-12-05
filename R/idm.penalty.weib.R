@@ -75,6 +75,8 @@ idm.penalty.weib<-function(b,fix0,size_V,
       list(b=cbind(x$b,newx$b),
            V=cbind(x$V,newx$V),
            H=cbind(x$H,newx$H),
+           dapath=cbind(x$dapath,newx$dapath),
+           gapath=cbind(x$gapath,newx$gapath),
            fix=cbind(x$fix,newx$fix),
            lambda=cbind(x$lambda,newx$lambda),
            alpha=c(x$alpha,newx$alpha),
@@ -91,6 +93,8 @@ idm.penalty.weib<-function(b,fix0,size_V,
       list(b=cbind(x$b,newx$b),
            V=cbind(x$V,newx$V),
            H=cbind(x$H,newx$H),
+           dapath=cbind(x$dapath,newx$dapath),
+           gapath=cbind(x$gapath,newx$gapath),
            fix=cbind(x$fix,newx$fix),
            lambda=cbind(x$lambda,newx$lambda),
            alpha=c(x$alpha,newx$alpha),
@@ -171,7 +175,8 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                npm01<-ifelse(nvat01>0,sum(fix0[7:(7+nvat01-1)]==0),0)
                                npm02<-ifelse(nvat02>0,sum(fix0[(7+nvat01):(6+nvat01+nvat02)]==0),0)
                                npm12<-ifelse(nvat12>0,sum(fix0[(7+nvat01+nvat02):size_V]==0),0)
-                               
+                               dapath<-rep(0,maxiter)
+                               gapath<-rep(0,maxiter)
                                
                                while(converged==F & ite<=maxiter){
                                  
@@ -407,6 +412,9 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                    # }else{idpos<-ifelse(any(abs(eigen.values)==0),1,0)}
                                    
                                  }
+                                 
+                                 dapath[ite+1]<-da
+                                 gapath[ite+1]<-ga
                                  
                                  if(idpos!=0){
                                    
@@ -813,6 +821,8 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                            ca.validity=eval.validity,
                                            cb=eval.loglik,
                                            istop=istop,
+                                           gapath=ga,
+                                           dapath=da,
                                            combine=combine))
                              }
     }else{
@@ -844,6 +854,8 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                  npm02<-ifelse(nvat02>0,sum(fix0[(7+nvat01):(6+nvat01+nvat02)]==0),0)
                                  npm12<-ifelse(nvat12>0,sum(fix0[(7+nvat01+nvat02):size_V]==0),0)
                                  
+                                 dapath<-rep(0,maxiter)
+                                 gapath<-rep(0,maxiter)
                                  
                                  while(converged==F & ite<=maxiter){
                                    
@@ -930,7 +942,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                      tr <- sum(diag(V))/npm
                                      V0<-V
                                      
-                                     eigen.values<-eigen(V,symmetric=T,only.values=T)$values
+                                     eigen.values<-1/diag(V)
                                      
                                      idpos<-ifelse(any(eigen.values<=eps.eigen),1,0)
                                      
@@ -966,7 +978,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                        # all eigen  values of the hessienne are >0.
                                        
                                        if(sum(V==Inf)>0|sum(V==-Inf)>0){break}
-                                       eigen.values<-eigen(V,symmetric=T,only.values=T)$values
+                                       eigen.values<-1/diag(V)
                                        # check if hessienne defined positive
                                        
                                        idpos<-ifelse(any(eigen.values<=eps.eigen),1,0)
@@ -976,6 +988,9 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                        # }else{idpos<-ifelse(any(abs(eigen.values)==0),1,0)}
                                        
                                      }
+                                     
+                                     dapath[ite+1]<-da
+                                     gapath[ite+1]<-ga
                                      
                                      if(idpos!=0){
                                        
@@ -1384,6 +1399,8 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                              ca.validity=eval.validity,
                                              cb=eval.loglik,
                                              istop=istop,
+                                             gapath=ga,
+                                             dapath=da,
                                              combine=combine))
                                }
     }
@@ -2176,7 +2193,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                          tr <- sum(diag(V))/npm
                                          V0<-V
                                          
-                                         eigen.values<-eigen(V,symmetric=T,only.values=T)$values
+                                         eigen.values<-1/diag(V)
                                          
                                          idpos<-ifelse(any(eigen.values<=eps.eigen),1,0)
                                          
@@ -2212,7 +2229,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                            # all eigen  values of the hessienne are >0.
                                            
                                            if(sum(V==Inf)>0|sum(V==-Inf)>0){break}
-                                           eigen.values<-eigen(V,symmetric=T,only.values=T)$values
+                                           eigen.values<-1/diag(V)
                                            # check if hessienne defined positive
                                            idpos<-ifelse(any(eigen.values<=eps.eigen),1,0)
                                            
