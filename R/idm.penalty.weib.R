@@ -942,7 +942,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                      tr <- sum(diag(V))/npm
                                      V0<-V
                                      
-                                     eigen.values<-1/diag(V)
+                                     eigen.values<-diag(V)
                                      
                                      idpos<-ifelse(any(eigen.values<=eps.eigen),1,0)
                                      
@@ -978,7 +978,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                        # all eigen  values of the hessienne are >0.
                                        
                                        if(sum(V==Inf)>0|sum(V==-Inf)>0){break}
-                                       eigen.values<-1/diag(V)
+                                       eigen.values<-diag(V)
                                        # check if hessienne defined positive
                                        
                                        idpos<-ifelse(any(eigen.values<=eps.eigen),1,0)
@@ -2193,7 +2193,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                          tr <- sum(diag(V))/npm
                                          V0<-V
                                          
-                                         eigen.values<-1/diag(V)
+                                         eigen.values<-diag(V)
                                          
                                          idpos<-ifelse(any(eigen.values<=eps.eigen),1,0)
                                          
@@ -2229,7 +2229,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                            # all eigen  values of the hessienne are >0.
                                            
                                            if(sum(V==Inf)>0|sum(V==-Inf)>0){break}
-                                           eigen.values<-1/diag(V)
+                                           eigen.values<-diag(V)
                                            # check if hessienne defined positive
                                            idpos<-ifelse(any(eigen.values<=eps.eigen),1,0)
                                            

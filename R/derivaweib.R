@@ -23,6 +23,7 @@
 ##' @param troncature indicator of troncature, value 1 if there is troncature otherwise 0.
 #' @useDynLib SmoothHazardoptim9
 #' @author R: Ariane Bercu <ariane.bercu@@u-bordeaux.fr> 
+#' @export
 
 derivaweib<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
                      dimnva01,dimnva02,dimnva12,nva01,nva02,nva12,
