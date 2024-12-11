@@ -91,14 +91,14 @@ idm.weib<-function(b,fix0,size_V,
               bfix=bfix,
               fix0=fix0))
   }else{
-    
 
-  
-    
-  
   # maximise loglik 
+
   out<- marqLevAlg::mla(b=b,
+                        print.info=T,
                     fn=idmlLikelihoodweib,
+                    gr=grmlaweib,
+                    hess = hessianmlaweib,
                     epsa=epsa,
                     epsb=epsb,
                     epsd=epsd,
@@ -127,7 +127,8 @@ idm.weib<-function(b,fix0,size_V,
                     t3=t3,
                     troncature=troncature,
                     gausspoint=gausspoint,weib=weib)
-
+  
+  
   if(out$istop==4){
     stop("Problem in the loglikelihood computation.")
   }

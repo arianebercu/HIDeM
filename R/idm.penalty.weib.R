@@ -69,7 +69,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
   pbr_compu<-0
   
   # combine model 
-  combine_lambda<-function(x,newx){
+  combine_lambda_mla<-function(x,newx){
     
     if(newx$combine==2){
       list(b=cbind(x$b,newx$b),
@@ -95,6 +95,42 @@ idm.penalty.weib<-function(b,fix0,size_V,
            H=cbind(x$H,newx$H),
            dapath=cbind(x$dapath,newx$dapath),
            gapath=cbind(x$gapath,newx$gapath),
+           fix=cbind(x$fix,newx$fix),
+           lambda=cbind(x$lambda,newx$lambda),
+           alpha=c(x$alpha,newx$alpha),
+           fn.value=c(x$fn.value,newx$fn.value),
+           fn.value.pena=c(x$fn.value.pena,newx$fn.value.pena),
+           ni=c(x$ni,newx$ni),
+           istop=c(x$istop,newx$istop),
+           ca.beta=cbind(x$ca.beta,newx$ca.beta),
+           ca.spline=cbind(x$ca.spline,newx$ca.spline),
+           ca.validity=cbind(x$ca.validity,newx$ca.validity),
+           cb=cbind(x$cb,newx$cb))}
+    
+  }
+  
+  combine_lambda_optim<-function(x,newx){
+    
+    if(newx$combine==2){
+      list(b=cbind(x$b,newx$b),
+           V=cbind(x$V,newx$V),
+           H=cbind(x$H,newx$H),
+           fix=cbind(x$fix,newx$fix),
+           lambda=cbind(x$lambda,newx$lambda),
+           alpha=c(x$alpha,newx$alpha),
+           fn.value=c(x$fn.value,newx$fn.value),
+           fn.value.pena=c(x$fn.value.pena,newx$fn.value.pena),
+           ni=c(x$ni,newx$ni),
+           istop=c(x$istop,newx$istop),
+           ca.beta=cbind(x$ca.beta,newx$ca.beta),
+           ca.spline=cbind(x$ca.spline,newx$ca.spline),
+           ca.validity=cbind(x$ca.validity,newx$ca.validity),
+           cb=cbind(x$cb,newx$cb))
+      
+    }else{
+      list(b=cbind(x$b,newx$b),
+           V=cbind(x$V,newx$V),
+           H=cbind(x$H,newx$H),
            fix=cbind(x$fix,newx$fix),
            lambda=cbind(x$lambda,newx$lambda),
            alpha=c(x$alpha,newx$alpha),
@@ -149,7 +185,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
     id.lambda<-NULL # for cran check 
     if(partialH==F){
     output<-foreach::foreach(id.lambda=1:nlambda,
-                             .combine = combine_lambda,
+                             .combine = combine_lambda_mla,
                              .errorhandling = "remove")%dopar%{
                                
                                # computation pbr 
@@ -336,7 +372,8 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                  
                                  if(npm02>0&npm12>0){
                                    V0212<- matrix(data=output[(min+1):(min+npm12*npm02)],
-                                                  nrow=npm12,ncol=npm02)}
+                                                  nrow=npm12,ncol=npm02)
+                                   }
                                  
                                  
                                  min<-min+npm12*npm02
@@ -373,8 +410,8 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                  
                                  idpos0<-idpos
                                  
-                                 ncount<-0
-                                 
+                                 ncount<-da<-ga<-0
+ 
                                  while(idpos != 0){
                                    
                                    if(ncount==0){ 
@@ -821,13 +858,13 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                            ca.validity=eval.validity,
                                            cb=eval.loglik,
                                            istop=istop,
-                                           gapath=ga,
-                                           dapath=da,
+                                           gapath=gapath,
+                                           dapath=dapath,
                                            combine=combine))
                              }
     }else{
       output<-foreach::foreach(id.lambda=1:nlambda,
-                               .combine = combine_lambda,
+                               .combine = combine_lambda_mla,
                                .errorhandling = "remove")%dopar%{
                                  
                                  # computation pbr 
@@ -949,7 +986,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                      
                                      idpos0<-idpos
                                      
-                                     ncount<-0
+                                     ncount<-da<-ga<-0
                                      
                                      while(idpos != 0){
                                        
@@ -1399,8 +1436,8 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                              ca.validity=eval.validity,
                                              cb=eval.loglik,
                                              istop=istop,
-                                             gapath=ga,
-                                             dapath=da,
+                                             gapath=gapath,
+                                             dapath=dapath,
                                              combine=combine))
                                }
     }
@@ -1412,8 +1449,9 @@ idm.penalty.weib<-function(b,fix0,size_V,
     
     id.lambda<-NULL # for cran check 
     if(partialH==F){
+      
     output<-foreach::foreach(id.lambda=1:nlambda,
-                             .combine = combine_lambda,
+                             .combine = combine_lambda_mla,
                              .errorhandling = "remove")%do%{
                                
                                
@@ -1441,6 +1479,8 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                npm02<-ifelse(nvat02>0,sum(fix0[(7+nvat01):(6+nvat01+nvat02)]==0),0)
                                npm12<-ifelse(nvat12>0,sum(fix0[(7+nvat01+nvat02):size_V]==0),0)
                                
+                               dapath<-rep(0,maxiter)
+                               gapath<-rep(0,maxiter)
                                
                                while(converged==F & ite<=maxiter){
                                
@@ -1598,7 +1638,8 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                  
                                  if(npm02>0&npm12>0){
                                  V0212<- matrix(data=output[(min+1):(min+npm12*npm02)],
-                                                nrow=npm12,ncol=npm02)}
+                                                nrow=npm12,ncol=npm02)
+                                 }
                                  
                                  
                                  min<-min+npm12*npm02
@@ -1635,7 +1676,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                  
                                  idpos0<-idpos
                                  
-                                 ncount<-0
+                                 ncount<-da<-ga<-0
                                  
                                  while(idpos != 0){
                                    
@@ -1671,6 +1712,10 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                    
                                    
                                  }
+                                 
+                                 dapath[ite+1]<-da
+                                 gapath[ite+1]<-ga
+                                 
                                  
                                  if(idpos!=0){
                                    
@@ -2073,10 +2118,12 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                            ca.validity=eval.validity,
                                            cb=eval.loglik,
                                            istop=istop,
+                                           dapath=dapath,
+                                           gapath=gapath,
                                            combine=combine))
                              }
     }else{output<-foreach::foreach(id.lambda=1:nlambda,
-                                   .combine = combine_lambda,
+                                   .combine = combine_lambda_mla,
                                    .errorhandling = "remove")%do%{
                                      
                                      
@@ -2104,6 +2151,8 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                      npm02<-ifelse(nvat02>0,sum(fix0[(7+nvat01):(6+nvat01+nvat02)]==0),0)
                                      npm12<-ifelse(nvat12>0,sum(fix0[(7+nvat01+nvat02):size_V]==0),0)
                                      
+                                     dapath<-rep(0,maxiter)
+                                     gapath<-rep(0,maxiter)
                                      
                                      while(converged==F & ite<=maxiter){
                                        
@@ -2200,7 +2249,8 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                          
                                          idpos0<-idpos
                                          
-                                         ncount<-0
+                                         ncount<-da<-ga<-0
+                                         
                                          
                                          while(idpos != 0){
                                            
@@ -2236,6 +2286,10 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                            
                                            
                                          }
+                                         
+                                         
+                                         dapath[ite+1]<-da
+                                         gapath[ite+1]<-ga
                                          
                                          if(idpos!=0){
                                            
@@ -2628,6 +2682,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                      # if stop==1 we can give matrix of second derivatives 
                                      
                                      combine<-combine+1
+                                    
                                      return(list(b=c(s,beta),
                                                  H=V0,
                                                  lambda=as.double(lambda[id.lambda,]),
@@ -2640,6 +2695,8 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                                  ca.validity=eval.validity,
                                                  cb=eval.loglik,
                                                  istop=istop,
+                                                 dapath=dapath,
+                                                 gapath=gapath,
                                                  combine=combine))
                                    }}
   }
@@ -2660,7 +2717,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
     
     if(nproc==1){
     output<-foreach::foreach(id.lambda=1:nlambda,
-                             .combine = combine_lambda,
+                             .combine = combine_lambda_optim,
                              .errorhandling = "remove")%do%{
                             #   browser()
                            # browser()
@@ -2874,7 +2931,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
       doParallel::registerDoParallel(clustpar)
       
       output<-foreach::foreach(id.lambda=1:nlambda,
-                               .combine = combine_lambda,
+                               .combine = combine_lambda_optim,
                                .errorhandling = "remove")%dopar%{
                                  
                                  
