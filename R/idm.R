@@ -234,11 +234,14 @@ idm <- function(formula01,
     if(!inherits(formula02,"formula"))stop("The argument formula02 must be a class 'formula'.")
     
     if(!method%in%c("Weib","splines"))stop("The argument method needs to be either splines or Weib")
-    if(method=="Weib" & !weib%in%c("square","logexp","square.div","logexp.div")){
+    if(method=="Weib" & !weib%in%c("doubleexp","exp","square","logexp","square.div","logexp.div","gamma")){
       stop("The argument weib needs to be either square, logexp, square.div or logexp.div")
     }else{weib<-ifelse(weib=="square",1,
                        ifelse(weib=="logexp",2,
-                              ifelse(weib=="square.div",3,4)))}
+                              ifelse(weib=="square.div",3,
+                                     ifelse(weib=="logexp.div",4,
+                                            ifelse(weib=="exp",5,
+                                                   ifelse(weib=="gamma",6,7))))))}
     if(length(methodCV)!=1)stop("The argument methodCV must be either Nelder-Mead, BFGS, CG, L-BFGS-B, SANN, Brent or mla")
     if(!methodCV%in%c("Nelder-Mead", "BFGS", "CG", "L-BFGS-B", "SANN",
                      "Brent","mla"))stop("The argument methodCV must be either Nelder-Mead, BFGS, CG, L-BFGS-B, SANN, Brent or mla")
@@ -635,7 +638,7 @@ idm <- function(formula01,
         # if(any(B[1:size_spline]<0)){stop(paste0("B need to be positive for spline parameters"))}
         if(length(B)!=(size_V)){stop(paste0("The length of the initialization must be : ",size_V))}
         b<-B}else{
-          if(weib%in%c(1,2)){
+          if(weib%in%c(1,2,5,7)){
           b<-c(1,sqrt(sum(idm)/ts),1,sqrt(sum(idd)/ts),1,sqrt(sum(idd)/ts),rep(0,size_V-6))
           }else{
             b<-c(1,1/sqrt(sum(idm)/ts),1,1/sqrt(sum(idd)/ts),1,1/sqrt(sum(idd)/ts),rep(0,size_V-6))

@@ -93,7 +93,7 @@ idm.weib<-function(b,fix0,size_V,
   }else{
 
   # maximise loglik 
-
+    #browser()
   out<- marqLevAlg::mla(b=b,
                         print.info=T,
                     fn=idmlLikelihoodweib,
