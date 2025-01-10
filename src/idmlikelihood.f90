@@ -3789,6 +3789,7 @@ subroutine qgaussPL61weib(a,b,the01,the02,the12,res,v01,v02,v12)
 !=============================================================================================        
 !================================  qgaussweibderiv  ==========================================
 !=== for derivatives approximation out a 15 point Gauss-Kronrod quadrature rule for weib =====
+!=== first and second derivatives of beta parameters =========================================
 !=============================================================================================  
 
 
@@ -4108,10 +4109,12 @@ res0202num,res0212num,res1212num,v01,v02,v12)
 !=============================================================================================        
 !================================  qgaussweibderiv  ==========================================
 !=== for derivatives approximation out a 15 point Gauss-Kronrod quadrature rule for weib =====
+!=== all parameters first and second derivatives =============================================
 !=============================================================================================  
 
 			
 subroutine qgaussweibbetaderiv(a,b,the01,the02,the12,resdenum,&
+
 resthe01,resthe02,resthe12,resthenum,resthenumsquare,&
 resthe0101,resthe0102,resthe0112,&
 resthe0202,resthe0212,resthe1212,&
@@ -4946,11 +4949,326 @@ res0202num,res0212num,res1212num,v01,v02,v12)
          
               
           end subroutine qgaussweibbetaderiv
+
 !=============================================================================================        
 !================================  qgaussweibderiv  ==========================================
 !=== for derivatives approximation out a 15 point Gauss-Kronrod quadrature rule for weib =====
-!========================= looking only at diag hessian ======================================
+!=== all parameters  first derivatives ======================================================
 !=============================================================================================  
+
+			
+subroutine qgaussweibbetafirstderiv(a,b,the01,the02,the12,resdenum,&
+
+resthe01,resthe02,resthe12,resthenum,&
+res01num,res02num,res12num,&
+v01,v02,v12)
+
+        implicit none
+         double precision a,b,the01(2),the02(2),the12(2)
+         double precision dx,xm,xr,reskdenum,&
+         resdenum,resk01num,res01num,resk02num,res02num, & 
+	resk12num,res12num,&
+	resthe01,resthe02,resthe12,resthenum, &
+	reskthe01,reskthe02,reskthe12,&
+	reskthenum,&
+	v01,v02,v12
+
+         double precision xx,f1denum,f2denum, f101num, f102num, f112num, & 
+	f201num, f202num, f212num, &
+	su01,ri01,ri12,su12,su02,ri02,fv1denum,fv2denum, &
+	fv101num,fv102num,fv112num,fv201num,fv202num,fv212num, & 
+	d1mach(5),epmach,uflow,fcdenum,fc01num,fc02num,fc12num
+	
+	double precision f1the01, f2the01,f1the02, f2the02,f1the12, f2the12, &
+	fv1the01, fv2the01,fv1the02, fv2the02,fv1the12, fv2the12, &
+	f1thenum,f2thenum,fv1thenum,fv2thenum,&
+	fcthe01, fcthe02, fcthe12,fcthenum
+
+     double precision gl01,gl12,gl02
+     integer::j,jtw,jtwm1
+     double precision,dimension(8)::xgk,wgk
+	 double precision,dimension(4)::wg
+	save wgk,xgk
+
+	 dimension fv1denum(7),fv2denum(7),fv101num(7),fv201num(7), &
+	fv102num(7),fv202num(7), fv112num(7),fv212num(7), &
+	fv1the01(7),fv2the01(7),fv1the02(7),fv2the02(7),&
+	fv1the12(7),fv2the12(7),fv1thenum(7),fv2thenum(7)
+
+   	D1MACH(1)=2.23D-308
+    	D1MACH(2)=1.79D+308
+    	D1MACH(3)=1.11D-16
+    	D1MACH(4)=2.22D-16
+    	D1MACH(5)=0.301029995663981195D0
+
+    	epmach = d1mach(4)
+    	uflow = d1mach(1)
+
+		wg(1)=0.129484966168869693270611432679082d0
+		wg(2)=0.279705391489276667901467771423780d0
+    	wg(3)=0.381830050505118944950369775488975d0
+    	wg(4)=0.417959183673469387755102040816327d0
+
+    	xgk(1)=0.991455371120812639206854697526329d0
+    	xgk(2)=0.949107912342758524526189684047851d0
+    	xgk(3)=0.864864423359769072789712788640926d0
+    	xgk(4)=0.741531185599394439863864773280788d0
+    	xgk(5)=0.586087235467691130294144838258730d0
+    	xgk(6)=0.405845151377397166906606412076961d0
+    	xgk(7)=0.207784955007898467600689403773245d0
+    	xgk(8)=0.000000000000000000000000000000000d0
+
+    	wgk(1)=0.022935322010529224963732008058970d0
+    	wgk(2)=0.063092092629978553290700663189204d0
+    	wgk(3)=0.104790010322250183839876322541518d0
+    	wgk(4)=0.140653259715525918745189590510238d0
+    	wgk(5)=0.169004726639267902826583426598550d0
+    	wgk(6)=0.190350578064785409913256402421014d0
+    	wgk(7)=0.204432940075298892414161999234649d0
+    	wgk(8)=0.209482141084727828012999174891714d0
+
+	xm = 0.5d+00*(b+a)
+        xr = 0.5d+00*(b-a)
+
+        resdenum = 0.d0
+	    res01num = 0.d0
+	    res02num = 0.d0
+	    res12num = 0.d0
+	    resthe01 = 0.d0
+	    resthe02 = 0.d0
+	    resthe12 = 0.d0
+	    resthenum = 0.d0
+	   
+
+    	call fonct(xm,the01,ri01,gl01,su01)
+    	call fonct(xm,the02,ri02,gl02,su02)
+   		call fonct(xm,the12,ri12,gl12,su12)
+		
+		!write(6,*) "su01",su01
+		!write(6,*) "su02",su02
+		!write(6,*) "su12",su12
+		!write(6,*) "ri01",ri01
+    	fcdenum =(su01**v01)*(su02**v02)*ri01*v01/(su12**v12)  ! valeur fct f au milieu de intervalle (a,b), cas pnt 0
+    	fc01num=(su01**v01)*(su02**v02)*ri01*v01*(1-(gl01*v01))/(su12**v12)
+		fc02num=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02/(su12**v12) 
+		fc12num=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12/(su12**v12) 
+
+		!write(6,*) "xm",xm
+		!write(6,*) "LOG(xm)",LOG(xm)
+		fcthe01=(su01**v01)*(su02**v02)*ri01*v01*gl01*v01*LOG(xm)/(su12**v12)
+		fcthe02=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02*LOG(xm)/(su12**v12)
+		fcthe12=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12*LOG(xm)/(su12**v12)
+
+		
+		fcthenum=&
+		(su01**v01)*(su02**v02)*ri01*v01*LOG(xm)/(su12**v12)
+		
+
+    		reskdenum = fcdenum*wgk(8)       ! init res Kronrod   ! fc * 8e poids Kronrod
+        	resk01num = fc01num*wgk(8)       ! init res Kronrod   ! fc * 8e poids Kronrod
+        	resk02num = fc02num*wgk(8)       ! init res Kronrod   ! fc * 8e poids Kronrod
+        	resk12num = fc12num*wgk(8)       ! init res Kronrod   ! fc * 8e poids Kronrod
+		
+		reskthenum = fcthenum*wgk(8)       ! init res Kronrod   ! fc * 8e poids Kronrod
+		reskthe01 = fcthe01*wgk(8)       ! init res Kronrod   ! fc * 8e poids Kronrod
+		reskthe02 = fcthe02*wgk(8)       ! init res Kronrod   ! fc * 8e poids Kronrod
+		reskthe12 = fcthe12*wgk(8)       ! init res Kronrod   ! fc * 8e poids Kronrod
+		
+   
+
+
+		do j=1,3
+	       		jtw = j*2
+               		dx=xr*xgk(jtw)
+               		xx = xm+dx
+               		call fonct(xx,the01,ri01,gl01,su01)
+               		call fonct(xx,the02,ri02,gl02,su02)
+	       		call fonct(xx,the12,ri12,gl12,su12)
+            
+			f1denum =(su01**v01)*(su02**v02)*ri01*v01/(su12**v12)
+			f101num=(su01**v01)*(su02**v02)*ri01*v01*(1-(gl01*v01))/(su12**v12)
+			f102num=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02/(su12**v12) 
+			f112num=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12/(su12**v12) 
+
+			
+			f1the01=(su01**v01)*(su02**v02)*ri01*v01*gl01*v01*LOG(xx)/(su12**v12)
+			f1the02=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02*LOG(xx)/(su12**v12)
+			f1the12=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12*LOG(xx)/(su12**v12)
+
+			
+			f1thenum=&
+		(su01**v01)*(su02**v02)*ri01*v01*LOG(xx)/(su12**v12)
+		
+               		xx = xm-dx
+               		call fonct(xx,the01,ri01,gl01,su01)
+               		call fonct(xx,the02,ri02,gl02,su02)
+	       		call fonct(xx,the12,ri12,gl12,su12)
+                        f2denum =(su01**v01)*(su02**v02)*ri01*v01/(su12**v12)
+			f201num=(su01**v01)*(su02**v02)*ri01*v01*(1-(gl01*v01))/(su12**v12)
+			f202num=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02/(su12**v12) 
+			f212num=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12/(su12**v12) 
+
+			
+			f2the01=(su01**v01)*(su02**v02)*ri01*v01*gl01*v01*LOG(xx)/(su12**v12)
+			f2the02=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02*LOG(xx)/(su12**v12)
+			f2the12=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12*LOG(xx)/(su12**v12)
+
+			
+			f2thenum=&
+		(su01**v01)*(su02**v02)*ri01*v01*LOG(xx)/(su12**v12)
+		
+			
+               		fv1denum(jtw) = f1denum   ! svgrd valeurs fct f a gche du centre
+               		fv2denum(jtw) = f2denum   ! svgrd valeurs fct f a drte du centre
+			reskdenum = reskdenum + wgk(jtw)*(f1denum+f2denum)
+			
+               		
+
+			fv101num(jtw) = f101num   ! svgrd valeurs fct f a gche du centre
+               		fv201num(jtw) = f201num   ! svgrd valeurs fct f a drte du centre
+			resk01num = resk01num + wgk(jtw)*(f101num+f201num)
+
+
+			fv102num(jtw) = f102num   ! svgrd valeurs fct f a gche du centre
+               		fv202num(jtw) = f202num   ! svgrd valeurs fct f a drte du centre
+			resk02num = resk02num + wgk(jtw)*(f102num+f202num)
+               		
+
+			fv112num(jtw) = f112num   ! svgrd valeurs fct f a gche du centre
+               		fv212num(jtw) = f212num   ! svgrd valeurs fct f a drte du centre
+			resk12num = resk12num + wgk(jtw)*(f112num+f212num)
+
+			
+			fv1thenum(jtw) = f1thenum   ! svgrd valeurs fct f a gche du centre
+               		fv2thenum(jtw) = f2thenum   ! svgrd valeurs fct f a drte du centre
+			reskthenum = reskthenum + wgk(jtw)*(f1thenum+f2thenum)
+               		
+			
+				fv1the01(jtw) = f1the01   ! svgrd valeurs fct f a gche du centre
+               		fv2the01(jtw) = f2the01  ! svgrd valeurs fct f a drte du centre
+			reskthe01 = reskthe01 + wgk(jtw)*(f1the01+f2the01)
+			
+			fv1the02(jtw) = f1the02   ! svgrd valeurs fct f a gche du centre
+               		fv2the02(jtw) = f2the02  ! svgrd valeurs fct f a drte du centre
+			reskthe02 = reskthe02 + wgk(jtw)*(f1the02+f2the02)
+			
+			fv1the12(jtw) = f1the12   ! svgrd valeurs fct f a gche du centre
+               		fv2the12(jtw) = f2the12  ! svgrd valeurs fct f a drte du centre
+			reskthe12 = reskthe12 + wgk(jtw)*(f1the12+f2the12)
+			
+			
+
+         	end do
+	 	do j=1,4
+			jtwm1 = j*2-1
+               		dx=xr*xgk(jtwm1)
+               		xx = xm+dx
+               		call fonct(xx,the01,ri01,gl01,su01)
+               		call fonct(xx,the02,ri02,gl02,su02)
+	       		call fonct(xx,the12,ri12,gl12,su12)
+      			f1denum =(su01**v01)*(su02**v02)*ri01*v01/(su12**v12)
+			f101num=(su01**v01)*(su02**v02)*ri01*v01*(1-(gl01*v01))/(su12**v12)
+			f102num=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02/(su12**v12) 
+			f112num=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12/(su12**v12) 
+
+
+			
+			f1the01=(su01**v01)*(su02**v02)*ri01*v01*gl01*v01*LOG(xx)/(su12**v12)
+			f1the02=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02*LOG(xx)/(su12**v12)
+			f1the12=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12*LOG(xx)/(su12**v12)
+
+			
+			f1thenum=&
+		(su01**v01)*(su02**v02)*ri01*v01*LOG(xx)/(su12**v12)
+		
+               		xx = xm-dx
+               		call fonct(xx,the01,ri01,gl01,su01)
+               		call fonct(xx,the02,ri02,gl02,su02)
+	       		call fonct(xx,the12,ri12,gl12,su12)
+      			f2denum =(su01**v01)*(su02**v02)*ri01*v01/(su12**v12)
+			f201num=(su01**v01)*(su02**v02)*ri01*v01*(1-(gl01*v01))/(su12**v12)
+			f202num=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02/(su12**v12) 
+			f212num=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12/(su12**v12) 
+
+			
+			!write(6,*) "xx",xx
+			!write(6,*) "LOG(xx)",LOG(xx)
+			f2the01=(su01**v01)*(su02**v02)*ri01*v01*gl01*v01*LOG(xx)/(su12**v12)
+			f2the02=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02*LOG(xx)/(su12**v12)
+			f2the12=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12*LOG(xx)/(su12**v12)
+
+			
+			f2thenum=&
+		(su01**v01)*(su02**v02)*ri01*v01*LOG(xx)/(su12**v12)
+		
+               		fv1denum(jtwm1) = f1denum   ! svgrd valeurs fct f a gche du centre
+               		fv2denum(jtwm1) = f2denum   ! svgrd valeurs fct f a drte du centre
+	       		reskdenum = reskdenum + wgk(jtwm1)*(f1denum+f2denum)
+               		
+
+			fv101num(jtwm1) = f101num   ! svgrd valeurs fct f a gche du centre
+               		fv201num(jtwm1) = f201num   ! svgrd valeurs fct f a drte du centre
+	       		resk01num = resk01num + wgk(jtwm1)*(f101num+f201num)
+               		
+			fv102num(jtwm1) = f102num   ! svgrd valeurs fct f a gche du centre
+               		fv202num(jtwm1) = f202num   ! svgrd valeurs fct f a drte du centre
+	       		resk02num = resk02num + wgk(jtwm1)*(f102num+f202num)
+               		
+
+			fv112num(jtwm1) = f112num   ! svgrd valeurs fct f a gche du centre
+               		fv212num(jtwm1) = f212num   ! svgrd valeurs fct f a drte du centre
+	       		resk12num = resk12num + wgk(jtwm1)*(f112num+f212num)
+               		
+
+			
+
+			fv1thenum(jtwm1) = f1thenum   ! svgrd valeurs fct f a gche du centre
+               		fv2thenum(jtwm1) = f2thenum   ! svgrd valeurs fct f a drte du centre
+			reskthenum = reskthenum + wgk(jtwm1)*(f1thenum+f2thenum)
+               		
+			
+				fv1the01(jtwm1) = f1the01   ! svgrd valeurs fct f a gche du centre
+               		fv2the01(jtwm1) = f2the01  ! svgrd valeurs fct f a drte du centre
+			reskthe01 = reskthe01 + wgk(jtwm1)*(f1the01+f2the01)
+			
+			fv1the02(jtwm1) = f1the02   ! svgrd valeurs fct f a gche du centre
+               		fv2the02(jtwm1) = f2the02  ! svgrd valeurs fct f a drte du centre
+			reskthe02 = reskthe02 + wgk(jtwm1)*(f1the02+f2the02)
+			
+			fv1the12(jtwm1) = f1the12   ! svgrd valeurs fct f a gche du centre
+               		fv2the12(jtwm1) = f2the12  ! svgrd valeurs fct f a drte du centre
+			reskthe12 = reskthe12 + wgk(jtwm1)*(f1the12+f2the12)
+			
+			
+			 !write(6,*) "reskdenum",reskdenum
+
+         	end do
+	
+    !write(6,*) "end  do qgauss"
+	!write(6,*) "reskdenum",reskdenum
+
+    		resdenum = reskdenum*xr
+    		res01num = resk01num*xr
+    		res02num = resk02num*xr
+    		res12num = resk12num*xr
+		
+		resthenum = reskthenum*xr
+		
+		resthe01 = reskthe01*xr
+		resthe02 = reskthe02*xr
+		resthe12 = reskthe12*xr
+		
+		!write(6,*) "end qgauss calculation"
+         
+              
+          end subroutine qgaussweibbetafirstderiv
+
+!=============================================================================================        
+!================================  qgaussweibderiv  ==========================================
+!=== for derivatives approximation out a 15 point Gauss-Kronrod quadrature rule for weib =====
+!========================= looking only at first derivative on beta parameter=================
+!=============================================================================================  
+
 
 
 subroutine qgaussweibfirstderiv(a,b,the01,the02,the12,resdenum,&
@@ -5133,7 +5451,8 @@ res01num,res02num,res12num,v01,v02,v12)
 !=============================================================================================        
 !================================  qgaussweibderiv  ==========================================
 !=== for derivatives approximation out a 15 point Gauss-Kronrod quadrature rule for weib =====
-!========================= looking only at diag hessian ======================================
+!========================= looking only at diag hessian of beta paramters  ===================
+!========================= and first derivatives of beta parameters ==========================
 !=============================================================================================  
 
 
@@ -5390,9 +5709,12 @@ res0202num,res1212num,v01,v02,v12)
               
           end subroutine qgaussweibderivdiag
 
+!=============================================================================================  
 !================================  QGAUS : 1  15  ==========================
 !================================ complete hessian =========================
 !================================ M-spline baseline risk ===================
+!================== first and second derivatives of beta parameters ========
+!=============================================================================================  
 
 
 subroutine qgausssplinederiv(a,b,the01,the02,the12,resdenum,&
@@ -5711,9 +6033,12 @@ subroutine qgausssplinederiv(a,b,the01,the02,the12,resdenum,&
 	
           end subroutine qgausssplinederiv
 
+!=============================================================================================  
 !================================  QGAUS : 1  15  ==========================
 !================================ only first derivatives  ===================
 !================================ M-spline baseline risk ===================
+!====================== first derivatives of beta parameters ===============
+!=============================================================================================  
 
 subroutine qgausssplinefirstderiv(a,b,the01,the02,the12,resdenum,&
 		res01num,res02num,res12num,v01,v02,v12)
@@ -5897,9 +6222,11 @@ subroutine qgausssplinefirstderiv(a,b,the01,the02,the12,resdenum,&
 	
           end subroutine qgausssplinefirstderiv
 
+!=============================================================================================  
 !================================  QGAUS : 1  15  ==========================
-!================================ only diagonal terms of hessian ===========
+!================================ only diagonal terms of hessian of beta parameters ===========
 !================================ M-spline baseline risk ===================
+!=============================================================================================  
 
 
 subroutine qgausssplinederivdiag(a,b,the01,the02,the12,resdenum,&
@@ -6162,6 +6489,7 @@ subroutine qgausssplinederivdiag(a,b,the01,the02,the12,resdenum,&
      
 	
           end subroutine qgausssplinederivdiag
+
 !=============================================================================================  
 !======================= Calculate derivatives of loglik with weibull baseline risk ==========
 !======================= only beta parameters ========================================================
@@ -6394,9 +6722,6 @@ subroutine derivaweib(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
             the12(i)=(bh(j))*(bh(j))
          end do
 
-
-
-	endif
 	
 !---------- calcul des derivees premiere ------------------   
 
@@ -12936,12 +13261,12 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 
     end subroutine derivaweiballpara
 
-	!=============================================================================================  
+!=============================================================================================  
 !======================= Calculate first derivatives of loglik with weibull baseline risk ==========
 !=============================================================================================  
 
 
-subroutine firstderivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
+subroutine derivaweiballparafirstderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
         dimnva01,dimnva12,dimnva02,nva01,nva12,nva02,t00,&
         t10,t20,t30,troncature0,likelihood_deriv)
 	
@@ -12949,24 +13274,17 @@ subroutine firstderivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve0
         implicit none
          
         double precision::res2denum,res201num,res202num,res212num, &
-	res20101num,res20102num,res20112num,res20202num,res20212num,&
-	res21212num,res20101numbis,&
-	res2thenum,res2thenumsquare,res2the01,res2the02,res2the12,&
-	res2the0101,res2the0202,res2the1212,res2the0102,res2the0112,&
-	res2the0212,res2the0101square,res2the0202square,&
-	res2the1212square,res2the0102square,res2the0112square,&
-	res2the0212square,res2the0101dsquare,res2the0202dsquare,&
-	res2the1212dsquare,vet01,vet12,vet02,resint,v,u1,u2,u3
+	res2thenum,res2the01,res2the02,res2the12,vet01,vet12, &
+	vet02,resint,v,u1,u2,u3
 	
         integer::np0,i,j,l,w,k,lfix, kfix,npar0,nva01,nva12,nva02,no0, &
 	nz010,nz020,nz120,troncature0,dimnva01,dimnva02,dimnva12, & 
 	nva01nofix,nva12nofix,nva02nofix,nvamax, sizespline,nva0102
-	integer::nvamax01,nvamax0102,nvamax0112,nvamax02,nvamax0212,nvamax12, &
-	nvaweib01,nvaweib02,nvaweib12,nvaweib,nvamax12weib12,iter,nweib
+	integer::nvaweib01,nvaweib02,nvaweib12,nvaweib,nweib
 
-	double precision,dimension(np0+np0*(np0+1)/2),intent(inout)::likelihood_deriv
+	double precision,dimension(np0),intent(inout)::likelihood_deriv
 	double precision,dimension(np0)::b0
-	double precision,dimension(np0+np0*(np0+1)/2)::res,res1
+	double precision,dimension(np0)::res,res1
         double precision,dimension(npar0)::bh
 	double precision,dimension(npar0-np0)::bfix0
 	integer,dimension(npar0)::fix0
@@ -12977,11 +13295,7 @@ subroutine firstderivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve0
 	
 	
         double precision::su01,ri01,su12,ri12,su02,ri02,gl01,gl02,gl12,&
-		troncweib01011,troncweib01011square, &
-		troncweib010112,troncweib01012,&
-		troncweib01012square,troncweib02021,troncweib02021square,&
-		troncweib020212,troncweib02022,&
-		troncweib02022square
+		troncweib01012,troncweib01011,troncweib02021,troncweib02022
 	double precision,dimension(no0)::t00,t10,t20,t30
 	integer,dimension(no0)::c0
 
@@ -13022,71 +13336,37 @@ subroutine firstderivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve0
 
 	nvaweib=nvaweib01+nvaweib02+nvaweib12
 	nva0102=nva01nofix+nva02nofix+nvaweib
-	nvamax=nva01nofix+nva02nofix+nva12nofix+nvaweib
-	
-	nvamax12weib12=nvamax+&
-	(nvaweib+1)*nvaweib/2+&
-	(nvamax-nvaweib)*nvaweib
-	
-	nvamax01=nvamax12weib12+(nva01nofix+1)*nva01nofix/2
-	nvamax0102=nvamax01+nva01nofix*nva02nofix
-	nvamax0112=nvamax0102+nva01nofix*nva12nofix
-	
-	nvamax02=nvamax0112+(nva02nofix+1)*nva02nofix/2
-	nvamax0212=nvamax02+nva02nofix*nva12nofix
-	nvamax12=nvamax0212+(nva12nofix+1)*nva12nofix/2
-
+	nvamax=nva0102+nva12nofix
 
 	if(nva01.gt.0) then 
 		allocate(ve01(no0,nva01))
 		allocate(ve01nofix(no0,nva01nofix))
-		allocate(ve01square(no0,nva01nofix*(nva01nofix+1)/2))
 		allocate(tronc01(nva01nofix))
-		allocate(tronc01square(nva01nofix*(nva01nofix+1)/2))
-		allocate(troncweib01011beta01(nva01nofix))
-		allocate(troncweib01012beta01(nva01nofix))
 	else 
 		allocate(ve01(no0,1))
 		allocate(ve01nofix(no0,1))
 		ve01nofix=0
-		allocate(ve01square(no0,1))
-		ve01square=0
 		allocate(tronc01(1))
-		allocate(tronc01square(1))
-		allocate(troncweib01011beta01(1))
-		allocate(troncweib01012beta01(1))
 	end if 
 	
 	if(nva02.gt.0) then 
 		allocate(ve02(no0,nva02))
 		allocate(ve02nofix(no0,nva02nofix))
-		allocate(ve02square(no0,nva02nofix*(nva02nofix+1)/2))
 		allocate(tronc02(nva02nofix))
-		allocate(tronc02square(nva02nofix*(nva02nofix+1)/2))
-		allocate(troncweib02021beta02(nva02nofix))
-		allocate(troncweib02022beta02(nva02nofix))
 	else 
 		allocate(ve02(no0,1))
 		allocate(ve02nofix(no0,1))
 		ve02nofix=0
-		allocate(ve02square(no0,1))
-		ve02square=0
 		allocate(tronc02(1))
-		allocate(tronc02square(1))
-		allocate(troncweib02021beta02(1))
-		allocate(troncweib02022beta02(1))
 	end if 
 
 	if(nva12.gt.0) then 
 		allocate(ve12(no0,nva12))
 		allocate(ve12nofix(no0,nva12nofix))
-		allocate(ve12square(no0,nva12nofix*(nva12nofix+1)/2))
 	else 
 		allocate(ve12(no0,1))
 		allocate(ve12nofix(no0,1))
 		ve12nofix=0
-		allocate(ve12square(no0,1))
-		ve12square=0
 	end if 
 
 
@@ -13118,16 +13398,6 @@ subroutine firstderivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve0
 	   end if 
 	end do
 	
-	do i=1,no0
-		lfix=1
-		do l=1,nva01nofix
-	   	ve01square(i,lfix:(lfix+nva01nofix-l))=&
-		ve01nofix(i,l:nva01nofix)
-		ve01square(i,lfix:(lfix+nva01nofix-l))=&
-		ve01square(i,lfix:(lfix+nva01nofix-l))*ve01nofix(i,l)
-		lfix=lfix+nva01nofix-l+1
-		end do
-	end do
 	 
         end if 
 	lfix=0
@@ -13140,15 +13410,6 @@ subroutine firstderivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve0
 	   end if 
 	end do
 
-	do i=1,no0
-		lfix=1
-		do l=1,nva02nofix
-	   	ve02square(i,lfix:(lfix+nva02nofix-l))=&
-		ve02nofix(i,l)*ve02nofix(i,l:nva02nofix)
-		lfix=lfix+nva02nofix-l+1
-		end do
-	end do
-
 	end if 
 	
 	lfix=0
@@ -13159,15 +13420,6 @@ subroutine firstderivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve0
 		lfix=lfix+1
 		ve12nofix(:,lfix)=ve12(:,k)
 	   end if 
-	end do
-
-	do i=1,no0
-		lfix=1
-		do l=1,nva12nofix
-	   		ve12square(i,lfix:(lfix+nva12nofix-l))=&
-			ve12nofix(i,l)*ve12nofix(i,l:nva12nofix)
-			lfix=lfix+nva12nofix-l+1
-		end do
 	end do
 
 	end if
@@ -13250,65 +13502,25 @@ subroutine firstderivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve0
                         if(t0(i).eq.0.d0)then
                             tronc01 = 0
 							tronc02 =  0
-                        	tronc01square= 0
-                        	tronc02square=0
-							troncweib01011=0
-							troncweib01011square=0
-							troncweib01011beta01=0
-							troncweib01012beta01=0
-							troncweib010112=0
-							troncweib01012=0
-							troncweib01012square=0
-							troncweib02021=0
-							troncweib02021square=0
-							troncweib020212=0
-							troncweib02021beta02=0
-							troncweib02022=0
-							troncweib02022square=0
-							troncweib02022beta02=0
+							troncweib01012 = 0
+							troncweib01011 = 0
+							troncweib02021 = 0
+							troncweib02022 = 0
+                        	
                         else 
 				call fonct(t0(i),the01,ri01,gl01,su01)
 				call fonct(t0(i),the02,ri02,gl02,su02)
 				
                             tronc01=ve01nofix(i,:)*gl01*vet01
                         	tronc02=ve02nofix(i,:)*gl02*vet02
-                        	tronc01square=ve01square(i,:)*gl01*vet01
-                        	tronc02square=ve02square(i,:)*gl02*vet02
-							
 							troncweib01011=gl01*vet01*LOG(the01(2)*t0(i))
-							troncweib01011square=&
-							((LOG(the01(2)*t0(i)))**2)*gl01*vet01
-							
-							troncweib01011beta01=LOG(the01(2)*t0(i))*tronc01
-							
-							troncweib01012beta01=tronc01*the01(1)/the01(2)
-							
-							troncweib010112=&
-							(1+LOG(the01(2)*t0(i))*the01(1))*gl01*vet01/the01(2)
-							
 							troncweib01012=the01(1)*gl01*vet01/the01(2)
-							
-							troncweib01012square=&
-							the01(1)*(the01(1)-1)*gl01*vet01/(the01(2)**2)
-							
 							troncweib02021=LOG(the02(2)*t0(i))*gl02*vet02
-							troncweib02021square=&
-							((LOG(the02(2)*t0(i)))**2)*gl02*vet02
-							
-							troncweib020212=&
-							(1+LOG(the02(2)*t0(i))*the02(1))*gl02*vet02/the02(2)
-							
-							troncweib02021beta02=&
-							tronc02*LOG(the02(2)*t0(i))
-							
 							troncweib02022=&
 							the02(1)*gl02*vet02/the02(2)
 							
-							troncweib02022square=&
-							the02(1)*(the02(1)-1)*gl02*vet02/(the02(2)**2)
 							
-							troncweib02022beta02=&
-							tronc02*the02(1)/the02(2)
+                        	
 							
 							
 							
@@ -13316,280 +13528,63 @@ subroutine firstderivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve0
                 else
                     tronc01 = 0
 							tronc02 =  0
-                        	tronc01square= 0
-                        	tronc02square=0
-							troncweib01011=0
-							troncweib01011square=0
-							troncweib01011beta01=0
-							troncweib01012beta01=0
-							troncweib010112=0
-							troncweib01012=0
-							troncweib01012square=0
-							troncweib02021=0
-							troncweib02021square=0
-							troncweib020212=0
-							troncweib02021beta02=0
-							troncweib02022=0
-							troncweib02022square=0
-							troncweib02022beta02=0
+							troncweib01012 = 0
+							troncweib01011 = 0
+							troncweib02021 = 0
+							troncweib02022 = 0
                 end if
 		
                 if(c(i).eq.1)then ! cad 0-->1 et 0-->2
 				!write(6, *) "start c=1" 
 			call fonct(t1(i),the01,ri01,gl01,su01)
 			call fonct(t1(i),the02,ri02,gl02,su02)
-			iter = 0
+
 			nweib= 0
 			if(fix(1).eq.0)then
-				iter = iter + 1
 				nweib = nweib + 1
 				res1(nweib)=-LOG(the01(2)*t1(i))*gl01*vet01 +&
 				troncweib01011
-				res1((nvamax+iter))=&
-				-((LOG(the01(2)*t1(i)))**2)*gl01*vet01 +&
-				troncweib01011square
-				if(fix(2).eq.0)then
-					iter = iter +1
-					res1((nvamax+iter))=&
-					-(1+the01(1)*LOG(the01(2)*t1(i)))* &
-					gl01*vet01/the01(2) +&
-					troncweib010112
-				endif
-				if(fix(3).eq.0)then
-					iter = iter +1
-					res1((nvamax+iter))=0
-				endif
-				if(fix(4).eq.0)then
-					iter = iter +1
-					res1((nvamax+iter))=0
-				endif
-				if(fix(5).eq.0)then
-					iter = iter +1
-					res1((nvamax+iter))=0
-				endif
-				if(fix(6).eq.0)then
-					iter = iter +1
-					res1((nvamax+iter))=0
-				endif
-				if(nva01nofix.gt.0) then 
-					
-					res1((nvamax+iter+1):(nvamax+iter+nva01nofix))=&
-					-ve01nofix(i,:)*gl01*vet01*LOG(the01(2)*t1(i))+&
-					troncweib01011beta01
-					iter = iter +nva01nofix
-				endif
-				if(nva02nofix.gt.0) then 
-					
-					res1((nvamax+iter+1):(nvamax+iter+nva02nofix))=0.d0
-					iter = iter +nva02nofix
-				endif
-				if(nva12nofix.gt.0) then 
-					
-					res1((nvamax+iter+1):(nvamax+iter+nva12nofix))=0.d0
-					iter = iter +nva12nofix
-				endif
 			endif 
 			
 			if(fix(2).eq.0)then
-				iter = iter + 1
 				nweib = nweib + 1
 				res1(nweib)=-the01(1)*gl01*vet01/the01(2) +&
 				troncweib01012
-				
-				res1(nvamax+iter)=&
-				-the01(1)*(the01(1)-1)*gl01*vet01/(the01(2)**2)+&
-				troncweib01012square
-				
-				if(fix(3).eq.0)then
-					iter = iter +1
-					res1((nvamax+iter))=0
-				endif
-				if(fix(4).eq.0)then
-					iter = iter +1
-					res1((nvamax+iter))=0
-				endif
-				if(fix(5).eq.0)then
-					iter = iter +1
-					res1((nvamax+iter))=0
-				endif
-				if(fix(6).eq.0)then
-					iter = iter +1
-					res1((nvamax+iter))=0
-				endif
-				if(nva01nofix.gt.0) then 
-					
-					res1((nvamax+iter+1):(nvamax+iter+nva01nofix))=&
-					-ve01nofix(i,:)*gl01*vet01*the01(1)/the01(2)+&
-					troncweib01012beta01
-					iter = iter +nva01nofix
-				endif
-				if(nva02nofix.gt.0) then 
-				
-					res1((nvamax+iter+1):(nvamax+iter+nva02nofix))=0.d0
-					iter = iter +nva02nofix
-				endif
-				if(nva12nofix.gt.0) then 
-					
-					res1((nvamax+iter+1):(nvamax+iter+nva12nofix))=0.d0
-					iter = iter +nva12nofix
-				endif
 			endif
 			
 			if(fix(3).eq.0)then
-				iter = iter + 1
 				nweib = nweib +1
 				res1(nweib)=-LOG(the02(2)*t1(i))*gl02*vet02 +&
 				troncweib02021
-				res1((nvamax+iter))=&
-				-((LOG(the02(2)*t1(i)))**2)*gl02*vet02+&
-				troncweib02021square
-				
-				if(fix(4).eq.0)then
-					iter = iter +1
-					res1((nvamax+iter))=&
-					-(1+the02(1)*LOG(the02(2)*t1(i)))* &
-					gl02*vet02/the02(2)+&
-					troncweib020212
-				endif
-				if(fix(5).eq.0)then
-					iter = iter +1
-					res1((nvamax+iter))=0
-				endif
-				if(fix(6).eq.0)then
-					iter = iter +1
-					res1((nvamax+iter))=0
-				endif
-				if(nva01nofix.gt.0) then 
-					
-					res1((nvamax+iter+1):(nvamax+iter+nva01nofix))=0.d0
-					iter = iter +nva01nofix
-				endif
-				if(nva02nofix.gt.0) then 
-					
-					res1((nvamax+iter+1):(nvamax+iter+nva02nofix))=&
-					troncweib02021beta02-&
-					ve02nofix(i,:)*gl02*vet02*LOG(the02(2)*t1(i))
-					iter = iter +nva02nofix
-				endif
-				if(nva12nofix.gt.0) then 
-					
-					res1((nvamax+iter+1):(nvamax+iter+nva12nofix))=0.d0
-					iter = iter +nva12nofix
-				endif
 			endif 
 			
 			if(fix(4).eq.0)then
-				iter = iter + 1
 				nweib= nweib +1
 				res1(nweib)=-the02(1)*gl02*vet02/the02(2)+&
 				troncweib02022
-				res1(nvamax+iter)=&
-				-the02(1)*(the02(1)-1)*gl02*vet02/(the02(2)**2)+&
-				troncweib02022square
-				if(fix(5).eq.0)then
-					iter = iter +1
-					res1((nvamax+iter))=0
-				endif
-				if(fix(6).eq.0)then
-					iter = iter +1
-					res1((nvamax+iter))=0
-				endif
-				if(nva01nofix.gt.0) then 
-					
-					res1((nvamax+iter+1):(nvamax+iter+nva01nofix))=0.d0
-					iter = iter +nva01nofix
-				endif
-				if(nva02nofix.gt.0) then 
-					
-					res1((nvamax+iter+1):(nvamax+iter+nva02nofix))=&
-					-ve02nofix(i,:)*gl02*vet02*the02(1)/the02(2)+&
-					troncweib02022beta02
-					iter = iter +nva02nofix
-				endif
-				if(nva12nofix.gt.0) then 
-					
-					res1((nvamax+iter+1):(nvamax+iter+nva12nofix))=0.d0
-					iter = iter +nva12nofix
-				endif
 			endif
 			
 			
 			if(fix(5).eq.0)then
-				iter = iter + 1
 				nweib= nweib +1
 				res1(nweib)=0
-				res1(nvamax+iter)=0
-				if(fix(6).eq.0)then
-					iter = iter +1
-					res1((nvamax+iter))=0
-				endif
-				if(nva01nofix.gt.0) then 
-					
-					res1((nvamax+iter+1):(nvamax+iter+nva01nofix))=0.d0
-					iter = iter +nva01nofix
-				endif
-				if(nva02nofix.gt.0) then 
-					
-					res1((nvamax+iter+1):(nvamax+iter+nva02nofix))=0.d0
-					iter = iter +nva02nofix
-				endif
-				if(nva12nofix.gt.0) then 
-					
-					res1((nvamax+iter+1):(nvamax+iter+nva12nofix))=0.d0
-					iter = iter +nva12nofix
-				endif
 			endif
 			
 			if(fix(6).eq.0)then
-				iter = iter + 1
 				nweib = nweib +1
 				res1(nweib)=0
-				res1(nvamax+iter)=0
-				if(nva01nofix.gt.0) then 
-					
-					res1((nvamax+iter+1):(nvamax+iter+nva01nofix))=0.d0
-					iter = iter +nva01nofix
 				endif
-				if(nva02nofix.gt.0) then 
-					
-					res1((nvamax+iter+1):(nvamax+iter+nva02nofix))=0.d0
-					iter = iter +nva02nofix
-				endif
-				if(nva12nofix.gt.0) then 
-					
-					res1((nvamax+iter+1):(nvamax+iter+nva12nofix))=0.d0
-					iter = iter +nva12nofix
-				endif
-			endif
 
 			if(nva01nofix.gt.0) then 
 			
 			res1((nvaweib+1):(nva01nofix+nvaweib))=&
 			-ve01nofix(i,:)*gl01*vet01+tronc01
-			res1((nvamax12weib12+1):nvamax01)=&
-			-ve01square(i,:)*gl01*vet01+&
-			tronc01square
-
-			if(nva02nofix.gt.0) then 
-			res1((nvamax01+1):nvamax0102)=0
-			end if 
-			if(nva12nofix.gt.0) then 
-			res1((nvamax0102+1):nvamax0112)=0
-			end if
-
 			end if 
 
 			if(nva02nofix.gt.0) then
 			res1((nvaweib+nva01nofix+1):nva0102)=&
 			-ve02nofix(i,:)*gl02*vet02+&
 			tronc02
-
-			res1((nvamax0112+1):nvamax02)=&
-			-ve02square(i,:)*gl02*vet02+&
-			tronc02square
-			if(nva12nofix.gt.0) then 
-			res1((nvamax02+1):nvamax0212)=0
-			end if 
 			end if 
 
 			if(nva12nofix.gt.0) then 
@@ -13606,26 +13601,15 @@ subroutine firstderivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve0
 
 			call fonct(t3(i),the12,ri12,gl12,su12)
 			!call logapproxi(t1(i),t2(i),res2denum) approxi log(x) OK
-			call qgaussweibbetaderiv(t1(i),t2(i),the01,&
+			call qgaussweibbetafirstderiv(t1(i),t2(i),the01,&
 			the02,the12,res2denum,res2the01,res2the02,&
-			res2the12,res2thenum,res2thenumsquare,&
-			res2the0101,res2the0102,res2the0112,res2the0202,&
-			res2the0212,res2the1212,res2the0101square,&
-			res2the0102square,res2the0112square,&
-			res2the0202square,res2the0212square,&
-			res2the1212square,res2the0101dsquare,&
-			res2the0202dsquare,res2the1212dsquare,&
-			res201num,res202num,res212num,res20101num,&
-			res20101numbis,&
-			res20102num,res20112num,&
-			res20202num,res20212num,res21212num,&
+			res2the12,res2thenum,&
+			res201num,res202num,res212num,&
 			vet01,vet02,vet12)
 			
-			iter = 0
 			nweib = 0
 			!write(6,*) "res2the01",res2the01
 			if(fix(1).eq.0)then
-				iter = iter + 1
 				nweib = nweib + 1
 				!write(6,*) "nweib",nweib
 				!write(6,*) "res2denum theta",res2denum
@@ -13636,321 +13620,22 @@ subroutine firstderivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve0
 				
 				res1(nweib)=res1(nweib)+troncweib01011
 				
-				!write(6,*) "troncweib01011square",troncweib01011square
-				res1((nvamax+iter))=&
-				(LOG(the01(2))**2)*res2denum+ &
-				LOG(the01(2))*2*res2thenum+ &
-				res2thenumsquare+ &
-				LOG(the01(2))*2/the01(1)*res2denum+ &
-				res2thenum*2/the01(1)- &
-				(LOG(the01(2))**2)*3*(res2denum-res201num)- &
-				LOG(the01(2))*6*res2the01- &
-				res2the0101square*3- &
-				LOG(the01(2))*2*(res2denum-res201num)/the01(1)-&
-				res2the01*2/the01(1)+ &
-				(LOG(the01(2))**2)*res20101numbis+ &
-				LOG(the01(2))*2*res2the0101+ &
-				res2the0101dsquare
-				
-				
-				res1((nvamax+iter))=&
-				res1((nvamax+iter))*res2denum -v*v
-				res1((nvamax+iter))=&
-				res1((nvamax+iter))/(res2denum*res2denum)
-				
-				res1((nvamax+iter))=&
-				res1((nvamax+iter))+troncweib01011square
-				
-				if(fix(2).eq.0)then
-					
-					u2=res2denum*the01(1)/the01(2)-&
-					(res2denum-res201num)*the01(1)/the01(2)
-					
-					u1=the01(1)*LOG(the01(2))*res20101numbis/the01(2)+&
-					the01(1)*res2the0101/the01(2)+&
-					(the01(1)*LOG(the01(2))+2)*res2denum/the01(2)+&
-					the01(1)*res2thenum/the01(2)-&
-					(3*the01(1)*LOG(the01(2))+2)* &
-					(res2denum-res201num)/the01(2)-3* &
-					the01(1)*res2the01/the01(2)
-					
-					iter = iter +1
-					res1((nvamax+iter))=&
-					u1*res2denum-u2*v
-					res1((nvamax+iter))=&
-					res1((nvamax+iter))/(res2denum*res2denum)
-					
-					res1((nvamax+iter))=&
-					res1((nvamax+iter))+troncweib010112
-				endif
-				if(fix(3).eq.0)then
-				
-					u1=-LOG(the01(2))*LOG(the02(2))*res202num-&
-					LOG(the01(2))*res2the02-LOG(the02(2))*res2the02-&
-					res2the0202square-LOG(the02(2))*res202num/the01(1)-&
-					res2the02/the01(1)+&
-					LOG(the01(2))*LOG(the02(2))*res20102num+&
-					LOG(the01(2))*res2the0102+&
-					LOG(the02(2))*res2the0102+&
-					res2the0102square
-					
-					u2=-LOG(the02(2))*(res202num)-&
-						res2the02
-					iter = iter +1
-					res1((nvamax+iter))=u1*res2denum-&
-					u2*v
-					res1((nvamax+iter))=&
-					res1((nvamax+iter))/(res2denum*res2denum)
-				endif
-				
-				if(fix(4).eq.0)then
-				
-					u1=-LOG(the01(2))*the02(1)*res202num/the02(2)-&
-					the02(1)*res2the02/the02(2)-&
-					the02(1)*res202num/(the01(1)*the02(2))+&
-					LOG(the01(2))*the02(1)*res20102num/the02(2)+&
-					the02(1)*res2the0102/the02(2)
-					
-					u2=-the02(1)*res202num/the02(2)
-					
-					iter = iter +1
-					res1((nvamax+iter))=u1*res2denum-&
-					u2*v
-					res1((nvamax+iter))=&
-					res1((nvamax+iter))/(res2denum*res2denum)
-				endif
-				
-				if(fix(5).eq.0)then
-				
-					u1=LOG(the01(2))*LOG(the12(2))*res212num+&
-					LOG(the01(2))*res2the12+LOG(the12(2))*res2the12+&
-					res2the1212square+LOG(the12(2))*res212num/the01(1)+&
-					res2the12/the01(1)-&
-					LOG(the01(2))*LOG(the12(2))*res20112num-&
-					LOG(the01(2))*res2the0112-&
-					LOG(the12(2))*res2the0112-&
-					res2the0112square
-					
-					u2=LOG(the12(2))*(res212num)+&
-						res2the12
-						
-					iter = iter +1
-					res1((nvamax+iter))=u1*res2denum-&
-					v*u2
-					res1((nvamax+iter))=&
-					res1((nvamax+iter))/(res2denum*res2denum)
-					
-				endif
-				
-				if(fix(6).eq.0)then
-					
-					u1=&
-					LOG(the01(2))*the12(1)*res212num/the12(2)+&
-					the12(1)/the12(2)*res2the12+res212num* &
-					the12(1)/(the12(2)*the01(1))-&
-					LOG(the01(2))*the12(1)*res20112num/the12(2)-&
-					the12(1)/the12(2)*res2the0112
-					
-					
-					u2=the12(1)*res212num/the12(2)
-					iter = iter +1
-					res1((nvamax+iter))=u1*res2denum-&
-					u2*v
-					res1((nvamax+iter))=&
-					res1((nvamax+iter))/(res2denum*res2denum)
-				endif
-				
-				if(nva01nofix.gt.0) then 
-					
-					u1=res2the0101+ &
-					LOG(the01(2))*res20101numbis-&
-					LOG(the01(2))*3*(res2denum-res201num)-&
-					res2the01*3-(res2denum-res201num)/the01(1)+&
-					(LOG(the01(2))+(1/the01(1)))*res2denum+&
-					res2thenum
-					
-					u2=res201num
-					
-					
-					res1((nvamax+iter+1):(nvamax+iter+nva01nofix))=&
-					ve01nofix(i,:)*(u1*res2denum-&
-					v*u2)/(res2denum*res2denum)
-					res1((nvamax+iter+1):(nvamax+iter+nva01nofix))=&
-					res1((nvamax+iter+1):(nvamax+iter+nva01nofix))+&
-					troncweib01011beta01
-					
-					iter = iter +nva01nofix
-				endif
-				if(nva02nofix.gt.0) then 
-					
-					u1=-(LOG(the01(2))+&
-					(1/the01(1)))*res202num-&
-					res2the02+&
-					LOG(the01(2))*res20102num+&
-					res2the0102
-					
-					u2=-res202num
-					
-					res1((nvamax+iter+1):(nvamax+iter+nva02nofix))=&
-					ve02nofix(i,:)*(u1*res2denum-&
-					v*u2)/(res2denum*res2denum)
-					iter = iter +nva02nofix
-				endif
-				if(nva12nofix.gt.0) then 
-					u1=(LOG(the01(2))+&
-					(1/the01(1)))*res212num+&
-					res2the12-&
-					LOG(the01(2))*res20112num-&
-					res2the0112
-					
-					u2=res212num
-					
-				
-					res1((nvamax+iter+1):(nvamax+iter+nva12nofix))=&
-					ve12nofix(i,:)*(u1*res2denum-&
-					v*u2)/(res2denum*res2denum)
-					
-					iter = iter +nva12nofix
-				endif
 			endif
 			
 			!write(6, *) " done x101 -c2" 
 			if(fix(2).eq.0)then
-				iter = iter + 1
 				nweib = nweib + 1
 				v=the01(1)*res2denum/the01(2) -&
 				the01(1)*(res2denum-res201num)/the01(2)
 				res1(nweib)=v/res2denum
 				res1(nweib)=res1(nweib)+troncweib01012
 				
-				u1=((the01(1)/the01(2))**2)*res20101numbis+&
-					the01(1)*(the01(1)-1)*res2denum/((the01(2))**2)-&
-					(res2denum-res201num)*(3*(the01(1)**2)-&
-					the01(1))/(the01(2)**2)
-				
-				
-				res1((nvamax+iter))=&
-				u1*res2denum-v*v
-				res1((nvamax+iter))=&
-				res1((nvamax+iter))/(res2denum*res2denum)
-				
-				res1((nvamax+iter))=&
-				res1((nvamax+iter))+ troncweib01012square
-				if(fix(3).eq.0)then
-				
-					u1=-LOG(the02(2))*the01(1)* &
-					res202num/the01(2)-&
-					the01(1)*res2the02/the01(2)+&
-					the01(1)*LOG(the02(2))*res20102num/the01(2)+&
-					the01(1)*res2the0102/the01(2)
-					
-					u2=-LOG(the02(2))*(res202num)-&
-						res2the02
-					iter = iter +1
-					res1((nvamax+iter))=u1*res2denum-&
-					u2*v
-					res1((nvamax+iter))=&
-					res1((nvamax+iter))/(res2denum*res2denum)
-				endif
-				
-				if(fix(4).eq.0)then
-				
-					u1=the01(1)*the02(1)*res20102num-&
-					the01(1)*the02(1)*res202num
-					u1=u1/(the01(2)*the02(2))
-					
-					u2=-the02(1)*res202num/the02(2)
-				
-					iter = iter +1
-					res1((nvamax+iter))=u1*res2denum-&
-					u2*v
-					res1((nvamax+iter))=&
-					res1((nvamax+iter))/(res2denum*res2denum)
-				endif
-				
-				if(fix(5).eq.0)then
-				
-					u1=LOG(the12(2))*the01(1)*res212num/the01(2)+&
-					the01(1)*res2the12/the01(2)-&
-					the01(1)*LOG(the12(2))*res20112num/the01(2)-&
-					the01(1)*res2the0112/the01(2)
-					
-					u2=LOG(the12(2))*(res212num)+&
-						res2the12
-						
-					iter = iter +1
-					res1((nvamax+iter))=u1*res2denum-&
-					v*u2
-					res1((nvamax+iter))=&
-					res1((nvamax+iter))/(res2denum*res2denum)
-					
-				endif
-				
-				if(fix(6).eq.0)then
-					
-					u1=-the01(1)*the12(1)*res20112num+&
-					the01(1)*the12(1)*res212num
-					u1=u1/(the01(2)*the12(2))
-					
-					u2=the12(1)*res212num/the12(2)
-				
-					iter = iter +1
-					res1((nvamax+iter))=u1*res2denum-&
-					u2*v
-					res1((nvamax+iter))=&
-					res1((nvamax+iter))/(res2denum*res2denum)
-				endif
-				
-				if(nva01nofix.gt.0) then 
-					
-					u1=the01(1)*res20101numbis/the01(2)+&
-					the01(1)*res2denum/the01(2)-&
-					the01(1)*3* &
-					(res2denum-res201num)/the01(2)
-					
-					u2=res201num
-					
-					
-					res1((nvamax+iter+1):(nvamax+iter+nva01nofix))=&
-					ve01nofix(i,:)*(u1*res2denum-&
-					v*u2)/(res2denum*res2denum)
-					res1((nvamax+iter+1):(nvamax+iter+nva01nofix))=&
-					res1((nvamax+iter+1):(nvamax+iter+nva01nofix))+&
-					troncweib01012beta01
-					
-					iter = iter +nva01nofix
-				endif
-				if(nva02nofix.gt.0) then 
-					
-					u1=res20102num-res202num
-					u1=u1*the01(1)/the01(2)
-					
-					u2=-res202num
-					
-					res1((nvamax+iter+1):(nvamax+iter+nva02nofix))=&
-					ve02nofix(i,:)*(u1*res2denum-&
-					v*u2)/(res2denum*res2denum)
-					iter = iter +nva02nofix
-				endif
-				if(nva12nofix.gt.0) then 
-				!here 
-					u1=-res20112num+res212num
-					u1=u1*the01(1)/the01(2)
-					
-					u2=res212num
-					
-					res1((nvamax+iter+1):(nvamax+iter+nva12nofix))=&
-					ve12nofix(i,:)*(u1*res2denum-&
-					v*u2)/(res2denum*res2denum)
-					iter = iter +nva12nofix
-				endif
 			endif
 			
 				!write(6, *) " done x201 -c2" 	
 				!here 
 				
 			if(fix(3).eq.0)then
-				iter = iter + 1
 				nweib = nweib + 1
 				!write(6,*) "res2the02",res2the02
 				v=-LOG(the02(2))*res202num-&
@@ -13959,219 +13644,19 @@ subroutine firstderivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve0
 				res1(nweib)=res1(nweib)+ &
 				troncweib02021
 				
-				res1((nvamax+iter))=&
-				((LOG(the02(2)))**2)* &
-				res20202num+2*LOG(the02(2))*res2the0202+&
-				res2the0202dsquare-&
-				((LOG(the02(2)))**2)* &
-				res202num-2*LOG(the02(2))*res2the02-&
-				res2the0202square
-				
-				res1((nvamax+iter))=&
-				res1((nvamax+iter))*res2denum -v*v
-				res1((nvamax+iter))=&
-				res1((nvamax+iter))/(res2denum*res2denum)
-				res1((nvamax+iter))=&
-				res1((nvamax+iter))+&
-				troncweib02021square
-				
-				if(fix(4).eq.0)then
-				
-					u1=-(the02(1)*LOG(the02(2))+1)* &
-					res202num/the02(2)-&
-					the02(1)*res2the02/the02(2)+ &
-					LOG(the02(2))*the02(1)* &
-					res20202num/the02(2)+ &
-					the02(1)/the02(2)*res2the0202
-					
-					u2=-the02(1)*res202num/the02(2)
-					
-					iter = iter +1
-					res1((nvamax+iter))=u1*res2denum-&
-					u2*v
-					res1((nvamax+iter))=&
-					res1((nvamax+iter))/(res2denum*res2denum)
-					
-					res1((nvamax+iter))=&
-					res1((nvamax+iter))+&
-					troncweib020212
-				endif
-				
-				if(fix(5).eq.0)then
-				
-					u1=-LOG(the02(2))*LOG(the12(2))*res20212num-&
-					LOG(the02(2))*res2the0212-LOG(the12(2))*res2the0212-&
-					res2the0212square
-					
-					u2=LOG(the12(2))*(res212num)+&
-						res2the12
-						
-					iter = iter +1
-					res1((nvamax+iter))=u1*res2denum-&
-					v*u2
-					res1((nvamax+iter))=&
-					res1((nvamax+iter))/(res2denum*res2denum)
-					
-				endif
-				
-				if(fix(6).eq.0)then
-				
-					u1=-LOG(the02(2))*the12(1)*res20212num/the12(2)-&
-					the12(1)*res2the0212/the12(2)
-					
-					u2=the12(1)*res212num/the12(2)
-					iter = iter +1
-					res1((nvamax+iter))=u1*res2denum-&
-					u2*v
-					res1((nvamax+iter))=&
-					res1((nvamax+iter))/(res2denum*res2denum)
-				endif
-				
-				if(nva01nofix.gt.0) then 
-					
-					u1=LOG(the02(2))*res20102num+&
-					res2the0102-res202num*LOG(the02(2))-&
-					res2the02
-					
-					u2=res201num
-					
-					
-					res1((nvamax+iter+1):(nvamax+iter+nva01nofix))=&
-					ve01nofix(i,:)*(u1*res2denum-&
-					v*u2)/(res2denum*res2denum)
-					
-					iter = iter +nva01nofix
-				endif
-				if(nva02nofix.gt.0) then 
-					
-					u1=-LOG(the02(2))*res202num-&
-					res2the02+LOG(the02(2))*res20202num+&
-					res2the0202
-					
-					u2=-res202num
-					
-					
-					res1((nvamax+iter+1):(nvamax+iter+nva02nofix))=&
-					ve02nofix(i,:)*(u1*res2denum-&
-					v*u2)/(res2denum*res2denum)
-					res1((nvamax+iter+1):(nvamax+iter+nva02nofix))=&
-					res1((nvamax+iter+1):(nvamax+iter+nva02nofix))+&
-					troncweib02021beta02
-					iter = iter +nva02nofix
-					
-				endif
-				if(nva12nofix.gt.0) then 
-				
-					u1=-LOG(the02(2))*res20212num-&
-					res2the0212
-					
-					u2=res212num
-					
-					res1((nvamax+iter+1):(nvamax+iter+nva12nofix))=&
-					ve12nofix(i,:)*(u1*res2denum-&
-					v*u2)/(res2denum*res2denum)
-					
-					iter = iter +nva12nofix
-				endif
 			endif
 			
              
 			!write(6, *) " done x102 -c2" 	
 			if(fix(4).eq.0)then
-				iter = iter + 1
 				nweib = nweib + 1
 				v=-the02(1)*res202num/the02(2)
 				res1(nweib)=v/res2denum
 				res1(nweib)=res1(nweib)+troncweib02022
 				
-				u1=((the02(1)/the02(2))**2)*res20202num-&
-					(the02(1)*(the02(1)-1)/((the02(2))**2))*res202num
-				
-				
-				res1((nvamax+iter))=&
-				u1*res2denum-v*v
-				res1((nvamax+iter))=&
-				res1((nvamax+iter))/(res2denum*res2denum)
-				
-				res1((nvamax+iter))=&
-				res1((nvamax+iter))+troncweib02022square
-				
-				
-				if(fix(5).eq.0)then
-				
-					u1=-the02(1)*LOG(the12(2))*res20212num/the02(2)-&
-					the02(1)*res2the0212/the02(2)
-					
-					u2=LOG(the12(2))*(res212num)+&
-						res2the12
-						
-					iter = iter +1
-					res1((nvamax+iter))=u1*res2denum-&
-					v*u2
-					res1((nvamax+iter))=&
-					res1((nvamax+iter))/(res2denum*res2denum)
-					
-				endif
-				
-				if(fix(6).eq.0)then
-					
-					u1=-the02(1)*the12(1)*res20212num
-					u1=u1/(the02(2)*the12(2))
-					
-					u2=the12(1)*res212num/the12(2)
-				
-					iter = iter +1
-					res1((nvamax+iter))=u1*res2denum-&
-					u2*v
-					res1((nvamax+iter))=&
-					res1((nvamax+iter))/(res2denum*res2denum)
-				endif
-				
-				
-				if(nva01nofix.gt.0) then 
-					
-					u1=-the02(1)*res202num/the02(2)+&
-					the02(1)*res20102num/the02(2)					
-					
-					u2=res201num
-					
-					res1((nvamax+iter+1):(nvamax+iter+nva01nofix))=&
-					ve01nofix(i,:)*(u1*res2denum-&
-					v*u2)/(res2denum*res2denum)
-					
-					iter = iter +nva01nofix
-				endif
-				
-				if(nva02nofix.gt.0) then 
-					
-					u1=the02(1)*res20202num/the02(2)-&
-					the02(1)*res202num/the02(2)
-					
-					u2=-res202num
-					
-					res1((nvamax+iter+1):(nvamax+iter+nva02nofix))=&
-					ve02nofix(i,:)*(u1*res2denum-&
-					v*u2)/(res2denum*res2denum)
-					res1((nvamax+iter+1):(nvamax+iter+nva02nofix))=&
-					res1((nvamax+iter+1):(nvamax+iter+nva02nofix))+&
-					troncweib02022beta02
-					
-					iter = iter +nva02nofix
-				endif
-				if(nva12nofix.gt.0) then 
-					u1=-res20212num*the02(1)/the02(2)
-					
-					u2=res212num
-				
-					res1((nvamax+iter+1):(nvamax+iter+nva12nofix))=&
-					ve12nofix(i,:)*(u1*res2denum-&
-					v*u2)/(res2denum*res2denum)
-					iter = iter +nva12nofix
-				endif
 			endif	
 			!write(6, *) " done x202 -c2" 	
 			if(fix(5).eq.0)then
-				iter = iter + 1
 				nweib = nweib + 1
 				
 				v=LOG(the12(2))*res212num+&
@@ -14180,174 +13665,21 @@ subroutine firstderivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve0
 				res1(nweib)=res1(nweib)-&
 				LOG(the12(2)*t3(i))*gl12*vet12
 				
-				res1((nvamax+iter))=&
-				((LOG(the12(2)))**2)* &
-				res21212num+2*LOG(the12(2))*res2the1212+&
-				res2the1212dsquare+&
-				((LOG(the12(2)))**2)* &
-				res212num+2*LOG(the12(2))*res2the12+&
-				res2the1212square
-				
-				res1((nvamax+iter))=&
-				res1((nvamax+iter))*res2denum -v*v
-				res1((nvamax+iter))=&
-				res1((nvamax+iter))/(res2denum*res2denum)
-				res1((nvamax+iter))=&
-				res1((nvamax+iter))-&
-				((LOG(the12(2)*t3(i)))**2)*gl12*vet12
-				
-
-				if(fix(6).eq.0)then
-			
-					u1=LOG(the12(2))*the12(1)*res21212num/the12(2)+&
-					the12(1)*res2the1212/the12(2)+&
-					(the12(1)*LOG(the12(2))+1)*res212num/the12(2)+&
-					the12(1)*res2the12/the12(2)
-					
-					u2=the12(1)*res212num/the12(2)
-					iter = iter +1
-					res1((nvamax+iter))=u1*res2denum-&
-					u2*v
-					res1((nvamax+iter))=&
-					res1((nvamax+iter))/(res2denum*res2denum)
-					res1((nvamax+iter))=&
-					res1((nvamax+iter))-&
-					(1+LOG(the12(2)*t3(i))*the12(1))*gl12*vet12/the12(2)
-				endif
-				
-				if(nva01nofix.gt.0) then 
-					
-					u1=-LOG(the12(2))*res20112num-&
-					res2the0112+res212num*LOG(the12(2))+&
-					res2the12
-					
-					u2=res201num
-					
-					
-					res1((nvamax+iter+1):(nvamax+iter+nva01nofix))=&
-					ve01nofix(i,:)*(u1*res2denum-&
-					v*u2)/(res2denum*res2denum)
-					
-					iter = iter +nva01nofix
-				endif
-				if(nva02nofix.gt.0) then 
-					!here
-					u1=-LOG(the12(2))*res20212num-&
-					res2the0212
-					
-					u2=-res202num
-					
-				
-					res1((nvamax+iter+1):(nvamax+iter+nva02nofix))=&
-					ve02nofix(i,:)*(u1*res2denum-&
-					v*u2)/(res2denum*res2denum)
-					iter = iter +nva02nofix
-					
-				endif
-				if(nva12nofix.gt.0) then 
-				
-					u1=LOG(the12(2))*res21212num+&
-					res2the1212+LOG(the12(2))*res212num+&
-					res2the12
-					
-					u2=res212num
-					
-				
-					res1((nvamax+iter+1):(nvamax+iter+nva12nofix))=&
-					ve12nofix(i,:)*(u1*res2denum-&
-					v*u2)/(res2denum*res2denum)
-					res1((nvamax+iter+1):(nvamax+iter+nva12nofix))=&
-					res1((nvamax+iter+1):(nvamax+iter+nva12nofix))-&
-					ve12nofix(i,:)*LOG(the12(2)*t3(i))*gl12*vet12
-					
-					iter = iter +nva12nofix
-				endif
 			endif
 			
 			  !!write(6, *) " done x112 -c2" 	
 
 			if(fix(6).eq.0)then
-				iter = iter + 1
 				nweib = nweib + 1
 				v=the12(1)*res212num/the12(2)
 				res1(nweib)=v/res2denum
 				res1(nweib)=res1(nweib)-&
 				the12(1)*gl12*vet12/the12(2)
 				
-				u1=((the12(1)/the12(2))**2)*res21212num+&
-					(the12(1)*(the12(1)-1)/((the12(2))**2))*res212num
-				
-				
-				res1((nvamax+iter))=&
-				u1*res2denum-v*v
-				res1((nvamax+iter))=&
-				res1((nvamax+iter))/(res2denum*res2denum)
-				
-				res1((nvamax+iter))=&
-				res1((nvamax+iter))-the12(1)* &
-				(the12(1)-1)*gl12*vet12/(the12(2)**2)
-				
-				
-				
-				if(nva01nofix.gt.0) then 
-					
-					u1=the12(1)*res212num/the12(2)-&
-					the12(1)*res20112num/the12(2)					
-					
-					u2=res201num
-					
-					
-					res1((nvamax+iter+1):(nvamax+iter+nva01nofix))=&
-					ve01nofix(i,:)*(u1*res2denum-&
-					v*u2)/(res2denum*res2denum)
-					
-					iter = iter +nva01nofix
-				endif
-				
-				if(nva02nofix.gt.0) then 
-					
-					u1=-the12(1)*res20212num/the12(2)
-					
-					u2=-res202num
-					
-					res1((nvamax+iter+1):(nvamax+iter+nva02nofix))=&
-					ve02nofix(i,:)*(u1*res2denum-&
-					v*u2)/(res2denum*res2denum)
-					
-					iter = iter +nva02nofix
-				endif
-				if(nva12nofix.gt.0) then 
-				!here
-					u1=res21212num*the12(1)/the12(2)+&
-					the12(1)*res212num/the12(2)
-					
-					u2=res212num
-							
-					
-					res1((nvamax+iter+1):(nvamax+iter+nva12nofix))=&
-					ve12nofix(i,:)*(u1*res2denum-&
-					v*u2)/(res2denum*res2denum)
-					res1((nvamax+iter+1):(nvamax+iter+nva12nofix))=&
-					res1((nvamax+iter+1):(nvamax+iter+nva12nofix))-&
-					ve12nofix(i,:)*the12(1)*gl12*vet12/the12(2)
-					iter = iter +nva12nofix
-				endif
 			endif	
 			
 			write(6,*) "res1(1) after all",res1(1) 	
 			v=res2denum*(su12**vet12)
-			!write(6,*)"v",v
-			!write(6,*)"nvaweib",nvaweib
-			!write(6,*) "nvamax",nvamax
-			!write(6,*) "nvamax01",nvamax01
-			!write(6,*) "nvamax02",nvamax02
-			!write(6,*) "nvamax0112",nvamax0112
-			!write(6,*) "nvamax0212",nvamax0212
-			!write(6,*) "nvamax12",nvamax12
-			!write(6,*) "nva0102",nva0102
-			!write(6,*) "iter",iter
-			!write(6,*) "nvamax12weib12",nvamax12weib12
-			
 			if(nva01nofix.gt.0) then
 
 			u1=res201num*(su12**vet12)
@@ -14356,16 +13688,6 @@ subroutine firstderivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve0
 			ve01nofix(i,:)*u1/v
 			res1((nvaweib+1):(nvaweib+nva01nofix))=&
 			res1((nvaweib+1):(nvaweib+nva01nofix))+tronc01
-
-			res1((nvamax12weib12+1):nvamax01)=&
-			ve01square(i,:)*res20101num*(su12**vet12)
-			res1((nvamax12weib12+1):nvamax01)=&
-			res1((nvamax12weib12+1):nvamax01)/v
-			res1((nvamax12weib12+1):nvamax01)=&
-			res1((nvamax12weib12+1):nvamax01)-ve01square(i,:)*((u1/v)**2)
-			res1((nvamax12weib12+1):nvamax01)=&
-			res1((nvamax12weib12+1):nvamax01)+&
-			tronc01square
 
 			end if 
 
@@ -14379,16 +13701,6 @@ subroutine firstderivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve0
 			res1((nvaweib+nva01nofix+1):nva0102)+&
 			tronc02
 
-			res1((nvamax0112+1):nvamax02)=&
-			-ve02square(i,:)*(su12**vet12)*(-res20202num+res202num)
-			res1((nvamax0112+1):nvamax02)=&
-			res1((nvamax0112+1):nvamax02)/v
-			res1((nvamax0112+1):nvamax02)=&
-			res1((nvamax0112+1):nvamax02)-ve02square(i,:)*((u2/v)**2)
-			res1((nvamax0112+1):nvamax02)=&
-			res1((nvamax0112+1):nvamax02)+tronc02square
-
-
 			end if 
 
 			
@@ -14399,92 +13711,6 @@ subroutine firstderivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve0
 
 			res1((nva0102+1):nvamax)=&
 			ve12nofix(i,:)*u3/v
-			res1((nvamax0212+1):nvamax12)=&
-			-2*gl12*vet12*res212num+res212num+&
-			res21212num-gl12*vet12*(1-gl12*vet12)*res2denum
-			res1((nvamax0212+1):nvamax12)=&
-			res1((nvamax0212+1):nvamax12)*(su12**vet12)*ve12square(i,:)
-			res1((nvamax0212+1):nvamax12)=&
-			res1((nvamax0212+1):nvamax12)/v
-			res1((nvamax0212+1):nvamax12)=&
-			res1((nvamax0212+1):nvamax12)-ve12square(i,:)*((u3/v)**2)
-
-			
-			end if 
-			
-			
-
-			
-			if(nva01nofix.gt.0 .AND. nva02nofix.gt.0) then 
-
-			kfix=nvamax01+1
-			lfix=kfix-1+nva02nofix
-
-			do j=1,nva01nofix
-
-			   res1(kfix:lfix)=&
-			  (res20102num-res202num)*(su12**vet12)
-			   res1(kfix:lfix)=&
-			   res1(kfix:lfix)*ve01nofix(i,j)*ve02nofix(i,:)
-			   res1(kfix:lfix)=&
-			   res1(kfix:lfix)*v
-			   
-			   res1(kfix:lfix)=&
-			   res1(kfix:lfix)-u1*u2*ve01nofix(i,j)*ve02nofix(i,:)
-			   res1(kfix:lfix)=&
-			   res1(kfix:lfix)/(v**2)
-			   kfix=lfix+1
-			   lfix=lfix+nva02nofix
-
-			end do
-
-			end if 
-
-			if(nva01nofix.gt.0 .AND. nva12nofix.gt.0) then 
-
-			kfix=nvamax0102+1
-			lfix=kfix-1+nva12nofix
-
-			do j=1,nva01nofix
-			   res1(kfix:lfix)=-gl12*vet12*res201num-res20112num+&
-			   res212num
-			   res1(kfix:lfix)=res1(kfix:lfix)*(su12**vet12)
-			   res1(kfix:lfix)=&
-			   res1(kfix:lfix)*ve01nofix(i,j)*ve12nofix(i,:)
-			   res1(kfix:lfix)=&
-			   res1(kfix:lfix)*v
-			   res1(kfix:lfix)=&
-			   res1(kfix:lfix)-u1*u3*ve01nofix(i,j)*ve12nofix(i,:)
-			   res1(kfix:lfix)=&
-			   res1(kfix:lfix)/(v**2)
-			   kfix=lfix+1
-			   lfix=lfix+nva12nofix
-			end do
-
-			end if 
-
-			
-			if(nva12nofix.gt.0 .AND. nva02nofix.gt.0) then 
-
-			kfix=nvamax02+1
-			lfix=kfix-1+nva12nofix
-
-			do j=1,nva02nofix
-			   res1(kfix:lfix)=-res20212num+&
-			   gl12*vet12*res202num
-			   res1(kfix:lfix)=res1(kfix:lfix)*(su12**vet12)
-			   res1(kfix:lfix)=&
-			   res1(kfix:lfix)*ve02nofix(i,j)*ve12nofix(i,:)
-			   res1(kfix:lfix)=&
-			   res1(kfix:lfix)*v
-			   res1(kfix:lfix)=&
-			   res1(kfix:lfix)-u2*u3*ve02nofix(i,j)*ve12nofix(i,:)
-			   res1(kfix:lfix)=&
-			   res1(kfix:lfix)/(v**2)
-			   kfix=lfix+1
-			   lfix=lfix+nva12nofix
-			end do
-
 			end if 
 			
                 else  
@@ -14495,290 +13721,64 @@ subroutine firstderivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve0
 			call fonct(t1(i),the02,ri02,gl02,su02)
 			call fonct(t1(i),the12,ri12,gl12,su12)
 
-			iter = 0
+			
 			nweib= 0
 			if(fix(1).eq.0)then
-				iter = iter + 1
 				nweib = nweib + 1
 				
 				res1(nweib)=-LOG(the01(2)*t1(i))*gl01*vet01 +&
 				troncweib01011+&
 				LOG(the01(2)*t1(i))+(1/the01(1))
 				
-				res1((nvamax+iter))=&
-				-((LOG(the01(2)*t1(i)))**2)*gl01*vet01 +&
-				troncweib01011square-1/(the01(1)**2)
-				!here
-				if(fix(2).eq.0)then
-					iter = iter +1
-					res1((nvamax+iter))=&
-					-(LOG(the01(2)*t1(i))* &
-					the01(1)+1)*gl01*vet01/the01(2)+&
-					troncweib010112+(1/the01(2))
-				endif
-				if(fix(3).eq.0)then
-					iter = iter +1
-					res1((nvamax+iter))=0
-				endif
-				if(fix(4).eq.0)then
-					iter = iter +1
-					res1((nvamax+iter))=0
-				endif
-				if(fix(5).eq.0)then
-					iter = iter +1
-					res1((nvamax+iter))=0
-				endif
-				if(fix(6).eq.0)then
-					iter = iter +1
-					res1((nvamax+iter))=0
-				endif
-				!here
-				if(nva01nofix.gt.0) then 
-					
-					res1((nvamax+iter+1):(nvamax+iter+nva01nofix))=&
-					-ve01nofix(i,:)*gl01*vet01*LOG(the01(2)*t1(i))+&
-					troncweib01011beta01
-					iter = iter +nva01nofix
-				endif
-				if(nva02nofix.gt.0) then 
-					
-					res1((nvamax+iter+1):(nvamax+iter+nva02nofix))=0.d0
-					iter = iter +nva02nofix
-				endif
-				if(nva12nofix.gt.0) then 
-					
-					res1((nvamax+iter+1):(nvamax+iter+nva12nofix))=0.d0
-					iter = iter +nva12nofix
-				endif
-			endif 
+				endif 
 			
 			if(fix(2).eq.0)then
 			
-				iter = iter + 1
 				nweib = nweib + 1
 				
 				res1(nweib)=-the01(1)*gl01*vet01/the01(2) +&
 				troncweib01012+&
 				the01(1)/the01(2)
-
-				res1(nvamax+iter)=&
-				-the01(1)*(the01(1)-1)*gl01*vet01/(the01(2)**2)+&
-				troncweib01012square-&
-				the01(1)/(the01(2)**2)
-				
-				if(fix(3).eq.0)then
-					iter = iter +1
-					res1((nvamax+iter))=0
-				endif
-				if(fix(4).eq.0)then
-					iter = iter +1
-					res1((nvamax+iter))=0
-				endif
-				if(fix(5).eq.0)then
-					iter = iter +1
-					res1((nvamax+iter))=0
-				endif
-				if(fix(6).eq.0)then
-					iter = iter +1
-					res1((nvamax+iter))=0
-				endif
-				if(nva01nofix.gt.0) then 
-				
-					res1((nvamax+iter+1):(nvamax+iter+nva01nofix))=&
-					-ve01nofix(i,:)*gl01*vet01*the01(1)/the01(2)+&
-					troncweib01012beta01
-					iter = iter +nva01nofix
-				endif
-				if(nva02nofix.gt.0) then 
-					
-					res1((nvamax+iter+1):(nvamax+iter+nva02nofix))=0.d0
-					iter = iter +nva02nofix
-				endif
-				if(nva12nofix.gt.0) then 
-					
-					res1((nvamax+iter+1):(nvamax+iter+nva12nofix))=0.d0
-					iter = iter +nva12nofix
-				endif
 			endif
 			!here
 			if(fix(3).eq.0)then
-				iter = iter + 1
 				nweib = nweib +1
 				res1(nweib)=-LOG(the02(2)*t1(i))*gl02*vet02 +&
 				troncweib02021
 				
-				res1((nvamax+iter))=&
-				-((LOG(the02(2)*t1(i)))**2)*gl02*vet02+&
-				troncweib02021square
-				!here
-				if(fix(4).eq.0)then
-					iter = iter +1
-					res1((nvamax+iter))=&
-					-(LOG(the02(2)*t1(i))* &
-					the02(1)+1)*gl02*vet02/the02(2)+&
-					troncweib020212
-				endif
-				if(fix(5).eq.0)then
-					iter = iter +1
-					res1((nvamax+iter))=0
-				endif
-				if(fix(6).eq.0)then
-					iter = iter +1
-					res1((nvamax+iter))=0
-				endif
-				if(nva01nofix.gt.0) then 
-					
-					res1((nvamax+iter):(nvamax+iter+nva01nofix))=0.d0
-					iter = iter +nva01nofix
-				endif
-				if(nva02nofix.gt.0) then 
-					
-					res1((nvamax+iter):(nvamax+iter+nva02nofix))=&
-					-ve02nofix(i,:)*LOG(the02(2)*t1(i))*gl12*vet12+&
-					troncweib02021beta02
-					iter = iter +nva02nofix
-				endif
-				if(nva12nofix.gt.0) then 
-					
-					res1((nvamax+iter+1):(nvamax+iter+nva12nofix))=0.d0
-					iter = iter +nva12nofix
-				endif
 			endif 
 			!here
 			if(fix(4).eq.0)then
-				iter = iter + 1
 				nweib= nweib +1
 				
 				res1(nweib)=-the02(1)*gl02*vet02/the02(2)+&
 				troncweib02022
-				
-				res1(nvamax+iter)=&
-				-the02(1)*(the02(1)-1)*gl02*vet02/(the02(2)**2)+&
-				troncweib02022square
-				!here
-				if(fix(5).eq.0)then
-					iter = iter +1
-					res1((nvamax+iter))=0
-				endif
-				if(fix(6).eq.0)then
-					iter = iter +1
-					res1((nvamax+iter))=0
-				endif
-				if(nva01nofix.gt.0) then 
-					
-					res1((nvamax+iter+1):(nvamax+iter+nva01nofix))=0.d0
-					iter = iter +nva01nofix
-				endif
-				if(nva02nofix.gt.0) then 
-					
-					res1((nvamax+iter+1):(nvamax+iter+nva02nofix))=&
-					-ve02nofix(i,:)*gl02*vet02*the02(1)/the02(2)+&
-					troncweib02022beta02
-					iter = iter +nva02nofix
-				endif
-				if(nva12nofix.gt.0) then 
-					res1((nvamax+iter+1):(nvamax+iter+nva12nofix))=0.d0
-					iter = iter +nva12nofix
-				endif
 			endif
 			!here
 			
 			if(fix(5).eq.0)then
-				iter = iter + 1
 				nweib= nweib +1
 				res1(nweib)=LOG(the12(2)*t1(i))*gl12*vet12
-				res1(nvamax+iter)=((LOG(the12(2)*t1(i)))**2)*gl12*vet12
-				if(fix(6).eq.0)then
-					iter = iter +1
-					res1((nvamax+iter))=(LOG(the12(2)*t1(i))* &
-					the12(1)+1)*gl12*vet12/the12(2)
-				endif
-				if(nva01nofix.gt.0) then 
-					res1((nvamax+iter+1):(nvamax+iter+nva01nofix))=0.d0
-					iter = iter +nva01nofix
-				endif
-				if(nva02nofix.gt.0) then 
 				
-					res1((nvamax+iter+1):(nvamax+iter+nva02nofix))=0.d0
-					iter = iter +nva02nofix
-				endif
-				if(nva12nofix.gt.0) then 
-					
-					res1((nvamax+iter+1):(nvamax+iter+nva12nofix))=&
-					ve12nofix(i,:)*LOG(the12(2)*t1(i))*gl12*vet12
-					call fonct(t3(i),the12,ri12,gl12,su12)
-					res1((nvamax+iter+1):(nvamax+iter+nva12nofix))=&
-					res1((nvamax+iter+1):(nvamax+iter+nva12nofix))-&
-					ve12nofix(i,:)*LOG(the12(2)*t3(i))*gl12*vet12
-					
-					iter = iter +nva12nofix
-				endif
 				
 				call fonct(t3(i),the12,ri12,gl12,su12)
 				
 				res1(nweib)=res1(nweib)-&
 				LOG(the12(2)*t3(i))*gl12*vet12
-				iter=iter-nva12nofix-nva02nofix-nva01nofix
-				if(fix(6).eq.0)then
-					res1((nvamax+iter))=&
-					res1((nvamax+iter))-&
-					(LOG(the12(2)*t3(i))* &
-					the12(1)+1)*gl12*vet12/the12(2)
-					iter=iter-1
-				endif
 				
-				res1(nvamax+iter)=res1(nvamax+iter)-&
-				((LOG(the12(2)*t3(i)))**2)*gl12*vet12
-				
-				iter=iter+nva12nofix+nva02nofix+nva01nofix
-				
-				if(fix(6).eq.0)then
-					iter=iter+1
-				endif
 				call fonct(t1(i),the12,ri12,gl12,su12)
 			endif
 			!here
 			
 			if(fix(6).eq.0)then
-				iter = iter + 1
+				
 				nweib= nweib +1
 				res1(nweib)=the12(1)*gl12*vet12/the12(2)
-				res1(nvamax+iter)=the12(1)* &
-				(the12(1)-1)*gl12*vet12/(the12(2)**2)
-				
-				if(nva01nofix.gt.0) then 
-					res1((nvamax+iter+1):(nvamax+iter+nva01nofix))=0.d0
-					iter = iter +nva01nofix
-				endif
-				if(nva02nofix.gt.0) then 
-				
-					res1((nvamax+iter+1):(nvamax+iter+nva02nofix))=0.d0
-					iter = iter +nva02nofix
-				endif
-				if(nva12nofix.gt.0) then 
-					
-					res1((nvamax+iter+1):(nvamax+iter+nva12nofix))=&
-					ve12nofix(i,:)*the12(1)*gl12*vet12/the12(2)
-					call fonct(t3(i),the12,ri12,gl12,su12)
-					res1((nvamax+iter+1):(nvamax+iter+nva12nofix))=&
-					res1((nvamax+iter+1):(nvamax+iter+nva12nofix))-&
-					ve12nofix(i,:)*the12(1)*gl12*vet12/the12(2)
-					
-					iter = iter +nva12nofix
-				endif
 				
 				call fonct(t3(i),the12,ri12,gl12,su12)
 				
 				res1(nweib)=res1(nweib)-&
 				the12(1)*gl12*vet12/the12(2)
-				
-				iter=iter-nva12nofix-nva02nofix-nva01nofix
-				
-				res1(nvamax+iter)=res1(nvamax+iter)-&
-				the12(1)*(the12(1)-1)*gl12*vet12/(the12(2)**2)
-				
-				iter=iter+nva12nofix+nva02nofix+nva01nofix
-				
 				call fonct(t1(i),the12,ri12,gl12,su12)
 			endif
 			
@@ -14788,18 +13788,7 @@ subroutine firstderivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve0
 
 			res1((nvaweib+1):(nvaweib+nva01nofix))=-ve01nofix(i,:)*gl01*vet01+&
 			tronc01+ve01nofix(i,:)
-			res1((nvamax12weib12+1):nvamax01)=&
-			-ve01square(i,:)*gl01*vet01+&
-			tronc01square
-
-			if(nva02nofix.gt.0) then 
-			res1((nvamax01+1):nvamax0102)=0
-			end if 
-
-			if(nva12nofix.gt.0)then 
-			res1((nvamax0102+1):nvamax0112)=0
-			end if 
-
+			
 			end if 
 
 			if(nva02nofix.gt.0) then 
@@ -14807,32 +13796,17 @@ subroutine firstderivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve0
 			res1((nva01nofix+1+nvaweib):nva0102)=&
 			-ve02nofix(i,:)*gl02*vet02+&
 			tronc02
-			res1((nvamax0112+1):nvamax02)=&
-			-ve02square(i,:)*gl02*vet02+&
-			tronc02square
-
-			if(nva12nofix.gt.0) then 
-			res1((nvamax02+1):nvamax0212)=0
-			end if 
-
 			end if 
 
 			if(nva12nofix.gt.0) then 
 
 			res1((nva0102+1):nvamax)=gl12*vet12
-			res1((nvamax0212+1):nvamax12)=gl12*vet12
-
+			
 			call fonct(t3(i),the12,ri12,gl12,su12)
 			res1((nva0102+1):nvamax)=&
 			res1((nva0102+1):nvamax)-gl12*vet12
 			res1((nva0102+1):nvamax)=&
 			res1((nva0102+1):nvamax)*ve12nofix(i,:)
-
-			res1((nvamax0212+1):nvamax12)=&
-			res1((nvamax0212+1):nvamax12)-gl12*vet12
-			res1((nvamax0212+1):nvamax12)=&
-			res1((nvamax0212+1):nvamax12)*ve12square(i,:)
-			
 
 			end if 
 			
@@ -14843,27 +13817,17 @@ subroutine firstderivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve0
 			
 			!write(6, *) "start c=4" 
 			call fonct(t3(i),the12,ri12,gl12,su12)
-			call qgaussweibbetaderiv(t1(i),t2(i),the01,&
+			call qgaussweibbetafirstderiv(t1(i),t2(i),the01,&
 			the02,the12,res2denum,res2the01,res2the02,&
-			res2the12,res2thenum,res2thenumsquare,&
-			res2the0101,res2the0102,res2the0112,res2the0202,&
-			res2the0212,res2the1212,res2the0101square,&
-			res2the0102square,res2the0112square,&
-			res2the0202square,res2the0212square,&
-			res2the1212square,res2the0101dsquare,&
-			res2the0202dsquare,res2the1212dsquare,&
-			res201num,res202num,res212num,res20101num,&
-			res20101numbis,&
-			res20102num,res20112num,&
-			res20202num,res20212num,res21212num,&
+			res2the12,res2thenum,&
+			res201num,res202num,res212num,&
 			vet01,vet02,vet12)
 			
-			iter = 0
+		
 			nweib = 0
 			
 			
 			if(fix(1).eq.0)then
-				iter = iter + 1
 				nweib = nweib + 1
 				
 				v=(LOG(the01(2))+(1/the01(1)))*res2denum +&
@@ -14872,541 +13836,40 @@ subroutine firstderivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve0
 				res1(nweib)=v/res2denum
 				res1(nweib)=res1(nweib)+troncweib01011
 				
-				res1((nvamax+iter))=&
-				LOG(the01(2))*2/the01(1)*res2denum+&
-				res2thenum*2/the01(1)+&
-				(LOG(the01(2))**2)*res2denum+&
-				LOG(the01(2))*2*res2thenum+&
-				res2thenumsquare-3*(LOG(the01(2))**2)* &
-				(res2denum-res201num)-&
-				LOG(the01(2))*6*res2the01-3*res2the0101square-&
-				LOG(the01(2))*2/the01(1)*(res2denum-res201num)- &
-				res2the01*2/the01(1)+ &
-				(LOG(the01(2))**2)*res20101numbis+&
-				LOG(the01(2))*2*res2the0101+&
-				res2the0101dsquare
-				
-				res1((nvamax+iter))=&
-				res1((nvamax+iter))*res2denum -v*v
-				res1((nvamax+iter))=&
-				res1((nvamax+iter))/(res2denum*res2denum)
-				
-				res1((nvamax+iter))=&
-				res1((nvamax+iter))+&
-				troncweib01011square
-				
-				if(fix(2).eq.0)then
-					
-					u2=res2denum*the01(1)/the01(2)-&
-					(res2denum-res201num)*the01(1)/the01(2)
-					
-					u1=the01(1)*LOG(the01(2))*res20101numbis/the01(2)+&
-					the01(1)*res2the0101/the01(2)+&
-					(the01(1)*LOG(the01(2))+2)*res2denum/the01(2)+&
-					the01(1)*res2thenum/the01(2)-&
-					(3*the01(1)*LOG(the01(2))+2)* &
-					(res2denum-res201num)/the01(2)-3* &
-					the01(1)*res2the01/the01(2)
-					
-					iter = iter +1
-					res1((nvamax+iter))=&
-					u1*res2denum-u2*v
-					res1((nvamax+iter))=&
-					res1((nvamax+iter))/(res2denum*res2denum)
-					
-					res1((nvamax+iter))=&
-					res1((nvamax+iter))+&
-					troncweib010112
-				endif
-				if(fix(3).eq.0)then
-				!here
-					u1=-LOG(the01(2))*LOG(the02(2))*res202num-&
-					LOG(the01(2))*res2the02-LOG(the02(2))*res2the02-&
-					res2the0202square-LOG(the02(2))*res202num/the01(1)-&
-					res2the02/the01(1)+&
-					LOG(the01(2))*LOG(the02(2))*res20102num+&
-					LOG(the01(2))*res2the0102+&
-					LOG(the02(2))*res2the0102+&
-					res2the0102square
-					
-					u2=-LOG(the02(2))*(res202num)-&
-						res2the02
-					iter = iter +1
-					res1((nvamax+iter))=u1*res2denum-&
-					u2*v
-					res1((nvamax+iter))=&
-					res1((nvamax+iter))/(res2denum*res2denum)
-				endif
-				
-				if(fix(4).eq.0)then
-				
-					u1=-LOG(the01(2))*the02(1)*res202num/the02(2)-&
-					the02(1)*res2the02/the02(2)-&
-					the02(1)*res202num/(the01(1)*the02(2))+&
-					LOG(the01(2))*the02(1)*res20102num/the02(2)+&
-					the02(1)*res2the0102/the02(2)
-					
-					u2=-the02(1)*res202num/the02(2)
-					
-					iter = iter +1
-					res1((nvamax+iter))=u1*res2denum-&
-					u2*v
-					res1((nvamax+iter))=&
-					res1((nvamax+iter))/(res2denum*res2denum)
-				endif
-				
-				if(fix(5).eq.0)then
-				!here
-					u1=LOG(the01(2))*LOG(the12(2))*res212num+&
-					LOG(the01(2))*res2the12+LOG(the12(2))*res2the12+&
-					res2the1212square+LOG(the12(2))*res212num/the01(1)+&
-					res2the12/the01(1)-&
-					LOG(the01(2))*LOG(the12(2))*res20112num-&
-					LOG(the01(2))*res2the0112-&
-					LOG(the12(2))*res2the0112-&
-					res2the0112square
-					
-					u2=LOG(the12(2))*(res212num)+&
-						res2the12
-						
-					iter = iter +1
-					res1((nvamax+iter))=u1*res2denum-&
-					v*u2
-					res1((nvamax+iter))=&
-					res1((nvamax+iter))/(res2denum*res2denum)
-					
-				endif
-				
-				if(fix(6).eq.0)then
-					u1=&
-					LOG(the01(2))*the12(1)*res212num/the12(2)+&
-					the12(1)/the12(2)*res2the12+res212num* &
-					the12(1)/(the12(2)*the01(1))-&
-					LOG(the01(2))*the12(1)*res20112num/the12(2)-&
-					the12(1)/the12(2)*res2the0112
-					
-					
-					u2=the12(1)*res212num/the12(2)
-					iter = iter +1
-					res1((nvamax+iter))=u1*res2denum-&
-					u2*v
-					res1((nvamax+iter))=&
-					res1((nvamax+iter))/(res2denum*res2denum)
-				endif
-				
-				if(nva01nofix.gt.0) then 
-					!here
-					u1=res2the0101+ &
-					LOG(the01(2))*res20101numbis-&
-					LOG(the01(2))*3*(res2denum-res201num)-&
-					res2the01*3-(res2denum-res201num)/the01(1)+&
-					(LOG(the01(2))+(1/the01(1)))*res2denum+&
-					res2thenum
-					
-					u2=res201num
-					
-					
-					res1((nvamax+iter+1):(nvamax+iter+nva01nofix))=&
-					ve01nofix(i,:)*(u1*res2denum-&
-					v*u2)/(res2denum*res2denum)
-					res1((nvamax+iter+1):(nvamax+iter+nva01nofix))=&
-					res1((nvamax+iter+1):(nvamax+iter+nva01nofix))+&
-					troncweib01011beta01
-					
-					iter = iter +nva01nofix
-				endif
-				if(nva02nofix.gt.0) then 
-					
-					u1=-(LOG(the01(2))+&
-					(1/the01(1)))*res202num-&
-					res2the02+&
-					LOG(the01(2))*res20102num+&
-					res2the0102
-					
-					u2=-res202num
-					
-					res1((nvamax+iter+1):(nvamax+iter+nva02nofix))=&
-					ve02nofix(i,:)*(u1*res2denum-&
-					v*u2)/(res2denum*res2denum)
-					iter = iter +nva02nofix
-				endif
-				if(nva12nofix.gt.0) then 
-					u1=(LOG(the01(2))+&
-					(1/the01(1)))*res212num+&
-					res2the12-&
-					LOG(the01(2))*res20112num-&
-					res2the0112
-					
-					u2=res212num
-					
-				
-					res1((nvamax+iter+1):(nvamax+iter+nva12nofix))=&
-					ve12nofix(i,:)*(u1*res2denum-&
-					v*u2)/(res2denum*res2denum)
-					
-					iter = iter +nva12nofix
-				endif
 			endif
 			
 			!write(6, *) " done x101 -c4" 	
 			if(fix(2).eq.0)then
-				iter = iter + 1
 				nweib = nweib + 1
 				v=the01(1)*res2denum/the01(2) -&
 				the01(1)*(res2denum-res201num)/the01(2)
 				res1(nweib)=v/res2denum
 				res1(nweib)=res1(nweib)+troncweib01012
-				
-				
-					
-				u1=((the01(1)/the01(2))**2)*res20101numbis+&
-					the01(1)*(the01(1)-1)*res2denum/((the01(2))**2)-&
-					(res2denum-res201num)*(3*(the01(1)**2)-&
-					the01(1))/(the01(2)**2)
-				
-				res1((nvamax+iter))=&
-				u1*res2denum-v*v
-				res1((nvamax+iter))=&
-				res1((nvamax+iter))/(res2denum*res2denum)
-				
-				res1((nvamax+iter))=&
-				res1((nvamax+iter))+troncweib01012square
-				if(fix(3).eq.0)then
-				
-					u1=-LOG(the02(2))*the01(1)*res202num/the01(2)-&
-					the01(1)*res2the02/the01(2)+&
-					the01(1)*LOG(the02(2))*res20102num/the01(2)+&
-					the01(1)*res2the0102/the01(2)
-					
-					u2=-LOG(the02(2))*(res202num)-&
-						res2the02
-					iter = iter +1
-					res1((nvamax+iter))=u1*res2denum-&
-					u2*v
-					res1((nvamax+iter))=&
-					res1((nvamax+iter))/(res2denum*res2denum)
-				endif
-				!here
-				if(fix(4).eq.0)then
-				
-					u1=the01(1)*the02(1)*res20102num-&
-					the01(1)*the02(1)*res202num
-					u1=u1/(the01(2)*the02(2))
-					
-					u2=-the02(1)*res202num/the02(2)
-				
-					iter = iter +1
-					res1((nvamax+iter))=u1*res2denum-&
-					u2*v
-					res1((nvamax+iter))=&
-					res1((nvamax+iter))/(res2denum*res2denum)
-				endif
-				
-				if(fix(5).eq.0)then
-				
-					u1=LOG(the12(2))*the01(1)*res212num/the01(2)+&
-					the01(1)*res2the12/the01(2)-&
-					the01(1)*LOG(the12(2))*res20112num/the01(2)-&
-					the01(1)*res2the0112/the01(2)
-					
-					u2=LOG(the12(2))*(res212num)+&
-						res2the12
-						
-					iter = iter +1
-					res1((nvamax+iter))=u1*res2denum-&
-					v*u2
-					res1((nvamax+iter))=&
-					res1((nvamax+iter))/(res2denum*res2denum)
-					
-				endif
-				
-				if(fix(6).eq.0)then
-					
-					u1=-the01(1)*the12(1)*res20112num+&
-					the01(1)*the12(1)*res212num
-					u1=u1/(the01(2)*the12(2))
-					
-					u2=the12(1)*res212num/the12(2)
-				
-					iter = iter +1
-					res1((nvamax+iter))=u1*res2denum-&
-					u2*v
-					res1((nvamax+iter))=&
-					res1((nvamax+iter))/(res2denum*res2denum)
-				endif
-				!here
-				if(nva01nofix.gt.0) then 
-					
-					u1=the01(1)*res20101numbis/the01(2)+&
-					the01(1)*res2denum/the01(2)-3* &
-					the01(1)*(res2denum-res201num)/the01(2)
-					
-					u2=res201num
-					
-					
-					res1((nvamax+iter+1):(nvamax+iter+nva01nofix))=&
-					ve01nofix(i,:)*(u1*res2denum-&
-					v*u2)/(res2denum*res2denum)
-					res1((nvamax+iter+1):(nvamax+iter+nva01nofix))=&
-					res1((nvamax+iter+1):(nvamax+iter+nva01nofix))+&
-					troncweib01012beta01
-					
-					iter = iter +nva01nofix
-				endif
-				if(nva02nofix.gt.0) then 
-					
-					u1=res20102num-res202num
-					u1=u1*the01(1)/the01(2)
-					
-					u2=-res202num
-					
-					res1((nvamax+iter+1):(nvamax+iter+nva02nofix))=&
-					ve02nofix(i,:)*(u1*res2denum-&
-					v*u2)/(res2denum*res2denum)
-					iter = iter +nva02nofix
-				endif
-				if(nva12nofix.gt.0) then 
-				!here 
-					u1=-res20112num+res212num
-					u1=u1*the01(1)/the01(2)
-					
-					u2=res212num
-					
-					res1((nvamax+iter+1):(nvamax+iter+nva12nofix))=&
-					ve12nofix(i,:)*(u1*res2denum-&
-					v*u2)/(res2denum*res2denum)
-					iter = iter +nva12nofix
-				endif
 			endif
 			!write(6, *) " done x201 -c4" 	
 					
 				!!here 
 				
 			if(fix(3).eq.0)then
-				iter = iter + 1
 				nweib = nweib + 1
 				
 				v=-LOG(the02(2))*res202num-&
 				res2the02
 				res1(nweib)=v/res2denum
 				res1(nweib)=res1(nweib)+troncweib02021
-				
-				res1((nvamax+iter))=&
-				((LOG(the02(2)))**2)*res20202num+2* &
-				LOG(the02(2))*res2the0202+&
-				res2the0202dsquare-&
-				((LOG(the02(2)))**2)*res202num-2* &
-				LOG(the02(2))*res2the02-&
-				res2the0202square
-				
-				res1((nvamax+iter))=&
-				res1((nvamax+iter))*res2denum -v*v
-				res1((nvamax+iter))=&
-				res1((nvamax+iter))/(res2denum*res2denum)
-				res1((nvamax+iter))=&
-				res1((nvamax+iter))+&
-				troncweib02021square
-				
-				if(fix(4).eq.0)then
-				
-					u1=-(the02(1)*LOG(the02(2))+1)* &
-					res202num/the02(2)-&
-					the02(1)*res2the02/the02(2)+ &
-					LOG(the02(2))*the02(1)* &
-					res20202num/the02(2)+ &
-					the02(1)/the02(2)*res2the0202
-					
-					u2=-the02(1)*res202num/the02(2)
-					
-					iter = iter +1
-					res1((nvamax+iter))=u1*res2denum-&
-					u2*v
-					res1((nvamax+iter))=&
-					res1((nvamax+iter))/(res2denum*res2denum)
-					
-					res1((nvamax+iter))=&
-					res1((nvamax+iter))+&
-					troncweib020212
-				endif
-				
-				if(fix(5).eq.0)then
-				
-					u1=-LOG(the02(2))*LOG(the12(2))*res20212num-&
-					LOG(the02(2))*res2the0212-LOG(the12(2))*res2the0212-&
-					res2the0212square
-					
-					u2=LOG(the12(2))*(res212num)+&
-						res2the12
-						
-					iter = iter +1
-					res1((nvamax+iter))=u1*res2denum-&
-					v*u2
-					res1((nvamax+iter))=&
-					res1((nvamax+iter))/(res2denum*res2denum)
-					
-				endif
-				
-				if(fix(6).eq.0)then
-				
-					u1=-LOG(the02(2))*the12(1)*res20212num/the12(2)-&
-					the12(1)*res2the0212/the12(2)
-					
-					u2=the12(1)*res212num/the12(2)
-					iter = iter +1
-					res1((nvamax+iter))=u1*res2denum-&
-					u2*v
-					res1((nvamax+iter))=&
-					res1((nvamax+iter))/(res2denum*res2denum)
-				endif
-				
-				if(nva01nofix.gt.0) then 
-					
-					u1=LOG(the02(2))*res20102num+&
-					res2the0102-res202num*LOG(the02(2))-&
-					res2the02
-					
-					u2=res201num
-					
-					
-					res1((nvamax+iter+1):(nvamax+iter+nva01nofix))=&
-					ve01nofix(i,:)*(u1*res2denum-&
-					v*u2)/(res2denum*res2denum)
-					
-					iter = iter +nva01nofix
-				endif
-				if(nva02nofix.gt.0) then 
-					
-					
-					u1=-LOG(the02(2))*res202num-&
-					res2the02+LOG(the02(2))*res20202num+&
-					res2the0202
-					
-					u2=-res202num
-					
-					
-					res1((nvamax+iter+1):(nvamax+iter+nva02nofix))=&
-					ve02nofix(i,:)*(u1*res2denum-&
-					v*u2)/(res2denum*res2denum)
-					res1((nvamax+iter+1):(nvamax+iter+nva02nofix))=&
-					res1((nvamax+iter+1):(nvamax+iter+nva02nofix))+&
-					troncweib02021beta02
-					iter = iter +nva02nofix
-					
-				endif
-				if(nva12nofix.gt.0) then 
-				
-					u1=-LOG(the02(2))*res20212num-&
-					res2the0212
-					
-					u2=res212num
-					
-					res1((nvamax+iter+1):(nvamax+iter+nva12nofix))=&
-					ve12nofix(i,:)*(u1*res2denum-&
-					v*u2)/(res2denum*res2denum)
-					
-					iter = iter +nva12nofix
-				endif
 			endif
 			
              !write(6, *) " done x102 -c4" 	
 !here!
 			if(fix(4).eq.0)then
-				iter = iter + 1
 				nweib = nweib + 1
 				v=-the02(1)*res202num/the02(2)
 				res1(nweib)=v/res2denum
 				res1(nweib)=res1(nweib)+troncweib02022
-				
-				
-				u1=((the02(1)/the02(2))**2)*res20202num-&
-					(the02(1)*(the02(1)-1)/((the02(2))**2))*res202num
-				
-				
-				res1((nvamax+iter))=&
-				u1*res2denum-v*v
-				res1((nvamax+iter))=&
-				res1((nvamax+iter))/(res2denum*res2denum)
-				
-				res1((nvamax+iter))=&
-				res1((nvamax+iter))+troncweib02022square
-				
-				
-				if(fix(5).eq.0)then
-				
-					u1=-the02(1)*LOG(the12(2))*res20212num/the02(2)-&
-					the02(1)*res2the0212/the02(2)
-					
-					u2=LOG(the12(2))*(res212num)+&
-						res2the12
-						
-					iter = iter +1
-					res1((nvamax+iter))=u1*res2denum-&
-					v*u2
-					res1((nvamax+iter))=&
-					res1((nvamax+iter))/(res2denum*res2denum)
-					
-				endif
-				
-				if(fix(6).eq.0)then
-					
-					u1=-the02(1)*the12(1)*res20212num
-					u1=u1/(the02(2)*the12(2))
-					
-					u2=the12(1)*res212num/the12(2)
-				
-					iter = iter +1
-					res1((nvamax+iter))=u1*res2denum-&
-					u2*v
-					res1((nvamax+iter))=&
-					res1((nvamax+iter))/(res2denum*res2denum)
-				endif
-				
-				
-				if(nva01nofix.gt.0) then 
-					
-					u1=-the02(1)*res202num/the02(2)+&
-					the02(1)*res20102num/the02(2)					
-					
-					u2=res201num
-					
-					res1((nvamax+iter+1):(nvamax+iter+nva01nofix))=&
-					ve01nofix(i,:)*(u1*res2denum-&
-					v*u2)/(res2denum*res2denum)
-					
-					iter = iter +nva01nofix
-				endif
-				
-				if(nva02nofix.gt.0) then 
-					
-					u1=the02(1)*res20202num/the02(2)-&
-					the02(1)*res202num/the02(2)
-					
-					u2=-res202num
-					
-					res1((nvamax+iter+1):(nvamax+iter+nva02nofix))=&
-					ve02nofix(i,:)*(u1*res2denum-&
-					v*u2)/(res2denum*res2denum)
-					res1((nvamax+iter+1):(nvamax+iter+nva02nofix))=&
-					res1((nvamax+iter+1):(nvamax+iter+nva02nofix))+&
-					troncweib02022beta02
-					
-					iter = iter +nva02nofix
-				endif
-				if(nva12nofix.gt.0) then 
-					u1=-res20212num*the02(1)/the02(2)
-					
-					u2=res212num
-				
-					res1((nvamax+iter+1):(nvamax+iter+nva12nofix))=&
-					ve12nofix(i,:)*(u1*res2denum-&
-					v*u2)/(res2denum*res2denum)
-					iter = iter +nva12nofix
-				endif
 			endif	
 !here!
 !write(6, *) " done x202 -c4" 	
 			if(fix(5).eq.0)then
-				iter = iter + 1
 				nweib = nweib + 1
 				
 				v=LOG(the12(2))*res212num+&
@@ -15416,163 +13879,17 @@ subroutine firstderivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve0
 				LOG(the12(2)*t3(i))*(1-gl12*vet12)+1/ &
 				the12(1)
 				
-				res1((nvamax+iter))=&
-				((LOG(the12(2)))**2)*res21212num+2* &
-				LOG(the12(2))*res2the1212+&
-				res2the1212dsquare+&
-				((LOG(the12(2)))**2)*res212num+2* &
-				LOG(the12(2))*res2the12+&
-				res2the1212square
-				
-				res1((nvamax+iter))=&
-				res1((nvamax+iter))*res2denum -v*v
-				res1((nvamax+iter))=&
-				res1((nvamax+iter))/(res2denum*res2denum)
-				res1((nvamax+iter))=&
-				res1((nvamax+iter))-&
-				((LOG(the12(2)*t3(i)))**2)*gl12*vet12-&
-				(1/(the12(1)**2))
-				
-!here!
-				if(fix(6).eq.0)then
-			
-					u1=LOG(the12(2))*the12(1)*res21212num/the12(2)+&
-					the12(1)*res2the1212/the12(2)+&
-					(the12(1)*LOG(the12(2))+1)*res212num/the12(2)+&
-					the12(1)*res2the12/the12(2)
-					
-					u2=the12(1)*res212num/the12(2)
-					iter = iter +1
-					res1((nvamax+iter))=u1*res2denum-&
-					u2*v
-					res1((nvamax+iter))=&
-					res1((nvamax+iter))/(res2denum*res2denum)
-					res1((nvamax+iter))=&
-					res1((nvamax+iter))-&
-					(1+LOG(the12(2)*t3(i))*the12(1))*gl12*vet12/the12(2)+&
-					(1/the12(2))
-				endif
-				
-				if(nva01nofix.gt.0) then 
-					
-					u1=-LOG(the12(2))*res20112num-&
-					res2the0112+res212num*LOG(the12(2))+&
-					res2the12
-					
-					u2=res201num
-					
-					
-					res1((nvamax+iter+1):(nvamax+iter+nva01nofix))=&
-					ve01nofix(i,:)*(u1*res2denum-&
-					v*u2)/(res2denum*res2denum)
-					
-					iter = iter +nva01nofix
-				endif
-				if(nva02nofix.gt.0) then 
-					!here
-					u1=-LOG(the12(2))*res20212num-&
-					res2the0212
-					
-					u2=-res202num
-					
-				
-					res1((nvamax+iter+1):(nvamax+iter+nva02nofix))=&
-					ve02nofix(i,:)*(u1*res2denum-&
-					v*u2)/(res2denum*res2denum)
-					iter = iter +nva02nofix
-					
-				endif
-				!here
-				if(nva12nofix.gt.0) then 
-				
-					u1=LOG(the12(2))*res21212num+&
-					res2the1212+LOG(the12(2))*res212num+&
-					res2the12
-					
-					u2=res212num
-					
-				
-					res1((nvamax+iter+1):(nvamax+iter+nva12nofix))=&
-					ve12nofix(i,:)*(u1*res2denum-&
-					v*u2)/(res2denum*res2denum)
-					res1((nvamax+iter+1):(nvamax+iter+nva12nofix))=&
-					res1((nvamax+iter+1):(nvamax+iter+nva12nofix))-&
-					ve12nofix(i,:)*LOG(the12(2)*t3(i))*gl12*vet12
-					
-					iter = iter +nva12nofix
-				endif
 			endif
 			
 	!write(6, *) " done x112 -c4" 			  
 !here!
 			if(fix(6).eq.0)then
-				iter = iter + 1
 				nweib = nweib + 1
 				v=the12(1)*res212num/the12(2)
 				res1(nweib)=v/res2denum
 				res1(nweib)=res1(nweib)-&
 				the12(1)*gl12*vet12/the12(2)+&
 				the12(1)/the12(2)
-				
-				u1=((the12(1)/the12(2))**2)*res21212num+&
-					(the12(1)*(the12(1)-1)/((the12(2))**2))*res212num
-				
-				
-				res1((nvamax+iter))=&
-				u1*res2denum-v*v
-				res1((nvamax+iter))=&
-				res1((nvamax+iter))/(res2denum*res2denum)
-				
-				res1((nvamax+iter))=&
-				res1((nvamax+iter))-the12(1)*(the12(1)-1)* &
-				gl12*vet12/(the12(2)**2)-&
-				the12(1)/(the12(2)**2)
-				
-				
-				
-				if(nva01nofix.gt.0) then 
-					
-					u1=the12(1)*res212num/the12(2)-&
-					the12(1)*res20112num/the12(2)					
-					
-					u2=res201num
-					
-					
-					res1((nvamax+iter+1):(nvamax+iter+nva01nofix))=&
-					ve01nofix(i,:)*(u1*res2denum-&
-					v*u2)/(res2denum*res2denum)
-					
-					iter = iter +nva01nofix
-				endif
-				
-				if(nva02nofix.gt.0) then 
-					
-					u1=-the12(1)*res20212num/the12(2)
-					
-					u2=-res202num
-					
-					res1((nvamax+iter+1):(nvamax+iter+nva02nofix))=&
-					ve02nofix(i,:)*(u1*res2denum-&
-					v*u2)/(res2denum*res2denum)
-					
-					iter = iter +nva02nofix
-				endif
-				if(nva12nofix.gt.0) then 
-				!here
-					u1=res21212num*the12(1)/the12(2)+&
-					the12(1)*res212num/the12(2)
-					
-					u2=res212num
-							
-					
-					res1((nvamax+iter+1):(nvamax+iter+nva12nofix))=&
-					ve12nofix(i,:)*(u1*res2denum-&
-					v*u2)/(res2denum*res2denum)
-					res1((nvamax+iter+1):(nvamax+iter+nva12nofix))=&
-					res1((nvamax+iter+1):(nvamax+iter+nva12nofix))-&
-					ve12nofix(i,:)*the12(1)*gl12*vet12/the12(2)
-					iter = iter +nva12nofix
-				endif
 			endif	
 !here!
 !write(6, *) " done x212 -c4" 	
@@ -15585,15 +13902,7 @@ subroutine firstderivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve0
 			ve01nofix(i,:)*u1/v
 			res1((nvaweib+1):nva01nofix)=res1((nvaweib+1):nva01nofix)+tronc01
 
-			res1((nvamax12weib12+1):nvamax01)=&
-			res20101num*(su12**vet12)*ri12*vet12*ve01square(i,:)
-			res1((nvamax12weib12+1):nvamax01)=&
-			res1((nvamax12weib12+1):nvamax01)/v
-			res1((nvamax12weib12+1):nvamax01)=&
-			res1((nvamax12weib12+1):nvamax01)-ve01square(i,:)*((u1/v)**2)
-			res1((nvamax12weib12+1):nvamax01)=&
-			res1((nvamax12weib12+1):nvamax01)+tronc01square
-
+			
 			end if 
 
 			
@@ -15607,17 +13916,7 @@ subroutine firstderivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve0
 			res1((nva01nofix+1+nvaweib):nva0102)+&
 			tronc02
 			
-			res1((nvamax0112+1):nvamax02)=&
-			(res20202num-res202num)*ri12*vet12*(su12**vet12)
-			res1((nvamax0112+1):nvamax02)=&
-			res1((nvamax0112+1):nvamax02)*ve02square(i,:)	
-			res1((nvamax0112+1):nvamax02)=&
-			res1((nvamax0112+1):nvamax02)/v
-			res1((nvamax0112+1):nvamax02)=&
-			res1((nvamax0112+1):nvamax02)-ve02square(i,:)*((u2/v)**2)
-			res1((nvamax0112+1):nvamax02)=&
-			res1((nvamax0112+1):nvamax02)+tronc02square
-
+			
 			end if 
 
 
@@ -15631,94 +13930,9 @@ subroutine firstderivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve0
 			res1((nva0102+1):nvamax)=&
 			ve12nofix(i,:)*u3/v
 			
-			res1((nvamax0212+1):nvamax12)=&
-			(1-gl12*vet12)*res212num+res21212num+&
-			((1-gl12*vet12)**2)*res2denum+&
-			(2-gl12*vet12)*res212num-gl12*vet12*res2denum
-			res1((nvamax0212+1):nvamax12)=&
-			res1((nvamax0212+1):nvamax12)*(su12**vet12)*ri12*vet12
-			res1((nvamax0212+1):nvamax12)=&
-			res1((nvamax0212+1):nvamax12)*ve12square(i,:)
-			res1((nvamax0212+1):nvamax12)=&
-			res1((nvamax0212+1):nvamax12)/v
-			res1((nvamax0212+1):nvamax12)=&
-			res1((nvamax0212+1):nvamax12)-ve12square(i,:)*((u3/v)**2)			
-
-
+			
 			end if 
 
-			
-			
-			if(nva01nofix.gt.0 .AND. nva02nofix.gt.0) then 
-			kfix=nvamax01+1
-			lfix=kfix-1+nva02nofix
-
-			do j=1,nva01nofix
-			   res1(kfix:lfix)=(-res202num+res20102num)*ri12*vet12
-			   res1(kfix:lfix)=&
-			   res1(kfix:lfix)*ve01nofix(i,j)*ve02nofix(i,:)
-			   res1(kfix:lfix)=&
-			   res1(kfix:lfix)*(su12**vet12)
-			   res1(kfix:lfix)=&
-			   res1(kfix:lfix)*v
-			   res1(kfix:lfix)=&
-			   res1(kfix:lfix)-u1*u2*ve01nofix(i,j)*ve02nofix(i,:)
-			   res1(kfix:lfix)=&
-			   res1(kfix:lfix)/(v**2)
-			   kfix=lfix+1
-			   lfix=lfix+nva02nofix
-			end do
-
-			end if 
-
-			if(nva01nofix.gt.0 .AND. nva12nofix.gt.0) then 
-			
-			kfix=nvamax0102+1
-			lfix=kfix-1+nva12nofix
-
-			do j=1,nva01nofix
-			   res1(kfix:lfix)=&
-			   (1-gl12*vet12)*res201num+&
-			   res212num-res20112num
-			   res1(kfix:lfix)=&
-			   res1(kfix:lfix)*ve01nofix(i,j)*ve12nofix(i,:)
-		           res1(kfix:lfix)=&
-			   res1(kfix:lfix)*ri12*vet12*(su12**vet12)
-			   res1(kfix:lfix)=res1(kfix:lfix)*v
-			   res1(kfix:lfix)=&
-			   res1(kfix:lfix)-u1*u3*ve01nofix(i,j)*ve12nofix(i,:)
-			   res1(kfix:lfix)=&
-			   res1(kfix:lfix)/(v**2)
-			   kfix=lfix+1
-			   lfix=lfix+nva12nofix
-			end do
-
-
-			end if 
-
-			if(nva12nofix.gt.0 .AND. nva02nofix.gt.0) then 
-			
-			kfix=nvamax02+1
-			lfix=kfix-1+nva12nofix
-
-			do j=1,nva02nofix
-			   res1(kfix:lfix)=&
-			   res20212num+(1-gl12*vet12)*res202num
-			   res1(kfix:lfix)=&
-			   -res1(kfix:lfix)*ve02nofix(i,j)*ve12nofix(i,:)
-			   res1(kfix:lfix)=&
-			   res1(kfix:lfix)*ri12*vet12*(su12**vet12)
-			   res1(kfix:lfix)=res1(kfix:lfix)*v
-			   res1(kfix:lfix)=&
-			   res1(kfix:lfix)-ve02nofix(i,j)*ve12nofix(i,:)*u2*u3
-			   res1(kfix:lfix)=res1(kfix:lfix)/(v**2)
-			   kfix=lfix+1
-			   lfix=lfix+nva12nofix
-			end do
-
-			end if 
-
-!here!
                        else
                          if(c(i).eq.5)then ! obs 0-->1 et obs 1-->2
 				!write(6, *) "start c=5" 
@@ -15726,294 +13940,63 @@ subroutine firstderivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve0
 				call fonct(t1(i),the02,ri02,gl02,su02)
 				call fonct(t1(i),the12,ri12,gl12,su12)
 				
-				iter = 0
+				
 				nweib= 0
 			if(fix(1).eq.0)then
-				iter = iter + 1
 				nweib = nweib + 1
 				
 				res1(nweib)=-LOG(the01(2)*t1(i))*gl01*vet01 +&
 				troncweib01011+&
 				LOG(the01(2)*t1(i))+(1/the01(1))
-				
-				res1((nvamax+iter))=&
-				-((LOG(the01(2)*t1(i)))**2)*gl01*vet01 +&
-				troncweib01011square-1/(the01(1)**2)
-				!here!!
-				if(fix(2).eq.0)then
-					iter = iter +1
-					res1((nvamax+iter))=&
-					-(LOG(the01(2)*t1(i))*the01(1)+1)* &
-					gl01*vet01/the01(2)+&
-					troncweib010112+(1/the01(2))
-				endif
-				if(fix(3).eq.0)then
-					iter = iter +1
-					res1((nvamax+iter))=0
-				endif
-				if(fix(4).eq.0)then
-					iter = iter +1
-					res1((nvamax+iter))=0
-				endif
-				if(fix(5).eq.0)then
-					iter = iter +1
-					res1((nvamax+iter))=0
-				endif
-				if(fix(6).eq.0)then
-					iter = iter +1
-					res1((nvamax+iter))=0
-				endif
-				!here!!
-				if(nva01nofix.gt.0) then 
-					
-					res1((nvamax+iter+1):(nvamax+iter+nva01nofix))=&
-					-ve01nofix(i,:)*gl01*vet01*LOG(the01(2)*t1(i))+&
-					troncweib01011beta01
-					iter = iter +nva01nofix
-				endif
-				if(nva02nofix.gt.0) then 
-					
-					res1((nvamax+iter+1):(nvamax+iter+nva02nofix))=0.d0
-					iter = iter +nva02nofix
-				endif
-				if(nva12nofix.gt.0) then 
-					
-					res1((nvamax+iter+1):(nvamax+iter+nva12nofix))=0.d0
-					iter = iter +nva12nofix
-				endif
 			endif 
 			!here!!
 			if(fix(2).eq.0)then
-			
-				iter = iter + 1
 				nweib = nweib + 1
 				
 				res1(nweib)=-the01(1)*gl01*vet01/the01(2) +&
 				troncweib01012+&
 				the01(1)/the01(2)
 
-				res1(nvamax+iter)=&
-				-the01(1)*(the01(1)-1)*gl01*vet01/(the01(2)**2)+&
-				troncweib01012square-&
-				the01(1)/(the01(2)**2)
-				
-				if(fix(3).eq.0)then
-					iter = iter +1
-					res1((nvamax+iter))=0
-				endif
-				if(fix(4).eq.0)then
-					iter = iter +1
-					res1((nvamax+iter))=0
-				endif
-				if(fix(5).eq.0)then
-					iter = iter +1
-					res1((nvamax+iter))=0
-				endif
-				if(fix(6).eq.0)then
-					iter = iter +1
-					res1((nvamax+iter))=0
-				endif
-				if(nva01nofix.gt.0) then 
-				
-					res1((nvamax+iter+1):(nvamax+iter+nva01nofix))=&
-					-ve01nofix(i,:)*gl01*vet01*the01(1)/the01(2)+&
-					troncweib01012beta01
-					iter = iter +nva01nofix
-				endif
-				if(nva02nofix.gt.0) then 
-					
-					res1((nvamax+iter+1):(nvamax+iter+nva02nofix))=0.d0
-					iter = iter +nva02nofix
-				endif
-				if(nva12nofix.gt.0) then 
-					
-					res1((nvamax+iter+1):(nvamax+iter+nva12nofix))=0.d0
-					iter = iter +nva12nofix
-				endif
 			endif
 			!here!!
 			if(fix(3).eq.0)then
-				iter = iter + 1
 				nweib = nweib +1
 				res1(nweib)=-LOG(the02(2)*t1(i))*gl02*vet02 +&
 				troncweib02021
-				
-				res1((nvamax+iter))=&
-				-((LOG(the02(2)*t1(i)))**2)*gl02*vet02+&
-				troncweib02021square
-				!here!!
-				if(fix(4).eq.0)then
-					iter = iter +1
-					res1((nvamax+iter))=&
-					-(LOG(the02(2)*t1(i))*the02(1)+1)* &
-					gl02*vet02/the02(2)+&
-					troncweib02021
-				endif
-				if(fix(5).eq.0)then
-					iter = iter +1
-					res1((nvamax+iter))=0
-				endif
-				if(fix(6).eq.0)then
-					iter = iter +1
-					res1((nvamax+iter))=0
-				endif
-				if(nva01nofix.gt.0) then 
-					
-					res1((nvamax+iter):(nvamax+iter+nva01nofix))=0.d0
-					iter = iter +nva01nofix
-				endif
-				if(nva02nofix.gt.0) then 
-					
-					res1((nvamax+iter):(nvamax+iter+nva02nofix))=&
-					-ve02nofix(i,:)*LOG(the02(2)*t1(i))*gl12*vet12+&
-					troncweib02021beta02
-					iter = iter +nva02nofix
-				endif
-				if(nva12nofix.gt.0) then 
-					
-					res1((nvamax+iter+1):(nvamax+iter+nva12nofix))=0.d0
-					iter = iter +nva12nofix
-				endif
 			endif 
 			!here!!
 			if(fix(4).eq.0)then
-				iter = iter + 1
 				nweib= nweib +1
 				
 				res1(nweib)=-the02(1)*gl02*vet02/the02(2)+&
 				troncweib02022
-				
-				res1(nvamax+iter)=&
-				-the02(1)*(the02(1)-1)*gl02*vet02/(the02(2)**2)+&
-				troncweib02022square
-				!here!!
-				if(fix(5).eq.0)then
-					iter = iter +1
-					res1((nvamax+iter))=0
-				endif
-				if(fix(6).eq.0)then
-					iter = iter +1
-					res1((nvamax+iter))=0
-				endif
-				if(nva01nofix.gt.0) then 
-					
-					res1((nvamax+iter+1):(nvamax+iter+nva01nofix))=0.d0
-					iter = iter +nva01nofix
-				endif
-				if(nva02nofix.gt.0) then 
-					
-					res1((nvamax+iter+1):(nvamax+iter+nva02nofix))=&
-					-ve02nofix(i,:)*gl02*vet02*the02(1)/the02(2)+&
-					troncweib02022beta02
-					iter = iter +nva02nofix
-				endif
-				if(nva12nofix.gt.0) then 
-					res1((nvamax+iter+1):(nvamax+iter+nva12nofix))=0.d0
-					iter = iter +nva12nofix
-				endif
 			endif
 			!here!!
 			
 			if(fix(5).eq.0)then
-				iter = iter + 1
 				nweib= nweib +1
 				res1(nweib)=LOG(the12(2)*t1(i))*gl12*vet12+&
 				(1/the12(1))
-				res1(nvamax+iter)=((LOG(the12(2)*t1(i)))**2)*gl12*vet12-&
-				(1/(the12(1)**2))
-				if(fix(6).eq.0)then
-					iter = iter +1
-					res1((nvamax+iter))=&
-					(LOG(the12(2)*t1(i))*the12(1)+1)* &
-					gl12*vet12/the12(2)+(1/the12(2))
-				endif
-				if(nva01nofix.gt.0) then 
-					res1((nvamax+iter+1):(nvamax+iter+nva01nofix))=0.d0
-					iter = iter +nva01nofix
-				endif
-				if(nva02nofix.gt.0) then 
-				
-					res1((nvamax+iter+1):(nvamax+iter+nva02nofix))=0.d0
-					iter = iter +nva02nofix
-				endif
-				if(nva12nofix.gt.0) then 
-					
-					res1((nvamax+iter+1):(nvamax+iter+nva12nofix))=&
-					ve12nofix(i,:)*LOG(the12(2)*t1(i))*gl12*vet12
-					call fonct(t3(i),the12,ri12,gl12,su12)
-					res1((nvamax+iter+1):(nvamax+iter+nva12nofix))=&
-					res1((nvamax+iter+1):(nvamax+iter+nva12nofix))-&
-					ve12nofix(i,:)*LOG(the12(2)*t3(i))*gl12*vet12
-					
-					iter = iter +nva12nofix
-				endif
 				
 				call fonct(t3(i),the12,ri12,gl12,su12)
 				
 				res1(nweib)=res1(nweib)-&
 				LOG(the12(2)*t3(i))*gl12*vet12+&
 				LOG(the12(2)*t3(i))
-				iter=iter-nva12nofix-nva02nofix-nva01nofix
-				if(fix(6).eq.0)then
-					res1((nvamax+iter))=res1((nvamax+iter))-&
-					(LOG(the12(2)*t3(i))*the12(1)+1)* &
-					gl12*vet12/the12(2)
-					iter=iter-1
-				endif
 				
-				res1(nvamax+iter)=res1(nvamax+iter)-&
-				((LOG(the12(2)*t3(i)))**2)*gl12*vet12
-				
-				iter=iter+nva12nofix+nva02nofix+nva01nofix
-				
-				if(fix(6).eq.0)then
-					iter=iter+1
-				endif
 				call fonct(t1(i),the12,ri12,gl12,su12)
 			endif
 			!here!!
 			
 			if(fix(6).eq.0)then
-				iter = iter + 1
 				nweib= nweib +1
 				res1(nweib)=the12(1)*gl12*vet12/the12(2)+&
 				the12(1)/the12(2)
-				res1(nvamax+iter)=the12(1)*(-1+&
-				the12(1))*gl12*vet12/(the12(2)**2)-&
-				(the12(1)/(the12(2)**2))
-				
-				if(nva01nofix.gt.0) then 
-					res1((nvamax+iter+1):(nvamax+iter+nva01nofix))=0.d0
-					iter = iter +nva01nofix
-				endif
-				if(nva02nofix.gt.0) then 
-				
-					res1((nvamax+iter+1):(nvamax+iter+nva02nofix))=0.d0
-					iter = iter +nva02nofix
-				endif
-				if(nva12nofix.gt.0) then 
-					
-					res1((nvamax+iter+1):(nvamax+iter+nva12nofix))=&
-					ve12nofix(i,:)*the12(1)*gl12*vet12/the12(2)
-					call fonct(t3(i),the12,ri12,gl12,su12)
-					res1((nvamax+iter+1):(nvamax+iter+nva12nofix))=&
-					res1((nvamax+iter+1):(nvamax+iter+nva12nofix))-&
-					ve12nofix(i,:)*the12(1)*gl12*vet12/the12(2)
-					
-					iter = iter +nva12nofix
-				endif
-				
 				call fonct(t3(i),the12,ri12,gl12,su12)
 				
 				res1(nweib)=res1(nweib)-&
 				the12(1)*gl12*vet12/the12(2)
 				
-				iter=iter-nva12nofix-nva02nofix-nva01nofix
-				
-				res1(nvamax+iter)=res1(nvamax+iter)-&
-				the12(1)*(the12(1)-1)*gl12*vet12/(the12(2)**2)
-				
-				iter=iter+nva12nofix+nva02nofix+nva01nofix
 				
 				call fonct(t1(i),the12,ri12,gl12,su12)
 			endif
@@ -16025,53 +14008,23 @@ subroutine firstderivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve0
 				-ve01nofix(i,:)*gl01*vet01+&
 				ve01nofix(i,:)+&
 				tronc01
-				res1((nvamax12weib12+1):nvamax01)=&
-				-ve01square(i,:)*gl01*vet01+&
-				tronc01square
-
-				if(nva02nofix.gt.0) then 
-				res1((nvamax01+1):nvamax0102)=0
-				end if 
-
-				if(nva12nofix.gt.0) then
-				res1((nvamax0102+1):nvamax0112)=0
-				end if 
-
 				end if 
 
 				if(nva02nofix.gt.0) then 
 
 				res1((nva01nofix+1+nvaweib):nva0102)=&
 				-ve02nofix(i,:)*gl02*vet02+tronc02
-				
-
-				res1((nvamax0112+1):nvamax02)=&
-				-ve02square(i,:)*gl02*vet02+&
-				tronc02square
-
-				if(nva12nofix.gt.0) then
-				res1((nvamax02+1):nvamax0212)=0
-				end if 
-
 				end if 
 			
 				if(nva12nofix.gt.0) then 
 
 				res1((nvamax0212+1):nvamax12)=&
 				gl12*vet12
-				res1((nva0102+1):nvamax)=&
-				ve12nofix(i,:)*gl12*vet12+&
-				ve12nofix(i,:)
-
+				
 				call fonct(t3(i),the12,ri12,gl12,su12)
 				res1((nva0102+1):nvamax)=&
 				res1((nva0102+1):nvamax)-ve12nofix(i,:)*gl12*vet12
-				res1((nvamax0212+1):nvamax12)=&
-				res1((nvamax0212+1):nvamax12)-gl12*vet12
-				res1((nvamax0212+1):nvamax12)=&
-				res1((nvamax0212+1):nvamax12)*ve12square(i,:)
 				
-
 				end if 
 				
 				
@@ -16084,29 +14037,19 @@ subroutine firstderivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve0
 				call fonct(t3(i),the02,ri02,gl02,su02)
 				call fonct(t3(i),the12,ri12,gl12,su12)
 
-			call qgaussweibbetaderiv(t1(i),t3(i),the01,&
+			call qgaussweibbetafirstderiv(t1(i),t3(i),the01,&
 			the02,the12,res2denum,res2the01,res2the02,&
-			res2the12,res2thenum,res2thenumsquare,&
-			res2the0101,res2the0102,res2the0112,res2the0202,&
-			res2the0212,res2the1212,res2the0101square,&
-			res2the0102square,res2the0112square,&
-			res2the0202square,res2the0212square,&
-			res2the1212square,res2the0101dsquare,&
-			res2the0202dsquare,res2the1212dsquare,&
-			res201num,res202num,res212num,res20101num,&
-			res20101numbis,&
-			res20102num,res20112num,&
-			res20202num,res20212num,res21212num,&
+			res2the12,res2thenum,&
+			res201num,res202num,res212num,&
 			vet01,vet02,vet12)
 			
-			iter = 0
+
 			nweib = 0
 			u1=((su12**vet12)*res2denum+(su01**vet01)*(su02**vet02))
 				
 				
 				
 			if(fix(1).eq.0)then
-				iter = iter + 1
 				nweib = nweib + 1
 				v=(LOG(the01(2))+(1/the01(1)))*res2denum +&
 				res2thenum-LOG(the01(2))*(res2denum-res201num)-&
@@ -16119,242 +14062,10 @@ subroutine firstderivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve0
 				
 				res1(nweib)=res1(nweib)+troncweib01011
 				
-				res1((nvamax+iter))=&
-				LOG(the01(2))*2/the01(1)*res2denum+&
-				res2thenum*2/the01(1)+&
-				(LOG(the01(2))**2)*res2denum+&
-				LOG(the01(2))*2*res2thenum+&
-				res2thenumsquare-3*(LOG(the01(2))**2)* &
-				(res2denum-res201num)-&
-				LOG(the01(2))*6*res2the01-3*res2the0101square-&
-				LOG(the01(2))*2/the01(1)*(res2denum-res201num)- &
-				res2the01*2/the01(1)+ &
-				(LOG(the01(2))**2)*res20101numbis+&
-				LOG(the01(2))*2*res2the0101+&
-				res2the0101dsquare
-				
-				res1((nvamax+iter))=&
-				res1((nvamax+iter))*(su12**vet12)+&
-				gl01*vet01*(LOG(the01(2)*t3(i))**2)*(-1+&
-				gl01*vet01)*(su01**vet01)*(su02**vet02)
-				res1((nvamax+iter))=&
-				(res1((nvamax+iter))*u1-v*v)/(u1*u1)
-				
-				res1((nvamax+iter))=&
-				res1((nvamax+iter))+&
-				troncweib01011square
-				!ici
-				if(fix(2).eq.0)then
-					
-					u2=res2denum*the01(1)/the01(2)-&
-					(res2denum-res201num)*the01(1)/the01(2)
-					u2=u2*(su12**vet12)-&
-					the01(1)*gl01*vet01*(su01**vet01)*(su02**vet02)/the01(2)
-					
-					u3=the01(1)*LOG(the01(2))*res20101numbis/the01(2)+&
-					the01(1)*res2the0101/the01(2)+&
-					(the01(1)*LOG(the01(2))+2)*res2denum/the01(2)+&
-					the01(1)*res2thenum/the01(2)-&
-					(3*the01(1)*LOG(the01(2))+2)* &
-					(res2denum-res201num)/the01(2)-3* &
-					the01(1)*res2the01/the01(2)
-					
-					u3=u3*(su12**vet12)+&
-					gl01*vet01*(su01**vet01)*(su02**vet02)*(-1-&
-					LOG(the01(2)*t3(i))*the01(1)+&
-					gl01*vet01*LOG(the01(2)*t3(i))*the01(1))/the01(2)
-					
-					iter = iter +1
-					res1((nvamax+iter))=&
-					(u3*u1-v*u2)/(u1*u1)
-					
-					res1((nvamax+iter))=&
-					res1((nvamax+iter))+&
-					troncweib010112
 				endif
-				!ici
-				if(fix(3).eq.0)then
-				
-					u3=-LOG(the01(2))*LOG(the02(2))*res202num-&
-					LOG(the01(2))*res2the02-LOG(the02(2))*res2the02-&
-					res2the0202square-LOG(the02(2))*res202num/the01(1)-&
-					res2the02/the01(1)+&
-					LOG(the01(2))*LOG(the02(2))*res20102num+&
-					LOG(the01(2))*res2the0102+&
-					LOG(the02(2))*res2the0102+&
-					res2the0102square
-					u3=u3*(su12**vet12)+&
-					gl01*vet01*gl02*vet02*(su01**vet01)*(su02**vet02)* &
-					LOG(the01(2)*t3(i))*LOG(the02(2)*t3(i))
-					
-					u2=-LOG(the02(2))*(res202num)-&
-						res2the02
-					u2=u2*(su12**vet12)-&
-					LOG(the02(2)*t3(i))*gl02*vet02* &
-					(su01**vet01)*(su02**vet02)
-					
-					iter = iter +1
-					res1((nvamax+iter))=(u3*u1-&
-					u2*v)/(u1*u1)
-				endif
-				!ici
-				if(fix(4).eq.0)then
-				
-					u3=-LOG(the01(2))*the02(1)*res202num/the02(2)-&
-					the02(1)*res2the02/the02(2)-&
-					the02(1)*res202num/(the01(1)*the02(2))+&
-					LOG(the01(2))*the02(1)*res20102num/the02(2)+&
-					the02(1)*res2the0102/the02(2)
-					
-					u3=u3*(su12**vet12)+&
-					gl01*vet01*gl02*vet02*(su01**vet01)* &
-					(su02**vet02)*the02(1)* &
-					LOG(the01(2)*t3(i))/the02(2)
-					
-					u2=-the02(1)*res202num/the02(2)
-					u2=u2*(su12**vet12)-&
-					the02(1)*gl02*vet02*(su01**vet01)* &
-					(su02**vet02)/the02(2)
-					
-					iter = iter +1
-					res1((nvamax+iter))=(u3*u1-&
-					u2*v)/(u1*u1)
-				endif
-				!ici
-				if(fix(5).eq.0)then
-				
-				
-					u3=LOG(the01(2))*LOG(the12(2))*res212num+&
-					LOG(the01(2))*res2the12+LOG(the12(2))*res2the12+&
-					res2the1212square+LOG(the12(2))*res212num/the01(1)+&
-					res2the12/the01(1)-&
-					LOG(the01(2))*LOG(the12(2))*res20112num-&
-					LOG(the01(2))*res2the0112-&
-					LOG(the12(2))*res2the0112-&
-					res2the0112square
-
-					u3=u3*(su12**vet12)-&
-					gl12*vet12*(su12**vet12)* &
-					LOG(the12(2)*t3(i))* &
-					((LOG(the01(2))+(1/the01(1)))*res2denum +&
-					res2thenum-LOG(the01(2))*(res2denum-res201num)-&
-					res2the01)
-					
-					u2=LOG(the12(2))*(res212num)+&
-						res2the12
-					u2=u2*(su12**vet12)-&
-					LOG(the12(2)*t3(i))*gl12*vet12* &
-					res2denum*(su12**vet12)
-						
-					iter = iter +1
-					res1((nvamax+iter))=(u3*u1-&
-					v*u2)/(u1*u1)
-					
-				endif
-				!ici
-				if(fix(6).eq.0)then
-				
-					
-					u3=&
-					LOG(the01(2))*the12(1)*res212num/the12(2)+&
-					the12(1)/the12(2)*res2the12+res212num* &
-					the12(1)/(the12(2)*the01(1))-&
-					LOG(the01(2))*the12(1)*res20112num/the12(2)-&
-					the12(1)/the12(2)*res2the0112
-					
-					u3=u3*(su12**vet12)-&
-					gl12*vet12*(su12**vet12)*the12(1)* &
-					((LOG(the01(2))+(1/the01(1)))*res2denum +&
-					res2thenum-LOG(the01(2))*(res2denum-res201num)-&
-					res2the01)/the12(2)
-					
-					
-					u2=the12(1)*res212num/the12(2)
-					
-					u2=u2*(su12**vet12)-&
-					the12(1)*gl12*vet12*(su12**vet12)* &
-					res2denum/the12(2)
-					
-					iter = iter +1
-					res1((nvamax+iter))=(u3*u1-&
-					u2*v)/(u1*u1)
-				endif
-				
-				!ici
-				if(nva01nofix.gt.0) then 
-					
-					u3=res2the0101+ &
-					LOG(the01(2))*res20101numbis-&
-					LOG(the01(2))*3*(res2denum-res201num)-&
-					res2the01*3-(res2denum-res201num)/the01(1)+&
-					(LOG(the01(2))+(1/the01(1)))*res2denum+&
-					res2thenum
-					
-					u3= u3*(su12**vet12)-&
-					LOG(the01(2)*t3(i))*gl01*vet01*(1-&
-					gl01*vet01)*(su01**vet01)*(su02**vet02)
-					
-					u2=res201num*(su12**vet12)-&
-					gl01*vet01*(su01**vet01)*(su02**vet02)
-					
-					
-					res1((nvamax+iter+1):(nvamax+iter+nva01nofix))=&
-					ve01nofix(i,:)*(u3*u1-&
-					v*u2)/(u1*u1)
-					res1((nvamax+iter+1):(nvamax+iter+nva01nofix))=&
-					res1((nvamax+iter+1):(nvamax+iter+nva01nofix))+&
-					troncweib01011beta01
-					
-					iter = iter +nva01nofix
-				endif
-				if(nva02nofix.gt.0) then 
-					
-					u3=-(LOG(the01(2))+&
-					(1/the01(1)))*res202num-&
-					res2the02+&
-					LOG(the01(2))*res20102num+&
-					res2the0102
-					
-					u3=u3*(su12**vet12)+&
-					LOG(the01(2)*t3(i))*gl01*vet01* &
-					gl02*vet02*(su01**vet01)*(su02**vet02)
-					
-					u2=-res202num*(su12**vet12)-&
-					gl02*vet02*(su01**vet01)*(su02**vet02)
-					
-					res1((nvamax+iter+1):(nvamax+iter+nva02nofix))=&
-					ve02nofix(i,:)*(u3*u1-&
-					v*u2)/(u1*u1)
-					iter = iter +nva02nofix
-				endif
-				!ici
-				if(nva12nofix.gt.0) then 
-					u3=(LOG(the01(2))+&
-					(1/the01(1)))*res212num+&
-					res2the12-&
-					LOG(the01(2))*res20112num-&
-					res2the0112
-					
-					u3=u3*(su12**vet12)-&
-					gl12*vet12*(su12**vet12)* &
-					((LOG(the01(2))+(1/the01(1)))*res2denum +&
-					res2thenum-LOG(the01(2))*(res2denum-res201num)-&
-					res2the01)
-					
-					u2=res212num*(su12**vet12)-&
-					gl12*vet12*(su12**vet12)*res2denum
-							
-					res1((nvamax+iter+1):(nvamax+iter+nva12nofix))=&
-					ve12nofix(i,:)*(u3*u1-&
-					v*u2)/(u1*u1)
-					
-					iter = iter +nva12nofix
-				endif
-			endif
 			
 			!write(6, *) " done x101 -c6" 	
 			if(fix(2).eq.0)then
-				iter = iter + 1
 				nweib = nweib + 1
 				
 				v=the01(1)*res2denum/the01(2) -&
@@ -16366,179 +14077,12 @@ subroutine firstderivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve0
 				
 				res1(nweib)=v/u1
 				res1(nweib)=res1(nweib)+troncweib01012
-				
-				
-				u2=((the01(1)/the01(2))**2)*res20101numbis+&
-					the01(1)*(the01(1)-1)*res2denum/((the01(2))**2)-&
-					(res2denum-res201num)*(3*(the01(1)**2)-&
-					the01(1))/(the01(2)**2)
-					
-				u2=u2*(su12**vet12)+&
-				gl01*vet01*(su01**vet01)*(su02**vet02)* &
-				the01(1)*(1-the01(1)+gl01*vet01*the01(1))/(the01(2)**2)
-				
-				res1((nvamax+iter))=&
-				(u2*u1-v*v)/(u1*u1)
-				res1((nvamax+iter))=&
-				res1((nvamax+iter))+troncweib01012square
-				
-				if(fix(3).eq.0)then
-				!ici
-					u3=-LOG(the02(2))*the01(1)*res202num/the01(2)-&
-					the01(1)*res2the02/the01(2)+&
-					the01(1)*LOG(the02(2))*res20102num/the01(2)+&
-					the01(1)*res2the0102/the01(2)
-					
-					u3=u3*(su12**vet12)+&
-					gl01*vet01*gl02*vet02*the01(1)* &
-					LOG(the02(2)*t3(i))*(su01**vet01)* &
-					(su02**vet02)/the01(2)
-					
-					
-					
-					u2=-LOG(the02(2))*(res202num)-&
-						res2the02
-					u2=u2*(su12**vet12)-&
-					LOG(the02(2)*t3(i))*gl02*vet02* &
-					(su01**vet01)*(su02**vet02)
-					
-					iter = iter +1
-					res1((nvamax+iter))=(u3*u1-&
-					u2*v)/(u1*u1)
-				endif
-				!ici!
-				if(fix(4).eq.0)then
-				
-					u3=the01(1)*the02(1)*res20102num-&
-					the01(1)*the02(1)*res202num
-					u3=u3/(the01(2)*the02(2))
-					u3=u3*(su12**vet12)+&
-					gl01*vet01*gl02*vet02* &
-					(su01**vet01)*(su02**vet02)* &
-					the01(1)*the02(1)/(the01(2)*the02(2))
-					
-					u2=-the02(1)*res202num/the02(2)
-					u2=u2*(su12**vet12)-&
-					the02(1)*gl02*vet02*(su01**vet01)* &
-					(su02**vet02)/the02(2)
-				
-					iter = iter +1
-					res1((nvamax+iter))=(u3*u1-&
-					u2*v)/(u1*u1)
-				endif
-				!ici
-				if(fix(5).eq.0)then
-				
-					u3=LOG(the12(2))*the01(1)*res212num/the01(2)+&
-					the01(1)*res2the12/the01(2)-&
-					the01(1)*LOG(the12(2))*res20112num/the01(2)-&
-					the01(1)*res2the0112/the01(2)
-					
-					u3=u3*(su12**vet12)-&
-					gl12*vet12*(su12**vet12)*LOG(the12(2)* &
-					t3(i))*(the01(1)*res2denum/the01(2) -&
-					the01(1)*(res2denum-res201num)/the01(2))
-				
-					
-					u2=LOG(the12(2))*(res212num)+&
-						res2the12
-					u2=u2*(su12**vet12)-&
-					LOG(the12(2)*t3(i))*gl12*vet12* &
-					(su12**vet12)*res2denum
-						
-					iter = iter +1
-					res1((nvamax+iter))=(u3*u1-&
-					v*u2)/(u1*u1)
-					
-				endif
-				!ici
-				if(fix(6).eq.0)then
-					
-					u3=-the01(1)*the12(1)*res20112num+&
-					the01(1)*the12(1)*res212num
-					u3=u3/(the01(2)*the12(2))
-					u3=u3*(su12**vet12)-&
-					gl12*vet12*(su12**vet12)*the12(1)* &
-					(the01(1)*res2denum/the01(2) -&
-					the01(1)*(res2denum-res201num)/the01(2))/ &
-					the12(2)
-					
-					
-					u2=the12(1)*res212num/the12(2)
-					u2=u2*(su12**vet12)-&
-					the12(1)*gl12*vet12*(su12**vet12)* &
-					res2denum/the12(2)
-				
-					iter = iter +1
-					res1((nvamax+iter))=(u3*u1-&
-					u2*v)/(u1*u1)
-				endif
-				!ici
-				if(nva01nofix.gt.0) then 
-					
-					u3=the01(1)*res20101numbis/the01(2)+&
-					the01(1)*res2denum/the01(2)-&
-					(3*the01(1)*(res2denum-res201num)/the01(2))
-					u3=u3*(su12**vet12)+&
-					the01(1)*gl01*vet01*(gl01*vet01-1)* &
-					(su01**vet01)*(su02**vet02)/the01(2)
-					
-					u2=res201num*(su12**vet12)-&
-					gl01*vet01*(su01**vet01)*(su02**vet02)
-					
-					
-					res1((nvamax+iter+1):(nvamax+iter+nva01nofix))=&
-					ve01nofix(i,:)*(u3*u1-&
-					v*u2)/(u1*u1)
-					res1((nvamax+iter+1):(nvamax+iter+nva01nofix))=&
-					res1((nvamax+iter+1):(nvamax+iter+nva01nofix))+&
-					troncweib01012beta01
-					
-					iter = iter +nva01nofix
-				endif
-				!ici
-				if(nva02nofix.gt.0) then 
-					
-					u3=res20102num-res202num
-					u3=u3*the01(1)/the01(2)
-					u3=u3*(su12**vet12)+&
-					the01(1)*gl01*vet01*gl02*vet02* &
-					(su01**vet01)*(su02**vet02)/the01(2)
-					
-					u2=-res202num*(su12**vet12)-&
-					gl02*vet02*(su01**vet01)*(su02**vet02)
-					
-					res1((nvamax+iter+1):(nvamax+iter+nva02nofix))=&
-					ve02nofix(i,:)*(u3*u1-&
-					v*u2)/(u1*u1)
-					
-					iter = iter +nva02nofix
-				endif
-				if(nva12nofix.gt.0) then 
-				!ici
-					u3=-res20112num+res212num
-					u3=u3*the01(1)/the01(2)
-					u3=u3*(su12**vet12)-&
-					gl12*vet12*(su12**vet12)* &
-					(the01(1)*res2denum/the01(2) -&
-					the01(1)*(res2denum-res201num)/the01(2))
-				
-					
-					u2=res212num*(su12**vet12)-&
-					gl12*vet12*(su12**vet12)*res2denum
-							
-					res1((nvamax+iter+1):(nvamax+iter+nva12nofix))=&
-					ve12nofix(i,:)*(u3*u1-&
-					v*u2)/(u1*u1)
-					iter = iter +nva12nofix
-				endif
 			endif
 			
 					!write(6, *) " done x201 -c6" 	
 				!ici
 				
 			if(fix(3).eq.0)then
-				iter = iter + 1
 				nweib = nweib + 1
 				
 				v=-LOG(the02(2))*res202num-&
@@ -16551,176 +14095,11 @@ subroutine firstderivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve0
 				res1(nweib)=v/u1
 				res1(nweib)=res1(nweib)+troncweib02021
 				
-				res1((nvamax+iter))=&
-				((LOG(the02(2)))**2)*res20202num+&
-				(2*LOG(the02(2))*res2the0202)+&
-				res2the0202dsquare-&
-				((LOG(the02(2)))**2)*res202num-&
-				(2*LOG(the02(2))*res2the02)-&
-				res2the0202square
-				
-				res1((nvamax+iter))=&
-				res1((nvamax+iter))*(su12**vet12)+&
-				gl02*vet02*(su01**vet01)*(su02**vet02)* &
-				(LOG(the02(2)*t3(i))**2)*(gl02*vet02-1)
-				
-				res1((nvamax+iter))=&
-				res1((nvamax+iter))*u1 -v*v
-				res1((nvamax+iter))=&
-				res1((nvamax+iter))/(u1*u1)
-				res1((nvamax+iter))=&
-				res1((nvamax+iter))+&
-				troncweib02021square
-				
-				!ici
-				if(fix(4).eq.0)then
-				
-					u3=-(the02(1)*LOG(the02(2))+1)* &
-					res202num/the02(2)-&
-					the02(1)*res2the02/the02(2)+ &
-					LOG(the02(2))*the02(1)* &
-					res20202num/the02(2)+ &
-					the02(1)/the02(2)*res2the0202
-					
-					u3=u3*(su12**vet12)+&
-					gl02*vet02*(su01**vet01)*(su02**vet02)* &
-					(-1-LOG(the02(2)*t3(i))*the02(1)+&
-					gl02*vet02*LOG(the02(2)*t3(i))* &
-					the02(1))/the02(2)
-					
-					u2=-the02(1)*res202num/the02(2)
-					u2=u2*(su12**vet12)-&
-					the02(1)*gl02*vet02*(su01**vet01)* &
-					(su02**vet02)/the02(2)
-					
-					iter = iter +1
-					res1((nvamax+iter))=u1*u3-&
-					u2*v
-					res1((nvamax+iter))=&
-					res1((nvamax+iter))/(u1*u1)
-					
-					res1((nvamax+iter))=&
-					res1((nvamax+iter))+&
-					troncweib020212
-				endif
-				!ici
-				if(fix(5).eq.0)then
-				
-					u3=-LOG(the02(2))*LOG(the12(2))*res20212num-&
-					LOG(the02(2))*res2the0212-LOG(the12(2))*res2the0212-&
-					res2the0212square
-					
-					u3=u3*(su12**vet12)-&
-					gl12*vet12*(su12**vet12)*LOG(the12(2)* &
-					t3(i))*(-LOG(the02(2))*res202num-&
-					res2the02)
-					
-					u2=LOG(the12(2))*(res212num)+&
-						res2the12
-					u2=u2*(su12**vet12)-&
-					LOG(the12(2)*t3(i))*gl12*vet12* &
-					(su12**vet12)*res2denum
-						
-					iter = iter +1
-					res1((nvamax+iter))=u1*u3-&
-					v*u2
-					res1((nvamax+iter))=&
-					res1((nvamax+iter))/(u1*u1)
-					
-				endif
-				!ici
-				if(fix(6).eq.0)then
-				
-					u3=-LOG(the02(2))*the12(1)*res20212num/the12(2)-&
-					the12(1)*res2the0212/the12(2)
-					u3=u3*(su12**vet12)-&
-					gl12*vet12*(su12**vet12)*the12(1)* &
-					(-1*LOG(the02(2))*res202num-&
-					res2the02)/the12(2)
-				
-					
-					
-					u2=the12(1)*res212num/the12(2)
-					u2=u2*(su12**vet12)-the12(1)*gl12*vet12* &
-					(su12**vet12)*res2denum/the12(2)
-					
-					iter = iter +1
-					res1((nvamax+iter))=u1*u3-&
-					u2*v
-					res1((nvamax+iter))=&
-					res1((nvamax+iter))/(u1*u1)
-				endif
-				!ici
-				if(nva01nofix.gt.0) then 
-					
-					u3=LOG(the02(2))*res20102num+&
-					res2the0102-res202num*LOG(the02(2))-&
-					res2the02
-					
-					u3=u3*(su12**vet12)+&
-					LOG(the02(2)*t3(i))*gl01*vet01* &
-					gl02*vet02*(su01**vet01)*(su02**vet02)
-					
-					u2=res201num*(su12**vet12)-&
-					gl01*vet01*(su01**vet01)* &
-					(su02**vet02)
-					
-					
-					res1((nvamax+iter+1):(nvamax+iter+nva01nofix))=&
-					ve01nofix(i,:)*(u1*u3-&
-					v*u2)/(u1*u1)
-					
-					iter = iter +nva01nofix
-				endif
-				!ici
-				if(nva02nofix.gt.0) then 
-					
-					u3=-LOG(the02(2))*res202num-&
-					res2the02+LOG(the02(2))*res20202num+&
-					res2the0202
-					u3=u3*(su12**vet12)+&
-					LOG(the02(2)*t3(i))*gl02*vet02* &
-					(su01**vet01)*(su02**vet02)* &
-					(-1+gl02*vet02)
-					
-					u2=-res202num*(su12**vet12)-&
-					gl02*vet02*(su01**vet01)*(su02**vet02)
-					
-					
-					res1((nvamax+iter+1):(nvamax+iter+nva02nofix))=&
-					ve02nofix(i,:)*(u1*u3-&
-					v*u2)/(u1*u1)
-					res1((nvamax+iter+1):(nvamax+iter+nva02nofix))=&
-					res1((nvamax+iter+1):(nvamax+iter+nva02nofix))+&
-					troncweib02021beta02
-					iter = iter +nva02nofix
-					
-				endif
-				!ici
-				if(nva12nofix.gt.0) then 
-				
-					u3=-LOG(the02(2))*res20212num-&
-					res2the0212
-					u3=u3*(su12**vet12)-&
-					gl12*vet12*(su12**vet12)* &
-					(-1*LOG(the02(2))*res202num-&
-					res2the02)
-					
-					u2=res212num*(su12**vet12)-&
-					gl12*vet12*(su12**vet12)*res2denum
-							
-					res1((nvamax+iter+1):(nvamax+iter+nva12nofix))=&
-					ve12nofix(i,:)*(u1*u3-&
-					v*u2)/(u1*u1)
-					
-					iter = iter +nva12nofix
-				endif
 			endif
 			
              !write(6, *) " done x102 -c6" 	
 			!ici
 			if(fix(4).eq.0)then
-				iter = iter + 1
 				nweib = nweib + 1
 				v=-the02(1)*res202num/the02(2)
 				
@@ -16731,128 +14110,11 @@ subroutine firstderivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve0
 				res1(nweib)=v/u1
 				res1(nweib)=res1(nweib)+troncweib02022
 				
-				u3=((the02(1)/the02(2))**2)*res20202num-&
-					(the02(1)*(the02(1)-1)/((the02(2))**2))*res202num
-
-				
-				u3=u3*(su12**vet12)+&
-				gl02*vet02*(su01**vet01)*(su02**vet02)* &
-				the02(1)*(1-the02(1)+the02(1)*gl02*vet02)/ &
-				(the02(2)**2)
-				
-				res1((nvamax+iter))=&
-				u1*u3-v*v
-				res1((nvamax+iter))=&
-				res1((nvamax+iter))/(u1*u1)
-				
-				res1((nvamax+iter))=&
-				res1((nvamax+iter))+troncweib02022square
-				
-				!ici
-				if(fix(5).eq.0)then
-				
-					u3=-the02(1)*LOG(the12(2))*res20212num/the02(2)-&
-					the02(1)*res2the0212/the02(2)
-					u3=u3*(su12**vet12)+&
-					gl12*vet12*(su12**vet12)*LOG(the12(2)*t3(i))* &
-					(the02(1)*res202num/the02(2))
-					
-					u2=LOG(the12(2))*(res212num)+&
-						res2the12
-					u2=u2*(su12**vet12)-&
-					LOG(the12(2)*t3(i))*gl12*vet12* &
-					(su12**vet12)*res2denum
-						
-					iter = iter +1
-					res1((nvamax+iter))=u1*u3-&
-					v*u2
-					res1((nvamax+iter))=&
-					res1((nvamax+iter))/(u1*u1)
-					
-				endif
-				!ici
-				if(fix(6).eq.0)then
-					
-					u3=-the02(1)*the12(1)*res20212num
-					u3=u3/(the02(2)*the12(2))
-					u3=u3*(su12**vet12)+&
-					gl12*vet12*(su12**vet12)*the12(1)* &
-					(the02(1)*res202num/the02(2))/the12(2)
-					
-					u2=the12(1)*res212num/the12(2)
-					u2=u2*(su12**vet12)-&
-					the12(1)*gl12*vet12*(su12**vet12)* &
-					res2denum/the12(2)
-				
-					iter = iter +1
-					res1((nvamax+iter))=u1*u3-&
-					u2*v
-					res1((nvamax+iter))=&
-					res1((nvamax+iter))/(u1*u1)
-				endif
-				
-				!ici
-				if(nva01nofix.gt.0) then 
-					
-					u3=-the02(1)*res202num/the02(2)+&
-					the02(1)*res20102num/the02(2)		
-					u3=u3*(su12**vet12)+&
-					the02(1)*gl02*vet02*gl01*vet01* &
-					(su01**vet01)*(su02**vet02)/the02(2)
-					
-					u2=res201num*(su12**vet12)-&
-					gl01*vet01*(su01**vet01)*(su02**vet02)
-					
-					res1((nvamax+iter+1):(nvamax+iter+nva01nofix))=&
-					ve01nofix(i,:)*(u1*u3-&
-					v*u2)/(u1*u1)
-					
-					iter = iter +nva01nofix
-				endif
-				!ici
-				if(nva02nofix.gt.0) then 
-					
-					u3=the02(1)*res20202num/the02(2)-&
-					the02(1)*res202num/the02(2)
-					u3=u3*(su12**vet12)+&
-					the02(1)*gl02*vet02*(su01**vet01)* &
-					(su02**vet02)*(gl02*vet02-1)/the02(2)
-					
-					u2=-res202num*(su12**vet12)-&
-					gl02*vet02*(su01**vet01)*(su02**vet02)
-					
-					res1((nvamax+iter+1):(nvamax+iter+nva02nofix))=&
-					ve02nofix(i,:)*(u1*u3-&
-					v*u2)/(u1*u1)
-					res1((nvamax+iter+1):(nvamax+iter+nva02nofix))=&
-					res1((nvamax+iter+1):(nvamax+iter+nva02nofix))+&
-					troncweib02022beta02
-					
-					iter = iter +nva02nofix
-				endif
-				!ici
-				if(nva12nofix.gt.0) then 
-					u3=-res20212num*the02(1)/the02(2)
-					u3=u3*(su12**vet12)+&
-					gl12*vet12*(su12**vet12)* &
-					(the02(1)*res202num/the02(2))
-					
-					u2=res212num*(su12**vet12)-&
-					gl12*vet12*(su12**vet12)*res2denum
-							
-					res1((nvamax+iter+1):(nvamax+iter+nva12nofix))=&
-					ve12nofix(i,:)*(u1*u3-&
-					v*u2)/(u1*u1)
-					iter = iter +nva12nofix
-				endif
 			endif	
 
 			!ici
 			!write(6, *) " done x202 -c6" 	
 			if(fix(5).eq.0)then
-			
-			
-				iter = iter + 1
 				nweib = nweib + 1
 				
 				v=LOG(the12(2))*res212num+&
@@ -16863,124 +14125,11 @@ subroutine firstderivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve0
 				
 				res1(nweib)=v/u1
 				
-				res1((nvamax+iter))=&
-				((LOG(the12(2)))**2)* &
-				res21212num+2*LOG(the12(2))*res2the1212+&
-				res2the1212dsquare+&
-				((LOG(the12(2)))**2)* &
-				res212num+2*LOG(the12(2))*res2the12+&
-				res2the1212square
-				
-				res1((nvamax+iter))=&
-				res1((nvamax+iter))*(su12**vet12)+&
-				gl12*vet12*(su12**vet12)*LOG(the12(2)* &
-				t3(i))*(-2*(LOG(the12(2))*res212num+&
-				res2the12)-LOG(the12(2)*t3(i))*res2denum* &
-				(1-gl12*vet12))
-				
-				res1((nvamax+iter))=&
-				res1((nvamax+iter))*u1 -v*v
-				res1((nvamax+iter))=&
-				res1((nvamax+iter))/(u1*u1)
-				
-				!ici
-				if(fix(6).eq.0)then
-			
-					u2=the12(1)*res212num/the12(2)
-					
-					u3=LOG(the12(2))*the12(1)*res21212num/the12(2)+&
-					the12(1)*res2the1212/the12(2)+&
-					(the12(1)*LOG(the12(2))+1)*res212num/the12(2)+&
-					the12(1)*res2the12/the12(2)
-					u3=u3*(su12**vet12)+&
-					gl12*vet12*(su12**vet12)* &
-					(-1*LOG(the12(2)*t3(i))*u2 - &
-					(LOG(the12(2))*res212num+&
-					res2the12)*the12(1)/the12(2)+&
-					res2denum*(-1-LOG(the12(2)*t3(i))*the12(1)+&
-					gl12*vet12*the12(1)*LOG(the12(2)*t3(i)))/ &
-					the12(2))
-					
-					u2=u2*(su12**vet12)-&
-					the12(1)*gl12*vet12*(su12**vet12)* &
-					res2denum/the12(2)
-					
-					
-					iter = iter +1
-					
-					res1((nvamax+iter))=u1*u3-&
-					u2*v
-					res1((nvamax+iter))=&
-					res1((nvamax+iter))/(u1*u1)
-				endif
-				
-				if(nva01nofix.gt.0) then 
-					!ici
-					u3=-LOG(the12(2))*res20112num-&
-					res2the0112+res212num*LOG(the12(2))+&
-					res2the12
-					u3=u3*(su12**vet12)-&
-					LOG(the12(2)*t3(i))*gl12*vet12* &
-					(su12**vet12)*res201num
-					
-					
-					u2=res201num*(su12**vet12)-&
-					gl01*vet01*(su01**vet01)*(su02**vet02)
-					
-					
-					res1((nvamax+iter+1):(nvamax+iter+nva01nofix))=&
-					ve01nofix(i,:)*(u1*u3-&
-					v*u2)/(u1*u1)
-					
-					iter = iter +nva01nofix
-				endif
-				if(nva02nofix.gt.0) then 
-					!ici
-					u3=-LOG(the12(2))*res20212num-&
-					res2the0212
-					u3=u3*(su12**vet12)-&
-					LOG(the12(2)*t3(i))*gl12*vet12* &
-					(su12**vet12)*(-res202num)
-					
-					u2=-res202num*(su12**vet12)-&
-					gl02*vet02*(su01**vet01)*(su02**vet02)
-					
-				
-					res1((nvamax+iter+1):(nvamax+iter+nva02nofix))=&
-					ve02nofix(i,:)*(u1*u3-&
-					v*u2)/(u1*u1)
-					iter = iter +nva02nofix
-					
-				endif
-				if(nva12nofix.gt.0) then 
-					!ici
-					u3=LOG(the12(2))*res21212num+&
-					res2the1212+LOG(the12(2))*res212num+&
-					res2the12
-					u3=u3*(su12**vet12)-&
-					gl12*vet12*(su12**vet12)* &
-					(LOG(the12(2))*res212num+&
-					res2the12)-gl12*vet12*(su12**vet12)* &
-					LOG(the12(2)*t3(i))* &
-					(res212num + res2denum*(1-gl12*vet12))
-					
-					u2=res212num*(su12**vet12)-&
-					gl12*vet12*(su12**vet12)*res2denum
-				
-					res1((nvamax+iter+1):(nvamax+iter+nva12nofix))=&
-					ve12nofix(i,:)*(u1*u3-&
-					v*u2)/(u1*u1)
-					
-					iter = iter +nva12nofix
-				endif
 			endif
 			
 			  !ici
 			!write(6, *) " done x112 -c6" 	
 			if(fix(6).eq.0)then
-			
-			
-				iter = iter + 1
 				nweib = nweib + 1
 				
 				v=the12(1)*res212num/the12(2)
@@ -16990,77 +14139,6 @@ subroutine firstderivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve0
 				
 				res1(nweib)=v/u1
 				
-				u3=((the12(1)/the12(2))**2)*res21212num+&
-					(the12(1)*(the12(1)-1)/((the12(2))**2))*res212num
-				u3=u3*(su12**vet12)+&
-				gl12*vet12*(su12**vet12)*the12(1)* &
-				(-2*(the12(1)*res212num/the12(2))-&
-				res2denum*(-1+the12(1)-&
-				gl12*vet12*the12(1))/the12(2))/the12(2)
-				
-				
-				res1((nvamax+iter))=&
-				u1*u3-v*v
-				res1((nvamax+iter))=&
-				res1((nvamax+iter))/(u1*u1)
-				
-				
-				if(nva01nofix.gt.0) then 
-					!ici
-					u3=the12(1)*res212num/the12(2)-&
-					the12(1)*res20112num/the12(2)					
-					u3=u3*(su12**vet12)-&
-					the12(1)*gl12*vet12*res201num* &
-					(su12**vet12)/the12(2)
-					
-					u2=res201num*(su12**vet12)-&
-					gl01*vet01*(su01**vet01)*(su02**vet02)
-					
-					
-					res1((nvamax+iter+1):(nvamax+iter+nva01nofix))=&
-					ve01nofix(i,:)*(u1*u3-&
-					v*u2)/(u1*u1)
-					
-					iter = iter +nva01nofix
-				endif
-				
-				if(nva02nofix.gt.0) then 
-					!ici
-					u3=-the12(1)*res20212num/the12(2)
-					u3=u3*(su12**vet12)+&
-					the12(1)*gl12*vet12*(su12**vet12)* &
-					(res202num)/the12(2)
-					
-					u2=-res202num*(su12**vet12)-&
-					gl02*vet02*(su01**vet01)*(su02**vet02)
-					
-					res1((nvamax+iter+1):(nvamax+iter+nva02nofix))=&
-					ve02nofix(i,:)*(u1*u3-&
-					v*u2)/(u1*u1)
-					
-					iter = iter +nva02nofix
-				endif
-				if(nva12nofix.gt.0) then 
-				!ici
-					u3=res21212num*the12(1)/the12(2)+&
-					the12(1)*res212num/the12(2)
-					u3=u3*(su12**vet12)-&
-					gl12*vet12*(su12**vet12)* &
-					(the12(1)*res212num/the12(2))-&
-					gl12*vet12*(su12**vet12)*the12(1)* &
-					(res212num+res2denum*(1-gl12*vet12))/ &
-					the12(2)
-					
-					u2=res212num*(su12**vet12)-&
-					gl12*vet12*(su12**vet12)*res2denum
-							
-					
-					res1((nvamax+iter+1):(nvamax+iter+nva12nofix))=&
-					ve12nofix(i,:)*(u1*u3-&
-					v*u2)/(u1*u1)
-					
-					iter = iter +nva12nofix
-				endif
 			endif	
 			
 			!write(6, *) " done x212 -c6" 	
@@ -17076,23 +14154,7 @@ subroutine firstderivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve0
 				res1((nvaweib+1):(nvaweib+nva01nofix))=&
 				res1((nvaweib+1):(nvaweib+nva01nofix))+tronc01
 
-				res1((nvamax12weib12+1):nvamax01)=&
-				res20101num*(su12**vet12)
-				resint=(su01**vet01)*(su02**vet02)
-				resint=resint*gl01*vet01*(1-gl01*vet01)
-				res1((nvamax12weib12+1):nvamax01)=&
-				res1((nvamax12weib12+1):nvamax01)-resint
 				
-				res1((nvamax12weib12+1):nvamax01)=&
-				res1((nvamax12weib12+1):nvamax01)*ve01square(i,:)
-				res1((nvamax12weib12+1):nvamax01)=&
-				res1((nvamax12weib12+1):nvamax01)/v
-
-				res1((nvamax12weib12+1):nvamax01)=&
-				res1((nvamax12weib12+1):nvamax01)-ve01square(i,:)*((u1/v)**2)
-				res1((nvamax12weib12+1):nvamax01)=&
-				res1((nvamax12weib12+1):nvamax01)+tronc01square
-
 				end if 
 				
 				if(nva02nofix.gt.0) then 
@@ -17105,19 +14167,7 @@ subroutine firstderivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve0
 				res1((nva01nofix+1+nvaweib):nva0102)+&
 				tronc02
 
-				res1((nvamax0112+1):nvamax02)=&
-				(su12**vet12)*(res20202num-res202num)-&
-				gl02*vet02*(su01**vet01)*(su02**vet02)*(1-gl02*vet02)
-				res1((nvamax0112+1):nvamax02)=&
-				res1((nvamax0112+1):nvamax02)*ve02square(i,:)
-				res1((nvamax0112+1):nvamax02)=&
-				res1((nvamax0112+1):nvamax02)/v
-
-				res1((nvamax0112+1):nvamax02)=&
-				res1((nvamax0112+1):nvamax02)-ve02square(i,:)*((u2/v)**2)
-				res1((nvamax0112+1):nvamax02)=&
-				res1((nvamax0112+1):nvamax02)+tronc02square
-
+				
 				
 				end if 
 
@@ -17128,114 +14178,19 @@ subroutine firstderivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve0
 				res1((nva0102+1):nvamax)=&
 				ve12nofix(i,:)*u3/v
 
-				res1((nvamax0212+1):nvamax12)=&
-				res21212num+(1-gl12*vet12)*res212num-&
-				gl12*vet12*(1-gl12*vet12)*res2denum-&
-				gl12*vet12*res212num
-				resint=(su12**vet12)
-				res1((nvamax0212+1):nvamax12)=&
-				res1((nvamax0212+1):nvamax12)*resint*ve12square(i,:)
-				res1((nvamax0212+1):nvamax12)=&
-				res1((nvamax0212+1):nvamax12)/v
-				res1((nvamax0212+1):nvamax12)=&
-				res1((nvamax0212+1):nvamax12)-ve12square(i,:)*((u3/v)**2)
-
+				
 
 				end if 
                         	
-				
-				if(nva01nofix.gt.0 .AND. nva02nofix.gt.0) then 
-
-				kfix=nvamax01+1
-				lfix=kfix-1+nva02nofix
-
-				do j=1,nva01nofix
-			   		res1(kfix:lfix)=&
-					-(res202num-res20102num)*(su12**vet12)
-					resint=(su01**vet01)*(su02**vet02)
-					res1(kfix:lfix)=res1(kfix:lfix)+&
-					gl01*vet01*gl02*vet02*resint
-			   		res1(kfix:lfix)=&
-					res1(kfix:lfix)*ve01nofix(i,j)*ve02nofix(i,:)
-			   		res1(kfix:lfix)=&
-					res1(kfix:lfix)*v
-			   		res1(kfix:lfix)=&
-					res1(kfix:lfix)-u1*u2*ve01nofix(i,j)*ve02nofix(i,:)
-					res1(kfix:lfix)=&
-			   		res1(kfix:lfix)/(v**2)
-			   		kfix=lfix+1
-			   		lfix=lfix+nva02nofix
-				end do
-
-				end if 
-
-				if(nva01nofix.gt.0 .AND. nva12nofix.gt.0) then 
-
-				
-				kfix=nvamax0102+1
-				lfix=kfix-1+nva12nofix
-
-				do j=1,nva01nofix
-			  		res1(kfix:lfix)=-gl12*vet12*res201num+&
-					res212num-res20112num
-					resint=(su12**vet12)
-			   		res1(kfix:lfix)=&
-			  		res1(kfix:lfix)*resint*ve01nofix(i,j)*ve12nofix(i,:)
-		           		res1(kfix:lfix)=&
-			   		res1(kfix:lfix)*v
-			   		res1(kfix:lfix)=&
-					res1(kfix:lfix)-u1*u3*ve01nofix(i,j)*ve12nofix(i,:)
-			   		res1(kfix:lfix)=&
-			   		res1(kfix:lfix)/(v**2)
-			   		kfix=lfix+1
-			   		lfix=lfix+nva12nofix
-				end do
-
-				end if 
-
-				
-				if(nva12nofix.gt.0 .AND. nva02nofix.gt.0) then 
-
-				kfix=nvamax02+1
-				lfix=kfix-1+nva12nofix
-
-				do j=1,nva02nofix
-			  		res1(kfix:lfix)=&
-					-res20212num+gl12*vet12*res202num
-					resint=(su12**vet12)
-					res1(kfix:lfix)=&
-					res1(kfix:lfix)*resint*ve02nofix(i,j)*ve12nofix(i,:)
-					res1(kfix:lfix)=&
-					res1(kfix:lfix)*v
-					res1(kfix:lfix)=&
-					res1(kfix:lfix)-u2*u3*ve02nofix(i,j)*ve12nofix(i,:)
-					res1(kfix:lfix)=&
-			   		res1(kfix:lfix)/(v**2)
-			   		kfix=lfix+1
-			   		lfix=lfix+nva12nofix
-				end do
-
-				end if 
-
-
 				
                             else ! passage 0-->2  
 				
 				!write(6, *) "start c=7" 
 				
-			call qgaussweibbetaderiv(t1(i),t3(i),the01,&
+			call qgaussweibbetafirstderiv(t1(i),t3(i),the01,&
 			the02,the12,res2denum,res2the01,res2the02,&
-			res2the12,res2thenum,res2thenumsquare,&
-			res2the0101,res2the0102,res2the0112,res2the0202,&
-			res2the0212,res2the1212,res2the0101square,&
-			res2the0102square,res2the0112square,&
-			res2the0202square,res2the0212square,&
-			res2the1212square,res2the0101dsquare,&
-			res2the0202dsquare,res2the1212dsquare,&
-			res201num,res202num,res212num,res20101num,&
-			res20101numbis,&
-			res20102num,res20112num,&
-			res20202num,res20212num,res21212num,&
+			res2the12,res2thenum,&
+			res201num,res202num,res212num,&
 			vet01,vet02,vet12)
 			
 			call fonct(t3(i),the01,ri01,gl01,su01)
@@ -17244,7 +14199,6 @@ subroutine firstderivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve0
 
 			!write(6, *) "calculate integrals -c7" 
 			
-			iter = 0
 			nweib = 0
 			
 			
@@ -17253,7 +14207,6 @@ subroutine firstderivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve0
 				
 			
 			if(fix(1).eq.0)then
-				iter = iter + 1
 				nweib = nweib + 1
 				v=(LOG(the01(2))+(1/the01(1)))*res2denum +&
 				res2thenum-LOG(the01(2))*(res2denum-res201num)-&
@@ -17267,275 +14220,10 @@ subroutine firstderivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve0
 				res1(nweib)=v/u1
 				
 				res1(nweib)=res1(nweib)+troncweib01011
-				!ici
-
-				
-				res1((nvamax+iter))=&
-				LOG(the01(2))*2/the01(1)*res2denum+&
-				res2thenum*2/the01(1)+&
-				(LOG(the01(2))**2)*res2denum+&
-				LOG(the01(2))*2*res2thenum+&
-				res2thenumsquare-3*(LOG(the01(2))**2)* &
-				(res2denum-res201num)-&
-				LOG(the01(2))*6*res2the01-3*res2the0101square-&
-				LOG(the01(2))*2/the01(1)*(res2denum-res201num)- &
-				res2the01*2/the01(1)+ &
-				(LOG(the01(2))**2)*res20101numbis+&
-				LOG(the01(2))*2*res2the0101+&
-				res2the0101dsquare
-				
-				res1((nvamax+iter))=&
-				res1((nvamax+iter))*(su12**vet12)*ri12*vet12+&
-				gl01*vet01*(LOG(the01(2)*t3(i))**2)*(-1+&
-				gl01*vet01)*(su01**vet01)*(su02**vet02)*ri02*vet02
-				
-				res1((nvamax+iter))=&
-				(res1((nvamax+iter))*u1-v*v)/(u1*u1)
-				
-				res1((nvamax+iter))=&
-				res1((nvamax+iter))+&
-				troncweib01011square
-				!la
-				if(fix(2).eq.0)then
-					
-					u2=res2denum*the01(1)/the01(2)-&
-					(res2denum-res201num)*the01(1)/the01(2)
-					u2=u2*(su12**vet12)*ri12*vet12-&
-					ri02*vet02*the01(1)*gl01*vet01* &
-					(su01**vet01)*(su02**vet02)/the01(2)
-					
-					u3=the01(1)*LOG(the01(2))*res20101numbis/the01(2)+&
-					the01(1)*res2the0101/the01(2)+&
-					(the01(1)*LOG(the01(2))+2)*res2denum/the01(2)+&
-					the01(1)*res2thenum/the01(2)-&
-					(3*the01(1)*LOG(the01(2))+2)* &
-					(res2denum-res201num)/the01(2)-3* &
-					the01(1)*res2the01/the01(2)
-					
-					u3=u3*(su12**vet12)*ri12*vet12+&
-					ri02*vet02*gl01*vet01*(su01**vet01)* &
-					(su02**vet02)*(-1-&
-					LOG(the01(2)*t3(i))*the01(1)+&
-					gl01*vet01*LOG(the01(2)*t3(i))*the01(1))/the01(2)
-					
-					iter = iter +1
-					res1((nvamax+iter))=&
-					(u3*u1-v*u2)/(u1*u1)
-					
-					res1((nvamax+iter))=&
-					res1((nvamax+iter))+troncweib010112
-				endif
-				!la
-				if(fix(3).eq.0)then
-				
-					u3=&
-					-LOG(the01(2))*LOG(the02(2))*res202num-&
-					LOG(the01(2))*res2the02-&
-					LOG(the02(2))*res2the02-&
-					res2the0202square-&
-					LOG(the02(2))*res202num/the01(1)-&
-					res2the02/the01(1)+&
-					LOG(the01(2))*LOG(the02(2))*res20102num+&
-					LOG(the01(2))*res2the0102+&
-					LOG(the02(2))*res2the0102+&
-					res2the0102square
-					
-					
-					u3=u3*(su12**vet12)*ri12*vet12+&
-					ri02*vet02*gl01*vet01* &
-					(su01**vet01)*(su02**vet02)* &
-					LOG(the01(2)*t3(i))* &
-					(LOG(the02(2)*t3(i))*gl02*vet02-&
-					LOG(the02(2)*t3(i))-&
-					(1/the02(1)))
-					
-					
-					u2=-LOG(the02(2))*(res202num)-&
-						res2the02
-					u2=u2*(su12**vet12)*ri12*vet12+&
-					ri02*vet02*(su01**vet01)*(su02**vet02)* &
-					(LOG(the02(2)*t3(i))+(1/the02(1))-&
-					LOG(the02(2)*t3(i))*gl02*vet02)
-					
-					iter = iter +1
-					res1((nvamax+iter))=(u3*u1-&
-					u2*v)/(u1*u1)
-				endif
-				!la
-				if(fix(4).eq.0)then
-				
-					u3=-LOG(the01(2))*the02(1)*res202num/the02(2)-&
-					the02(1)*res2the02/the02(2)-&
-					the02(1)*res202num/(the01(1)*the02(2))+&
-					LOG(the01(2))*the02(1)*res20102num/the02(2)+&
-					the02(1)*res2the0102/the02(2)
-					
-					
-					u3=u3*(su12**vet12)*ri12*vet12-&
-					ri02*vet02*gl01*vet01* &
-					(1-gl02*vet02)*(su01**vet01)* &
-					(su02**vet02)*the02(1)* &
-					LOG(the01(2)*t3(i))/the02(2)
-					
-					u2=-the02(1)*res202num/the02(2)
-					u2=u2*(su12**vet12)*ri12*vet12+&
-					ri02*vet02*the02(1)*(1-gl02*vet02)*(su01**vet01)* &
-					(su02**vet02)/the02(2)
-
-					
-					iter = iter +1
-					res1((nvamax+iter))=(u3*u1-&
-					u2*v)/(u1*u1)
-				endif
-				!la
-				if(fix(5).eq.0)then
-				
-					
-					u3=LOG(the01(2))*LOG(the12(2))*res212num+&
-					LOG(the01(2))*res2the12+LOG(the12(2))*res2the12+&
-					res2the1212square+LOG(the12(2))*res212num/the01(1)+&
-					res2the12/the01(1)-&
-					LOG(the01(2))*LOG(the12(2))*res20112num-&
-					LOG(the01(2))*res2the0112-&
-					LOG(the12(2))*res2the0112-&
-					res2the0112square
-					
-					u3=u3*(su12**vet12)*ri12*vet12+&
-					ri12*vet12*(su12**vet12)* &
-					(LOG(the12(2)*t3(i))+ &
-					(1/the12(1))-&
-					LOG(the12(2)*t3(i))*gl12*vet12)* &
-					((LOG(the01(2))+(1/the01(1)))*res2denum +&
-				res2thenum-LOG(the01(2))*(res2denum-res201num)-&
-				res2the01)
-					
-					
-					u2=LOG(the12(2))*(res212num)+&
-						res2the12
-					u2=u2*(su12**vet12)*ri12*vet12+&
-					ri12*vet12*(su12**vet12)*res2denum* &
-					(LOG(the12(2)*t3(i))+&
-					(1/the12(1))-&
-					LOG(the12(2)*t3(i))*gl12*vet12)
-						
-						
-					
-					iter = iter +1
-					res1((nvamax+iter))=(u3*u1-&
-					v*u2)/(u1*u1)
-					
-				endif
-				!la
-				if(fix(6).eq.0)then
-				
-					u3=&
-					LOG(the01(2))*the12(1)*res212num/the12(2)+&
-					the12(1)/the12(2)*res2the12+res212num* &
-					the12(1)/(the12(2)*the01(1))-&
-					LOG(the01(2))*the12(1)*res20112num/the12(2)-&
-					the12(1)/the12(2)*res2the0112
-					
-					u3=u3*(su12**vet12)*ri12*vet12+&
-					ri12*vet12*(su12**vet12)*the12(1)* &
-					(1-gl12*vet12)* &
-					((LOG(the01(2))+(1/the01(1)))*res2denum +&
-					res2thenum-LOG(the01(2))*(res2denum-res201num)-&
-					res2the01)/the12(2)
-					
-					
-					
-					u2=the12(1)*res212num/the12(2)
-					u2=u2*(su12**vet12)*ri12*vet12+&
-					ri12*vet12*the12(1)*(1-gl12*vet12)* &
-					(su12**vet12)* &
-					res2denum/the12(2)
-					
-					iter = iter +1
-					res1((nvamax+iter))=(u3*u1-&
-					u2*v)/(u1*u1)
-				endif
-				
-				!la
-				if(nva01nofix.gt.0) then 
-					
-					u3=res2the0101+ &
-					LOG(the01(2))*res20101numbis-&
-					LOG(the01(2))*3*(res2denum-res201num)-&
-					res2the01*3-(res2denum-res201num)/the01(1)+&
-					(LOG(the01(2))+(1/the01(1)))*res2denum+&
-					res2thenum
-					
-					u3= u3*(su12**vet12)*ri12*vet12-&
-					ri02*vet02*LOG(the01(2)*t3(i))*gl01*vet01*(1-&
-					gl01*vet01)*(su01**vet01)*(su02**vet02)
-					
-					u2=res201num*(su12**vet12)*ri12*vet12-&
-					ri02*vet02*gl01*vet01*(su01**vet01)*(su02**vet02)
-					
-					
-					res1((nvamax+iter+1):(nvamax+iter+nva01nofix))=&
-					ve01nofix(i,:)*(u3*u1-&
-					v*u2)/(u1*u1)
-					res1((nvamax+iter+1):(nvamax+iter+nva01nofix))=&
-					res1((nvamax+iter+1):(nvamax+iter+nva01nofix))+&
-					troncweib01011beta01
-					
-					iter = iter +nva01nofix
-				endif
-				!la
-				if(nva02nofix.gt.0) then 
-					
-					
-					u3=-(LOG(the01(2))+&
-					(1/the01(1)))*res202num-&
-					res2the02+&
-					LOG(the01(2))*res20102num+&
-					res2the0102
-					
-					u3=u3*(su12**vet12)*ri12*vet12-&
-					ri02*vet02*LOG(the01(2)*t3(i))*gl01*vet01* &
-					(su01**vet01)*(su02**vet02)* &
-					(1-gl02*vet02)
-					
-					u2=-res202num*(su12**vet12)*ri12*vet12+&
-					(1-gl02*vet02)*(su01**vet01)*(su02**vet02)* &
-					ri02*vet02
-					
-					res1((nvamax+iter+1):(nvamax+iter+nva02nofix))=&
-					ve02nofix(i,:)*(u3*u1-&
-					v*u2)/(u1*u1)
-					iter = iter +nva02nofix
-				endif
-				!ici
-				if(nva12nofix.gt.0) then 
-				!la
-					u3=(LOG(the01(2))+&
-					(1/the01(1)))*res212num+&
-					res2the12-&
-					LOG(the01(2))*res20112num-&
-					res2the0112
-					
-					u3=u3*(su12**vet12)*ri12*vet12+&
-					ri12*vet12*(1-gl12*vet12)*(su12**vet12)* &
-					((LOG(the01(2))+(1/the01(1)))*res2denum +&
-					res2thenum-LOG(the01(2))*(res2denum-res201num)-&
-					res2the01)
-					
-					u2=res212num*(su12**vet12)*ri12*vet12+&
-					(1-gl12*vet12)*(su12**vet12)*res2denum* &
-					ri12*vet12
-							
-					res1((nvamax+iter+1):(nvamax+iter+nva12nofix))=&
-					ve12nofix(i,:)*(u3*u1-&
-					v*u2)/(u1*u1)
-					
-					iter = iter +nva12nofix
-				endif
 			endif
 			
 			!write(6, *) " done x101 -c7" 
 			if(fix(2).eq.0)then
-				iter = iter + 1
 				nweib = nweib + 1
 				
 				v=the01(1)*res2denum/the01(2) -&
@@ -17547,195 +14235,12 @@ subroutine firstderivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve0
 				
 				res1(nweib)=v/u1
 				res1(nweib)=res1(nweib)+troncweib01012
-				!la
-				
-				u2=((the01(1)/the01(2))**2)*res20101numbis+&
-					the01(1)*(the01(1)-1)*res2denum/((the01(2))**2)-&
-					(res2denum-res201num)*(3*(the01(1)**2)-&
-					the01(1))/(the01(2)**2)
-					
-				u2=u2*(su12**vet12)*ri12*vet12-&
-				ri02*vet02*(1-gl01*vet01)*(su01**vet01)*(su02**vet02)* &
-				((the01(1)/the01(2))**2)*gl01*vet01+&
-				ri02*vet02*gl01*vet01*(su01**vet01)* &
-				(su02**vet02)*the01(1)/(the01(2)**2)
-				
-				res1((nvamax+iter))=&
-				(u2*u1-v*v)/(u1*u1)
-				res1((nvamax+iter))=&
-				res1((nvamax+iter))+troncweib01012square
-				
-				if(fix(3).eq.0)then
-				!la!
-					
-					u3=-LOG(the02(2))*the01(1)* &
-					res202num/the01(2)-&
-					the01(1)*res2the02/the01(2)+&
-					the01(1)*LOG(the02(2))*res20102num/the01(2)+&
-					the01(1)*res2the0102/the01(2)
-					
-					u3=u3*(su12**vet12)*ri12*vet12-&
-					ri02*vet02*gl01*vet01*the01(1)* &
-					(su01**vet01)*(su02**vet02)* &
-					(LOG(the02(2)*t3(i))*(1-&
-					gl02*vet02)+(1/the02(1)))/the01(2)
-					
-					u2=-LOG(the02(2))*(res202num)-&
-						res2the02
-					u2=u2*(su12**vet12)*ri12*vet12+&
-					ri02*vet02*(su01**vet01)*(su02**vet02)* &
-					(LOG(the02(2)*t3(i))+&
-					(1/the02(1))-&
-					gl02*vet02*LOG(the02(2)*t3(i)))
-					
-					iter = iter +1
-					res1((nvamax+iter))=(u3*u1-&
-					u2*v)/(u1*u1)
-				endif
-				!la
-				if(fix(4).eq.0)then
-				
-					u3=the01(1)*the02(1)*res20102num-&
-					the01(1)*the02(1)*res202num
-					u3=u3/(the01(2)*the02(2))
-					u3=u3*(su12**vet12)*ri12*vet12+&
-					ri02*vet02*gl01*vet01*(gl02*vet02-1)* &
-					(su01**vet01)*(su02**vet02)* &
-					the01(1)*the02(1)/(the01(2)*the02(2))
-					
-					u2=-the02(1)*res202num/the02(2)
-					u2=u2*(su12**vet12)*ri12*vet12+&
-					ri02*vet02*the02(1)*(1-gl02*vet02)* &
-					(su01**vet01)* &
-					(su02**vet02)/the02(2)
-				
-					iter = iter +1
-					res1((nvamax+iter))=(u3*u1-&
-					u2*v)/(u1*u1)
-				endif
-				!la
-				if(fix(5).eq.0)then
-				
-					u3=LOG(the12(2))*the01(1)*res212num/the01(2)+&
-					the01(1)*res2the12/the01(2)-&
-					the01(1)*LOG(the12(2))*res20112num/the01(2)-&
-					the01(1)*res2the0112/the01(2)
-					
-					u3=u3*(su12**vet12)*ri12*vet12+&
-					ri12*vet12*(su12**vet12)*(LOG(the12(2)* &
-					t3(i)) + &
-					(1/the12(1))-LOG(the12(2)*t3(i))*gl12*vet12)* &
-					(the01(1)*res2denum/the01(2) -&
-					the01(1)*(res2denum-res201num)/the01(2))
-					
-					u2=LOG(the12(2))*(res212num)+&
-						res2the12
-					u2=u2*(su12**vet12)*ri12*vet12+&
-					ri12*vet12*(su12**vet12)*res2denum* &
-					(LOG(the12(2)*t3(i))+&
-					(1/the12(1))-&
-					LOG(the12(2)*t3(i))*gl12*vet12)
-						
-					iter = iter +1
-					res1((nvamax+iter))=(u3*u1-&
-					v*u2)/(u1*u1)
-					
-				endif
-				!la
-				if(fix(6).eq.0)then
-					
-					u3=-the01(1)*the12(1)*res20112num+&
-					the01(1)*the12(1)*res212num
-					
-					u3=u3/(the01(2)*the12(2))
-					
-					
-					u3=u3*(su12**vet12)*ri12*vet12+&
-					ri12*vet12*(su12**vet12)*the12(1)* &
-					(the01(1)*res2denum/the01(2) -&
-					the01(1)*(res2denum-res201num)/the01(2))* &
-					(1-gl12*vet12)/the12(2)
-					
-					
-					u2=the12(1)*res212num/the12(2)
-					
-					u2=u2*(su12**vet12)*ri12*vet12+&
-					ri12*vet12*the12(1)*(1-gl12*vet12)* &
-					(su12**vet12)*res2denum/the12(2)
-				
-					iter = iter +1
-					res1((nvamax+iter))=(u3*u1-&
-					u2*v)/(u1*u1)
-				endif
-				!la
-				if(nva01nofix.gt.0) then 
-					
-					u3=the01(1)*res20101numbis/the01(2)+&
-					the01(1)*res2denum/the01(2)-&
-					(3*the01(1)*(res2denum-res201num)/the01(2))
-					u3=u3*(su12**vet12)*ri12*vet12-&
-					ri02*vet02*the01(1)*(1-gl01*vet01)* &
-					gl01*vet01*(su01**vet01)*(su02**vet02)/the01(2)
-					
-					u2=res201num*(su12**vet12)*ri12*vet12-&
-					ri02*vet02*gl01*vet01*(su01**vet01)* &
-					(su02**vet02)
-					
-					
-					res1((nvamax+iter+1):(nvamax+iter+nva01nofix))=&
-					ve01nofix(i,:)*(u3*u1-&
-					v*u2)/(u1*u1)
-					res1((nvamax+iter+1):(nvamax+iter+nva01nofix))=&
-					res1((nvamax+iter+1):(nvamax+iter+nva01nofix))+&
-					troncweib01012beta01
-					
-					iter = iter +nva01nofix
-				endif
-				!la
-				if(nva02nofix.gt.0) then 
-					
-					u3=res20102num-res202num
-					u3=u3*the01(1)/the01(2)
-					u3=u3*(su12**vet12)*ri12*vet12-&
-					the01(1)*gl01*vet01*(1-gl02*vet02)* &
-					(su01**vet01)*(su02**vet02)/the01(2)* &
-					ri02*vet02
-					
-					u2=-res202num*(su12**vet12)*ri12*vet12+&
-					(1-gl02*vet02)*(su01**vet01)*(su02**vet02)* &
-					ri02*vet02
-					
-					res1((nvamax+iter+1):(nvamax+iter+nva02nofix))=&
-					ve02nofix(i,:)*(u3*u1-&
-					v*u2)/(u1*u1)
-					
-					iter = iter +nva02nofix
-				endif
-				if(nva12nofix.gt.0) then 
-				!la
-					u3=-res20112num+res212num
-					u3=u3*the01(1)/the01(2)
-					u3=u3*(su12**vet12)*ri12*vet12+&
-					ri12*vet12*(1-gl12*vet12)*(su12**vet12)* &
-					(the01(1)*res2denum/the01(2) -&
-					the01(1)*(res2denum-res201num)/the01(2))
-				
-					
-					u2=res212num*(su12**vet12)*ri12*vet12+&
-					(1-gl12*vet12)*ri12*vet12*(su12**vet12)*res2denum
-							
-					res1((nvamax+iter+1):(nvamax+iter+nva12nofix))=&
-					ve12nofix(i,:)*(u3*u1-&
-					v*u2)/(u1*u1)
-					iter = iter +nva12nofix
-				endif
 			endif
 			!write(6, *) " done x201 -c7" 
 					
 				!ici
 		!la fin de journee : 181224
 			if(fix(3).eq.0)then
-				iter = iter + 1
 				nweib = nweib + 1
 				
 				v=-LOG(the02(2))*res202num-&
@@ -17749,202 +14254,11 @@ subroutine firstderivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve0
 				
 				res1(nweib)=v/u1
 				res1(nweib)=res1(nweib)+troncweib02021
-				res1((nvamax+iter))=&
-				((LOG(the02(2)))**2)* &
-				res20202num+2*LOG(the02(2))*res2the0202+&
-				res2the0202dsquare-&
-				((LOG(the02(2)))**2)* &
-				res202num-2*LOG(the02(2))*res2the02-&
-				res2the0202square
-				
-				res1((nvamax+iter))=&
-				res1((nvamax+iter))* &
-				(su12**vet12)*ri12*vet12+&
-				ri02*vet02*(su01**vet01)*(su02**vet02)* &
-				(((LOG(the02(2)*t3(i))+&
-				(1/the02(1))-&
-				gl02*vet02*LOG(the02(2)*t3(i)))**2)-&
-				((1/(the02(1)**2))+&
-				(LOG(the02(2)*t3(i))**2)*gl02*vet02))
-				
-				res1((nvamax+iter))=&
-				res1((nvamax+iter))*u1 -v*v
-				res1((nvamax+iter))=&
-				res1((nvamax+iter))/(u1*u1)
-				res1((nvamax+iter))=&
-				res1((nvamax+iter))+&
-				troncweib02021square
-				
-				!la
-				if(fix(4).eq.0)then
-				
-					u3=-(the02(1)*LOG(the02(2))+1)* &
-					res202num/the02(2)-&
-					the02(1)*res2the02/the02(2)+ &
-					LOG(the02(2))*the02(1)* &
-					res20202num/the02(2)+ &
-					the02(1)/the02(2)*res2the0202
-					
-					u3=u3*(su12**vet12)*ri12*vet12+&
-					ri02*vet02*(1-gl02*vet02)*the02(1)* &
-					(su01**vet01)*(su02**vet02)* &
-					(LOG(the02(2)*t3(i))+&
-					(1/the02(1))-&
-					LOG(the02(2)*t3(i))*gl02*vet02)/the02(2)+ &
-					ri02*vet02*(su01**vet01)*(su02**vet02)* &
-					(1-gl02*vet02-LOG(the02(2)*t3(i))*the02(1)* &
-					gl02*vet02)/the02(2)
-					
-					u2=-the02(1)*res202num/the02(2)
-					u2=u2*(su12**vet12)*ri12*vet12+&
-					ri02*vet02*the02(1)*(1-gl02*vet02)* &
-					(su01**vet01)* &
-					(su02**vet02)/the02(2)
-					
-					iter = iter +1
-					res1((nvamax+iter))=u1*u3-&
-					u2*v
-					res1((nvamax+iter))=&
-					res1((nvamax+iter))/(u1*u1)
-					
-					res1((nvamax+iter))=&
-					res1((nvamax+iter))+troncweib020212
-				endif
-				!la
-				if(fix(5).eq.0)then
-				
-					u3=-LOG(the02(2))*LOG(the12(2))*res20212num-&
-					LOG(the02(2))*res2the0212-LOG(the12(2))*res2the0212-&
-					res2the0212square
-					
-					u3=u3*(su12**vet12)*ri12*vet12+&
-					ri12*vet12*(su12**vet12)* &
-					(LOG(the12(2)*t3(i))+&
-					(1/the12(1))-&
-					LOG(the12(2)*t3(i))*gl12*vet12)* &
-					(-1*LOG(the02(2))*res202num-&
-					res2the02)
-					
-					u2=LOG(the12(2))*(res212num)+&
-						res2the12
-					u2=u2*(su12**vet12)*ri12*vet12+&
-					ri12*vet12*(su12**vet12)*res2denum* &
-					(LOG(the12(2)*t3(i))+&
-					(1/the12(1))-&
-					LOG(the12(2)*t3(i))*gl12*vet12)
-						
-					iter = iter +1
-					res1((nvamax+iter))=u1*u3-&
-					v*u2
-					res1((nvamax+iter))=&
-					res1((nvamax+iter))/(u1*u1)
-					
-				endif
-				!la
-				if(fix(6).eq.0)then
-				
-					u3=-LOG(the02(2))*the12(1)*res20212num/the12(2)-&
-					the12(1)*res2the0212/the12(2)
-					
-					u3=u3*(su12**vet12)*ri12*vet12+&
-					ri12*vet12*(1-gl12*vet12)*(su12**vet12)*the12(1)* &
-					(-1*LOG(the02(2))*res202num-&
-					res2the02)/the12(2)
-				
-					
-					
-					u2=the12(1)*res212num/the12(2)
-					u2=u2*(su12**vet12)*ri12*vet12+ &
-					ri12*vet12*the12(1)*(1-gl12*vet12)* &
-					(su12**vet12)*res2denum/the12(2)
-					
-				
-					iter = iter +1
-					res1((nvamax+iter))=u1*u3-&
-					u2*v
-					res1((nvamax+iter))=&
-					res1((nvamax+iter))/(u1*u1)
-				endif
-				!la
-				if(nva01nofix.gt.0) then 
-					
-					
-					u3=LOG(the02(2))*res20102num+&
-					res2the0102-res202num*LOG(the02(2))-&
-					res2the02
-					
-					u3=u3*(su12**vet12)*ri12*vet12-&
-					ri02*vet02*gl01*vet01* &
-					(su01**vet01)*(su02**vet02)* &
-					(LOG(the02(2)*t3(i))+&
-					(1/the02(1))-&
-					LOG(the02(2)*t3(i))*gl02*vet02)
-					
-					u2=res201num*(su12**vet12)*ri12*vet12-&
-					ri02*vet02*gl01*vet01*(su01**vet01)* &
-					(su02**vet02)
-					
-					
-					res1((nvamax+iter+1):(nvamax+iter+nva01nofix))=&
-					ve01nofix(i,:)*(u1*u3-&
-					v*u2)/(u1*u1)
-					
-					iter = iter +nva01nofix
-				endif
-				!la
-				if(nva02nofix.gt.0) then 
-					
-					u3=-LOG(the02(2))*res202num-&
-					res2the02+LOG(the02(2))*res20202num+&
-					res2the0202
-					u3=u3*(su12**vet12)*ri12*vet12+&
-					ri02*vet02*(1-gl02*vet02)* &
-					(su01**vet01)*(su02**vet02)* &
-					(LOG(the02(2)*t3(i))+&
-					(1/the02(1))-&
-					LOG(the02(2)*t3(i))*gl02*vet02)-&
-					ri02*vet02*gl02*vet02*(su01**vet01)* &
-					(su02**vet02)*LOG(the02(2)*t3(i))
-					
-					u2=-res202num*(su12**vet12)*ri12*vet12+&
-					(1-gl02*vet02)*(su01**vet01)* &
-					(su02**vet02)*ri02*vet02
-					
-					
-					res1((nvamax+iter+1):(nvamax+iter+nva02nofix))=&
-					ve02nofix(i,:)*(u1*u3-&
-					v*u2)/(u1*u1)
-					res1((nvamax+iter+1):(nvamax+iter+nva02nofix))=&
-					res1((nvamax+iter+1):(nvamax+iter+nva02nofix))+&
-					troncweib02021beta02
-					iter = iter +nva02nofix
-					
-				endif
-				!la
-				if(nva12nofix.gt.0) then 
-				
-					u3=-LOG(the02(2))*res20212num-&
-					res2the0212
-					u3=u3*(su12**vet12)*ri12*vet12+&
-					ri12*vet12*(1-gl12*vet12)*(su12**vet12)* &
-					(-1*LOG(the02(2))*res202num-&
-					res2the02)
-					
-					u2=res212num*(su12**vet12)*ri12*vet12+&
-					ri12*vet12*(1-gl12*vet12)*(su12**vet12)*res2denum
-							
-					res1((nvamax+iter+1):(nvamax+iter+nva12nofix))=&
-					ve12nofix(i,:)*(u1*u3-&
-					v*u2)/(u1*u1)
-					
-					iter = iter +nva12nofix
-				endif
 			endif
 			
              !write(6, *) " done x102 -c7" 
 			!la
 			if(fix(4).eq.0)then
-				iter = iter + 1
 				nweib = nweib + 1
 				v=-the02(1)*res202num/the02(2)
 				
@@ -17955,152 +14269,10 @@ subroutine firstderivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve0
 				
 				res1(nweib)=v/u1
 				res1(nweib)=res1(nweib)+troncweib02022
-				!la
-				
-				u3=((the02(1)/the02(2))**2)*res20202num-&
-					(the02(1)*(the02(1)-1)/((the02(2))**2))*res202num
-				
-				u3=u3*(su12**vet12)*ri12*vet12+&
-				ri02*vet02*(1-gl02*vet02)* &
-				(su01**vet01)*(su02**vet02)* &
-				the02(1)*(-gl02*vet02*the02(1)/the02(2)- &
-				(1/the02(2))+&
-				the02(1)/the02(2))/the02(2)-&
-				ri02*vet02*gl02*vet02*(the02(1)**2)* &
-				(su01**vet01)*(su02**vet02)/(the02(2)**2)
-				
-				res1((nvamax+iter))=&
-				u1*u3-v*v
-				res1((nvamax+iter))=&
-				res1((nvamax+iter))/(u1*u1)
-				
-				res1((nvamax+iter))=&
-				res1((nvamax+iter))+troncweib02022square
-				
-				!write(6, *) " done x202/x202 -c7" 
-				if(fix(5).eq.0)then
-				
-					u3=-the02(1)*LOG(the12(2))*res20212num/the02(2)-&
-					the02(1)*res2the0212/the02(2)
-					u3=u3*(su12**vet12)*ri12*vet12-&
-					ri12*vet12*(su12**vet12)* &
-					(LOG(the12(2)*t3(i))+&
-					(1/the12(1))- &
-					LOG(the12(2)*t3(i))*gl12*vet12)* &
-					(the02(1)*res202num/the02(2))
-					
-					u2=LOG(the12(2))*(res212num)+&
-						res2the12
-					u2=u2*(su12**vet12)*ri12*vet12+&
-					ri12*vet12*(su12**vet12)*res2denum* &
-					(LOG(the12(2)*t3(i))+&
-					(1/the12(1))-&
-					LOG(the12(2)*t3(i))*gl12*vet12)
-						
-					iter = iter +1
-					res1((nvamax+iter))=u1*u3-&
-					v*u2
-					res1((nvamax+iter))=&
-					res1((nvamax+iter))/(u1*u1)
-					
-					!write(6, *) " done x202/x112 -c7" 
-					
-				endif
-				!la
-				if(fix(6).eq.0)then
-					
-					u3=-the02(1)*the12(1)*res20212num
-					u3=u3/(the02(2)*the12(2))
-					
-					u3=u3*(su12**vet12)*ri12*vet12-&
-					ri12*vet12*(su12**vet12)*the12(1)* &
-					(1-gl12*vet12)* &
-					(the02(1)*res202num/the02(2))/the12(2)
-					
-				
-					u2=the12(1)*res212num/the12(2)
-					u2=u2*(su12**vet12)*ri12*vet12+&
-					ri12*vet12*the12(1)*(1-gl12*vet12)* &
-					(su12**vet12)*res2denum/the12(2)
-
-					iter = iter +1
-					res1((nvamax+iter))=u1*u3-&
-					u2*v
-					res1((nvamax+iter))=&
-					res1((nvamax+iter))/(u1*u1)
-					
-					!write(6, *) " done x202/x212 -c7" 
-				endif
-				
-				!la
-				if(nva01nofix.gt.0) then 
-					
-					u3=-the02(1)*res202num/the02(2)+&
-					the02(1)*res20102num/the02(2)		
-					u3=u3*(su12**vet12)*ri12*vet12-&
-					ri02*vet02*the02(1)*(1- &
-					gl02*vet02)*gl01*vet01* &
-					(su01**vet01)*(su02**vet02)/the02(2)
-					
-					u2=res201num*(su12**vet12)*ri12*vet12-&
-					ri02*vet02*gl01*vet01* &
-					(su01**vet01)*(su02**vet02)
-					
-					res1((nvamax+iter+1):(nvamax+iter+nva01nofix))=&
-					ve01nofix(i,:)*(u1*u3-&
-					v*u2)/(u1*u1)
-					
-					iter = iter +nva01nofix
-					
-					!write(6, *) " done x202/b01 -c7" 
-				endif
-				!la
-				if(nva02nofix.gt.0) then 
-					
-					u3=the02(1)*res20202num/the02(2)-&
-					the02(1)*res202num/the02(2)
-					u3=u3*(su12**vet12)*ri12*vet12+&
-					the02(1)*((1-gl02*vet02)**2)*(su01**vet01)* &
-					(su02**vet02)*ri02*vet02/the02(2)-&
-					ri02*vet02*the02(1)*gl02*vet02* &
-					(su01**vet01)*(su02**vet02)/the02(2)
-					
-					u2=-res202num*(su12**vet12)*ri12*vet12+&
-					(1-gl02*vet02)*(su01**vet01)* &
-					(su02**vet02)*ri02*vet02
-					
-					res1((nvamax+iter+1):(nvamax+iter+nva02nofix))=&
-					ve02nofix(i,:)*(u1*u3-&
-					v*u2)/(u1*u1)
-					res1((nvamax+iter+1):(nvamax+iter+nva02nofix))=&
-					res1((nvamax+iter+1):(nvamax+iter+nva02nofix))+&
-					troncweib02022beta02
-					
-					iter = iter +nva02nofix
-					!write(6, *) " done x202/b02 -c7" 
-				endif
-				!la
-				if(nva12nofix.gt.0) then 
-					u3=-res20212num*the02(1)/the02(2)
-					u3=u3*(su12**vet12)*ri12*vet12-&
-					ri12*vet12*(1-gl12*vet12)*(su12**vet12)* &
-					(the02(1)*res202num/the02(2))
-					
-					u2=res212num*(su12**vet12)*ri12*vet12+&
-					ri12*vet12*(1- &
-					gl12*vet12)*(su12**vet12)*res2denum
-							
-					res1((nvamax+iter+1):(nvamax+iter+nva12nofix))=&
-					ve12nofix(i,:)*(u1*u3-&
-					v*u2)/(u1*u1)
-					iter = iter +nva12nofix
-					!write(6, *) " done x202/b12 -c7" 
-				endif
 			endif	
 			!write(6, *) " done x202 -c7" 
 			!la!
 			if(fix(5).eq.0)then
-				iter = iter + 1
 				nweib = nweib + 1
 				
 				v=LOG(the12(2))*res212num+&
@@ -18113,162 +14285,11 @@ subroutine firstderivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve0
 				
 				res1(nweib)=v/u1
 				!la
-				res1((nvamax+iter))=&
-				((LOG(the12(2)))**2)* &
-				res21212num+2*LOG(the12(2))*res2the1212+&
-				res2the1212dsquare+&
-				((LOG(the12(2)))**2)* &
-				res212num+2*LOG(the12(2))*res2the12+&
-				res2the1212square
-				
-				res1((nvamax+iter))=&
-				res1((nvamax+iter))*(su12**vet12)*ri12*vet12+&
-				ri12*vet12*(su12**vet12)* &
-				(LOG(the12(2)*t3(i)) +&
-				(1/the12(1))-&
-				LOG(the12(2)*t3(i))*gl12*vet12)* &
-				(2*(LOG(the12(2))*res212num+&
-				res2the12)+res2denum*(LOG(the12(2)*t3(i))+&
-				(1/the12(1))-&
-				LOG(the12(2)*t3(i))*gl12*vet12))-&
-				ri12*vet12*(su12**vet12)*res2denum* &
-				((1/(the12(1)**2))+&
-				(LOG(the12(2)*t3(i))**2)*gl12*vet12)
-				
-				res1((nvamax+iter))=&
-				res1((nvamax+iter))*u1 -v*v
-				res1((nvamax+iter))=&
-				res1((nvamax+iter))/(u1*u1)
-				
-				!write(6, *) " done x112/x112 -c7" 
-				if(fix(6).eq.0)then
-	
-					u2=the12(1)*res212num/the12(2)
-					
-					u3=LOG(the12(2))*the12(1)*res21212num/the12(2)+&
-					the12(1)*res2the1212/the12(2)+&
-					(the12(1)*LOG(the12(2))+1)*res212num/the12(2)+&
-					the12(1)*res2the12/the12(2)
-					
-					u3=u3*(su12**vet12)*ri12*vet12+&
-					ri12*vet12*(1-gl12*vet12)* &
-					(su12**vet12)*the12(1)* &
-					((LOG(the12(2))*res212num+&
-					res2the12)+&
-					res2denum*(LOG(the12(2)*t3(i))+&
-					(1/the12(1))-&
-					LOG(the12(2)*t3(i))*gl12*vet12))/the12(2)
-					
-					u3=u3+ &
-					ri12*vet12*(su12**vet12)*res2denum* &
-					(1-LOG(the12(2)*t3(i))*the12(1)* &
-					gl12*vet12-gl12*vet12)/the12(2)+&
-					ri12*vet12*(su12**vet12)*u2* &
-					(LOG(the12(2)*t3(i))+(1/the12(1))-&
-					LOG(the12(2)*t3(i))*gl12*vet12)
-					
-					
-					u2=u2*(su12**vet12)*ri12*vet12+&
-					ri12*vet12*the12(1)*(1-&
-					gl12*vet12)*(su12**vet12)* &
-					res2denum/the12(2)
-					
-					iter = iter +1
-					
-					res1((nvamax+iter))=u1*u3-&
-					u2*v
-					res1((nvamax+iter))=&
-					res1((nvamax+iter))/(u1*u1)
-					
-					!write(6, *) " done x112/x212 -c7" 
-				endif
-				!la
-				if(nva01nofix.gt.0) then 
-					!ici
-					u3=-LOG(the12(2))*res20112num-&
-					res2the0112+res212num*LOG(the12(2))+&
-					res2the12
-					u3=u3*(su12**vet12)*ri12*vet12+&
-					ri12*vet12*(su12**vet12)* &
-					(LOG(the12(2)*t3(i))+&
-					(1/the12(1))-&
-					LOG(the12(2)*t3(i))*gl12*vet12)* &
-					res201num
-					
-					
-					u2=res201num*(su12**vet12)*ri12*vet12-&
-					ri02*vet02*gl01*vet01*(su01**vet01)*(su02**vet02)
-					
-					
-					res1((nvamax+iter+1):(nvamax+iter+nva01nofix))=&
-					ve01nofix(i,:)*(u1*u3-&
-					v*u2)/(u1*u1)
-					
-					iter = iter +nva01nofix
-					
-					!write(6, *) " done x112/b01 -c7" 
-				endif
-				if(nva02nofix.gt.0) then 
-					!la
-					u3=-LOG(the12(2))*res20212num-&
-					res2the0212
-					u3=u3*(su12**vet12)*ri12*vet12-&
-					ri12*vet12*(su12**vet12)* &
-					(LOG(the12(2)*t3(i))+&
-					(1/the12(1))-&
-					LOG(the12(2)*t3(i))*gl12*vet12)* &
-					(res202num)
-					
-					u2=-res202num*(su12**vet12)*ri12*vet12+&
-					(1-gl02*vet02)*(su01**vet01)* &
-					(su02**vet02)*ri02*vet02
-					
-				
-					res1((nvamax+iter+1):(nvamax+iter+nva02nofix))=&
-					ve02nofix(i,:)*(u1*u3-&
-					v*u2)/(u1*u1)
-					iter = iter +nva02nofix
-					
-					!write(6, *) " done x112/b02 -c7" 
-					
-				endif
-				if(nva12nofix.gt.0) then 
-					!la
-
-					
-					u3=LOG(the12(2))*res21212num+&
-					res2the1212+LOG(the12(2))*res212num+&
-					res2the12
-					
-					u3=u3*(su12**vet12)*ri12*vet12+&
-					(1-gl12*vet12)*(su12**vet12)* &
-					(LOG(the12(2))*res212num+&
-					res2the12)*ri12*vet12+&
-					ri12*vet12*(su12**vet12)* &
-					(LOG(the12(2)*t3(i))+(1/the12(1))-&
-					LOG(the12(2)*t3(i))*gl12*vet12)* &
-					(res212num+res2denum*(1-gl12*vet12))-&
-					LOG(the12(2)*t3(i))*gl12*vet12* &
-					ri12*vet12*(su12**vet12)*res2denum
-					
-					u2=res212num*(su12**vet12)*ri12*vet12+&
-					(1-gl12*vet12)*ri12*vet12* &
-					(su12**vet12)*res2denum
-				
-					res1((nvamax+iter+1):(nvamax+iter+nva12nofix))=&
-					ve12nofix(i,:)*(u1*u3-&
-					v*u2)/(u1*u1)
-					
-					iter = iter +nva12nofix
-					
-					!write(6, *) " done x112/b12 -c7" 
-				endif
 			endif
 			
 			  !la
 			!write(6, *) " done x112 -c7" 
 			if(fix(6).eq.0)then
-				iter = iter + 1
 				nweib = nweib + 1
 				
 				v=the12(1)*res212num/the12(2)
@@ -18279,93 +14300,6 @@ subroutine firstderivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve0
 				
 				res1(nweib)=v/u1
 				
-				u3=((the12(1)/the12(2))**2)*res21212num+&
-				(the12(1)*(the12(1)-1)/((the12(2))**2))*res212num
-				
-
-				u3=u3*(su12**vet12)*ri12*vet12+&
-				ri12*vet12*(su12**vet12)*the12(1)*(1-&
-				gl12*vet12)*(2*the12(1)*res212num/the12(2)+&
-				res2denum*the12(1)*(1-gl12*vet12)/the12(2)- &
-				res2denum/the12(2))/the12(2)-&
-				(the12(1)**2)*gl12*vet12*ri12*vet12* &
-				(su12**vet12)*res2denum/(the12(2)**2)
-				
-				
-				res1((nvamax+iter))=&
-				u1*u3-v*v
-				res1((nvamax+iter))=&
-				res1((nvamax+iter))/(u1*u1)
-				
-				
-				if(nva01nofix.gt.0) then 
-					!la
-					u3=the12(1)*res212num/the12(2)-&
-					the12(1)*res20112num/the12(2)	
-					
-					u3=u3*(su12**vet12)*ri12*vet12+&
-					ri12*vet12*the12(1)*(1-&
-					gl12*vet12)*res201num* &
-					(su12**vet12)/the12(2)
-					
-					u2=res201num*(su12**vet12)*ri12*vet12-&
-					ri02*vet02*gl01*vet01* &
-					(su01**vet01)*(su02**vet02)
-					
-					
-					res1((nvamax+iter+1):(nvamax+iter+nva01nofix))=&
-					ve01nofix(i,:)*(u1*u3-&
-					v*u2)/(u1*u1)
-					
-					iter = iter +nva01nofix
-				endif
-				
-				if(nva02nofix.gt.0) then 
-					!la
-					
-					
-					u3=-the12(1)*res20212num/the12(2)
-					u3=u3*(su12**vet12)*ri12*vet12-&
-					ri12*vet12*the12(1)*(1-&
-					gl12*vet12)*(su12**vet12)* &
-					res202num/the12(2)
-					
-					
-					u2=-(su12**vet12)*ri12*vet12*res202num+&
-				(1-gl02*vet02)*(su01**vet01)*(su02**vet02)*ri02*vet02
-
-					res1((nvamax+iter+1):(nvamax+iter+nva02nofix))=&
-					ve02nofix(i,:)*(u1*u3-&
-					v*u2)/(u1*u1)
-					
-					iter = iter +nva02nofix
-				endif
-				if(nva12nofix.gt.0) then 
-				!la
-					u3=res21212num*the12(1)/the12(2)+&
-					the12(1)*res212num/the12(2)
-					
-					u3=u3*(su12**vet12)*ri12*vet12+&
-					ri12*vet12*(su12**vet12)*(1-&
-					gl12*vet12)*the12(1)*res212num/the12(2)+&
-					ri12*vet12*(su12**vet12)*(1-&
-					gl12*vet12)*the12(1)* &
-					(res212num+res2denum*(1-gl12*vet12))/ &
-					the12(2)-ri12*vet12*gl12*vet12* &
-					(su12**vet12)*res2denum*the12(1)/ &
-					the12(2)
-					
-					u2=res212num*(su12**vet12)*ri12*vet12+&
-					ri12*vet12*(1-&
-					gl12*vet12)*(su12**vet12)*res2denum
-							
-					
-					res1((nvamax+iter+1):(nvamax+iter+nva12nofix))=&
-					ve12nofix(i,:)*(u1*u3-&
-					v*u2)/(u1*u1)
-					
-					iter = iter +nva12nofix
-				endif
 			endif	
 			!write(6, *) " done x212 -c7" 
 				v=(su12**vet12)*ri12*vet12*res2denum+&
@@ -18383,21 +14317,7 @@ subroutine firstderivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve0
 				res1((nvaweib+1):(nvaweib+nva01nofix))= &
 				res1((nvaweib+1):(nvaweib+nva01nofix))+tronc01
 
-				res1((nvamax12weib12+1):nvamax01)=&
-				res20101num*(su12**vet12)*ri12*vet12
-				resint=(su01**vet01)*(su02**vet02)*gl01*vet01
-				resint=resint*(1-gl01*vet01)*ri02*vet02
-				res1((nvamax12weib12+1):nvamax01)=&
-				res1((nvamax12weib12+1):nvamax01)-resint
-				res1((nvamax12weib12+1):nvamax01)=&
-				res1((nvamax12weib12+1):nvamax01)*ve01square(i,:)
-				res1((nvamax12weib12+1):nvamax01)=&
-				res1((nvamax12weib12+1):nvamax01)/v
-				res1((nvamax12weib12+1):nvamax01)=&
-				res1((nvamax12weib12+1):nvamax01)-ve01square(i,:)*((u1/v)**2)
-				res1((nvamax12weib12+1):nvamax01)=&
-				res1((nvamax12weib12+1):nvamax01)+tronc01square
-
+				
 
 				end if 
 
@@ -18412,24 +14332,7 @@ subroutine firstderivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve0
 				res1((nva01nofix+1+nvaweib):nva0102)+&
 				tronc02
 
-				res1((nvamax0112+1):nvamax02)=&
-				-gl02*vet02*(su01**vet01)*(su02**vet02)*ri02*vet02
-				res1((nvamax0112+1):nvamax02)=&
-				res1((nvamax0112+1):nvamax02)+&
-				(su12**vet12)*ri12*vet12*(res20202num-res202num)+&
-				((1-gl02*vet02)**2)*ri02*vet02*(su01**vet01)*(su02**vet02)
-
-
-				res1((nvamax0112+1):nvamax02)=&
-				res1((nvamax0112+1):nvamax02)*ve02square(i,:)
-				res1((nvamax0112+1):nvamax02)=&
-				res1((nvamax0112+1):nvamax02)/v
-				res1((nvamax0112+1):nvamax02)=&
-				res1((nvamax0112+1):nvamax02)-ve02square(i,:)*((u2/v)**2)
-				res1((nvamax0112+1):nvamax02)=&
-				res1((nvamax0112+1):nvamax02)+tronc02square
-
-
+				
 				end if 
 
 				if(nva12nofix.gt.0) then 
@@ -18440,103 +14343,9 @@ subroutine firstderivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve0
 				res1((nva0102+1):nvamax)=&
 				ve12nofix(i,:)*u3/v
 
-				res1((nvamax0212+1):nvamax12)=&
-				-gl12*vet12*res2denum+((1-gl12*vet12)**2)*res2denum+&
-				(2*(1-gl12*vet12)*res212num+res212num)+&
-				res21212num
-
-				resint=ri12*vet12*(su12**vet12)
-				res1((nvamax0212+1):nvamax12)=&
-				res1((nvamax0212+1):nvamax12)*resint*ve12square(i,:)
-				res1((nvamax0212+1):nvamax12)=&
-				res1((nvamax0212+1):nvamax12)/v
 				
-				res1((nvamax0212+1):nvamax12)=&
-				res1((nvamax0212+1):nvamax12)-ve12square(i,:)*((u3/v)**2)
-
-
 				end if 
 
-				
-				if(nva01nofix.gt.0 .AND. nva02nofix.gt.0) then 
-
-				kfix=nvamax01+1
-				lfix=kfix-1+nva02nofix
-
-				do j=1,nva01nofix
-			    		res1(kfix:lfix)=(-res202num+&
-					res20102num)*(su12**vet12)*ri12*vet12
-					resint=-gl01*vet01*(1-gl02*vet02)*(su01**vet01)
-					resint=resint*(su02**vet02)*ri02*vet02
-					res1(kfix:lfix)=&
-					res1(kfix:lfix)+resint
-			   		res1(kfix:lfix)=&
-					res1(kfix:lfix)*ve01nofix(i,j)*ve02nofix(i,:)
-			    		res1(kfix:lfix)=&
-			    		res1(kfix:lfix)*v
-					res1(kfix:lfix)=&
-					res1(kfix:lfix)-u1*u2*ve01nofix(i,j)*ve02nofix(i,:)
-					res1(kfix:lfix)=&
-			   		res1(kfix:lfix)/(v**2)
-			   	kfix=lfix+1
-			   	lfix=lfix+nva02nofix
-				end do
-
-				end if 
-
-				if(nva01nofix.gt.0 .AND. nva12nofix.gt.0) then 
-
-				
-				kfix=nvamax0102+1
-				lfix=kfix-1+nva12nofix
-
-				do j=1,nva01nofix
-			  		res1(kfix:lfix)=&
-					(1-gl12*vet12)*res201num-res20112num+&
-					res212num
-					res1(kfix:lfix)=&
-					res1(kfix:lfix)*ve01nofix(i,j)*ve12nofix(i,:)
-					res1(kfix:lfix)=&
-					res1(kfix:lfix)*(su12**vet12)*ri12*vet12
-					res1(kfix:lfix)=&
-			   		res1(kfix:lfix)*v
-					res1(kfix:lfix)=&
-					res1(kfix:lfix)-u1*u3*ve01nofix(i,j)*ve12nofix(i,:)
-					res1(kfix:lfix)=&
-			   		res1(kfix:lfix)/(v**2)
-			   		kfix=lfix+1
-			   		lfix=lfix+nva12nofix
-				end do
-
-				end if 
-
-
-				if(nva12nofix.gt.0 .AND. nva02nofix.gt.0) then 
-
-				
-				
-        			kfix=nvamax02+1
-				lfix=kfix-1+nva12nofix
-
-				do j=1,nva02nofix
-			  	res1(kfix:lfix)=res20212num+&
-				(1-gl12*vet12)*res202num
-				resint=(su12**vet12)
-				res1(kfix:lfix)=&
-				res1(kfix:lfix)*resint*ve02nofix(i,j)*ve12nofix(i,:)
-				res1(kfix:lfix)=&
-				-res1(kfix:lfix)*ri12*vet12
-				res1(kfix:lfix)=&
-				res1(kfix:lfix)*v
-				res1(kfix:lfix)=&
-				res1(kfix:lfix)-u2*u3*ve02nofix(i,j)*ve12nofix(i,:)
-				res1(kfix:lfix)=&
-			   	res1(kfix:lfix)/(v**2)
-			   	kfix=lfix+1
-			  	lfix=lfix+nva12nofix
-				end do
-
-				end if 
                             endif
                          endif                        
                       endif
@@ -18559,11 +14368,9 @@ subroutine firstderivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve0
 	 
 	deallocate(b,bfix,fix,ve01,ve02,ve12,ve01nofix,&
 	ve02nofix,ve12nofix,tronc01,tronc02,t0,t1,t2,t3,c,&
-	ve01square,ve02square,ve12square,&
-	tronc01square,tronc02square,troncweib01011beta01,&
-	troncweib01012beta01,troncweib02021beta02,troncweib02022beta02)     
+	ve01square,ve02square,ve12square)     
 
-    end subroutine firstderivaweiballpara
+    end subroutine derivaweiballparafirstderiv
 
 !=============================================================================================  
 !======================= Calculate first derivatives of loglik with weibull baseline risk ==========
@@ -19099,7 +14906,7 @@ subroutine firstderivaweib(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 
 !=============================================================================================  
 !======================= Calculate derivatives of loglik with weibull baseline risk ==========
-!======================= only diagnola terms for second derivatives of beta parameters             ==========
+!======================= only diagonal terms for second derivatives of beta parameters             ==========
 !=============================================================================================  
 
 
@@ -19884,6 +15691,7 @@ subroutine derivaweibdiag(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 
 !=============================================================================================  
 !======================= Calculate derivatives of loglik with M-splines baseline risk ========
+!======================= first and seconds ===================================================
  !======================= only beta parameters ========================================================
 !============================================================================================= 
 
