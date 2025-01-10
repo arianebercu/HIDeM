@@ -30,7 +30,7 @@
 #' 
 idmlLikelihoodweib<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
                          dimnva01,dimnva02,dimnva12,nva01,nva02,nva12,
-                         t0,t1,t2,t3,troncature,gausspoint,weib){
+                         t0,t1,t2,t3,troncature,gausspoint){
   res<-0
   .Fortran("idmlikelihoodweib",
            ## input
@@ -56,7 +56,6 @@ idmlLikelihoodweib<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
            as.double(t3),
            as.integer(troncature),
            as.integer(gausspoint),
-           as.integer(weib),
            likelihood_res=as.double(res),
            PACKAGE="SmoothHazardoptim9")$likelihood_res
 }

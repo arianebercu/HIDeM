@@ -188,7 +188,6 @@ idm <- function(formula01,
                 data,
                 method="Weib",
                 methodCV="mla",
-                weib="square",
                 scale.X=T,
                 maxiter=100,
                 maxiter.pena=10,
@@ -234,14 +233,7 @@ idm <- function(formula01,
     if(!inherits(formula02,"formula"))stop("The argument formula02 must be a class 'formula'.")
     
     if(!method%in%c("Weib","splines"))stop("The argument method needs to be either splines or Weib")
-    if(method=="Weib" & !weib%in%c("doubleexp","exp","square","logexp","square.div","logexp.div","gamma")){
-      stop("The argument weib needs to be either square, logexp, square.div or logexp.div")
-    }else{weib<-ifelse(weib=="square",1,
-                       ifelse(weib=="logexp",2,
-                              ifelse(weib=="square.div",3,
-                                     ifelse(weib=="logexp.div",4,
-                                            ifelse(weib=="exp",5,
-                                                   ifelse(weib=="gamma",6,7))))))}
+
     if(length(methodCV)!=1)stop("The argument methodCV must be either Nelder-Mead, BFGS, CG, L-BFGS-B, SANN, Brent or mla")
     if(!methodCV%in%c("Nelder-Mead", "BFGS", "CG", "L-BFGS-B", "SANN",
                      "Brent","mla"))stop("The argument methodCV must be either Nelder-Mead, BFGS, CG, L-BFGS-B, SANN, Brent or mla")
@@ -638,11 +630,9 @@ idm <- function(formula01,
         # if(any(B[1:size_spline]<0)){stop(paste0("B need to be positive for spline parameters"))}
         if(length(B)!=(size_V)){stop(paste0("The length of the initialization must be : ",size_V))}
         b<-B}else{
-          if(weib%in%c(1,2,5,7)){
+        
           b<-c(1,sqrt(sum(idm)/ts),1,sqrt(sum(idd)/ts),1,sqrt(sum(idd)/ts),rep(0,size_V-6))
-          }else{
-            b<-c(1,1/sqrt(sum(idm)/ts),1,1/sqrt(sum(idd)/ts),1,1/sqrt(sum(idd)/ts),rep(0,size_V-6))
-          }
+          
         }
     }
     
@@ -862,7 +852,6 @@ idm <- function(formula01,
                                     ts=ts,
                                     troncature=troncature,
                                     gausspoint=gausspoint,
-                        weib=weib,
                         methodCV=methodCV)
             
         
@@ -1394,8 +1383,7 @@ idm <- function(formula01,
                              t2=t2,
                              t3=t3,
                              troncature=troncature,
-                             gausspoint=gausspoint,
-                             weib=weib)
+                             gausspoint=gausspoint)
             
             # take thoses values if converged only otherwise thoses
             # by default or by the user
@@ -1440,7 +1428,7 @@ idm <- function(formula01,
                                   t2=t2,
                                   t3=t3,
                                   troncature=troncature,
-                                  gausspoint=gausspoint,weib=weib)
+                                  gausspoint=gausspoint)
               
              
               if(nproc>1){parallel::stopCluster(clustpar)}
@@ -1527,7 +1515,6 @@ idm <- function(formula01,
                                penalty.factor=penalty.factor,
                                penalty=penalty,
                                gausspoint=gausspoint,
-                               weib=weib,
                                methodCV=methodCV,
                                partialH=partialH)
               

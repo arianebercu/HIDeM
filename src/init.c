@@ -20,20 +20,24 @@ extern void F77_NAME(idmlikelihood)(double *,int *, int *, double *,int*, double
 
 extern void F77_NAME(idmlikelihoodweib)(double *,int *, int *, double *,int*,
               int *,int *, double *,double*, double *,
-              int *,int *,int *,int *,int *,int *, double *,double*, double *, double *,int *,int *,int *,double *);
+              int *,int *,int *,int *,int *,int *, double *,double*, double *, double *,int *,int *,double *);
 
 
 extern void F77_NAME(derivaweib)(double *,int *, int *, double *,int*,
               int *,int *, double *,double*, double *,
-              int *,int *,int *,int *,int *,int *, double *,double*, double *, double *,int *,int *,double *);
+              int *,int *,int *,int *,int *,int *, double *,double*, double *, double *,int *,double *);
+
+extern void F77_NAME(derivaweiballpara)(double *,int *, int *, double *,int*,
+              int *,int *, double *,double*, double *,
+              int *,int *,int *,int *,int *,int *, double *,double*, double *, double *,int *,double *);
 
 extern void F77_NAME(derivaweibdiag)(double *,int *, int *, double *,int*,
               int *,int *, double *,double*, double *,
-              int *,int *,int *,int *,int *,int *, double *,double*, double *, double *,int *,int *,double *);
+              int *,int *,int *,int *,int *,int *, double *,double*, double *, double *,int *,double *);
 
 extern void F77_NAME(firstderivaweib)(double *,int *, int *, double *,int*,
               int *,int *, double *,double*, double *,
-              int *,int *,int *,int *,int *,int *, double *,double*, double *, double *,int *,int *,double *);
+              int *,int *,int *,int *,int *,int *, double *,double*, double *, double *,int *,double *);
 
 
 extern void F77_NAME(derivaspline)(double *,int *, int *, double *,int*, double *,double *,double *,
@@ -51,10 +55,11 @@ extern void F77_NAME(firstderivaspline)(double *,int *, int *, double *,int*, do
 
 static const R_FortranMethodDef FortranEntries[] = {
     {"idmlikelihood",(DL_FUNC) &F77_NAME(idmlikelihood),    29},
-    {"idmlikelihoodweib",(DL_FUNC) &F77_NAME(idmlikelihoodweib),    24},
-    {"derivaweib",(DL_FUNC) &F77_NAME(derivaweib),    23},
-    {"derivaweibdiag",(DL_FUNC) &F77_NAME(derivaweibdiag),    23},
-    {"firstderivaweib",(DL_FUNC) &F77_NAME(firstderivaweib),    23},
+    {"idmlikelihoodweib",(DL_FUNC) &F77_NAME(idmlikelihoodweib),    23},
+    {"derivaweib",(DL_FUNC) &F77_NAME(derivaweib),    22},
+    {"derivaweiballpara",(DL_FUNC) &F77_NAME(derivaweiballpara),    22},
+    {"derivaweibdiag",(DL_FUNC) &F77_NAME(derivaweibdiag),    22},
+    {"firstderivaweib",(DL_FUNC) &F77_NAME(firstderivaweib),    22},
     {"derivaspline",(DL_FUNC) &F77_NAME(derivaspline),    28},
     {"derivasplinediag",(DL_FUNC) &F77_NAME(derivasplinediag),    28},
     {"firstderivaspline",(DL_FUNC) &F77_NAME(firstderivaspline),    28},

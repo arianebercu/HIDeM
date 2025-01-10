@@ -249,54 +249,9 @@ deriva <- function(nproc=1,b,funcpa,.packages=NULL,...){
 
 grmlaweib<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
                       dimnva01,dimnva02,dimnva12,nva01,nva02,nva12,
-                      t0,t1,t2,t3,troncature,lambda,alpha,penalty.factor,penalty,gausspoint,weib){
+                      t0,t1,t2,t3,troncature,lambda,alpha,penalty.factor,penalty,gausspoint){
   
-  #browser()
-  
-  # test<-deriva(b=b,funcpa=idmlLikelihoodweib,npm=length(b),
-  #              npar=size_V,
-  #              bfix=bfix,
-  #              fix=fix0,
-  #              ctime=ctime,
-  #              no=N,
-  #              ve01=ve01,
-  #              ve02=ve02,
-  #              ve12=ve12,
-  #              dimnva01=dimnva01,
-  #              dimnva02=dimnva02,
-  #              dimnva12=dimnva12,
-  #              nva01=nvat01,
-  #              nva02=nvat02,
-  #              nva12=nvat12,
-  #              t0=t0,
-  #              t1=t1,
-  #              t2=t2,
-  #              t3=t3,
-  #              troncature=troncature,
-  #              gausspoint=gausspoint,weib=weib)
-  # 
-  # 
-  # testbis<-grad(x0=b,f=idmlLikelihoodweib,npm=length(b),
-  #              npar=size_V,
-  #              bfix=bfix,
-  #              fix=fix0,
-  #              ctime=ctime,
-  #              no=N,
-  #              ve01=ve01,
-  #              ve02=ve02,
-  #              ve12=ve12,
-  #              dimnva01=dimnva01,
-  #              dimnva02=dimnva02,
-  #              dimnva12=dimnva12,
-  #              nva01=nvat01,
-  #              nva02=nvat02,
-  #              nva12=nvat12,
-  #              t0=t0,
-  #              t1=t1,
-  #              t2=t2,
-  #              t3=t3,
-  #              troncature=troncature,
-  #              gausspoint=gausspoint,weib=weib)
+
   start<-sum(fix[1:6]==1)
   if(sum(fix[1:6])==6){
     svar<-NULL
@@ -337,7 +292,6 @@ grmlaweib<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
                    as.double(t2),
                    as.double(t3),
                    as.integer(troncature),
-                   as.integer(weib),
                    likelihood_deriv=as.double(grbeta),
                    PACKAGE="SmoothHazardoptim9")$likelihood_deriv
   
@@ -366,7 +320,7 @@ grmlaweib<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
                          t2=t2,
                          t3=t3,
                          troncature=troncature,
-                         gausspoint=gausspoint,weib=weib)$v
+                         gausspoint=gausspoint)$v
     return(-sol)
   }else{
   bb<-rep(NA,npar)
@@ -404,10 +358,11 @@ grmlaweib<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
                        t2=t2,
                        t3=t3,
                        troncature=troncature,
-                       gausspoint=gausspoint,weib=weib)
+                       gausspoint=gausspoint)
   
   
   sol<-c(-grs$v,grbeta)
+  #browser()
   }else{sol<-grbeta}
   if(any(sol==Inf)| any(sol==-Inf) | any(is.na(sol)) | any(is.nan(sol))){
     stop(paste0("Problem of computation on the gradient. Verify your function specification...\n. Infinite value with finite parameters : b=",round(b,4),"\n"))
@@ -438,18 +393,56 @@ grmlaweib<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
                          t2=t2,
                          t3=t3,
                          troncature=troncature,
-                         gausspoint=gausspoint,weib=weib)$v
+                         gausspoint=gausspoint)$v
     return(-sol)
   }
 }
 
 
 
+grmlaweibana<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
+                   dimnva01,dimnva02,dimnva12,nva01,nva02,nva12,
+                   t0,t1,t2,t3,troncature,lambda,alpha,penalty.factor,penalty,gausspoint){
+  
+ 
+res<-rep(0,npm+npm*(npm+1)/2)
+output<-.Fortran("derivaweiballpara",
+                 ## input
+                 as.double(b),
+                 as.integer(npm),
+                 as.integer(npar),
+                 as.double(bfix),
+                 as.integer(fix),
+                 as.integer(ctime),
+                 as.integer(no),
+                 as.double(ve01),
+                 as.double(ve12),
+                 as.double(ve02),
+                 as.integer(dimnva01),
+                 as.integer(dimnva12),
+                 as.integer(dimnva02),
+                 as.integer(nva01),
+                 as.integer(nva12),
+                 as.integer(nva02),
+                 as.double(t0),
+                 as.double(t1),
+                 as.double(t2),
+                 as.double(t3),
+                 as.integer(troncature),
+                 likelihood_deriv=as.double(res),
+                 PACKAGE="SmoothHazardoptim9")$likelihood_deriv
+#browser()
+sol<-output[1:npm]
+if(sum(fix[1:6])!=6){
+sol[1:(6-sum(fix[1:6]))]<-sol[1:(6-sum(fix[1:6]))]*2*b[which(fix[1:6]==0)]
+}
 
+return(sol)
+}
 
 hessianmlaweib<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
                     dimnva01,dimnva02,dimnva12,nva01,nva02,nva12,
-                    t0,t1,t2,t3,troncature,gausspoint,weib){
+                    t0,t1,t2,t3,troncature,gausspoint){
   
 #browser()
   start<-sum(fix[1:6]==1)
@@ -494,12 +487,15 @@ hessianmlaweib<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
                    as.double(t2),
                    as.double(t3),
                    as.integer(troncature),
-                   as.integer(weib),
                    likelihood_deriv=as.double(output),
                    PACKAGE="SmoothHazardoptim9")$likelihood_deriv
   
   if(any(output[(npm_all+1):length(output)]==Inf)| any(output[(npm_all+1):length(output)]==-Inf) | any(is.na(output[(npm_all+1):length(output)])) | any(is.nan(output[(npm_all+1):length(output)]))){
     cat("Problem of computation on the analytical hessian, thus compute finite differences.\n")
+     # test<-b
+     # test[2]<-sqrt(exp(test[2]))
+     # test[4]<-sqrt(exp(test[4]))
+     # test[6]<-sqrt(exp(test[6]))
     Vall<-deriva(b=b,f=idmlLikelihoodweib,npm=length(b),
                              npar=npar,
                              bfix=bfix,
@@ -520,12 +516,13 @@ hessianmlaweib<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
                              t2=t2,
                              t3=t3,
                              troncature=troncature,
-                             gausspoint=gausspoint,weib=weib)
+                             gausspoint=gausspoint)
     
     if(any(Vall$v==Inf)| any(Vall$v==-Inf) | any(is.na(Vall$v)) | any(is.nan(Vall$v))){
       stop(paste0("Problem of computation on the hessian with finite differences. Verify your function specification...\n.
                   Infinite value with finite parameters : b=",round(b,4),"\n"))
     }
+    
     return(Vall$v[1:(length(b)*(length(b)+1)/2)])
  }else{
     min<-npm_all
@@ -615,7 +612,7 @@ hessianmlaweib<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
                                t2=t2,
                                t3=t3,
                                troncature=troncature,
-                               gausspoint=gausspoint,weib=weib)
+                               gausspoint=gausspoint)
       Vall[c((length(svar)+1):dim(Vall)[1]),c((length(svar)+1):dim(Vall)[1])]<-t(V)
       
       if(any(Vall==Inf)| any(Vall==-Inf) | any(is.na(Vall)) | any(is.nan(Vall))){
@@ -624,8 +621,7 @@ hessianmlaweib<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
         
       }
       
-      
-      
+      #browser()
       return(Vall[upper.tri(Vall,diag=T)])
       
     }
@@ -653,7 +649,7 @@ hessianmlaweib<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
                  t2=t2,
                  t3=t3,
                  troncature=troncature,
-                 gausspoint=gausspoint,weib=weib)
+                 gausspoint=gausspoint)
     
     if(any(Vall$v==Inf)| any(Vall$v==-Inf) | any(is.na(Vall$v)) | any(is.nan(Vall$v))){
       stop(paste0("Problem of computation on the hessian with finite differences. Verify your function specification...\n.
@@ -662,5 +658,138 @@ hessianmlaweib<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
     return(Vall$v[1:(length(b)*(length(b)+1)/2)])
 }
 }
- 
 
+hessianmlaweibana<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
+                         dimnva01,dimnva02,dimnva12,nva01,nva02,nva12,
+                         t0,t1,t2,t3,troncature,gausspoint){
+  
+  res<-rep(0,npm+npm*(npm+1)/2)
+  output<-.Fortran("derivaweiballpara",
+                   ## input
+                   as.double(b),
+                   as.integer(npm),
+                   as.integer(npar),
+                   as.double(bfix),
+                   as.integer(fix),
+                   as.integer(ctime),
+                   as.integer(no),
+                   as.double(ve01),
+                   as.double(ve12),
+                   as.double(ve02),
+                   as.integer(dimnva01),
+                   as.integer(dimnva12),
+                   as.integer(dimnva02),
+                   as.integer(nva01),
+                   as.integer(nva12),
+                   as.integer(nva02),
+                   as.double(t0),
+                   as.double(t1),
+                   as.double(t2),
+                   as.double(t3),
+                   as.integer(troncature),
+                   likelihood_deriv=as.double(res),
+                   PACKAGE="SmoothHazardoptim9")$likelihood_deriv
+  
+ 
+  if(any(output==Inf)| any(output==-Inf) | any(is.na(output)) | any(is.nan(output))){
+    stop(paste0("Problem of computation on the hessian for weibull parameters. Verify your function specification...\n.
+        Infinite value with finite parameters : b=",round(b,4),"\n"))
+    
+  }
+      nweib<-sum(fix[1:6]==0)
+      min<-npm
+      max<-min+nweib*(nweib+1)/2+nweib*(npm-nweib)
+      Vweib<-matrix(0,npm,npm)
+      
+      if(nweib>0){
+        
+      val<-c(output[(min+1):(max)],rep(0,(npm-nweib)*(npm-nweib+1)/2))
+      Vweib[lower.tri(Vweib,diag=TRUE)] <- val
+     Vweib[1:nweib,1:nweib]<-4*matrix(b[which(fix[1:6]==0)],ncol=1)%*%b[which(fix[1:6]==0)]*Vweib[1:nweib,1:nweib]+diag(output[1:nweib])*2
+     Vweib[(nweib+1):npm,1:nweib]<-2*matrix(rep(b[which(fix[1:6]==0)],npm-nweib),ncol=nweib,byrow=T)*
+       Vweib[(nweib+1):npm,1:nweib]
+     
+      }
+    
+      min<-max
+      V01<- matrix(0,nva01,nva01)
+      V01[lower.tri(V01,diag=TRUE)] <- output[(min+1):(min+nva01*(nva01+1)/2)]
+      
+      
+      min<-min+(nva01*(nva01+1)/2)
+      if(nva01>0&nva02>0){
+        V0102<- matrix(data=output[(min+1):(min+nva02*nva01)],
+                       nrow=nva02,ncol=nva01)
+      }
+      
+      min<-min+nva02*nva01
+      
+      if(nva01>0&nva12>0){
+        V0112<- matrix(data=output[(min+1):(min+nva12*nva01)],
+                       nrow=nva12,ncol=nva01)
+      }
+      
+      
+      min<-min+nva12*nva01
+      V02<- matrix(0,nva02,nva02)
+      V02[lower.tri(V02,diag=TRUE)] <- output[(min+1):(min+nva02*(nva02+1)/2)]
+      
+      
+      min<-min+(nva02*(nva02+1)/2)
+      
+      if(nva02>0&nva12>0){
+        V0212<- matrix(data=output[(min+1):(min+nva12*nva02)],
+                       nrow=nva12,ncol=nva02)
+      }
+      
+      
+      min<-min+nva12*nva02
+      V12<- matrix(0,nva12,nva12)
+      V12[lower.tri(V12,diag=TRUE)] <- output[(min+1):length(output)]
+      
+      
+     
+      if(nva01>0){
+        Vweib[(nweib+1):(nweib+nva01),(nweib+1):(nweib+nva01)]<-V01
+        if(nva02>0){
+          Vweib[(nweib+nva01+1):(nweib+nva01+nva02),(nweib+1):(nweib+nva01)]<-V0102
+        }
+        if(nva12>0){
+          Vweib[(nweib+nva01+nva02+1):npm,(nweib+1):(nweib+nva01)]<-V0112
+        }
+      }
+      if(nva02>0){
+        Vweib[(nva01+nweib+1):(nva01+nva02+nweib),(nva01+nweib+1):(nva01+nva02+nweib)]<-V02
+        if(nva12>0){
+          Vweib[(nva01+nva02+nweib+1):npm,(nva01+nweib+1):(nva01+nva02+nweib)]<-V0212
+        }
+      }
+      
+      if(nva12>0){
+        Vweib[(nva01+nva02+nweib+1):npm,(nva01+nva02+1+nweib):npm]<-V12
+      }
+      
+      # hessian is - second derivatives 
+      #V<-V+t(V)
+      #diag(V)<-diag(V)/2
+      # hessian is - second derivatives 
+
+      return(-t(Vweib)[upper.tri(Vweib,diag=T)])
+  
+    }
+    
+    
+  
+
+ 
+# p<-b[5:6]
+# p[1]<-exp(p[1])
+# p[2]<-p[2]^2
+# x<-t1
+# risq = p[1]*(p[2]**p[1])*(x^(p[1]-1))
+# risq
+# surv = exp(-(p[2]*x)**p[1])
+# surv
+# 1/surv
+# glam = (p[2]*x)^p[1]
+# glam

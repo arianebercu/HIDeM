@@ -37,7 +37,6 @@
 ##' @param penalty which penalty to consider
 ##' @param penalty.factor which variable should be penalised
 ##' @param gausspoint number of points in gauss quadrature
-##' @param weib the form of the weibull parameters 
 ##' @param methodCV methodolgy to optimise penalised parameters 
 ##' @param partialH which hessian is computed for Newton-Raphson path of penalised parameters
 #' @author R: Ariane Bercu <ariane.bercu@@u-bordeaux.fr> 
@@ -52,7 +51,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                    ve01,ve02,ve12,dimnva01,dimnva02,dimnva12,nvat01,nvat02,nvat12,
                    t0,t1,t2,t3,troncature,
                    nlambda01,lambda01,nlambda02,lambda02,nlambda12,lambda12,
-                   alpha,penalty.factor,penalty,gausspoint,weib,methodCV,partialH){
+                   alpha,penalty.factor,penalty,gausspoint,methodCV,partialH){
   
   
   # need to keep original fix to calculate for beta 
@@ -242,8 +241,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                                     t1=t1,
                                                     t2=t2,
                                                     t3=t3,
-                                                    troncature=troncature,
-                                                    weib=weib)
+                                                    troncature=troncature)
                                  
                                  if(ite==0){# loglik penalised
                                    fn.value<-idmlLikelihoodweibpena(b=b,
@@ -271,8 +269,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                                                     alpha=alpha,
                                                                     penalty.factor=penalty.factor,
                                                                     penalty=penalty,
-                                                                    gausspoint=gausspoint,
-                                                                    weib=weib)
+                                                                    gausspoint=gausspoint)
                                  }
                                  
                                  if(any(is.na(output))|any(output==Inf) |any(output==-Inf)){
@@ -510,8 +507,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                                              alpha=alpha,
                                                              penalty.factor=penalty.factor,
                                                              penalty=penalty,
-                                                             gausspoint=gausspoint,
-                                                             weib=weib)
+                                                             gausspoint=gausspoint)
                                  
                                  
                                  # we want to maximise the loglik thus : 
@@ -573,8 +569,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                                   alpha=alpha,
                                                   penalty.factor=penalty.factor,
                                                   penalty=penalty,
-                                                  gausspoint=gausspoint,
-                                                  weib=weib)
+                                                  gausspoint=gausspoint)
                                    
                                    
                                    betanew<-beta+delta*sears$vw
@@ -606,8 +601,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                                                alpha=alpha,
                                                                penalty.factor=penalty.factor,
                                                                penalty=penalty,
-                                                               gausspoint=gausspoint,
-                                                               weib=weib)
+                                                               gausspoint=gausspoint)
                                  }
                                  # if not better or do not exist need to readjust
                                  # value of beta 
@@ -657,8 +651,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                                   t2=t2,
                                                   t3=t3,
                                                   troncature=troncature,
-                                                  gausspoint=gausspoint,
-                                                  weib=weib)
+                                                  gausspoint=gausspoint)
                                  
                                  # look at convergence for each lambda :
                                  # mla output is loglik
@@ -778,8 +771,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                                       t1=t1,
                                                       t2=t2,
                                                       t3=t3,
-                                                      troncature=troncature,
-                                                      weib=weib)
+                                                      troncature=troncature)
                                    min<-npm
                                    V01<- matrix(0,npm01,npm01)
                                    V01[lower.tri(V01,diag=TRUE)] <- output[(min+1):(min+npm01*(npm01+1)/2)]
@@ -923,8 +915,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                                             t1=t1,
                                                             t2=t2,
                                                             t3=t3,
-                                                            troncature=troncature,
-                                                            weib=weib)
+                                                            troncature=troncature)
                                      
                                      if(ite==0){# loglik penalised
                                        fn.value<-idmlLikelihoodweibpena(b=b,
@@ -952,8 +943,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                                                         alpha=alpha,
                                                                         penalty.factor=penalty.factor,
                                                                         penalty=penalty,
-                                                                        gausspoint=gausspoint,
-                                                                        weib=weib)
+                                                                        gausspoint=gausspoint)
                                      }
                                      
                                      if(any(is.na(output))|any(output==Inf) |any(output==-Inf)){
@@ -1088,8 +1078,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                                                alpha=alpha,
                                                                penalty.factor=penalty.factor,
                                                                penalty=penalty,
-                                                               gausspoint=gausspoint,
-                                                               weib=weib)
+                                                               gausspoint=gausspoint)
                                    
                                    
                                    # we want to maximise the loglik thus : 
@@ -1151,8 +1140,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                                     alpha=alpha,
                                                     penalty.factor=penalty.factor,
                                                     penalty=penalty,
-                                                    gausspoint=gausspoint,
-                                                    weib=weib)
+                                                    gausspoint=gausspoint)
                                      
                                      
                                      betanew<-beta+delta*sears$vw
@@ -1184,8 +1172,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                                                  alpha=alpha,
                                                                  penalty.factor=penalty.factor,
                                                                  penalty=penalty,
-                                                                 gausspoint=gausspoint,
-                                                                 weib=weib)
+                                                                 gausspoint=gausspoint)
                                    }
                                    # if not better or do not exist need to readjust
                                    # value of beta 
@@ -1235,8 +1222,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                                                 t2=t2,
                                                                 t3=t3,
                                                                 troncature=troncature,
-                                                                gausspoint=gausspoint,
-                                                                weib=weib)
+                                                                gausspoint=gausspoint)
                                    
                                    # look at convergence for each lambda :
                                    # mla output is loglik
@@ -1356,8 +1342,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                                         t1=t1,
                                                         t2=t2,
                                                         t3=t3,
-                                                        troncature=troncature,
-                                                        weib=weib)
+                                                        troncature=troncature)
                                      min<-npm
                                      V01<- matrix(0,npm01,npm01)
                                      V01[lower.tri(V01,diag=TRUE)] <- output[(min+1):(min+npm01*(npm01+1)/2)]
@@ -1509,8 +1494,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                                     t1=t1,
                                                     t2=t2,
                                                     t3=t3,
-                                                    troncature=troncature,
-                                                    weib=weib)
+                                                    troncature=troncature)
                                  
                                if(ite==0){
                                    fn.value<-idmlLikelihoodweibpena(b=b,
@@ -1538,8 +1522,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                                                     alpha=alpha,
                                                                     penalty.factor=penalty.factor,
                                                                     penalty=penalty,
-                                                                    gausspoint=gausspoint,
-                                                                    weib=weib)
+                                                                    gausspoint=gausspoint)
                                }
                                  
                                  if(any(is.na(output))|any(output==Inf) |any(output==-Inf)){
@@ -1771,8 +1754,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                                          alpha=alpha,
                                                          penalty.factor=penalty.factor,
                                                          penalty=penalty,
-                                                         gausspoint=gausspoint,
-                                                         weib=weib)
+                                                         gausspoint=gausspoint)
                                  
                                  
                                  # we want to maximise the loglik thus : 
@@ -1837,8 +1819,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                                    alpha=alpha,
                                                   penalty.factor=penalty.factor,
                                                   penalty=penalty,
-                                                  gausspoint=gausspoint,
-                                                  weib=weib)
+                                                  gausspoint=gausspoint)
                                    
                                    
                                    betanew<-beta+delta*sears$vw
@@ -1870,8 +1851,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                                                alpha=alpha,
                                                                penalty.factor=penalty.factor,
                                                                penalty=penalty,
-                                                               gausspoint=gausspoint,
-                                                               weib=weib)
+                                                               gausspoint=gausspoint)
                                    
                                  }
                                  # if not better or do not exist need to readjust
@@ -1921,8 +1901,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                                   t2=t2,
                                                   t3=t3,
                                                   troncature=troncature,
-                                                  gausspoint=gausspoint,
-                                                  weib=weib)
+                                                  gausspoint=gausspoint)
                                 
                                  # look at convergence for each lambda :
                                  
@@ -2039,8 +2018,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                                       t1=t1,
                                                       t2=t2,
                                                       t3=t3,
-                                                      troncature=troncature,
-                                                      weib=weib)
+                                                      troncature=troncature)
                                    min<-npm
                                    V01<- matrix(0,npm01,npm01)
                                    V01[lower.tri(V01,diag=TRUE)] <- output[(min+1):(min+npm01*(npm01+1)/2)]
@@ -2182,8 +2160,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                                                 t1=t1,
                                                                 t2=t2,
                                                                 t3=t3,
-                                                                troncature=troncature,
-                                                                weib=weib)
+                                                                troncature=troncature)
                                          
                                        
                                          
@@ -2213,8 +2190,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                                                             alpha=alpha,
                                                                             penalty.factor=penalty.factor,
                                                                             penalty=penalty,
-                                                                            gausspoint=gausspoint,
-                                                                            weib=weib)
+                                                                            gausspoint=gausspoint)
                                          }
                                          
                                          if(any(is.na(output))|any(output==Inf) |any(output==-Inf)){
@@ -2346,8 +2322,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                                                    alpha=alpha,
                                                                    penalty.factor=penalty.factor,
                                                                    penalty=penalty,
-                                                                   gausspoint=gausspoint,
-                                                                   weib=weib)
+                                                                   gausspoint=gausspoint)
                                        
                                        
                                        # we want to maximise the loglik thus : 
@@ -2412,8 +2387,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                                         alpha=alpha,
                                                         penalty.factor=penalty.factor,
                                                         penalty=penalty,
-                                                        gausspoint=gausspoint,
-                                                        weib=weib)
+                                                        gausspoint=gausspoint)
                                          
                                          
                                          betanew<-beta+delta*sears$vw
@@ -2445,8 +2419,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                                                      alpha=alpha,
                                                                      penalty.factor=penalty.factor,
                                                                      penalty=penalty,
-                                                                     gausspoint=gausspoint,
-                                                                     weib=weib)
+                                                                     gausspoint=gausspoint)
                                          
                                        }
                                        # if not better or do not exist need to readjust
@@ -2496,8 +2469,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                                                     t2=t2,
                                                                     t3=t3,
                                                                     troncature=troncature,
-                                                                    gausspoint=gausspoint,
-                                                                    weib=weib)
+                                                                    gausspoint=gausspoint)
                                        
                                        # look at convergence for each lambda :
                                        
@@ -2614,8 +2586,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                                             t1=t1,
                                                             t2=t2,
                                                             t3=t3,
-                                                            troncature=troncature,
-                                                            weib=weib)
+                                                            troncature=troncature)
                                          min<-npm
                                          V01<- matrix(0,npm01,npm01)
                                          V01[lower.tri(V01,diag=TRUE)] <- output[(min+1):(min+npm01*(npm01+1)/2)]
@@ -2832,8 +2803,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                           alpha=alpha,
                                           penalty.factor=penalty.factor,
                                           penalty=penalty,
-                                          gausspoint=gausspoint,
-                                          weib=weib)
+                                          gausspoint=gausspoint)
                                
                           
     fn<--res$value
@@ -2870,8 +2840,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                    t2=t2,
                    t3=t3,
                    troncature=troncature,
-                   gausspoint=gausspoint,
-                   weib=weib)
+                   gausspoint=gausspoint)
     
     H<- matrix(0,length(b0),length(b0))
     H[lower.tri(H,diag=TRUE)] <- Hderia$v[(length(b0)+1):(length(Hderia$v))]
@@ -2969,8 +2938,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                             alpha=alpha,
                                             penalty.factor=penalty.factor,
                                             penalty=penalty,
-                                            gausspoint=gausspoint,
-                                            weib=weib)
+                                            gausspoint=gausspoint)
                                  
                                  
                                  
@@ -3008,8 +2976,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                                 t2=t2,
                                                 t3=t3,
                                                 troncature=troncature,
-                                                gausspoint=gausspoint,
-                                                weib=weib)
+                                                gausspoint=gausspoint)
                                  
                                  H<- matrix(0,length(b0),length(b0))
                                  H[lower.tri(H,diag=TRUE)] <- Hderia$v[(length(b0)+1):(length(Hderia$v))]

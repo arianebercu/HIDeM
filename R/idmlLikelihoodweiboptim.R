@@ -29,7 +29,7 @@
 #' 
 idmlLikelihoodweiboptim<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
                                    dimnva01,dimnva02,dimnva12,nva01,nva02,nva12,
-                                   t0,t1,t2,t3,troncature,lambda,alpha,penalty.factor,penalty,gausspoint,weib){
+                                   t0,t1,t2,t3,troncature,lambda,alpha,penalty.factor,penalty,gausspoint){
   
 #in b we have b=c(weibull para, b+, b-)
   # should do pmax ?? 
@@ -44,7 +44,7 @@ idmlLikelihoodweiboptim<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
   
   res<-idmlLikelihoodweib(b0,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
                           dimnva01,dimnva02,dimnva12,nva01,nva02,nva12,
-                          t0,t1,t2,t3,troncature,gausspoint,weib)
+                          t0,t1,t2,t3,troncature,gausspoint)
   
   ball<-rep(NA,npar)
   ball[which(fix==0)]<-b0
@@ -75,7 +75,7 @@ idmlLikelihoodweiboptim<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
 
 groptimweib<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
                   dimnva01,dimnva02,dimnva12,nva01,nva02,nva12,
-                  t0,t1,t2,t3,troncature,lambda,alpha,penalty.factor,penalty,gausspoint,weib){
+                  t0,t1,t2,t3,troncature,lambda,alpha,penalty.factor,penalty,gausspoint){
 
   start<-sum(fix[1:6]==1)
   svar<-b[1:(6-start)]
@@ -182,7 +182,6 @@ groptimweib<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
              as.double(t2),
              as.double(t3),
              as.integer(troncature),
-             as.integer(weib),
              likelihood_deriv=as.double(grbeta),
              PACKAGE="SmoothHazardoptim9")$likelihood_deriv
   
@@ -247,7 +246,7 @@ groptimweib<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
                     t2=t2,
                     t3=t3,
                     troncature=troncature,
-                    gausspoint=gausspoint,weib=weib)
+                    gausspoint=gausspoint)
   
 
   #browser()
