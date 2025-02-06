@@ -48,7 +48,7 @@
 ##'                method = "splines")
 ##' }
 ##' @importFrom pracma gauss_kronrod
-#' @useDynLib SmoothHazardoptim9
+#' @useDynLib HIDeM
 ##' @export
 #' @author R: Ariane Bercu <ariane.bercu@@u-bordeaux.fr> 
 #' 
@@ -234,13 +234,13 @@ intensity <- function(times,knots,number.knots=NULL,theta,linear.predictor=0,V=N
 #----------------------------------------------------------------------
 ### intensity.R ends here
 # # 
-#  library(SmoothHazardoptim9)
+#  library(HIDeM)
 #  data(Paq1000)
 #  
 # #  Illness-death model with certif on the 3 transitions
 # #  Weibull parametrization and likelihood maximization
 #  
-#  fit.weib <- SmoothHazardoptim9::idm(formula02=Hist(time=t,event=death,entry=e)~certif,
+#  fit.weib <- HIDeM::idm(formula02=Hist(time=t,event=death,entry=e)~certif,
 #                  formula01=Hist(time=list(l,r),event=dementia)~certif,
 #                  data=Paq1000)
 #  
@@ -256,7 +256,7 @@ intensity <- function(times,knots,number.knots=NULL,theta,linear.predictor=0,V=N
 #  test$upperintensity
 #  fit.weib$upperIntensity01
 #  
-#  fit.s<- SmoothHazardoptim9::idm(formula02=Hist(time=t,event=death,entry=e)~certif,
+#  fit.s<- HIDeM::idm(formula02=Hist(time=t,event=death,entry=e)~certif,
 #                                        formula01=Hist(time=list(l,r),event=dementia)~certif,
 #                                        data=Paq1000,method = "splines",n.knots = c(3,3,3))
 #  
@@ -269,7 +269,7 @@ intensity <- function(times,knots,number.knots=NULL,theta,linear.predictor=0,V=N
 #                  fix=rep(0,5),converged=1,conf.int = 0.95,
 #                  method="splines")
 #  
-#  fit.idm <-  SmoothHazardoptim9::idm(formula02 = Hist(time = t, event = death, entry = e) ~ certif,
+#  fit.idm <-  HIDeM::idm(formula02 = Hist(time = t, event = death, entry = e) ~ certif,
 #                  formula01 = Hist(time = list(l,r), event = dementia) ~ certif,
 #                  formula12 = ~ certif, method = "Splines", data = Paq1000)
 #  

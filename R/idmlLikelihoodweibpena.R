@@ -28,7 +28,7 @@
 ##' @param penalty which penalty to consider
 ##' @param penalty.factor which variable should be penalised
 ##' @param gausspoint number of points in gauss quadrature
-#' @useDynLib SmoothHazardoptim9
+#' @useDynLib HIDeM
 ##' @export
 #' @author R: Ariane Bercu <ariane.bercu@@u-bordeaux.fr> 
 #' 
@@ -65,7 +65,7 @@ idmlLikelihoodweibpena<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
            as.integer(troncature),
            as.integer(gausspoint),
            likelihood_res=as.double(res),
-           PACKAGE="SmoothHazardoptim9")$likelihood_res
+           PACKAGE="HIDeM")$likelihood_res
 
   b<-rep(NA,npar)
   b[fix==0]<-b0

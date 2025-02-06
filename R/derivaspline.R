@@ -27,7 +27,7 @@
 ##' @param t2 time of last visit or time diagnose of illness
 ##' @param t3 time of last visit or death
 ##' @param troncature indicator of troncature, value 1 if there is troncature otherwise 0.
-#' @useDynLib SmoothHazardoptim9
+#' @useDynLib HIDeM
 #' @author R: Ariane Bercu <ariane.bercu@@u-bordeaux.fr>  
 derivaspline<-function(b,npm,npar,bfix,fix,zi01,zi02,zi12,ctime,no,nz01,nz02,nz12,ve01,ve02,ve12,
                        dimnva01,dimnva02,dimnva12,nva01,nva02,nva12,
@@ -63,7 +63,7 @@ derivaspline<-function(b,npm,npar,bfix,fix,zi01,zi02,zi12,ctime,no,nz01,nz02,nz1
            as.double(t3),
            as.integer(troncature),
            likelihood_deriv=as.double(res),
-           PACKAGE="SmoothHazardoptim9")$likelihood_deriv
+           PACKAGE="HIDeM")$likelihood_deriv
 }
 
 derivasplinediag<-function(b,npm,npar,bfix,fix,zi01,zi02,zi12,ctime,no,nz01,nz02,nz12,ve01,ve02,ve12,
@@ -100,5 +100,5 @@ derivasplinediag<-function(b,npm,npar,bfix,fix,zi01,zi02,zi12,ctime,no,nz01,nz02
            as.double(t3),
            as.integer(troncature),
            likelihood_deriv=as.double(res),
-           PACKAGE="SmoothHazardoptim9")$likelihood_deriv
+           PACKAGE="HIDeM")$likelihood_deriv
 }

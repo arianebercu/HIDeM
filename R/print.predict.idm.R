@@ -3,7 +3,7 @@
 #' @param x an \code{idm} class objects returned by a call to the \code{\link{idm}} function
 #' @param digits number of digits to be printed
 #' @param ... other parameters link to function \code{idm} 
-#' @useDynLib SmoothHazardoptim9
+#' @useDynLib HIDeM
 #' @author R: Ariane Bercu <ariane.bercu@@u-bordeaux.fr> 
 #' @export
 

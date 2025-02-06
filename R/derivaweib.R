@@ -21,7 +21,7 @@
 ##' @param t2 time of last visit or time diagnose of illness
 ##' @param t3 time of last visit or death
 ##' @param troncature indicator of troncature, value 1 if there is troncature otherwise 0.
-#' @useDynLib SmoothHazardoptim9
+#' @useDynLib HIDeM
 #' @author R: Ariane Bercu <ariane.bercu@@u-bordeaux.fr> 
 #' @export
 
@@ -54,7 +54,7 @@ derivaweib<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
            as.double(t3),
            as.integer(troncature),
            likelihood_deriv=as.double(res),
-           PACKAGE="SmoothHazardoptim9")$likelihood_deriv
+           PACKAGE="HIDeM")$likelihood_deriv
 }
 
 derivaweibdiag<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
@@ -86,7 +86,7 @@ derivaweibdiag<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
            as.double(t3),
            as.integer(troncature),
            likelihood_deriv=as.double(res),
-           PACKAGE="SmoothHazardoptim9")$likelihood_deriv
+           PACKAGE="HIDeM")$likelihood_deriv
 }
 
 derivaweibdiagana<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
@@ -118,7 +118,7 @@ derivaweibdiagana<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
                    as.double(t3),
                    as.integer(troncature),
                    likelihood_deriv=as.double(res),
-                   PACKAGE="SmoothHazardoptim9")$likelihood_deriv
+                   PACKAGE="HIDeM")$likelihood_deriv
   
   if(any(output==Inf)| any(output==-Inf) | any(is.na(output)) | any(is.nan(output))){
     
@@ -169,7 +169,7 @@ derivaweibana<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
                    as.double(t3),
                    as.integer(troncature),
                    likelihood_deriv=as.double(res),
-                   PACKAGE="SmoothHazardoptim9")$likelihood_deriv
+                   PACKAGE="HIDeM")$likelihood_deriv
   
   
   if(any(output==Inf)| any(output==-Inf) | any(is.na(output)) | any(is.nan(output))){

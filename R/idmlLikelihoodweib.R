@@ -24,7 +24,7 @@
 ##' @param troncature indicator if troncature or not
 ##' @param gausspoint number of gausspoint quadrature
 ##' @param weib the form of the weibull parameters 
-#' @useDynLib SmoothHazardoptim9
+#' @useDynLib HIDeM
 ##' @export
 #' @author R: Ariane Bercu <ariane.bercu@@u-bordeaux.fr> 
 #' 
@@ -57,7 +57,7 @@ idmlLikelihoodweib<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
            as.integer(troncature),
            as.integer(gausspoint),
            likelihood_res=as.double(res),
-           PACKAGE="SmoothHazardoptim9")$likelihood_res
+           PACKAGE="HIDeM")$likelihood_res
 }
 
 

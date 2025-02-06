@@ -33,7 +33,7 @@
 ##' @param alpha alpha on all transitions 
 ##' @param penalty which penalty to consider
 ##' @param penalty.factor which variable should be penalised
-#' @useDynLib SmoothHazardoptim9
+#' @useDynLib HIDeM
 #' @author R: Ariane Bercu <ariane.bercu@@u-bordeaux.fr> 
 #'
 idmlLikelihoodoptim<-function(b,npm,npar,bfix,fix,zi01,zi02,zi12,ctime,no,nz01,nz02,nz12,ve01,ve02,ve12,
@@ -190,7 +190,7 @@ groptim<-function(b,npm,npar,bfix,fix,zi01,zi02,zi12,ctime,no,nz01,nz02,nz12,ve0
                    as.double(t3),
                    as.integer(troncature),
                    likelihood_deriv=as.double(grbeta),
-                   PACKAGE="SmoothHazardoptim9")$likelihood_deriv
+                   PACKAGE="HIDeM")$likelihood_deriv
   
 
   bb<-rep(NA,npar)

@@ -57,7 +57,7 @@
 #' plot(fitpenspline,lambda=c(10,10,10))
 #' }
 #'  
-#'@useDynLib SmoothHazardoptim9
+#'@useDynLib HIDeM
 #' @export
 #' @author R: Ariane Bercu <ariane.bercu@@u-bordeaux.fr> 
 plot.idm <- function(x,

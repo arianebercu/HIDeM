@@ -11,7 +11,7 @@
 ##' @param fu -loglikelihood
 ##' @param lambda lambda penalised parameter
 ##' @param alpha alpha penalised parameter
-#' @useDynLib SmoothHazardoptim9
+#' @useDynLib HIDeM
 #' @author R: Ariane Bercu <ariane.bercu@@u-bordeaux.fr>  
 cv.model<-function(beta,
                    nva01,

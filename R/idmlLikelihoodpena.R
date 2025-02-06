@@ -33,7 +33,7 @@
 ##' @param alpha alpha on all transitions 
 ##' @param penalty which penalty to consider
 ##' @param penalty.factor which variable should be penalised
-#' @useDynLib SmoothHazardoptim9
+#' @useDynLib HIDeM
 #' @author R: Ariane Bercu <ariane.bercu@@u-bordeaux.fr> 
 #' 
 
@@ -74,7 +74,7 @@ idmlLikelihoodpena<-function(b,npm,npar,bfix,fix,zi01,zi02,zi12,ctime,no,nz01,nz
            as.integer(troncature),
            as.integer(gausspoint),
            likelihood_res=as.double(res),
-           PACKAGE="SmoothHazardoptim9")$likelihood_res
+           PACKAGE="HIDeM")$likelihood_res
 
   b<-rep(NA,npar)
   b[fix==0]<-b0

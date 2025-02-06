@@ -42,7 +42,7 @@
 ##'  fix splines
 ##' @param methodCV methodolgy to optimise penalised parameters 
 #' @author R: Ariane Bercu <ariane.bercu@@u-bordeaux.fr> 
-#' @useDynLib SmoothHazardoptim9
+#' @useDynLib HIDeM
 
 idm.splines<-function(b,clustertype,epsa,epsb,epsd,nproc,maxiter,size_V,size_spline,noVar,bfix,
                          fix0,knots01,knots02,knots12,ctime,N,nknots01,nknots02,nknots12,

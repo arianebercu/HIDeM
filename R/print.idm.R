@@ -34,7 +34,7 @@
 #' pp<-predict(fitpenweib,s=10,t=15,lambda = "BIC") 
 #' print(pp)
 #' }
-#' @useDynLib SmoothHazardoptim9
+#' @useDynLib HIDeM
 #' @author R: Ariane Bercu <ariane.bercu@@u-bordeaux.fr> 
 #' @export
 print.idm <- function(x,conf.int=.95,digits=4,pvalDigits=4,eps=0.0001,coef=F,...){

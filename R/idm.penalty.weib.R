@@ -42,7 +42,7 @@
 #' @author R: Ariane Bercu <ariane.bercu@@u-bordeaux.fr> 
 #' @importFrom foreach "%do%"
 #' @importFrom foreach "%dopar%"
-#' @useDynLib SmoothHazardoptim9
+#' @useDynLib HIDeM
 
 
 idm.penalty.weib<-function(b,fix0,size_V,

@@ -114,7 +114,7 @@
 #' of nonlinear parameters.  \emph{SIAM Journal of Applied Mathematics},
 #' 431-441.
 #' @importFrom prodlim Hist
-#' @useDynLib SmoothHazardoptim9
+#' @useDynLib HIDeM
 #' @export
 gridsearch.penidm <- function(
                 gridmethod="BIC",
@@ -398,7 +398,7 @@ gridsearch.penidm <- function(
   environment(f01)<-environment(f02)<-environment(f12)
   
   
-  m01 <-SmoothHazardoptim9::idm(formula02 = f02,
+  m01 <-HIDeM::idm(formula02 = f02,
                                   formula01 = f01,
                                   formula12 = f12,
                                   data=data,
@@ -434,7 +434,7 @@ gridsearch.penidm <- function(
     environment(f02)<-environment(f01)<-environment(f12)
     
     
-    m02 <-SmoothHazardoptim9::idm(formula02 = f02,
+    m02 <-HIDeM::idm(formula02 = f02,
                                   formula01 = f01,
                                   formula12 = f12,
                                   data=data,
@@ -472,7 +472,7 @@ gridsearch.penidm <- function(
   environment(f12)<-environment(f02)<-environment(f01)
   
   
-  m12 <-SmoothHazardoptim9::idm(formula02 = f02,
+  m12 <-HIDeM::idm(formula02 = f02,
                                   formula01 = f01,
                                   formula12 = f12,
                                   data=data,

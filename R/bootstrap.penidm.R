@@ -107,7 +107,7 @@
 ##' @author R: Ariane Bercu <ariane.bercu@@u-bordeaux.fr> 
 #' @keywords illness-death
 #' @importFrom prodlim Hist
-#' @useDynLib SmoothHazardoptim9
+#' @useDynLib HIDeM
 #' @export
 bootstrap.penidm <- function(
                 K=100, # number of sample,
@@ -202,7 +202,7 @@ bootstrap.penidm <- function(
           }else{B<-c(model.idm$theta01,model.idm$theta02,model.idm$theta12,model.idm$coef)}
         }
       }
-      model.idm<-SmoothHazardoptim9::idm(formula01=formula01,
+      model.idm<-HIDeM::idm(formula01=formula01,
                  formula02=formula02,
                  formula12=formula12,
                  data=subdata,
@@ -248,7 +248,7 @@ bootstrap.penidm <- function(
                         c(model.idm$theta01,model.idm$theta02,model.idm$theta12,model.idm$coef[,1]),
                         c(model.idm$theta01[,1],model.idm$theta02[,1],model.idm$theta12[,1],model.idm$coef[,1]))}
       }
-      model.idm<-SmoothHazardoptim9::idm(formula01=formula01,
+      model.idm<-HIDeM::idm(formula01=formula01,
                      formula02=formula02,
                      formula12=formula12,
                      data=subdata,
