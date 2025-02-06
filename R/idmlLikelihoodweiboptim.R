@@ -23,7 +23,7 @@
 ##' @param t3 time of event/out
 ##' @param troncature indicator if troncature or not
 ##' @param gausspoint number of gausspoint quadrature
-#' @useDynLib SmoothHazardoptim9
+#' @useDynLib HIDeM
 ##' @export
 #' @author R: Ariane Bercu <ariane.bercu@@u-bordeaux.fr> 
 #' 
@@ -183,7 +183,7 @@ groptimweib<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
              as.double(t3),
              as.integer(troncature),
              likelihood_deriv=as.double(grbeta),
-             PACKAGE="SmoothHazardoptim9")$likelihood_deriv
+             PACKAGE="HIDeM")$likelihood_deriv
   
   
   bb<-rep(NA,npar)

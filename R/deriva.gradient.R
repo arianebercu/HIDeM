@@ -17,7 +17,7 @@
 #' matrix and the first derivatives} \item{rl}{the value of the funcpa function
 #' at point b}
 #' @references Donald W. Marquardt An algorithm for Least-Squares Estimation of Nonlinear Parameters. Journal of the Society for Industrial and Applied Mathematics, Vol. 11, No. 2. (Jun, 1963), pp. 431-441.
-#'@useDynLib SmoothHazardoptim9
+#'@useDynLib HIDeM
 #' @export
 #'
 
@@ -293,7 +293,7 @@ grmlaweib<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
                    as.double(t3),
                    as.integer(troncature),
                    likelihood_deriv=as.double(grbeta),
-                   PACKAGE="SmoothHazardoptim9")$likelihood_deriv
+                   PACKAGE="HIDeM")$likelihood_deriv
   
   if(any(grbeta==Inf)| any(grbeta==-Inf) | any(is.na(grbeta)) | any(is.nan(grbeta))){
     cat("Problem of computation on the analytical gradient, perform finite differencies. \n")
@@ -430,7 +430,7 @@ output<-.Fortran("derivaweiballparafirstderiv",
                  as.double(t3),
                  as.integer(troncature),
                  likelihood_deriv=as.double(res),
-                 PACKAGE="SmoothHazardoptim9")$likelihood_deriv
+                 PACKAGE="HIDeM")$likelihood_deriv
 
 
 if(any(output==Inf)| any(output==-Inf) | any(is.na(output)) | any(is.nan(output))){
@@ -495,7 +495,7 @@ hessianmlaweib<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
                    as.double(t3),
                    as.integer(troncature),
                    likelihood_deriv=as.double(output),
-                   PACKAGE="SmoothHazardoptim9")$likelihood_deriv
+                   PACKAGE="HIDeM")$likelihood_deriv
   
   if(any(output[(npm_all+1):length(output)]==Inf)| any(output[(npm_all+1):length(output)]==-Inf) | any(is.na(output[(npm_all+1):length(output)])) | any(is.nan(output[(npm_all+1):length(output)]))){
     cat("Problem of computation on the analytical hessian, thus compute finite differences.\n")
@@ -696,7 +696,7 @@ hessianmlaweibana<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
                    as.double(t3),
                    as.integer(troncature),
                    likelihood_deriv=as.double(res),
-                   PACKAGE="SmoothHazardoptim9")$likelihood_deriv
+                   PACKAGE="HIDeM")$likelihood_deriv
   
  
   if(any(output==Inf)| any(output==-Inf) | any(is.na(output)) | any(is.nan(output))){

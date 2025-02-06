@@ -61,7 +61,7 @@
 #'                   lambda12 = 10)
 #' predict(fitpenweib,s=10,t=15,lambda = "BIC") 
 #' }
-#'@useDynLib SmoothHazardoptim9
+#'@useDynLib HIDeM
 #' @export
 #' @author R: Ariane Bercu <ariane.bercu@@u-bordeaux.fr> 
 predict.idm <- function(object,s,
@@ -905,7 +905,7 @@ predict.idm <- function(object,s,
 }
 
 ## prediction indicators with splines 
-#' @useDynLib SmoothHazardoptim9
+#' @useDynLib HIDeM
 #' @author R: Ariane Bercu <ariane.bercu@@u-bordeaux.fr> 
 Predict0.idmPl <- function(s,t,knots01,nknots01,the01,knots12,nknots12,the12,knots02,nknots02,the02,bZ01=0,bZ12=0,bZ02=0) {
     if (s>(min(knots01[nknots01+6],knots02[nknots02+6],knots12[nknots12+6]))) {stop("argument s is off")}    
@@ -938,7 +938,7 @@ Predict0.idmPl <- function(s,t,knots01,nknots01,the01,knots12,nknots12,the12,kno
 }
 
 ## prediction indicators with weibull 
-#' @useDynLib SmoothHazardoptim9
+#' @useDynLib HIDeM
 #' @author R: Ariane Bercu <ariane.bercu@@u-bordeaux.fr> 
 Predict0.idmWeib <- function(s,t,a01,b01,a02,b02,a12,b12,bZ01=0,bZ02=0,bZ12=0) {
 
@@ -1071,7 +1071,7 @@ S.pl <- function(s,t,zi,nknots,the,bZ=0) {
 
 
 # Life expectency with weibull 
-#' @useDynLib SmoothHazardoptim9
+#' @useDynLib HIDeM
 #' @author R: Ariane Bercu <ariane.bercu@@u-bordeaux.fr> 
 lifexpect0.idmWeib <- function(s,a01,b01,a02,b02,a12,b12,bZ01=0,bZ02=0,bZ12=0,max) {
 
@@ -1116,7 +1116,7 @@ lifexpect0.idmWeib <- function(s,a01,b01,a02,b02,a12,b12,bZ01=0,bZ02=0,bZ12=0,ma
 
 }
 # Life expectency with splines
-#' @useDynLib SmoothHazardoptim9
+#' @useDynLib HIDeM
 #' @author R: Ariane Bercu <ariane.bercu@@u-bordeaux.fr> 
 lifexpect0.idmPl <- function(s,knots01,nknots01,the01,knots12,nknots12,the12,knots02,nknots02,the02,bZ01=0,bZ12=0,bZ02=0) {
   if(any(c(knots12[nknots12+6],knots02[nknots02+6],knots01[nknots01+6])==Inf)){

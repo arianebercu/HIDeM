@@ -28,7 +28,7 @@
 ##' @param t3 time of event/out
 ##' @param troncature indicator if troncature or not
 ##' @param gausspoint number of gausspoint quadrature
-#' @useDynLib SmoothHazardoptim9
+#' @useDynLib HIDeM
 ##' @export
 #' @author R: Ariane Bercu <ariane.bercu@@u-bordeaux.fr> 
 idmlLikelihood<-function(b,npm,npar,bfix,fix,zi01,zi02,zi12,ctime,no,nz01,nz02,nz12,ve01,ve02,ve12,
@@ -67,7 +67,7 @@ idmlLikelihood<-function(b,npm,npar,bfix,fix,zi01,zi02,zi12,ctime,no,nz01,nz02,n
            as.integer(troncature),
            as.integer(gausspoint),
            likelihood_res=as.double(res),
-           PACKAGE="SmoothHazardoptim9")$likelihood_res
+           PACKAGE="HIDeM")$likelihood_res
 }
 
 

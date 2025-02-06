@@ -8,7 +8,7 @@
 #' \dontrun{
 #' splinesMI(x=seq(0.01,10,length.out=20),knots=c(2,5,8),Boundary.knots=c(0.01,10))$Mspline
 #' }
-#' @useDynLib SmoothHazardoptim9
+#' @useDynLib HIDeM
 #' @author R: Ariane Bercu <ariane.bercu@@u-bordeaux.fr> 
 #' @export
 splinesMI<-function(x,knots,Boundary.knots){

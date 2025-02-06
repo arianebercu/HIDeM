@@ -2,7 +2,7 @@
 ##' @title Sample illness-death model data 
 ##' @description
 ##'  Simulate data from an illness-death model with interval censored event times
-##' and covariates for the purpose of illustrating the help pages of the SmoothHazard package.
+##' and covariates for the purpose of illustrating the help pages of the HIDeM package.
 ##' See the body of the function for details, i.e., evaluate simulateIDM
 ##' @param x An \code{idmModel} object as obtained with
 ##' \code{idmModel}
@@ -28,7 +28,7 @@
 #' }
 ##' @author R: Ariane Bercu <ariane.bercu@@u-bordeaux.fr> 
 ##' @importFrom lava sim
-##' @useDynLib SmoothHazardoptim9
+##' @useDynLib HIDeM
 
 
 
@@ -152,7 +152,7 @@ sim.idmModel <- function(x,
 ##' @title Sample illness-death model data 
 ##' @description
 ##'  Simulate data from an illness-death model with interval censored event times
-##' and covariates for the purpose of illustrating the help pages of the SmoothHazard package.
+##' and covariates for the purpose of illustrating the help pages of the HIDeM package.
 ##' See the body of the function for details, i.e., evaluate simulateIDM
 ##' @param scale.illtime Weilbull scale for latent illness time
 ##' @param shape.illtime Weilbull shape for latent illness time
@@ -179,7 +179,7 @@ sim.idmModel <- function(x,
 ##' @param beta12 value of beta on transition 1 --> 2
 ##' @param n number of observations
 #' @importFrom ggplot2 ggplot geom_line geom_point theme_classic ylab aes_string aes facet_grid
-#' @useDynLib SmoothHazardoptim9
+#' @useDynLib HIDeM
 #' @author R: Ariane Bercu <ariane.bercu@@u-bordeaux.fr> 
 #' @export
 

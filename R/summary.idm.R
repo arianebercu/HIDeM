@@ -34,7 +34,7 @@
 #'                   lambda02 = 10, lambda12 = 10)
 #' summary(fitpenweib)
 #' }
-#' @useDynLib SmoothHazardoptim9
+#' @useDynLib HIDeM
 #' @export
 summary.idm <- function(object,conf.int=.95,digits=4,pvalDigits=4,eps=.0001, ...){
     if (!inherits(object,"idm")) stop("Object must be of class 'idm'")
