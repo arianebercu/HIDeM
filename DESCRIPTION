@@ -1,5 +1,5 @@
-Package: SmoothHazardoptim9
-Title: Estimation of Smooth Hazard Models for Interval-Censored Data with
+Package: HIDeM
+Title: In high dimension, estimation of Smooth Hazard Models for Interval-Censored Data with
     Applications to Survival and Illness-Death Models
 Version: 1.4.1
 Author: Ariane Bercu, Agathe Guilloux, Helene Jacqmin-Gadda and Cecile Proust-Lima

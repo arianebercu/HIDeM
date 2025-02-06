@@ -1,5 +1,5 @@
 Version: 1.0
-ProjectId: 7e490172-ac2c-4651-b884-86762d7ed608
+ProjectId: bc5c79b4-ea97-4682-9e7a-3b8ff6a271d1
 
 RestoreWorkspace: Default
 SaveWorkspace: Default
@@ -16,7 +16,3 @@ LaTeX: pdfLaTeX
 BuildType: Package
 PackageUseDevtools: Yes
 PackageInstallArgs: --no-multiarch --with-keep.source
-PackageCheckArgs: --as-cran
-PackageRoxygenize: rd,collate,namespace
-
-ProjectName: HIDeM

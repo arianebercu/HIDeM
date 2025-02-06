@@ -180,7 +180,7 @@
 ##'@importFrom graphics par
 ##'@importFrom graphics polygon segments
 ##'@importFrom stats as.formula formula integrate model.frame model.matrix na.fail na.omit pchisq pweibull qnorm quantile terms update.formula
-#' @useDynLib SmoothHazardoptim9
+#' @useDynLib HIDeM
 #' @export
 idm <- function(formula01,
                 formula02,
