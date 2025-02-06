@@ -34,8 +34,8 @@ idm.weib(
   ts,
   troncature,
   gausspoint,
-  weib,
-  methodCV
+  methodCV,
+  analytics
 )
 }
 \arguments{
@@ -97,9 +97,9 @@ idm.weib(
 
 \item{gausspoint}{number of points in gauss quadrature}
 
-\item{weib}{the form of the weibull parameters}
-
 \item{methodCV}{methodolgy to optimise penalised parameters}
+
+\item{weib}{the form of the weibull parameters}
 }
 \description{
 Illness-death model algorithm with weibull baseline risk

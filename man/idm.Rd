@@ -11,7 +11,6 @@ idm(
   data,
   method = "Weib",
   methodCV = "mla",
-  weib = "square",
   scale.X = T,
   maxiter = 100,
   maxiter.pena = 10,
@@ -37,6 +36,8 @@ idm(
     \%in\% c("elasticnet"), 0.5, 1))),
   partialH = F,
   nproc = 1,
+  onestep = F,
+  analytics = T,
   clustertype = "FORK",
   envir = parent.frame()
 )
