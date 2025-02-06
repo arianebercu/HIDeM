@@ -110,7 +110,7 @@ intensity <- function(times,knots,number.knots=NULL,theta,linear.predictor=0,V=N
     survival=rep(0,length(times))   # survie
 
     theta.square<-theta^2
-    
+
     if(method=="weib"){
       
       

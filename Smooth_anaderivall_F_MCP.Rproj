@@ -1,4 +1,5 @@
 Version: 1.0
+ProjectId: 7e490172-ac2c-4651-b884-86762d7ed608
 
 RestoreWorkspace: Default
 SaveWorkspace: Default
@@ -17,3 +18,5 @@ PackageUseDevtools: Yes
 PackageInstallArgs: --no-multiarch --with-keep.source
 PackageCheckArgs: --as-cran
 PackageRoxygenize: rd,collate,namespace
+
+ProjectName: HIDeM

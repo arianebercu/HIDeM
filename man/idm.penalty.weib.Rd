@@ -42,7 +42,6 @@ idm.penalty.weib(
   penalty.factor,
   penalty,
   gausspoint,
-  weib,
   methodCV,
   partialH
 )
@@ -121,8 +120,6 @@ idm.penalty.weib(
 \item{penalty}{which penalty to consider}
 
 \item{gausspoint}{number of points in gauss quadrature}
-
-\item{weib}{the form of the weibull parameters}
 
 \item{methodCV}{methodolgy to optimise penalised parameters}
 

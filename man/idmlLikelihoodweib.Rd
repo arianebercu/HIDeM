@@ -26,8 +26,7 @@ idmlLikelihoodweib(
   t2,
   t3,
   troncature,
-  gausspoint,
-  weib
+  gausspoint
 )
 }
 \arguments{

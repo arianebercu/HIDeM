@@ -30,8 +30,7 @@ idmlLikelihoodweiboptim(
   alpha,
   penalty.factor,
   penalty,
-  gausspoint,
-  weib
+  gausspoint
 )
 }
 \arguments{

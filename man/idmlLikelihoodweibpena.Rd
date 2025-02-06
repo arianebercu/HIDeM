@@ -30,8 +30,7 @@ idmlLikelihoodweibpena(
   alpha,
   penalty.factor,
   penalty,
-  gausspoint,
-  weib
+  gausspoint
 )
 }
 \arguments{
@@ -87,8 +86,6 @@ idmlLikelihoodweibpena(
 \item{penalty}{which penalty to consider}
 
 \item{gausspoint}{number of points in gauss quadrature}
-
-\item{weib}{the form of the weibull parameters}
 }
 \description{
 Log likelihood with weibull baseline risk

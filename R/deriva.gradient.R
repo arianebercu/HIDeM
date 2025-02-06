@@ -405,8 +405,8 @@ grmlaweibana<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
                    t0,t1,t2,t3,troncature,lambda,alpha,penalty.factor,penalty,gausspoint){
   
  
-res<-rep(0,npm+npm*(npm+1)/2)
-output<-.Fortran("derivaweiballpara",
+res<-rep(0,npm)
+output<-.Fortran("derivaweiballparafirstderiv",
                  ## input
                  as.double(b),
                  as.integer(npm),
@@ -431,8 +431,15 @@ output<-.Fortran("derivaweiballpara",
                  as.integer(troncature),
                  likelihood_deriv=as.double(res),
                  PACKAGE="SmoothHazardoptim9")$likelihood_deriv
-#browser()
-sol<-output[1:npm]
+
+
+if(any(output==Inf)| any(output==-Inf) | any(is.na(output)) | any(is.nan(output))){
+
+  output[any(output==Inf)|any(is.na(output)) | any(is.nan(output))]<-.Machine$double.eps
+  output[any(output==-Inf)]<--.Machine$double.eps
+  
+}
+sol<-output
 if(sum(fix[1:6])!=6){
 sol[1:(6-sum(fix[1:6]))]<-sol[1:(6-sum(fix[1:6]))]*2*b[which(fix[1:6]==0)]
 }
@@ -621,7 +628,7 @@ hessianmlaweib<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
         
       }
       
-      #browser()
+
       return(Vall[upper.tri(Vall,diag=T)])
       
     }
@@ -664,6 +671,7 @@ hessianmlaweibana<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
                          t0,t1,t2,t3,troncature,gausspoint){
   
   res<-rep(0,npm+npm*(npm+1)/2)
+  #browser()
   output<-.Fortran("derivaweiballpara",
                    ## input
                    as.double(b),
@@ -692,9 +700,10 @@ hessianmlaweibana<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
   
  
   if(any(output==Inf)| any(output==-Inf) | any(is.na(output)) | any(is.nan(output))){
-    stop(paste0("Problem of computation on the hessian for weibull parameters. Verify your function specification...\n.
-        Infinite value with finite parameters : b=",round(b,4),"\n"))
-    
+
+   output[any(output==Inf)|any(is.na(output)) | any(is.nan(output))]<-.Machine$double.eps
+   output[any(output==-Inf)]<--.Machine$double.eps
+
   }
       nweib<-sum(fix[1:6]==0)
       min<-npm
@@ -782,14 +791,4 @@ hessianmlaweibana<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
   
 
  
-# p<-b[5:6]
-# p[1]<-exp(p[1])
-# p[2]<-p[2]^2
-# x<-t1
-# risq = p[1]*(p[2]**p[1])*(x^(p[1]-1))
-# risq
-# surv = exp(-(p[2]*x)**p[1])
-# surv
-# 1/surv
-# glam = (p[2]*x)^p[1]
-# glam
+
