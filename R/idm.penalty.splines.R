@@ -51,7 +51,7 @@
 #' @importFrom foreach "%do%"
 #' @importFrom foreach "%dopar%"
 #' @author R: Ariane Bercu <ariane.bercu@@u-bordeaux.fr> 
-#' @useDynLib SmoothHazardoptim9
+#' @useDynLib HIDeM
 idm.penalty.splines<-function(b,fix0,size_V,size_spline,
                       clustertype,epsa,epsb,epsd,eps.eigen,nproc,maxiter,maxiter.pena,
                       knots01,knots02,knots12,ctime,N,nknots01,nknots02,nknots12,
