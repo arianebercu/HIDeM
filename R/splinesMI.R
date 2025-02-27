@@ -79,3 +79,19 @@ splinesMI<-function(x,knots,Boundary.knots){
   return(list(Mspline=Mspline,Ispline=Ispline))
 }
 
+<<<<<<< HEAD
+=======
+
+ 
+# 
+# 
+# msplines<-splinesMI(x=c(18,8.9090034031997476,11.448188338834687,0.83138401861838951),knots=9,Boundary.knots=c(0,18))$Mspline
+# isplines<-splinesMI(x=c(18,8.9090034031997476,11.448188338834687,0.83138401861838951),knots=9,Boundary.knots=c(0,18))$Ispline
+# #splines2::iSpline(x=times,knots=knots.int,Boundary.knots=knots.bound,intercept=T)
+# #browser()
+# 
+# intensity<-msplines%*%rep(0.25,5)
+# cumulative.intensity<-isplines%*%rep(0.25,5)
+# intensity
+# cumulative.intensity
+>>>>>>> 119efca (HIDeM new name and add splines hessian in fortran)

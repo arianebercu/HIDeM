@@ -58,7 +58,11 @@ idm.penalty.splines<-function(b,fix0,size_V,size_spline,
                       ve01,ve02,ve12,dimnva01,dimnva02,dimnva12,nvat01,nvat02,nvat12,
                       t0,t1,t2,t3,troncature,gausspoint,
                       nlambda01,lambda01,nlambda02,lambda02,
+<<<<<<< HEAD
                       nlambda12,lambda12,alpha,penalty.factor,penalty,methodCV,partialH){
+=======
+                      nlambda12,lambda12,alpha,penalty.factor,penalty,methodCV,partialH,analytics){
+>>>>>>> 119efca (HIDeM new name and add splines hessian in fortran)
   
   
   # need to keep original fix to calculate for beta 
@@ -1735,7 +1739,11 @@ idm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                  }
                                  
                                  
+<<<<<<< HEAD
                                  
+=======
+                                 #browser()
+>>>>>>> 119efca (HIDeM new name and add splines hessian in fortran)
                                  output.cv<-cv.model(beta=beta,
                                                      nva01=npm01,
                                                      nva02=npm02,
@@ -1908,6 +1916,11 @@ idm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                  bfix<-b[fix0.beta==1]
                                  b<-b[fix0.beta==0]
                                  
+<<<<<<< HEAD
+=======
+                                 browser()
+                                 if(analytics==T){
+>>>>>>> 119efca (HIDeM new name and add splines hessian in fortran)
                                  output.mla<- marqLevAlg::mla(b=b,
                                                   fn=idmlLikelihood,
                                                   epsa=epsa,
@@ -1942,7 +1955,50 @@ idm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                                   t3=t3,
                                                   troncature=troncature,
                                                   gausspoint=gausspoint)
+<<<<<<< HEAD
                                  
+=======
+                                 }else{
+                                 
+                                 output.mla<- marqLevAlg::mla(b=b,
+                                                              gr=grmlasplineana,
+                                                              hess = hessianmlasplineana,
+                                                              fn=idmlLikelihood,
+                                                              epsa=epsa,
+                                                              epsb=epsb,
+                                                              epsd=epsd,
+                                                              maxiter=maxiter.pena,
+                                                              minimize=F,
+                                                              npm=length(b),
+                                                              npar=size_V,
+                                                              bfix=bfix,
+                                                              fix=fix0.beta,
+                                                              zi01=knots01,
+                                                              zi02=knots02,
+                                                              zi12=knots12,
+                                                              ctime=ctime,
+                                                              no=N,
+                                                              nz01=nknots01,
+                                                              nz02=nknots02,
+                                                              nz12=nknots12,
+                                                              ve01=ve01,
+                                                              ve02=ve02,
+                                                              ve12=ve12,
+                                                              dimnva01=dimnva01,
+                                                              dimnva02=dimnva02,
+                                                              dimnva12=dimnva12,
+                                                              nva01=nvat01,
+                                                              nva02=nvat02,
+                                                              nva12=nvat12,
+                                                              t0=t0,
+                                                              t1=t1,
+                                                              t2=t2,
+                                                              t3=t3,
+                                                              troncature=troncature,
+                                                              gausspoint=gausspoint)
+                                 
+                                 }
+>>>>>>> 119efca (HIDeM new name and add splines hessian in fortran)
                                  
                                  # look at convergence for each lambda :
                                  

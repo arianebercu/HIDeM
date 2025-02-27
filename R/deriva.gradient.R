@@ -88,6 +88,10 @@ deriva.gradient <- function(nproc=1,b,funcpa,.packages=NULL,...){
     
    
   result <- list(v=v,rl=rl)
+<<<<<<< HEAD
+=======
+
+>>>>>>> 119efca (HIDeM new name and add splines hessian in fortran)
   return(result)
 }
 
@@ -240,7 +244,11 @@ deriva <- function(nproc=1,b,funcpa,.packages=NULL,...){
       }
     }
   }
+<<<<<<< HEAD
   
+=======
+
+>>>>>>> 119efca (HIDeM new name and add splines hessian in fortran)
   result <- list(v=v,rl=rl)
   return(result)
 }
@@ -441,9 +449,20 @@ if(any(output==Inf)| any(output==-Inf) | any(is.na(output)) | any(is.nan(output)
 }
 sol<-output
 if(sum(fix[1:6])!=6){
+<<<<<<< HEAD
 sol[1:(6-sum(fix[1:6]))]<-sol[1:(6-sum(fix[1:6]))]*2*b[which(fix[1:6]==0)]
 }
 
+=======
+  
+  bb<-rep(NA,npar)
+  bb[which(fix==0)]<-b
+  bb[which(fix==1)]<-bfix
+  
+sol[1:(6-sum(fix[1:6]))]<-sol[1:(6-sum(fix[1:6]))]*2*bb[which(fix[1:6]==0)]
+}
+#browser()
+>>>>>>> 119efca (HIDeM new name and add splines hessian in fortran)
 return(sol)
 }
 
@@ -671,7 +690,11 @@ hessianmlaweibana<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
                          t0,t1,t2,t3,troncature,gausspoint){
   
   res<-rep(0,npm+npm*(npm+1)/2)
+<<<<<<< HEAD
   #browser()
+=======
+ #browser()
+>>>>>>> 119efca (HIDeM new name and add splines hessian in fortran)
   output<-.Fortran("derivaweiballpara",
                    ## input
                    as.double(b),
@@ -705,22 +728,45 @@ hessianmlaweibana<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
    output[any(output==-Inf)]<--.Machine$double.eps
 
   }
+<<<<<<< HEAD
+=======
+  bb<-rep(NA,npar)
+  bb[which(fix==0)]<-b
+  bb[which(fix==1)]<-bfix
+  
+>>>>>>> 119efca (HIDeM new name and add splines hessian in fortran)
       nweib<-sum(fix[1:6]==0)
       min<-npm
       max<-min+nweib*(nweib+1)/2+nweib*(npm-nweib)
       Vweib<-matrix(0,npm,npm)
       
+<<<<<<< HEAD
+=======
+      nvat01<-ifelse(nva01==0,0,sum(fix[7:(6+nva01)]==0))
+      nvat02<-ifelse(nva02==0,0,sum(fix[(6+nva01+1):(6+nva01+nva02)]==0))
+      nvat12<-ifelse(nva12==0,0,sum(fix[(6+nva01+nva02+1):(6+nva01+nva02+nva12)]==0))
+      
+>>>>>>> 119efca (HIDeM new name and add splines hessian in fortran)
       if(nweib>0){
         
       val<-c(output[(min+1):(max)],rep(0,(npm-nweib)*(npm-nweib+1)/2))
       Vweib[lower.tri(Vweib,diag=TRUE)] <- val
+<<<<<<< HEAD
      Vweib[1:nweib,1:nweib]<-4*matrix(b[which(fix[1:6]==0)],ncol=1)%*%b[which(fix[1:6]==0)]*Vweib[1:nweib,1:nweib]+diag(output[1:nweib])*2
      Vweib[(nweib+1):npm,1:nweib]<-2*matrix(rep(b[which(fix[1:6]==0)],npm-nweib),ncol=nweib,byrow=T)*
        Vweib[(nweib+1):npm,1:nweib]
+=======
+     Vweib[1:nweib,1:nweib]<-4*matrix(bb[which(fix[1:6]==0)],ncol=1)%*%bb[which(fix[1:6]==0)]*Vweib[1:nweib,1:nweib]+diag(output[1:nweib])*2
+     if(nvat01>0 | nvat02 >0 | nvat12>0){
+     Vweib[(nweib+1):npm,1:nweib]<-2*matrix(rep(bb[which(fix[1:6]==0)],npm-nweib),ncol=nweib,byrow=T)*
+       Vweib[(nweib+1):npm,1:nweib]
+     }
+>>>>>>> 119efca (HIDeM new name and add splines hessian in fortran)
      
       }
     
       min<-max
+<<<<<<< HEAD
       V01<- matrix(0,nva01,nva01)
       V01[lower.tri(V01,diag=TRUE)] <- output[(min+1):(min+nva01*(nva01+1)/2)]
       
@@ -776,6 +822,68 @@ hessianmlaweibana<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
       
       if(nva12>0){
         Vweib[(nva01+nva02+nweib+1):npm,(nva01+nva02+1+nweib):npm]<-V12
+=======
+      if(nvat01>0){
+      V01<- matrix(0,nvat01,nvat01)
+      V01[lower.tri(V01,diag=TRUE)] <- output[(min+1):(min+nvat01*(nvat01+1)/2)]
+      }
+      
+      
+      min<-min+(nvat01*(nvat01+1)/2)
+      if(nvat01>0&nvat02>0){
+        V0102<- matrix(data=output[(min+1):(min+nvat02*nvat01)],
+                       nrow=nvat02,ncol=nvat01)
+      }
+      
+      min<-min+nvat02*nvat01
+      
+      if(nvat01>0&nvat12>0){
+        V0112<- matrix(data=output[(min+1):(min+nvat12*nvat01)],
+                       nrow=nvat12,ncol=nvat01)
+      }
+      
+      
+      min<-min+nvat12*nvat01
+      if(nvat02>0){
+      V02<- matrix(0,nvat02,nvat02)
+      V02[lower.tri(V02,diag=TRUE)] <- output[(min+1):(min+nvat02*(nvat02+1)/2)]
+      }
+      
+      min<-min+(nvat02*(nvat02+1)/2)
+      
+      if(nvat02>0&nvat12>0){
+        V0212<- matrix(data=output[(min+1):(min+nvat12*nvat02)],
+                       nrow=nvat12,ncol=nvat02)
+      }
+      
+      
+      min<-min+nvat12*nvat02
+      if(nvat12>0){
+      V12<- matrix(0,nvat12,nvat12)
+      V12[lower.tri(V12,diag=TRUE)] <- output[(min+1):length(output)]
+      }
+      
+      
+     
+      if(nvat01>0){
+        Vweib[(nweib+1):(nweib+nvat01),(nweib+1):(nweib+nvat01)]<-V01
+        if(nvat02>0){
+          Vweib[(nweib+nvat01+1):(nweib+nvat01+nvat02),(nweib+1):(nweib+nvat01)]<-V0102
+        }
+        if(nvat12>0){
+          Vweib[(nweib+nvat01+nvat02+1):npm,(nweib+1):(nweib+nvat01)]<-V0112
+        }
+      }
+      if(nvat02>0){
+        Vweib[(nvat01+nweib+1):(nvat01+nvat02+nweib),(nvat01+nweib+1):(nvat01+nvat02+nweib)]<-V02
+        if(nvat12>0){
+          Vweib[(nvat01+nvat02+nweib+1):npm,(nvat01+nweib+1):(nvat01+nvat02+nweib)]<-V0212
+        }
+      }
+      
+      if(nvat12>0){
+        Vweib[(nvat01+nvat02+nweib+1):npm,(nvat01+nvat02+1+nweib):npm]<-V12
+>>>>>>> 119efca (HIDeM new name and add splines hessian in fortran)
       }
       
       # hessian is - second derivatives 
@@ -787,8 +895,213 @@ hessianmlaweibana<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
   
     }
     
+<<<<<<< HEAD
     
   
 
  
+=======
+
+grmlasplineana<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
+                       dimnva01,dimnva02,dimnva12,nva01,nva02,nva12,
+                       nz01,nz02,nz12,zi01,zi02,zi12,
+                       t0,t1,t2,t3,troncature,gausspoint){
+  
+  
+  res<-rep(0,npm)
+  output<-.Fortran("derivasplinesfirstderiv",
+           ## input
+           as.double(b),
+           as.integer(npm),
+           as.integer(npar),
+           as.double(bfix),
+           as.integer(fix),
+           as.double(zi01),
+           as.double(zi12),
+           as.double(zi02),
+           as.integer(ctime),
+           as.integer(no),
+           as.integer(nz01),
+           as.integer(nz12),
+           as.integer(nz02),
+           as.double(ve01),
+           as.double(ve12),
+           as.double(ve02),
+           as.integer(dimnva01),
+           as.integer(dimnva12),
+           as.integer(dimnva02),
+           as.integer(nva01),
+           as.integer(nva12),
+           as.integer(nva02),
+           as.double(t0),
+           as.double(t1),
+           as.double(t2),
+           as.double(t3),
+           as.integer(troncature),
+           likelihood_deriv=as.double(res),
+           PACKAGE="HIDeM")$likelihood_deriv
+  
+  nn<-nz01+nz02+nz12+6
+  if(length(-c(which(fix[1:nn]==1)))>0){
+  output<-output[-c(which(fix[1:nn]==1))]}
+  if(any(output==Inf)| any(output==-Inf) | any(is.na(output)) | any(is.nan(output))){
+    
+    output[any(output==Inf)|any(is.na(output)) | any(is.nan(output))]<-.Machine$double.eps
+    output[any(output==-Inf)]<--.Machine$double.eps
+    
+  }
+  sol<-output
+  
+  bb<-rep(NA,npar)
+  bb[which(fix==0)]<-b
+  bb[which(fix==1)]<-bfix
+  np<-sum(fix[1:nn]==0)
+    
+  sol[1:np]<-sol[1:np]*2*bb[which(fix[1:nn]==0)]
+  
+
+  
+# 
+#   test<-deriva.gradient(b=b,
+#                         funcpa=idmlLikelihood,
+#                         npm=npm,
+#                         npar=npar,
+#                         bfix=bfix,
+#                         fix=fix,
+#                         zi01=zi01,
+#                         zi02=zi02,
+#                         zi12=zi12,
+#                         ctime=ctime,
+#                         no=no,
+#                         nz01=nz01,
+#                         nz02=nz02,
+#                         nz12=nz12,
+#                         ve01=ve01,
+#                         ve02=ve02,
+#                         ve12=ve12,
+#                         dimnva01=dimnva01,
+#                         dimnva02=dimnva02,
+#                         dimnva12=dimnva12,
+#                         nva01=nva01,
+#                         nva02=nva02,
+#                         nva12=nva12,
+#                         t0=t0,
+#                         t1=t1,
+#                         t2=t2,
+#                         t3=t3,
+#                         troncature=troncature,
+#                         gausspoint=10)
+  return(sol)
+}
+
+
+hessianmlasplineana<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
+                              dimnva01,dimnva02,dimnva12,nva01,nva02,nva12,
+                              nz01,nz02,nz12,zi01,zi02,zi12,
+                              t0,t1,t2,t3,troncature,gausspoint){
+  
+  res<-rep(0,npm+npm*(npm+1)/2)
+
+  output<-.Fortran("derivasplinessecondderiv",
+                   ## input
+                   as.double(b),
+                   as.integer(npm),
+                   as.integer(npar),
+                   as.double(bfix),
+                   as.integer(fix),
+                   as.double(zi01),
+                   as.double(zi12),
+                   as.double(zi02),
+                   as.integer(ctime),
+                   as.integer(no),
+                   as.integer(nz01),
+                   as.integer(nz12),
+                   as.integer(nz02),
+                   as.double(ve01),
+                   as.double(ve12),
+                   as.double(ve02),
+                   as.integer(dimnva01),
+                   as.integer(dimnva12),
+                   as.integer(dimnva02),
+                   as.integer(nva01),
+                   as.integer(nva12),
+                   as.integer(nva02),
+                   as.double(t0),
+                   as.double(t1),
+                   as.double(t2),
+                   as.double(t3),
+                   as.integer(troncature),
+                   likelihood_deriv=as.double(res),
+                   PACKAGE="HIDeM")$likelihood_deriv
+  
+  
+  
+  if(any(output==Inf)| any(output==-Inf) | any(is.na(output)) | any(is.nan(output))){
+    
+    output[any(output==Inf)|any(is.na(output)) | any(is.nan(output))]<-.Machine$double.eps
+    output[any(output==-Inf)]<--.Machine$double.eps
+    
+  }
+  bb<-rep(NA,npar)
+  bb[which(fix==0)]<-b
+  bb[which(fix==1)]<-bfix
+  
+  nn<-nz01+nz02+nz12+6
+  nspline<-sum(fix[1:nn]==0)
+  min<-npm
+  max<-min+nspline*(nspline+1)/2+nspline*(npm-nspline)
+  Vspline<-matrix(0,npm,npm)
+  
+  if(nspline>0){
+    
+    val<-c(output[(min+1):(max)],rep(0,(npm-nspline)*(npm-nspline+1)/2))
+    Vspline[lower.tri(Vspline,diag=TRUE)] <- val
+    Vspline[1:nspline,1:nspline]<-4*matrix(bb[which(fix[1:nn]==0)],ncol=1)%*%bb[which(fix[1:nn]==0)]*Vspline[1:nspline,1:nspline]+diag(output[1:nspline])*2
+   
+    
+  }
+   # 
+   #  test<-deriva(b=b,
+   #                        funcpa=idmlLikelihood,
+   #                        npm=npm,
+   #                        npar=npar,
+   #                        bfix=bfix,
+   #                        fix=fix,
+   #                        zi01=zi01,
+   #                        zi02=zi02,
+   #                        zi12=zi12,
+   #                        ctime=ctime,
+   #                        no=no,
+   #                        nz01=nz01,
+   #                        nz02=nz02,
+   #                        nz12=nz12,
+   #                        ve01=ve01,
+   #                        ve02=ve02,
+   #                        ve12=ve12,
+   #                        dimnva01=dimnva01,
+   #                        dimnva02=dimnva02,
+   #                        dimnva12=dimnva12,
+   #                        nva01=nva01,
+   #                        nva02=nva02,
+   #                        nva12=nva12,
+   #                        t0=t0,
+   #                        t1=t1,
+   #                        t2=t2,
+   #                        t3=t3,
+   #                        troncature=troncature,
+   #                        gausspoint=gausspoint)
+   #  V<-matrix(0,npm,npm)
+   # 
+   # V[upper.tri(V,diag=TRUE)] <- test$v[(1):(max-min)]
+   # 
+   # browser()
+  # hessian is - second derivatives 
+  #V<-V+t(V)
+  #diag(V)<-diag(V)/2
+  # hessian is - second derivatives 
+  #browser()
+  return(-t(Vspline)[upper.tri(Vspline,diag=T)])
+  
+}
+>>>>>>> 119efca (HIDeM new name and add splines hessian in fortran)
 
