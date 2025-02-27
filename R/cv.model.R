@@ -24,12 +24,7 @@ cv.model<-function(beta,
                    fu,
                    lambda,
                    alpha){
-<<<<<<< HEAD
-  
-  #browser()
-=======
 
->>>>>>> 119efca (HIDeM new name and add splines hessian in fortran)
   
 # add to do base::which for CRAN check 
   BETA<-beta[fix==0]
@@ -77,11 +72,7 @@ cv.model<-function(beta,
     sign12<-sign[(nva01+nva02+1):length(num)]
   }
   
-<<<<<<< HEAD
-  NEWBETA<-rep(NA,length(num))
-=======
   NEWBETA<-rep(0,length(num))
->>>>>>> 119efca (HIDeM new name and add splines hessian in fortran)
   idbeta<-NULL
   
   # if penalty update beta all at once 
@@ -115,44 +106,6 @@ cv.model<-function(beta,
   
   
   if(penalty=="mcp"){
-<<<<<<< HEAD
-    
-    
-    # 0 -> 1, 
-    idbeta<-base::which((num01>=(alpha*lambda[,1]*denum01)) & (num01<lambda[,1]) & (denum01<(1/alpha)))
-    NEWBETA[idbeta]<-sign01[idbeta]*alpha*lambda[,1]
-    # no definition put 0 ? 
-    idbeta<-base::which(((num01<(alpha*lambda[,1]*denum01)) | (num01>=lambda[,1])) & (denum01<(1/alpha)))
-    NEWBETA[idbeta]<-0
-    
-    idbeta<-base::which((num01<=(alpha*lambda[,1]*denum01)) & num01>lambda[,1] & (denum01>=(1/alpha)))
-    NEWBETA[idbeta]<-sign01[idbeta]*(num01[idbeta]-lambda[,1])/(denum01[idbeta]-(1/alpha))
-    idbeta<-base::which(((num01>(alpha*lambda[,1]*denum01)) | num01<=lambda[,1]) & (denum01>=(1/alpha)))
-    NEWBETA[idbeta]<-0
-    
-    # 0 -> 2
-    idbeta<-base::which((num02>=(alpha*lambda[,2]*denum02)) & (num02<lambda[,2]) & (denum02<(1/alpha)))
-    NEWBETA[idbeta+nva01]<-sign02[idbeta]*alpha*lambda[,2]
-    idbeta<-base::which(((num02<(alpha*lambda[,2]*denum02)) | (num02>=lambda[,2])) & (denum02<(1/alpha)))
-    NEWBETA[idbeta+nva01]<-0
-    
-    idbeta<-base::which((num02<=(alpha*lambda[,2]*denum02)) & num02>lambda[,2] & (denum02>=(1/alpha)))
-    NEWBETA[idbeta+nva01]<-sign02[idbeta]*(num02[idbeta]-lambda[,2])/(denum02[idbeta]-(1/alpha))
-    idbeta<-base::which(((num02>(alpha*lambda[,2]*denum02)) | num02<=lambda[,2]) & (denum02>=(1/alpha)))
-    NEWBETA[idbeta+nva01]<-0
-    
-    
-    # 1 -> 2
-    idbeta<-base::which((num12>=(alpha*lambda[,3]*denum12)) & (num12<lambda[,3]) & (denum12<(1/alpha)))
-    NEWBETA[idbeta+nva01+nva02]<-sign12[idbeta]*alpha*lambda[,3]
-    idbeta<-base::which(((num12<(alpha*lambda[,3]*denum12)) | (num12>=lambda[,3])) & (denum12<(1/alpha)))
-    NEWBETA[idbeta+nva01+nva02]<-0
-    
-    idbeta<-base::which((num12<=(alpha*lambda[,3]*denum12)) & num12>lambda[,3] & (denum12>=(1/alpha)))
-    NEWBETA[idbeta+nva01+nva02]<-sign12[idbeta]*(num12[idbeta]-lambda[,3])/(denum12[idbeta]-(1/alpha))
-    idbeta<-base::which(((num12>(alpha*lambda[,3]*denum12)) | num12<=lambda[,3]) & (denum12>=(1/alpha)))
-    NEWBETA[idbeta+nva01+nva02]<-0
-=======
 
     # 0 -> 1
     if(nva01>0){
@@ -181,7 +134,6 @@ cv.model<-function(beta,
     idbeta<-base::which((num12>(alpha*lambda[,3]*denum12)) & (denum12>(1/alpha)))
     NEWBETA[idbeta+nva01+nva02]<-sign12[idbeta]*num12[idbeta]/denum12[idbeta]
     }
->>>>>>> 119efca (HIDeM new name and add splines hessian in fortran)
     
     }
   
@@ -191,46 +143,6 @@ cv.model<-function(beta,
     
     
     # 0 -> 1
-<<<<<<< HEAD
-    idbeta<-base::which((num01<=(lambda[,1]*(1+denum01))) & (num01 >lambda[,1]) & (denum01>=(1/(alpha-1))))
-    NEWBETA[idbeta]<-sign01[idbeta]*(num01[idbeta]-lambda[,1])/denum01[idbeta]
-    idbeta<-base::which(((num01>(lambda[,1]*(1+denum01))) | (num01 <= lambda[,1]*denum01)) & (denum01>=(1/(alpha-1))))
-    NEWBETA[idbeta]<-0
-    
-    idbeta<-base::which((num01<=(alpha*lambda[,1]*denum01)) & (num01 > lambda[,1]) & (denum01<(1/(alpha-1))) & (denum01>=(1/alpha)))
-    NEWBETA[idbeta]<-sign01[idbeta]*(num01[idbeta]-lambda[,1])/denum01[idbeta]
-    idbeta<-base::which(((num01>(alpha*lambda[,1]*denum01)) | (num01 <= lambda[,1])) & (denum01<(1/(alpha-1))) & (denum01>=(1/alpha)))
-    NEWBETA[idbeta]<-0
-    idbeta<-base::which( (denum01<(1/(alpha-1))) & (denum01<(1/alpha)))
-    NEWBETA[idbeta]<-0
-    
-    # 0 ->2
-    idbeta<-base::which((num02<=(lambda[,2]*(1+denum02))) & (num02 >lambda[,2]) & (denum02>=(1/(alpha-1))))
-    NEWBETA[idbeta+nva01]<-sign02[idbeta]*(num02[idbeta]-lambda[,2])/denum02[idbeta]
-    idbeta<-base::which(((num02>(lambda[,2]*(1+denum02))) | (num02 <= lambda[,2]*denum02)) & (denum02>=(1/(alpha-1))))
-    NEWBETA[idbeta+nva01]<-0
-    
-    idbeta<-base::which((num02<=(alpha*lambda[,2]*denum02)) & (num02 > lambda[,2]) & (denum02<(1/(alpha-1))) & (denum02>=(1/alpha)))
-    NEWBETA[idbeta+nva01]<-sign02[idbeta]*(num02[idbeta]-lambda[,2])/denum02[idbeta]
-    idbeta<-base::which(((num02>(alpha*lambda[,2]*denum02)) | (num02 <= lambda[,2])) & (denum02<(1/(alpha-1))) & (denum02>=(1/alpha)))
-    NEWBETA[idbeta+nva01]<-0
-    idbeta<-base::which( (denum02<(1/(alpha-1))) & (denum02<(1/alpha)))
-    NEWBETA[idbeta+nva01]<-0
-    
-    # 1 ->2
-    
-    idbeta<-base::which((num12<=(lambda[,3]*(1+denum12))) & (num12 >lambda[,3]) & (denum12>=(1/(alpha-1))))
-    NEWBETA[idbeta+nva01+nva02]<-sign12[idbeta]*(num12[idbeta]-lambda[,3])/denum12[idbeta]
-    idbeta<-base::which(((num12>(lambda[,3]*(1+denum12))) | (num12 <= lambda[,3]*denum12)) & (denum12>=(1/(alpha-1))))
-    NEWBETA[idbeta+nva01+nva02]<-0
-    
-    idbeta<-base::which((num12<=(alpha*lambda[,3]*denum12)) & (num12 > lambda[,3]) & (denum12<(1/(alpha-1))) & (denum12>=(1/alpha)))
-    NEWBETA[idbeta+nva01+nva02]<-sign12[idbeta]*(num12[idbeta]-lambda[,3])/denum12[idbeta]
-    idbeta<-base::which(((num12>(alpha*lambda[,3]*denum12)) | (num12 <= lambda[,3])) & (denum12<(1/(alpha-1))) & (denum12>=(1/alpha)))
-    NEWBETA[idbeta+nva01+nva02]<-0
-    idbeta<-base::which( (denum12<(1/(alpha-1))) & (denum12<(1/alpha)))
-    NEWBETA[idbeta+nva01+nva02]<-0
-=======
     if(nva01>0){
       
     idbeta<-base::which((num01<=(lambda[,1]*(1+denum01))) & (num01 >lambda[,1]) & (denum01>=(1/(alpha-1))))
@@ -292,7 +204,6 @@ cv.model<-function(beta,
       
       
     }
->>>>>>> 119efca (HIDeM new name and add splines hessian in fortran)
     }
 
   idbeta<-base::which(penalty.factor==0)
@@ -401,97 +312,6 @@ cv.model.onestep<-function(beta,
   }
 
 
-<<<<<<< HEAD
-
-
-  if(penalty=="mcp"){
-
-
-    # 0 -> 1,
-    idbeta<-base::which((num01>=(alpha*lambda[,1]*denum01)) & (num01<lambda[,1]) & (denum01<(1/alpha)))
-    NEWBETA[idbeta+nweib]<-sign01[idbeta]*alpha*lambda[,1]
-    # no definition put 0 ?
-    idbeta<-base::which(((num01<(alpha*lambda[,1]*denum01)) | (num01>=lambda[,1])) & (denum01<(1/alpha)))
-    NEWBETA[idbeta+nweib]<-0
-
-    idbeta<-base::which((num01<=(alpha*lambda[,1]*denum01)) & num01>lambda[,1] & (denum01>=(1/alpha)))
-    NEWBETA[idbeta+nweib]<-sign01[idbeta]*(num01[idbeta]-lambda[,1])/(denum01[idbeta]-(1/alpha))
-    idbeta<-base::which(((num01>(alpha*lambda[,1]*denum01)) | num01<=lambda[,1]) & (denum01>=(1/alpha)))
-    NEWBETA[idbeta+nweib]<-0
-
-    # 0 -> 2
-    idbeta<-base::which((num02>=(alpha*lambda[,2]*denum02)) & (num02<lambda[,2]) & (denum02<(1/alpha)))
-    NEWBETA[idbeta+nva01+nweib]<-sign02[idbeta]*alpha*lambda[,2]
-    idbeta<-base::which(((num02<(alpha*lambda[,2]*denum02)) | (num02>=lambda[,2])) & (denum02<(1/alpha)))
-    NEWBETA[idbeta+nva01+nweib]<-0
-
-    idbeta<-base::which((num02<=(alpha*lambda[,2]*denum02)) & num02>lambda[,2] & (denum02>=(1/alpha)))
-    NEWBETA[idbeta+nva01+nweib]<-sign02[idbeta]*(num02[idbeta]-lambda[,2])/(denum02[idbeta]-(1/alpha))
-    idbeta<-base::which(((num02>(alpha*lambda[,2]*denum02)) | num02<=lambda[,2]) & (denum02>=(1/alpha)))
-    NEWBETA[idbeta+nva01+nweib]<-0
-
-
-    # 1 -> 2
-    idbeta<-base::which((num12>=(alpha*lambda[,3]*denum12)) & (num12<lambda[,3]) & (denum12<(1/alpha)))
-    NEWBETA[idbeta+nva01+nva02+nweib]<-sign12[idbeta]*alpha*lambda[,3]
-    idbeta<-base::which(((num12<(alpha*lambda[,3]*denum12)) | (num12>=lambda[,3])) & (denum12<(1/alpha)))
-    NEWBETA[idbeta+nva01+nva02+nweib]<-0
-
-    idbeta<-base::which((num12<=(alpha*lambda[,3]*denum12)) & num12>lambda[,3] & (denum12>=(1/alpha)))
-    NEWBETA[idbeta+nva01+nva02+nweib]<-sign12[idbeta]*(num12[idbeta]-lambda[,3])/(denum12[idbeta]-(1/alpha))
-    idbeta<-base::which(((num12>(alpha*lambda[,3]*denum12)) | num12<=lambda[,3]) & (denum12>=(1/alpha)))
-    NEWBETA[idbeta+nva01+nva02+nweib]<-0
-
-  }
-
-
-  if(penalty=="scad"){
-
-
-
-    # 0 -> 1
-    idbeta<-base::which((num01<=(lambda[,1]*(1+denum01))) & (num01 >lambda[,1]) & (denum01>=(1/(alpha-1))))
-    NEWBETA[idbeta+nweib]<-sign01[idbeta]*(num01[idbeta]-lambda[,1])/denum01[idbeta]
-    idbeta<-base::which(((num01>(lambda[,1]*(1+denum01))) | (num01 <= lambda[,1]*denum01)) & (denum01>=(1/(alpha-1))))
-    NEWBETA[idbeta+nweib]<-0
-
-    idbeta<-base::which((num01<=(alpha*lambda[,1]*denum01)) & (num01 > lambda[,1]) & (denum01<(1/(alpha-1))) & (denum01>=(1/alpha)))
-    NEWBETA[idbeta+nweib]<-sign01[idbeta]*(num01[idbeta]-lambda[,1])/denum01[idbeta]
-    idbeta<-base::which(((num01>(alpha*lambda[,1]*denum01)) | (num01 <= lambda[,1])) & (denum01<(1/(alpha-1))) & (denum01>=(1/alpha)))
-    NEWBETA[idbeta+nweib]<-0
-    idbeta<-base::which( (denum01<(1/(alpha-1))) & (denum01<(1/alpha)))
-    NEWBETA[idbeta+nweib]<-0
-
-    # 0 ->2
-    idbeta<-base::which((num02<=(lambda[,2]*(1+denum02))) & (num02 >lambda[,2]) & (denum02>=(1/(alpha-1))))
-    NEWBETA[idbeta+nva01+nweib]<-sign02[idbeta]*(num02[idbeta]-lambda[,2])/denum02[idbeta]
-    idbeta<-base::which(((num02>(lambda[,2]*(1+denum02))) | (num02 <= lambda[,2]*denum02)) & (denum02>=(1/(alpha-1))))
-    NEWBETA[idbeta+nva01+nweib]<-0
-
-    idbeta<-base::which((num02<=(alpha*lambda[,2]*denum02)) & (num02 > lambda[,2]) & (denum02<(1/(alpha-1))) & (denum02>=(1/alpha)))
-    NEWBETA[idbeta+nva01+nweib]<-sign02[idbeta]*(num02[idbeta]-lambda[,2])/denum02[idbeta]
-    idbeta<-base::which(((num02>(alpha*lambda[,2]*denum02)) | (num02 <= lambda[,2])) & (denum02<(1/(alpha-1))) & (denum02>=(1/alpha)))
-    NEWBETA[idbeta+nva01+nweib]<-0
-    idbeta<-base::which( (denum02<(1/(alpha-1))) & (denum02<(1/alpha)))
-    NEWBETA[idbeta+nva01+nweib]<-0
-
-    # 1 ->2
-
-    idbeta<-base::which((num12<=(lambda[,3]*(1+denum12))) & (num12 >lambda[,3]) & (denum12>=(1/(alpha-1))))
-    NEWBETA[idbeta+nva01+nva02+nweib]<-sign12[idbeta]*(num12[idbeta]-lambda[,3])/denum12[idbeta]
-    idbeta<-base::which(((num12>(lambda[,3]*(1+denum12))) | (num12 <= lambda[,3]*denum12)) & (denum12>=(1/(alpha-1))))
-    NEWBETA[idbeta+nva01+nva02+nweib]<-0
-
-    idbeta<-base::which((num12<=(alpha*lambda[,3]*denum12)) & (num12 > lambda[,3]) & (denum12<(1/(alpha-1))) & (denum12>=(1/alpha)))
-    NEWBETA[idbeta+nva01+nva02+nweib]<-sign12[idbeta]*(num12[idbeta]-lambda[,3])/denum12[idbeta]
-    idbeta<-base::which(((num12>(alpha*lambda[,3]*denum12)) | (num12 <= lambda[,3])) & (denum12<(1/(alpha-1))) & (denum12>=(1/alpha)))
-    NEWBETA[idbeta+nva01+nva02+nweib]<-0
-    idbeta<-base::which( (denum12<(1/(alpha-1))) & (denum12<(1/alpha)))
-    NEWBETA[idbeta+nva01+nva02+nweib]<-0
-  }
-
-=======
->>>>>>> 119efca (HIDeM new name and add splines hessian in fortran)
   idbeta<-base::which(penalty.factor==0)
   # if no penalty on parameter, beta_k=A_k/-x_kk
   NEWBETA[idbeta]<-sign[idbeta]*num[idbeta]/denum[idbeta]

@@ -58,11 +58,7 @@ idm.penalty.splines<-function(b,fix0,size_V,size_spline,
                       ve01,ve02,ve12,dimnva01,dimnva02,dimnva12,nvat01,nvat02,nvat12,
                       t0,t1,t2,t3,troncature,gausspoint,
                       nlambda01,lambda01,nlambda02,lambda02,
-<<<<<<< HEAD
-                      nlambda12,lambda12,alpha,penalty.factor,penalty,methodCV,partialH){
-=======
                       nlambda12,lambda12,alpha,penalty.factor,penalty,methodCV,partialH,analytics){
->>>>>>> 119efca (HIDeM new name and add splines hessian in fortran)
   
   
   # need to keep original fix to calculate for beta 
@@ -1739,11 +1735,7 @@ idm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                  }
                                  
                                  
-<<<<<<< HEAD
-                                 
-=======
                                  #browser()
->>>>>>> 119efca (HIDeM new name and add splines hessian in fortran)
                                  output.cv<-cv.model(beta=beta,
                                                      nva01=npm01,
                                                      nva02=npm02,
@@ -1916,11 +1908,8 @@ idm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                  bfix<-b[fix0.beta==1]
                                  b<-b[fix0.beta==0]
                                  
-<<<<<<< HEAD
-=======
                                  browser()
                                  if(analytics==T){
->>>>>>> 119efca (HIDeM new name and add splines hessian in fortran)
                                  output.mla<- marqLevAlg::mla(b=b,
                                                   fn=idmlLikelihood,
                                                   epsa=epsa,
@@ -1955,9 +1944,6 @@ idm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                                   t3=t3,
                                                   troncature=troncature,
                                                   gausspoint=gausspoint)
-<<<<<<< HEAD
-                                 
-=======
                                  }else{
                                  
                                  output.mla<- marqLevAlg::mla(b=b,
@@ -1998,7 +1984,6 @@ idm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                                               gausspoint=gausspoint)
                                  
                                  }
->>>>>>> 119efca (HIDeM new name and add splines hessian in fortran)
                                  
                                  # look at convergence for each lambda :
                                  
