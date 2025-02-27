@@ -93,8 +93,6 @@
 #' @param alpha alpha on all transitions 
 #' @param penalty which penalty to consider
 #' @param penalty.factor which variable should be penalised
-#' @param partialH default FALSE, if TRUE only the diagonal terms of the hessian will be 
-#' computed for the Newton-Raphson path for the penalised regression parameter. If FALSE, the 
 #' complete hessian is computed.
 #' @param step.sequential should we use the optimisation version to fix splines 
 #' @param clustertype in which cluster to work
@@ -214,7 +212,6 @@ idm <- function(formula01,
                 alpha=ifelse(penalty=="scad",3.7,
                              ifelse(penalty=="mcp",3,
                                     ifelse(penalty%in%c("elasticnet"),0.5,1))),
-                partialH=F,
                 nproc=1,
                 onestep=F,
                 analytics=T,
@@ -652,7 +649,7 @@ idm <- function(formula01,
     fix0<-rep(0,size_V)
     if(is.null(penalty)){
       penalty<-"none"
-      partialH<-F}
+      }
     if(!penalty%in%c("none","lasso","ridge","elasticnet","mcp","scad")){
       stop(paste0("Parameter penalty must be either : lasso, ridge, elasticnet, mcp or scad"))}
     
@@ -1203,7 +1200,6 @@ idm <- function(formula01,
                              penalty.factor=penalty.factor,
                              penalty=penalty,
                              methodCV=methodCV,
-                             partialH=partialH,
                              analytics=analytics)
             
 ############################## Output   ########################################
@@ -1529,8 +1525,7 @@ idm <- function(formula01,
                                     alpha=alpha,
                                     penalty.factor=penalty.factor,
                                     penalty=penalty,
-                                    gausspoint=gausspoint,
-                                    partialH=partialH)
+                                    gausspoint=gausspoint)
             
             }else{
             
@@ -1571,8 +1566,7 @@ idm <- function(formula01,
                                penalty.factor=penalty.factor,
                                penalty=penalty,
                                gausspoint=gausspoint,
-                               methodCV=methodCV,
-                               partialH=partialH)
+                               methodCV=methodCV)
             }
               
               
@@ -1792,8 +1786,6 @@ idm <- function(formula01,
         fit$responseAbs <- responseAbs
         fit$responseTrans <- responseTrans
 
-
-        fit$partialH<-partialH
         fit$V <- V
         fit$H <- H
         fit$fix<-fix
