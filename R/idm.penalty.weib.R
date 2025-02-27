@@ -625,11 +625,8 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                  b<-b[fix0.beta==0]
                                  # update for modelPar
                                  output.mla<- marqLevAlg::mla(b=b,
-<<<<<<< HEAD
-=======
                                                               gr=grmlaweibana,
                                                               hess = hessianmlaweibana,
->>>>>>> 119efca (HIDeM new name and add splines hessian in fortran)
                                                   fn=idmlLikelihoodweib,
                                                   epsa=epsa,
                                                   epsb=epsb,
@@ -1202,11 +1199,8 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                    b<-b[fix0.beta==0]
                                    # update for modelPar
                                    output.mla<- marqLevAlg::mla(b=b,
-<<<<<<< HEAD
-=======
                                                                 gr=grmlaweibana,
                                                                 hess = hessianmlaweibana,
->>>>>>> 119efca (HIDeM new name and add splines hessian in fortran)
                                                                 fn=idmlLikelihoodweib,
                                                                 epsa=epsa,
                                                                 epsb=epsb,
@@ -1888,36 +1882,6 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                  bfix<-b[fix0.beta==1]
                                  b<-b[fix0.beta==0]
                                  # update modelPar
-<<<<<<< HEAD
-                                 output.mla<- marqLevAlg::mla(b=b,
-                                                  fn=idmlLikelihoodweib,
-                                                  epsa=epsa,
-                                                  epsb=epsb,
-                                                  epsd=epsd,
-                                                  maxiter=maxiter.pena,
-                                                  minimize=F,
-                                                  npm=length(b),
-                                                  npar=size_V,
-                                                  bfix=bfix,
-                                                  fix=fix0.beta,
-                                                  ctime=ctime,
-                                                  no=N,
-                                                  ve01=ve01,
-                                                  ve02=ve02,
-                                                  ve12=ve12,
-                                                  dimnva01=dimnva01,
-                                                  dimnva02=dimnva02,
-                                                  dimnva12=dimnva12,
-                                                  nva01=nvat01,
-                                                  nva02=nvat02,
-                                                  nva12=nvat12,
-                                                  t0=t0,
-                                                  t1=t1,
-                                                  t2=t2,
-                                                  t3=t3,
-                                                  troncature=troncature,
-                                                  gausspoint=gausspoint)
-=======
                                  
                                  
                                  
@@ -1951,7 +1915,6 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                                               t3=t3,
                                                               troncature=troncature,
                                                               gausspoint=gausspoint)
->>>>>>> 119efca (HIDeM new name and add splines hessian in fortran)
                                 
                                  # look at convergence for each lambda :
                                  
@@ -2493,11 +2456,8 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                        b<-b[fix0.beta==0]
                                        # update modelPar
                                        output.mla<- marqLevAlg::mla(b=b,
-<<<<<<< HEAD
-=======
                                                                     gr=grmlaweibana,
                                                                     hess = hessianmlaweibana,
->>>>>>> 119efca (HIDeM new name and add splines hessian in fortran)
                                                                     fn=idmlLikelihoodweib,
                                                                     epsa=epsa,
                                                                     epsb=epsb,

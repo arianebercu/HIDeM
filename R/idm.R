@@ -1203,12 +1203,8 @@ idm <- function(formula01,
                              penalty.factor=penalty.factor,
                              penalty=penalty,
                              methodCV=methodCV,
-<<<<<<< HEAD
-                             partialH=partialH)
-=======
                              partialH=partialH,
                              analytics=analytics)
->>>>>>> 119efca (HIDeM new name and add splines hessian in fortran)
             
 ############################## Output   ########################################
 ############################## on beta and HR   ################################

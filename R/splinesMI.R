@@ -79,8 +79,6 @@ splinesMI<-function(x,knots,Boundary.knots){
   return(list(Mspline=Mspline,Ispline=Ispline))
 }
 
-<<<<<<< HEAD
-=======
 
  
 # 
@@ -94,4 +92,3 @@ splinesMI<-function(x,knots,Boundary.knots){
 # cumulative.intensity<-isplines%*%rep(0.25,5)
 # intensity
 # cumulative.intensity
->>>>>>> 119efca (HIDeM new name and add splines hessian in fortran)
