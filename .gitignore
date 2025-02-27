@@ -5,7 +5,3 @@
 src/*.o
 src/*.so
 src/*.dll
-.Rdata
-.httr-oauth
-.DS_Store
-.quarto
