@@ -967,41 +967,41 @@ hessianmlasplineana<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
    
     
   }
-   # 
-   #  test<-deriva(b=b,
-   #                        funcpa=idmlLikelihood,
-   #                        npm=npm,
-   #                        npar=npar,
-   #                        bfix=bfix,
-   #                        fix=fix,
-   #                        zi01=zi01,
-   #                        zi02=zi02,
-   #                        zi12=zi12,
-   #                        ctime=ctime,
-   #                        no=no,
-   #                        nz01=nz01,
-   #                        nz02=nz02,
-   #                        nz12=nz12,
-   #                        ve01=ve01,
-   #                        ve02=ve02,
-   #                        ve12=ve12,
-   #                        dimnva01=dimnva01,
-   #                        dimnva02=dimnva02,
-   #                        dimnva12=dimnva12,
-   #                        nva01=nva01,
-   #                        nva02=nva02,
-   #                        nva12=nva12,
-   #                        t0=t0,
-   #                        t1=t1,
-   #                        t2=t2,
-   #                        t3=t3,
-   #                        troncature=troncature,
-   #                        gausspoint=gausspoint)
-   #  V<-matrix(0,npm,npm)
-   # 
-   # V[upper.tri(V,diag=TRUE)] <- test$v[(1):(max-min)]
-   # 
-   # browser()
+
+    test<-deriva(b=b,
+                          funcpa=idmlLikelihood,
+                          npm=npm,
+                          npar=npar,
+                          bfix=bfix,
+                          fix=fix,
+                          zi01=zi01,
+                          zi02=zi02,
+                          zi12=zi12,
+                          ctime=ctime,
+                          no=no,
+                          nz01=nz01,
+                          nz02=nz02,
+                          nz12=nz12,
+                          ve01=ve01,
+                          ve02=ve02,
+                          ve12=ve12,
+                          dimnva01=dimnva01,
+                          dimnva02=dimnva02,
+                          dimnva12=dimnva12,
+                          nva01=nva01,
+                          nva02=nva02,
+                          nva12=nva12,
+                          t0=t0,
+                          t1=t1,
+                          t2=t2,
+                          t3=t3,
+                          troncature=troncature,
+                          gausspoint=gausspoint)
+    V<-matrix(0,npm,npm)
+
+   V[upper.tri(V,diag=TRUE)] <- test$v[(1):(max-min)]
+
+   browser()
   # hessian is - second derivatives 
   #V<-V+t(V)
   #diag(V)<-diag(V)/2

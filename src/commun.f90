@@ -19,19 +19,22 @@ module commun
 !-------------------  ve1 -------------------------------------------
         double precision,dimension(:,:),allocatable,save::ve01,ve12,ve02,ve01nofix, &
 	ve02nofix,ve12nofix,ve01square,ve02square,ve12square
+
 	double precision,dimension(:),allocatable,save::tronc01, tronc02, & 
 	tronc01square, tronc02square
+
 	double precision,dimension(:),allocatable,save::troncweib01011beta01,&
 	troncweib01012beta01,troncweib02021beta02,troncweib02022beta02
 
 !-------------------  dace1new -------------------------------------------
         double precision,dimension(:),allocatable,save::t0,t1,t2,t3,t4
         integer,dimension(:),allocatable,save::c
+
 !-------------------  dace1new -------------------------------------------
         integer,save::troncature,ind_hess
         double precision,dimension(:,:),allocatable,save::hessienne     
 !-------------------  dace1 -------------------------------------------
-        double precision,dimension(:),allocatable,save::zi
+        double precision,dimension(:),allocatable,save::zi,ispline,mspline
 !-------------------  dace -------------------------------------------
         integer::nz,verSurv
 !-------------------  ve1 -------------------------------------------
