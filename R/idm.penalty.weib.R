@@ -1105,6 +1105,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                        bfix<-b[fix0.beta==1]
                                        b<-b[fix0.beta==0]
                                        # update modelPar
+                                      
                                        output.mla<- marqLevAlg::mla(b=b,
                                                                     gr=grmlaweibana,
                                                                     hess = hessianmlaweibana,

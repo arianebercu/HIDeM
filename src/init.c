@@ -60,6 +60,15 @@ extern void F77_NAME(firstderivaspline)(double *,int *, int *, double *,int*, do
                      int *,int *,int *,int *, int *, double *,double*, double *,
                      int *,int *,int *,int *,int *,int *, double *,double*, double *, double *,int *,double *);
 
+extern void F77_NAME(derivasplinesfirstderiv)(double *,int *, int *, double *,int*, double *,double *,double *,
+                     int *,int *,int *,int *, int *, double *,double*, double *,
+                     int *,int *,int *,int *,int *,int *, double *,double*, double *, double *,int *,double *);
+
+extern void F77_NAME(derivasplinessecondderiv)(double *,int *, int *, double *,int*, double *,double *,double *,
+                     int *,int *,int *,int *, int *, double *,double*, double *,
+                     int *,int *,int *,int *,int *,int *, double *,double*, double *, double *,int *,double *);
+
+
 
 static const R_FortranMethodDef FortranEntries[] = {
     {"idmlikelihood",(DL_FUNC) &F77_NAME(idmlikelihood),    29},
@@ -73,6 +82,8 @@ static const R_FortranMethodDef FortranEntries[] = {
     {"derivaspline",(DL_FUNC) &F77_NAME(derivaspline),    28},
     {"derivasplinediag",(DL_FUNC) &F77_NAME(derivasplinediag),    28},
     {"firstderivaspline",(DL_FUNC) &F77_NAME(firstderivaspline),    28},
+     {"derivasplinesfirstderiv",(DL_FUNC) &F77_NAME(derivasplinesfirstderiv),    28},
+      {"derivasplinessecondderiv",(DL_FUNC) &F77_NAME(derivasplinessecondderiv),    28},
     {NULL, NULL, 0}
 };
 
