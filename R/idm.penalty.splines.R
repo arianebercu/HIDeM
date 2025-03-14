@@ -1112,7 +1112,8 @@ idm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                    bfix<-b[fix0.beta==1]
                                    b<-b[fix0.beta==0]
                                    
-                                   browser()
+                               # browser()
+                                   if(analytics==F){
                                    output.mla<- marqLevAlg::mla(b=b,
                                                                 fn=idmlLikelihood,
                                                                 gr=grmlasplineana,
@@ -1149,6 +1150,7 @@ idm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                                                 t3=t3,
                                                                 troncature=troncature,
                                                                 gausspoint=gausspoint)
+                                   }else{
                                    output.mla<- marqLevAlg::mla(b=b,
                                                                 fn=idmlLikelihood,
                                                                 epsa=epsa,
@@ -1183,6 +1185,7 @@ idm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                                                 t3=t3,
                                                                 troncature=troncature,
                                                                 gausspoint=gausspoint)
+                                   }
                                    
                                    
                                    # look at convergence for each lambda :

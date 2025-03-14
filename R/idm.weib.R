@@ -38,7 +38,7 @@ idm.weib<-function(b,fix0,size_V,
                    clustertype,epsa,epsb,epsd,nproc,maxiter,
                    ctime,N,
                    ve01,ve02,ve12,dimnva01,dimnva02,dimnva12,nvat01,nvat02,nvat12,
-                   t0,t1,t2,t3,idd,idm,ts,troncature,gausspoint,methodCV,analytics){
+                   t0,t1,t2,t3,idd,idm,ts,troncature,gausspoint,methodCV){
 
   bfix<-b[fix0==1]
   b<-b[fix0==0]
@@ -94,42 +94,6 @@ idm.weib<-function(b,fix0,size_V,
 
   # maximise loglik 
 
-    if(analytics==T){
-  
-  out<- marqLevAlg::mla(b=b,
-                           print.info=T,
-                           fn=idmlLikelihoodweib,
-                           gr=grmlaweibana,
-                           hess = hessianmlaweibana,
-                           epsa=epsa,
-                           epsb=epsb,
-                           epsd=epsd,
-                           nproc=nproc,
-                           clustertype=clustertype,
-                           maxiter=maxiter,
-                           minimize=F,
-                           npm=length(b),
-                           npar=size_V,
-                           bfix=bfix,
-                           fix=fix0,
-                           ctime=ctime,
-                           no=N,
-                           ve01=ve01,
-                           ve02=ve02,
-                           ve12=ve12,
-                           dimnva01=dimnva01,
-                           dimnva02=dimnva02,
-                           dimnva12=dimnva12,
-                           nva01=nvat01,
-                           nva02=nvat02,
-                           nva12=nvat12,
-                           t0=t0,
-                           t1=t1,
-                           t2=t2,
-                           t3=t3,
-                           troncature=troncature,
-                           gausspoint=gausspoint)
-    }else{
       out<- marqLevAlg::mla(b=b,
                             print.info=T,
                             fn=idmlLikelihoodweib,
@@ -163,7 +127,7 @@ idm.weib<-function(b,fix0,size_V,
                             t3=t3,
                             troncature=troncature,
                             gausspoint=gausspoint)
-    }
+    
   
   if(out$istop==4){
     stop("Problem in the loglikelihood computation.")

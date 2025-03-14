@@ -816,7 +816,7 @@ grmlasplineana<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
   
   
   res<-rep(0,npm)
-  output<-.Fortran("derivasplinesfirstderiv",
+  output<-.Fortran("derivasplinesfirstderivbis",
            ## input
            as.double(b),
            as.integer(npm),
@@ -847,10 +847,12 @@ grmlasplineana<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
            as.integer(troncature),
            likelihood_deriv=as.double(res),
            PACKAGE="HIDeM")$likelihood_deriv
-  
+
   nn<-nz01+nz02+nz12+6
+  
   if(length(-c(which(fix[1:nn]==1)))>0){
   output<-output[-c(which(fix[1:nn]==1))]}
+  
   if(any(output==Inf)| any(output==-Inf) | any(is.na(output)) | any(is.nan(output))){
     
     output[any(output==Inf)|any(is.na(output)) | any(is.nan(output))]<-.Machine$double.eps
@@ -863,41 +865,45 @@ grmlasplineana<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
   bb[which(fix==0)]<-b
   bb[which(fix==1)]<-bfix
   np<-sum(fix[1:nn]==0)
-    
   sol[1:np]<-sol[1:np]*2*bb[which(fix[1:nn]==0)]
-  
-
-  
 # 
-#   test<-deriva.gradient(b=b,
-#                         funcpa=idmlLikelihood,
-#                         npm=npm,
-#                         npar=npar,
-#                         bfix=bfix,
-#                         fix=fix,
-#                         zi01=zi01,
-#                         zi02=zi02,
-#                         zi12=zi12,
-#                         ctime=ctime,
-#                         no=no,
-#                         nz01=nz01,
-#                         nz02=nz02,
-#                         nz12=nz12,
-#                         ve01=ve01,
-#                         ve02=ve02,
-#                         ve12=ve12,
-#                         dimnva01=dimnva01,
-#                         dimnva02=dimnva02,
-#                         dimnva12=dimnva12,
-#                         nva01=nva01,
-#                         nva02=nva02,
-#                         nva12=nva12,
-#                         t0=t0,
-#                         t1=t1,
-#                         t2=t2,
-#                         t3=t3,
-#                         troncature=troncature,
-#                         gausspoint=10)
+# 
+# 
+# 
+  # test<-deriva.gradient(b=b,
+  #                       funcpa=idmlLikelihood,
+  #                       npm=npm,
+  #                       npar=npar,
+  #                       bfix=bfix,
+  #                       fix=fix,
+  #                       zi01=zi01,
+  #                       zi02=zi02,
+  #                       zi12=zi12,
+  #                       ctime=ctime,
+  #                       no=no,
+  #                       nz01=nz01,
+  #                       nz02=nz02,
+  #                       nz12=nz12,
+  #                       ve01=ve01,
+  #                       ve02=ve02,
+  #                       ve12=ve12,
+  #                       dimnva01=dimnva01,
+  #                       dimnva02=dimnva02,
+  #                       dimnva12=dimnva12,
+  #                       nva01=nva01,
+  #                       nva02=nva02,
+  #                       nva12=nva12,
+  #                       t0=t0,
+  #                       t1=t1,
+  #                       t2=t2,
+  #                       t3=t3,
+  #                       troncature=troncature,
+  #                       gausspoint=10)
+
+  # 
+  # sol
+  # test$v
+  # browser()
   return(sol)
 }
 
@@ -909,7 +915,7 @@ hessianmlasplineana<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
   
   res<-rep(0,npm+npm*(npm+1)/2)
 
-  output<-.Fortran("derivasplinessecondderiv",
+  output<-.Fortran("derivasplinessecondderivbis",
                    ## input
                    as.double(b),
                    as.integer(npm),
@@ -967,7 +973,7 @@ hessianmlasplineana<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
    
     
   }
-
+# 
     test<-deriva(b=b,
                           funcpa=idmlLikelihood,
                           npm=npm,
@@ -1001,7 +1007,10 @@ hessianmlasplineana<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
 
    V[upper.tri(V,diag=TRUE)] <- test$v[(1):(max-min)]
 
-   browser()
+   View(-t(Vspline))
+   View(V)
+  browser()
+
   # hessian is - second derivatives 
   #V<-V+t(V)
   #diag(V)<-diag(V)/2
