@@ -83,12 +83,17 @@ splinesMI<-function(x,knots,Boundary.knots){
  
 # 
 # 
-# msplines<-splinesMI(x=c(18,8.9090034031997476,11.448188338834687,0.83138401861838951),knots=9,Boundary.knots=c(0,18))$Mspline
-# isplines<-splinesMI(x=c(18,8.9090034031997476,11.448188338834687,0.83138401861838951),knots=9,Boundary.knots=c(0,18))$Ispline
+# 
+#  isplines<-splinesMI(x=c(6.9737166779146103,16.299821108664101,9.0080791198823302),knots=8.993984,Boundary.knots=c(0,17.987968))$Ispline
+#  isplines
+#  
+#  msplines<-splinesMI(x=c(17.305951234715799),knots=8.993984,Boundary.knots=c(0,17.987968))$Mspline
+#  msplines
 # #splines2::iSpline(x=times,knots=knots.int,Boundary.knots=knots.bound,intercept=T)
 # #browser()
 # 
-# intensity<-msplines%*%rep(0.25,5)
+# intensity<-msplines%*%fit.idm.Cbis$theta12^2
+# intensity
 # cumulative.intensity<-isplines%*%rep(0.25,5)
 # intensity
 # cumulative.intensity
