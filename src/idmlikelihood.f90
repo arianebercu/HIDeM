@@ -2020,6 +2020,301 @@ else
 
 
 !============================================================================================= 
+!========================         causal idmlLikelihood         ====================================
+!========================    with baseline weibull        ==================================== 
+!============================================================================================= 
+
+
+
+      subroutine causalidmlikelihoodweib(b0,np0,npar0,bfix0,fix0,c0,&
+      no0,ve010,ve120,ve020,dimnva01,dimnva12,dimnva02,nva01,&
+      nva12,nva02,nva12dep,semiMark,t00,t10,t20,t30,troncature0,likelihood_res)
+
+	use commun
+        implicit none
+         
+        double precision::res,res1,res2,tronc, &
+        vet01,vet12,vet02, gamma
+	double precision, intent(inout)::likelihood_res
+        integer::np0,i,j,l,w,k,npar0,nva01,nva12,nva02,nva12dep,no0, &
+	troncature0,dimnva01,dimnva02,dimnva12, semiMark
+
+	double precision,dimension(np0)::b0
+        double precision,dimension(npar0)::bh
+	double precision,dimension(npar0-np0)::bfix0
+	integer,dimension(npar0)::fix0
+	double precision,dimension(2)::the01
+	double precision,dimension(2)::the12
+	double precision,dimension(2)::the02
+        double precision,dimension(no0,dimnva01)::ve010
+	double precision,dimension(no0,dimnva02)::ve020
+	double precision,dimension(no0,dimnva12)::ve120
+	
+	
+        double precision::su01,ri01,su12,ri12,su02,ri02,gl01,gl02,gl12
+	double precision,dimension(no0)::t00,t10,t20,t30, tps
+	integer,dimension(no0)::c0
+
+	allocate(b(np0),bfix(npar0-np0),fix(npar0))
+	b=b0
+	bfix=bfix0
+	fix=fix0
+	
+	troncature=troncature0
+
+
+	if(nva01.gt.0) then 
+		allocate(ve01(no0,nva01))
+	else 
+		allocate(ve01(no0,1))
+	end if 
+	
+	if(nva02.gt.0) then 
+		allocate(ve02(no0,nva02))
+	else 
+		allocate(ve02(no0,1))
+	end if 
+
+	if(nva12.gt.0) then 
+		allocate(ve12(no0,nva12))
+	else 
+		allocate(ve12(no0,1))
+	end if 
+
+
+	ve01=ve010
+	ve02=ve020
+	ve12=ve120
+
+	allocate(t0(no0),t1(no0),t2(no0),t3(no0),c(no0))
+	c=c0
+	t0=t00
+	t1=t10
+	t2=t20
+	t3=t30
+	
+
+         
+        ! we need to put bh at its original values if in posfix 
+
+
+       l=0
+       w=0
+
+
+       do k=1,(np0+sum(fix))
+         if(fix(k).eq.0) then
+            l=l+1
+            bh(k)=b(l)
+         end if
+         if(fix(k).eq.1) then
+            w=w+1
+            bh(k)=bfix(w)
+         end if
+      end do
+ 
+!	Print *, 'semiMark', semiMark
+	
+
+	if (nva12dep.eq.1) then
+		gamma = bh(npar0)
+	else
+	gamma=0
+	end if
+ 
+! Print *, 'NVA12DEP test', nva12dep	
+
+ 
+ 
+
+
+         do i=1,2
+            the01(i)=(bh(i))*(bh(i))
+!       the01(i)=dexp(bh(i))
+         end do
+         do i=1,2
+            j = 2+i
+            the02(i)=(bh(j))*(bh(j))
+!       the12(i)=dexp(bh(j))
+         end do
+         do i=1,2
+            j = 4+i
+            the12(i)=(bh(j))*(bh(j))
+!       the02(i)=dexp(bh(j))
+         end do
+
+	
+!---------- calcul de la vraisemblance ------------------
+
+
+
+        res = 0.d0
+        do i=1,no0
+
+                vet01 = 0.d0
+                vet12 = 0.d0
+                vet02 = 0.d0
+
+
+                if(nva01.gt.0)then
+                        do j=1,nva01
+                                vet01 =vet01 +&
+                                bh(npar0-nva01-nva12-nva02+j)*dble(ve01(i,j))
+                        end do
+                endif  
+ 
+                if(nva02.gt.0)then
+                        do j=1,nva02
+                                vet02 =vet02 +&
+                                bh(npar0-nva02-nva12+j)*dble(ve02(i,j))
+                        end do
+                endif
+
+                if(nva12.gt.0)then
+                        do j=1,nva12
+                                vet12 =vet12 +&
+                                bh(npar0-nva12+j)*dble(ve12(i,j))
+                        end do
+                endif
+
+                vet01 = dexp(vet01)
+                vet12 = dexp(vet12)
+                vet02 = dexp(vet02)
+
+
+                res1 = 0.d0
+                
+                if(troncature.eq.1)then
+                        if(t0(i).eq.0.d0)then
+                                tronc = 0.d0
+                        else 
+                                call fonct(t0(i),the01,ri01,gl01,su01) 
+                                call fonct(t0(i),the02,ri02,gl02,su02) 
+                                tronc=(gl01*vet01)+(gl02*vet02)
+                        end if
+                else
+                        tronc = 0.d0
+                end if
+
+		
+                if(c(i).eq.1)then ! cad 0-->1 et 0-->2
+
+			call fonct(t1(i),the01,ri01,gl01,su01)
+                        call fonct(t3(i),the02,ri02,gl02,su02)
+                        res1 = -(gl01*vet01)-(gl02*vet02)
+                else
+                if(c(i).eq.2)then ! cpi 0-->1
+			
+                         call  qgauss1(c(i),t1(i),t2(i),t3(i),the01,the02,&
+                         the12,res2,vet01,vet02,vet12, gamma, semiMark)
+                        res1=dlog(res2)
+                        
+
+                else  
+                    if(c(i).eq.3)then ! obs 0-->1
+			call fonct(t1(i),the01,ri01,gl01,su01)
+                        call fonct(t1(i),the02,ri02,gl02,su02)
+                        call fonct(t1(i),the12,ri12,gl12,su12)
+                        res1 = -(gl01*vet01)-(gl02*vet02)+&
+                        dlog(ri01*vet01)+(gl12*vet12)
+                        call fonct(t3(i),the12,ri12,gl12,su12)
+                        res1 = res1 -(gl12*vet12)
+                        
+                        if(semiMark.eq.1)then
+                        call fonct(t1(i),the01,ri01,gl01,su01)
+                        call fonct(t1(i),the02,ri02,gl02,su02)
+                        res1 = -(gl01*vet01)-(gl02*vet02)+&
+                        dlog(ri01*vet01)
+                        tps(i) = t3(i) - t1(i)
+                        call fonct(tps(i),the12,ri12,gl12,su12)
+                        res1 = res1 -(gl12*vet12)
+                        endif
+                        
+                        
+                        
+                    else   
+                       if(c(i).eq.4)then ! cpi 0-->1 et obs 1-->2
+
+                        call  qgauss1(c(i),t1(i),t2(i),t3(i),the01,the02,the12,&
+                        res2,vet01,vet02,vet12,gamma, semiMark)
+                        res1=dlog(res2)
+                       
+     ! Print *, 'res test', the01, the02, the12, vet01, vet02, vet12                  
+                        
+                       else
+                         if(c(i).eq.5)then ! obs 0-->1 et obs 1-->2
+				call fonct(t1(i),the01,ri01,gl01,su01)
+                                call fonct(t1(i),the02,ri02,gl02,su02)
+                                call fonct(t1(i),the12,ri12,gl12,su12)
+                                res1 = -(gl01*vet01)-(gl02*vet02)+&
+                                dlog(ri01*vet01)+(gl12*vet12)
+                                call fonct(t3(i),the12,ri12,gl12,su12)
+                                res1 = res1 -(gl12*vet12) + dlog(ri12*vet12)
+                                
+                                
+                        if(semiMark.eq.1)then
+                        call fonct(t1(i),the01,ri01,gl01,su01)
+                        call fonct(t1(i),the02,ri02,gl02,su02)
+                        res1 = -(gl01*vet01)-(gl02*vet02)+&
+                        dlog(ri01*vet01)
+                        tps(i) = t3(i) - t1(i)
+                        call fonct(tps(i),the12,ri12,gl12,su12)
+                        res1 = res1 -(gl12*vet12)+ dlog(ri12*vet12)
+                        endif
+                                
+                                
+                                
+                         else
+                            if(c(i).eq.6)then ! vivant ???
+				 call fonct(t3(i),the01,ri01,gl01,su01)
+                                call fonct(t3(i),the02,ri02,gl02,su02)
+                               
+                                call  qgauss1(c(i),t1(i),t3(i),t3(i),the01,the02,&
+                                the12,res2,vet01,vet02,vet12, gamma, semiMark)
+                                res1 = (res2)+&
+                                ((su01**vet01)*(su02**vet02))
+                                res1 = dlog(res1)
+
+                            else ! passage 0-->2  
+
+				call fonct(t3(i),the01,ri01,gl01,su01)
+                                call fonct(t3(i),the02,ri02,gl02,su02)
+                                
+                                call  qgauss1(c(i),t1(i),t3(i),t3(i),the01,the02,&
+                                the12,res2,vet01,vet02,vet12, gamma, semiMark)
+                                res1 = (res2)+&
+                                ((su01**vet01)*(su02**vet02)*ri02*vet02)
+                                res1 = dlog(res1)
+                                
+                              !   Print *, 'res test', the01, the02, vet01, vet02 
+                            endif
+                         endif                        
+                      endif
+                   endif   
+                endif   
+                endif   
+
+                res = res + res1 + tronc
+
+! Print *, 'RES TEST', res
+     
+                if ((res.ne.res).or.(abs(res).ge. 1.d30)) then
+                        likelihood_res=-1.d9
+                        goto 123
+                end if
+        end do   
+! Print *, 'RES', res
+        likelihood_res = res
+! Print *, 'Loglik', likelihood_res
+
+123     continue 
+	 
+	deallocate(b,bfix,fix,ve01,ve02,ve12,t0,t1,t2,t3,c)
+
+        end subroutine causalidmlikelihoodweib
+
+
+!============================================================================================= 
 !==========================  SUSP  ===========================================================
 !===================== calculate splines distribution ========================================
 !============================================================================================= 
@@ -2387,7 +2682,143 @@ subroutine fonct(x,p,risq,glam,surv)
 
 end subroutine fonct
 !============================================================================================= 
-!================================   QGAUS for weib : CHEBYCHEV   =============================
+!================================  causal QGAUS for weib : CHEBYCHEV   =============================
+!============================================================================================= 
+
+
+subroutine qgauss1(cas,a,b,c, the01,the02,the12,res,v01,v02,v12_ref, gamma, semiMark)
+        implicit none
+         double precision a,b,c,ctemp,the01(2),the02(2),the12(2)
+         double precision dx,xm,xr,w(5),x(5),res,v01,v02,v12, gamma
+         double precision xx,f1,su01,ri01,ri12,f2,su12,su02,ri02
+         double precision gl01,gl12,gl02,su12_t,ri12_t,v12_ref,v12dem
+         integer j, cas,semiMark
+         save w,x
+         data w/0.2955242247d0,0.2692667193d0,0.2190863625d0,0.1494513491d0,0.0666713443d0/
+         data x/0.1488743389d0,0.4333953941d0,0.6794095682d0,0.8650633666d0,0.9739065285d0/
+
+         
+            xm = 0.5d0*(b+a)
+            xr = 0.5d0*(b-a)
+ 
+ 
+      
+      v12 = v12_ref
+   	!  Print *, "Gamma dans Qgauss :", gamma, v12_ref
+      
+            
+       !Print *, "v12dem et v12", v12dem, v12
+       
+            res = 0.d0
+            if(a.eq.b)then
+               res = 0.d0
+            else
+               do 11 j=1,5
+                  dx=xr*x(j)
+                  xx = xm+dx
+               
+   	              
+   	     !   Print *, 'semiMark GAUSS', semiMark      
+            
+             ctemp=c
+             if(semiMark.eq.1)then
+              ctemp=c-xx
+             endif
+             
+              v12dem = exp(gamma*xx)
+   	          v12 = v12_ref*v12dem
+   	                
+   	         !   Print *, "Gamma", gamma, xx 
+                  
+                  call fonct(xx,the01,ri01,gl01,su01)
+                  call fonct(xx,the02,ri02,gl02,su02)
+                  if(semiMark.eq.0)then
+                  call fonct(xx,the12,ri12,gl12,su12)
+                  endif
+                  call fonct(ctemp,the12,ri12_t,gl12,su12_t)
+      	            
+      	           
+                   
+  if((cas.eq.4 .or. cas.eq.7)) then
+                 
+               !  Print *, "Cas 0"
+                
+                if(semiMark.eq.0)then
+                 f1 = (su01**v01)*(su02**v02)*ri01*v01*(su12_t**v12)*ri12_t*v12/&
+                       (su12**v12)
+                else
+                 
+                 f1 = (su01**v01)*(su02**v02)*ri01*v01*(su12_t**v12)*ri12_t*v12
+                 endif       
+                
+                  
+             else
+ if((cas.eq.2 .or. cas.eq.6)) then
+               if(semiMark.eq.0)then
+                 f1 = (su01**v01)*(su02**v02)*ri01*v01*(su12_t**v12)/(su12**v12)
+                 
+                 else
+                 f1 = (su01**v01)*(su02**v02)*ri01*v01*(su12_t**v12)
+                 endif
+     endif  
+     endif
+                  
+                ! Print *, 'F1 dans qgauss', f1 
+                  xx = xm-dx
+                  
+             ctemp=c
+             if(semiMark.eq.1)then
+              ctemp=c-xx
+             endif
+   	         
+                   
+   	         v12dem = exp(gamma*xx)
+   	         v12 = v12_ref*v12dem
+   	         
+                  call fonct(xx,the01,ri01,gl01,su01)
+                  call fonct(xx,the02,ri02,gl02,su02)
+                  if(semiMark.eq.0)then
+                  call fonct(xx,the12,ri12,gl12,su12)
+                  endif
+                  call fonct(ctemp,the12,ri12_t,gl12,su12_t)
+                  
+  if((cas.eq.4 .or. cas.eq.7)) then
+                               if(semiMark.eq.0)then
+
+                  f2 = ((su01**v01)*(su02**v02)*ri01*v01)*(su12_t**v12)*ri12_t*v12/(su12**v12)
+                   else
+                f2 = ((su01**v01)*(su02**v02)*ri01*v01)*(su12_t**v12)*ri12_t*v12
+                 endif
+                  
+            
+             else
+  if((cas.eq.2 .or. cas.eq.6)) then
+                  if(semiMark.eq.0)then
+                  
+                  f2 = (su01**v01)*(su02**v02)*ri01*v01*(su12_t**v12)/(su12**v12)
+                  
+                  else
+               f2 = (su01**v01)*(su02**v02)*ri01*v01*(su12_t**v12)
+                 endif
+                  
+                  
+  endif 
+  endif
+               !  Print *, 'F2 dans qgauss', f2
+                  res = res + w(j)*(f1+f2)
+                   
+                  
+ 11            continue
+! Print *, 'Res 1', res
+ 
+            endif
+            res = res*xr
+
+        ! Print *, 'Res dans qgauss', res 
+          end subroutine qgauss1
+
+!============================================================================================= 
+!================================  causal QGAUS for weib : CHEBYCHEV   =============================
 !============================================================================================= 
 
 subroutine qgaussPLweib(a,b,the01,the02,the12,res,v01,v02,v12)
@@ -25814,6 +26245,7 @@ subroutine derivasplinessecondderivbis(b0,np0,npar0,bfix0,fix0,zi010,zi120,&
 				res2i01num,res2i02num,res2i12num,res2m01num,res2im0101num,res2i0101num, & 
 				res2i0102num,res2mi0102num,res2mi0112num,res2i0112num,res2i0202num,res2i0212num, & 
 				res2i1212num,vet01,vet02,vet12,zi01,zi02,zi12,nz01,nz02,nz12)
+			
 			call susp(t3(i),the12,nz12,su12,ri12,zi12,gl12)
 			call suspMIbis(t3(i),nz12,zi12,i12,m12)
 			 
@@ -25822,6 +26254,7 @@ subroutine derivasplinessecondderivbis(b0,np0,npar0,bfix0,fix0,zi010,zi120,&
 			
 			m=nz01+nz02+nz12+7
 			
+			 
 			!!write(6, *) "01",m
 			if(nz01.GT.0) then
 			
@@ -25872,7 +26305,7 @@ subroutine derivasplinessecondderivbis(b0,np0,npar0,bfix0,fix0,zi010,zi120,&
 			if(nz02.GT.0) then
 			
 			res1((nz01+3):(nz02+nz01+4))=-res2i02num(-2:(nz02-1))* &
-			vet02/u+ tronc02(-2:(nz02-1))
+			vet02/u + tronc02(-2:(nz02-1))
 			do k=-2,(nz02-1)
 			 u1=-res2i02num(k)*vet02
 			 
@@ -25917,7 +26350,7 @@ subroutine derivasplinessecondderivbis(b0,np0,npar0,bfix0,fix0,zi010,zi120,&
 			 
 			 res1(m)=(res1(m)*u-u1*u2)/(u*u)
 			 res1(m)=res1(m)- & 
-			 m12(k)*m12(j)*(vet12**2)/((ri12*vet12)**2)
+			 m12(k)*m12(j)/(ri12**2)
 			 
 			 
 			 m=m+1
@@ -25925,7 +26358,7 @@ subroutine derivasplinessecondderivbis(b0,np0,npar0,bfix0,fix0,zi010,zi120,&
 			end do 
 			end if 
 			
-			
+
 			
                        else
                          if(c(i).eq.5)then ! obs 0-->1 et obs 1-->2

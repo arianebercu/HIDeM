@@ -71,6 +71,7 @@ idm.penalty.splines<-function(b,fix0,size_V,size_spline,
   nlambda<-dim(lambda)[1]
   # combine model estimations 
   combine_lambda<-function(x,newx){
+    
 
     if(newx$combine==2){
       list(b=cbind(x$b,newx$b),
@@ -1112,7 +1113,7 @@ idm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                    bfix<-b[fix0.beta==1]
                                    b<-b[fix0.beta==0]
                                    
-                               # browser()
+                                #browser()
                                    if(analytics==F){
                                    output.mla<- marqLevAlg::mla(b=b,
                                                                 fn=idmlLikelihood,
@@ -1273,12 +1274,15 @@ idm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                    
                                  }
                                  
+                                 #browser()
                                  
                                  if(maxiter<=ite & converged==F){
+                                   #browser()
                                    istop<-2
                                  }else{
                                    if(ite<=maxiter & converged==T){### if CV is obtained 
                                      ### calculate derivatives 
+                                     #browser()
                                      istop<-1
                                      b<-c(s,beta)
                                      bfix<-b[fix0==1]
@@ -1376,6 +1380,7 @@ idm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                  
                                  
                                  combine<-combine+1
+                                 #browser()
                                  return(list(b=c(s,beta),
                                              fix=fix00,
                                              H=V0,
