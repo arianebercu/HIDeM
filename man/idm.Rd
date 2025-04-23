@@ -157,6 +157,8 @@ complete hessian is computed.}
 
 \item{nproc}{number of cluster}
 
+\item{analytics}{TRUE if analytical hessian for M-spline otherwise FALSE - diff finite (default)}
+
 \item{clustertype}{in which cluster to work}
 
 \item{envir}{working environment}
