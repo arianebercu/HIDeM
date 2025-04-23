@@ -140,6 +140,8 @@ idm.penalty.splines(
 \item{penalty.factor}{which variable should be penalised}
 
 \item{penalty}{which penalty to consider}
+
+\item{analytics}{TRUE if analytical hessian for M-spline otherwise FALSE - diff finite (default)}
 }
 \description{
 Penalised Illness-death model algorithm with M-splines baseline risk

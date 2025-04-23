@@ -218,7 +218,6 @@ idm <- function(formula01,
                              ifelse(penalty=="mcp",3,
                                     ifelse(penalty%in%c("elasticnet"),0.5,1))),
                 nproc=1,
-                onestep=F,
                 analytics=T,
                 clustertype="FORK",
                 envir=parent.frame()){
@@ -238,9 +237,6 @@ idm <- function(formula01,
     
     if(!method%in%c("Weib","splines"))stop("The argument method needs to be either splines or Weib")
 
-    
-    if(length(onestep)!=1)stop("The argument onestep must be either T or F")
-    if(!onestep%in%c(T,F))stop("The argument onestep must be either T or F")
     if(length(analytics)!=1)stop("The argument analytics must be either T or F")
     if(!analytics%in%c(T,F))stop("The argument analytics must be either T or F")
     ## if(missing(formula02)) formula02 <- formula01
@@ -1585,46 +1581,7 @@ idm <- function(formula01,
             
             #browser()
             
-            if(onestep==T){
-            out <- idm.penalty.weib.onestep(b=b,
-                                    fix0=fix0,
-                                    size_V=size_V,
-                                    clustertype=clustertype,
-                                    epsa=epsa,
-                                    epsb=epsb,
-                                    epsd=epsd,
-                                    eps.eigen=eps.eigen,
-                                    nproc=nproc,
-                                    maxiter=maxiter,
-                                    maxiter.pena=maxiter.pena,
-                                    ctime=ctime,
-                                    N=N,
-                                    ve01=ve01,
-                                    ve02=ve02,
-                                    ve12=ve12,
-                                    dimnva01=dimnva01,
-                                    dimnva02=dimnva02,
-                                    dimnva12=dimnva12,
-                                    nvat01=nvat01,
-                                    nvat02=nvat02,
-                                    nvat12=nvat12,
-                                    t0=t0,
-                                    t1=t1,
-                                    t2=t2,
-                                    t3=t3,
-                                    troncature=troncature,
-                                    nlambda01=nlambda01,
-                                    lambda01=lambda01,
-                                    nlambda02=nlambda02,
-                                    lambda02=lambda02,
-                                    nlambda12=nlambda12,
-                                    lambda12=lambda12,
-                                    alpha=alpha,
-                                    penalty.factor=penalty.factor,
-                                    penalty=penalty,
-                                    gausspoint=gausspoint)
             
-            }else{
             
               out <- idm.penalty.weib(b=b,
                                fix0=fix0,
@@ -1663,7 +1620,7 @@ idm <- function(formula01,
                                penalty.factor=penalty.factor,
                                penalty=penalty,
                                gausspoint=gausspoint)
-            }
+            
               
               
 ######################### Output ###############################################
@@ -1784,7 +1741,7 @@ idm <- function(formula01,
                   }
                   # only beta different from 0 
                   lambda.matrix<-lambda.matrix[id.keep,id.keep,drop=FALSE]
-                  if(onestep==F){
+                  
                   if(out$istop[i]==1){
                     H_spec<-out$H[,(1+(i-1)*npm):(i*npm),drop=FALSE]
                     # only beta different from 0 
@@ -1806,40 +1763,15 @@ idm <- function(formula01,
                       fit$GCV[i]<--1/N*(out$fn.value[i]-trace_model)}
                     }
                   }
-                  }else{
-                    
-                    if(out$istop[i]==1){
-                      nweib<-sum(fix0[1:6]==0)
-                      H_spec<-out$H[(nweib+1):(npm+nweib),(1+nweib+(i-1)*(npm+nweib)):(i*(npm+nweib)),drop=FALSE]
-                      # only beta different from 0 
-                      H_spec<-H_spec[id.keep,id.keep,drop=FALSE]
-                      
-                      if(!(any(is.na(H_spec))|any(H_spec==Inf) |any(H_spec==-Inf))){
-                        if(abs(det(H_spec))>1e-10 & kappa(H_spec)<1e10){
-                          #V[,(1+(i-1)*npm):(i*npm)]<-solve(out$H[,(1+(i-1)*npm):(i*npm),drop=FALSE])
-                          id.keepV<-(1+(i-1)*npm):(i*npm)
-                          id.keepV<-id.keepV[id.keepV%in%((i-1)*npm+id.keep)]
-                          
-                          V[id.keep,id.keepV]<-solve(H_spec)
-                         
-                            H_pl<-H_spec+lambda.matrix
-                            trace_model<-lava::tr(solve(H_pl)%*%H_spec)
-                          
-                          fit$GCV[i]<--1/N*(out$fn.value[i]-trace_model)}
-                      }
-                    }
-                  }
+                  
                   
                 }
               }
                 
-              if(onestep==F){
+              
               cv<-list(ca.beta=out$ca.beta,ca.spline=out$ca.spline,ca.validity=out$ca.validity,
                        cb=out$cb,rdm=NULL)
-              }else{
-                cv<-list(ca.beta=out$ca.beta,ca.spline=out$ca.spline,ca.validity=out$ca.validity,
-                         cb=out$cb,rdm=out$rdm)
-              }
+              
              
               fit$modelPar<-as.matrix(modelPar)
               
