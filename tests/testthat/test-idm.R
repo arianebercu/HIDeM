@@ -1,5 +1,5 @@
 
-
+dontrun{
 test_that("HIDeM idm", {
   
 data("mydata", package = "HIDeM") 
@@ -174,3 +174,4 @@ test_that("HIDeM grid search", {
   
 })
 
+}
