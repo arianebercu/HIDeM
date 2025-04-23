@@ -859,8 +859,7 @@ idm <- function(formula01,
                                     ts=ts,
                                     troncature=troncature,
                                     gausspoint=gausspoint,
-                        methodCV=methodCV,
-                        analytics=analytics)
+                        methodCV=methodCV)
             
         
         
@@ -1059,10 +1058,56 @@ idm <- function(formula01,
 ########################## perform penalty algorithm ###########################
 ##########################   with M-splines baseline risk ######################
 ################################################################################
-          
+          #browser()
           if(method=="splines"){
             # if user did not specified the lambda values 
+            
+            output.mla<- marqLevAlg::mla(b=b[which(fix0[1:size_spline]==0)],
+                                         fn=idmlLikelihood,
+                                         epsa=epsa,
+                                         epsb=epsb,
+                                         epsd=epsd,
+                                         nproc=nproc,
+                                         clustertype = clustertype,
+                                         maxiter=maxiter,
+                                         minimize=F,
+                                         npm=sum(fix0[1:6]==0),
+                                         npar=size_V,
+                                         bfix=c(b[which(fix0[1:size_spline]==1)],b[(size_spline +1):size_V][which(fix0[(size_spline +1):size_V]==0)]),
+                                         fix=c(fix0[1:size_spline],rep(1,size_V-(size_spline))),
+                                         zi01=knots01,
+                                         zi02=knots02,
+                                         zi12=knots12,
+                                         ctime=ctime,
+                                         no=N,
+                                         nz01=nknots01,
+                                         nz02=nknots02,
+                                         nz12=nknots12,
+                                         ve01=ve01,
+                                         ve02=ve02,
+                                         ve12=ve12,
+                                         dimnva01=dimnva01,
+                                         dimnva02=dimnva02,
+                                         dimnva12=dimnva12,
+                                         nva01=nvat01,
+                                         nva02=nvat02,
+                                         nva12=nvat12,
+                                         t0=t0,
+                                         t1=t1,
+                                         t2=t2,
+                                         t3=t3,
+                                         troncature=troncature,
+                                         gausspoint=gausspoint)
+            
+            # take thoses values if converged only otherwise thoses
+            # by default or by the user
+            if(output.mla$istop==1){
+              b[which(fix0[1:size_spline]==0)]<-output.mla$b}
+            
+ 
             if(is.null(lambda01)|is.null(lambda02)|is.null(lambda12)){
+              
+              
               
               if(nproc>1){
                 if(is.null(clustertype)){
@@ -1205,7 +1250,6 @@ idm <- function(formula01,
 ############################## Output   ########################################
 ############################## on beta and HR   ################################
             
-           
             lambda<-out$lambda
             alpha<-out$alpha
             
