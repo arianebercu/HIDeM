@@ -1,7 +1,7 @@
 
-dontrun{
+
 test_that("HIDeM idm", {
-  
+  skip("Skipping test for now")
 data("mydata", package = "HIDeM") 
 
 mydata.scale<-scale(mydata[,paste0("X",seq(1:50))])
@@ -27,12 +27,12 @@ model <-HIDeM::  idm(formula02 = f02,
 
 expect_true(exists("model"))
 
-
 })
 
 
 
 test_that("HIDeM grid search", {
+  skip("Skipping test for now")
   data("mydata", package = "HIDeM") 
   
   mydata.scale<-scale(mydata[,paste0("X",seq(1:50))])
@@ -170,8 +170,7 @@ test_that("HIDeM grid search", {
   #setwd("C:/Users/ab17/Desktop/CURTA/SMOOTH_HAZARD/OPTIM_B_DIFFLAMBDA_derivaana")
   
   expect_true(exists("m12") & exists("m02") & exists("m01"))
-  
+
   
 })
 
-}
