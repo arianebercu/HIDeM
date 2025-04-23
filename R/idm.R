@@ -185,7 +185,6 @@ idm <- function(formula01,
                 formula12,
                 data,
                 method="Weib",
-                methodCV="mla",
                 scale.X=T,
                 maxiter=100,
                 maxiter.pena=10,
@@ -237,10 +236,6 @@ idm <- function(formula01,
     
     if(!method%in%c("Weib","splines"))stop("The argument method needs to be either splines or Weib")
 
-    if(length(methodCV)!=1)stop("The argument methodCV must be either Nelder-Mead, BFGS, CG, L-BFGS-B, SANN, Brent or mla")
-    
-    if(!methodCV%in%c("Nelder-Mead", "BFGS", "CG", "L-BFGS-B", "SANN",
-                     "Brent","mla"))stop("The argument methodCV must be either Nelder-Mead, BFGS, CG, L-BFGS-B, SANN, Brent or mla")
     
     if(length(onestep)!=1)stop("The argument onestep must be either T or F")
     if(!onestep%in%c(T,F))stop("The argument onestep must be either T or F")
@@ -741,8 +736,7 @@ idm <- function(formula01,
                          troncature=troncature,
                          gausspoint=gausspoint,
                          step.sequential=step.sequential,
-                         option.sequential=option.sequential,
-                         methodCV=methodCV)
+                         option.sequential=option.sequential)
   
       
 ############################## Output   ########################################
@@ -755,8 +749,7 @@ idm <- function(formula01,
         
 ######################### on covariance matrix #################################
 ### if CV is true keep V and solve V to have inverse for confidence intervals###
-        CV<-ifelse(methodCV=="mla",out$istop,
-                   ifelse(out$istop==0,1,0))
+        CV<-out$istop
         if(CV==1){
           
           
@@ -907,8 +900,7 @@ idm <- function(formula01,
                                     idd=idd,
                                     ts=ts,
                                     troncature=troncature,
-                                    gausspoint=gausspoint,
-                        methodCV=methodCV)}
+                                    gausspoint=gausspoint)}
             
         
         
@@ -919,8 +911,8 @@ idm <- function(formula01,
         npm<-sum(fix==0)
         
 ### if CV is true keep V and solve V to have inverse for confidence intervals###
-        CV<-ifelse(methodCV=="mla",out$istop,
-                   ifelse(out$istop==0,1,0))
+        CV<-out$istop
+        
         if(CV==1){
           
           
@@ -1013,7 +1005,6 @@ idm <- function(formula01,
       # No value given by BIC as no penalty
       lambda<-alpha<-fit$BIC<-fit$GCV<-NULL
       fit$loglik <- c(out$fn.value,NULL)
-      fit$methodCV<-methodCV
       
     }else{
 
@@ -1305,7 +1296,6 @@ idm <- function(formula01,
                              alpha=alpha,
                              penalty.factor=penalty.factor,
                              penalty=penalty,
-                             methodCV=methodCV,
                              analytics=analytics)
             
 ############################## Output   ########################################
@@ -1670,8 +1660,7 @@ idm <- function(formula01,
                                alpha=alpha,
                                penalty.factor=penalty.factor,
                                penalty=penalty,
-                               gausspoint=gausspoint,
-                               methodCV=methodCV)
+                               gausspoint=gausspoint)
             }
               
               
@@ -1703,10 +1692,10 @@ idm <- function(formula01,
               betaCoef<-as.matrix(betaCoef)
               fit$coef <- betaCoef
               fit$HR <- exp(betaCoef)
-              if(methodCV=="mla"){
+              
               fit$ga<-out$gapath
               fit$da<-out$dapath
-              }
+              
               
 ####################   calculate BIC    #######################################
               if(dim(beta)[2]>1){
@@ -1808,14 +1797,10 @@ idm <- function(formula01,
                       V[id.keep,id.keepV]<-solve(H_spec)
                       # maximisation issue thus : 10/04/24
                       # as mla in maximisation return -second derivatives 
-                      if(methodCV=="mla"){
+                     
                       H_pl<-H_spec+lambda.matrix
                       trace_model<-lava::tr(solve(H_pl)%*%H_spec)
-                      }else{
-                        H_pl<-H_spec
-                        H_spec<-H_spec-lambda.matrix
-                        trace_model<-lava::tr(solve(H_pl)%*%H_spec)
-                      }
+                      
                       fit$GCV[i]<--1/N*(out$fn.value[i]-trace_model)}
                     }
                   }
