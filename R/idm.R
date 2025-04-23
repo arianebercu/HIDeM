@@ -101,6 +101,7 @@
 #' @param nproc number of cluster
 #' @param option.sequential parameters to give if you want to do the optimisation version to
 #'  fix splines
+#' @param analytics TRUE if analytical hessian for M-spline otherwise FALSE - diff finite (default)
 #' @param envir working environment 
 #' @return
 #' \item{call}{the call that produced the result.} \item{coef}{regression
