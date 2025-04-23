@@ -36,7 +36,6 @@ idm(
   alpha = ifelse(penalty == "scad", 3.7, ifelse(penalty == "mcp", 3, ifelse(penalty
     \%in\% c("elasticnet"), 0.5, 1))),
   nproc = 1,
-  onestep = F,
   analytics = T,
   clustertype = "FORK",
   envir = parent.frame()
@@ -127,6 +126,10 @@ This argument is only used for models with M-splines.}
 \item{posfix}{index of fixed parameters}
 
 \item{gausspoint}{gauss quadrature points in the approximation of integrals in the likelihood}
+
+\item{timedep12}{TRUE if time dependent on 1 --> 2 otherwise FALSE (default)}
+
+\item{semiMarkov}{TRUE if semi Markov on 1 --> 2 otherwise FALSE (default)}
 
 \item{step.sequential}{should we use the optimisation version to fix splines}
 
