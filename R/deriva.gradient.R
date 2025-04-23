@@ -167,7 +167,7 @@ deriva <- function(nproc=1,b,funcpa,.packages=NULL,...){
     
     
     ## derivees premieres:
-    ll <- foreach(k=(m*(m+1)/2)+1:m,
+    ll <- foreach::foreach(k=(m*(m+1)/2)+1:m,
                   .combine=cbind,
                   .packages=.packages) %dopar%
       {
@@ -190,7 +190,7 @@ deriva <- function(nproc=1,b,funcpa,.packages=NULL,...){
     v1 <- ll[2,] 
     
     ## derivees secondes:
-    v2 <- foreach(k=1:(m*(m+1)/2),
+    v2 <- foreach::foreach(k=1:(m*(m+1)/2),
                   .combine=c,
                   .packages=.packages) %dopar%
       {
@@ -509,7 +509,7 @@ hessianmlaweib<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
      # test[2]<-sqrt(exp(test[2]))
      # test[4]<-sqrt(exp(test[4]))
      # test[6]<-sqrt(exp(test[6]))
-    Vall<-deriva(b=b,f=idmlLikelihoodweib,npm=length(b),
+    Vall<-deriva(b=b,funcpa=idmlLikelihoodweib,npm=length(b),
                              npar=npar,
                              bfix=bfix,
                              fix=fix,
@@ -605,7 +605,7 @@ hessianmlaweib<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
     if(start==6){
       return(t(V)[upper.tri(t(V),diag=T)])
     }else{
-      Vall<-deriva.hessianweib(b=b,f=idmlLikelihoodweib,npm=length(b),
+      Vall<-deriva.hessianweib(b=b,funcpa=idmlLikelihoodweib,npm=length(b),
                                npar=npar,
                                bfix=bfix,
                                fix=fix,

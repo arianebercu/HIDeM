@@ -78,7 +78,7 @@ print.idm <- function(x,conf.int=.95,digits=4,pvalDigits=4,eps=0.0001,coef=F,...
       }else{
         switch(as.character(x$converged[1]),
                "1"={ warning("Maximum number of iterations reached. \n",call.=FALSE)},
-               "10"={ warning("Degeneracy of the Nelder–Mead simplex. \n",call.=FALSE)},
+               "10"={ warning("Degeneracy of the Nelder-Mead simplex. \n",call.=FALSE)},
                "51"={ warning("Warning from the L-BFGS-B method. \n",call.=FALSE)},
                "52"={ warning("Error from the L-BFGS-B method. \n",call.=FALSE)})
       }

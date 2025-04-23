@@ -29,7 +29,6 @@
 ##' @param idm number of subjects that had illness
 ##' @param ts delay in the study
 ##' @param gausspoint number of points in gauss quadrature
-##' @param methodCV methodolgy to optimise penalised parameters 
 ##' @param weib the form of the weibull parameters 
 #' @author R: Ariane Bercu <ariane.bercu@@u-bordeaux.fr> 
 #' @useDynLib HIDeM
@@ -38,59 +37,11 @@ idm.weib<-function(b,fix0,size_V,
                    clustertype,epsa,epsb,epsd,nproc,maxiter,
                    ctime,N,
                    ve01,ve02,ve12,dimnva01,dimnva02,dimnva12,nvat01,nvat02,nvat12,
-                   t0,t1,t2,t3,idd,idm,ts,troncature,gausspoint,methodCV){
+                   t0,t1,t2,t3,idd,idm,ts,troncature,gausspoint){
 
   bfix<-b[fix0==1]
   b<-b[fix0==0]
 
-  if(methodCV%in%c("Nelder-Mead", "BFGS", "CG", "L-BFGS-B", "SANN",
-                 "Brent")){
-    
-
-  out<- optim(par=b,
-              method=methodCV,
-              hessian = T,
-              control=list(maxit=maxiter,
-                           fnscale=-1, #to maximise function
-                           abstol=epsb,
-                           parscale=rep(1,length(b))),
-              
-                        fn=idmlLikelihoodweib,
-                        npm=length(b),
-                        npar=size_V,
-                        bfix=bfix,
-                        fix=fix0,
-                        ctime=ctime,
-                        no=N,
-                        ve01=ve01,
-                        ve02=ve02,
-                        ve12=ve12,
-                        dimnva01=dimnva01,
-                        dimnva02=dimnva02,
-                        dimnva12=dimnva12,
-                        nva01=nvat01,
-                        nva02=nvat02,
-                        nva12=nvat12,
-                        t0=t0,
-                        t1=t1,
-                        t2=t2,
-                        t3=t3,
-                        troncature=troncature,
-                        gausspoint=gausspoint)
-  V<-solve(-out$hessian)
-  
-  return(list(b=out$par,
-              fn.value=out$value,
-              ni=out$counts[1],
-              istop=out$convergence,
-              v=V,
-              grad=NULL,
-              ca=NULL,
-              cb=NULL,
-              rdm=NULL,
-              bfix=bfix,
-              fix0=fix0))
-  }else{
 
   # maximise loglik 
 
@@ -143,7 +94,7 @@ idm.weib<-function(b,fix0,size_V,
               rdm=out$rdm,
               bfix=bfix,
               fix0=fix0))
-  }
+  
   
 
 
