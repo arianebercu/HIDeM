@@ -46,6 +46,7 @@
 ##' @param penalty which penalty to consider
 ##' @param penalty.factor which variable should be penalised
 ##' @param gausspoint number of points in gauss quadrature
+##' @param analytics TRUE if analytical hessian for M-spline otherwise FALSE - diff finite (default)
 
 #' @importFrom foreach "%do%"
 #' @importFrom foreach "%dopar%"

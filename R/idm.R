@@ -84,6 +84,8 @@
 #' @param scale.X do you want to center and reduce your explanatory variables
 #' @param posfix index of fixed parameters 
 #' @param gausspoint gauss quadrature points in the approximation of integrals in the likelihood
+#' @param timedep12 TRUE if time dependent on 1 --> 2 otherwise FALSE (default)
+#' @param semiMarkov TRUE if semi Markov on 1 --> 2 otherwise FALSE (default)
 #' @param lambda01 Lambda on transition 0 --> 1
 #' @param lambda02 Lambda on transition 0 --> 2
 #' @param lambda12 Lambda on transition 1 --> 2

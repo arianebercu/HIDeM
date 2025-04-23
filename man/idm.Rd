@@ -10,7 +10,6 @@ idm(
   formula12,
   data,
   method = "Weib",
-  methodCV = "mla",
   scale.X = T,
   maxiter = 100,
   maxiter.pena = 10,

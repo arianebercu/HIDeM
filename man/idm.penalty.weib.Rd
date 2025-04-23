@@ -41,8 +41,7 @@ idm.penalty.weib(
   alpha,
   penalty.factor,
   penalty,
-  gausspoint,
-  methodCV
+  gausspoint
 )
 }
 \arguments{
@@ -119,8 +118,6 @@ idm.penalty.weib(
 \item{penalty}{which penalty to consider}
 
 \item{gausspoint}{number of points in gauss quadrature}
-
-\item{methodCV}{methodolgy to optimise penalised parameters}
 }
 \description{
 Penalised Illness-death model algorithm with weibull baseline risk

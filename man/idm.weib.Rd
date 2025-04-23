@@ -33,8 +33,7 @@ idm.weib(
   idm,
   ts,
   troncature,
-  gausspoint,
-  methodCV
+  gausspoint
 )
 }
 \arguments{
@@ -95,8 +94,6 @@ idm.weib(
 \item{troncature}{indicator if troncature or not}
 
 \item{gausspoint}{number of points in gauss quadrature}
-
-\item{methodCV}{methodolgy to optimise penalised parameters}
 
 \item{weib}{the form of the weibull parameters}
 }
