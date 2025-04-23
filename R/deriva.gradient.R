@@ -642,7 +642,7 @@ hessianmlaweib<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
   
   
 }else{
-    Vall<-deriva(b=b,f=idmlLikelihoodweib,npm=length(b),
+    Vall<-deriva(b=b,funcpa=idmlLikelihoodweib,npm=length(b),
                  npar=npar,
                  bfix=bfix,
                  fix=fix,

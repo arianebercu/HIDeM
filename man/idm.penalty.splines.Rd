@@ -49,7 +49,6 @@ idm.penalty.splines(
   alpha,
   penalty.factor,
   penalty,
-  methodCV,
   analytics
 )
 }
@@ -141,8 +140,6 @@ idm.penalty.splines(
 \item{penalty.factor}{which variable should be penalised}
 
 \item{penalty}{which penalty to consider}
-
-\item{methodCV}{methodolgy to optimise penalised parameters}
 }
 \description{
 Penalised Illness-death model algorithm with M-splines baseline risk
