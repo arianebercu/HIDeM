@@ -1,0 +1,438 @@
+---
+title: "Reg-IDM-ICT-Paq1000"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Reg-IDM-ICT-Paq1000}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## Load HIDeM and Paq1000 data set
+
+The Paquid data set composed of 1000 subjects selected randomly from the Paquid data set of 3675 subjects. We have one row per individual observation and the following 8 columns : 
+
+- dementia for dementia status, 0=non-demented, 1=demented
+- death for death status, 0=alive, 1=dead
+- e, the age at entry in the study
+- l : age at the last visit before the diagnostic of dementia or age at last visit for non-demented subjects
+- r : age at the diagnostic visit for demented subject or age at the last visit for non-demented subjects
+- t : age at death or age at the latest news for alive subject
+- certif : primary school certificate, 0=without certificate, 1=with certificate
+- gender: 0=female, 1=male
+
+In addition, we had fifty noise variable noted Z, following an independent Gaussian distribution (centered and reduced). 
+
+```{r setup}
+library(HIDeM)
+library(MASS)
+library(gtsummary)
+library(gt)
+library(dplyr)
+
+# Load the data (assuming it's a space-separated or tab-delimited file)
+Paq1000 <- HIDeM::Paq1000
+
+summaries<-Paq1000 %>%
+   mutate(dementia = ifelse(dementia==1,"Demented","Healthy"),
+          death=ifelse(death==1,"Death","Alive"),
+          certif=ifelse(certif==1,"with certificate","without certificate"),
+          gender=ifelse(gender==0,"female","male"))%>%
+   tbl_strata(
+     strata = dementia,
+     .tbl_fun =
+       ~ .x %>%
+       tbl_summary(by = death,
+                   type = list(where(is.numeric) ~ "continuous2"),
+                   statistic = list(
+                     all_categorical() ~ "{n} ({p}%)"
+                   ),
+                   digits = all_continuous() ~ 2),
+     .header = "**{strata}**, N = {n}"
+   ) %>%
+    modify_caption("Characteristics of individuals in Paq1000 dataset")
+
+summaries
+Z<-MASS::mvrnorm(n = 1000, mu = rep(0,50), Sigma = diag(50))
+Z<-as.data.frame(Z)
+colnames(Z)<-paste0("Z",c(1:50))
+
+Paq1000<-cbind(Paq1000,Z)
+```
+
+
+## Run IDM-ICT 
+
+In this section, we will explicit the profile likelihood, with an
+
+- outer loop on penalty parameters noted $(a,\lambda_{01},\lambda_{02},\lambda_{12})$, and 
+- an inner loop on regression parameters $(\beta_{01},\beta_{02},\beta_{12})$ and baseline intensity parameters $(\theta_{01},\theta_{02},\theta_{12})$
+
+Firstly, we need to perform a pre-selection of penalty parameters for each transition separately. For each transition, we first fit multi-state models including covariates only in the transition from state $h$ to $l$, and considering a grid of $\lambda_{hl}$ with equidistant values from  0.0001 and 100 while keeping $a$ fixed at 1. It is recommended to try multiple values of $a$ in $]0,1]$, but for this example we will limit to lasso penalty (a=1). 
+
+We choose to estimate the baseline intensity transition with M-spline basis with nodes at 65, 84 and 103 years old. To initiative, baseline intensities parameters of M-splines, we run a model without covariates. 
+
+1. Choose baseline intensity parametrization based on void model
+```{r,eval=F}
+
+mvoidPaq1000 <-  HIDeM::idm(formula02=Hist(time=t,event=death,entry=e)~1,
+                        formula01=Hist(time=list(l,r),event=dementia)~1,
+                        formula12=~1,
+                        method="splines",
+                        data=Paq1000,maxiter=100)
+
+mvoidquant <-  HIDeM::idm(formula02=Hist(time=t,event=death,entry=e)~1,
+                        formula01=Hist(time=list(l,r),event=dementia)~1,
+                        formula12=~1,
+                        method="splines",n.knots = c(3,3,3),knots="quantile",
+                     type.quantile=1,
+                        data=Paq1000,maxiter=100)
+
+-2*mvoid$loglik 
+-2*mvoidquant$loglik 
+
+mvoidn4 <-  HIDeM::idm(formula02=Hist(time=t,event=death,entry=e)~1,
+                        formula01=Hist(time=list(l,r),event=dementia)~1,
+                        formula12=~1,
+                        method="splines",n.knots = c(4,4,4),
+                        data=Paq1000,maxiter=100)
+
+mvoidquantn4 <-  HIDeM::idm(formula02=Hist(time=t,event=death,entry=e)~1,
+                        formula01=Hist(time=list(l,r),event=dementia)~1,
+                        formula12=~1,
+                        method="splines",n.knots = c(4,4,4),knots="quantile",
+                     type.quantile=1,
+                        data=Paq1000,maxiter=100)
+
+-2*mvoid$loglik +2*(3*5)
+-2*mvoidn4$loglik +2*(3*6)
+
+-2*mvoidquant$loglik +2*3*5
+-2*mvoidquantn4$loglik +2*3*6
+
+# best to keep 5 parameters per transition using equidistant points
+
+```
+
+2. Estimation of Reg IDM-ICT transition specific model 
+```{r,eval=F}
+a<-1
+
+start<-c(mvoidPaq1000$theta01,mvoidPaq1000$theta02,mvoidPaq1000$theta12,rep(0,52))
+  
+  nlambda<-20
+  lambdatest<-seq(0.01,100,length.out=nlambda)
+  penalty<-ifelse(a==1,"lasso","elasticnet")
+
+  
+############################ 01 ################################################
+    f02<-as.formula("Hist(time = t, event =death,entry=e) ~1")
+  f01<-as.formula(paste0("Hist(time = list(l,r), event = dementia) ~ certif + gender +",paste0(paste0("Z",seq(1:50)),collapse="+")))
+  f12<-as.formula("~1")
+  
+  m01Paq1000 <-HIDeM::  idm(formula02 = f02,
+                                    formula01 = f01,
+                                    formula12 = f12,data=Paq1000,
+                                    penalty=penalty,eps=c(7,4,1),
+                                    lambda01 = lambdatest,
+                                    lambda02=0.0001,
+                                    lambda12=0.0001,B=start,
+                                method="splines",
+                                alpha=k,maxiter=100,maxiter.pena = 2)
+  
+
+################################ 02 ############################################
+
+  f02<-as.formula(paste0("Hist(time = t, event = death,entry=e) ~ certif + gender + ",paste0(paste0("Z",seq(1:50)),collapse="+")))
+  f01<-as.formula("Hist(time = list(l,r), event = dementia) ~ 1")
+  f12<-as.formula("~1")
+#setwd("C:/Users/ab17/Desktop/CURTA/SMOOTH_HAZARD/OPTIM_B_DIFFLAMBDA_derivaana_all/Weibull_simu/Scenario1")
+
+  m02Paq1000 <-HIDeM::  idm(formula02 = f02,
+                                    formula01 = f01,
+                                    formula12 = f12,data=Paq1000,
+                                penalty=penalty,eps=c(7,4,1),
+                                method="splines",
+                                    lambda02 = lambdatest,
+                                    lambda01=0.0001,
+                                    lambda12=0.0001,B=start,
+                                alpha=k,maxiter=100,maxiter.pena = 2)
+  
+
+
+######################################## 12 ###################################
+
+  f02<-as.formula("Hist(time = t, event = death,entry=e) ~1")
+  f01<-as.formula("Hist(time = list(l,r), event =dementia) ~ 1")
+  f12<-as.formula(paste0("~ certif + gender + ",paste0(paste0("Z",seq(1:50)),collapse="+")))
+
+  m12Paq1000 <-HIDeM::  idm(formula02 = f02,
+                                formula01 = f01,
+                                formula12 = f12,data=Paq1000,
+                                penalty=penalty,eps=c(7,4,1),
+                                method="splines",
+                                lambda01 = 0.0001,
+                                lambda12= lambdatest,
+                                lambda02=0.0001,B=start,
+                                alpha=k,maxiter=100,maxiter.pena = 2)
+  
+  
+```
+
+The ouput of each models can be displayed using standard function such as print and summary : 
+```{r,fig.width=6}
+
+m01Paq1000<-HIDeM::m01Paq1000
+m02Paq1000<-HIDeM::m02Paq1000
+m12Paq1000<-HIDeM::m12Paq1000
+
+#print(m01Paq1000)
+#summary(m01Paq1000)
+
+#print(m02Paq1000)
+#summary(m02Paq1000)
+
+#print(m12Paq1000)
+#summary(m12Paq1000)
+```
+The following step is to visualize the Bayesian Indicator Criteria (BIC) and determine the 3 values of $\lambda$ per transition minimizing it : 
+
+```{r,fig.width=6,fig.height=6}
+
+plot(m01Paq1000$lambda[1,],m01Paq1000$BIC,xlab="Lambda values for 0 -> 1",ylab="BIC")
+plot(m02Paq1000$lambda[2,],m02Paq1000$BIC,xlab="Lambda values for 0 -> 2",ylab="BIC")
+plot(m12Paq1000$lambda[3,],m12Paq1000$BIC,xlab="Lambda values for 1 -> 2",ylab="BIC")
+
+lambda01<-lambda02<-lambda12<-rep(NA,3)
+
+############################## 01 ##############################################
+BIC01<-sort(m01Paq1000$BIC[m01Paq1000$converged==1])[1:3]
+BIC01<-na.omit(unique(BIC01))
+  
+  id<-which(m01Paq1000$BIC%in%BIC01)
+  if(length(id)>3){
+    lambda<-m01Paq1000$lambda[1,id]
+    lambda01[1:3]<-sort(lambda)[1:3]
+  }else{
+    
+      lambda01[1:3]<-m01Paq1000$lambda[1,id]
+      lambda01<-na.omit(lambda01)
+  }
+  
+############################## 02 ##############################################
+BIC02<-sort(m02Paq1000$BIC[m02Paq1000$converged==1])[1:3]
+BIC02<-na.omit(unique(BIC02))
+  
+  id<-which(m02Paq1000$BIC%in%BIC02)
+  if(length(id)>3){
+    lambda<-m02Paq1000$lambda[2,id]
+    lambda02[1:3]<-sort(lambda)[1:3]
+  }else{
+    
+      lambda02[1:3]<-m02Paq1000$lambda[2,id]
+      lambda02<-na.omit(lambda02)
+  }
+  
+############################## 12 ##############################################
+BIC12<-sort(m12Paq1000$BIC[m12Paq1000$converged==1])[1:3]
+BIC12<-na.omit(unique(BIC12))
+  
+  id<-which(m12Paq1000$BIC%in%BIC12)
+  if(length(id)>3){
+    lambda<-m12Paq1000$lambda[3,id]
+    lambda12[1:3]<-sort(lambda)[1:3]
+  }else{
+    
+      lambda12[1:3]<-m12Paq1000$lambda[3,id]
+      lambda12<-na.omit(lambda12)
+  }
+  
+lambda01
+lambda02
+lambda12
+```
+Note that for each transition, we reached the minimum as we have this U-shape of BIC values along $\lambda$. Once we have determined each value $\lambda$, we have 27 combinations of $\lambda_{01}$, $\lambda_{02}$ and $\lambda_{12}$ for $a=1$, leading to $108$ combinations in total. Now, we can estimate the full model and ultimately select the combination $(a,\lambda_{01},\lambda_{02},\lambda_{12})$ that minimizes the BIC. 
+
+3. Estimate Reg IDM-ICT with variable selection on all transitions
+```{r,eval=F}
+   f02<-as.formula(paste0("Hist(time = t, event = death,entry=e) ~ certif + gender +",paste0(paste0("Z",seq(1:50)),collapse="+")))
+  f01<-as.formula(paste0("Hist(time = list(l,r), event = dementia) ~ certif + gender +",paste0(paste0("Z",seq(1:50)),collapse="+")))
+  f12<-as.formula(paste0("~ certif + gender +",paste0(paste0("Z",seq(1:50)),collapse="+")))
+
+  modelPaq1000 <-HIDeM::  idm(formula02 = f02,
+                                formula01 = f01,
+                                formula12 = f12,data=Paq1000,
+                                penalty=penalty,eps=c(7,4,1),
+                                method="splines",
+                                lambda01 = lambda01,
+                                lambda12= lambda12,
+                                lambda02=lambda02,B=c(start,rep(0,52*2)),
+                                alpha=k,maxiter=100,maxiter.pena = 2)
+  
+  
+  
+  
+```
+```{r}
+
+modelPaq1000<-HIDeM::modelPaq1000
+
+summary(modelPaq1000)
+
+min(modelPaq1000$BIC)
+modelPaq1000$lambda[,which.min(modelPaq1000$BIC)]
+
+# no variable on 0 --> 1
+coef01<-modelPaq1000$coef[1:52,which.min(modelPaq1000$BIC)]
+coef01<-names(coef01[coef01!=0])
+# gender on 0 --> 2 
+coef02<-modelPaq1000$coef[53:104,which.min(modelPaq1000$BIC)]
+coef02<-names(coef02[coef02!=0])
+
+# no variable on 1 -->2
+coef12<-modelPaq1000$coef[105:156,which.min(modelPaq1000$BIC)]
+coef12<-names(coef12[coef12!=0])
+```
+
+4. Estimate covariate effects 
+
+Based on the variable selection made in Reg IDM-ICT, we can re-estimate the model : 
+
+```{r,eval=F}
+   f02<-as.formula(paste0("Hist(time = t, event = death,entry=e) ~ gender"))
+  f01<-as.formula(paste0("Hist(time = list(l,r), event = dementia) ~ 1"))
+  f12<-as.formula(paste0("~ 1"))
+
+  remodelPaq1000 <-HIDeM::  idm(formula02 = f02,
+                                formula01 = f01,
+                                formula12 = f12,data=Paq1000,
+                                eps=c(7,4,2),
+                                method="splines",
+                                lambda02=lambda02,B=c(mvoidPaq1000$theta01,
+                                                      mvoidPaq1000$theta02,
+                                                      mvoidPaq1000$theta12,0),
+                                maxiter=100,maxiter.pena = 2)
+  
+  
+  
+```
+
+```{r,fig.width=6}
+remodelPaq1000<-HIDeM::remodelPaq1000
+summary(remodelPaq1000)
+print(remodelPaq1000)
+```
+
+To evaluate the stability of the variable selection for given penalty parameters, we can perform boostrap on individuals. As an illustration we will perform it on 50 samples, 
+
+```{r,eval=F}
+mvoidPaq1000<-HIDeM::mvoidPaq1000
+start<-c(mvoidPaq1000$theta01,mvoidPaq1000$theta02,mvoidPaq1000$theta12,rep(0,52*3))
+lambda01<-modelPaq1000$lambda[1,which.min(modelPaq1000$BIC)]
+lambda02<-modelPaq1000$lambda[2,which.min(modelPaq1000$BIC)]
+lambda12<-modelPaq1000$lambda[3,which.min(modelPaq1000$BIC)]
+
+bootmodel<-list()
+length(bootmodel)<-50
+for (k in 1:50){
+  
+  set.seed(k)
+  print(k)
+  id<-sample(c(1:dim(Paq1000)[1]),size=dim(Paq1000)[1],replace=T)
+  boot<-Paq1000[id,]
+  
+  
+     f02<-as.formula(paste0("Hist(time = t, event = death,entry=e) ~ certif + gender +",paste0(paste0("Z",seq(1:50)),collapse="+")))
+  f01<-as.formula(paste0("Hist(time = list(l,r), event = dementia) ~ certif + gender +",paste0(paste0("Z",seq(1:50)),collapse="+")))
+  f12<-as.formula(paste0("~ certif + gender +",paste0(paste0("Z",seq(1:50)),collapse="+")))
+
+  modelPaq1000 <-HIDeM::  idm(formula02 = f02,
+                                formula01 = f01,
+                                formula12 = f12,data=boot,
+                                penalty="lasso",eps=c(7,4,1),
+                                method="splines",
+                                lambda01 = lambda01,
+                                lambda12= lambda12,
+                                lambda02=lambda02,B=start,
+                                alpha=1,maxiter=100,maxiter.pena = 2)
+  bootmodel[[k]]<-modelPaq1000
+  
+
+}
+```
+```{r,fig.width=6,fig.height=6}
+allboot<-NULL
+library(ggplot2)
+
+for(k in 1:50){
+  
+  ########################### all ######################################
+  modelPaq1000<-HIDeM::bootPaq1000[[k]]
+  set<-k
+
+  bootk<-data.frame(coef=as.vector(modelPaq1000$coef),
+                  names=rownames(modelPaq1000$coef),
+                  transition=c(rep("01",length(unique(rownames(modelPaq1000$coef)))),rep("02",length(unique(rownames(modelPaq1000$coef)))),
+                               rep("12",length(unique(rownames(modelPaq1000$coef))))),
+                               
+                  id=rep(k,dim(modelPaq1000$coef)[1]))
+  
+  ##################### combine ############################
+  allboot<-rbind(bootk,allboot)
+  
+  
+}
+ 
+  test<-aggregate(data=allboot,coef~transition+names,FUN=function(x){sum(x!=0)})
+  test$coef<-test$coef/50
+  
+  plot<-test[test$transition=="01",]
+  plot<-plot[order(plot$coef),]
+  plot$order<-c(1:dim(plot)[1])
+  labs<-plot$names
+    
+  p01<-ggplot(plot,aes(x=coef,y=as.factor(order)))+geom_bar(position = position_dodge(),
+                    stat="identity",
+                   color = "black",alpha=0.5)+theme_classic()+
+    scale_y_discrete(name="Variable",breaks=c(1:dim(plot)[1]),
+                     labels=labs)+facet_grid(~transition,labeller = as_labeller(c(`01`="Healthy to dementia",`02`="Healthy to death",`12`="Dementia to death")),scales="free_x")+theme_classic()+
+    geom_vline(xintercept = 1,color="red")+xlab(" %selected (50 replicates)")
+    
+    
+  plot<-test[test$transition=="02",]
+  plot<-plot[order(plot$coef),]
+  plot$order<-c(1:dim(plot)[1])
+  labs<-plot$names
+ 
+  p02<-ggplot(plot,aes(x=coef,y=as.factor(order)))+geom_bar(position = position_dodge(),
+                    stat="identity",
+                   color = "black",alpha=0.5)+theme_classic()+
+    scale_y_discrete(name=" ",breaks=c(1:dim(plot)[1]),
+                     labels=labs)+ facet_grid(~transition,labeller = as_labeller(c(`01`="Healthy to dementia",`02`="Healthy to death",`12`="Dementia to death")),scales="free_x")+
+  geom_vline(xintercept = 1,color="red")+xlab("%selected (500 replicates)")
+
+  plot<-test[test$transition=="12",]
+  plot<-plot[order(plot$coef),]
+  plot$order<-c(1:dim(plot)[1])
+  labs<-plot$names
+
+ 
+  p12<-ggplot(plot,aes(x=coef,y=as.factor(order)))+geom_bar(position = position_dodge(),
+                    stat="identity",
+                   color = "black",alpha=0.5)+theme_classic()+
+    scale_y_discrete(name=" ",breaks=c(1:dim(plot)[1]),
+                     labels=labs)+ facet_grid(~transition,labeller = as_labeller(c(`01`="Healthy to dementia",`02`="Healthy to death",`12`="Dementia to death")),scales="free_x")+
+  geom_vline(xintercept = 1,color="red")+xlab("%selected (500 replicates)")
+p01
+p02
+p12
+
+```
+
+

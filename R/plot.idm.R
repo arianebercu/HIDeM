@@ -80,18 +80,12 @@ plot.idm <- function(x,
                      ...){ 
 
     # {{{ collecting the (X, Y)-values of the lines
-  
-  
-  if(x$methodCV=="mla"){
+
+
   if(any(x$converged!=1)){
     conf.int<-F
   }
-  }else{
-    if(any(x$converged!=0)){
-      conf.int<-F
-    }
-    x$converged<-ifelse(x$converged==0,1,2)
-  }
+
   
   if(conf.int==T){
     conf<-0.95

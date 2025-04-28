@@ -1,0 +1,588 @@
+---
+title: "Reg-IDM-ICT-example"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Reg-IDM-ICT-example}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## Install the package
+
+The HIDeM package is avaible on github, using the following commands : 
+```{r setup,eval=F}
+remotes::install_github("arianebercu/HIDeM")
+```
+
+The HIDeM package depends on other R package, namely :
+
+- lava (>= 1.4.1),
+- mvtnorm (>= 1.0-3),
+- marqLevAlg (> 2.0), 
+- doParallel, 
+- foreach, 
+- parallel, 
+- MASS,
+- graphics, 
+- grDevices, 
+- stats, 
+- ggplot2,
+- pracma
+
+We are using foreach, parallel and doParallel for parallelizing some time consuming functions, mvtnorm for generating random parameters in simulation, marqLevAlg (>2.0) for the numerical optimization. 
+
+License: GPL (>= 2)
+RoxygenNote: 7.3.2
+Encoding: UTF-8
+
+## Simulation interval censored data 
+
+We have a sample of N=2000 individuals, followed during 18 years with visit scheduled every 2.5 years (0.5 variability) and at each visit a probability of being lost to follow-up of 5\%. 
+
+In IDM, we simulate transition intensities defined as, 
+\begin{equation*} \label{eq:2}
+\forall hl \in 01,02,12, \quad \quad \quad
+\alpha_{hl}(t|\theta_{hl},\beta_{hl}, Z_{hl}) = \alpha_{0,hl}(t|\theta_{hl})e^{\beta_{hl}^\top Z_{hl}}
+\end{equation*}
+
+In this example, we choose to simulate 50 covariates having an independent Gaussian distribution (centered and reduced), $Z_{01}=Z_{02}=Z_{12}=Z$. Each covariate has a transition specific effect, on transition healthy $\rightarrow$ diseased $\beta_{01}$, healthy $\rightarrow$ deceased $\beta_{02}$ and diseased $\rightarrow$ deceased $\beta_{12}$. 
+
+```{r echo=FALSE, results='asis'}
+library(knitr)
+
+# Define the table data as a matrix or data frame
+tab <- data.frame(
+  Transition = c(
+    "$0 \\rightarrow 1$", "$0 \\rightarrow 2$", "$1 \\rightarrow 2$"
+    ),
+  
+   `\\( \\beta_1 \\)` = c(0.8, 0, 0),
+  `\\( \\beta_2 \\)` = c(0.8, 0.8, 0.8),
+  `\\( \\beta_3 \\)` = c(0.8, 0.8, 0),
+  `\\( \\beta_4 \\)` = c(0, 0, 0),
+   `...` = rep("", 3),  
+  `\\( \\beta_{10} \\)` = c(0, 0, 0),
+  `\\( \\beta_{11} \\)` = c(-0.8, 0, 0),
+  `\\( \\beta_{12} \\)` = c(-0.5, 0,-0.5),
+  `\\( \\beta_{13} \\)` = c(-0.5, 0.5, 0),
+  `\\( \\beta_{14} \\)` = c(0, 0, 0),
+   `...` = rep("", 3),  
+  `\\( \\beta_{20} \\)` = c(0, 0, 0),
+  `\\( \\beta_{21} \\)` = c(0, -0.8, 0),
+  `\\( \\beta_{22} \\)` = c(0, -0.5, -0.5),
+  `\\( \\beta_{23} \\)` = c(0, 0, -0.8),
+  `\\( \\beta_{24} \\)` = c(0, 0, 0),
+   `...` = rep("", 3),  
+  `\\( \\beta_{30} \\)` = c(0, 0, 0),
+  check.names = FALSE
+  
+)
+kable(tab, format = "html", escape = FALSE, caption = "")
+
+tab <- data.frame(
+  Transition = c(
+    "$0 \\rightarrow 1$", "$0 \\rightarrow 2$", "$1 \\rightarrow 2$"
+    ),
+  
+  `\\( \\beta_{31} \\)` = c(0, 0.8, 0),
+  `\\( \\beta_{32} \\)` = c(0, 0.8, 0.8),
+  `\\( \\beta_{33} \\)` = c(0, 0, 0.8),
+  `\\( \\beta_{34} \\)` = c(0, 0, 0),
+   `...` = rep("", 3),  
+  `\\( \\beta_{40} \\)` = c(0, 0, 0),
+  `\\( \\beta_{41} \\)` = c(0, 0, -0.5),
+  `\\( \\beta_{42} \\)` = c(-0.5, 0.5, -0.5),
+  `\\( \\beta_{43} \\)` = c(0, 0.5, 0),
+  `\\( \\beta_{44} \\)` = c(0, 0, 0),
+   `...` = rep("", 3),  
+  `\\( \\beta_{50} \\)` = c(0, 0, 0),
+  check.names = FALSE
+  
+)
+
+
+# Print the table using kable for HTML output
+kable(tab, format = "html", escape = FALSE, caption = "")
+
+```
+
+Following, the baseline transition intensity follows a Weibull distribution,
+$$\displaystyle {\alpha_{0,hl}(t|\theta_{1,hl},\theta_{2,hl})=\theta_{1,hl}\theta_{2,hl}(\theta_{2,hl}t)^{\theta_{1,hl}-1}}$$
+
+such that, $(\theta_{1,01},\theta_{2,01})=(3.4,0.075)$,$(\theta_{1,02},\theta_{2,02})=(3.4,0.085)$ and $(\theta_{1,12},\theta_{2,12})=(3.4,0.07)$. 
+```{r }
+library(HIDeM)
+n_var<-50
+
+BETA01<-rep(0,n_var)
+BETA02<-rep(0,n_var)
+BETA12<-rep(0,n_var)
+
+BETA01[1:3]<-c(0.8,0.8,0.8)
+BETA02[1:3]<-c(0,0.8,0.8)
+BETA12[1:3]<-c(0,0.8,0)
+
+BETA01[11:13]<-c(-0.8,-0.5,-0.5)
+BETA02[11:13]<-c(0,0,0.5)
+BETA12[11:13]<-c(0,-0.5,0)
+
+BETA01[21:23]<-c(0,0,0)
+BETA02[21:23]<-c(-0.8,-0.5,0)
+BETA12[21:23]<-c(0,-0.5,-0.8)
+
+BETA01[31:33]<-c(0,0,0)
+BETA02[31:33]<-c(0.8,0.8,0)
+BETA12[31:33]<-c(0,0.8,0.8)
+
+BETA01[41:43]<-c(0,-0.5,0)
+BETA02[41:43]<-c(0,0.5,0.5)
+BETA12[41:43]<-c(-0.5,-0.5,0)
+
+id02<-paste0("X",which(BETA02!=0))
+id01<-paste0("X",which(BETA01!=0))
+id12<-paste0("X",which(BETA12!=0))
+
+cov<-matrix(0,ncol=n_var,nrow=n_var)
+diag(cov)<-1
+
+#scale.waittime=0.18,shape.waittime=1.8,
+#scale.lifetime=0.15,shape.lifetime=2.3,
+#scale.illtime=0.14,shape.illtime=2.2,
+rep<-2
+simu<-HIDeM::simulateIDM(n=2000,seed=rep,
+                  scale.waittime=0.07,shape.waittime=3.4,
+                  scale.lifetime=0.085,shape.lifetime=3.4,
+                  scale.illtime=0.075,shape.illtime=3.4,
+                  prob.censoring=0.05,
+                  n.inspections=8,
+                  administrative.censoring = 18,
+                  schedule=2.5,punctuality=0.5,nvar=n_var,mean=rep(0,n_var),cov=cov,
+                  x01=id01,x02=id02,x12=id12,
+                  beta01=BETA01[BETA01!=0],beta02=BETA02[BETA02!=0],
+                  beta12=BETA12[BETA12!=0])
+```
+
+In the output $simu$, you have two elements : the dataset \$data and explanatory plots \$plot. 
+```{r}
+head(simu$data)
+library(gtsummary)
+library(gt)
+library(dplyr)
+var<-paste0("X",c(1:n_var))
+summaries<-simu$data[,!colnames(simu$data)%in%var]  %>%
+  mutate(illstatus = ifelse(illstatus==1,"Ill","Healthy"),
+          id.nodem.death=ifelse(id.nodem.death==1,"Yes","No"))%>%
+   rename("L = time of last visit illness-free" = L)%>%
+   rename("R = diagnosis visit time" = R)%>%
+  rename("illstatus = true indicator of illness "=illstatus)%>%
+   rename("observed.lifetime = time of death" = observed.lifetime)%>%
+  rename("lifetime = time of death with IC on illness" = lifetime)%>%
+  rename("T01 = simulated time on transition to illness"=T01)%>%
+ rename("T02 = simulated time on transition to death illness-free"=T02)%>%
+rename("T12 = simulated time on transition to death with illness"=T12)%>%
+  rename("administrative.censoring = 18"=administrative.censoring)%>%
+  rename("censtime = simulated last visit"=censtime)%>%
+  rename("id.nodem.death = illness not observed due to death"=id.nodem.death)%>%
+   mutate(seen.ill = ifelse(seen.ill==1,"Ill","Healthy"),
+          seen.exit=ifelse(seen.exit==1,"Death","Alive"))%>%
+   tbl_strata(
+     strata = seen.ill,
+     .tbl_fun =
+       ~ .x %>%
+       tbl_summary(by = seen.exit,
+                   type = list(where(is.numeric) ~ "continuous2"),
+                   statistic = list(
+                     all_categorical() ~ "{n} ({p}%)"
+                   ),
+                   digits = all_continuous() ~ 2),
+     .header = "**{strata}**, N = {n}"
+   ) %>%
+    modify_caption("Characteristics of individuals in simulated dataset")
+summaries
+```
+
+In $data, we have a line per individual observation with : 
+
+- seen.ill : observed illness (=1, ill)
+- seen.exit : indicator of death (=1, dead)
+- L : time of last visit illness-free (last visit for healthy individual)
+- R : diagnosis visit time (r=l for healthy individual)
+- observed.lifetime : time of death (18 for alive individual)
+- illstatus : true indicator of illness (without interval censoring)
+- lifetime : time of death knowing illstatus (without interval censoring)
+- T01 : simulated time on transition $0 \rightarrow 1$
+- T02 : simulated time on transition $0 \rightarrow 2$
+- T12 : simulated time on transition $1 \rightarrow 2$
+- id.nodem.death : illness not observed due to death (=1 if true)
+
+
+In \$plot, we have 7 elements : 
+
+- [[1]] : survival baseline intensity simulated on each transition 
+- [[2]] : table of individual survival for transition $0 \rightarrow 1$ at given time points
+- [[3]] : plot of 3 individual survival for transition $0 \rightarrow 1$ at given time points (id=1,2 and 3)
+- [[4]] : table of individual survival for transition $0 \rightarrow 2$ at given time points
+- [[5]] : plot of 3 individual survival for transition $0 \rightarrow 2$ at given time points (id=1,2 and 3)
+- [[6]] : table of individual survival for transition $1 \rightarrow 2$ at given time points
+- [[7]] : plot of 3 individual survival for transition $1 \rightarrow 2$ at given time points (id=1,2 and 3)
+
+```{r,fig.width=6}
+simu$plot[[1]]
+head(simu$plot[[2]])
+simu$plot[[3]]
+head(simu$plot[[4]])
+simu$plot[[5]]
+head(simu$plot[[6]])
+simu$plot[[7]]
+```
+
+## Run IDM-ICT 
+
+In this section, we will explicit the profile likelihood, with an
+
+- outer loop on penalty parameters noted $(a,\lambda_{01},\lambda_{02},\lambda_{12})$, and 
+- an inner loop on regression parameters $(\beta_{01},\beta_{02},\beta_{12})$ and baseline intensity parameters $(\theta_{01},\theta_{02},\theta_{12})$
+
+Firstly, we need to perform a pre-selection of penalty parameters for each transition separately. For each transition, we first fit multi-state models including covariates only in the transition from state $h$ to $l$, and considering a grid of $\lambda_{hl}$ with equidistant values from  0.0001 and 100 while keeping $a$ fixed at 1. It is recommended to try multiple values of $a$ in $]0,1]$, but for this example we will limit to lasso penalty (a=1). 
+
+We choose to estimate the baseline intensity transition with M-spline basis with nodes at 0, 9 and 18 years of follow-up. To initiative, baseline intensities parameters of M-splines, we run a model without covariates. 
+
+```{r,eval=F}
+a<-1
+  
+  mvoidexample <-HIDeM::  idm(formula02 = Hist(time = observed.lifetime, event = seen.exit) ~1,
+                       formula01 = Hist(time = list(L,R), event = seen.ill) ~ 1,
+                       formula12 = ~ 1,data=simu$data,
+                       nproc=1,eps=c(7,4,1),
+                       scale.X=F,
+                       method="splines",
+                       alpha=k,maxiter=100)
+  
+  start<-c(mvoidexample$theta01,mvoidexample$theta02,mvoidexample$theta12,rep(0,50))
+  
+  nlambda<-20
+  lambdatest<-seq(0.01,100,length.out=nlambda)
+  penalty<-ifelse(a==1,"lasso","elasticnet")
+
+  
+############################ 01 ################################################
+    f02<-as.formula("Hist(time = observed.lifetime, event = seen.exit) ~1")
+  f01<-as.formula(paste0("Hist(time = list(L,R), event = seen.ill) ~",paste0(paste0("X",seq(1:50)),collapse="+")))
+  f12<-as.formula("~1")
+  
+  m01example <-HIDeM::  idm(formula02 = f02,
+                                    formula01 = f01,
+                                    formula12 = f12,data=simu$data,
+                                    penalty=penalty,eps=c(7,4,1),
+                                    lambda01 = lambdatest,
+                                    lambda02=0.0001,
+                                    lambda12=0.0001,B=start,
+                                method="splines",nproc=2,clustertype = "PSOCK",
+                                alpha=k,maxiter=100,maxiter.pena = 2)
+  
+
+################################ 02 ############################################
+
+  f02<-as.formula(paste0("Hist(time = observed.lifetime, event = seen.exit) ~",paste0(paste0("X",seq(1:50)),collapse="+")))
+  f01<-as.formula("Hist(time = list(L,R), event = seen.ill) ~ 1")
+  f12<-as.formula("~1")
+#setwd("C:/Users/ab17/Desktop/CURTA/SMOOTH_HAZARD/OPTIM_B_DIFFLAMBDA_derivaana_all/Weibull_simu/Scenario1")
+
+  m02example <-HIDeM::  idm(formula02 = f02,
+                                    formula01 = f01,
+                                    formula12 = f12,data=simu$data,
+                                penalty=penalty,eps=c(7,4,1),
+                                method="splines",
+                                    lambda02 = lambdatest,
+                                    lambda01=0.0001,
+                                    lambda12=0.0001,B=start,nproc=2,clustertype = "PSOCK",
+                                alpha=k,maxiter=100,maxiter.pena = 2)
+  
+
+
+######################################## 12 ###################################
+
+  f02<-as.formula("Hist(time = observed.lifetime, event = seen.exit) ~1")
+  f01<-as.formula("Hist(time = list(L,R), event = seen.ill) ~ 1")
+  f12<-as.formula(paste0("~",paste0(paste0("X",seq(1:50)),collapse="+")))
+
+  m12example <-HIDeM::  idm(formula02 = f02,
+                                formula01 = f01,
+                                formula12 = f12,data=simu$data,
+                                penalty=penalty,eps=c(7,4,1),
+                                method="splines",
+                                lambda01 = 0.0001,
+                                lambda12= lambdatest,
+                                lambda02=0.0001,B=start,nproc=2,clustertype = "PSOCK",
+                                alpha=k,maxiter=100,maxiter.pena = 2)
+  
+  
+```
+The ouput of each models can be displayed using standard function such as print and summary : 
+```{r}
+m01example<-HIDeM::m01example
+m02example<-HIDeM::m02example
+m12example<-HIDeM::m12example
+#print(m01example)
+#summary(m01example)
+
+#print(m02example)
+#summary(m02example)
+
+#print(m12example)
+#summary(m12example)
+```
+The following step is to visualize the Bayesian Indicator Criteria (BIC) and determine the 3 values of $\lambda$ per transition minimizing it : 
+
+```{r,fig.width=6}
+
+plot(m01example$lambda[1,],m01example$BIC,xlab="Lambda values for 0 -> 1",ylab="BIC")
+plot(m02example$lambda[2,],m02example$BIC,xlab="Lambda values for 0 -> 2",ylab="BIC")
+plot(m12example$lambda[3,],m12example$BIC,xlab="Lambda values for 1 -> 2",ylab="BIC")
+
+lambda01<-lambda02<-lambda12<-rep(NA,3)
+
+############################## 01 ##############################################
+BIC01<-sort(m01example$BIC[m01example$converged==1])[1:3]
+BIC01<-na.omit(unique(BIC01))
+  
+  id<-which(m01example$BIC%in%BIC01)
+  if(length(id)>3){
+    lambda<-m01example$lambda[1,id]
+    lambda01[1:3]<-sort(lambda)[1:3]
+  }else{
+    
+      lambda01[1:3]<-m01example$lambda[1,id]
+      lambda01<-na.omit(lambda01)
+  }
+  
+############################## 02 ##############################################
+BIC02<-sort(m02example$BIC[m02example$converged==1])[1:3]
+BIC02<-na.omit(unique(BIC02))
+  
+  id<-which(m02example$BIC%in%BIC02)
+  if(length(id)>3){
+    lambda<-m02example$lambda[2,id]
+    lambda02[1:3]<-sort(lambda)[1:3]
+  }else{
+    
+      lambda02[1:3]<-m02example$lambda[2,id]
+      lambda02<-na.omit(lambda02)
+  }
+  
+############################## 12 ##############################################
+BIC12<-sort(m12example$BIC[m12example$converged==1])[1:3]
+BIC12<-na.omit(unique(BIC12))
+  
+  id<-which(m12example$BIC%in%BIC12)
+  if(length(id)>3){
+    lambda<-m12example$lambda[3,id]
+    lambda12[1:3]<-sort(lambda)[1:3]
+  }else{
+    
+      lambda12[1:3]<-m12example$lambda[3,id]
+      lambda12<-na.omit(lambda12)
+  }
+  
+lambda01
+lambda02
+lambda12
+```
+Note that for each transition, we reached the minimum as we have this U-shape of BIC values along $\lambda$. Once we have determined each value $\lambda$, we have 27 combinations of $\lambda_{01}$, $\lambda_{02}$ and $\lambda_{12}$ for $a=1$, leading to $108$ combinations in total. Now, we can estimate the full model and ultimately select the combination $(a,\lambda_{01},\lambda_{02},\lambda_{12})$ that minimizes the BIC. 
+
+```{r,eval=F}
+   f02<-as.formula(paste0("Hist(time = observed.lifetime, event = seen.exit) ~",paste0(paste0("X",seq(1:50)),collapse="+")))
+  f01<-as.formula(paste0("Hist(time = list(L,R), event = seen.ill) ~",paste0(paste0("X",seq(1:50)),collapse="+")))
+  f12<-as.formula(paste0("~",paste0(paste0("X",seq(1:50)),collapse="+")))
+
+  modelexample <-HIDeM::  idm(formula02 = f02,
+                                formula01 = f01,
+                                formula12 = f12,data=simu$data,
+                                penalty=penalty,eps=c(7,4,1),
+                                method="splines",
+                                lambda01 = lambda01,
+                                lambda12= lambda12,
+                                lambda02=lambda02,B=c(start,rep(0,n_var*2)),
+                                nproc=2,clustertype = "PSOCK",
+                                alpha=k,maxiter=100,maxiter.pena = 2)
+  
+  
+```
+
+```{r}
+modelexample<-HIDeM::modelexample
+summary(modelexample)
+min(modelexample$BIC)
+modelexample$lambda[,which.min(modelexample$BIC)]
+
+
+coef01<-modelexample$coef[1:50,which.min(modelexample$BIC)]
+coef01<-names(coef01[coef01!=0])
+
+coef02<-modelexample$coef[51:100,which.min(modelexample$BIC)]
+coef02<-names(coef02[coef02!=0])
+
+coef12<-modelexample$coef[101:150,which.min(modelexample$BIC)]
+coef12<-names(coef12[coef12!=0])
+```
+
+
+Based on the variable selection made in Reg IDM-ICT, we can re-estimate the model : 
+
+```{r,eval=F}
+
+# formula on each transition
+  f02<-as.formula(paste0("Hist(time = observed.lifetime, event = seen.exit) ~",paste0(coef02,collapse="+")))
+  f01<-as.formula(paste0("Hist(time = list(L,R), event = seen.ill) ~",paste0(coef01,collapse="+")))
+  f12<-as.formula(paste0("~",paste0(coef12,collapse="+")))
+
+  #starting point
+  start<-modelexample$coef[,which.min(modelexample$BIC)]
+  start<-start[start!=0]
+  start<-c(modelexample$theta01[,which.min(modelexample$BIC)],
+                                                      modelexample$theta02[,which.min(modelexample$BIC)],
+                                                      modelexample$theta12[,which.min(modelexample$BIC)],start)
+  
+  #re-estimation
+  remodelexample <-HIDeM::  idm(formula02 = f02,
+                                formula01 = f01,
+                                formula12 = f12,data=simu$data,
+                                eps=c(7,4,2),
+                                method="splines",
+                                lambda02=lambda02,B=start,
+                                maxiter=100)
+  
+  
+  
+```
+
+```{r}
+remodelexample<-HIDeM::remodelexample
+summary(remodelexample)
+print(remodelexample)
+```
+
+As we are in simulation setting we can evaluate its predicitive abilities using : The predictive ability is evaluated by the Mean Square Error on the probability for a healthy individual of becoming diseased at a time $u$ between 0 and t, 
+$$\displaystyle{\widehat{MSEP}=\frac{1}{N}\sum_{i=1}^{N}(\widehat F_{01}(t_i) - \widetilde F_{01}(t_i))^2}
+\mbox{ with }F_{01}(t)=\int_{0}^{t}e^{-A_{01}(u)-A_{02}(u)}\alpha_{01}(u)du,$$
+where $N$ is the number of individuals, $t$ the time of first event between the illness, the death illness-free and the administrative censoring ($t$=min\{$T^{01},T^{02},18$\}), $\widehat F_{01}(t)$ the estimated probability by the fitted model and $\widetilde F_{01}(t)$ the respective true probability modeled in the simulation. 
+
+We need to model a test replicate, the $\widehat{MSEP}$ is calculated by estimating the model with the variable selected in the regularized approach on the corresponding data train replicate. 
+
+Firstly we simulate the test replicate using HIDeM::simulateIDM with a different seed.
+```{r}
+rep<-3
+datatest<-HIDeM::simulateIDM(n=2000,seed=rep,
+                  scale.waittime=0.07,shape.waittime=3.4,
+                  scale.lifetime=0.085,shape.lifetime=3.4,
+                  scale.illtime=0.075,shape.illtime=3.4,
+                  prob.censoring=0.05,
+                  n.inspections=8,
+                  administrative.censoring = 18,
+                  schedule=2.5,punctuality=0.5,nvar=n_var,mean=rep(0,n_var),cov=cov,
+                  x01=id01,x02=id02,x12=id12,
+                  beta01=BETA01[BETA01!=0],beta02=BETA02[BETA02!=0],
+                  beta12=BETA12[BETA12!=0])
+```
+
+Following using HIDeM::intensity and pracma::gauss_kronrod we can calculate $\widehat F_{01}(t)$ for all individuals : 
+```{r}
+datatest<-datatest$data
+F01<-trueF01<-rep(NA,2000)
+time<-sapply(1:dim(datatest)[1],FUN=function(x){
+     min(datatest$T01[x],datatest$T02[x],datatest$administrative.censoring[x])
+   })
+
+
+modelPar<-c(3.4,0.075,3.4,0.085,3.4,0.07)
+
+library(pracma)
+
+ for(i in 1:2000){
+   
+   # as time = 0 we have denum = 1 but in  other cases you can calculate
+   # the left truncation using the following code of denum 
+   
+  beta01<-remodelexample$coef[1:remodelexample$NC[1]]
+  b01<-sum(datatest[i,colnames(datatest)%in%remodelexample$Xnames01]*beta01)
+  b01true<-sum(datatest[i,colnames(datatest)%in%paste0("X",c(1:50))]*BETA01)
+  
+      denum<-HIDeM::intensity(times=0,
+                       knots=remodelexample$knots01,
+                       theta=remodelexample$theta01,
+                       linear.predictor = b01,
+                       number.knots = remodelexample$nknots01,
+                       method="splines")$survival
+      
+  beta02<-remodelexample$coef[(remodelexample$NC[1]+1):(remodelexample$NC[2]+remodelexample$NC[1])]
+  b02<-sum(datatest[i,colnames(datatest)%in%remodelexample$Xnames02]*beta02)
+  b02true<-sum(datatest[i,colnames(datatest)%in%paste0("X",c(1:50))]*BETA02)
+  
+      denum<-denum*intensity(times=0,
+                             knots=remodelexample$knots02,
+                             theta=remodelexample$theta02,
+                             number.knots = remodelexample$nknots02,
+                             linear.predictor = b02,
+                             method="splines")$survival
+
+    
+      if(time[i]>0){
+      num<- gauss_kronrod(f=function(x){
+
+        res<-intensity(times=x,
+                       knots=remodelexample$knots01,
+                       theta=remodelexample$theta01,
+                       linear.predictor = b01,
+                       number.knots = remodelexample$nknots01,
+                       method="splines")$intensity
+        
+        res<-res*intensity(times=x,
+                           knots=remodelexample$knots01,
+                           theta=remodelexample$theta01,
+                           linear.predictor = b01,
+                           number.knots = remodelexample$nknots01,
+                           method="splines")$survival
+        res<-res*intensity(times=x,
+                           knots=remodelexample$knots02,
+                           theta=remodelexample$theta02,
+                           number.knots = remodelexample$nknots02,
+                           linear.predictor = b02,
+                           method="splines")$survival
+        
+        return(res)
+      },a=0,b=time[i])$value
+      
+      truenum<- gauss_kronrod(f=function(x){
+
+        res<-intensity(times=x,
+                       theta=modelPar[1:2],
+                       linear.predictor = b01true,
+                       method="weib")$intensity
+        
+        res<-res*intensity(times=x,
+                           theta=modelPar[1:2],
+                           linear.predictor = b01true,
+                           method="weib")$survival
+        res<-res*intensity(times=x,
+                           theta=modelPar[3:4],
+                           linear.predictor = b02true,
+                           method="weib")$survival
+        
+        return(res)
+      },a=0,b=time[i])$value
+      }else{num<-0}
+      
+      F01[i]<-(num/denum)
+      trueF01[i]<-truenum
+      
+ }
+
+sum(abs(F01-trueF01)^2)/2000
+```

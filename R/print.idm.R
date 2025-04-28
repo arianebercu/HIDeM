@@ -67,21 +67,13 @@ print.idm <- function(x,conf.int=.95,digits=4,pvalDigits=4,eps=0.0001,coef=F,...
     # {{{ convergence
     # FIXME: what is the difference between maximum number of iterations reached and
     #        model did not converge?
-  enterif<-ifelse((x$methodCV=="mla" & sum(x$converged!=1)>0 & length(x$converged)==1)|
-                    (x$methodCV!="mla" & sum(x$converged!=0)>0 & length(x$converged)==1),T,F)
+    enterif<-ifelse((length(x$converged==1) & sum(x$converged!=1)>0),T,F)
     if(enterif){
         warning("The model did not converge.","\n")
-      if(x$modelCV=="mla"){
+      
         switch(as.character(x$converged[1]),
                "2"={ warning("Maximum number of iterations reached. \n",call.=FALSE)},
                "3"={ warning("Fisher information matrix non-positive definite. \n",call.=FALSE)})
-      }else{
-        switch(as.character(x$converged[1]),
-               "1"={ warning("Maximum number of iterations reached. \n",call.=FALSE)},
-               "10"={ warning("Degeneracy of the Nelder-Mead simplex. \n",call.=FALSE)},
-               "51"={ warning("Warning from the L-BFGS-B method. \n",call.=FALSE)},
-               "52"={ warning("Error from the L-BFGS-B method. \n",call.=FALSE)})
-      }
     }else{
         if(length(x$converged)==1 ){
             
@@ -90,25 +82,11 @@ print.idm <- function(x,conf.int=.95,digits=4,pvalDigits=4,eps=0.0001,coef=F,...
               cat("Log-likelihood : ",x$loglik[1], "\n")
               cat("----\nModel converged.\n")
               cat("number of iterations: ", x$niter,"\n")
-              if(x$methodCV=="mla"){
+            
             cat("convergence criteria: parameters=", signif(na.omit(x$cv$ca),2), "\n")
             cat("                    : likelihood=", signif(na.omit(x$cv$cb),2), "\n") 
             cat("                    : second derivatives=", signif(na.omit(x$cv$rdm),2), "\n")}
-            }else{
-              cat("The model did converge. \n")
-              cat("Penalised log-likelihood : ",x$loglik[2], "\n")
-              cat("----\nModel converged.\n")
-              cat("number of iterations: ", x$niter,"\n")
-              ca<-na.omit(x$cv$ca.beta)
-              ca<-ca[length(ca)]
-              caspline<-na.omit(x$cv$ca.spline)
-              caspline<-caspline[length(caspline)]
-              cb<-na.omit(x$cv$cb)
-              cb<-abs(cb[length(cb)]-cb[length(cb)-1])/abs(cb[length(cb)-1])
-              cat("convergence criteria: parameters beta=", signif(ca,2), "\n")
-              cat("                    : parameters base risk=", signif(caspline,2), "\n") 
-              cat("                    : penalised-likelihood=", signif(cb,2), "\n")
-            }
+            
   
         }else{
           if(sum(x$converged!=1)>0){
@@ -182,7 +160,7 @@ print.idm <- function(x,conf.int=.95,digits=4,pvalDigits=4,eps=0.0001,coef=F,...
       
       if(n_model==1){
         
-        if((x$methodCV=="mla" & x$converged==1) |(x$methodCV!="mla" & x$converged==0)){
+        if(( x$converged==1) |(x$converged==0)){
           se<-sqrt(diag(x$V[(n_spline+1):(dim(x$V)[1]),(n_spline+1):(dim(x$V)[1])]))
           z <- abs(qnorm((1 + conf.int)/2))
           wald <- (x$coef/se)**2

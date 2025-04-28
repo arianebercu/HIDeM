@@ -29,6 +29,13 @@
 ##' @param troncature indicator of troncature, value 1 if there is troncature otherwise 0.
 #' @useDynLib HIDeM
 #' @author R: Ariane Bercu <ariane.bercu@@u-bordeaux.fr>  
+
+#################################################################################
+# FORTRAN-ANA UPDATE FOR REGRESSION PARAMETERS #####################################################################
+################################################################################
+# FIRST AND SECOND DERIVATIVES 
+# COMPLETE HESSIAN MATRIX 
+
 derivaspline<-function(b,npm,npar,bfix,fix,zi01,zi02,zi12,ctime,no,nz01,nz02,nz12,ve01,ve02,ve12,
                        dimnva01,dimnva02,dimnva12,nva01,nva02,nva12,
                        t0,t1,t2,t3,troncature){
@@ -66,6 +73,11 @@ derivaspline<-function(b,npm,npar,bfix,fix,zi01,zi02,zi12,ctime,no,nz01,nz02,nz1
            PACKAGE="HIDeM")$likelihood_deriv
 }
 
+#################################################################################
+# FORTRAN-ANA UPDATE FOR REGRESSION PARAMETERS #####################################################################
+################################################################################
+# FIRST AND SECOND DERIVATIVES 
+# DIAGONAL HESSIAN MATRIX 
 derivasplinediag<-function(b,npm,npar,bfix,fix,zi01,zi02,zi12,ctime,no,nz01,nz02,nz12,ve01,ve02,ve12,
                        dimnva01,dimnva02,dimnva12,nva01,nva02,nva12,
                        t0,t1,t2,t3,troncature){
