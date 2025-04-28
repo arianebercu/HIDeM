@@ -19474,7 +19474,7 @@ subroutine derivaweibdiag(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 
 				res1((nvamax02+1):nvamax12)=&
 				-gl12*vet12*res2denum+((1-gl12*vet12)**2)*res2denum+&
-				2*(1-gl12*vet12)*res212num+res212num+&
+				(1-gl12*vet12)*2*res212num+res212num+&
 				res21212num
 
 				resint=ri12*vet12*(su12**vet12)

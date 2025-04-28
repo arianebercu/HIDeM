@@ -247,7 +247,9 @@ deriva <- function(nproc=1,b,funcpa,.packages=NULL,...){
 }
 
 
-
+#################################################################################
+# FORTRAN-ANA UPDATE FOR REGRESSION PARAMETERS AND DIFF FINITE FOR BASELINE INTENSITY PARAMETERS #####################################################################
+################################################################################
 grmlaweib<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
                       dimnva01,dimnva02,dimnva12,nva01,nva02,nva12,
                       t0,t1,t2,t3,troncature,lambda,alpha,penalty.factor,penalty,gausspoint){
@@ -399,7 +401,9 @@ grmlaweib<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
   }
 }
 
-
+#################################################################################
+# FORTRAN-ANA UPDATE FOR REGRESSION PARAMETERS AND BASELINE INTENSITY PARAMETERS #####################################################################
+################################################################################
 
 grmlaweibana<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
                    dimnva01,dimnva02,dimnva12,nva01,nva02,nva12,
@@ -453,6 +457,10 @@ sol[1:(6-sum(fix[1:6]))]<-sol[1:(6-sum(fix[1:6]))]*2*bb[which(fix[1:6]==0)]
 return(sol)
 }
 
+#################################################################################
+# FORTRAN-ANA UPDATE FOR REGRESSION PARAMETERS AND DIFF FINITE FOR BASELINE INTENSITY PARAMETERS #####################################################################
+################################################################################
+# COMPLETE HESSIAN MATRIX
 hessianmlaweib<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
                     dimnva01,dimnva02,dimnva12,nva01,nva02,nva12,
                     t0,t1,t2,t3,troncature,gausspoint){
@@ -672,6 +680,12 @@ hessianmlaweib<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
 }
 }
 
+
+#################################################################################
+# FORTRAN-ANA UPDATE FOR REGRESSION PARAMETERS AND BASELINE INTENSITY PARAMETERS #####################################################################
+################################################################################
+# COMPLETE HESSIAN MATRIX
+
 hessianmlaweibana<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
                          dimnva01,dimnva02,dimnva12,nva01,nva02,nva12,
                          t0,t1,t2,t3,troncature,gausspoint){
@@ -808,6 +822,10 @@ hessianmlaweibana<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
   
     }
     
+#################################################################################
+# FORTRAN-ANA UPDATE FOR BASELINE INTENSITY PARAMETERS #####################################################################
+################################################################################
+# ATTENTION NO POSSIBLE FIX PARAMETERS IN FORTRAN
 
 grmlasplineana<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
                        dimnva01,dimnva02,dimnva12,nva01,nva02,nva12,
@@ -907,6 +925,11 @@ grmlasplineana<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
   return(sol)
 }
 
+#################################################################################
+# FORTRAN-ANA UPDATE FOR BASELINE INTENSITY PARAMETERS #####################################################################
+################################################################################
+# ATTENTION NO POSSIBLE FIX PARAMETERS IN FORTRAN
+# COMPLETE HESSIAN MATRIX 
 
 hessianmlasplineana<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
                               dimnva01,dimnva02,dimnva12,nva01,nva02,nva12,

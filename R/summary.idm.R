@@ -45,9 +45,7 @@ summary.idm <- function(object,conf.int=.95,digits=4,pvalDigits=4,eps=.0001, ...
     }
   
   if(object$penalty=="none"){
-    object$converged<-ifelse(object$methodCV=="mla",
-                             object$converged,
-                             ifelse(object$converged==0,1,2))
+
         cat("Method:",switch(object$method,
                              "splines"="M-splines based on likelihood",
                              "Weib"="Weibull parametrization"),"\n")
@@ -60,7 +58,10 @@ summary.idm <- function(object,conf.int=.95,digits=4,pvalDigits=4,eps=.0001, ...
         if((sum(object$NC)>0)&(object$converged==1)){
             n_base<-ifelse(object$method=="Weib",7,object$nknots01+object$nknots02+object$nknots12+6+1)
             se<-object$V[n_base:dim(object$V)[1],n_base:dim(object$V)[2]]
-            se<-sqrt(diag(se))
+            if(length(se)==1){
+              se<-sqrt(se)
+            }else{
+            se<-sqrt(diag(se))}
             wald <- (object$coef/se)**2
             z <- abs(qnorm((1 + conf.int)/2))
             out <- data.frame("Hazard ratio"=format(round(exp(object$coef),digits)),
@@ -98,21 +99,30 @@ summary.idm <- function(object,conf.int=.95,digits=4,pvalDigits=4,eps=.0001, ...
       cat("Minimum BIC with convergence : BIC=", min(object$BIC[object$converged==1])," \n with lambda (",object$lambda[1,id],";",
           object$lambda[2,id],";",object$lambda[3,id],") and alpha =",object$alpha[id],"\n")
       
+      if(object$NC[1]>0){
       out01 <- data.frame("Variable"=object$Xnames01,
                         "Hazard_ratio"=format(round(exp(object$coef[1:object$NC[1],id]),digits)),
                         "Selected"=ifelse(object$coef[1:object$NC[1],id]==0,"No","Yes"))
+      cat("For transition '0-->1': \n \n")
+      print(out01,row.names=F)
+      }
+      if(object$NC[2]>0){
       out02 <- data.frame("Variable"=object$Xnames02,
                         "Hazard_ratio"=format(round(exp(object$coef[(object$NC[1]+1):(object$NC[1]+object$NC[2]),id]),digits)),
                         "Selected"=ifelse(object$coef[(object$NC[1]+1):(object$NC[1]+object$NC[2]),id]==0,"No","Yes"))
+      cat(" \n \n For transition '0-->2': \n \n")
+      print(out02,row.names=F)
+      }
+      if(object$NC[3]>0){
       out12 <- data.frame("Variable"=object$Xnames12,
                         "Hazard_ratio"=format(round(exp(object$coef[(object$NC[1]+object$NC[2]+1):(sum(object$NC)),id]),digits)),
                         "Selected"=ifelse(object$coef[(object$NC[1]+object$NC[2]+1):(sum(object$NC)),id]==0,"No","Yes"))
-      cat("For transition '0-->1': \n \n")
-      print(out01,row.names=F)
-      cat(" \n \n For transition '0-->2': \n \n")
-      print(out02,row.names=F)
       cat("\n \n For transition '1-->2': \n \n")
       print(out12,row.names=F)
+      }
+      
+      
+      
     }else{cat("No convergence was obtained for all lambda values, consider increasing maxiter or/and changing values of lambda \n")
     }
   }

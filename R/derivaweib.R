@@ -25,6 +25,11 @@
 #' @author R: Ariane Bercu <ariane.bercu@@u-bordeaux.fr> 
 #' @export
 
+#################################################################################
+# FORTRAN-ANA UPDATE FOR REGRESSION PARAMETERS #####################################################################
+################################################################################
+# FIRST AND SECOND DERIVATIVES 
+# COMPLETE HESSIAN MATRIX 
 derivaweib<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
                      dimnva01,dimnva02,dimnva12,nva01,nva02,nva12,
                      t0,t1,t2,t3,troncature){
@@ -57,6 +62,12 @@ derivaweib<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
            PACKAGE="HIDeM")$likelihood_deriv
 }
 
+#################################################################################
+# FORTRAN-ANA UPDATE FOR REGRESSION PARAMETERS #####################################################################
+################################################################################
+# FIRST AND SECOND DERIVATIVES 
+# DIAGONAL HESSIAN MATRIX 
+
 derivaweibdiag<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
                      dimnva01,dimnva02,dimnva12,nva01,nva02,nva12,
                      t0,t1,t2,t3,troncature){
@@ -88,6 +99,12 @@ derivaweibdiag<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
            likelihood_deriv=as.double(res),
            PACKAGE="HIDeM")$likelihood_deriv
 }
+
+#################################################################################
+# FORTRAN-ANA UPDATE FOR REGRESSION PARAMETERS AND BASELINE INTENSITY PARAMETERS #####################################################################
+################################################################################
+# FIRST AND SECOND DERIVATIVES 
+# DIAGONAL HESSIAN MATRIX 
 
 derivaweibdiagana<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
                             dimnva01,dimnva02,dimnva12,nva01,nva02,nva12,
@@ -139,6 +156,12 @@ derivaweibdiagana<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
   
 }
 
+
+#################################################################################
+# FORTRAN-ANA UPDATE FOR REGRESSION PARAMETERS AND BASELINE INTENSITY PARAMETERS #####################################################################
+################################################################################
+# FIRST AND SECOND DERIVATIVES 
+# COMPLETE HESSIAN MATRIX 
 
 derivaweibana<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
                         dimnva01,dimnva02,dimnva12,nva01,nva02,nva12,
