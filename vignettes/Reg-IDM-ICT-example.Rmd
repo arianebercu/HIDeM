@@ -18,7 +18,7 @@ knitr::opts_chunk$set(
 
 The HIDeM package is avaible on github, using the following commands : 
 ```{r setup,eval=F}
-remotes::install_github("arianebercu/HIDeM")
+remotes::install_github("arianebercu/HIDeM", build_vignettes=T)
 ```
 
 The HIDeM package depends on other R package, namely :

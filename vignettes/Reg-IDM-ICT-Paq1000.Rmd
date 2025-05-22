@@ -203,7 +203,7 @@ m12Paq1000<-HIDeM::m12Paq1000
 ```
 The following step is to visualize the Bayesian Indicator Criteria (BIC) and determine the 3 values of $\lambda$ per transition minimizing it : 
 
-```{r,fig.width=6,fig.height=6}
+```{r,fig.width=6,fig.height=6,fig.alt="BIC display"}
 
 plot(m01Paq1000$lambda[1,],m01Paq1000$BIC,xlab="Lambda values for 0 -> 1",ylab="BIC")
 plot(m02Paq1000$lambda[2,],m02Paq1000$BIC,xlab="Lambda values for 0 -> 2",ylab="BIC")
@@ -366,7 +366,7 @@ for (k in 1:50){
 
 }
 ```
-```{r,fig.width=6,fig.height=6}
+```{r,fig.width=6,fig.height=6, fig.alt="Bootstrap variable selection"}
 allboot<-NULL
 library(ggplot2)
 
