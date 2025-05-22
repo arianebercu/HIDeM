@@ -72,7 +72,6 @@
 #' is na.omit. Another possible value is NULL.
 #' @param scale.X do you want to center and reduce your explanatory variables
 #' @param posfix index of fixed parameters 
-#' @param gausspoint gauss quadrature points in the approximation of integrals
 #' @param lambda01 Lambda on transition 0 --> 1
 #' @param lambda02 Lambda on transition 0 --> 2
 #' @param lambda12 Lambda on transition 1 --> 2
@@ -138,7 +137,6 @@ gridsearch.penidm <- function(
                 B=NULL,
                 posfix=NULL,
 
-                gausspoint=10,
 
                 lambda01=NULL,
                 lambda02=NULL,
@@ -324,7 +322,6 @@ gridsearch.penidm <- function(
   if(!inherits(nproc,c("numeric","integer"))|(nproc!=floor(nproc)))stop("nproc has to be an integer.")
   
   # nbr of quadrature points for estimating integral in idm without penalisation
-  if(!gausspoint%in%c(10,15,21,31,41,51,61))stop("Argument type.quantile has to a numeric : 10, 15, 21, 31, 51 or 61.")
   
     if(method=="Weib"){
     posfix01<-c(posfix,3:6)
@@ -419,7 +416,6 @@ gridsearch.penidm <- function(
                                   type.quantile=type.quantile,
                                   na.action =na.action,
                                   B=B,
-                                  gausspoint=gausspoint,
                                   clustertype=clustertype)
   
   
@@ -456,7 +452,6 @@ gridsearch.penidm <- function(
                                   type.quantile=type.quantile,
                                   na.action =na.action,
                                   B=B,
-                                  gausspoint=gausspoint,
                                   clustertype=clustertype)
  
   
@@ -494,7 +489,6 @@ gridsearch.penidm <- function(
                                   type.quantile=type.quantile,
                                   na.action =na.action,
                                   B=B,
-                                  gausspoint=gausspoint,
                                   clustertype=clustertype)
   
   

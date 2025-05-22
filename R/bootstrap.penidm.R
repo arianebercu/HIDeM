@@ -72,7 +72,6 @@
 #' is na.omit. Another possible value is NULL.
 #' @param scale.X do you want to center and reduce your explanatory variables
 #' @param posfix index of fixed parameters 
-#' @param gausspoint gauss quadrature points in the approximation of integrals
 #' @param lambda01 Lambda on transition 0 --> 1
 #' @param lambda02 Lambda on transition 0 --> 2
 #' @param lambda12 Lambda on transition 1 --> 2
@@ -130,8 +129,6 @@ bootstrap.penidm <- function(
 
                 B=NULL,
                 posfix=NULL,
-
-                gausspoint=10,
 
                 lambda01=NULL,
                 lambda02=NULL,
@@ -217,7 +214,6 @@ bootstrap.penidm <- function(
                  na.action =na.action,
                  B=B,
                  posfix=posfix,
-                 gausspoint=gausspoint,
                  lambda01=lambda01,
                  lambda02=lambda02,
                  lambda12=lambda12,
@@ -263,7 +259,6 @@ bootstrap.penidm <- function(
                      na.action =na.action,
                      B=B,
                      posfix=posfix,
-                     gausspoint=gausspoint,
                      lambda01=lambda01,
                      lambda02=lambda02,
                      lambda12=lambda12,

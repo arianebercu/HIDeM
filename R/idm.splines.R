@@ -36,7 +36,6 @@
 ##' @param nproc number of cluster
 ##' @param maxiter Maximum number of iterations. The default is 200.
 ##' @param troncature indicator if troncature or not
-##' @param gausspoint number of points in gauss quadrature
 ##' @param step.sequential should we use the optimisation version to fix splines 
 ##' @param option.sequential parameters to give if you want to do the optimisation version to
 ##'  fix splines
@@ -46,7 +45,7 @@
 idm.splines<-function(b,clustertype,epsa,epsb,epsd,nproc,maxiter,size_V,size_spline,noVar,bfix,
                          fix0,knots01,knots02,knots12,ctime,N,nknots01,nknots02,nknots12,
                          ve01,ve02,ve12,dimnva01,dimnva02,dimnva12,nvat01,nvat02,nvat12,
-                         t0,t1,t2,t3,troncature,gausspoint,step.sequential,option.sequential){
+                         t0,t1,t2,t3,troncature,step.sequential,option.sequential){
   fix00<-fix0
   
  
@@ -89,8 +88,7 @@ idm.splines<-function(b,clustertype,epsa,epsb,epsd,nproc,maxiter,size_V,size_spl
              t1=t1,
              t2=t2,
              t3=t3,
-             troncature=troncature,
-             gausspoint=gausspoint
+             troncature=troncature
     )
     
     
@@ -140,8 +138,7 @@ idm.splines<-function(b,clustertype,epsa,epsb,epsd,nproc,maxiter,size_V,size_spl
                t1=t1,
                t2=t2,
                t3=t3,
-               troncature=troncature,
-               gausspoint=gausspoint
+               troncature=troncature
       )
       
       
@@ -230,8 +227,7 @@ idm.splines<-function(b,clustertype,epsa,epsb,epsd,nproc,maxiter,size_V,size_spl
                t1=t1,
                t2=t2,
                t3=t3,
-               troncature=troncature,
-               gausspoint=gausspoint
+               troncature=troncature
       )
       
      

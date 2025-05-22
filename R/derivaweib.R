@@ -108,7 +108,7 @@ derivaweibdiag<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
 
 derivaweibdiagana<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
                             dimnva01,dimnva02,dimnva12,nva01,nva02,nva12,
-                            t0,t1,t2,t3,troncature,gausspoint){
+                            t0,t1,t2,t3,troncature){
   
   res<-rep(0,npm*2)
   output<-.Fortran("derivaweiballparadiag",
@@ -165,7 +165,7 @@ derivaweibdiagana<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
 
 derivaweibana<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
                         dimnva01,dimnva02,dimnva12,nva01,nva02,nva12,
-                        t0,t1,t2,t3,troncature,gausspoint){
+                        t0,t1,t2,t3,troncature){
 
   res<-rep(0,npm+npm*(npm+1)/2)
   output<-.Fortran("derivaweiballpara",

@@ -27,13 +27,12 @@
 ##' @param t2 time R
 ##' @param t3 time of event/out
 ##' @param troncature indicator if troncature or not
-##' @param gausspoint number of gausspoint quadrature
 #' @useDynLib HIDeM
 ##' @export
 #' @author R: Ariane Bercu <ariane.bercu@@u-bordeaux.fr> 
 idmlLikelihood<-function(b,npm,npar,bfix,fix,zi01,zi02,zi12,ctime,no,nz01,nz02,nz12,ve01,ve02,ve12,
                          dimnva01,dimnva02,dimnva12,nva01,nva02,nva12,
-                         t0,t1,t2,t3,troncature,gausspoint){
+                         t0,t1,t2,t3,troncature){
   res<-0
   #browser()
   .Fortran("idmlikelihood",
@@ -65,7 +64,6 @@ idmlLikelihood<-function(b,npm,npar,bfix,fix,zi01,zi02,zi12,ctime,no,nz01,nz02,n
            as.double(t2),
            as.double(t3),
            as.integer(troncature),
-           as.integer(gausspoint),
            likelihood_res=as.double(res),
            PACKAGE="HIDeM")$likelihood_res
 }
