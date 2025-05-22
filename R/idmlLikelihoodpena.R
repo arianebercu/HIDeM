@@ -27,7 +27,6 @@
 ##' @param t2 time R
 ##' @param t3 time of event/out
 ##' @param troncature indicator if troncature or not
-##' @param gausspoint number of gausspoint quadrature
 ##' @param lambda matrix of penalty lambda with column one for transiton from 
 ##' 0 --> 1, column two from 0 --> 2 and column 3 for 1 --> 2
 ##' @param alpha alpha on all transitions 
@@ -39,7 +38,7 @@
 
 idmlLikelihoodpena<-function(b,npm,npar,bfix,fix,zi01,zi02,zi12,ctime,no,nz01,nz02,nz12,ve01,ve02,ve12,
                          dimnva01,dimnva02,dimnva12,nva01,nva02,nva12,
-                         t0,t1,t2,t3,troncature,gausspoint,lambda,alpha,penalty.factor,penalty){
+                         t0,t1,t2,t3,troncature,lambda,alpha,penalty.factor,penalty){
   res<-0
   b0<-b
   #browser()
@@ -72,7 +71,6 @@ idmlLikelihoodpena<-function(b,npm,npar,bfix,fix,zi01,zi02,zi12,ctime,no,nz01,nz
            as.double(t2),
            as.double(t3),
            as.integer(troncature),
-           as.integer(gausspoint),
            likelihood_res=as.double(res),
            PACKAGE="HIDeM")$likelihood_res
 

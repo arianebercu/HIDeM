@@ -83,7 +83,6 @@
 #' is na.omit. Another possible value is NULL.
 #' @param scale.X do you want to center and reduce your explanatory variables
 #' @param posfix index of fixed parameters 
-#' @param gausspoint gauss quadrature points in the approximation of integrals in the likelihood
 #' @param timedep12 TRUE if time dependent on 1 --> 2 otherwise FALSE (default)
 #' @param semiMarkov TRUE if semi Markov on 1 --> 2 otherwise FALSE (default)
 #' @param lambda01 Lambda on transition 0 --> 1
@@ -198,7 +197,6 @@ idm <- function(formula01,
                 na.action = na.fail,
                 B=NULL,
                 posfix=NULL,
-                gausspoint=10,
                 
                 timedep12=FALSE,
                 semiMarkov=TRUE,
@@ -385,7 +383,7 @@ idm <- function(formula01,
       if(!inherits(nproc,c("numeric","integer"))|(nproc!=floor(nproc)))stop("nproc has to be an integer.")
     
       # nbr of quadrature points for estimating integral in idm without penalisation
-      if(!gausspoint%in%c(10,15,21,31,41,51,61))stop("Argument type.quantile has to a numeric : 10, 15, 21, 31, 51 or 61.")
+      
       if(!inherits(step.sequential,"logical"))stop("Argument step.sequential has to be TRUE or FALSE.")
 
     ###########################################################################
@@ -733,7 +731,6 @@ idm <- function(formula01,
                          t2=t2,
                          t3=t3,
                          troncature=troncature,
-                         gausspoint=gausspoint,
                          step.sequential=step.sequential,
                          option.sequential=option.sequential)
   
@@ -898,8 +895,7 @@ idm <- function(formula01,
                                     idm=idm,
                                     idd=idd,
                                     ts=ts,
-                                    troncature=troncature,
-                                    gausspoint=gausspoint)}
+                                    troncature=troncature)}
             
         
         
@@ -1147,8 +1143,7 @@ idm <- function(formula01,
                                          t1=t1,
                                          t2=t2,
                                          t3=t3,
-                                         troncature=troncature,
-                                         gausspoint=gausspoint)
+                                         troncature=troncature)
             
             # take thoses values if converged only otherwise thoses
             # by default or by the user
@@ -1201,8 +1196,7 @@ idm <- function(formula01,
                                   t1=t1,
                                   t2=t2,
                                   t3=t3,
-                                  troncature=troncature,
-                                  gausspoint=gausspoint)
+                                  troncature=troncature)
               
               if(nproc>1){parallel::stopCluster(clustpar)}
               ## what should we do if max(output$v) == 0
@@ -1285,7 +1279,6 @@ idm <- function(formula01,
                              t2=t2,
                              t3=t3,
                              troncature=troncature,
-                             gausspoint=gausspoint,
                              nlambda01=nlambda01,
                              lambda01=lambda01,
                              nlambda02=nlambda02,
@@ -1485,8 +1478,7 @@ idm <- function(formula01,
                              t1=t1,
                              t2=t2,
                              t3=t3,
-                             troncature=troncature,
-                             gausspoint=gausspoint)
+                             troncature=troncature)
             
             # take thoses values if converged only otherwise thoses
             # by default or by the user
@@ -1529,8 +1521,7 @@ idm <- function(formula01,
                                   t1=t1,
                                   t2=t2,
                                   t3=t3,
-                                  troncature=troncature,
-                                  gausspoint=gausspoint)
+                                  troncature=troncature)
               
              
               if(nproc>1){parallel::stopCluster(clustpar)}
@@ -1619,8 +1610,7 @@ idm <- function(formula01,
                                lambda12=lambda12,
                                alpha=alpha,
                                penalty.factor=penalty.factor,
-                               penalty=penalty,
-                               gausspoint=gausspoint)
+                               penalty=penalty)
             
               
               

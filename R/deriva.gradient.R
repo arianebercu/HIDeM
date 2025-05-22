@@ -252,7 +252,7 @@ deriva <- function(nproc=1,b,funcpa,.packages=NULL,...){
 ################################################################################
 grmlaweib<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
                       dimnva01,dimnva02,dimnva12,nva01,nva02,nva12,
-                      t0,t1,t2,t3,troncature,lambda,alpha,penalty.factor,penalty,gausspoint){
+                      t0,t1,t2,t3,troncature,lambda,alpha,penalty.factor,penalty){
   
 
   start<-sum(fix[1:6]==1)
@@ -322,8 +322,7 @@ grmlaweib<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
                          t1=t1,
                          t2=t2,
                          t3=t3,
-                         troncature=troncature,
-                         gausspoint=gausspoint)$v
+                         troncature=troncature)$v
     return(-sol)
   }else{
   bb<-rep(NA,npar)
@@ -360,8 +359,7 @@ grmlaweib<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
                        t1=t1,
                        t2=t2,
                        t3=t3,
-                       troncature=troncature,
-                       gausspoint=gausspoint)
+                       troncature=troncature)
   
   
   sol<-c(-grs$v,grbeta)
@@ -395,8 +393,7 @@ grmlaweib<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
                          t1=t1,
                          t2=t2,
                          t3=t3,
-                         troncature=troncature,
-                         gausspoint=gausspoint)$v
+                         troncature=troncature)$v
     return(-sol)
   }
 }
@@ -407,7 +404,7 @@ grmlaweib<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
 
 grmlaweibana<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
                    dimnva01,dimnva02,dimnva12,nva01,nva02,nva12,
-                   t0,t1,t2,t3,troncature,lambda,alpha,penalty.factor,penalty,gausspoint){
+                   t0,t1,t2,t3,troncature,lambda,alpha,penalty.factor,penalty){
   
  
 res<-rep(0,npm)
@@ -457,13 +454,71 @@ sol[1:(6-sum(fix[1:6]))]<-sol[1:(6-sum(fix[1:6]))]*2*bb[which(fix[1:6]==0)]
 return(sol)
 }
 
+
+#################################################################################
+# FORTRAN-ANA UPDATE FOR BASELINE INTENSITY PARAMETERS ##########################
+################################################################################
+
+reggrmlaweibana<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
+                       dimnva01,dimnva02,dimnva12,nva01,nva02,nva12,
+                       t0,t1,t2,t3,troncature,lambda,alpha,penalty.factor,penalty){
+  
+  
+  res<-rep(0,npm)
+  output<-.Fortran("derivaweibfirstderiv",
+                   ## input
+                   as.double(b),
+                   as.integer(npm),
+                   as.integer(npar),
+                   as.double(bfix),
+                   as.integer(fix),
+                   as.integer(ctime),
+                   as.integer(no),
+                   as.double(ve01),
+                   as.double(ve12),
+                   as.double(ve02),
+                   as.integer(dimnva01),
+                   as.integer(dimnva12),
+                   as.integer(dimnva02),
+                   as.integer(nva01),
+                   as.integer(nva12),
+                   as.integer(nva02),
+                   as.double(t0),
+                   as.double(t1),
+                   as.double(t2),
+                   as.double(t3),
+                   as.integer(troncature),
+                   likelihood_deriv=as.double(res),
+                   PACKAGE="HIDeM")$likelihood_deriv
+  
+  
+  if(any(output==Inf)| any(output==-Inf) | any(is.na(output)) | any(is.nan(output))){
+    
+    output[any(output==Inf)|any(is.na(output)) | any(is.nan(output))]<-.Machine$double.eps
+    output[any(output==-Inf)]<--.Machine$double.eps
+    
+  }
+  sol<-output
+  if(sum(fix[1:6])!=6){
+    
+    bb<-rep(NA,npar)
+    bb[which(fix==0)]<-b
+    bb[which(fix==1)]<-bfix
+    
+    sol[1:(6-sum(fix[1:6]))]<-sol[1:(6-sum(fix[1:6]))]*2*bb[which(fix[1:6]==0)]
+  }
+  #browser()
+  return(sol)
+}
+
+
 #################################################################################
 # FORTRAN-ANA UPDATE FOR REGRESSION PARAMETERS AND DIFF FINITE FOR BASELINE INTENSITY PARAMETERS #####################################################################
 ################################################################################
 # COMPLETE HESSIAN MATRIX
 hessianmlaweib<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
                     dimnva01,dimnva02,dimnva12,nva01,nva02,nva12,
-                    t0,t1,t2,t3,troncature,gausspoint){
+                    t0,t1,t2,t3,troncature){
   
 #browser()
   start<-sum(fix[1:6]==1)
@@ -536,8 +591,7 @@ hessianmlaweib<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
                              t1=t1,
                              t2=t2,
                              t3=t3,
-                             troncature=troncature,
-                             gausspoint=gausspoint)
+                             troncature=troncature)
     
     if(any(Vall$v==Inf)| any(Vall$v==-Inf) | any(is.na(Vall$v)) | any(is.nan(Vall$v))){
       stop(paste0("Problem of computation on the hessian with finite differences. Verify your function specification...\n.
@@ -632,8 +686,7 @@ hessianmlaweib<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
                                t1=t1,
                                t2=t2,
                                t3=t3,
-                               troncature=troncature,
-                               gausspoint=gausspoint)
+                               troncature=troncature)
       Vall[c((length(svar)+1):dim(Vall)[1]),c((length(svar)+1):dim(Vall)[1])]<-t(V)
       
       if(any(Vall==Inf)| any(Vall==-Inf) | any(is.na(Vall)) | any(is.nan(Vall))){
@@ -669,8 +722,7 @@ hessianmlaweib<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
                  t1=t1,
                  t2=t2,
                  t3=t3,
-                 troncature=troncature,
-                 gausspoint=gausspoint)
+                 troncature=troncature)
     
     if(any(Vall$v==Inf)| any(Vall$v==-Inf) | any(is.na(Vall$v)) | any(is.nan(Vall$v))){
       stop(paste0("Problem of computation on the hessian with finite differences. Verify your function specification...\n.
@@ -688,7 +740,7 @@ hessianmlaweib<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
 
 hessianmlaweibana<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
                          dimnva01,dimnva02,dimnva12,nva01,nva02,nva12,
-                         t0,t1,t2,t3,troncature,gausspoint){
+                         t0,t1,t2,t3,troncature){
   
   res<-rep(0,npm+npm*(npm+1)/2)
  #browser()
@@ -820,21 +872,88 @@ hessianmlaweibana<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
 
       return(-t(Vweib)[upper.tri(Vweib,diag=T)])
   
-    }
+}
+
+#################################################################################
+# FORTRAN-ANA UPDATE BASELINE INTENSITY PARAMETERS ##############################
+################################################################################
+# COMPLETE HESSIAN MATRIX
+
+reghessianmlaweibana<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
+                            dimnva01,dimnva02,dimnva12,nva01,nva02,nva12,
+                            t0,t1,t2,t3,troncature){
+  
+  res<-rep(0,npm+npm*(npm+1)/2)
+  #browser()
+  output<-.Fortran("derivaweibsecondderiv",
+                   ## input
+                   as.double(b),
+                   as.integer(npm),
+                   as.integer(npar),
+                   as.double(bfix),
+                   as.integer(fix),
+                   as.integer(ctime),
+                   as.integer(no),
+                   as.double(ve01),
+                   as.double(ve12),
+                   as.double(ve02),
+                   as.integer(dimnva01),
+                   as.integer(dimnva12),
+                   as.integer(dimnva02),
+                   as.integer(nva01),
+                   as.integer(nva12),
+                   as.integer(nva02),
+                   as.double(t0),
+                   as.double(t1),
+                   as.double(t2),
+                   as.double(t3),
+                   as.integer(troncature),
+                   likelihood_deriv=as.double(res),
+                   PACKAGE="HIDeM")$likelihood_deriv
+  
+  
+  if(any(output==Inf)| any(output==-Inf) | any(is.na(output)) | any(is.nan(output))){
+    
+    output[any(output==Inf)|any(is.na(output)) | any(is.nan(output))]<-.Machine$double.eps
+    output[any(output==-Inf)]<--.Machine$double.eps
+    
+  }
+  bb<-rep(NA,npar)
+  bb[which(fix==0)]<-b
+  bb[which(fix==1)]<-bfix
+  
+  nweib<-sum(fix[1:6]==0)
+  min<-npm
+  max<-min+nweib*(nweib+1)/2+nweib*(npm-nweib)
+  Vweib<-matrix(0,npm,npm)
+  
+  if(nweib>0){
+    
+    val<-c(output[(min+1):(max)],rep(0,(npm-nweib)*(npm-nweib+1)/2))
+    Vweib[lower.tri(Vweib,diag=TRUE)] <- val
+    Vweib[1:nweib,1:nweib]<-4*matrix(bb[which(fix[1:6]==0)],ncol=1)%*%bb[which(fix[1:6]==0)]*Vweib[1:nweib,1:nweib]+diag(output[1:nweib])*2
+    
+    
+  }
+  
+  #browser()
+  return(-t(Vweib)[upper.tri(Vweib,diag=T)])
+  
+}
     
 #################################################################################
 # FORTRAN-ANA UPDATE FOR BASELINE INTENSITY PARAMETERS #####################################################################
 ################################################################################
 # ATTENTION NO POSSIBLE FIX PARAMETERS IN FORTRAN
 
-grmlasplineana<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
+reggrmlasplineana<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
                        dimnva01,dimnva02,dimnva12,nva01,nva02,nva12,
                        nz01,nz02,nz12,zi01,zi02,zi12,
-                       t0,t1,t2,t3,troncature,gausspoint){
+                       t0,t1,t2,t3,troncature){
   
   
   res<-rep(0,npm)
-  output<-.Fortran("derivasplinesfirstderivbis",
+  output<-.Fortran("derivasplinesfirstderiv",
            ## input
            as.double(b),
            as.integer(npm),
@@ -915,8 +1034,7 @@ grmlasplineana<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
     #                       t1=t1,
     #                       t2=t2,
     #                       t3=t3,
-    #                       troncature=troncature,
-    #                       gausspoint=10)
+    #                       troncature=troncature)
     # 
     # 
     # sol
@@ -931,14 +1049,14 @@ grmlasplineana<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
 # ATTENTION NO POSSIBLE FIX PARAMETERS IN FORTRAN
 # COMPLETE HESSIAN MATRIX 
 
-hessianmlasplineana<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
+reghessianmlasplineana<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
                               dimnva01,dimnva02,dimnva12,nva01,nva02,nva12,
                               nz01,nz02,nz12,zi01,zi02,zi12,
-                              t0,t1,t2,t3,troncature,gausspoint){
+                              t0,t1,t2,t3,troncature){
   
   res<-rep(0,npm+npm*(npm+1)/2)
 
-  output<-.Fortran("derivasplinessecondderivbis",
+  output<-.Fortran("derivasplinessecondderiv",
                    ## input
                    as.double(b),
                    as.integer(npm),
@@ -1024,8 +1142,7 @@ hessianmlasplineana<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
    #                        t1=t1,
    #                        t2=t2,
    #                        t3=t3,
-   #                        troncature=troncature,
-   #                        gausspoint=gausspoint)
+   #                        troncature=troncature)
    #  V<-matrix(0,npm,npm)
    # 
    # V[upper.tri(V,diag=TRUE)] <- test$v[(1):(max-min)]

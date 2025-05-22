@@ -28,7 +28,6 @@
 ##' @param idd number of subjects that died
 ##' @param idm number of subjects that had illness
 ##' @param ts delay in the study
-##' @param gausspoint number of points in gauss quadrature
 ##' @param weib the form of the weibull parameters 
 #' @author R: Ariane Bercu <ariane.bercu@@u-bordeaux.fr> 
 #' @useDynLib HIDeM
@@ -37,7 +36,7 @@ idm.weib<-function(b,fix0,size_V,
                    clustertype,epsa,epsb,epsd,nproc,maxiter,
                    ctime,N,
                    ve01,ve02,ve12,dimnva01,dimnva02,dimnva12,nvat01,nvat02,nvat12,
-                   t0,t1,t2,t3,idd,idm,ts,troncature,gausspoint){
+                   t0,t1,t2,t3,idd,idm,ts,troncature){
 
   bfix<-b[fix0==1]
   b<-b[fix0==0]
@@ -76,8 +75,7 @@ idm.weib<-function(b,fix0,size_V,
                             t1=t1,
                             t2=t2,
                             t3=t3,
-                            troncature=troncature,
-                            gausspoint=gausspoint)
+                            troncature=troncature)
     
   
   if(out$istop==4){
