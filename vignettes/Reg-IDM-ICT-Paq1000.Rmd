@@ -81,9 +81,10 @@ We choose to estimate the baseline intensity transition with M-spline basis with
 1. Choose baseline intensity parametrization based on void model
 ```{r,eval=F}
 
-mvoidPaq1000 <-  HIDeM::idm(formula02=Hist(time=t,event=death,entry=e)~1,
-                        formula01=Hist(time=list(l,r),event=dementia)~1,
-                        formula12=~1,
+
+mvoidPaq1000 <-  HIDeM::idm(formula02=Hist(time=t,event=death,entry=e)~certif+gender,
+                        formula01=Hist(time=list(l,r),event=dementia)~certif+gender,
+                        formula12=~certif+gender,
                         method="splines",
                         data=Paq1000,maxiter=100)
 

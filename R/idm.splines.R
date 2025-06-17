@@ -48,8 +48,9 @@ idm.splines<-function(b,clustertype,epsa,epsb,epsd,nproc,maxiter,size_V,size_spl
                          t0,t1,t2,t3,troncature,step.sequential,option.sequential){
   fix00<-fix0
   
- 
+
   # if do not fix more splines parameters step.sequential==F
+ 
   if(step.sequential==F){
     
     

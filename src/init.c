@@ -18,9 +18,6 @@ extern void F77_NAME(idmlikelihood)(double *,int *, int *, double *,int*, double
               int *,int *,int *,int *, int *, double *,double*, double *,
               int *,int *,int *,int *,int *,int *, double *,double*, double *, double *,int *,double *);
 
-extern void F77_NAME(idmlikelihoodbis)(double *,int *, int *, double *,int*, double *,double *,double *,
-              int *,int *,int *,int *, int *, double *,double*, double *,
-              int *,int *,int *,int *,int *,int *, double *,double*, double *, double *,int *,double *);
 
 extern void F77_NAME(idmlikelihoodweib)(double *,int *, int *, double *,int*,
               int *,int *, double *,double*, double *,
@@ -88,7 +85,6 @@ extern void F77_NAME(derivasplinessecondderiv)(double *,int *, int *, double *,i
 
 static const R_FortranMethodDef FortranEntries[] = {
     {"idmlikelihood",(DL_FUNC) &F77_NAME(idmlikelihood),    28},
-     {"idmlikelihoodbis",(DL_FUNC) &F77_NAME(idmlikelihoodbis),    28},
     {"idmlikelihoodweib",(DL_FUNC) &F77_NAME(idmlikelihoodweib),    22},
     {"causalidmlikelihoodweib",(DL_FUNC) &F77_NAME(causalidmlikelihoodweib),    24},
     {"derivaweib",(DL_FUNC) &F77_NAME(derivaweib),    22},

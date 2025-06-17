@@ -33,8 +33,8 @@
 idmlLikelihood<-function(b,npm,npar,bfix,fix,zi01,zi02,zi12,ctime,no,nz01,nz02,nz12,ve01,ve02,ve12,
                          dimnva01,dimnva02,dimnva12,nva01,nva02,nva12,
                          t0,t1,t2,t3,troncature){
+ 
   res<-0
-  #browser()
   .Fortran("idmlikelihood",
            ## input
            as.double(b),

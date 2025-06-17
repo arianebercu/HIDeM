@@ -614,12 +614,14 @@ idm <- function(formula01,
       if (is.null(B)){
         
         b<-c(rep(0.5,size_spline),rep(0,size1))
+        init<-F
         # define splines and initialize them
       }else{
         if(!inherits(B,"numeric")){stop(paste0("B need to be a numeric"))}
         # if(any(B[1:size_spline]<0)){stop(paste0("B need to be positive for spline parameters"))}
         if(length(B)!=(size_V)){stop(paste0("The length of the initialization must be : ",size_V))}
-        b<-B}
+        b<-B
+        init<-T}
       
       
     }
@@ -642,10 +644,11 @@ idm <- function(formula01,
         if(!inherits(B,"numeric")){stop(paste0("B need to be a numeric"))}
         # if(any(B[1:size_spline]<0)){stop(paste0("B need to be positive for spline parameters"))}
         if(length(B)!=(size_V)){stop(paste0("The length of the initialization must be : ",size_V))}
-        b<-B}else{
+        b<-B
+        init<-T}else{
         
           b<-c(1,sqrt(sum(idm)/ts),1,sqrt(sum(idd)/ts),1,sqrt(sum(idd)/ts),rep(0,size_V-6))
-          
+          init<-F
         }
     }
     
@@ -1108,7 +1111,8 @@ idm <- function(formula01,
           #browser()
           if(method=="splines"){
             # if user did not specified the lambda values 
-            
+            #browser()
+            if(init==F){
             output.mla<- marqLevAlg::mla(b=b[which(fix0[1:size_spline]==0)],
                                          fn=idmlLikelihood,
                                          epsa=epsa,
@@ -1149,6 +1153,7 @@ idm <- function(formula01,
             # by default or by the user
             if(output.mla$istop==1){
               b[which(fix0[1:size_spline]==0)]<-output.mla$b}
+            }
             
  
             if(is.null(lambda01)|is.null(lambda02)|is.null(lambda12)){
@@ -1450,6 +1455,7 @@ idm <- function(formula01,
            
               #	cat("------ Program Weibull ------ \n")
 ############### some initial steps to have values for weibull parameters #########
+            if(init==F){
             output.mla<- marqLevAlg::mla(b=b[which(fix0[1:6]==0)],
                              fn=idmlLikelihoodweib,
                              epsa=epsa,
@@ -1484,6 +1490,7 @@ idm <- function(formula01,
             # by default or by the user
             if(output.mla$istop==1){
               b[which(fix0[1:6]==0)]<-output.mla$b}
+            }
             
             if(is.null(lambda01)|is.null(lambda02)|is.null(lambda12)){
               if(nproc>1){
