@@ -32,10 +32,11 @@ Maintainer: Ariane Bercu <ariane.bercu@u-bordeaux.fr>
 License: GPL (>= 2)
 RoxygenNote: 7.3.2
 Encoding: UTF-8
+VignetteBuilder: knitr
 Suggests: 
     testthat (>= 3.0.0), 
     knitr,
     rmarkdown
 Config/testthat/edition: 3
 LazyData: true
-VignetteBuilder: knitr
+
