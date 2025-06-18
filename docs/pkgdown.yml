@@ -1,7 +1,0 @@
-pandoc: '3.2'
-pkgdown: 2.1.1
-pkgdown_sha: ~
-articles:
-  Reg-IDM-ICT-example: Reg-IDM-ICT-example.html
-  Reg-IDM-ICT-Paq1000: Reg-IDM-ICT-Paq1000.html
-last_built: 2025-04-28T09:57Z

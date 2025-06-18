@@ -698,7 +698,7 @@ idm <- function(formula01,
           bfix<-b[fix0==1]
           b<-b[fix0==0]
         }else{bfix<-1}
-        
+  
       
         out<-idm.splines(b=b,
                          clustertype=clustertype,

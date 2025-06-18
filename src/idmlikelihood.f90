@@ -2,39 +2,6 @@
 
 
 
-
-module quadrature_15data
-    implicit none
-    double precision,dimension(8)::xgk,wgk
-    double precision,dimension(4)::wg
-    double precision::epmach, uflow
-
-    data xgk /0.991455371120812639206854697526329d0, &
-              0.949107912342758524526189684047851d0, &
-              0.864864423359769072789712788640926d0, &
-              0.741531185599394439863864773280788d0, &
-              0.586087235467691130294144838258730d0, &
-              0.405845151377397166906606412076961d0, &
-              0.207784955007898467600689403773245d0, &
-              0.000000000000000000000000000000000d0/
-
-    data wgk /0.022935322010529224963732008058970d0, &
-              0.063092092629978553290700663189204d0, &
-              0.104790010322250183839876322541518d0, &
-              0.140653259715525918745189590510238d0, &
-              0.169004726639267902826583426598550d0, &
-              0.190350578064785409913256402421014d0, &
-              0.204432940075298892414161999234649d0, &
-              0.209482141084727828012999174891714d0/
-
-    data wg /0.129484966168869693270611432679082d0, &
-             0.279705391489276667901467771423780d0, &
-             0.381830050505118944950369775488975d0, &
-             0.417959183673469387755102040816327d0/
-
-    data epmach /2.22D-16/, uflow /2.23D-308/
-end module quadrature_15data
-
 !============================================================================================= 
 !========================          idmlLikelihood         ====================================
 !========================   with baseline M-splines       ==================================== 
@@ -47,8 +14,7 @@ end module quadrature_15data
         t30,troncature0,likelihood_res)
 
 	use commun
-
-        implicit none
+	   implicit none
          
         double precision::res,res1,res2,tronc, &
         vet01,vet12,vet02
@@ -75,39 +41,51 @@ end module quadrature_15data
         double precision::su01,ri01,su12,ri12,su02,ri02,gl01,gl02,gl12
 	double precision,dimension(no0)::t00,t10,t20,t30
 	integer,dimension(no0)::c0
+	
 
 	allocate(b(np0),bfix(npar0-np0),fix(npar0))
+
+
+     
 	b=b0
 	bfix=bfix0
 	fix=fix0
+	nz01=nz010
+	nz02=nz020
+	nz12=nz120
+	
 	allocate(zi01(-2:(nz01+3)),zi12(-2:(nz12+3)),zi02(-2:(nz02+3)))
 	zi01=zi010
 	zi02=zi020
 	zi12=zi120
 
 	
-	nz01=nz010
-	nz02=nz020
-	nz12=nz120
+	
 	troncature=troncature0
 
 
 	if(nva01.gt.0) then 
 		allocate(ve01(no0,nva01))
+
 	else 
 		allocate(ve01(no0,1))
+		
 	end if 
 	
 	if(nva02.gt.0) then 
 		allocate(ve02(no0,nva02))
+	
 	else 
 		allocate(ve02(no0,1))
+		
 	end if 
 
 	if(nva12.gt.0) then 
 		allocate(ve12(no0,nva12))
+	
 	else 
 		allocate(ve12(no0,1))
+		
 	end if 
 
 
@@ -121,6 +99,7 @@ end module quadrature_15data
 	t1=t10
 	t2=t20
 	t3=t30
+
 
          
         ! we need to put bh at its original values if in posfix 
@@ -139,23 +118,27 @@ end module quadrature_15data
             bh(k)=bfix(w)
          end if
       end do
-    
+	 
+  
 	
-	 do i = 1, (nz01+2)
-      the01(i) = bh(i)**2
-	 end do
-	
-	
-	 do i = 1, (nz02+2)
-      the02(i) = bh(i+nz01+2)**2
-	 end do
-	
-	do i = 1, (nz12+2)
-      the12(i) = bh(i+nz01+2+nz02+2)**2
-	 end do
+	  do i=1,nz01+2
+            the01(i-3)=(bh(i))**2
+!       the01(i-3)=dexp(bh(i))
+         end do
+         do i=1,nz02+2
+            j = nz01+2+i
+            the02(i-3)=(bh(j))**2
+!       the12(i-3)=dexp(bh(j))
+         end do
+         do i=1,nz12+2
+            j = nz02+2+nz01+2+i
+            the12(i-3)=(bh(j))**2
+!       the02(i-3)=dexp(bh(j))
+         end do
+
 		
 !---------- calcul de la vraisemblance ------------------
-
+	
 
 
         res = 0.d0
@@ -192,6 +175,7 @@ end module quadrature_15data
                         tronc = 0.d0
                 end if
 
+		
 		select case(c(i))
         case (1) ! cad 0-->1 et 0-->2
                         call susp(t1(i),the01,nz01,su01,ri01,zi01,gl01)
@@ -199,12 +183,14 @@ end module quadrature_15data
 
                         res1 = (-gl01*vet01)-(gl02*vet02)
         case (2) ! cpi 0-->1
+			
                        
                         	call qgaussPL15(t1(i),t2(i),the01,the12,&
                         	the02,res2,vet01,vet12,vet02)
                           call susp(t3(i),the12,nz12,su12,ri12,zi12,gl12)
 !               res1=dLOG(res2)-gl12*vet12 (autre ecriture)
 		                      res1=dLOG(res2*(su12**vet12))
+							  
 
         case (3) ! obs 0-->1
                     call susp(t2(i),the01,nz01,su01,ri01,zi01,gl01)
@@ -215,6 +201,7 @@ end module quadrature_15data
                     call susp(t2(i),the12,nz12,su12,ri12,zi12,gl12)
                     res1=res2 +gl12*vet12
         case (4) ! cpi 0-->1 et obs 1-->2
+		
                           call susp(t3(i),the12,nz12,su12,ri12,zi12,gl12)
                           call qgaussPL15(t1(i),t2(i),the01,the12,the02,&
                         	res2,vet01,vet12,vet02)
@@ -230,6 +217,7 @@ end module quadrature_15data
                          res1=res2+gl12*vet12
 
         case (6) ! vivant ???
+		
                           		call qgaussPL15(t1(i),t2(i),the01,the12,the02,&
                               res2,vet01,vet12,vet02)
                               call susp(t3(i),the12,nz12,su12,ri12,zi12,gl12)
@@ -239,6 +227,7 @@ end module quadrature_15data
                             (su01**vet01)*(su02**vet02))  
 
         case (7) ! passage 0-->2  
+		
 
                                 call susp(t3(i),the12,nz12,su12,ri12,zi12,gl12)
                                 call susp(t3(i),the02,nz02,su02,ri02,zi02,gl02)
@@ -258,7 +247,7 @@ end module quadrature_15data
                 
           end do 
           
-
+	
 
         likelihood_res = res
 
@@ -266,6 +255,7 @@ end module quadrature_15data
 123     continue 
 	 
 	deallocate(b,bfix,fix,zi01,zi02,zi12,ve01,ve02,ve12,t0,t1,t2,t3,c)
+
 
         end subroutine idmlikelihood
 
@@ -490,7 +480,6 @@ end module quadrature_15data
 !========================         causal idmlLikelihood         ====================================
 !========================    with baseline weibull        ==================================== 
 !============================================================================================= 
-
 
 
       subroutine causalidmlikelihoodweib(b0,np0,npar0,bfix0,fix0,c0,&
@@ -1022,7 +1011,6 @@ end subroutine fonct
 !================================  causal QGAUS for weib : CHEBYCHEV   =============================
 !============================================================================================= 
 
-
 subroutine qgauss1(cas,a,b,c, the01,the02,the12,res,v01,v02,v12_ref, gamma, semiMark)
         implicit none
          double precision a,b,c,ctemp,the01(2),the02(2),the12(2)
@@ -1246,14 +1234,47 @@ subroutine qgaussPLweib(a,b,the01,the02,the12,res,v01,v02,v12)
 !=============================================================================================  
 subroutine qgaussPL15weib(a,b,the01,the02,the12,res,v01,v02,v12)
 
-		use quadrature_15data
          implicit none
          
          integer::j,jtw,jtwm1
          double precision::a,b,dx,xm,xr,res,resk,v01,v02,v12,&
          the01(2),the12(2),the02(2)
          double precision::xx,f1,su01,ri01,ri12,f2,su12,su02,ri02,fc,gl01,gl02,gl12
+		 double precision,dimension(8)::xgk,wgk
+		 double precision,dimension(4)::wg
+		 double precision::epmach, uflow
          
+
+
+
+    	epmach = 2.22D-16
+    	uflow = 2.23D-308
+
+	wg(1) = 0.129484966168869693270611432679082d0
+wg(2) = 0.279705391489276667901467771423780d0
+wg(3) = 0.381830050505118944950369775488975d0
+wg(4) = 0.417959183673469387755102040816327d0
+
+    	xgk(1) = 0.991455371120812639206854697526329d0
+	xgk(2) = 0.949107912342758524526189684047851d0
+	xgk(3) = 0.864864423359769072789712788640926d0
+	xgk(4) = 0.741531185599394439863864773280788d0
+	xgk(5) = 0.586087235467691130294144838258730d0
+	xgk(6) = 0.405845151377397166906606412076961d0
+	xgk(7) = 0.207784955007898467600689403773245d0
+	xgk(8) = 0.000000000000000000000000000000000d0
+
+	
+    wgk(1) = 0.022935322010529224963732008058970d0
+wgk(2) = 0.063092092629978553290700663189204d0
+wgk(3) = 0.104790010322250183839876322541518d0
+wgk(4) = 0.140653259715525918745189590510238d0
+wgk(5) = 0.169004726639267902826583426598550d0
+wgk(6) = 0.190350578064785409913256402421014d0
+wgk(7) = 0.204432940075298892414161999234649d0
+wgk(8) = 0.209482141084727828012999174891714d0
+
+
 
 
         xm = 0.5d+00*(b+a)
@@ -1263,6 +1284,7 @@ subroutine qgaussPL15weib(a,b,the01,the02,the12,res,v01,v02,v12)
         call fonct(xm,the12,ri12,gl12,su12)
         fc = (su01**v01)*(su02**v02)*ri01*v01/(su12**v12)  ! valeur fct f au milieu de intervalle (a,b), cas pnt 0
 
+		
     	
         resk = fc*wgk(8)       ! init res Kronrod   ! fc * 8e poids Kronrod
          
@@ -1303,6 +1325,8 @@ subroutine qgaussPL15weib(a,b,the01,the02,the12,res,v01,v02,v12)
 	    
     	res = xr*resk
 	endif
+	
+	
     
           end subroutine qgaussPL15weib
 
@@ -1313,7 +1337,6 @@ subroutine qgaussPL15weib(a,b,the01,the02,the12,res,v01,v02,v12)
 
       subroutine qgaussPL15(a,b,the01,the12,the02,res,v1,v2,v3)
 
-	use quadrature_15data
 	use commun,only:zi01,zi12,zi02,nz01,nz12,nz02
 
          implicit none
@@ -1325,18 +1348,57 @@ subroutine qgaussPL15weib(a,b,the01,the02,the12,res,v01,v02,v12)
          double precision,dimension(-2:(nz02-1))::the02
 
          double precision::xx,f1,su01,ri01,ri12,f2,su12,su02,ri02,fc,gl01,gl02,gl12
+		 double precision,dimension(8)::xgk,wgk
+		 double precision,dimension(4)::wg
+		 double precision::epmach, uflow
 
 
+
+		
+    	epmach = 2.22D-16
+    	uflow = 2.23D-308
+
+	wg(1) = 0.129484966168869693270611432679082d0
+wg(2) = 0.279705391489276667901467771423780d0
+wg(3) = 0.381830050505118944950369775488975d0
+wg(4) = 0.417959183673469387755102040816327d0
+
+    	xgk(1) = 0.991455371120812639206854697526329d0
+	xgk(2) = 0.949107912342758524526189684047851d0
+	xgk(3) = 0.864864423359769072789712788640926d0
+	xgk(4) = 0.741531185599394439863864773280788d0
+	xgk(5) = 0.586087235467691130294144838258730d0
+	xgk(6) = 0.405845151377397166906606412076961d0
+	xgk(7) = 0.207784955007898467600689403773245d0
+	xgk(8) = 0.000000000000000000000000000000000d0
+
+	
+    wgk(1) = 0.022935322010529224963732008058970d0
+wgk(2) = 0.063092092629978553290700663189204d0
+wgk(3) = 0.104790010322250183839876322541518d0
+wgk(4) = 0.140653259715525918745189590510238d0
+wgk(5) = 0.169004726639267902826583426598550d0
+wgk(6) = 0.190350578064785409913256402421014d0
+wgk(7) = 0.204432940075298892414161999234649d0
+wgk(8) = 0.209482141084727828012999174891714d0
    	
-        xm = 0.5d+00*(b+a)
+             ! init res Kronrod   ! fc * 8e poids Kronrod
+        
+
+
+    res = 0.d0
+    if(a.eq.b)then
+               res = 0.d0
+            else
+			
+		 xm = 0.5d+00*(b+a)
         xr = 0.5d+00*(b-a)
         call susp(xm,the01,nz01,su01,ri01,zi01,gl01)
         call susp(xm,the02,nz02,su02,ri02,zi02,gl02)
         call susp(xm,the12,nz12,su12,ri12,zi12,gl12)
         fc = (su01**v1)*(su02**v3)*ri01*v1/(su12**v2)  ! valeur fct f au milieu de intervalle (a,b), cas pnt 0
 
-        resk = fc*wgk(8)       ! init res Kronrod   ! fc * 8e poids Kronrod
-        
+        resk = fc*wgk(8) 
 
          do j=1,3
 	       jtw = j*2
@@ -1370,6 +1432,10 @@ subroutine qgaussPL15weib(a,b,the01,the02,the12,res,v01,v02,v12)
          end do
     
     res = xr*resk
+	
+	end if 
+	
+
   
          end subroutine qgaussPL15
 
@@ -2757,7 +2823,7 @@ subroutine qgaussweibderiv(a,b,the01,the02,the12,resdenum,&
 res01num,res02num,res12num,res0101num,res0102num,res0112num,&
 res0202num,res0212num,res1212num,v01,v02,v12)
 
-		use quadrature_15data
+	
         implicit none
          double precision a,b,the01(2),the02(2),the12(2),num
          double precision dx,xm,xr,reskdenum,&
@@ -2776,6 +2842,37 @@ res0202num,res0212num,res1212num,v01,v02,v12)
 
          double precision gl01,gl12,gl02
          integer::j,jtw,jtwm1
+		 
+		 
+		 double precision,dimension(8)::xgk,wgk
+		 double precision,dimension(4)::wg
+		 double precision::epmach, uflow
+
+
+		data xgk /0.991455371120812639206854697526329d0, &
+				  0.949107912342758524526189684047851d0, &
+				  0.864864423359769072789712788640926d0, &
+				  0.741531185599394439863864773280788d0, &
+				  0.586087235467691130294144838258730d0, &
+				  0.405845151377397166906606412076961d0, &
+				  0.207784955007898467600689403773245d0, &
+				  0.000000000000000000000000000000000d0/
+
+		data wgk /0.022935322010529224963732008058970d0, &
+				  0.063092092629978553290700663189204d0, &
+				  0.104790010322250183839876322541518d0, &
+				  0.140653259715525918745189590510238d0, &
+				  0.169004726639267902826583426598550d0, &
+				  0.190350578064785409913256402421014d0, &
+				  0.204432940075298892414161999234649d0, &
+				  0.209482141084727828012999174891714d0/
+
+		data wg /0.129484966168869693270611432679082d0, &
+				 0.279705391489276667901467771423780d0, &
+				 0.381830050505118944950369775488975d0, &
+				 0.417959183673469387755102040816327d0/
+
+		data epmach /2.22D-16/, uflow /2.23D-308/
    
 	
 
@@ -2966,7 +3063,7 @@ res01num,res02num,res12num,res0101num,res0101numbis, &
 res0102num,res0112num,&
 res0202num,res0212num,res1212num,v01,v02,v12)
 
-		use quadrature_15data
+		
         implicit none
          double precision a,b,the01(2),the02(2),the12(2)
          double precision dx,xm,xr,reskdenum,&
@@ -3020,6 +3117,36 @@ res0202num,res0212num,res1212num,v01,v02,v12)
 
      double precision gl01,gl12,gl02
      integer::j,jtw,jtwm1
+	 
+	 		 double precision,dimension(8)::xgk,wgk
+		 double precision,dimension(4)::wg
+		 double precision::epmach, uflow
+
+
+		data xgk /0.991455371120812639206854697526329d0, &
+				  0.949107912342758524526189684047851d0, &
+				  0.864864423359769072789712788640926d0, &
+				  0.741531185599394439863864773280788d0, &
+				  0.586087235467691130294144838258730d0, &
+				  0.405845151377397166906606412076961d0, &
+				  0.207784955007898467600689403773245d0, &
+				  0.000000000000000000000000000000000d0/
+
+		data wgk /0.022935322010529224963732008058970d0, &
+				  0.063092092629978553290700663189204d0, &
+				  0.104790010322250183839876322541518d0, &
+				  0.140653259715525918745189590510238d0, &
+				  0.169004726639267902826583426598550d0, &
+				  0.190350578064785409913256402421014d0, &
+				  0.204432940075298892414161999234649d0, &
+				  0.209482141084727828012999174891714d0/
+
+		data wg /0.129484966168869693270611432679082d0, &
+				 0.279705391489276667901467771423780d0, &
+				 0.381830050505118944950369775488975d0, &
+				 0.417959183673469387755102040816327d0/
+
+		data epmach /2.22D-16/, uflow /2.23D-308/
 
 
         resdenum = 0.d0
@@ -3547,7 +3674,7 @@ resthe0101dsquare,resthe0202dsquare,resthe1212dsquare,&
 res01num,res02num,res12num,res0101num,res0101numbis, &
 res0202num,res1212num,v01,v02,v12)
 
-	use quadrature_15data
+
         implicit none
          double precision a,b,the01(2),the02(2),the12(2)
          double precision dx,xm,xr,reskdenum,&
@@ -3597,6 +3724,36 @@ res0202num,res1212num,v01,v02,v12)
 
      double precision gl01,gl12,gl02
      integer::j,jtw,jtwm1
+	 
+	 		 double precision,dimension(8)::xgk,wgk
+		 double precision,dimension(4)::wg
+		 double precision::epmach, uflow
+
+
+		data xgk /0.991455371120812639206854697526329d0, &
+				  0.949107912342758524526189684047851d0, &
+				  0.864864423359769072789712788640926d0, &
+				  0.741531185599394439863864773280788d0, &
+				  0.586087235467691130294144838258730d0, &
+				  0.405845151377397166906606412076961d0, &
+				  0.207784955007898467600689403773245d0, &
+				  0.000000000000000000000000000000000d0/
+
+		data wgk /0.022935322010529224963732008058970d0, &
+				  0.063092092629978553290700663189204d0, &
+				  0.104790010322250183839876322541518d0, &
+				  0.140653259715525918745189590510238d0, &
+				  0.169004726639267902826583426598550d0, &
+				  0.190350578064785409913256402421014d0, &
+				  0.204432940075298892414161999234649d0, &
+				  0.209482141084727828012999174891714d0/
+
+		data wg /0.129484966168869693270611432679082d0, &
+				 0.279705391489276667901467771423780d0, &
+				 0.381830050505118944950369775488975d0, &
+				 0.417959183673469387755102040816327d0/
+
+		data epmach /2.22D-16/, uflow /2.23D-308/
 		
 		 resdenum = 0.d0
 	    res01num = 0.d0
@@ -3989,7 +4146,6 @@ resthe01,resthe02,resthe12,resthenum,&
 res01num,res02num,res12num,&
 v01,v02,v12)
 
-		use quadrature_15data
         implicit none
          double precision a,b,the01(2),the02(2),the12(2)
          double precision dx,xm,xr,reskdenum,&
@@ -4010,6 +4166,35 @@ v01,v02,v12)
      double precision gl01,gl12,gl02
      integer::j,jtw,jtwm1
      
+	 		 double precision,dimension(8)::xgk,wgk
+		 double precision,dimension(4)::wg
+		 double precision::epmach, uflow
+
+
+		data xgk /0.991455371120812639206854697526329d0, &
+				  0.949107912342758524526189684047851d0, &
+				  0.864864423359769072789712788640926d0, &
+				  0.741531185599394439863864773280788d0, &
+				  0.586087235467691130294144838258730d0, &
+				  0.405845151377397166906606412076961d0, &
+				  0.207784955007898467600689403773245d0, &
+				  0.000000000000000000000000000000000d0/
+
+		data wgk /0.022935322010529224963732008058970d0, &
+				  0.063092092629978553290700663189204d0, &
+				  0.104790010322250183839876322541518d0, &
+				  0.140653259715525918745189590510238d0, &
+				  0.169004726639267902826583426598550d0, &
+				  0.190350578064785409913256402421014d0, &
+				  0.204432940075298892414161999234649d0, &
+				  0.209482141084727828012999174891714d0/
+
+		data wg /0.129484966168869693270611432679082d0, &
+				 0.279705391489276667901467771423780d0, &
+				 0.381830050505118944950369775488975d0, &
+				 0.417959183673469387755102040816327d0/
+
+		data epmach /2.22D-16/, uflow /2.23D-308/
 	
 
         resdenum = 0.d0
@@ -4207,7 +4392,7 @@ v01,v02,v12)
 subroutine qgaussweibfirstderiv(a,b,the01,the02,the12,resdenum,&
 res01num,res02num,res12num,v01,v02,v12)
 
-	use quadrature_15data
+	
         implicit none
          double precision a,b,the01(2),the02(2),the12(2)
          double precision dx,xm,xr,reskdenum,&
@@ -4221,7 +4406,35 @@ res01num,res02num,res12num,v01,v02,v12)
          double precision gl01,gl12,gl02
          integer::j,jtw,jtwm1
     
+		 double precision,dimension(8)::xgk,wgk
+		 double precision,dimension(4)::wg
+		 double precision::epmach, uflow
 
+
+		data xgk /0.991455371120812639206854697526329d0, &
+				  0.949107912342758524526189684047851d0, &
+				  0.864864423359769072789712788640926d0, &
+				  0.741531185599394439863864773280788d0, &
+				  0.586087235467691130294144838258730d0, &
+				  0.405845151377397166906606412076961d0, &
+				  0.207784955007898467600689403773245d0, &
+				  0.000000000000000000000000000000000d0/
+
+		data wgk /0.022935322010529224963732008058970d0, &
+				  0.063092092629978553290700663189204d0, &
+				  0.104790010322250183839876322541518d0, &
+				  0.140653259715525918745189590510238d0, &
+				  0.169004726639267902826583426598550d0, &
+				  0.190350578064785409913256402421014d0, &
+				  0.204432940075298892414161999234649d0, &
+				  0.209482141084727828012999174891714d0/
+
+		data wg /0.129484966168869693270611432679082d0, &
+				 0.279705391489276667901467771423780d0, &
+				 0.381830050505118944950369775488975d0, &
+				 0.417959183673469387755102040816327d0/
+
+		data epmach /2.22D-16/, uflow /2.23D-308/
 
             resdenum = 0.d0
 	    res01num = 0.d0
@@ -4326,7 +4539,7 @@ subroutine qgaussweibderivdiag(a,b,the01,the02,the12,resdenum,&
 res01num,res02num,res12num,res0101num,&
 res0202num,res1212num,v01,v02,v12)
 
-		use quadrature_15data
+	
         implicit none
          double precision a,b,the01(2),the02(2),the12(2)
          double precision dx,xm,xr,reskdenum,resdenum,&
@@ -4342,6 +4555,36 @@ res0202num,res1212num,v01,v02,v12)
 
          double precision gl01,gl12,gl02
          integer::j,jtw,jtwm1
+		 
+		 		 double precision,dimension(8)::xgk,wgk
+		 double precision,dimension(4)::wg
+		 double precision::epmach, uflow
+
+
+		data xgk /0.991455371120812639206854697526329d0, &
+				  0.949107912342758524526189684047851d0, &
+				  0.864864423359769072789712788640926d0, &
+				  0.741531185599394439863864773280788d0, &
+				  0.586087235467691130294144838258730d0, &
+				  0.405845151377397166906606412076961d0, &
+				  0.207784955007898467600689403773245d0, &
+				  0.000000000000000000000000000000000d0/
+
+		data wgk /0.022935322010529224963732008058970d0, &
+				  0.063092092629978553290700663189204d0, &
+				  0.104790010322250183839876322541518d0, &
+				  0.140653259715525918745189590510238d0, &
+				  0.169004726639267902826583426598550d0, &
+				  0.190350578064785409913256402421014d0, &
+				  0.204432940075298892414161999234649d0, &
+				  0.209482141084727828012999174891714d0/
+
+		data wg /0.129484966168869693270611432679082d0, &
+				 0.279705391489276667901467771423780d0, &
+				 0.381830050505118944950369775488975d0, &
+				 0.417959183673469387755102040816327d0/
+
+		data epmach /2.22D-16/, uflow /2.23D-308/
         
             resdenum = 0.d0
 	    res01num = 0.d0
@@ -4493,7 +4736,7 @@ subroutine qgausssplinederiv(a,b,the01,the02,the12,resdenum,&
 		res01num,res02num,res12num,res0101num,res0102num,res0112num,&
 		res0202num,res0212num,res1212num,v01,v02,v12)
 
-	use quadrature_15data
+	
    use commun,only:zi01,zi12,zi02,nz01,nz12,nz02
 
         double precision a,b
@@ -4519,6 +4762,35 @@ subroutine qgausssplinederiv(a,b,the01,the02,the12,resdenum,&
          double precision,dimension(-2:(nz02-1))::the02
 
     
+			 double precision,dimension(8)::xgk,wgk
+		 double precision,dimension(4)::wg
+		 double precision::epmach, uflow
+
+
+		data xgk /0.991455371120812639206854697526329d0, &
+				  0.949107912342758524526189684047851d0, &
+				  0.864864423359769072789712788640926d0, &
+				  0.741531185599394439863864773280788d0, &
+				  0.586087235467691130294144838258730d0, &
+				  0.405845151377397166906606412076961d0, &
+				  0.207784955007898467600689403773245d0, &
+				  0.000000000000000000000000000000000d0/
+
+		data wgk /0.022935322010529224963732008058970d0, &
+				  0.063092092629978553290700663189204d0, &
+				  0.104790010322250183839876322541518d0, &
+				  0.140653259715525918745189590510238d0, &
+				  0.169004726639267902826583426598550d0, &
+				  0.190350578064785409913256402421014d0, &
+				  0.204432940075298892414161999234649d0, &
+				  0.209482141084727828012999174891714d0/
+
+		data wg /0.129484966168869693270611432679082d0, &
+				 0.279705391489276667901467771423780d0, &
+				 0.381830050505118944950369775488975d0, &
+				 0.417959183673469387755102040816327d0/
+
+		data epmach /2.22D-16/, uflow /2.23D-308/
 
             resdenum = 0.d0
 	    res01num = 0.d0
@@ -4697,7 +4969,7 @@ subroutine qgausssplinederiv(a,b,the01,the02,the12,resdenum,&
 subroutine qgausssplinefirstderiv(a,b,the01,the02,the12,resdenum,&
 		res01num,res02num,res12num,v01,v02,v12)
 
-	use quadrature_15data
+
    use commun,only:zi01,zi12,zi02,nz01,nz12,nz02
 
         double precision a,b
@@ -4717,6 +4989,35 @@ subroutine qgausssplinefirstderiv(a,b,the01,the02,the12,resdenum,&
          double precision,dimension(-2:(nz02-1))::the02
 
 
+		 double precision,dimension(8)::xgk,wgk
+		 double precision,dimension(4)::wg
+		 double precision::epmach, uflow
+
+
+		data xgk /0.991455371120812639206854697526329d0, &
+				  0.949107912342758524526189684047851d0, &
+				  0.864864423359769072789712788640926d0, &
+				  0.741531185599394439863864773280788d0, &
+				  0.586087235467691130294144838258730d0, &
+				  0.405845151377397166906606412076961d0, &
+				  0.207784955007898467600689403773245d0, &
+				  0.000000000000000000000000000000000d0/
+
+		data wgk /0.022935322010529224963732008058970d0, &
+				  0.063092092629978553290700663189204d0, &
+				  0.104790010322250183839876322541518d0, &
+				  0.140653259715525918745189590510238d0, &
+				  0.169004726639267902826583426598550d0, &
+				  0.190350578064785409913256402421014d0, &
+				  0.204432940075298892414161999234649d0, &
+				  0.209482141084727828012999174891714d0/
+
+		data wg /0.129484966168869693270611432679082d0, &
+				 0.279705391489276667901467771423780d0, &
+				 0.381830050505118944950369775488975d0, &
+				 0.417959183673469387755102040816327d0/
+
+		data epmach /2.22D-16/, uflow /2.23D-308/
             resdenum = 0.d0
 	    res01num = 0.d0
 	    res02num = 0.d0
@@ -4817,7 +5118,7 @@ subroutine qgausssplinederivdiag(a,b,the01,the02,the12,resdenum,&
 		res01num,res02num,res12num,res0101num,&
 		res0202num,res1212num,v01,v02,v12)
 
-	use quadrature_15data
+
    use commun,only:zi01,zi12,zi02,nz01,nz12,nz02
 
         double precision a,b
@@ -4841,7 +5142,35 @@ subroutine qgausssplinederivdiag(a,b,the01,the02,the12,resdenum,&
          double precision,dimension(-2:(nz12-1))::the12
          double precision,dimension(-2:(nz02-1))::the02
 
-   
+   		 double precision,dimension(8)::xgk,wgk
+		 double precision,dimension(4)::wg
+		 double precision::epmach, uflow
+
+
+		data xgk /0.991455371120812639206854697526329d0, &
+				  0.949107912342758524526189684047851d0, &
+				  0.864864423359769072789712788640926d0, &
+				  0.741531185599394439863864773280788d0, &
+				  0.586087235467691130294144838258730d0, &
+				  0.405845151377397166906606412076961d0, &
+				  0.207784955007898467600689403773245d0, &
+				  0.000000000000000000000000000000000d0/
+
+		data wgk /0.022935322010529224963732008058970d0, &
+				  0.063092092629978553290700663189204d0, &
+				  0.104790010322250183839876322541518d0, &
+				  0.140653259715525918745189590510238d0, &
+				  0.169004726639267902826583426598550d0, &
+				  0.190350578064785409913256402421014d0, &
+				  0.204432940075298892414161999234649d0, &
+				  0.209482141084727828012999174891714d0/
+
+		data wg /0.129484966168869693270611432679082d0, &
+				 0.279705391489276667901467771423780d0, &
+				 0.381830050505118944950369775488975d0, &
+				 0.417959183673469387755102040816327d0/
+
+		data epmach /2.22D-16/, uflow /2.23D-308/
 	
             resdenum = 0.d0
 	    res01num = 0.d0
@@ -20771,18 +21100,20 @@ subroutine derivaweibdiag(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
    
 	
 
-    do i = 1, (nz01+2)
-      the01(i) = bh(i)**2
-	 end do
-	
-	
-	 do i = 1, (nz02+2)
-      the02(i) = bh(i+nz01+2)**2
-	 end do
-	
-	do i = 1, (nz12+2)
-      the12(i) = bh(i+nz01+2+nz02+2)**2
-	 end do
+    	  do i=1,nz01+2
+            the01(i-3)=(bh(i))**2
+!       the01(i-3)=dexp(bh(i))
+         end do
+         do i=1,nz02+2
+            j = nz01+2+i
+            the02(i-3)=(bh(j))**2
+!       the12(i-3)=dexp(bh(j))
+         end do
+         do i=1,nz12+2
+            j = nz02+2+nz01+2+i
+            the12(i-3)=(bh(j))**2
+!       the02(i-3)=dexp(bh(j))
+         end do
 !---------- calcul des derivees premiere ------------------   
 
 	res = 0
@@ -21847,18 +22178,20 @@ subroutine derivaweibdiag(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 
 
 
-       	 do i = 1, (nz01+2)
-      the01(i) = bh(i)**2
-	 end do
-	
-	
-	 do i = 1, (nz02+2)
-      the02(i) = bh(i+nz01+2)**2
-	 end do
-	
-	do i = 1, (nz12+2)
-      the12(i) = bh(i+nz01+2+nz02+2)**2
-	 end do
+    	  do i=1,nz01+2
+            the01(i-3)=(bh(i))**2
+!       the01(i-3)=dexp(bh(i))
+         end do
+         do i=1,nz02+2
+            j = nz01+2+i
+            the02(i-3)=(bh(j))**2
+!       the12(i-3)=dexp(bh(j))
+         end do
+         do i=1,nz12+2
+            j = nz02+2+nz01+2+i
+            the12(i-3)=(bh(j))**2
+!       the02(i-3)=dexp(bh(j))
+         end do
 
 	
 !---------- calcul des derivees premiere ------------------   
@@ -22387,18 +22720,20 @@ subroutine derivaweibdiag(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 
 
 
-    	 do i = 1, (nz01+2)
-      the01(i) = bh(i)**2
-	 end do
-	
-	
-	 do i = 1, (nz02+2)
-      the02(i) = bh(i+nz01+2)**2
-	 end do
-	
-	do i = 1, (nz12+2)
-      the12(i) = bh(i+nz01+2+nz02+2)**2
-	 end do
+    	  do i=1,nz01+2
+            the01(i-3)=(bh(i))**2
+!       the01(i-3)=dexp(bh(i))
+         end do
+         do i=1,nz02+2
+            j = nz01+2+i
+            the02(i-3)=(bh(j))**2
+!       the12(i-3)=dexp(bh(j))
+         end do
+         do i=1,nz12+2
+            j = nz02+2+nz01+2+i
+            the12(i-3)=(bh(j))**2
+!       the02(i-3)=dexp(bh(j))
+         end do
 
 	
 !---------- calcul des derivees premiere ------------------   
@@ -22948,7 +23283,7 @@ subroutine qgausssplinebetafirstderiv(a,b,the01,the02,the12,resdenum,&
 resi01num,resi02num,resi12num,resm01num, &
 v01,v02,v12,z01,z02,z12,n01,n02,n12)
 
-		use quadrature_15data
+
          double precision a,b
          double precision dx,xm,xr,reskdenum,&
          resdenum,v01,v02,v12
@@ -22981,6 +23316,35 @@ double precision,dimension(-2:(n01+3))::z01
 	f2i02num,fci02num,resi02num,reski02num, &
 	si02,sm02
 	
+			 double precision,dimension(8)::xgk,wgk
+		 double precision,dimension(4)::wg
+		 double precision::epmach, uflow
+
+
+		data xgk /0.991455371120812639206854697526329d0, &
+				  0.949107912342758524526189684047851d0, &
+				  0.864864423359769072789712788640926d0, &
+				  0.741531185599394439863864773280788d0, &
+				  0.586087235467691130294144838258730d0, &
+				  0.405845151377397166906606412076961d0, &
+				  0.207784955007898467600689403773245d0, &
+				  0.000000000000000000000000000000000d0/
+
+		data wgk /0.022935322010529224963732008058970d0, &
+				  0.063092092629978553290700663189204d0, &
+				  0.104790010322250183839876322541518d0, &
+				  0.140653259715525918745189590510238d0, &
+				  0.169004726639267902826583426598550d0, &
+				  0.190350578064785409913256402421014d0, &
+				  0.204432940075298892414161999234649d0, &
+				  0.209482141084727828012999174891714d0/
+
+		data wg /0.129484966168869693270611432679082d0, &
+				 0.279705391489276667901467771423780d0, &
+				 0.381830050505118944950369775488975d0, &
+				 0.417959183673469387755102040816327d0/
+
+		data epmach /2.22D-16/, uflow /2.23D-308/
    
 	
 
@@ -23162,7 +23526,7 @@ resi0102num,resmi0102num,resmi0112num,resi0112num,resi0202num,resi0212num,&
 resi1212num,v01,v02,v12,z01,z02,z12,n01,n02,n12)
 
 
-		use quadrature_15data
+		
          double precision a,b
          double precision dx,xm,xr,reskdenum,&
          resdenum,v01,v02,v12,num
@@ -23216,6 +23580,35 @@ resi1212num,v01,v02,v12,z01,z02,z12,n01,n02,n12)
 	reski1212num,fci1212num,f1i1212num,f2i1212num
 	 
 	 
+	 		 double precision,dimension(8)::xgk,wgk
+		 double precision,dimension(4)::wg
+		 double precision::epmach, uflow
+
+
+		data xgk /0.991455371120812639206854697526329d0, &
+				  0.949107912342758524526189684047851d0, &
+				  0.864864423359769072789712788640926d0, &
+				  0.741531185599394439863864773280788d0, &
+				  0.586087235467691130294144838258730d0, &
+				  0.405845151377397166906606412076961d0, &
+				  0.207784955007898467600689403773245d0, &
+				  0.000000000000000000000000000000000d0/
+
+		data wgk /0.022935322010529224963732008058970d0, &
+				  0.063092092629978553290700663189204d0, &
+				  0.104790010322250183839876322541518d0, &
+				  0.140653259715525918745189590510238d0, &
+				  0.169004726639267902826583426598550d0, &
+				  0.190350578064785409913256402421014d0, &
+				  0.204432940075298892414161999234649d0, &
+				  0.209482141084727828012999174891714d0/
+
+		data wg /0.129484966168869693270611432679082d0, &
+				 0.279705391489276667901467771423780d0, &
+				 0.381830050505118944950369775488975d0, &
+				 0.417959183673469387755102040816327d0/
+
+		data epmach /2.22D-16/, uflow /2.23D-308/
 	 
 	
 
@@ -23870,19 +24263,20 @@ subroutine derivasplinesfirstderiv(b0,np0,npar0,bfix0,fix0,zi010,zi120,&
 	!the02(2)=dexp(bh(4))
 	!the12(2)=dexp(bh(6))
     
-		 do i = 1, (nz01+2)
-      the01(i) = bh(i)**2
-	 end do
-	
-	
-	 do i = 1, (nz02+2)
-      the02(i) = bh(i+nz01+2)**2
-	 end do
-	
-	do i = 1, (nz12+2)
-      the12(i) = bh(i+nz01+2+nz02+2)**2
-	 end do
-	
+		  do i=1,nz01+2
+            the01(i-3)=(bh(i))**2
+!       the01(i-3)=dexp(bh(i))
+         end do
+         do i=1,nz02+2
+            j = nz01+2+i
+            the02(i-3)=(bh(j))**2
+!       the12(i-3)=dexp(bh(j))
+         end do
+         do i=1,nz12+2
+            j = nz02+2+nz01+2+i
+            the12(i-3)=(bh(j))**2
+!       the02(i-3)=dexp(bh(j))
+         end do
 	
 
 !---------- calcul des derivees premiere ------------------   
@@ -24369,21 +24763,20 @@ subroutine derivasplinessecondderiv(b0,np0,npar0,bfix0,fix0,zi010,zi120,&
     !the01(2)=dexp(bh(2))
 	!the02(2)=dexp(bh(4))
 	!the12(2)=dexp(bh(6))
-    
-		 do i = 1, (nz01+2)
-      the01(i) = bh(i)**2
-	 end do
-	
-	
-	 do i = 1, (nz02+2)
-      the02(i) = bh(i+nz01+2)**2
-	 end do
-	
-	do i = 1, (nz12+2)
-      the12(i) = bh(i+nz01+2+nz02+2)**2
-	 end do
-	
-
+    	  do i=1,nz01+2
+            the01(i-3)=(bh(i))**2
+!       the01(i-3)=dexp(bh(i))
+         end do
+         do i=1,nz02+2
+            j = nz01+2+i
+            the02(i-3)=(bh(j))**2
+!       the12(i-3)=dexp(bh(j))
+         end do
+         do i=1,nz12+2
+            j = nz02+2+nz01+2+i
+            the12(i-3)=(bh(j))**2
+!       the02(i-3)=dexp(bh(j))
+         end do
 
 !---------- calcul des derivees premiere ------------------   
 

@@ -1,0 +1,5 @@
+ start loop
+ start case
+ case 7
+ start gauss
+ end gauss

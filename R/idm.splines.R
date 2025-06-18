@@ -50,6 +50,7 @@ idm.splines<-function(b,clustertype,epsa,epsb,epsd,nproc,maxiter,size_V,size_spl
   
 
   # if do not fix more splines parameters step.sequential==F
+
  
   if(step.sequential==F){
     
