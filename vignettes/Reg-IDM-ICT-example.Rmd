@@ -155,7 +155,7 @@ diag(cov)<-1
 #scale.waittime=0.18,shape.waittime=1.8,
 #scale.lifetime=0.15,shape.lifetime=2.3,
 #scale.illtime=0.14,shape.illtime=2.2,
-rep<-2
+rep<-1
 simu<-HIDeM::simulateIDM(n=2000,seed=rep,
                   scale.waittime=0.07,shape.waittime=3.4,
                   scale.lifetime=0.085,shape.lifetime=3.4,
@@ -456,6 +456,7 @@ Based on the variable selection made in Reg IDM-ICT, we can re-estimate the mode
                                 lambda02=lambda02,B=start,
                                 maxiter=100)
   
+
   
   
 ```
@@ -464,6 +465,7 @@ Based on the variable selection made in Reg IDM-ICT, we can re-estimate the mode
 remodelexample<-HIDeM::remodelexample
 summary(remodelexample)
 print(remodelexample)
+
 ```
 
 As we are in simulation setting we can evaluate its predicitive abilities using : The predictive ability is evaluated by the Mean Square Error on the probability for a healthy individual of becoming diseased at a time $u$ between 0 and t, 
