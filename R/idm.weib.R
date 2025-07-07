@@ -41,7 +41,6 @@ idm.weib<-function(b,fix0,size_V,
   bfix<-b[fix0==1]
   b<-b[fix0==0]
 
-
   # maximise loglik 
 
       out<- marqLevAlg::mla(b=b,

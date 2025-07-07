@@ -259,6 +259,8 @@ grmlaweib<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
   if(sum(fix[1:6])==6){
     svar<-NULL
   }else{svar<-b[1:(6-start)]}
+  
+  if(npm>6){
   ball<-b[(6-start+1):(npm)]
   npm_all<-length(ball)
   grbeta<-rep(0,npm_all)
@@ -271,7 +273,6 @@ grmlaweib<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
   bb<-na.omit(bb)
   # b_positive<-pmax(ball,0)
   # return first and second derivatives of the loglik
-  if(length(ball)>0){
   grbeta<-.Fortran("firstderivaweib",
                    ## input
                    as.double(ball),
@@ -520,15 +521,43 @@ hessianmlaweib<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
                     dimnva01,dimnva02,dimnva12,nva01,nva02,nva12,
                     t0,t1,t2,t3,troncature){
   
-#browser()
   start<-sum(fix[1:6]==1)
   
   if(sum(fix[1:6])==6){
     svar<-NULL
   }else{svar<-b[1:(6-start)]}
   
+  if(npm==6){
+    Vall<-deriva(b=b,funcpa=idmlLikelihoodweib,npm=length(b),
+                 npar=npar,
+                 bfix=bfix,
+                 fix=fix,
+                 ctime=ctime,
+                 no=no,
+                 ve01=ve01,
+                 ve02=ve02,
+                 ve12=ve12,
+                 dimnva01=dimnva01,
+                 dimnva02=dimnva02,
+                 dimnva12=dimnva12,
+                 nva01=nva01,
+                 nva02=nva02,
+                 nva12=nva12,
+                 t0=t0,
+                 t1=t1,
+                 t2=t2,
+                 t3=t3,
+                 troncature=troncature)
+    
+    if(any(Vall$v==Inf)| any(Vall$v==-Inf) | any(is.na(Vall$v)) | any(is.nan(Vall$v))){
+      stop(paste0("Problem of computation on the hessian with finite differences. Verify your function specification...\n.
+                  Infinite value with finite parameters : b=",round(b,4),"\n"))
+    }
+    return(Vall$v[1:(length(b)*(length(b)+1)/2)])
+  }else{
   ball<-b[(6-start+1):(npm)]
   npm_all<-length(ball)
+
   output<-rep(0,(npm_all*(npm_all+1)/2)+npm_all)
   
   fixbeta<-fix
@@ -539,7 +568,6 @@ hessianmlaweib<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
   bb[which(fixbeta==1 & fix==0)]<-svar
   bb<-na.omit(bb)
   
-  if(length(ball)>0){
   output<-.Fortran("derivaweib",
                    ## input
                    as.double(ball),
@@ -700,35 +728,8 @@ hessianmlaweib<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
       
     }
   }
-  
-  
-}else{
-    Vall<-deriva(b=b,funcpa=idmlLikelihoodweib,npm=length(b),
-                 npar=npar,
-                 bfix=bfix,
-                 fix=fix,
-                 ctime=ctime,
-                 no=no,
-                 ve01=ve01,
-                 ve02=ve02,
-                 ve12=ve12,
-                 dimnva01=dimnva01,
-                 dimnva02=dimnva02,
-                 dimnva12=dimnva12,
-                 nva01=nva01,
-                 nva02=nva02,
-                 nva12=nva12,
-                 t0=t0,
-                 t1=t1,
-                 t2=t2,
-                 t3=t3,
-                 troncature=troncature)
+
     
-    if(any(Vall$v==Inf)| any(Vall$v==-Inf) | any(is.na(Vall$v)) | any(is.nan(Vall$v))){
-      stop(paste0("Problem of computation on the hessian with finite differences. Verify your function specification...\n.
-                  Infinite value with finite parameters : b=",round(b,4),"\n"))
-    }
-    return(Vall$v[1:(length(b)*(length(b)+1)/2)])
 }
 }
 

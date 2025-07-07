@@ -786,6 +786,7 @@ idm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                    
                                    pbr_compu<-0
                                    
+                                   #browser()
                                    output<-derivasplinediag(b=b,
                                                         npm=length(b),
                                                         npar=size_V,
