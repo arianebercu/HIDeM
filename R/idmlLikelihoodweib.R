@@ -54,6 +54,7 @@ idmlLikelihoodweib<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
            as.double(t2),
            as.double(t3),
            as.integer(troncature),
+           as.integer(10),
            likelihood_res=as.double(res),
            PACKAGE="HIDeM")$likelihood_res
 }
