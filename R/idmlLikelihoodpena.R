@@ -71,6 +71,7 @@ idmlLikelihoodpena<-function(b,npm,npar,bfix,fix,zi01,zi02,zi12,ctime,no,nz01,nz
            as.double(t2),
            as.double(t3),
            as.integer(troncature),
+          as.integer(10),
            likelihood_res=as.double(res),
            PACKAGE="HIDeM")$likelihood_res
 
