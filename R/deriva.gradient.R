@@ -789,6 +789,347 @@ hessianmlaweibana<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
     
     
   
+#################################################################################
+# FORTRAN-ANA UPDATE BASELINE INTENSITY PARAMETERS ##############################
+################################################################################
+# COMPLETE HESSIAN MATRIX
 
+reghessianmlaweibana<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
+                            dimnva01,dimnva02,dimnva12,nva01,nva02,nva12,
+                            t0,t1,t2,t3,troncature){
+  
+  res<-rep(0,npm+npm*(npm+1)/2)
+  #browser()
+  output<-.Fortran("derivaweibsecondderiv",
+                   ## input
+                   as.double(b),
+                   as.integer(npm),
+                   as.integer(npar),
+                   as.double(bfix),
+                   as.integer(fix),
+                   as.integer(ctime),
+                   as.integer(no),
+                   as.double(ve01),
+                   as.double(ve12),
+                   as.double(ve02),
+                   as.integer(dimnva01),
+                   as.integer(dimnva12),
+                   as.integer(dimnva02),
+                   as.integer(nva01),
+                   as.integer(nva12),
+                   as.integer(nva02),
+                   as.double(t0),
+                   as.double(t1),
+                   as.double(t2),
+                   as.double(t3),
+                   as.integer(troncature),
+                   likelihood_deriv=as.double(res),
+                   PACKAGE="HIDeM")$likelihood_deriv
+  
+  
+  if(any(output==Inf)| any(output==-Inf) | any(is.na(output)) | any(is.nan(output))){
+    
+    output[any(output==Inf)|any(is.na(output)) | any(is.nan(output))]<-.Machine$double.eps
+    output[any(output==-Inf)]<--.Machine$double.eps
+    
+  }
+  bb<-rep(NA,npar)
+  bb[which(fix==0)]<-b
+  bb[which(fix==1)]<-bfix
+  
+  nweib<-sum(fix[1:6]==0)
+  min<-npm
+  max<-min+nweib*(nweib+1)/2+nweib*(npm-nweib)
+  Vweib<-matrix(0,npm,npm)
+  
+  if(nweib>0){
+    
+    val<-c(output[(min+1):(max)],rep(0,(npm-nweib)*(npm-nweib+1)/2))
+    Vweib[lower.tri(Vweib,diag=TRUE)] <- val
+    Vweib[1:nweib,1:nweib]<-4*matrix(bb[which(fix[1:6]==0)],ncol=1)%*%bb[which(fix[1:6]==0)]*Vweib[1:nweib,1:nweib]+diag(output[1:nweib])*2
+    
+    
+  }
+  
+  #browser()
+  return(-t(Vweib)[upper.tri(Vweib,diag=T)])
+  
+}
+    
+#################################################################################
+# FORTRAN-ANA UPDATE FOR BASELINE INTENSITY PARAMETERS #####################################################################
+################################################################################
+# ATTENTION NO POSSIBLE FIX PARAMETERS IN FORTRAN
+
+reggrmlasplineana<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
+                       dimnva01,dimnva02,dimnva12,nva01,nva02,nva12,
+                       nz01,nz02,nz12,zi01,zi02,zi12,
+                       t0,t1,t2,t3,troncature){
+  
+  
+  res<-rep(0,npm)
+  output<-.Fortran("derivasplinesfirstderiv",
+           ## input
+           as.double(b),
+           as.integer(npm),
+           as.integer(npar),
+           as.double(bfix),
+           as.integer(fix),
+           as.double(zi01),
+           as.double(zi12),
+           as.double(zi02),
+           as.integer(ctime),
+           as.integer(no),
+           as.integer(nz01),
+           as.integer(nz12),
+           as.integer(nz02),
+           as.double(ve01),
+           as.double(ve12),
+           as.double(ve02),
+           as.integer(dimnva01),
+           as.integer(dimnva12),
+           as.integer(dimnva02),
+           as.integer(nva01),
+           as.integer(nva12),
+           as.integer(nva02),
+           as.double(t0),
+           as.double(t1),
+           as.double(t2),
+           as.double(t3),
+           as.integer(troncature),
+           likelihood_deriv=as.double(res),
+           PACKAGE="HIDeM")$likelihood_deriv
+
+  nn<-nz01+nz02+nz12+6
+  
+  if(length(-c(which(fix[1:nn]==1)))>0){
+  output<-output[-c(which(fix[1:nn]==1))]}
+  
+  if(any(output==Inf)| any(output==-Inf) | any(is.na(output)) | any(is.nan(output))){
+    
+    output[any(output==Inf)|any(is.na(output)) | any(is.nan(output))]<-.Machine$double.eps
+    output[any(output==-Inf)]<--.Machine$double.eps
+    
+  }
+  sol<-output
+  
+  bb<-rep(NA,npar)
+  bb[which(fix==0)]<-b
+  bb[which(fix==1)]<-bfix
+  np<-sum(fix[1:nn]==0)
+  sol[1:np]<-sol[1:np]*2*bb[which(fix[1:nn]==0)]
+# 
+# 
+# 
+# 
+    # test<-deriva.gradient(b=b,
+    #                       funcpa=idmlLikelihood,
+    #                       npm=npm,
+    #                       npar=npar,
+    #                       bfix=bfix,
+    #                       fix=fix,
+    #                       zi01=zi01,
+    #                       zi02=zi02,
+    #                       zi12=zi12,
+    #                       ctime=ctime,
+    #                       no=no,
+    #                       nz01=nz01,
+    #                       nz02=nz02,
+    #                       nz12=nz12,
+    #                       ve01=ve01,
+    #                       ve02=ve02,
+    #                       ve12=ve12,
+    #                       dimnva01=dimnva01,
+    #                       dimnva02=dimnva02,
+    #                       dimnva12=dimnva12,
+    #                       nva01=nva01,
+    #                       nva02=nva02,
+    #                       nva12=nva12,
+    #                       t0=t0,
+    #                       t1=t1,
+    #                       t2=t2,
+    #                       t3=t3,
+    #                       troncature=troncature)
+    # 
+    # 
+    # sol
+    # test$v
+    #browser()
+  return(sol)
+}
+
+#################################################################################
+# FORTRAN-ANA UPDATE FOR BASELINE INTENSITY PARAMETERS #####################################################################
+################################################################################
+# ATTENTION NO POSSIBLE FIX PARAMETERS IN FORTRAN
+# COMPLETE HESSIAN MATRIX 
+
+reghessianmlasplineana<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
+                              dimnva01,dimnva02,dimnva12,nva01,nva02,nva12,
+                              nz01,nz02,nz12,zi01,zi02,zi12,
+                              t0,t1,t2,t3,troncature){
+  
+  res<-rep(0,npm+npm*(npm+1)/2)
+
+  output<-.Fortran("derivasplinessecondderiv",
+                   ## input
+                   as.double(b),
+                   as.integer(npm),
+                   as.integer(npar),
+                   as.double(bfix),
+                   as.integer(fix),
+                   as.double(zi01),
+                   as.double(zi12),
+                   as.double(zi02),
+                   as.integer(ctime),
+                   as.integer(no),
+                   as.integer(nz01),
+                   as.integer(nz12),
+                   as.integer(nz02),
+                   as.double(ve01),
+                   as.double(ve12),
+                   as.double(ve02),
+                   as.integer(dimnva01),
+                   as.integer(dimnva12),
+                   as.integer(dimnva02),
+                   as.integer(nva01),
+                   as.integer(nva12),
+                   as.integer(nva02),
+                   as.double(t0),
+                   as.double(t1),
+                   as.double(t2),
+                   as.double(t3),
+                   as.integer(troncature),
+                   likelihood_deriv=as.double(res),
+                   PACKAGE="HIDeM")$likelihood_deriv
+  
+  
+  
+  if(any(output==Inf)| any(output==-Inf) | any(is.na(output)) | any(is.nan(output))){
+    
+    output[any(output==Inf)|any(is.na(output)) | any(is.nan(output))]<-.Machine$double.eps
+    output[any(output==-Inf)]<--.Machine$double.eps
+    
+  }
+  bb<-rep(NA,npar)
+  bb[which(fix==0)]<-b
+  bb[which(fix==1)]<-bfix
+  
+  nn<-nz01+nz02+nz12+6
+  nspline<-sum(fix[1:nn]==0)
+  min<-npm
+  max<-min+nspline*(nspline+1)/2+nspline*(npm-nspline)
+  Vspline<-matrix(0,npm,npm)
+  
+  if(nspline>0){
+    
+    val<-c(output[(min+1):(max)],rep(0,(npm-nspline)*(npm-nspline+1)/2))
+    Vspline[lower.tri(Vspline,diag=TRUE)] <- val
+    Vspline[1:nspline,1:nspline]<-4*matrix(bb[which(fix[1:nn]==0)],ncol=1)%*%bb[which(fix[1:nn]==0)]*Vspline[1:nspline,1:nspline]+diag(output[1:nspline])*2
+   
+    
+  }
+# 
+   #  test<-deriva(b=b,
+   #                        funcpa=idmlLikelihood,
+   #                        npm=npm,
+   #                        npar=npar,
+   #                        bfix=bfix,
+   #                        fix=fix,
+   #                        zi01=zi01,
+   #                        zi02=zi02,
+   #                        zi12=zi12,
+   #                        ctime=ctime,
+   #                        no=no,
+   #                        nz01=nz01,
+   #                        nz02=nz02,
+   #                        nz12=nz12,
+   #                        ve01=ve01,
+   #                        ve02=ve02,
+   #                        ve12=ve12,
+   #                        dimnva01=dimnva01,
+   #                        dimnva02=dimnva02,
+   #                        dimnva12=dimnva12,
+   #                        nva01=nva01,
+   #                        nva02=nva02,
+   #                        nva12=nva12,
+   #                        t0=t0,
+   #                        t1=t1,
+   #                        t2=t2,
+   #                        t3=t3,
+   #                        troncature=troncature)
+   #  V<-matrix(0,npm,npm)
+   # 
+   # V[upper.tri(V,diag=TRUE)] <- test$v[(1):(max-min)]
+   # 
+   # View(-t(Vspline))
+   # View(V)
+  #browser()
+
+  # hessian is - second derivatives 
+  #V<-V+t(V)
+  #diag(V)<-diag(V)/2
+  # hessian is - second derivatives 
+  #browser()
+  return(-t(Vspline)[upper.tri(Vspline,diag=T)])
+  
+}
+
+
+#################################################################################
+# FORTRAN-ANA UPDATE FOR BASELINE INTENSITY PARAMETERS ##########################
+################################################################################
+
+reggrmlaweibana<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
+                          dimnva01,dimnva02,dimnva12,nva01,nva02,nva12,
+                          t0,t1,t2,t3,troncature,lambda,alpha,penalty.factor,penalty){
+  
+  
+  res<-rep(0,npm)
+  output<-.Fortran("derivaweibfirstderiv",
+                   ## input
+                   as.double(b),
+                   as.integer(npm),
+                   as.integer(npar),
+                   as.double(bfix),
+                   as.integer(fix),
+                   as.integer(ctime),
+                   as.integer(no),
+                   as.double(ve01),
+                   as.double(ve12),
+                   as.double(ve02),
+                   as.integer(dimnva01),
+                   as.integer(dimnva12),
+                   as.integer(dimnva02),
+                   as.integer(nva01),
+                   as.integer(nva12),
+                   as.integer(nva02),
+                   as.double(t0),
+                   as.double(t1),
+                   as.double(t2),
+                   as.double(t3),
+                   as.integer(troncature),
+                   likelihood_deriv=as.double(res),
+                   PACKAGE="HIDeM")$likelihood_deriv
+  
+  
+  if(any(output==Inf)| any(output==-Inf) | any(is.na(output)) | any(is.nan(output))){
+    
+    output[any(output==Inf)|any(is.na(output)) | any(is.nan(output))]<-.Machine$double.eps
+    output[any(output==-Inf)]<--.Machine$double.eps
+    
+  }
+  sol<-output
+  if(sum(fix[1:6])!=6){
+    
+    bb<-rep(NA,npar)
+    bb[which(fix==0)]<-b
+    bb[which(fix==1)]<-bfix
+    
+    sol[1:(6-sum(fix[1:6]))]<-sol[1:(6-sum(fix[1:6]))]*2*bb[which(fix[1:6]==0)]
+  }
+  #browser()
+  return(sol)
+}
  
 
