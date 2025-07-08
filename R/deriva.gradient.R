@@ -256,19 +256,21 @@ grmlaweib<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
   if(sum(fix[1:6])==6){
     svar<-NULL
   }else{svar<-b[1:(6-start)]}
-  ball<-b[(6-start+1):(npm)]
-  npm_all<-length(ball)
-  grbeta<-rep(0,npm_all)
-  
-  fixbeta<-fix
-  fixbeta[1:6]<-1
-  bb<-rep(NA,npar)
-  bb[which(fix==1)]<-bfix
-  bb[which(fixbeta==1 & fix==0)]<-svar
-  bb<-na.omit(bb)
+ 
   # b_positive<-pmax(ball,0)
   # return first and second derivatives of the loglik
-  if(length(ball)>0){
+  if(npm>6){
+    
+    ball<-b[(6-start+1):(npm)]
+    npm_all<-length(ball)
+    grbeta<-rep(0,npm_all)
+    
+    fixbeta<-fix
+    fixbeta[1:6]<-1
+    bb<-rep(NA,npar)
+    bb[which(fix==1)]<-bfix
+    bb[which(fixbeta==1 & fix==0)]<-svar
+    bb<-na.omit(bb)
   grbeta<-.Fortran("firstderivaweib",
                    ## input
                    as.double(ball),
@@ -403,8 +405,7 @@ grmlaweib<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
 grmlaweibana<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
                    dimnva01,dimnva02,dimnva12,nva01,nva02,nva12,
                    t0,t1,t2,t3,troncature,lambda,alpha,penalty.factor,penalty,gausspoint){
-  
- 
+
 res<-rep(0,npm)
 output<-.Fortran("derivaweiballparafirstderiv",
                  ## input
@@ -451,26 +452,27 @@ hessianmlaweib<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
                     dimnva01,dimnva02,dimnva12,nva01,nva02,nva12,
                     t0,t1,t2,t3,troncature,gausspoint){
   
-#browser()
   start<-sum(fix[1:6]==1)
   
   if(sum(fix[1:6])==6){
     svar<-NULL
   }else{svar<-b[1:(6-start)]}
   
-  ball<-b[(6-start+1):(npm)]
-  npm_all<-length(ball)
-  output<-rep(0,(npm_all*(npm_all+1)/2)+npm_all)
   
-  fixbeta<-fix
-  fixbeta[1:6]<-1
   
-  bb<-rep(NA,npar)
-  bb[which(fix==1)]<-bfix
-  bb[which(fixbeta==1 & fix==0)]<-svar
-  bb<-na.omit(bb)
-  
-  if(length(ball)>0){
+  if(npm>6){
+    
+    ball<-b[(6-start+1):(npm)]
+    npm_all<-length(ball)
+    output<-rep(0,(npm_all*(npm_all+1)/2)+npm_all)
+    
+    fixbeta<-fix
+    fixbeta[1:6]<-1
+    
+    bb<-rep(NA,npar)
+    bb[which(fix==1)]<-bfix
+    bb[which(fixbeta==1 & fix==0)]<-svar
+    bb<-na.omit(bb)
   output<-.Fortran("derivaweib",
                    ## input
                    as.double(ball),
@@ -636,6 +638,7 @@ hessianmlaweib<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
   
   
 }else{
+  
     Vall<-deriva(b=b,f=idmlLikelihoodweib,npm=length(b),
                  npar=npar,
                  bfix=bfix,
@@ -671,7 +674,7 @@ hessianmlaweibana<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
                          t0,t1,t2,t3,troncature,gausspoint){
   
   res<-rep(0,npm+npm*(npm+1)/2)
-  #browser()
+
   output<-.Fortran("derivaweiballpara",
                    ## input
                    as.double(b),
@@ -715,8 +718,9 @@ hessianmlaweibana<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
       val<-c(output[(min+1):(max)],rep(0,(npm-nweib)*(npm-nweib+1)/2))
       Vweib[lower.tri(Vweib,diag=TRUE)] <- val
      Vweib[1:nweib,1:nweib]<-4*matrix(b[which(fix[1:6]==0)],ncol=1)%*%b[which(fix[1:6]==0)]*Vweib[1:nweib,1:nweib]+diag(output[1:nweib])*2
-     Vweib[(nweib+1):npm,1:nweib]<-2*matrix(rep(b[which(fix[1:6]==0)],npm-nweib),ncol=nweib,byrow=T)*
-       Vweib[(nweib+1):npm,1:nweib]
+     if(npm>nweib){
+       Vweib[(nweib+1):npm,1:nweib]<-2*matrix(rep(b[which(fix[1:6]==0)],npm-nweib),ncol=nweib,byrow=T)*
+       Vweib[(nweib+1):npm,1:nweib]}
      
       }
     
