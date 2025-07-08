@@ -83,6 +83,8 @@
 #' is na.omit. Another possible value is NULL.
 #' @param scale.X do you want to center and reduce your explanatory variables
 #' @param posfix index of fixed parameters 
+#' @param timedep12 TRUE if time dependent on 1 --> 2 otherwise FALSE (default)
+#' @param semiMarkov TRUE if semi Markov on 1 --> 2 otherwise FALSE (default)
 #' @param gausspoint gauss quadrature points in the approximation of integrals in the likelihood
 #' @param lambda01 Lambda on transition 0 --> 1
 #' @param lambda02 Lambda on transition 0 --> 2
@@ -196,6 +198,9 @@ idm <- function(formula01,
                 na.action = na.fail,
                 B=NULL,
                 posfix=NULL,
+
+                timedep12=FALSE,
+                semiMarkov=TRUE,
                 gausspoint=10,
                 step.sequential=F,
                 option.sequential=list(cutoff=10^-3,
@@ -293,15 +298,25 @@ idm <- function(formula01,
         Xnames02 <- colnames(x02)
     else
         Xnames02 <- NULL
-    ## formula12
+    nvat12dep <- as.numeric(timedep12)
+    
+    semiMark <- as.numeric(semiMarkov)
+    
     x12 <- model.matrix(formula12,data=m12)[, -1, drop = FALSE]
     NC12 <- NCOL(x12)
 
 
-    if (NC12>0)
-        Xnames12 <- colnames(x12)
-    else
-        Xnames12 <- NULL
+    if (NC12>0 & nvat12dep!=1){
+      Xnames12 <- colnames(x12) 
+    }else{
+      if (nvat12dep==1){
+        
+        x12 <- cbind(x12,"IllnessTime"=1)
+        NC12 = NC12 + 1
+        Xnames12 <-colnames(x12)
+        m12 <- x12
+      }else{
+        Xnames12 <- NULL}}
 
 
     #################################################################################
@@ -820,6 +835,39 @@ idm <- function(formula01,
 
         #browser()
         #save(ctime,file="testctime.RData")
+        if(nvat12dep==1){
+          out <- causal.idm.weib(b=b,
+                          fix0=fix0,
+                          size_V=size_V,
+                          clustertype=clustertype,
+                          epsa=epsa,
+                          epsb=epsb,
+                          epsd=epsd,
+                          eps.eigen=eps.eigen,
+                          nproc=nproc,
+                          maxiter=maxiter,
+                          ctime=ctime,
+                          N=N,
+                          ve01=ve01,
+                          ve02=ve02,
+                          ve12=ve12,
+                          dimnva01=dimnva01,
+                          dimnva02=dimnva02,
+                          dimnva12=dimnva12,
+                          nvat01=nvat01,
+                          nvat02=nvat02,
+                          nvat12=nvat12,
+                          nvat12dep=nvat12dep,
+                          semiMark = semiMark,
+                          t0=t0,
+                          t1=t1,
+                          t2=t2,
+                          t3=t3,
+                          idm=idm,
+                          idd=idd,
+                          ts=ts,
+                          troncature=troncature)
+        }else{
         out <- idm.weib(b=b,
                                     fix0=fix0,
                                     size_V=size_V,
@@ -848,8 +896,8 @@ idm <- function(formula01,
                                     idd=idd,
                                     ts=ts,
                                     troncature=troncature,
-                                    gausspoint=gausspoint
-                        analytics=analytics)
+                                    gausspoint=gausspoint,
+                        analytics=analytics)}
             
         
         
@@ -912,12 +960,25 @@ idm <- function(formula01,
                          "modelPar1 12",
                          "modelPar2 12")
         
+         if(nvat12dep==1){
+          XnamesTemp <- c(Xnames01,Xnames02,Xnames12)
+          # if (timedep12) XnamesTemp <- c(Xnames01,Xnames02,Xnames12,"IllnessTime")
+          
+          names(beta)<- c(theta_names,XnamesTemp)
+          names(fix)<- c(theta_names,XnamesTemp)
+          colnames(V) <- c(theta_names,XnamesTemp)
+          rownames(V) <- c(theta_names,XnamesTemp)
+          colnames(H) <- c(theta_names,XnamesTemp)
+          rownames(H) <- c(theta_names,XnamesTemp)
+        }else{
+        
         names(beta)<- c(theta_names,c(Xnames01,Xnames02,Xnames12))
         names(fix)<- c(theta_names,c(Xnames01,Xnames02,Xnames12))
         colnames(V) <- c(theta_names,c(Xnames01,Xnames02,Xnames12))
         rownames(V) <- c(theta_names,c(Xnames01,Xnames02,Xnames12))
         colnames(H) <- c(theta_names,c(Xnames01,Xnames02,Xnames12))
-        rownames(H) <- c(theta_names,c(Xnames01,Xnames02,Xnames12))
+        rownames(H) <- c(theta_names,c(Xnames01,Xnames02,Xnames12))}
+        
         
         modelPar<-beta[1:6]
         
