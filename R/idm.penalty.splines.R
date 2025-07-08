@@ -46,8 +46,6 @@
 ##' @param penalty which penalty to consider
 ##' @param penalty.factor which variable should be penalised
 ##' @param gausspoint number of points in gauss quadrature
-##' @param methodCV methodolgy to optimise penalised parameters 
-##' @param partialH which hessian is computed for Newton-Raphson path of penalised parameters
 #' @importFrom foreach "%do%"
 #' @importFrom foreach "%dopar%"
 #' @author R: Ariane Bercu <ariane.bercu@@u-bordeaux.fr> 
@@ -58,7 +56,7 @@ idm.penalty.splines<-function(b,fix0,size_V,size_spline,
                       ve01,ve02,ve12,dimnva01,dimnva02,dimnva12,nvat01,nvat02,nvat12,
                       t0,t1,t2,t3,troncature,gausspoint,
                       nlambda01,lambda01,nlambda02,lambda02,
-                      nlambda12,lambda12,alpha,penalty.factor,penalty,methodCV,partialH){
+                      nlambda12,lambda12,alpha,penalty.factor,penalty){
   
   
   # need to keep original fix to calculate for beta 
@@ -128,7 +126,6 @@ idm.penalty.splines<-function(b,fix0,size_V,size_spline,
   fix0.beta<-fix000
   fix0.beta[(size_spline+1):size_V]<-rep(1,length(beta.start))
   
-  if(methodCV=="mla"){
   
   if(nproc >1){
     
