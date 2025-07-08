@@ -13,6 +13,7 @@
 #'   \item{seen.exit}{death indicator, 0=censored, 1=dead}
 #'   \item{X1 à X50}{Covariables simulées}
 #' }
+#' @docType data
 #' @source Simulations internes
 #' @usage data(Paq1000)
 #' @keywords datasets
@@ -21,7 +22,7 @@
 #' m01example dataset
 #'
 #' Description of the m01example dataset.
-#'
+#' @docType data
 #' @format model on transition specific 0 to 1 using data set simulated
 #' @usage data(m01example)
 #' @keywords datasets
@@ -30,7 +31,7 @@
 #' m02example dataset
 #'
 #' Description of the m02example dataset.
-#'
+#' @docType data
 #' @format model on transition specific 0 to 2 using data set simulated
 #' @usage data(m02example)
 #' @keywords datasets
@@ -39,7 +40,7 @@
 #' m12example dataset
 #'
 #' Description of the m12example dataset.
-#'
+#' @docType data
 #' @format model on transition specific 1 to 2 using data set simulated
 #' @usage data(m12example)
 #' @keywords datasets
@@ -48,7 +49,7 @@
 #' m01Paq1000 dataset
 #'
 #' Description of the m01Paq1000 dataset.
-#'
+#' @docType data
 #' @format model on transition specific 0 to 1 using Paquid data set
 #' @usage data(m01Paq1000)
 #' @keywords datasets
@@ -57,7 +58,7 @@
 #' m02Paq1000 dataset
 #'
 #' Description of the m02Paq1000 dataset.
-#'
+#' @docType data
 #' @format model on transition specific 0 to 2 using Paquid data set
 #' @usage data(m02Paq1000)
 #' @keywords datasets
@@ -66,7 +67,7 @@
 #' m12Paq1000 dataset
 #'
 #' Description of the m12Paq1000 dataset.
-#'
+#' @docType data
 #' @format model on transition specific 1 to 2 using Paquid data set
 #' @usage data(m12Paq1000)
 #' @keywords datasets
@@ -75,7 +76,7 @@
 #' bootPaq1000 dataset
 #'
 #' Description of the bootPaq1000 dataset.
-#'
+#' @docType data
 #' @format boostrap model on Paquid data set
 #' @usage data(bootPaq1000)
 #' @keywords datasets
@@ -84,7 +85,7 @@
 #' modelexample dataset
 #'
 #' Description of the modelexample dataset.
-#'
+#' @docType data
 #' @format Final model on simulated data set
 #' @usage data(modelexample)
 #' @keywords datasets
@@ -93,7 +94,7 @@
 #' modelPaq1000 dataset
 #'
 #' Description of the modelPaq1000 dataset.
-#'
+#' @docType data
 #' @format Final model on Paquid data set
 #' @usage data(modelPaq1000)
 #' @keywords datasets
@@ -102,7 +103,7 @@
 #' mvoidexample dataset
 #'
 #' Description of the mvoidexample dataset.
-#'
+#' @docType data
 #' @format void model on simulated data set
 #' @usage data(mvoidexample)
 #' @keywords datasets
@@ -111,7 +112,7 @@
 #' mvoidPaq1000 dataset
 #'
 #' Description of the mvoidPaq1000 dataset.
-#'
+#' @docType data
 #' @format void model on Paquid data set
 #' @usage data(mvoidPaq1000)
 #' @keywords datasets
@@ -120,7 +121,7 @@
 #' remodelexample dataset
 #'
 #' Description of the remodelexample dataset.
-#'
+#' @docType data
 #' @format Re estimated final model on simulated data set
 #' @usage data(remodelexample)
 #' @keywords datasets
@@ -129,7 +130,7 @@
 #' remodelPaq1000 dataset
 #'
 #' Description of the remodelPaq1000 dataset.
-#'
+#' @docType data
 #' @format Re estimated final model on Paquid data set
 #' @usage data(remodelPaq1000)
 #' @keywords datasets
