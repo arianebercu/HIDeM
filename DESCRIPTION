@@ -33,8 +33,10 @@ License: GPL (>= 2)
 RoxygenNote: 7.3.2
 Encoding: UTF-8
 Suggests: 
+    knitr, 
+	rmarkdown,
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
 VignetteBuilder: knitr
-Suggests: knitr, rmarkdown, testthat (>= 3.0.0)
+
 
