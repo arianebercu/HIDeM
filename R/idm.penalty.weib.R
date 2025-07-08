@@ -1536,8 +1536,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                  b<-c(s,beta)
                                  bfix<-b[fix0==1]
                                  b<-b[fix0==0]
-                                 
-                                browser()
+                                
                                  output<-derivaweib(b=b,
                                                     npm=length(b),
                                                     npar=size_V,
