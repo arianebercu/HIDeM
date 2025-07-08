@@ -14,7 +14,7 @@ Description: Estimation irreversible illness-death models with possibly interval
     estimation and selection are obtained by maximising the penalised log-likelihood using 
     a proximal gradient algorithm.
 Depends:
-    R (>= 1.9.1),
+    R (>= 3.5),
     prodlim (>= 1.4.9)
 Imports:
     lava (>= 1.4.1),
@@ -38,5 +38,4 @@ Suggests:
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
 VignetteBuilder: knitr
-
-
+LazyData: true
