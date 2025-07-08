@@ -77,7 +77,9 @@ extern void F77_NAME(derivasplinessecondderiv)(double *,int *, int *, double *,i
                             int *,int *, double *,double*, double *,
                             int *,int *,int *, int *,int*, int *,int *,int *, double *,double*, double *, double *,int *,double *);
 
-
+ extern void F77_NAME(derivaweibsecondderiv)(double *,int *, int *, double *,int*,
+                int *,int *, double *,double*, double *,
+                int *,int *,int *,int *,int *,int *, double *,double*, double *, double *,int *,double *);
 static const R_FortranMethodDef FortranEntries[] = {
     {"idmlikelihood",(DL_FUNC) &F77_NAME(idmlikelihood),    29},
     {"idmlikelihoodweib",(DL_FUNC) &F77_NAME(idmlikelihoodweib),    23},
