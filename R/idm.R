@@ -98,6 +98,7 @@
 #' computed for the Newton-Raphson path for the penalised regression parameter. If FALSE, the 
 #' complete hessian is computed.
 #' @param step.sequential should we use the optimisation version to fix splines 
+#' @param partialH True if should use only diagonal terms of the derivatives of beta
 #' @param clustertype in which cluster to work
 #' @param nproc number of cluster
 #' @param option.sequential parameters to give if you want to do the optimisation version to
@@ -219,6 +220,7 @@ idm <- function(formula01,
                                     ifelse(penalty%in%c("elasticnet"),0.5,1))),
                 nproc=1,
                 analytics=T,
+                partialH=F,
                 clustertype="FORK",
                 envir=parent.frame()){
 
@@ -1247,7 +1249,8 @@ idm <- function(formula01,
                              alpha=alpha,
                              penalty.factor=penalty.factor,
                              penalty=penalty,
-                                    analytics=analytics)
+                                    analytics=analytics,
+                             partialH=partialH)
             
 ############################## Output   ########################################
 ############################## on beta and HR   ################################
@@ -1573,7 +1576,8 @@ idm <- function(formula01,
                                penalty.factor=penalty.factor,
                                penalty=penalty,
                                gausspoint=gausspoint,
-                                     analytics=analytics)
+                                     analytics=analytics,
+                               partialH=partialH)
             
               
               
