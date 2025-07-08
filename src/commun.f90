@@ -31,7 +31,7 @@ module commun
         integer,save::troncature,ind_hess
         double precision,dimension(:,:),allocatable,save::hessienne     
 !-------------------  dace1 -------------------------------------------
-        double precision,dimension(:),allocatable,save::zi
+        double precision,dimension(:),allocatable,save::zi,ispline,mspline
 !-------------------  dace -------------------------------------------
         integer::nz,verSurv
 !-------------------  ve1 -------------------------------------------
