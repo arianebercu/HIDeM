@@ -149,6 +149,120 @@ sim.idmModel <- function(x,
               plot=plot))
 }
 
+simdep.idmModel <- function(x,
+                         n,
+                         plot,
+                         latent=FALSE,
+                         keep.inspectiontimes=FALSE,
+                         ...){
+  # simulate latent data
+  #class(x) <- "lvm"
+  #dat <- lava::sim(x,n=n,...)
+  dat<-x[x$num.visit==1,]
+  T01<-dat$latent.illtime
+  T02<-dat$latent.lifetime
+  T12<-dat$latent.waittime
+  dat$illtime <- dat$latent.illtime
+  dat$illstatus <- 1*((dat$illtime<dat$latent.lifetime)& (dat$illtime<dat$administrative.censoring))
+  #dat$illtime[dat$illtime>dat$latent.lifetime] <- 0
+  # construct lifetime
+  # for ill subjects as the sum of the time to illness (illtime) and
+  # the time spent in the illness state (waittime)
+  dat$lifetime <- dat$latent.lifetime
+  dat$lifetime[dat$illstatus==1]<-dat$latent.waittime[dat$illstatus==1]
+  id.nodem.death<-rep(0,n)
+  
+  #id<-which(T01<T02 & T01<18 & T12<18 & T01>dat$censtime)
+  # interval censored illtime
+  ipos <- grep("inspection[0-9]+",names(dat))
+  
+  if (length(ipos)>0) {
+    # compute inspection times
+    # make sure all inspection times are in the future
+    # of the previous inspection time
+    iframe <- dat[,ipos]
+    dat <- dat[,-ipos]
+    
+    interval <- do.call("rbind",lapply(1:n,function(i){
+      
+      ## remove duplicates
+      itimes <- unique(iframe[i,])
+      
+      ## remove inspection times that are 
+      ## larger than the individual lifetime
+      itimes <- itimes[itimes<dat$lifetime[i]]
+      ## and those larger than the right censoring time
+      itimes <- itimes[itimes<=dat$censtime[i]]
+      ## if all inspection times are censored
+      ## set a single one at 0
+      #if (length(itimes)==0) {
+      #  itimes <- 0}
+      
+      ## mark the last inspection time 
+      #last.inspection <- itimes[length(itimes)]
+      ## find the interval where illness happens
+      
+      if (dat$illstatus[i]){
+        
+        if(dat$lifetime[i]>=dat$administrative.censoring[i]){
+          if(dat$latent.illtime[i]<dat$censtime[i]){
+            idL<-which(itimes<dat$illtime[i])
+            idR<-which(itimes>=dat$illtime[i])
+            L<-itimes[max(idL)]
+            R<-itimes[min(idR)]
+            c(L,R,dat$administrative.censoring[i],1,0)
+          }else{
+            c(dat$censtime[i],dat$censtime[i],dat$administrative.censoring[i],0,0)
+          }
+        }else{
+          if(dat$latent.illtime[i]<dat$censtime[i]){
+            idL<-which(itimes<dat$illtime[i])
+            idR<-which(itimes>=dat$illtime[i])
+            
+            #dat$lifetime[i]<R is equivalent to length(idR)==0
+            if(length(idR)==0){
+              L<-itimes[max(idL)]
+              c(L,L,dat$lifetime[i],-1,1)
+            }else{
+              R<-itimes[min(idR)]
+              L<-itimes[max(idL)]
+              c(L,R,dat$lifetime[i],1,1)
+            }
+          }else{
+            c(dat$censtime[i],dat$censtime[i],dat$lifetime[i],0,1)
+          }
+        }
+        
+        
+      }else{
+        
+        # check administrative censoring for death
+        if(dat$lifetime[i]<=dat$administrative.censoring[i]){
+          
+          c(itimes[length(itimes)],itimes[length(itimes)],dat$lifetime[i],0,1)
+        }else{
+          
+          c(itimes[length(itimes)],itimes[length(itimes)],dat$administrative.censoring[i],0,0)}
+      }
+    }))
+    colnames(interval) <- c("L","R","observed.lifetime","seen.ill","seen.exit")
+    # count illness not observed due to death 
+    dat <- cbind(dat,interval)
+    if (latent==FALSE)
+      dat <- dat[,-grep("latent\\.",names(dat))]
+    if (keep.inspectiontimes) dat <- cbind(dat,iframe)
+  }
+  id.nodem.death[which(dat$seen.ill==-1)]<-1
+  dat$seen.ill[dat$seen.ill==-1]<-0
+  
+  dat$T01<-T01
+  dat$T02<-T02
+  dat$T12<-T12
+  dat$id.nodem.death<-id.nodem.death
+  dat<-merge(dat[,!colnames(dat)%in%c("num.visit","visit","y")],x[,colnames(x)%in%c("ID","num.visit","visit","y")],by=c("ID"))
+  return(list(data=dat))
+}
+
 ##' @title Sample illness-death model data 
 ##' @description
 ##'  Simulate data from an illness-death model with interval censored event times
@@ -403,6 +517,262 @@ simulateIDM <- function(n=100,
   
   
   sim.idmModel(x=fit,n=n,plot=list(p2,surv01,p01,surv02,p02,surv12,p12))
+  
+}
+
+
+
+
+simulatedepIDM <- function(n=100,
+                        seed=1,
+                        scale.illtime=2.5,
+                        shape.illtime=8/100,
+                        scale.lifetime=2.5,
+                        shape.lifetime=8/100,
+                        scale.waittime=2.5,
+                        shape.waittime=8/100,
+                        prob.censoring=0.05,
+                        administrative.censoring=18,
+                        n.inspections=8,
+                        schedule=2.5,
+                        punctuality=0.5,
+                        nvar=10,
+                        mean=rep(0,10),
+                        cov=matrix(c(1,0,0,0,0,0,0,0,0,0,
+                                     0,1,0,0,0,0,0,0,0,0,
+                                     0,0,1,0,0,0,0,0,0,0,
+                                     0,0,0,1,0,0,0,0,0,0,
+                                     0,0,0,0,1,0,0,0,0,0,
+                                     0,0,0,0,0,1,0,0,0,0,
+                                     0,0,0,0,0,0,1,0,0,0,
+                                     0,0,0,0,0,0,0,1,0,0,
+                                     0,0,0,0,0,0,0,0,1,0,
+                                     0,0,0,0,0,0,0,0,0,1),nrow=10,ncol=10),
+                        x01=paste0("X",1:10),
+                        x02=paste0("X",1:10),
+                        x12=paste0("X",1:10),
+                        beta01=rep(0.5,10),
+                        beta02=rep(0.5,10),
+                        beta12=rep(0.5,10),
+                        B=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3),
+                        mu_sigma=0,
+                        beta0=0.5, beta1=0.5,
+                        alpha0_01=0.5, alpha_y_01=0.5, alpha_slope_01=0.5,
+                        alpha0_02=0.5, alpha_y_02=0.5, alpha_slope_02=0.5,
+                        alpha0_12=0.5, alpha_y_12=0.5, alpha_slope_12=0.5){
+  
+  ##############################################################################
+  ####################### check entry parameters ###############################
+  ##############################################################################
+  gaussKronrod <-
+    function (k = 15) {
+      sk <- c(-0.949107912342758524526189684047851, -0.741531185599394439863864773280788, -0.405845151377397166906606412076961, 0,
+              0.405845151377397166906606412076961, 0.741531185599394439863864773280788, 0.949107912342758524526189684047851, -0.991455371120812639206854697526329,
+              -0.864864423359769072789712788640926, -0.586087235467691130294144838258730, -0.207784955007898467600689403773245, 0.207784955007898467600689403773245,
+              0.586087235467691130294144838258730, 0.864864423359769072789712788640926, 0.991455371120812639206854697526329)
+      wk15 <- c(0.063092092629978553290700663189204, 0.140653259715525918745189590510238, 0.190350578064785409913256402421014,
+                0.209482141084727828012999174891714, 0.190350578064785409913256402421014, 0.140653259715525918745189590510238, 0.063092092629978553290700663189204,
+                0.022935322010529224963732008058970, 0.104790010322250183839876322541518, 0.169004726639267902826583426598550, 0.204432940075298892414161999234649,
+                0.204432940075298892414161999234649, 0.169004726639267902826583426598550, 0.104790010322250183839876322541518, 0.022935322010529224963732008058970)
+      wk7 <- c(0.129484966168869693270611432679082, 0.279705391489276667901467771423780, 0.381830050505118944950369775488975,
+               0.417959183673469387755102040816327, 0.381830050505118944950369775488975, 0.279705391489276667901467771423780, 0.129484966168869693270611432679082)
+      if (k == 7)
+        list(sk = sk[1:7], wk = wk7)
+      else
+        list(sk = sk, wk = wk15)
+    }
+  
+  sk <- gaussKronrod()$sk
+  wk <- gaussKronrod()$wk
+  if(!inherits(seed,c("numeric","integer")) | length(seed)!=1|seed<=0)stop("The seed has to be a numeric or integer higher than 0.")
+  if(!inherits(n,c("numeric","integer")) | round(n)!=n |length(n)!=1|n<=0)stop("The number of subject has to be an integer higher than 0.")
+  if(!inherits(prob.censoring,c("numeric","integer")) | prob.censoring > 1 |prob.censoring<0 |length(prob.censoring)!=1)stop("The prob.censoring has to a numeric or integer between 0 and 1.")
+  if(!inherits(administrative.censoring,c("numeric","integer")) | administrative.censoring <=0 |length(administrative.censoring)!=1)stop("The administrative.censoring has to be a numeric or integer higher than 0.")
+  if(!inherits(n.inspections,c("numeric","integer")) | round(n.inspections)!=n.inspections |length(n.inspections)!=1 | n.inspections <= 0)stop("The n.inspections has to be an integer higher than 0.")
+  if(!inherits(schedule,c("numeric","integer")) |length(schedule)!=1 | schedule <= 0)stop("The schedule has to be an integer higher than 0.")
+  if(!inherits(punctuality,c("numeric","integer")) | length(punctuality)!=1 | punctuality <= 0)stop("The punctuality has to be an integer or numeric higher than 0.")
+  
+  if(!inherits(mean,c("numeric","integer")) | length(mean)!=nvar)stop("The mean value of variables has to be an integer or numeric of length nvar.")
+  if(!inherits(as.vector(cov),c("numeric","integer")) | dim(cov)[1]!=nvar | dim(cov)[2]!=nvar)stop("The covariance matrix of variables has to contain integer or numeric of dimension nvar*nvar.")
+  if(nvar>0){
+  if(!inherits(x01,c("character")) | any(!x01%in%paste0("X",1:nvar)) | length(x01)>nvar | length(x01)<=0)stop(paste0("The x01 has to contain either X1, X2, ..., until X",nvar))
+  if(!inherits(x02,c("character")) | any(!x02%in%paste0("X",1:nvar)) | length(x02)>nvar | length(x02)<=0)stop(paste0("The x02 has to contain either X1, X2, ..., until X",nvar))
+  if(!inherits(x12,c("character")) | any(!x12%in%paste0("X",1:nvar)) | length(x12)>nvar | length(x12)<=0)stop(paste0("The x12 has to contain either X1, X2, ..., until X",nvar))
+  if(!inherits(beta01,c("numeric","integer")) |  length(beta01)>nvar | length(beta01)<=0)stop("The effets on transition 0 -> 1 beta01 has to be an integer or numeric of length nvar.")
+  if(!inherits(beta02,c("numeric","integer")) |  length(beta02)>nvar | length(beta02)<=0)stop("The effets on transition 0 -> 2 beta02 has to be an integer or numeric of length nvar.")
+  if(!inherits(beta12,c("numeric","integer")) |  length(beta12)>nvar | length(beta12)<=0)stop("The effets on transition 1 -> 2 beta12 has to be an integer or numeric of length nvar.")}else{
+    beta12<-beta01<-beta02<-0
+  }
+  
+  # Set the seed for reproducibility
+  set.seed(seed)
+  
+  # Define the number of latent processes
+  # "latent.illtime","latent.lifetime","latent.waittime","censtime"
+  num_latent_processes <- 4
+  
+  # Define the number of exogenous variables
+  # nvar and inspections
+  num_exogenous_vars <- nvar+n.inspections
+  
+  # Generate random data for exogenous variables X1 to XN
+  #exogenous_data <- as.data.frame(matrix(rnorm(nvar * n, mean = mean, sd = sd), ncol = nvar))
+  if(nvar>0){
+  exogenous_data<-MASS::mvrnorm(n = n, mu = mean, Sigma = cov)
+}else{exogenous_data<-NULL}
+  # Set the column names of the exogenous data frame
+  #colnames(exogenous_data) <- paste0("X", 1:nvar)
+  
+  # Create a covariance matrix for the exogenous variables
+  #cov(exogenous_data) <- cov
+  #exogenous_data<-cbind(exogenous_data,as.data.frame(matrix(rnorm(nvar * n, mean = schedule, sd = punctuality), ncol = n.inspections)))
+  #cov<-matrix(0,n.inspections,n.inspections)
+  #diag(cov)<-punctuality
+  #exogenous_data<-cbind(exogenous_data,mvrnorm(n = n, mu = rep(schedule,n.inspections), Sigma = cov))
+  
+  V<-matrix(NA,nrow=n,ncol=n.inspections)
+  N_max<-n
+  still<-c(1:N_max)
+  C<-rep(NA,n)
+  
+  for(j in 1:n.inspections){
+    if(j==1){
+      V[,j]<-0
+    }else{
+      #V[,j]<-runif(n=N[i],min=(j-1)*step[i],max=(step[i]*(j-1)+var.step[i]))}
+      V[,j]<-stats::runif(n=n,min=(j-1)*schedule,max=(schedule*(j-1)+punctuality))}
+    
+    if(j>1){
+      id.censoring<-stats::rbinom(N_max,1,prob.censoring)
+      C[still]<-ifelse(id.censoring==1,V[still,j-1],NA)
+      N_max<-N_max-sum(id.censoring)
+      still<-still[id.censoring==0]
+      
+    }
+  }
+  # C at NA put last visit 
+  C[is.na(C)]<-V[is.na(C),dim(V)[2]]
+  
+  exogenous_data<-as.data.frame(cbind(exogenous_data,V))
+  
+  #cov(exogenous_data)<-matrix(0,num_exogenous_vars ,num_exogenous_vars )
+  #cov(exogenous_data)[1:nvar,1:nvar] <- cov
+  #diag(cov(exogenous_data)[(nvar+1):num_exogenous_vars,(nvar+1):num_exogenous_vars]) <- punctuality
+  # Define the structural model for latent processes following a Weibull distribution
+  U01<-stats::runif(n=n)
+  U02<-stats::runif(n=n)
+  U12<-stats::runif(n=n)
+  # center and reduce var : 
+  #exogenous_data<-scale(exogenous_data)
+  if(nvar>0){
+    colnames(exogenous_data) <- c(paste0("X", 1:nvar),paste0("inspection",1:n.inspections))
+  X01<-as.matrix(exogenous_data[,colnames(exogenous_data)%in%x01])
+  X02<-as.matrix(exogenous_data[,colnames(exogenous_data)%in%x02])
+  X12<-as.matrix(exogenous_data[,colnames(exogenous_data)%in%x12])
+  }else{
+    colnames(exogenous_data) <- paste0("inspection",1:n.inspections)
+    X01<-X02<-X12<-as.matrix(rep(0,n))
+  }
+  
+  data_long <- c()
+
+  for( i in 1:n){
+    #On tire les effets aléatoires
+    random.effects <- mvtnorm::rmvnorm(n=1, sigma = B)
+    b0 <- random.effects[1]
+    b1 <- random.effects[2]
+    tau.sigma <- random.effects[3]
+    sigma <- exp(mu_sigma+tau.sigma)
+    visit<-as.numeric(exogenous_data[i,(dim(exogenous_data)[2]-n.inspections+1):dim(exogenous_data)[2]])
+    data_long_i <- c()
+    data_long_i <- as.data.frame(cbind(rep(i, n.inspections),
+                                       c(1:n.inspections),
+                                       visit))
+    colnames(data_long_i) <- c("ID", "num.visit",  "visit")
+    error1 <- rnorm(n.inspections, mean = 0, sd = sigma)
+    data_long_i$y <- beta0+b0+visit*(beta1+b1) + error1
+    
+    S_01_inv <- function(tstar){
+      (tstar/2)*sum(shape.illtime*wk*(((tstar/2)*(sk+1))**(shape.illtime-1))*exp(alpha0_01 +sum(X01[i,]*beta01)+
+                                                                         alpha_y_01*(beta0 + b0 + (beta1+b1)*((tstar/2)*(sk+1))) +
+                                                                         alpha_slope_01*((beta1+b1))
+      )) + log(U01[i])
+      
+    }
+    T_01 <- try(expr = uniroot(S_01_inv,
+                               interval = c(0, max(visit)))$root,
+                silent = TRUE)
+    
+    S_02_inv <- function(tstar){
+      (tstar/2)*sum(shape.lifetime*wk*(((tstar/2)*(sk+1))**(shape.lifetime-1))*exp(alpha0_02 + sum(X02[i,]*beta02)+
+                                                                         alpha_y_02*(beta0 + b0 + (beta1+b1)*((tstar/2)*(sk+1))) +
+                                                                         alpha_slope_02*((beta1+b1)) 
+      )) + log(U02[i])
+    }
+    T_02 <- try(expr = uniroot(S_02_inv,
+                               interval = c(0, max(visit)))$root,
+                silent = TRUE)
+    
+    if(inherits(T_01, "try-error")){
+      T_01 <- 1000000
+    }
+    if(inherits(T_02, "try-error")){
+      T_02 <- 1000000
+    }
+    
+    data_long_i$latent.illtime<-T_01
+    data_long_i$latent.lifetime<-T_02
+    data_long_i$latent.waittime<-T_02
+    illstatus <-1*((T_01<T_02)&(T_02<administrative.censoring))
+  if(illstatus==1){
+    S_12 <- function(tps){
+      (tps/2)*sum(shape.waittime*wk*(((tps/2)*(sk+1))**(shape.waittime-1))*exp(alpha0_12 + sum(X12[i,]*beta12)+
+                                                                     alpha_y_12*(beta0 + b0 + (beta1+b1)*((tps/2)*(sk+1))) +
+                                                                     alpha_slope_12*((beta1+b1))
+      ))
+    }
+    u12_corrige <- U12[i]*exp(-S_12(T_01))
+    S_12_inv <- function(tstar){
+      (tstar/2)*sum(shape.waittime*wk*(((tstar/2)*(sk+1))**(shape.waittime-1))*exp(alpha0_12 +sum(X12[i,]*beta12)+
+                                                                         alpha_y_12*(beta0 + b0 + (beta1+b1)*((tstar/2)*(sk+1))) +
+                                                                         alpha_slope_12*((beta1+b1)) 
+      )) + log(u12_corrige)
+    }
+    T_12 <- try(expr = uniroot(S_12_inv,
+                               interval = c(0, max(visit)))$root,
+                silent = TRUE)
+    
+    if(inherits(T_12, "try-error")){
+      T_12 <- 100000000
+    }
+    
+    
+    data_long_i$latent.waittime<-T_12
+  }
+    
+    data_long_i$censtime<-C[i]
+    data_long_i$administrative.censoring<-administrative.censoring
+    
+    data_long<-rbind(data_long,data_long_i)
+                                       
+                                       
+  }
+
+  exogenous_data$ID<-c(1:n)
+  data_long<-merge(x=data_long,exogenous_data,by="ID",all.x=T)
+  #for(i in 1:n){
+  #   if(illstatus[i]==1){
+  #     cv<-F
+  #     while(cv==F){
+  #       U12<-stats::runif(n=1)
+  #       latent.waittime[i]<-(((-log(U12)*exp(-X12%*%beta12))^(1/shape.waittime))/scale.waittime)[i]
+  #       if(latent.waittime[i]>latent.illtime[i]){cv<-T}
+  #     }
+  #   }else{
+  #     latent.waittime[i]<-latent.lifetime[i]
+  #   }
+  # }
+  simdep.idmModel(x=data_long,n=n,plot=list(p2,surv01,p01,surv02,p02,surv12,p12))
   
 }
 
