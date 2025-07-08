@@ -499,6 +499,44 @@ idm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                    bfix<-b[fix0.beta==1]
                                    b<-b[fix0.beta==0]
                                    ################## update splines parameters ##
+                                  if(analytics==F){
+                                   output.mla<- marqLevAlg::mla(b=b,
+                                                                fn=idmlLikelihood,
+                                                                gr=reggrmlasplineana,
+                                                                hess = reghessianmlasplineana,
+                                                                epsa=epsa,
+                                                                epsb=epsb,
+                                                                epsd=epsd,
+                                                                maxiter=maxiter.pena,
+                                                                minimize=F,
+                                                                npm=length(b),
+                                                                npar=size_V,
+                                                                bfix=bfix,
+                                                                fix=fix0.beta,
+                                                                zi01=knots01,
+                                                                zi02=knots02,
+                                                                zi12=knots12,
+                                                                ctime=ctime,
+                                                                no=N,
+                                                                nz01=nknots01,
+                                                                nz02=nknots02,
+                                                                nz12=nknots12,
+                                                                ve01=ve01,
+                                                                ve02=ve02,
+                                                                ve12=ve12,
+                                                                dimnva01=dimnva01,
+                                                                dimnva02=dimnva02,
+                                                                dimnva12=dimnva12,
+                                                                nva01=nvat01,
+                                                                nva02=nvat02,
+                                                                nva12=nvat12,
+                                                                t0=t0,
+                                                                t1=t1,
+                                                                t2=t2,
+                                                                t3=t3,
+                                                                troncature=troncature,
+                                                               gausspoint=gausspoint)
+                                   }else{
                                    output.mla<- marqLevAlg::mla(b=b,
                                                                 fn=idmlLikelihood,
                                                                 epsa=epsa,
@@ -532,7 +570,9 @@ idm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                                                 t2=t2,
                                                                 t3=t3,
                                                                 troncature=troncature,
-                                                                gausspoint=gausspoint)
+                                                               gausspoint=gausspoint)
+                                   }
+                                   
                                    
                                    
                                    # look at convergence for each lambda :
@@ -1109,6 +1149,45 @@ idm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                    bfix<-b[fix0.beta==1]
                                    b<-b[fix0.beta==0]
                                    
+                                   
+                                   if(analytics==F){
+                                   output.mla<- marqLevAlg::mla(b=b,
+                                                                fn=idmlLikelihood,
+                                                                gr=reggrmlasplineana,
+                                                                hess = reghessianmlasplineana,
+                                                                epsa=epsa,
+                                                                epsb=epsb,
+                                                                epsd=epsd,
+                                                                maxiter=maxiter.pena,
+                                                                minimize=F,
+                                                                npm=length(b),
+                                                                npar=size_V,
+                                                                bfix=bfix,
+                                                                fix=fix0.beta,
+                                                                zi01=knots01,
+                                                                zi02=knots02,
+                                                                zi12=knots12,
+                                                                ctime=ctime,
+                                                                no=N,
+                                                                nz01=nknots01,
+                                                                nz02=nknots02,
+                                                                nz12=nknots12,
+                                                                ve01=ve01,
+                                                                ve02=ve02,
+                                                                ve12=ve12,
+                                                                dimnva01=dimnva01,
+                                                                dimnva02=dimnva02,
+                                                                dimnva12=dimnva12,
+                                                                nva01=nvat01,
+                                                                nva02=nvat02,
+                                                                nva12=nvat12,
+                                                                t0=t0,
+                                                                t1=t1,
+                                                                t2=t2,
+                                                                t3=t3,
+                                                                troncature=troncature,
+                                                               gausspoint=gausspoint)
+                                   }else{
                                    output.mla<- marqLevAlg::mla(b=b,
                                                                 fn=idmlLikelihood,
                                                                 epsa=epsa,
@@ -1142,7 +1221,8 @@ idm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                                                 t2=t2,
                                                                 t3=t3,
                                                                 troncature=troncature,
-                                                                gausspoint=gausspoint)
+                                                               gausspoint=gausspoint)
+                                   }
                                    
                                    
                                    # look at convergence for each lambda :
