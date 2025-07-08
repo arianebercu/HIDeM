@@ -1536,7 +1536,8 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                  b<-c(s,beta)
                                  bfix<-b[fix0==1]
                                  b<-b[fix0==0]
-                                
+                                 
+                                #browser()
                                  output<-derivaweib(b=b,
                                                     npm=length(b),
                                                     npar=size_V,
@@ -1940,6 +1941,8 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                  bfix<-b[fix0.beta==1]
                                  b<-b[fix0.beta==0]
                                  # update modelPar
+                                 
+                           
                                  if(analytics==T){
                                  output.mla<- marqLevAlg::mla(b=b,
                                                   fn=idmlLikelihoodweib,
@@ -2231,6 +2234,8 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                      dapath<-rep(0,maxiter+1)
                                      gapath<-rep(0,maxiter+1)
                                      
+                                     #browser()
+                                     
                                      while(converged==F & ite<=maxiter){
                                        
                                        b<-c(s,beta)
@@ -2239,7 +2244,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                        
                                  
                                          
-                                         outputb<-derivaweibdiag(b=b,
+                                         output<-derivaweibdiag(b=b,
                                                                 npm=length(b),
                                                                 npar=size_V,
                                                                 bfix=bfix,
@@ -2307,10 +2312,10 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                            break
                                          }
                                          
-                                         fub <- outputb[1:npm]
+                                         fu <- output[1:npm]
                                          
-                                         Vb<- matrix(0,npm,npm)
-                                         diag(Vb) <- outputb[(npm+1):(2*npm)]
+                                         V<- matrix(0,npm,npm)
+                                         diag(V) <- output[(npm+1):(2*npm)]
                                          # hessian is - second derivatives 
                                          V<--V
                                          
@@ -2541,6 +2546,8 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                        bfix<-b[fix0.beta==1]
                                        b<-b[fix0.beta==0]
                                        # update modelPar
+                                       
+                                       #browser()
                                        if(analytics==T){
                                        output.mla<- marqLevAlg::mla(b=b,
                                                                     fn=idmlLikelihoodweib,

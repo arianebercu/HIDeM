@@ -1536,7 +1536,7 @@ idm <- function(formula01,
             }
             }else{lambda12<-0.0001}
             
-            #browser()
+            
             
            
               out <- idm.penalty.weib(b=b,

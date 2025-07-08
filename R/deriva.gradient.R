@@ -796,8 +796,8 @@ hessianmlaweibana<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
 
 reghessianmlaweibana<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
                             dimnva01,dimnva02,dimnva12,nva01,nva02,nva12,
-                            t0,t1,t2,t3,troncature){
-  
+                            t0,t1,t2,t3,troncature,gausspoint){
+
   res<-rep(0,npm+npm*(npm+1)/2)
   #browser()
   output<-.Fortran("derivaweibsecondderiv",
@@ -864,7 +864,7 @@ reghessianmlaweibana<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
 reggrmlasplineana<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
                        dimnva01,dimnva02,dimnva12,nva01,nva02,nva12,
                        nz01,nz02,nz12,zi01,zi02,zi12,
-                       t0,t1,t2,t3,troncature){
+                       t0,t1,t2,t3,troncature,gausspoint){
   
   
   res<-rep(0,npm)
@@ -967,7 +967,7 @@ reggrmlasplineana<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
 reghessianmlasplineana<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
                               dimnva01,dimnva02,dimnva12,nva01,nva02,nva12,
                               nz01,nz02,nz12,zi01,zi02,zi12,
-                              t0,t1,t2,t3,troncature){
+                              t0,t1,t2,t3,troncature,gausspoint){
   
   res<-rep(0,npm+npm*(npm+1)/2)
 
@@ -1082,9 +1082,9 @@ reghessianmlasplineana<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
 
 reggrmlaweibana<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
                           dimnva01,dimnva02,dimnva12,nva01,nva02,nva12,
-                          t0,t1,t2,t3,troncature,lambda,alpha,penalty.factor,penalty){
+                          t0,t1,t2,t3,troncature,lambda,alpha,penalty.factor,penalty,gausspoint){
   
-  
+
   res<-rep(0,npm)
   output<-.Fortran("derivaweibfirstderiv",
                    ## input
