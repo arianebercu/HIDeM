@@ -56,7 +56,7 @@ idm.penalty.splines<-function(b,fix0,size_V,size_spline,
                       ve01,ve02,ve12,dimnva01,dimnva02,dimnva12,nvat01,nvat02,nvat12,
                       t0,t1,t2,t3,troncature,gausspoint,
                       nlambda01,lambda01,nlambda02,lambda02,
-                      nlambda12,lambda12,alpha,penalty.factor,penalty){
+                      nlambda12,lambda12,alpha,penalty.factor,penalty,analytics){
   
   
   # need to keep original fix to calculate for beta 
