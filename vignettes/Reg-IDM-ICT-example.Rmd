@@ -44,7 +44,7 @@ Encoding: UTF-8
 
 ## Simulation interval censored data 
 
-We have a sample of N=2000 individuals, followed during 18 years with visit scheduled every 2.5 years (0.5 variability) and at each visit a probability of being lost to follow-up of 5\%. 
+We have a sample of N=2000 individuals, followed during 18 years with visit scheduled every 2.5 years (+0.5 variability) and at each visit a probability of being lost to follow-up of 5\%. 
 
 In IDM, we simulate transition intensities defined as, 
 \begin{equation*} \label{eq:2}
@@ -245,9 +245,9 @@ simu$plot[[7]]
 
 ## Run IDM-ICT 
 
-In this section, we will explicit the profile likelihood, with an
+In this section, we will explicit the profile likelihood, with:
 
-- outer loop on penalty parameters noted $(a,\lambda_{01},\lambda_{02},\lambda_{12})$, and 
+- an outer loop on penalty parameters noted $(a,\lambda_{01},\lambda_{02},\lambda_{12})$, and 
 - an inner loop on regression parameters $(\beta_{01},\beta_{02},\beta_{12})$ and baseline intensity parameters $(\theta_{01},\theta_{02},\theta_{12})$
 
 Firstly, we need to perform a pre-selection of penalty parameters for each transition separately. For each transition, we first fit multi-state models including covariates only in the transition from state $h$ to $l$ ($hl \in \{01,02,12\}$), and considering a grid of $\lambda_{hl}$ with equidistant values from  0.0001 and 100 while keeping $a$ fixed at 1. It is recommended to try multiple values of $a$ in $]0,1]$, but for this example we will limit to lasso penalty (a=1). 
@@ -392,7 +392,7 @@ lambda01
 lambda02
 lambda12
 ```
-Note that for each transition, we reached the minimum as we have this U-shape of BIC values along $\lambda$. Once we have determined each value $\lambda$, we have 27 combinations of $\lambda_{01}$, $\lambda_{02}$ and $\lambda_{12}$ for $a=1$, leading to $108$ combinations in total. Now, we can estimate the full model and ultimately select the combination $(a,\lambda_{01},\lambda_{02},\lambda_{12})$ that minimizes the BIC. 
+Note that for each transition, we reached the minimum as we have this U-shape of BIC values along $\lambda$. Once we have determined each value $\lambda$, we have 27 combinations of $\lambda_{01}$, $\lambda_{02}$ and $\lambda_{12}$ for $a=1$. Now, we can estimate the full model and ultimately select the combination $(\lambda_{01},\lambda_{02},\lambda_{12})$ that minimizes the BIC for lasso penalty ($a=1$). 
 
 ```{r,eval=F}
    f02<-as.formula(paste0("Hist(time = observed.lifetime, event = seen.exit) ~",paste0(paste0("X",seq(1:50)),collapse="+")))
@@ -468,14 +468,11 @@ print(remodelexample)
 
 ```
 
-As we are in simulation setting we can evaluate its predicitive abilities using : The predictive ability is evaluated by the Mean Square Error on the probability for a healthy individual of becoming diseased at a time $u$ between 0 and t, 
-$$\displaystyle{\widehat{MSEP}=\frac{1}{N}\sum_{i=1}^{N}(\widehat F_{01}(t_i) - \widetilde F_{01}(t_i))^2}
-\mbox{ with }F_{01}(t)=\int_{0}^{t}e^{-A_{01}(u)-A_{02}(u)}\alpha_{01}(u)du,$$
-where $N$ is the number of individuals, $t$ the time of first event between the illness, the death illness-free and the administrative censoring ($t$=min\{$T^{01},T^{02},18$\}), $\widehat F_{01}(t)$ the estimated probability by the fitted model and $\widetilde F_{01}(t)$ the respective true probability modeled in the simulation. 
+As we are in simulation setting, we can look at the Mean Square Error on the probability for a healthy individual of becoming diseased at a time $u$ between 0 and t, 
+$$\displaystyle{\widehat{MSEP}=\frac{1}{N}\sum_{i=1}^{N}(\widehat F_{01i}(t_i) -  F_{01i}(t_i))^2}$$
+where $N$ is the number of individuals, $t$ the time of first event between the illness, the death illness-free and the administrative censoring ($t$=min\{$T^{01},T^{02},18$\}), $\widehat F_{01i}(t_i)$ the estimated probability for individual $i$ of having the diseased until time $t_i$ and $ F_{01i}(t_i)$ the respective true probability modeled in the simulation. Note: $\widehat F_{01i}(t_i)=\int_0^{t_i}e^{-\widehat A_{01i}(u)-\widehat A_{02i}(u)}\widehat \alpha_{01i}(u)du$
 
-We need to model a test replicate, the $\widehat{MSEP}$ is calculated by estimating the model with the variable selected in the regularized approach on the corresponding data train replicate. 
-
-Firstly we simulate the test replicate using HIDeM::simulateIDM with a different seed.
+To avoid overoptimism in predictive abilities, we need to use a test replicate and calculate the corresponding $\widehat{MSEP}$ on it. Firstly we simulate the test replicate using HIDeM::simulateIDM with a different seed.
 ```{r}
 rep<-3
 datatest<-HIDeM::simulateIDM(n=2000,seed=rep,
