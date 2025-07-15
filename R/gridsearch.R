@@ -177,7 +177,7 @@ gridsearch <- function(
     stop("gridmethod should be BIC or GCV")
   }
   # do check on sizegrid 
-  
+ 
   if(sizegrid[1]>nlambda01){sizegrid[1]<-nlambda01}
   if(sizegrid[2]>nlambda02){sizegrid[1]<-nlambda02}
   if(sizegrid[3]>nlambda12){sizegrid[3]<-nlambda12}
@@ -407,10 +407,11 @@ gridsearch <- function(
                                   eps=eps,
                                   method=method,
                                   scale.X=scale.X,
+                                  lambda01 = lambda01,
                                   nlambda01 = nlambda01,
                                   lambda02=0.0001,
                                   lambda12=0.0001,
-                                  posfix=posfix01,
+                                  #posfix=posfix01,
                                   alpha=alpha,
                                   maxiter=maxiter,
                                   maxiter.pena = maxiter.pena,
@@ -447,7 +448,7 @@ gridsearch <- function(
                                   nlambda02 = nlambda02,
                                   lambda01=0.0001,
                                   lambda12=0.0001,
-                                  posfix=posfix02,
+                                  #posfix=posfix02,
                                   alpha=alpha,
                                   maxiter=maxiter,
                                   maxiter.pena = maxiter.pena,
@@ -485,7 +486,7 @@ gridsearch <- function(
                                   nlambda12 = nlambda12,
                                   lambda01=0.0001,
                                   lambda02=0.0001,
-                                  posfix=posfix12,
+                                  #posfix=posfix12,
                                   alpha=alpha,
                                   maxiter=maxiter,
                                   maxiter.pena = maxiter.pena,
