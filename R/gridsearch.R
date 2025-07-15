@@ -102,7 +102,7 @@
 #' set.seed(17)
 #' d <- simulateIDM(n=1000,beta01=c(1,1,0,0.5,0.5,rep(0,5)),
 #' beta02=c(1,0,0,0,0.5,rep(0,5)),beta12=c(1,0,0,0,0.5,rep(0,5)))$data
-#' fitgrid<- gridsearch.penidm(formula01=Hist(time=list(L,R),
+#' fitgrid<- gridsearch(formula01=Hist(time=list(L,R),
 #' event=seen.ill)~X1+X2+X3+X4+X5+X6+X7+X8+X9+X10,
 #' formula02=Hist(time=observed.lifetime,
 #' event=seen.exit)~X1+X2+X3+X4+X5+X6+X7+X8+X9+X10,
@@ -116,7 +116,7 @@
 #' @importFrom prodlim Hist
 #' @useDynLib HIDeM
 #' @export
-gridsearch.penidm <- function(
+gridsearch <- function(
                 gridmethod="BIC",
                 sizegrid=c(3,3,3),
                 formula01,

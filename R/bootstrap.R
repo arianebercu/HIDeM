@@ -98,7 +98,7 @@
 #'  library(prodlim)
 #'  set.seed(17)
 #'  d <- simulateIDM(n=1000)$data
-#'  fitweib <- bootstrap.idm(formula01=Hist(time=list(L,R),event=seen.ill)~X1+X2,
+#'  fitweib <- bootstrap(formula01=Hist(time=list(L,R),event=seen.ill)~X1+X2,
 #'  formula02=Hist(time=observed.lifetime,event=seen.exit)~X1+X2,
 #'  formula12=Hist(time=observed.lifetime,event=seen.exit)~X1+X2,data=d,penalty="none",K=3)
 #'  print(fitweib)
@@ -109,7 +109,7 @@
 #' @importFrom prodlim Hist
 #' @useDynLib HIDeM
 #' @export
-bootstrap.penidm <- function(
+bootstrap <- function(
                 K=100, # number of sample,
                 tau = 0.5, #% in each fold
                 seed = 1, # seed
