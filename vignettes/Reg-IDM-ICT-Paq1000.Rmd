@@ -1,5 +1,5 @@
 ---
-title: "Reg-IDM-ICT-Paq1000"
+title: "Example of regularized illness-death model on Paquid data set"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Reg-IDM-ICT-Paq1000}
@@ -69,9 +69,9 @@ Paq1000<-cbind(Paq1000,Z)
 
 ## Run IDM-ICT 
 
-In this section, we will explicit the profile likelihood, with an
+In this section, we will explicit the profile likelihood, with:
 
-- outer loop on penalty parameters noted $(a,\lambda_{01},\lambda_{02},\lambda_{12})$, and 
+- an outer loop on penalty parameters noted $(a,\lambda_{01},\lambda_{02},\lambda_{12})$, and 
 - an inner loop on regression parameters $(\beta_{01},\beta_{02},\beta_{12})$ and baseline intensity parameters $(\theta_{01},\theta_{02},\theta_{12})$
 
 Firstly, we need to perform a pre-selection of penalty parameters for each transition separately. For each transition, we first fit multi-state models including covariates only in the transition from state $h$ to $l$, and considering a grid of $\lambda_{hl}$ with equidistant values from  0.0001 and 100 while keeping $a$ fixed at 1. It is recommended to try multiple values of $a$ in $]0,1]$, but for this example we will limit to lasso penalty (a=1). 

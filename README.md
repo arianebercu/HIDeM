@@ -19,8 +19,13 @@ remotes::install_github("arianebercu/HIDeM",build_vignettes=T)
 
 In this package, we choose to illustrate a simulated scenario and an application to Paquid data set using vignettes: Reg-IDM-ICT-example and Reg-IDM-ICT-Paq1000. The Reg-IDM-ICT-example takes back the simulated Scenario B -see paper- and presents the variable selection process. 
 
+👉 See the [Getting Started vignette](doc/Reg-IDM-ICT-example.html and doc/Reg-IDM-ICT-Paq1000.html)
+
 ``` r
 library(HIDeM)
+vignette(package="HIDeM")
+vignette("Reg-IDM-ICT-example", package = "HIDeM")
+vignette("Reg-IDM-ICT-Paq1000", package = "HIDeM")
 ## basic example code
 ```
 

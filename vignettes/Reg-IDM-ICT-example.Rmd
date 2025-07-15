@@ -1,5 +1,5 @@
 ---
-title: "Reg-IDM-ICT-example"
+title: "Example of regularized illness-death model on simulated data set"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Reg-IDM-ICT-example}
