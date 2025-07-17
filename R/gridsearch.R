@@ -396,8 +396,9 @@ gridsearch <- function(
   f02<-as.formula(paste0(f02,"~1"))
   f01<-formula01
   environment(f01)<-environment(f02)<-environment(f12)
+
   
-  
+  if(dim(x01)[2]>1){
   m01 <-HIDeM::idm(formula02 = f02,
                                   formula01 = f01,
                                   formula12 = f12,
@@ -422,6 +423,7 @@ gridsearch <- function(
                                   B=B,
                                   gausspoint=gausspoint,
                                   clustertype=clustertype)
+  }else{m01<-NULL}
   
   
   ################################ 02 ############################################
@@ -434,6 +436,7 @@ gridsearch <- function(
     
     environment(f02)<-environment(f01)<-environment(f12)
     
+    if(dim(x02)[2]>1){
     
     m02 <-HIDeM::idm(formula02 = f02,
                                   formula01 = f01,
@@ -459,6 +462,7 @@ gridsearch <- function(
                                   B=B,
                                   gausspoint=gausspoint,
                                   clustertype=clustertype)
+    }else{m02<-NULL}
  
   
   ######################################## 12 ###################################
@@ -472,7 +476,7 @@ gridsearch <- function(
   
   environment(f12)<-environment(f02)<-environment(f01)
   
-  
+  if(dim(x12)[2]>1){
   m12 <-HIDeM::idm(formula02 = f02,
                                   formula01 = f01,
                                   formula12 = f12,
@@ -498,91 +502,87 @@ gridsearch <- function(
                                   gausspoint=gausspoint,
                                   clustertype=clustertype)
   
+  }else{m12<-NULL}
   
   if(gridmethod=="BIC"){
     
   # sort BIC 
+  if(!is.null(m12)){
    BIC12<-sort(m12$BIC[m12$converged==1])
-   BIC02<-sort(m02$BIC[m02$converged==1])
-   BIC01<-sort(m01$BIC[m01$converged==1])
    BIC12<-na.omit(unique(BIC12))
-   BIC02<-na.omit(unique(BIC02))
-   BIC01<-na.omit(unique(BIC01))
-   
    if(length(BIC12)<sizegrid[3]){sizegrid[3]<-length(BIC12)}
-   if(length(BIC02)<sizegrid[2]){sizegrid[2]<-length(BIC02)}
-   if(length(BIC01)<sizegrid[1]){sizegrid[1]<-length(BIC01)}
-   
-   # keep only best values in size we want 
-   
    BIC12<-BIC12[1:sizegrid[3]]
-   BIC02<-BIC02[1:sizegrid[2]]
-   BIC01<-BIC01[1:sizegrid[1]]
+   # identify the lambda associated
    
-  # identify the lambda associated
+   id12<-which(m12$BIC%in%BIC12)
+   if(length(id12)==0){
+     warning("No model converged for transition 1-->2, values without convergence will be given.")
+     BIC12<-sort(m12$BIC)
+     BIC12<-na.omit(unique(BIC12))
+     sizegrid[3]<-ifelse(length(BIC12)<sizegrid[3],length(BIC12),sizegrid[3])
+     BIC12<-BIC12[1:sizegrid[3]]
+   }
+   id12<-which(m12$BIC%in%BIC12)
+   lambda12<-m12$lambda[3,id12]
+   lambda12<-na.omit(lambda12)
+   # verify that good size, if two BIC equal need to keep only one 
+   lambda12<-lambda12[1:sizegrid[3]]
+  }else{lambda12<-NULL}
+    
+    if(!is.null(m02)){
+   BIC02<-sort(m02$BIC[m02$converged==1])
+   BIC02<-na.omit(unique(BIC02))
+   if(length(BIC02)<sizegrid[2]){sizegrid[2]<-length(BIC02)}
+   BIC02<-BIC02[1:sizegrid[2]]
+   id02<-which(m02$BIC%in%BIC02)
+   if(length(id02)==0){
+     warning("No model converged for transition 0-->2, values without convergence will be give.")
+     BIC02<-sort(m02$BIC)[1:sizegrid[2]]
+     BIC02<-na.omit(unique(BIC02))
+     sizegrid[2]<-ifelse(length(BIC02)<sizegrid[2],length(BIC02),sizegrid[2])
+     BIC02<-BIC02[1:sizegrid[2]]}
+   id02<-which(m02$BIC%in%BIC02)
+   lambda02<-m02$lambda[2,id02]
+   lambda02<-na.omit(lambda02)
+   # verify that good size, if two BIC equal need to keep only one 
+   lambda02<-lambda02[1:sizegrid[2]]
+    }else{lambda02<-NULL}
+    
+    if(!is.null(m01)){
+   BIC01<-sort(m01$BIC[m01$converged==1])
+   BIC01<-na.omit(unique(BIC01))
+   if(length(BIC01)<sizegrid[1]){sizegrid[1]<-length(BIC01)}
+   BIC01<-BIC01[1:sizegrid[1]]
+   id01<-which(m01$BIC%in%BIC01)
+   if(length(id01)==0){
+     warning("No model converged for transition 0-->1, values without convergence will be give.")
+     BIC01<-sort(m01$BIC)[1:sizegrid[1]]
+     BIC01<-na.omit(unique(BIC01))
+     sizegrid[1]<-ifelse(length(BIC01)<sizegrid[1],length(BIC01),sizegrid[1])
+     BIC01<-BIC01[1:sizegrid[1]]}
+   id01<-which(m01$BIC%in%BIC01)
+   lambda01<-m01$lambda[1,id01]
+   lambda01<-na.omit(lambda01)
+   # verify that good size, if two BIC equal need to keep only one 
+   lambda01<-lambda01[1:sizegrid[1]]
+   
+    }else{lambda01<-NULL}
+   
+   
+
   
-  id12<-which(m12$BIC%in%BIC12)
-  if(length(id12)==0){
-    warning("No model converged for transition 1-->2, values without convergence will be given.")
-    BIC12<-sort(m12$BIC)
-    BIC12<-na.omit(unique(BIC12))
-    sizegrid[3]<-ifelse(length(BIC12)<sizegrid[3],length(BIC12),sizegrid[3])
-    BIC12<-BIC12[1:sizegrid[3]]
-  }
-  id12<-which(m12$BIC%in%BIC12)
-  lambda12<-m12$lambda[3,id12]
-  lambda12<-na.omit(lambda12)
-  # verify that good size, if two BIC equal need to keep only one 
-  lambda12<-lambda12[1:sizegrid[3]]
+ 
   
-  id02<-which(m02$BIC%in%BIC02)
-  if(length(id02)==0){
-    warning("No model converged for transition 0-->2, values without convergence will be give.")
-    BIC02<-sort(m02$BIC)[1:sizegrid[2]]
-    BIC02<-na.omit(unique(BIC02))
-    sizegrid[2]<-ifelse(length(BIC02)<sizegrid[2],length(BIC02),sizegrid[2])
-    BIC02<-BIC02[1:sizegrid[2]]}
-  id02<-which(m02$BIC%in%BIC02)
-  lambda02<-m02$lambda[2,id02]
-  lambda02<-na.omit(lambda02)
-  # verify that good size, if two BIC equal need to keep only one 
-  lambda02<-lambda02[1:sizegrid[2]]
-  
-  
-  id01<-which(m01$BIC%in%BIC01)
-  if(length(id01)==0){
-    warning("No model converged for transition 0-->1, values without convergence will be give.")
-    BIC01<-sort(m01$BIC)[1:sizegrid[1]]
-    BIC01<-na.omit(unique(BIC01))
-    sizegrid[1]<-ifelse(length(BIC01)<sizegrid[1],length(BIC01),sizegrid[1])
-    BIC01<-BIC01[1:sizegrid[1]]}
-  id01<-which(m01$BIC%in%BIC01)
-  lambda01<-m01$lambda[1,id01]
-  lambda01<-na.omit(lambda01)
-  # verify that good size, if two BIC equal need to keep only one 
-  lambda01<-lambda01[1:sizegrid[1]]
   
   }else{
     # Do on GCV
     
     # sort GCV 
+    if(!is.null(m12)){
     GCV12<-sort(m12$GCV[m12$converged==1])
-    GCV02<-sort(m02$GCV[m02$converged==1])
-    GCV01<-sort(m01$GCV[m01$converged==1])
     GCV12<-na.omit(unique(GCV12))
-    GCV02<-na.omit(unique(GCV02))
-    GCV01<-na.omit(unique(GCV01))
-    
     if(length(GCV12)<sizegrid[3]){sizegrid[3]<-length(GCV12)}
-    if(length(GCV02)<sizegrid[2]){sizegrid[2]<-length(GCV02)}
-    if(length(GCV01)<sizegrid[1]){sizegrid[1]<-length(GCV01)}
-    
-    # keep only best values in size we want 
-    
     GCV12<-GCV12[1:sizegrid[3]]
-    GCV02<-GCV02[1:sizegrid[2]]
-    GCV01<-GCV01[1:sizegrid[1]]
-    
     # identify the lambda associated
     
     id12<-which(m12$GCV%in%GCV12)
@@ -595,30 +595,49 @@ gridsearch <- function(
       # verify that good size, if two GCV equal need to keep only one 
       lambda12<-lambda12[1:sizegrid[3]]
     }
+    }else{lambda12<-NULL}
     
+    if(!is.null(m02)){
+    GCV02<-sort(m02$GCV[m02$converged==1])
+    GCV02<-na.omit(unique(GCV02))
+    if(length(GCV02)<sizegrid[2]){sizegrid[2]<-length(GCV02)}
+    GCV02<-GCV02[1:sizegrid[2]]
     id02<-which(m02$GCV%in%GCV02)
     if(length(id02)==0){
       warning("No model converged for transition 0-->2, no values of GCV could be computed.")
       lambda02<-NULL
-      }else{
-        lambda02<-m02$lambda[2,id02]
-        lambda02<-na.omit(lambda02)
-        # verify that good size, if two GCV equal need to keep only one 
-        lambda02<-lambda02[1:sizegrid[2]]
-      }
+    }else{
+      lambda02<-m02$lambda[2,id02]
+      lambda02<-na.omit(lambda02)
+      # verify that good size, if two GCV equal need to keep only one 
+      lambda02<-lambda02[1:sizegrid[2]]
+    }
     
+    }else{lambda02<-NULL}
+    
+    if(!is.null(m01)){
+    GCV01<-sort(m01$GCV[m01$converged==1])
+    GCV01<-na.omit(unique(GCV01))
+    if(length(GCV01)<sizegrid[1]){sizegrid[1]<-length(GCV01)}
+    GCV01<-GCV01[1:sizegrid[1]]
     
     id01<-which(m01$GCV%in%GCV01)
     if(length(id01)==0){
       warning("No model converged for transition 0-->1, no values of GCV could be computed.")
       lambda01<-NULL
-      }else{
-          id01<-which(m01$GCV%in%GCV01)
-          lambda01<-m01$lambda[1,id01]
-          lambda01<-na.omit(lambda01)
-          # verify that good size, if two GCV equal need to keep only one 
-          lambda01<-lambda01[1:sizegrid[1]]
-      }
+    }else{
+      id01<-which(m01$GCV%in%GCV01)
+      lambda01<-m01$lambda[1,id01]
+      lambda01<-na.omit(lambda01)
+      # verify that good size, if two GCV equal need to keep only one 
+      lambda01<-lambda01[1:sizegrid[1]]
+    }
+    }else{lambda01<-NULL}
+  
+    
+    
+
+    
   }
     
   fit<-NULL
