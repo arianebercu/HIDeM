@@ -22,6 +22,19 @@ extern void F77_NAME(idmlikelihoodweib)(double *,int *, int *, double *,int*,
               int *,int *, double *,double*, double *,
               int *,int *,int *,int *,int *,int *, double *,double*, double *, double *,int *,int *,double *);
 
+extern void F77_NAME(idmlikelihoodweibtimedep)(double *,int *, int *, double *,int*,
+              int *,int *, double *,double*, double *, double *,double*, double *,
+              int *,int *,int *,int *,int *,int *,int *,
+              int *,int *,int *,int *,int *,int *, double *,double*, double *, double *,int *,double *);
+
+
+extern void F77_NAME(idmlikelihoodweibtimedepgrid)(double *,int *, int *, double *,int*,
+              int *,int *, double *,double*, double *, double *,double*, double *,
+              int *,int *,int *,int *,int *,int *,int *, double *,
+              int *,int *,int *,int *,int *,int *, double *,double*, double *, double *,int *,double *);
+
+
+
 
 extern void F77_NAME(derivaweib)(double *,int *, int *, double *,int*,
               int *,int *, double *,double*, double *,
@@ -83,6 +96,8 @@ extern void F77_NAME(derivasplinessecondderiv)(double *,int *, int *, double *,i
 static const R_FortranMethodDef FortranEntries[] = {
     {"idmlikelihood",(DL_FUNC) &F77_NAME(idmlikelihood),    29},
     {"idmlikelihoodweib",(DL_FUNC) &F77_NAME(idmlikelihoodweib),    23},
+    {"idmlikelihoodweibtimedep",(DL_FUNC) &F77_NAME(idmlikelihoodweibtimedep),    32},
+     {"idmlikelihoodweibtimedepgrid",(DL_FUNC) &F77_NAME(idmlikelihoodweibtimedepgrid),    33},
  {"causalidmlikelihoodweib",(DL_FUNC) &F77_NAME(causalidmlikelihoodweib),    24},
     {"derivaweib",(DL_FUNC) &F77_NAME(derivaweib),    22},
     {"derivaweiballpara",(DL_FUNC) &F77_NAME(derivaweiballpara),    22},
@@ -101,7 +116,7 @@ static const R_FortranMethodDef FortranEntries[] = {
 };
 
 
-void R_init_SmoothHazardoptim9(DllInfo *dll)
+void R_init_HIDeM(DllInfo *dll)
 {
     R_registerRoutines(dll, NULL, NULL, FortranEntries, NULL);
     R_useDynamicSymbols(dll, FALSE);
