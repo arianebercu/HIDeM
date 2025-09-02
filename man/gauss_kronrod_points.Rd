@@ -8,7 +8,7 @@ gauss_kronrod_points(
   lower.intdouble,
   upper.intdouble,
   end.time,
-  truncation,
+  truncated,
   entry.time
 )
 }
@@ -19,9 +19,9 @@ gauss_kronrod_points(
 
 \item{end.time}{upper bound of integral from 0 to end of follow-up (death or censoring)}
 
-\item{truncation}{TRUE if left-truncation, otherwise FALSE}
-
 \item{entry.time}{time of entry in the study (values 0 if no left truncation, otherwise >0)}
+
+\item{truncation}{TRUE if left-truncation, otherwise FALSE}
 }
 \description{
 Define the time points at which Y need to be estimated

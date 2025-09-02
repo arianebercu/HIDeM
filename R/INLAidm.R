@@ -12,6 +12,7 @@ INLAidm<-function(timeVar,family,basRisk,assoc,
   # define timePoints of prediction : 
 
 
+  if(Ypredmethod=="gauss"){
   idsubjects<-unique(dataSurv[,colnames(dataSurv)%in%id])
   
   timePointsdata<-do.call(rbind, lapply(idsubjects,FUN=function(x){
@@ -25,8 +26,8 @@ INLAidm<-function(timeVar,family,basRisk,assoc,
                                      end.time=t3[index],
                                      truncated=truncated,
                                      entry.time=t0[index])
-    return(data.frame(timePoints=timePoints,
-                      index=x))}))
+    return(data.frame(index=x,timePoints=timePoints))}))
+  }
 
     
   print("Start running joint univarite models")
@@ -49,6 +50,8 @@ INLAidm<-function(timeVar,family,basRisk,assoc,
       familyinla<<-family[indice]
       basRiskinla<<-basRisk[indice]
       associnla<<-assoc[[indice]]
+      
+      browser()
 
       INLAmodel<-tryCatch({ INLAjoint::joint(formSurv = formSurvinla,
                                        formLong = formLonginla,

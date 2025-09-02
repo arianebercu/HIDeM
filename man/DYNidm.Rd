@@ -8,15 +8,17 @@ DYNidm(
   formula01,
   formula02,
   formula12,
-  id,
-  timeVar,
+  data,
   formLong,
-  family,
-  basRisk,
-  assoc,
+  Longitransition,
   threshold,
-  dataSurv,
   dataLongi,
+  timeVar,
+  id,
+  Nsample,
+  methodJM = list(functional_forms, n_iter = 3500, n_burnin = 500, n_thin = 1, n_chains =
+    3, seed = 1234),
+  methodINLA = list(family = "gaussian", basRisk = "rw1", assoc = NULL),
   method = "Weib",
   scale.X = T,
   maxiter = 100,
@@ -45,6 +47,8 @@ DYNidm(
   analytics = T,
   partialH = F,
   clustertype = "FORK",
+  Ypredmethod = "gauss",
+  NtimesPoints = 250,
   envir = parent.frame()
 )
 }
@@ -65,7 +69,7 @@ state. The left hand side must be equal to the left hand side of
 state.  operator is not required. If missing it is set to
 \code{formula01}.}
 
-\item{dataSurv}{A survival data frame in which to interpret the variables of
+\item{data}{A survival data frame in which to interpret the variables of
 \code{formula01}, \code{formula02} and \code{formula12}.}
 
 \item{dataLongi}{A longitudinal data frame for the time dependent covariates}

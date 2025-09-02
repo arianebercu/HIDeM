@@ -41,32 +41,18 @@ DYNidm.weib<-function(b,fix0,size_V,
                       Longitransition,
                       NtimesPoints,
                       Ypredmethod,
-                      timeVar,ynames,id){
+                      timeVar,ynames,id,
+                      outcome,outcome01,outcome02,outcome12,
+                      p01,p02,p12,
+                      dimp01,dimp02,dimp12){
   
   bfix<-b[fix0==1]
   b<-b[fix0==0]
+  npm<-size_V-sum(fix0)
+  
   
   Nsample<-dim(dataY)[2]-3
   browser()
-  
-# idd<-which(table(dataY$ID)!=256)
-# dataY<-dataY[!dataY$ID%in%idd,]
-# N<-length(unique(dataY$ID))
-  
-  outcome<-ynames
-  outcome01<-  ynames[unlist(lapply(Longitransition,FUN=function(x){
-    if("01"%in%x){
-      return(T)}else{return(F)}
-  }))]
-  outcome02<-  ynames[unlist(lapply(Longitransition,FUN=function(x){
-    if("02"%in%x){
-      return(T)}else{return(F)}
-  }))]
-  
-  outcome12<-  ynames[unlist(lapply(Longitransition,FUN=function(x){
-    if("12"%in%x){
-      return(T)}else{return(F)}
-  }))]
   
   if(Ypredmethod=="equi"){
   
@@ -91,76 +77,47 @@ DYNidm.weib<-function(b,fix0,size_V,
   
   if(length(outcome01)>=1){
   y01<-dataY[dataY$Outcome%in%outcome01,]
-  p01<-length(outcome01)
-  dimp01<-length(outcome01)
-
   # order  by individual and timeline 
   y01<-y01[order(y01[,colnames(y01)%in%id],y01$order),]
   
   
   }else{
-    p01<-0
-    dimp01<-1
     y01<-as.double(rep(0,N*NtimesPoints))
   }
   
   if(length(outcome02)>=1){
     y02<-dataY[dataY$Outcome%in%outcome02,]
-    p02<-length(outcome02)
-    dimp02<-length(outcome02)
-    
-    # order  by individual and timeline 
     y02<-y02[order(y02$ID,y02$order),]
     
   }else{
-    p02<-0
-    dimp02<-1
     y02<-as.double(rep(0,N*NtimesPoints))
   }
   
   if(length(outcome12)>=1){
     y12<-dataY[dataY$Outcome%in%outcome12,]
-    p12<-length(outcome12)
-    dimp12<-length(outcome12)
-    
     # order  by individual and timeline 
     y12<-y12[order(y12$ID,y12$order),]
     
   }else{
-    p12<-0
-    dimp12<-1
     y12<-as.double(rep(0,N*NtimesPoints))
   }
 
- b<-c(b,rep(0,p01),rep(0,p02),rep(0,p12))
- size_V<-size_V+p01+p02+p12
- npm<-size_V-sum(fix0)
- 
- if(length(fix0)!=size_V){
-   fix0<-rep(0,size_V)
- }
- if(sum(fix0)>0){
-   bfix<-b[fix0==1]
-   b<-b[fix0==0]
- }else{
-   bfix<-1
-   }
  
  out<-list()
  length(out)<-Nsample
  
- # error comes from ctime = 1 ? 
- 
- idd<-which(ctime==1)
- ctime<-ctime[-idd]
- t0<-t0[-idd]
- t1<-t1[-idd]
- t2<-t2[-idd]
- t3<-t3[-idd]
- N<-N-length(idd)
- y01<-y01[!y01$ID%in%idd,]
- y02<-y02[!y02$ID%in%idd,]
- y12<-y12[!y12$ID%in%idd,]
+ # # error comes from ctime = 1 ? 
+ # 
+ # idd<-which(ctime==1)
+ # ctime<-ctime[-idd]
+ # t0<-t0[-idd]
+ # t1<-t1[-idd]
+ # t2<-t2[-idd]
+ # t3<-t3[-idd]
+ # N<-N-length(idd)
+ # y01<-y01[!y01$ID%in%idd,]
+ # y02<-y02[!y02$ID%in%idd,]
+ # y12<-y12[!y12$ID%in%idd,]
   for(k in 1:Nsample){
   
   out[[k]]<- tryCatch({ marqLevAlg::mla(b=b,
@@ -235,66 +192,39 @@ DYNidm.weib<-function(b,fix0,size_V,
     # to keep tracks of time order for each individual 
     dataY$order<-as.numeric(ave(dataY[,colnames(dataY)%in%id], cumsum(c(TRUE, diff(dataY[,colnames(dataY)%in%id]) != 0)), FUN = seq_along))
     
+
     if(length(outcome01)>=1){
       y01<-dataY[dataY$Outcome%in%outcome01,]
-      p01<-length(outcome01)
-      dimp01<-length(outcome01)
-      
       # order  by individual and timeline 
       y01<-y01[order(y01[,colnames(y01)%in%id],y01$order),]
       
       
     }else{
-      p01<-0
-      dimp01<-1
       y01<-as.double(rep(0,N*NtimesPoints))
     }
     
     if(length(outcome02)>=1){
       y02<-dataY[dataY$Outcome%in%outcome02,]
-      p02<-length(outcome02)
-      dimp02<-length(outcome02)
-      
       # order  by individual and timeline 
       y02<-y02[order(y02$ID,y02$order),]
       
     }else{
-      p02<-0
-      dimp02<-1
       y02<-as.double(rep(0,N*NtimesPoints))
     }
     
     if(length(outcome12)>=1){
       y12<-dataY[dataY$Outcome%in%outcome12,]
-      p12<-length(outcome12)
-      dimp12<-length(outcome12)
-      
       # order  by individual and timeline 
       y12<-y12[order(y12$ID,y12$order),]
       
     }else{
-      p12<-0
-      dimp12<-1
       y12<-as.double(rep(0,N*NtimesPoints))
     }
     
-    b<-c(b,rep(0,p01),rep(0,p02),rep(0,p12))
-    size_V<-size_V+p01+p02+p12
-    npm<-size_V-sum(fix0)
-    
-    if(length(fix0)!=size_V){
-      fix0<-rep(0,size_V)
-    }
-    if(sum(fix0)>0){
-      bfix<-b[fix0==1]
-      b<-b[fix0==0]
-    }else{
-      bfix<-1
-      }
     
     out<-list()
     length(out)<-Nsample
-    k<-1
+k<-1
     browser()
     for(k in 1:Nsample){
       

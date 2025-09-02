@@ -104,7 +104,7 @@ sim.idmModel <- function(x,
           if(dat$latent.illtime[i]<dat$censtime[i]){
             idL<-which(itimes<dat$illtime[i])
             idR<-which(itimes>=dat$illtime[i])
-           
+            
             #dat$lifetime[i]<R is equivalent to length(idR)==0
             if(length(idR)==0){
               L<-itimes[max(idL)]
@@ -150,11 +150,11 @@ sim.idmModel <- function(x,
 }
 
 simdep.idmModel <- function(x,
-                         n,
-                         plot,
-                         latent=FALSE,
-                         keep.inspectiontimes=FALSE,
-                         ...){
+                            n,
+                            plot,
+                            latent=FALSE,
+                            keep.inspectiontimes=FALSE,
+                            ...){
   # simulate latent data
   #class(x) <- "lvm"
   #dat <- lava::sim(x,n=n,...)
@@ -259,8 +259,29 @@ simdep.idmModel <- function(x,
   dat$T02<-T02
   dat$T12<-T12
   dat$id.nodem.death<-id.nodem.death
-  dat<-merge(dat[,!colnames(dat)%in%c("num.visit","visit","y")],x[,colnames(x)%in%c("ID","num.visit","visit","y")],by=c("ID"))
-  return(list(data=dat))
+
+  
+  #delete measure of longitudinal marker after Tdeath or censoring
+  
+  col<-colnames(x)[1:(which(colnames(x)=="latent.illtime")-1)]
+  dat<-merge(dat[,!colnames(dat)%in%c("num.visit","visit",col[4:length(col)])],x[,c(1:(which(colnames(x)=="latent.illtime")-1))],by=c("ID"))
+  
+  dat<-do.call(rbind,apply(dat,MARGIN = 1,FUN=function(x){
+    if(x[names(x)=="seen.exit"]==1){
+      if(x[names(x)=="observed.lifetime"]<x[names(x)=="visit"] |x[names(x)=="censtime"]<x[names(x)=="visit"]){
+        return(NULL)
+      }else{
+        return(x)
+      }
+    }else{
+      if(x[names(x)=="censtime"]<x[names(x)=="visit"]){
+        return(NULL)
+      }else{
+      return(x)}
+    }
+  }))
+  dat<-as.data.frame(dat)
+  return(dat)
 }
 
 ##' @title Sample illness-death model data 
@@ -323,7 +344,7 @@ simulateIDM <- function(n=100,
                                      0,0,0,0,0,0,0,1,0,0,
                                      0,0,0,0,0,0,0,0,1,0,
                                      0,0,0,0,0,0,0,0,0,1),nrow=10,ncol=10),
-                           x01=paste0("X",1:10),
+                        x01=paste0("X",1:10),
                         x02=paste0("X",1:10),
                         x12=paste0("X",1:10),
                         beta01=rep(0.5,10),
@@ -333,7 +354,7 @@ simulateIDM <- function(n=100,
   ##############################################################################
   ####################### check entry parameters ###############################
   ##############################################################################
-
+  
   if(!inherits(seed,c("numeric","integer")) | length(seed)!=1|seed<=0)stop("The seed has to be a numeric or integer higher than 0.")
   if(!inherits(n,c("numeric","integer")) | round(n)!=n |length(n)!=1|n<=0)stop("The number of subject has to be an integer higher than 0.")
   if(!inherits(prob.censoring,c("numeric","integer")) | prob.censoring > 1 |prob.censoring<0 |length(prob.censoring)!=1)stop("The prob.censoring has to a numeric or integer between 0 and 1.")
@@ -374,27 +395,27 @@ simulateIDM <- function(n=100,
   #cov<-matrix(0,n.inspections,n.inspections)
   #diag(cov)<-punctuality
   #exogenous_data<-cbind(exogenous_data,mvrnorm(n = n, mu = rep(schedule,n.inspections), Sigma = cov))
-
+  
   V<-matrix(NA,nrow=n,ncol=n.inspections)
   N_max<-n
   still<-c(1:N_max)
   C<-rep(NA,n)
   
-   for(j in 1:n.inspections){
+  for(j in 1:n.inspections){
     if(j==1){
       V[,j]<-0
     }else{
       #V[,j]<-runif(n=N[i],min=(j-1)*step[i],max=(step[i]*(j-1)+var.step[i]))}
       V[,j]<-stats::runif(n=n,min=(j-1)*schedule,max=(schedule*(j-1)+punctuality))}
-     
-     if(j>1){
-       id.censoring<-stats::rbinom(N_max,1,prob.censoring)
-       C[still]<-ifelse(id.censoring==1,V[still,j-1],NA)
-       N_max<-N_max-sum(id.censoring)
-       still<-still[id.censoring==0]
-       
-     }
-   }
+    
+    if(j>1){
+      id.censoring<-stats::rbinom(N_max,1,prob.censoring)
+      C[still]<-ifelse(id.censoring==1,V[still,j-1],NA)
+      N_max<-N_max-sum(id.censoring)
+      still<-still[id.censoring==0]
+      
+    }
+  }
   # C at NA put last visit 
   C[is.na(C)]<-V[is.na(C),dim(V)[2]]
   
@@ -431,7 +452,7 @@ simulateIDM <- function(n=100,
   illstatus <-1*((latent.illtime<latent.lifetime)&(latent.illtime<administrative.censoring))
   latent.waittime[illstatus==1]<-(((-log(U12*S12)*exp(-X12%*%beta12))^(1/shape.waittime))/scale.waittime)[illstatus==1]
   latent.waittime[illstatus!=1]<-latent.lifetime[illstatus!=1]
-
+  
   #for(i in 1:n){
   #   if(illstatus[i]==1){
   #     cv<-F
@@ -470,8 +491,8 @@ simulateIDM <- function(n=100,
   
   surv<-id<-NULL
   surv01<-data.frame(time=rep(time,n),
-             surv=as.vector(survival01),
-             id=sort(rep(c(1:(n)),length(time))))
+                     surv=as.vector(survival01),
+                     id=sort(rep(c(1:(n)),length(time))))
   
   surv01$id<-as.factor(surv01$id)
   p01<-ggplot(surv01[surv01$id%in%c(1:3),],aes(x=time,y=surv,color=id))+
@@ -505,8 +526,8 @@ simulateIDM <- function(n=100,
   
   data.weibull[,1]<-c(S01,S02,S12)
   data.weibull[,2]<-c(rep("01",length(S01)),
-                       rep("02",length(S02)),
-                       rep("12",length(S12)))
+                      rep("02",length(S02)),
+                      rep("12",length(S12)))
   data.weibull[,3]<-rep(time,3)
   colnames(data.weibull)<-c("survie","type","time")
   data.weibull<-as.data.frame(data.weibull)
@@ -520,46 +541,87 @@ simulateIDM <- function(n=100,
   
 }
 
+##' @title Sample illness-death model data 
+##' @description
+##'  Simulate data from an illness-death model with interval censored event times
+##' and covariates for the purpose of illustrating the help pages of the HIDeM package.
+##' See the body of the function for details, i.e., evaluate simulateIDM
+##' @param scale.illtime Weilbull scale for latent illness time
+##' @param shape.illtime Weilbull shape for latent illness time
+##' @param scale.lifetime Weilbull scale for latent life time
+##' @param shape.lifetime Weilbull shape for latent life time
+##' @param scale.waittime Weilbull scale for latent life time
+##' @param shape.waittime Weilbull shape for latent life time
+##' @param seed specify the seed 
+##' @param prob.censoring probability of censoring at each visit 
+##' @param administrative.censoring specify time of administrative censoring
+##' @param n.inspections Number of inspection times
+##' @param schedule Mean of the waiting time between adjacent
+##' inspections.
+##' @param punctuality Standard deviation of waiting time between
+##' inspections.
+##' @param nvar number of variables
+##' @param mean mean of each explanatory variables
+##' @param cov covariance matrix of explanatory variables
+##' @param x01 names of variables on transition 0 --> 1
+##' @param x02 names of variables on transition 0 --> 2
+##' @param x12 names of variables on transition 1 --> 2
+##' @param beta01 value of beta on transition 0 --> 1
+##' @param beta02 value of beta on transition 0 --> 2
+##' @param beta12 value of beta on transition 1 --> 2
+##' @param n number of observations
+##' @param B correlation matrix between random effects of all longitudinal markers
+##' @param beta0 Intercept regression parameter for each longitudinal marker
+##' @param beta1 Slope regression parameter for each longitudinal marker
+##' @param alpha_y_01 Regression parameters of each current value of longitudinal marker on transition 0 to 1
+##' @param alpha_y_02 Regression parameters of each current value of longitudinal marker on transition 0 to 2
+##' @param alpha_y_12 Regression parameters of each current value of longitudinal marker on transition 1 to 2
+##' @param alpha_slope_01 Regression parameters of each slope of longitudinal marker on transition 0 to 1
+##' @param alpha_slope_02 Regression parameters of each slope of longitudinal marker on transition 0 to 2
+##' @param alpha_slope_12 Regression parameters of each slope of longitudinal marker on transition 1 to 2
+#' @importFrom ggplot2 ggplot geom_line geom_point theme_classic ylab aes_string aes facet_grid
+#' @useDynLib HIDeM
+#' @author R: Ariane Bercu <ariane.bercu@@u-bordeaux.fr> 
+#' @export
 
 
-
-simulatedepIDM <- function(n=100,
-                        seed=1,
-                        scale.illtime=2.5,
-                        shape.illtime=8/100,
-                        scale.lifetime=2.5,
-                        shape.lifetime=8/100,
-                        scale.waittime=2.5,
-                        shape.waittime=8/100,
-                        prob.censoring=0.05,
-                        administrative.censoring=18,
-                        n.inspections=8,
-                        schedule=2.5,
-                        punctuality=0.5,
-                        nvar=10,
-                        mean=rep(0,10),
-                        cov=matrix(c(1,0,0,0,0,0,0,0,0,0,
-                                     0,1,0,0,0,0,0,0,0,0,
-                                     0,0,1,0,0,0,0,0,0,0,
-                                     0,0,0,1,0,0,0,0,0,0,
-                                     0,0,0,0,1,0,0,0,0,0,
-                                     0,0,0,0,0,1,0,0,0,0,
-                                     0,0,0,0,0,0,1,0,0,0,
-                                     0,0,0,0,0,0,0,1,0,0,
-                                     0,0,0,0,0,0,0,0,1,0,
-                                     0,0,0,0,0,0,0,0,0,1),nrow=10,ncol=10),
-                        x01=paste0("X",1:10),
-                        x02=paste0("X",1:10),
-                        x12=paste0("X",1:10),
-                        beta01=rep(0.5,10),
-                        beta02=rep(0.5,10),
-                        beta12=rep(0.5,10),
-                        B=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3),
-                        mu_sigma=0,
-                        beta0=0.5, beta1=0.5,
-                        alpha0_01=0.5, alpha_y_01=0.5, alpha_slope_01=0.5,
-                        alpha0_02=0.5, alpha_y_02=0.5, alpha_slope_02=0.5,
-                        alpha0_12=0.5, alpha_y_12=0.5, alpha_slope_12=0.5){
+simulateDYNIDM <- function(n=100,
+                           seed=1,
+                           scale.illtime=2.5,
+                           shape.illtime=8/100,
+                           scale.lifetime=2.5,
+                           shape.lifetime=8/100,
+                           scale.waittime=2.5,
+                           shape.waittime=8/100,
+                           prob.censoring=0.05,
+                           administrative.censoring=18,
+                           n.inspections=8,
+                           schedule=2.5,
+                           punctuality=0.5,
+                           nvar=10,
+                           mean=rep(0,10),
+                           cov=matrix(c(1,0,0,0,0,0,0,0,0,0,
+                                        0,1,0,0,0,0,0,0,0,0,
+                                        0,0,1,0,0,0,0,0,0,0,
+                                        0,0,0,1,0,0,0,0,0,0,
+                                        0,0,0,0,1,0,0,0,0,0,
+                                        0,0,0,0,0,1,0,0,0,0,
+                                        0,0,0,0,0,0,1,0,0,0,
+                                        0,0,0,0,0,0,0,1,0,0,
+                                        0,0,0,0,0,0,0,0,1,0,
+                                        0,0,0,0,0,0,0,0,0,1),nrow=10,ncol=10),
+                           x01=paste0("X",1:10),
+                           x02=paste0("X",1:10),
+                           x12=paste0("X",1:10),
+                           beta01=rep(0.5,10),
+                           beta02=rep(0.5,10),
+                           beta12=rep(0.5,10),
+                           B=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3),
+                           sigma=1,
+                           beta0=0.5, beta1=0.5,
+                           alpha0_01=0.5, alpha_y_01=0.5, alpha_slope_01=0,
+                           alpha0_02=0.5, alpha_y_02=0.5, alpha_slope_02=0,
+                           alpha0_12=0.5, alpha_y_12=0.5, alpha_slope_12=0){
   
   ##############################################################################
   ####################### check entry parameters ###############################
@@ -595,14 +657,14 @@ simulatedepIDM <- function(n=100,
   if(!inherits(mean,c("numeric","integer")) | length(mean)!=nvar)stop("The mean value of variables has to be an integer or numeric of length nvar.")
   if(!inherits(as.vector(cov),c("numeric","integer")) | dim(cov)[1]!=nvar | dim(cov)[2]!=nvar)stop("The covariance matrix of variables has to contain integer or numeric of dimension nvar*nvar.")
   if(nvar>0){
-  if(!inherits(x01,c("character")) | any(!x01%in%paste0("X",1:nvar)) | length(x01)>nvar | length(x01)<=0)stop(paste0("The x01 has to contain either X1, X2, ..., until X",nvar))
-  if(!inherits(x02,c("character")) | any(!x02%in%paste0("X",1:nvar)) | length(x02)>nvar | length(x02)<=0)stop(paste0("The x02 has to contain either X1, X2, ..., until X",nvar))
-  if(!inherits(x12,c("character")) | any(!x12%in%paste0("X",1:nvar)) | length(x12)>nvar | length(x12)<=0)stop(paste0("The x12 has to contain either X1, X2, ..., until X",nvar))
-  if(!inherits(beta01,c("numeric","integer")) |  length(beta01)>nvar | length(beta01)<=0)stop("The effets on transition 0 -> 1 beta01 has to be an integer or numeric of length nvar.")
-  if(!inherits(beta02,c("numeric","integer")) |  length(beta02)>nvar | length(beta02)<=0)stop("The effets on transition 0 -> 2 beta02 has to be an integer or numeric of length nvar.")
-  if(!inherits(beta12,c("numeric","integer")) |  length(beta12)>nvar | length(beta12)<=0)stop("The effets on transition 1 -> 2 beta12 has to be an integer or numeric of length nvar.")}else{
-    beta12<-beta01<-beta02<-0
-  }
+    if(!inherits(x01,c("character")) | any(!x01%in%paste0("X",1:nvar)) | length(x01)>nvar | length(x01)<=0)stop(paste0("The x01 has to contain either X1, X2, ..., until X",nvar))
+    if(!inherits(x02,c("character")) | any(!x02%in%paste0("X",1:nvar)) | length(x02)>nvar | length(x02)<=0)stop(paste0("The x02 has to contain either X1, X2, ..., until X",nvar))
+    if(!inherits(x12,c("character")) | any(!x12%in%paste0("X",1:nvar)) | length(x12)>nvar | length(x12)<=0)stop(paste0("The x12 has to contain either X1, X2, ..., until X",nvar))
+    if(!inherits(beta01,c("numeric","integer")) |  length(beta01)>nvar | length(beta01)<=0)stop("The effets on transition 0 -> 1 beta01 has to be an integer or numeric of length nvar.")
+    if(!inherits(beta02,c("numeric","integer")) |  length(beta02)>nvar | length(beta02)<=0)stop("The effets on transition 0 -> 2 beta02 has to be an integer or numeric of length nvar.")
+    if(!inherits(beta12,c("numeric","integer")) |  length(beta12)>nvar | length(beta12)<=0)stop("The effets on transition 1 -> 2 beta12 has to be an integer or numeric of length nvar.")}else{
+      beta12<-beta01<-beta02<-0
+    }
   
   # Set the seed for reproducibility
   set.seed(seed)
@@ -618,8 +680,8 @@ simulatedepIDM <- function(n=100,
   # Generate random data for exogenous variables X1 to XN
   #exogenous_data <- as.data.frame(matrix(rnorm(nvar * n, mean = mean, sd = sd), ncol = nvar))
   if(nvar>0){
-  exogenous_data<-MASS::mvrnorm(n = n, mu = mean, Sigma = cov)
-}else{exogenous_data<-NULL}
+    exogenous_data<-MASS::mvrnorm(n = n, mu = mean, Sigma = cov)
+  }else{exogenous_data<-NULL}
   # Set the column names of the exogenous data frame
   #colnames(exogenous_data) <- paste0("X", 1:nvar)
   
@@ -666,37 +728,46 @@ simulatedepIDM <- function(n=100,
   #exogenous_data<-scale(exogenous_data)
   if(nvar>0){
     colnames(exogenous_data) <- c(paste0("X", 1:nvar),paste0("inspection",1:n.inspections))
-  X01<-as.matrix(exogenous_data[,colnames(exogenous_data)%in%x01])
-  X02<-as.matrix(exogenous_data[,colnames(exogenous_data)%in%x02])
-  X12<-as.matrix(exogenous_data[,colnames(exogenous_data)%in%x12])
+    X01<-as.matrix(exogenous_data[,colnames(exogenous_data)%in%x01])
+    X02<-as.matrix(exogenous_data[,colnames(exogenous_data)%in%x02])
+    X12<-as.matrix(exogenous_data[,colnames(exogenous_data)%in%x12])
   }else{
     colnames(exogenous_data) <- paste0("inspection",1:n.inspections)
     X01<-X02<-X12<-as.matrix(rep(0,n))
   }
   
   data_long <- c()
-
+  mu_sigma<- 0 #random error are normally distributed around 0 
+  
   for( i in 1:n){
+    
     #On tire les effets aléatoires
     random.effects <- mvtnorm::rmvnorm(n=1, sigma = B)
-    b0 <- random.effects[1]
-    b1 <- random.effects[2]
-    tau.sigma <- random.effects[3]
-    sigma <- exp(mu_sigma+tau.sigma)
+    b0 <- random.effects[seq(1,length(random.effects),by=2)]
+    b1 <- random.effects[seq(2,length(random.effects),by=2)]
+    
     visit<-as.numeric(exogenous_data[i,(dim(exogenous_data)[2]-n.inspections+1):dim(exogenous_data)[2]])
     data_long_i <- c()
     data_long_i <- as.data.frame(cbind(rep(i, n.inspections),
                                        c(1:n.inspections),
                                        visit))
     colnames(data_long_i) <- c("ID", "num.visit",  "visit")
-    error1 <- rnorm(n.inspections, mean = 0, sd = sigma)
-    data_long_i$y <- beta0+b0+visit*(beta1+b1) + error1
+    error1 <- matrix(rnorm(n.inspections*dim(B)[2]/2, mean = 0, sd = sigma),ncol=n.inspections,nrow=dim(B)[2]/2)
     
+    y <- matrix(rep(beta0+b0,n.inspections),ncol=dim(B)[2]/2,nrow=n.inspections,byrow = T)+(visit)%*%t(beta1+b1) + t(error1)
+
+    colnames(y)<-paste0("Y",c(1:dim(y)[2]))
+    data_long_i<-cbind(data_long_i,y)
+   
     S_01_inv <- function(tstar){
-      (tstar/2)*sum(shape.illtime*wk*(((tstar/2)*(sk+1))**(shape.illtime-1))*exp(alpha0_01 +sum(X01[i,]*beta01)+
-                                                                         alpha_y_01*(beta0 + b0 + (beta1+b1)*((tstar/2)*(sk+1))) +
-                                                                         alpha_slope_01*((beta1+b1))
+     
+      nodes <- (tstar/2) * (sk + 1) 
+     
+      (tstar/2)*sum(shape.illtime*(scale.illtime^shape.illtime)*wk*((nodes)^(shape.illtime-1))*exp(sum(X01[i,]*beta01)+
+                                                                                   sum(alpha_y_01*(beta0 + b0)) + colSums(alpha_y_01*(beta1+b1)%*%t(nodes)) +
+                                                                                   sum(alpha_slope_01*((beta1+b1)))
       )) + log(U01[i])
+      
       
     }
     T_01 <- try(expr = uniroot(S_01_inv,
@@ -704,9 +775,11 @@ simulatedepIDM <- function(n=100,
                 silent = TRUE)
     
     S_02_inv <- function(tstar){
-      (tstar/2)*sum(shape.lifetime*wk*(((tstar/2)*(sk+1))**(shape.lifetime-1))*exp(alpha0_02 + sum(X02[i,]*beta02)+
-                                                                         alpha_y_02*(beta0 + b0 + (beta1+b1)*((tstar/2)*(sk+1))) +
-                                                                         alpha_slope_02*((beta1+b1)) 
+      
+      nodes <- (tstar/2) * (sk + 1) 
+      (tstar/2)*sum(shape.lifetime*(scale.lifetime^shape.lifetime)*wk*(nodes^(shape.lifetime-1))*exp(sum(X02[i,]*beta02)+
+                                                                                     sum(alpha_y_02*(beta0 + b0)) + colSums(alpha_y_02*(beta1+b1)%*%t(nodes)) +
+                                                                                     sum(alpha_slope_02*((beta1+b1)))
       )) + log(U02[i])
     }
     T_02 <- try(expr = uniroot(S_02_inv,
@@ -723,39 +796,46 @@ simulatedepIDM <- function(n=100,
     data_long_i$latent.illtime<-T_01
     data_long_i$latent.lifetime<-T_02
     data_long_i$latent.waittime<-T_02
-    illstatus <-1*((T_01<T_02)&(T_02<administrative.censoring))
-  if(illstatus==1){
-    S_12 <- function(tps){
-      (tps/2)*sum(shape.waittime*wk*(((tps/2)*(sk+1))**(shape.waittime-1))*exp(alpha0_12 + sum(X12[i,]*beta12)+
-                                                                     alpha_y_12*(beta0 + b0 + (beta1+b1)*((tps/2)*(sk+1))) +
-                                                                     alpha_slope_12*((beta1+b1))
-      ))
+    illstatus <-1*((T_01<T_02)&(T_01<administrative.censoring))
+    if(illstatus==1){
+      S_12 <- function(tps){
+        
+        nodes <- (tps/2) * (sk + 1) 
+        
+        (tps/2)*sum(shape.waittime*wk*(scale.waittime^shape.waittime)*(nodes^(shape.waittime-1))*exp(sum(X12[i,]*beta12)+
+                                                                                   
+                                                                                   sum(alpha_y_12*(beta0 + b0)) + colSums(alpha_y_12*(beta1+b1)%*%t(nodes)) +
+                                                                                   sum(alpha_slope_12*((beta1+b1)))
+        ))
+      }
+      u12_corrige <- U12[i]*exp(-S_12(T_01))
+      S_12_inv <- function(tstar){
+        
+        nodes <- (tstar/2) * (sk + 1) 
+        
+        (tstar/2)*sum(shape.waittime*wk*(scale.waittime^shape.waittime)*(nodes^(shape.waittime-1))*exp(sum(X12[i,]*beta12)+
+                                                                                       sum(alpha_y_12*(beta0 + b0)) + colSums(alpha_y_12*(beta1+b1)%*%t(nodes)) +
+                                                                                       sum(alpha_slope_12*((beta1+b1)))
+        )) + log(u12_corrige)
+      }
+      T_12 <- try(expr = uniroot(S_12_inv,
+                                 interval = c(0, max(visit)))$root,
+                  silent = TRUE)
+      
+      if(inherits(T_12, "try-error")){
+        T_12 <- 100000000
+      }
+      
+      
+      data_long_i$latent.waittime<-T_12
     }
-    u12_corrige <- U12[i]*exp(-S_12(T_01))
-    S_12_inv <- function(tstar){
-      (tstar/2)*sum(shape.waittime*wk*(((tstar/2)*(sk+1))**(shape.waittime-1))*exp(alpha0_12 +sum(X12[i,]*beta12)+
-                                                                         alpha_y_12*(beta0 + b0 + (beta1+b1)*((tstar/2)*(sk+1))) +
-                                                                         alpha_slope_12*((beta1+b1)) 
-      )) + log(u12_corrige)
-    }
-    T_12 <- try(expr = uniroot(S_12_inv,
-                               interval = c(0, max(visit)))$root,
-                silent = TRUE)
-    
-    if(inherits(T_12, "try-error")){
-      T_12 <- 100000000
-    }
-    
-    
-    data_long_i$latent.waittime<-T_12
-  }
     
     data_long_i$censtime<-C[i]
     data_long_i$administrative.censoring<-administrative.censoring
     
     data_long<-rbind(data_long,data_long_i)
-                                       
-                                       
+    
+    
   }
 
   exogenous_data$ID<-c(1:n)

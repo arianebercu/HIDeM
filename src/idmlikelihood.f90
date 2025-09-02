@@ -2084,8 +2084,8 @@ else
 	double precision,dimension(no0)::t00,t10,t20,t30
 	integer,dimension(no0)::c0
 
-	allocate(b(np0+dimp01+dimp02+dimp12),bfix(npar0-np0))
-	allocate(fix(npar0+dimp01+dimp02+dimp12))
+	allocate(b(np0),bfix(npar0-np0))
+	allocate(fix(npar0))
 	
 	troncature=troncature0
 
@@ -2207,6 +2207,8 @@ else
          end do
 
 
+		write(6,*)'b ',b
+		write(6,*)'bh ',bh
 
 	
 !---------- calcul de la vraisemblance ------------------
@@ -2253,9 +2255,17 @@ else
 				if(p01.gt.0)then
 					do l=1,Ntime
                         do j=1,dimp01
+						!write(6,*)'l ',l
+						!write(6,*)'j ',j
 								k = (i-1)*Ntime*dimp01+(l-1)*dimp01+j
+						!write(6,*)'k ',k
+						!write(6,*)'y01t(l) ',y01t(l)
                                 y01t(l) =y01t(l) +&
                                 bh(6+nva01+nva02+nva12+j)*y01(k)
+						!		write(6,*)'bh(6+nva01+nva02+nva12+j) ',bh(6+nva01+nva02+nva12+j)
+						!		write(6,*)'y01(k) ',y01(k)
+						 !       write(6,*)'y01t(l) ',y01t(l)
+
                         end do
 					end do 
                 endif  
@@ -2284,6 +2294,9 @@ else
 				y02t=dexp(y02t)
 				y12t=dexp(y12t)
 
+				write(6,*)'y01t',y01t
+				write(6,*)'y02t',y02t
+				write(6,*)'y12t',y12t
                 vet01 = dexp(vet01)
                 vet12 = dexp(vet12)
                 vet02 = dexp(vet02)
@@ -2305,33 +2318,33 @@ else
 
 		
                 if(c(i).eq.1)then ! cad 0-->1 et 0-->2
-			!	write(6,*)'c1'
+				write(6,*)'c1'
 
 			           call fonctdep(t1(i),the01,ri01,gl01,su01,y01t(241:256))
                        call fonctdep(t3(i),the02,ri02,gl02,su02,y02t(241:256))
                        res1 = -(gl01*vet01)-(gl02*vet02)
 					   
-			!	write(6,*)'res1 ',res1
-			!					
-			!					write(6,*)'ri02 ',ri02
-			!					write(6,*)'su02 ',su02
-			!					write(6,*)'su01 ',su01
+				write(6,*)'res1 ',res1
+								
+								write(6,*)'ri02 ',ri02
+								write(6,*)'su02 ',su02
+								write(6,*)'su01 ',su01
                 else
                 if(c(i).eq.2)then ! cpi 0-->1
 				
-			!	write(6,*)'c2'
+				write(6,*)'c2'
 						 call fonctdep(t3(i),the12,ri12,gl12,su12,y12t(241:256))
                          call  qgaussPL15weibtimedep(t1(i),t2(i),the01,the02,&
                          the12,res2,vet01,vet02,vet12,y01t(1:240),y02t(1:240),y12t(1:240))
                         res1=dLOG(res2*(su12**vet12))
 						
-					!	write(6,*)'res1 ',res1
-					!			write(6,*)'res2 ',res2
-					!			write(6,*)'su12 ',su12
-					!			write(6,*)'ri12 ',ri12
-					!			write(6,*)'ri02 ',ri02
-					!			write(6,*)'su02 ',su02
-					!			write(6,*)'su01 ',su01
+						write(6,*)'res1 ',res1
+								write(6,*)'res2 ',res2
+								write(6,*)'su12 ',su12
+								write(6,*)'ri12 ',ri12
+								write(6,*)'ri02 ',ri02
+								write(6,*)'su02 ',su02
+								write(6,*)'su01 ',su01
 
                 else  
                     if(c(i).eq.3)then ! obs 0-->1
@@ -2345,19 +2358,19 @@ else
                     else   
                        if(c(i).eq.4)then ! cpi 0-->1 et obs 1-->2
 					   
-					!   write(6,*)'c4'
+					   write(6,*)'c4'
 						call fonctdep(t3(i),the12,ri12,gl12,su12,y12t(241:256))
                         call  qgaussPL15weibtimedep(t1(i),t2(i),the01,the02,the12,&
                         res2,vet01,vet02,vet12,y01t(1:240),y02t(1:240),y12t(1:240))
                         res1=dLOG(res2*(su12**vet12)*ri12*vet12)
 						
-					!	write(6,*)'res1 ',res1
-					!			write(6,*)'res2 ',res2
-					!			write(6,*)'su12 ',su12
-					!			write(6,*)'ri12 ',ri12
-					!			write(6,*)'ri02 ',ri02
-					!			write(6,*)'su02 ',su02
-					!			write(6,*)'su01 ',su01
+						write(6,*)'res1 ',res1
+								write(6,*)'res2 ',res2
+								write(6,*)'su12 ',su12
+								write(6,*)'ri12 ',ri12
+								write(6,*)'ri02 ',ri02
+								write(6,*)'su02 ',su02
+								write(6,*)'su01 ',su01
                        else
                          if(c(i).eq.5)then ! obs 0-->1 et obs 1-->2
 								call fonctdep(t1(i),the01,ri01,gl01,su01,y01t(225:240))
@@ -2369,7 +2382,7 @@ else
                                 res1 = res1 -(gl12*vet12) + dLOG(ri12*vet12)
                          else
                             if(c(i).eq.6)then ! vivant ???
-							! write(6,*)'c6'
+							 write(6,*)'c6'
 								call fonctdep(t3(i),the01,ri01,gl01,su01,y01t(241:256))
                                 call fonctdep(t3(i),the02,ri02,gl02,su02,y02t(241:256))
                                 call fonctdep(t3(i),the12,ri12,gl12,su12,y12t(241:256))
@@ -2379,17 +2392,17 @@ else
                                 ((su01**vet01)*(su02**vet02))
                                 res1 = dLOG(res1)
 								
-							!	write(6,*)'res1 ',res1
-							!	write(6,*)'res2 ',res2
-							!	write(6,*)'su12 ',su12
-							!	write(6,*)'ri12 ',ri12
-							!	write(6,*)'ri02 ',ri02
-							!	write(6,*)'su02 ',su02
-							!	write(6,*)'su01 ',su01
+								write(6,*)'res1 ',res1
+								write(6,*)'res2 ',res2
+								write(6,*)'su12 ',su12
+								write(6,*)'ri12 ',ri12
+								write(6,*)'ri02 ',ri02
+								write(6,*)'su02 ',su02
+								write(6,*)'su01 ',su01
 
                             else ! passage 0-->2  
 								
-							!	write(6,*)'c7'
+								write(6,*)'c7'
 				                call fonctdep(t3(i),the01,ri01,gl01,su01,y01t(241:256))
                                 call fonctdep(t3(i),the02,ri02,gl02,su02,y02t(241:256))
                                 call fonctdep(t3(i),the12,ri12,gl12,su12,y12t(241:256))
@@ -2401,13 +2414,13 @@ else
                                 ((su01**vet01)*(su02**vet02)*ri02*vet02)
                                 res1 = dLOG(res1)
 								
-							!	write(6,*)'res1 ',res1
-							!	write(6,*)'res2 ',res2
-							!	write(6,*)'su12 ',su12
-							!	write(6,*)'ri12 ',ri12
-							!	write(6,*)'ri02 ',ri02
-							!	write(6,*)'su02 ',su02
-							!	write(6,*)'su01 ',su01
+								write(6,*)'res1 ',res1
+								write(6,*)'res2 ',res2
+								write(6,*)'su12 ',su12
+								write(6,*)'ri12 ',ri12
+								write(6,*)'ri02 ',ri02
+								write(6,*)'su02 ',su02
+								write(6,*)'su01 ',su01
                             endif
                          endif                        
                       endif
@@ -2415,12 +2428,12 @@ else
                 endif   
                 endif  				
 
-			!	write(6,*) 'res',res
-			!	write(6,*) 'res1',res1
+				write(6,*) 'res',res
+				write(6,*) 'res1',res1
 			!	write(6,*) 'tronc',tronc
                 res = res + res1 + tronc
 
-			!	write(6,*) 'res',res
+				write(6,*) 'res',res
                 if ((res.ne.res).or.(abs(res).ge. 1.d30)) then
                         likelihood_res=-1.d9
                         goto 123

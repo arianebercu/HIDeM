@@ -169,14 +169,15 @@ DYNidm <- function(formula01,
                 
                 
                 methodJM=list(functional_forms,
-                              n_iter, 
-                              n_burnin,
-                              n_thin,
-                              n_chains),
+                              n_iter=3500, 
+                              n_burnin=500,
+                              n_thin=1,
+                              n_chains=3,
+                              seed=1234),
                 
-                methodINLA=list(family,
-                                basRisk,
-                                assoc),
+                methodINLA=list(family="gaussian",
+                                basRisk= "rw1",
+                                assoc=NULL),
                 
                 method="Weib",
                 scale.X=T,
@@ -413,6 +414,7 @@ DYNidm <- function(formula01,
       if(!inherits(option.sequential$cutoff,c("numeric","integer")))stop("The cutoff for spline has to a numeric or integer.")
       if(!inherits(maxiter,c("numeric","integer"))|(maxiter!=floor(maxiter)))stop("Maxiter has to be an integer.")
     if(maxiter<0)stop("Maxiter has to be an integer greater or equal to 0.")
+
     if(!inherits(NtimesPoints,c("numeric","integer"))|(NtimesPoints!=floor(NtimesPoints)))stop("NtimesPoints has to be an integer greater than 100.")
     if(NtimesPoints<100)stop("NtimesPoints has to be an integer greater than 100.")
       if(!inherits(nproc,c("numeric","integer"))|(nproc!=floor(nproc)))stop("nproc has to be an integer.")
@@ -519,8 +521,111 @@ DYNidm <- function(formula01,
     #####################         and initiate values         ##################
     ############################################################################
     
+    if(methodlongi=="INLA"){
+    
+      
+      if(!inherits(formLong,"list")){stop("formLong should be a list of equation")}
+      type<-lapply(formLong,FUN=function(x)!inherits(x,"formula"))
+      type<-unlist(type)
+      if(any(type)){stop("formLong should be a list of equation")}
+      type<-lapply(formLong,FUN=function(x){
+        match(as.character(x[[2]]),colnames(dataLongi),nomatch=0)
+      })
+      type<-unlist(type)
+      if(any(type==0)){stop("Each outcome in formLong should be in dataLongi")}
+      
+      # keep names of Y 
+      ynames<-unlist(lapply(formLong,FUN=function(x){as.character(x[[2]])}))
+      
+    }else{
+      
+      if(!inherits(formLong,"list")){stop("formLong should be a list of lme models")}
+      type<-lapply(formLong,FUN=function(x)!inherits(x,c("MixMod","lme")))
+      type<-unlist(type)
+      if(any(type)){stop("formLong should be a list of lme or MixMod models")}
+      type<-lapply(formLong,FUN=function(x){
+        if(class(x)=="lme"){
+          match(as.character(x$terms[[2]]),colnames(dataLongi),nomatch=0)
+        }else{
+          match(as.character(x$Terms$termsX[[2]]),colnames(dataLongi),nomatch=0)
+        }
+      })
+      type<-unlist(type)
+      if(any(type==0)){stop("Each outcome in formLong should be in dataLongi")}
+      
+      
+      CR_forms<-list()
+      length(CR_forms)<-length(formLong)
+      ynames<-lapply(formLong,FUN=function(x){
+        if(class(x)=="lme"){
+          as.character(x$terms[[2]])
+        }else{
+          as.character(x$Terms$termsX[[2]])
+        }
+      })
+      ynames<-unlist(ynames)
+      browser()
+      for(m in 1:length(formLong)){
+        if("value"%in%methodJM$functional_forms[[m]] & "slope"%in%methodJM$functional_forms[[m]]){
+          CR_forms[[m]]<-as.formula(paste0("~value(",ynames[m],"):CR + slope(",ynames[m],"):CR"))
+        }else{
+          if("value"%in%methodJM$functional_forms[[m]]){
+            CR_forms[[m]]<-as.formula(paste0("~value(",ynames[m],"):CR"))
+          }else{
+            CR_forms[[m]]<-as.formula(paste0("~slope(",ynames[m],"):CR"))
+          }
+        }
+      }
+      names(CR_forms)<-ynames
+      
+      
+    }
     
     
+    outcome<-ynames
+    outcome01<-  ynames[unlist(lapply(Longitransition,FUN=function(x){
+      if("01"%in%x){
+        return(T)}else{return(F)}
+    }))]
+    outcome02<-  ynames[unlist(lapply(Longitransition,FUN=function(x){
+      if("02"%in%x){
+        return(T)}else{return(F)}
+    }))]
+    
+    outcome12<-  ynames[unlist(lapply(Longitransition,FUN=function(x){
+      if("12"%in%x){
+        return(T)}else{return(F)}
+    }))]
+    
+    if(length(outcome01)>=1){
+      p01<-length(outcome01)
+      dimp01<-length(outcome01)
+    }else{
+      p01<-0
+      dimp01<-1
+    }
+    
+    if(length(outcome02)>=1){
+      p02<-length(outcome02)
+      dimp02<-length(outcome02)
+    }else{
+      p02<-0
+      dimp02<-1
+    }
+    
+    if(length(outcome12)>=1){
+      p12<-length(outcome12)
+      dimp12<-length(outcome12)
+      
+    }else{
+      p12<-0
+      dimp12<-1
+    }
+    
+
+    size1<-size1+p01+p02+p12
+    
+    browser()
     if(method=="splines"){
       
       if (is.character(knots)){
@@ -744,26 +849,17 @@ DYNidm <- function(formula01,
       if(!id%in%colnames(data)|!id%in%colnames(dataLongi)){stop("id need to be in data and dataLongi")}}
     
 browser()
+
+# competing risk definition 
+iddCR<-ifelse(idm==1,0,
+              ifelse(idd==1 & t3<=t2+threshold,1,0))
+TimeCR<-ifelse(idm==1,(t1+t2)/2,
+               ifelse(idd==1 & t3<=t2+threshold,t3,t2))
     
     if(methodlongi=="INLA"){
+     
       
-      if(!inherits(formLong,"list")){stop("formLong should be a list of equation")}
-      type<-lapply(formLong,FUN=function(x)!inherits(x,"formula"))
-      type<-unlist(type)
-      if(any(type)){stop("formLong should be a list of equation")}
-      type<-lapply(formLong,FUN=function(x){
-        match(as.character(x[[2]]),colnames(dataLongi),nomatch=0)
-      })
-      type<-unlist(type)
-      if(any(type==0)){stop("Each outcome in formLong should be in dataLongi")}
       
-      # keep names of Y 
-      ynames<-unlist(lapply(formLong,FUN=function(x){as.character(x[[2]])}))
-      
-      iddCR<-ifelse(idm==1,0,
-                    ifelse(idd==1 & t3<=t2+threshold,1,0))
-      TimeCR<-ifelse(idm==1,(t1+t2)/2,
-                     ifelse(idd==1 & t3<=t2+threshold,t3,t2))
       if(truncated==1){
         formSurv<-list(inla.surv(time=TimeCR, event=idm,truncation=t0) ~ 1,
                        inla.surv(time=TimeCR, event=iddCR,truncation=t0) ~ 1)
@@ -819,32 +915,12 @@ browser()
                     clustertype=clustertype,
                    Ypredmethod=Ypredmethod,
                    NtimesPoints=NtimesPoints)
-    if(Ypredmethod=="equi"){NtimesPoints<-NtimesPoints+1}
+
     
     }else{
+
       
-      
-      if(!inherits(formLong,"list")){stop("formLong should be a list of lme models")}
-      type<-lapply(formLong,FUN=function(x)!inherits(x,c("MixMod","lme")))
-      type<-unlist(type)
-      if(any(type)){stop("formLong should be a list of lme or MixMod models")}
-      type<-lapply(formLong,FUN=function(x){
-        if(class(x)=="lme"){
-        match(as.character(x$terms[[2]]),colnames(dataLongi),nomatch=0)
-        }else{
-          match(as.character(x$Terms$termsX[[2]]),colnames(dataLongi),nomatch=0)
-        }
-      })
-      type<-unlist(type)
-      if(any(type==0)){stop("Each outcome in formLong should be in dataLongi")}
-      
-      
-      
-      iddCR<-ifelse(idm==1,0,
-                    ifelse(idd==1 & t3<=t2+threshold,1,0))
-      TimeCR<-ifelse(idm==1,(t1+t2)/2,
-                     ifelse(idd==1 & t3<=t2+threshold,t3,t2))
-      
+     
       dataJM<-data.frame(ID=data[,colnames(data)%in%id],
                          status=ifelse(idm==1,1,
                                        ifelse(iddCR==1,2,0)),
@@ -861,29 +937,7 @@ browser()
       CoxFit_CR <- coxph(Surv(TimeCR, status2) ~ strata(CR),
                          data = dataJM)
       
-      CR_forms<-list()
-      length(CR_forms)<-length(formLong)
-      ynames<-lapply(formLong,FUN=function(x){
-        if(class(x)=="lme"){
-          as.character(x$terms[[2]])
-        }else{
-          as.character(x$Terms$termsX[[2]])
-        }
-      })
-      ynames<-unlist(ynames)
-      browser()
-      for(m in 1:length(formLong)){
-        if("value"%in%methodJM$functional_forms[[m]] & "slope"%in%methodJM$functional_forms[[m]]){
-        CR_forms[[m]]<-as.formula(paste0("~value(",ynames[m],"):CR + slope(",ynames[m],"):CR"))
-        }else{
-        if("value"%in%functional_forms[[m]]){
-          CR_forms[[m]]<-as.formula(paste0("~value(",ynames[m],"):CR"))
-        }else{
-          CR_forms[[m]]<-as.formula(paste0("~slope(",ynames[m],"):CR"))
-        }
-        }
-      }
-      names(CR_forms)<-ynames
+      
         
       if(missing(Nsample)){
         Nsample<-100}else{
@@ -913,12 +967,85 @@ browser()
                      idd=idd,
                      clustertype=clustertype,
                    Ypredmethod=Ypredmethod,
-                   NtimesPoints=NtimesPoints)
+                   NtimesPoints=NtimesPoints,
+                   seed=methodJM$seed)
       
     }
     browser()
                    
     
+    ############################# scale explanatory variables #####################
+    if(scale.X==T){
+      # to know which variable to center and reduces : 
+      
+      if(nvat01>0){
+        names<-as.vector(unlist(lapply(m01, class)))[-1]
+        
+        # standardize variable : 
+        # we need to center and reduce variables when penalty is done 
+        namesx01<-as.vector(unlist(lapply(m01[,colnames(m01)%in%Xnames01], class)))[-1]
+        scaledx01<-scale(x01[,which(namesx01=="numeric")])
+        # keep center and reduces parameters 
+        xm01<-attr(scaledx01,"scaled:center")
+        xs01<-attr(scaledx01,"scaled:scale")
+        x01[,which(namesx01=="numeric")]<-scaledx01
+        
+      }
+      
+      if(nvat02>0){
+        
+        # to know wich variable to center and reduces : 
+        names<-as.vector(unlist(lapply(m02, class)))[-1]
+        
+        # standardize variable : 
+        
+        # we need to center and reduce variables when penalty is done 
+        namesx02<-as.vector(unlist(lapply(m02[,colnames(m02)%in%Xnames02], class)))[-1]
+        scaledx02<-scale(x02[,which(namesx02=="numeric")])
+        # keep center and reduces parameters 
+        xm02<-attr(scaledx02,"scaled:center")
+        xs02<-attr(scaledx02,"scaled:scale")
+        x02[,which(namesx02=="numeric")]<-scaledx02
+      }
+      
+      if(nvat12>0){
+        
+        # to know wich variable to center and reduces : 
+        # no need [-1] as no element before ~
+        names<-as.vector(unlist(lapply(m12, class)))
+        
+        # standardize variable : 
+        
+        # we need to center and reduce variables when penalty is done 
+        namesx12<-as.vector(unlist(lapply(m12[,colnames(m12)%in%Xnames12], class)))
+        scaledx12<-scale(x12[,which(namesx12=="numeric")])
+        # keep center and reduces parameters 
+        xm12<-attr(scaledx12,"scaled:center")
+        xs12<-attr(scaledx12,"scaled:scale")
+        x12[,which(namesx12=="numeric")]<-scaledx12
+      }
+      
+      if(noVar[1]==1){ve01<-as.double(rep(0,N))}else{ve01<-as.double(x01)}
+      if(noVar[2]==1){ve02<-as.double(rep(0,N))}else{ve02<-as.double(x02)}
+      if(noVar[3]==1){ve12<-as.double(rep(0,N))}else{ve12<-as.double(x12)}
+      
+     ym <- do.call(rbind, lapply(split(dataY[, 4:dim(dataY)[2]], dataY$Outcome), function(x) {
+        apply(x, 2, mean)
+      }))
+      
+      # sds per group
+      ys <- do.call(rbind, lapply(split(dataY[, 4:dim(dataY)[2]], dataY$Outcome), function(x) {
+        apply(x, 2, sd)
+      }))
+      
+      dataY[, 4:dim(dataY)[2]] <- do.call(rbind,
+                                  lapply(split( dataY[, 4:dim(dataY)[2]], dataY$Outcome), function(x) {
+                                    apply(x, 2, function(col) (col - min(col)) / (max(col) - min(col)))
+                                  })
+      )
+      
+      
+    }
     
     if(penalty=="none"){
  
@@ -1070,37 +1197,7 @@ browser()
 
         #browser()
         #save(ctime,file="testctime.RData")
-        if(nvat12dep==1){
-          out <- causal.idm.weib(b=b,
-                          fix0=fix0,
-                          size_V=size_V,
-                          clustertype=clustertype,
-                          epsa=epsa,
-                          epsb=epsb,
-                          epsd=epsd,
-                          eps.eigen=eps.eigen,
-                          nproc=nproc,
-                          maxiter=maxiter,
-                          ctime=ctime,
-                          N=N,
-                          ve01=ve01,
-                          ve02=ve02,
-                          ve12=ve12,
-                          dimnva01=dimnva01,
-                          dimnva02=dimnva02,
-                          dimnva12=dimnva12,
-                          nvat01=nvat01,
-                          nvat02=nvat02,
-                          nvat12=nvat12,
-                          t0=t0,
-                          t1=t1,
-                          t2=t2,
-                          t3=t3,
-                          idm=idm,
-                          idd=idd,
-                          ts=ts,
-                          troncature=troncature)
-        }else{
+        
         out <- DYNidm.weib(b=b,
                                     fix0=fix0,
                                     size_V=size_V,
@@ -1136,9 +1233,17 @@ browser()
                         Ypredmethod=Ypredmethod,
                         timeVar=timeVar,
                         ynames=ynames,
-                        id=id)
+                        id=id,
+                        outcome=outcome,
+                        outcome01=outcome01,
+                        outcome02=outcome02,
+                        outcome12=outcome12,
+                        p01=p01,p02=p02,p12=p12,
+                        dimp01=dimp01,
+                        dimp02=dimp02,
+                        dimp12=dimp12)
         
-        }
+        
             
         
         
@@ -1201,24 +1306,14 @@ browser()
                          "modelPar1 12",
                          "modelPar2 12")
         
-         if(nvat12dep==1){
-          XnamesTemp <- c(Xnames01,Xnames02,Xnames12)
-         
-          
-          names(beta)<- c(theta_names,XnamesTemp)
-          names(fix)<- c(theta_names,XnamesTemp)
-          colnames(V) <- c(theta_names,XnamesTemp)
-          rownames(V) <- c(theta_names,XnamesTemp)
-          colnames(H) <- c(theta_names,XnamesTemp)
-          rownames(H) <- c(theta_names,XnamesTemp)
-        }else{
+        
         
         names(beta)<- c(theta_names,c(Xnames01,Xnames02,Xnames12))
         names(fix)<- c(theta_names,c(Xnames01,Xnames02,Xnames12))
         colnames(V) <- c(theta_names,c(Xnames01,Xnames02,Xnames12))
         rownames(V) <- c(theta_names,c(Xnames01,Xnames02,Xnames12))
         colnames(H) <- c(theta_names,c(Xnames01,Xnames02,Xnames12))
-        rownames(H) <- c(theta_names,c(Xnames01,Xnames02,Xnames12))}
+        rownames(H) <- c(theta_names,c(Xnames01,Xnames02,Xnames12))
         
         
         modelPar<-beta[1:6]
@@ -1263,64 +1358,7 @@ browser()
             }
           }
 
- ############################# scale explanatory variables #####################
-          if(scale.X==T){
-            # to know which variable to center and reduces : 
-            
-            if(nvat01>0){
-            names<-as.vector(unlist(lapply(m01, class)))[-1]
-            
-            # standardize variable : 
-            
-            # we need to center and reduce variables when penalty is done 
-            namesx01<-as.vector(unlist(lapply(m01[,colnames(m01)%in%Xnames01], class)))[-1]
-            scaledx01<-scale(x01[,which(namesx01=="numeric")])
-            # keep center and reduces parameters 
-            xm01<-attr(scaledx01,"scaled:center")
-            xs01<-attr(scaledx01,"scaled:scale")
-            x01[,which(namesx01=="numeric")]<-scaledx01
-            
-            }
-            
-            if(nvat02>0){
-            
-            # to know wich variable to center and reduces : 
-            names<-as.vector(unlist(lapply(m02, class)))[-1]
-            
-            # standardize variable : 
-            
-            # we need to center and reduce variables when penalty is done 
-            namesx02<-as.vector(unlist(lapply(m02[,colnames(m02)%in%Xnames02], class)))[-1]
-            scaledx02<-scale(x02[,which(namesx02=="numeric")])
-            # keep center and reduces parameters 
-            xm02<-attr(scaledx02,"scaled:center")
-            xs02<-attr(scaledx02,"scaled:scale")
-            x02[,which(namesx02=="numeric")]<-scaledx02
-            }
-            
-            if(nvat12>0){
-            
-            # to know wich variable to center and reduces : 
-            # no need [-1] as no element before ~
-            names<-as.vector(unlist(lapply(m12, class)))
-            
-            # standardize variable : 
-            
-            # we need to center and reduce variables when penalty is done 
-            namesx12<-as.vector(unlist(lapply(m12[,colnames(m12)%in%Xnames12], class)))
-            scaledx12<-scale(x12[,which(namesx12=="numeric")])
-            # keep center and reduces parameters 
-            xm12<-attr(scaledx12,"scaled:center")
-            xs12<-attr(scaledx12,"scaled:scale")
-            x12[,which(namesx12=="numeric")]<-scaledx12
-            }
-            
-            if(noVar[1]==1){ve01<-as.double(rep(0,N))}else{ve01<-as.double(x01)}
-            if(noVar[2]==1){ve02<-as.double(rep(0,N))}else{ve02<-as.double(x02)}
-            if(noVar[3]==1){ve12<-as.double(rep(0,N))}else{ve12<-as.double(x12)}
-            
-            
-          }
+
            
 ############################ set value of penalty parameters ###################
           if(penalty=="lasso"){alpha<-1}
@@ -1778,7 +1816,7 @@ browser()
             
             
            
-              out <- idm.penalty.weib(b=b,
+              out <- DYNidm.penalty.weib(b=b,
                                fix0=fix0,
                                size_V=size_V,
                                clustertype=clustertype,
@@ -1814,9 +1852,14 @@ browser()
                                alpha=alpha,
                                penalty.factor=penalty.factor,
                                penalty=penalty,
-                               gausspoint=gausspoint,
-                                     analytics=analytics,
-                               partialH=partialH)
+                               partialH=partialH,
+                               dataY=dataY,
+                               Longitransition=Longitransition,
+                               NtimesPoints=NtimesPoints,
+                               Ypredmethod=Ypredmethod,
+                               timeVar=timeVar,
+                               ynames=ynames,
+                               id=id)
             
               
               
