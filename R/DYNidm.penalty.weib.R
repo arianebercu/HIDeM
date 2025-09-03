@@ -78,8 +78,6 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
       list(b=cbind(x$b,newx$b),
            V=cbind(x$V,newx$V),
            H=cbind(x$H,newx$H),
-           dapath=cbind(x$dapath,newx$dapath),
-           gapath=cbind(x$gapath,newx$gapath),
            fix=cbind(x$fix,newx$fix),
            lambda=cbind(x$lambda,newx$lambda),
            alpha=c(x$alpha,newx$alpha),
@@ -96,8 +94,6 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
       list(b=cbind(x$b,newx$b),
            V=cbind(x$V,newx$V),
            H=cbind(x$H,newx$H),
-           dapath=cbind(x$dapath,newx$dapath),
-           gapath=cbind(x$gapath,newx$gapath),
            fix=cbind(x$fix,newx$fix),
            lambda=cbind(x$lambda,newx$lambda),
            alpha=c(x$alpha,newx$alpha),
@@ -342,7 +338,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                  
                                  if(ite==0){# loglik penalised
                                    fn.value<-DYNidmlLikelihoodweibpena(b=b,
-                                                                    npm=length(b),
+                                                                    npm=npm,
                                                                     npar=size_V,
                                                                     bfix=bfix,
                                                                     fix=fix0,
@@ -458,8 +454,6 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                    
                                  }
                                  
-                                 dapath[ite+1]<-da
-                                 gapath[ite+1]<-ga
                                  
                                  if(idpos!=0){
                                    
@@ -503,19 +497,6 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                              fix=rep(0,size_V),
                                                              ctime=ctime,
                                                              no=N,
-                                                             epsa=epsa,
-                                                             epsb=epsb,
-                                                             epsd=epsd,
-                                                             nproc=nproc,
-                                                             clustertype=clustertype,
-                                                             maxiter=maxiter,
-                                                             minimize=F,
-                                                             npm=npm,
-                                                             npar=size_V,
-                                                             bfix=bfix,
-                                                             fix=fix0,
-                                                             ctime=ctime,
-                                                             no=N,
                                                              ve01=ve01,
                                                              ve02=ve02,
                                                              ve12=ve12,
@@ -530,9 +511,9 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                              t2=t2,
                                                              t3=t3,
                                                              troncature=troncature,
-                                                             y01=y01[,colnames(y01)%in%paste0("Sample_",k)],
-                                                             y02=y02[,colnames(y02)%in%paste0("Sample_",k)],
-                                                             y12=y12[,colnames(y12)%in%paste0("Sample_",k)],
+                                                             y01=y01k,
+                                                             y02=y02k,
+                                                             y12=y12k,
                                                              p01=p01,
                                                              p02=p02,
                                                              p12=p12,
@@ -588,19 +569,6 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                   fix=fix0,
                                                   ctime=ctime,
                                                   no=N,
-                                                  epsa=epsa,
-                                                  epsb=epsb,
-                                                  epsd=epsd,
-                                                  nproc=nproc,
-                                                  clustertype=clustertype,
-                                                  maxiter=maxiter,
-                                                  minimize=F,
-                                                  npm=npm,
-                                                  npar=size_V,
-                                                  bfix=bfix,
-                                                  fix=fix0,
-                                                  ctime=ctime,
-                                                  no=N,
                                                   ve01=ve01,
                                                   ve02=ve02,
                                                   ve12=ve12,
@@ -615,9 +583,9 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                   t2=t2,
                                                   t3=t3,
                                                   troncature=troncature,
-                                                  y01=y01[,colnames(y01)%in%paste0("Sample_",k)],
-                                                  y02=y02[,colnames(y02)%in%paste0("Sample_",k)],
-                                                  y12=y12[,colnames(y12)%in%paste0("Sample_",k)],
+                                                  y01=y01k,
+                                                  y02=y02k,
+                                                  y12=y12k,
                                                   p01=p01,
                                                   p02=p02,
                                                   p12=p12,
@@ -643,19 +611,6 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                                fix=rep(0,size_V),
                                                                ctime=ctime,
                                                                no=N,
-                                                               epsa=epsa,
-                                                               epsb=epsb,
-                                                               epsd=epsd,
-                                                               nproc=nproc,
-                                                               clustertype=clustertype,
-                                                               maxiter=maxiter,
-                                                               minimize=F,
-                                                               npm=npm,
-                                                               npar=size_V,
-                                                               bfix=bfix,
-                                                               fix=fix0,
-                                                               ctime=ctime,
-                                                               no=N,
                                                                ve01=ve01,
                                                                ve02=ve02,
                                                                ve12=ve12,
@@ -670,9 +625,9 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                                t2=t2,
                                                                t3=t3,
                                                                troncature=troncature,
-                                                               y01=y01[,colnames(y01)%in%paste0("Sample_",k)],
-                                                               y02=y02[,colnames(y02)%in%paste0("Sample_",k)],
-                                                               y12=y12[,colnames(y12)%in%paste0("Sample_",k)],
+                                                               y01=y01k,
+                                                               y02=y02k,
+                                                               y12=y12k,
                                                                p01=p01,
                                                                p02=p02,
                                                                p12=p12,
@@ -721,19 +676,6 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                   fix=fix0.beta,
                                                   ctime=ctime,
                                                   no=N,
-                                                  epsa=epsa,
-                                                  epsb=epsb,
-                                                  epsd=epsd,
-                                                  nproc=nproc,
-                                                  clustertype=clustertype,
-                                                  maxiter=maxiter,
-                                                  minimize=F,
-                                                  npm=npm,
-                                                  npar=size_V,
-                                                  bfix=bfix,
-                                                  fix=fix0,
-                                                  ctime=ctime,
-                                                  no=N,
                                                   ve01=ve01,
                                                   ve02=ve02,
                                                   ve12=ve12,
@@ -748,9 +690,9 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                   t2=t2,
                                                   t3=t3,
                                                   troncature=troncature,
-                                                  y01=y01[,colnames(y01)%in%paste0("Sample_",k)],
-                                                  y02=y02[,colnames(y02)%in%paste0("Sample_",k)],
-                                                  y12=y12[,colnames(y12)%in%paste0("Sample_",k)],
+                                                  y01=y01k,
+                                                  y02=y02k,
+                                                  y12=y12k,
                                                   p01=p01,
                                                   p02=p02,
                                                   p12=p12,
@@ -765,15 +707,43 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                  # new values for splines:
                                  snew<-s
                                  snew[fix00[1:6]==0]<-output.mla$b
-                                 if(nvat01>0){
-                                 b01<-betanew[1:nvat01][penalty.factor[1:nvat01]==1]
-                                 }else{b01<-0}
-                                 if(nvat02>0){
-                                 b02<-betanew[(nvat01+1):(nvat01+nvat02)][penalty.factor[(nvat01+1):(nvat01+nvat02)]==1]
-                                 }else{b02<-0}
-                                 if(nvat12>0){
-                                 b12<-betanew[(nvat01+nvat02+1):length(betanew)][penalty.factor[(nvat01+nvat02+1):length(betanew)]==1]
-                                 }else{b12<-0}
+                               
+                                 
+                                 
+                                 if(nva01t>0){
+                                   b01<-betanew[1:nva01t][penalty.factor[1:nva01t]==1]
+                                   if(p01>0){
+                                     b01<-c(b01,betanew[(nva01t+nva02t+nva12t+1):(nva01t+nva02t+nva12t+p01)][penalty.factor[(nva01t+nva02t+nva12t+1):(nva01t+nva02t+nva12t+p01)]==1])
+                                   }
+                                 }else{
+                                   if(p01>0){
+                                     b01<-betanew[(nva01t+nva02t+nva12t+1):(nva01t+nva02t+nva12t+p01)][penalty.factor[(nva01t+nva02t+nva12t+1):(nva01t+nva02t+nva12t+p01)]==1]
+                                   }else{
+                                     b01<-0
+                                   }
+                                 }
+                                 
+                                 if(nva02t>0){
+                                   b02<-betanew[(nva01t+1):(nva01t+nva02t)][penalty.factor[(nva01t+1):(nva01t+nva02t)]==1]
+                                   if(p02>0){
+                                     b02<-c(b02,betanew[(nva01t+nva02t+nva12t+p01+1):(nva01t+nva02t+nva12t+p01+p02)][penalty.factor[(nva01t+nva02t+nva12t+p01+1):(nva01t+nva02t+nva12t+p01+p02)]==1])
+                                   }
+                                 }else{
+                                   if(p02>0){
+                                     b02<-betanew[(nva01t+nva02t+nva12t+p01+1):(nva01t+nva02t+nva12t+p01+p02)][penalty.factor[(nva01t+nva02t+nva12t+p01+1):(nva01t+nva02t+nva12t+p01+p02)]==1]
+                                   }else{b02<-0}
+                                 }
+                                 
+                                 if(nva12t>0){
+                                   b12<-betanew[(nva01t+nva02t+1):(nvat01+nvat02+nvat12)][penalty.factor[(nva01t+nva02t+1):(nva01t+nva02t+nva12t)]==1]
+                                   if(p12>0){
+                                     b12<-c(b12,betanew[(nva01t+nva02t+nva12t+p01+p02+1):(nva01t+nva02t+nva12t+p01+p02+p12)][penalty.factor[(nva01t+nva02t+nva12t+p01+p02+1):(nva01t+nva02t+nva12t+p01+p02+p12)]==1])
+                                   }
+                                 }else{
+                                   if(p12>0){
+                                     b12<-betanew[(nva01t+nva02t+nva12t+p01+p02+1):(nva01t+nva02t+nva12t+p01+p02+p12)][penalty.factor[(nva01t+nva02t+nva12t+p01+p02+1):(nva01t+nva02t+nva12t+p01+p02+p12)]==1]
+                                   }else{b12<-0}
+                                 }
                                  
                                  # calculate loglik pen 
                                  if(penalty%in%c("lasso","ridge","elasticnet","corrected.elasticnet")){
@@ -858,103 +828,48 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                    bfix<-b[fix0==1]
                                    b<-b[fix0==0]
                                    
-                                   output<-derivaweib(b=b,
-                                                      npm=length(b),
-                                                      npar=size_V,
-                                                      bfix=bfix,
-                                                      fix=fix0,
-                                                      ctime=ctime,
-                                                      no=N,
-                                                      epsa=epsa,
-                                                      epsb=epsb,
-                                                      epsd=epsd,
-                                                      nproc=nproc,
-                                                      clustertype=clustertype,
-                                                      maxiter=maxiter,
-                                                      minimize=F,
-                                                      npm=npm,
-                                                      npar=size_V,
-                                                      bfix=bfix,
-                                                      fix=fix0,
-                                                      ctime=ctime,
-                                                      no=N,
-                                                      ve01=ve01,
-                                                      ve02=ve02,
-                                                      ve12=ve12,
-                                                      dimnva01=dimnva01,
-                                                      dimnva02=dimnva02,
-                                                      dimnva12=dimnva12,
-                                                      nva01=nvat01,
-                                                      nva02=nvat02,
-                                                      nva12=nvat12,
-                                                      t0=t0,
-                                                      t1=t1,
-                                                      t2=t2,
-                                                      t3=t3,
-                                                      troncature=troncature,
-                                                      y01=y01[,colnames(y01)%in%paste0("Sample_",k)],
-                                                      y02=y02[,colnames(y02)%in%paste0("Sample_",k)],
-                                                      y12=y12[,colnames(y12)%in%paste0("Sample_",k)],
-                                                      p01=p01,
-                                                      p02=p02,
-                                                      p12=p12,
-                                                      dimp01=dimp01,
-                                                      dimp02=dimp02,
-                                                      dimp12=dimp12,
-                                                      Ntime=NtimesPoints,
-                                                      time=time)
-                                   min<-npm
-                                   V01<- matrix(0,npm01,npm01)
-                                   V01[lower.tri(V01,diag=TRUE)] <- output[(min+1):(min+npm01*(npm01+1)/2)]
+                                   output<-deriva(funcpa=DYNidmlLikelihoodweib,
+                                                  b=b,
+                                                  npm=length(b),
+                                                  npar=size_V,
+                                                  bfix=bfix,
+                                                  fix=fix0,
+                                                  ctime=ctime,
+                                                  no=N,
+                                                  ve01=ve01,
+                                                  ve02=ve02,
+                                                  ve12=ve12,
+                                                  dimnva01=dimnva01,
+                                                  dimnva02=dimnva02,
+                                                  dimnva12=dimnva12,
+                                                  nva01=nvat01,
+                                                  nva02=nvat02,
+                                                  nva12=nvat12,
+                                                  t0=t0,
+                                                  t1=t1,
+                                                  t2=t2,
+                                                  t3=t3,
+                                                  troncature=troncature,
+                                                  y01=y01k,
+                                                  y02=y02k,
+                                                  y12=y12k,
+                                                  p01=p01,
+                                                  p02=p02,
+                                                  p12=p12,
+                                                  dimp01=dimp01,
+                                                  dimp02=dimp02,
+                                                  dimp12=dimp12,
+                                                  Ntime=NtimesPoints,
+                                                  time=time)
                                    
-                                   
-                                   min<-min+(npm01*(npm01+1)/2)
-                                   if(npm01>0&npm02>0){
-                                     V0102<- matrix(data=output[(min+1):(min+npm02*npm01)],
-                                                    nrow=npm02,ncol=npm01)
-                                   }
-                                   
-                                   min<-min+npm02*npm01
-                                   
-                                   if(npm01>0&npm12>0){
-                                     V0112<- matrix(data=output[(min+1):(min+npm12*npm01)],
-                                                    nrow=npm12,ncol=npm01)
-                                   }
-                                   
-                                   
-                                   min<-min+npm12*npm01
-                                   V02<- matrix(0,npm02,npm02)
-                                   V02[lower.tri(V02,diag=TRUE)] <- output[(min+1):(min+npm02*(npm02+1)/2)]
-                                   
-                                   
-                                   min<-min+(npm02*(npm02+1)/2)
-                                   
-                                   if(npm02>0&npm12>0){
-                                     V0212<- matrix(data=output[(min+1):(min+npm12*npm02)],
-                                                    nrow=npm12,ncol=npm02)}
-                                   
-                                   
-                                   min<-min+npm12*npm02
-                                   V12<- matrix(0,npm12,npm12)
-                                   V12[lower.tri(V12,diag=TRUE)] <- output[(min+1):length(output)]
-                                   
-                                   
-                                   V<- matrix(0,npm,npm)
-                                   if(npm01>0){
-                                     V[1:npm01,1:npm01]<-V01
-                                     if(npm02>0){V[(npm01+1):(npm01+npm02),1:npm01]<-V0102}
-                                     if(npm12>0){V[(npm01+npm02+1):npm,1:npm01]<-V0112}
-                                   }
-                                   if(npm02>0){
-                                     V[(npm01+1):(npm01+npm02),(npm01+1):(npm01+npm02)]<-V02
-                                     if(npm12>0){V[(npm01+npm02+1):npm,(npm01+1):(npm01+npm02)]<-V0212}
-                                   }
-                                   
-                                   if(npm12>0){
-                                     V[(npm01+npm02+1):npm,(npm01+npm02+1):(npm)]<-V12}
-                                   
-                                   V<-V+t(V)
-                                   diag(V)<-diag(V)/2
+                                min<-npm*(npm+1)/2
+                                 
+                                 fu <- output[(min+1):length(output)]
+                                 
+                                 V<- matrix(0,npm,npm)
+                                 V[lower.tri(diag=TRUE)] <- output[1:min]
+                                 V<-V+t(V)
+                                 diag(V)<-diag(V)/2
                                    # hessian is - second derivatives 
                                    V<--V
                                    V0<-V
@@ -981,8 +896,6 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                            ca.validity=eval.validity,
                                            cb=eval.loglik,
                                            istop=istop,
-                                           gapath=gapath,
-                                           dapath=dapath,
                                            combine=combine))
                              }
     }else{
@@ -1163,9 +1076,6 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                        
                                      }
                                      
-                                     dapath[ite+1]<-da
-                                     gapath[ite+1]<-ga
-                                     
                                      if(idpos!=0){
                                        
                                        warning("Hessian not defined positive")
@@ -1203,31 +1113,41 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                    
                                    # penalised loglik see if inferior to previous
                                    res<-DYNidmlLikelihoodweibpena(b=b,
-                                                               npm=length(b),
-                                                               npar=size_V,
-                                                               bfix=1,
-                                                               fix=rep(0,size_V),
-                                                               ctime=ctime,
-                                                               no=N,
-                                                               ve01=ve01,
-                                                               ve02=ve02,
-                                                               ve12=ve12,
-                                                               dimnva01=dimnva01,
-                                                               dimnva02=dimnva02,
-                                                               dimnva12=dimnva12,
-                                                               nva01=nvat01,
-                                                               nva02=nvat02,
-                                                               nva12=nvat12,
-                                                               t0=t0,
-                                                               t1=t1,
-                                                               t2=t2,
-                                                               t3=t3,
-                                                               troncature=troncature,
-                                                               lambda=lambda[id.lambda,],
-                                                               alpha=alpha,
-                                                               penalty.factor=penalty.factor,
-                                                               penalty=penalty,
-                                                               gausspoint=gausspoint)
+                                                                  npm=length(b),
+                                                                  npar=size_V,
+                                                                  bfix=1,
+                                                                  fix=rep(0,size_V),
+                                                                  ctime=ctime,
+                                                                  no=N,
+                                                                  ve01=ve01,
+                                                                  ve02=ve02,
+                                                                  ve12=ve12,
+                                                                  dimnva01=dimnva01,
+                                                                  dimnva02=dimnva02,
+                                                                  dimnva12=dimnva12,
+                                                                  nva01=nvat01,
+                                                                  nva02=nvat02,
+                                                                  nva12=nvat12,
+                                                                  t0=t0,
+                                                                  t1=t1,
+                                                                  t2=t2,
+                                                                  t3=t3,
+                                                                  troncature=troncature,
+                                                                  y01=y01k,
+                                                                  y02=y02k,
+                                                                  y12=y12k,
+                                                                  p01=p01,
+                                                                  p02=p02,
+                                                                  p12=p12,
+                                                                  dimp01=dimp01,
+                                                                  dimp02=dimp02,
+                                                                  dimp12=dimp12,
+                                                                  Ntime=NtimesPoints,
+                                                                  time=time,
+                                                                  lambda=lambda[id.lambda,],
+                                                                  alpha=alpha,
+                                                                  penalty.factor=penalty.factor,
+                                                                  penalty=penalty)
                                    
                                    
                                    # we want to maximise the loglik thus : 
@@ -1263,7 +1183,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                     step=step,
                                                     b=beta,
                                                     delta=delta,
-                                                    funcpa=idmlLikelihoodweibpena,
+                                                    funcpa=DYNidmlLikelihoodweibpena,
                                                     res.out.error=res.out.error,
                                                     npm=length(beta),
                                                     npar=size_V,
@@ -1285,43 +1205,62 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                     t2=t2,
                                                     t3=t3,
                                                     troncature=troncature,
+                                                    y01=y01k,
+                                                    y02=y02k,
+                                                    y12=y12k,
+                                                    p01=p01,
+                                                    p02=p02,
+                                                    p12=p12,
+                                                    dimp01=dimp01,
+                                                    dimp02=dimp02,
+                                                    dimp12=dimp12,
+                                                    Ntime=NtimesPoints,
+                                                    time=time,
                                                     lambda=lambda[id.lambda,],
                                                     alpha=alpha,
                                                     penalty.factor=penalty.factor,
-                                                    penalty=penalty,
-                                                    gausspoint=gausspoint)
-                                     
+                                                    penalty=penalty)
                                      
                                      betanew<-beta+delta*sears$vw
                                      b<-c(s,betanew)
                                      
                                      
                                      res<-DYNidmlLikelihoodweibpena(b=b,
-                                                                 npm=length(b),
-                                                                 npar=size_V,
-                                                                 bfix=1,
-                                                                 fix=rep(0,size_V),
-                                                                 ctime=ctime,
-                                                                 no=N,
-                                                                 ve01=ve01,
-                                                                 ve02=ve02,
-                                                                 ve12=ve12,
-                                                                 dimnva01=dimnva01,
-                                                                 dimnva02=dimnva02,
-                                                                 dimnva12=dimnva12,
-                                                                 nva01=nvat01,
-                                                                 nva02=nvat02,
-                                                                 nva12=nvat12,
-                                                                 t0=t0,
-                                                                 t1=t1,
-                                                                 t2=t2,
-                                                                 t3=t3,
-                                                                 troncature=troncature,
-                                                                 lambda=lambda[id.lambda,],
-                                                                 alpha=alpha,
-                                                                 penalty.factor=penalty.factor,
-                                                                 penalty=penalty,
-                                                                 gausspoint=gausspoint)
+                                                                    npm=length(b),
+                                                                    npar=size_V,
+                                                                    bfix=1,
+                                                                    fix=rep(0,size_V),
+                                                                    ctime=ctime,
+                                                                    no=N,
+                                                                    ve01=ve01,
+                                                                    ve02=ve02,
+                                                                    ve12=ve12,
+                                                                    dimnva01=dimnva01,
+                                                                    dimnva02=dimnva02,
+                                                                    dimnva12=dimnva12,
+                                                                    nva01=nvat01,
+                                                                    nva02=nvat02,
+                                                                    nva12=nvat12,
+                                                                    t0=t0,
+                                                                    t1=t1,
+                                                                    t2=t2,
+                                                                    t3=t3,
+                                                                    troncature=troncature,
+                                                                    y01=y01k,
+                                                                    y02=y02k,
+                                                                    y12=y12k,
+                                                                    p01=p01,
+                                                                    p02=p02,
+                                                                    p12=p12,
+                                                                    dimp01=dimp01,
+                                                                    dimp02=dimp02,
+                                                                    dimp12=dimp12,
+                                                                    Ntime=NtimesPoints,
+                                                                    time=time,
+                                                                    lambda=lambda[id.lambda,],
+                                                                    alpha=alpha,
+                                                                    penalty.factor=penalty.factor,
+                                                                    penalty=penalty)
                                    }
                                    # if not better or do not exist need to readjust
                                    # value of beta 
@@ -1372,22 +1311,57 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                                 t2=t2,
                                                                 t3=t3,
                                                                 troncature=troncature,
-                                                                gausspoint=gausspoint)
+                                                                y01=y01k,
+                                                                y02=y02k,
+                                                                y12=y12k,
+                                                                p01=p01,
+                                                                p02=p02,
+                                                                p12=p12,
+                                                                dimp01=dimp01,
+                                                                dimp02=dimp02,
+                                                                dimp12=dimp12,
+                                                                Ntime=NtimesPoints,
+                                                                time=time)
 
                                    # look at convergence for each lambda :
                                    # mla output is loglik
                                    # new values for splines:
                                    snew<-s
                                    snew[fix00[1:6]==0]<-output.mla$b
-                                   if(nvat01>0){
-                                     b01<-betanew[1:nvat01][penalty.factor[1:nvat01]==1]
-                                   }else{b01<-0}
-                                   if(nvat02>0){
-                                     b02<-betanew[(nvat01+1):(nvat01+nvat02)][penalty.factor[(nvat01+1):(nvat01+nvat02)]==1]
-                                   }else{b02<-0}
-                                   if(nvat12>0){
-                                     b12<-betanew[(nvat01+nvat02+1):length(betanew)][penalty.factor[(nvat01+nvat02+1):length(betanew)]==1]
-                                   }else{b12<-0}
+                                   if(nva01t>0){
+                                     b01<-betanew[1:nva01t][penalty.factor[1:nva01t]==1]
+                                     if(p01>0){
+                                       b01<-c(b01,betanew[(nva01t+nva02t+nva12t+1):(nva01t+nva02t+nva12t+p01)][penalty.factor[(nva01t+nva02t+nva12t+1):(nva01t+nva02t+nva12t+p01)]==1])
+                                     }
+                                   }else{
+                                     if(p01>0){
+                                       b01<-betanew[(nva01t+nva02t+nva12t+1):(nva01t+nva02t+nva12t+p01)][penalty.factor[(nva01t+nva02t+nva12t+1):(nva01t+nva02t+nva12t+p01)]==1]
+                                     }else{
+                                       b01<-0
+                                     }
+                                   }
+                                   
+                                   if(nva02t>0){
+                                     b02<-betanew[(nva01t+1):(nva01t+nva02t)][penalty.factor[(nva01t+1):(nva01t+nva02t)]==1]
+                                     if(p02>0){
+                                       b02<-c(b02,betanew[(nva01t+nva02t+nva12t+p01+1):(nva01t+nva02t+nva12t+p01+p02)][penalty.factor[(nva01t+nva02t+nva12t+p01+1):(nva01t+nva02t+nva12t+p01+p02)]==1])
+                                     }
+                                   }else{
+                                     if(p02>0){
+                                       b02<-betanew[(nva01t+nva02t+nva12t+p01+1):(nva01t+nva02t+nva12t+p01+p02)][penalty.factor[(nva01t+nva02t+nva12t+p01+1):(nva01t+nva02t+nva12t+p01+p02)]==1]
+                                     }else{b02<-0}
+                                   }
+                                   
+                                   if(nva12t>0){
+                                     b12<-betanew[(nva01t+nva02t+1):(nvat01+nvat02+nvat12)][penalty.factor[(nva01t+nva02t+1):(nva01t+nva02t+nva12t)]==1]
+                                     if(p12>0){
+                                       b12<-c(b12,betanew[(nva01t+nva02t+nva12t+p01+p02+1):(nva01t+nva02t+nva12t+p01+p02+p12)][penalty.factor[(nva01t+nva02t+nva12t+p01+p02+1):(nva01t+nva02t+nva12t+p01+p02+p12)]==1])
+                                     }
+                                   }else{
+                                     if(p12>0){
+                                       b12<-betanew[(nva01t+nva02t+nva12t+p01+p02+1):(nva01t+nva02t+nva12t+p01+p02+p12)][penalty.factor[(nva01t+nva02t+nva12t+p01+p02+1):(nva01t+nva02t+nva12t+p01+p02+p12)]==1]
+                                     }else{b12<-0}
+                                   }
                                    
                                    # calculate loglik pen 
                                    if(penalty%in%c("lasso","ridge","elasticnet","corrected.elasticnet")){
@@ -1472,7 +1446,8 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                      bfix<-b[fix0==1]
                                      b<-b[fix0==0]
                                      
-                                     output<-derivaweib(b=b,
+                                     output<-derivadiag(funcpa=DYNidmlLikelihoodweib,
+                                                        b=b,
                                                         npm=length(b),
                                                         npar=size_V,
                                                         bfix=bfix,
@@ -1492,60 +1467,24 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                         t1=t1,
                                                         t2=t2,
                                                         t3=t3,
-                                                        troncature=troncature)
+                                                        troncature=troncature,
+                                                        y01=y01k,
+                                                        y02=y02k,
+                                                        y12=y12k,
+                                                        p01=p01,
+                                                        p02=p02,
+                                                        p12=p12,
+                                                        dimp01=dimp01,
+                                                        dimp02=dimp02,
+                                                        dimp12=dimp12,
+                                                        Ntime=NtimesPoints,
+                                                        time=time)
+                                     
                                      min<-npm
-                                     V01<- matrix(0,npm01,npm01)
-                                     V01[lower.tri(V01,diag=TRUE)] <- output[(min+1):(min+npm01*(npm01+1)/2)]
-                                     
-                                     
-                                     min<-min+(npm01*(npm01+1)/2)
-                                     if(npm01>0&npm02>0){
-                                       V0102<- matrix(data=output[(min+1):(min+npm02*npm01)],
-                                                      nrow=npm02,ncol=npm01)
-                                     }
-                                     
-                                     min<-min+npm02*npm01
-                                     
-                                     if(npm01>0&npm12>0){
-                                       V0112<- matrix(data=output[(min+1):(min+npm12*npm01)],
-                                                      nrow=npm12,ncol=npm01)
-                                     }
-                                     
-                                     
-                                     min<-min+npm12*npm01
-                                     V02<- matrix(0,npm02,npm02)
-                                     V02[lower.tri(V02,diag=TRUE)] <- output[(min+1):(min+npm02*(npm02+1)/2)]
-                                     
-                                     
-                                     min<-min+(npm02*(npm02+1)/2)
-                                     
-                                     if(npm02>0&npm12>0){
-                                       V0212<- matrix(data=output[(min+1):(min+npm12*npm02)],
-                                                      nrow=npm12,ncol=npm02)}
-                                     
-                                     
-                                     min<-min+npm12*npm02
-                                     V12<- matrix(0,npm12,npm12)
-                                     V12[lower.tri(V12,diag=TRUE)] <- output[(min+1):length(output)]
-                                     
+                                     fu <- output[(min+1):length(output)]
                                      
                                      V<- matrix(0,npm,npm)
-                                     if(npm01>0){
-                                       V[1:npm01,1:npm01]<-V01
-                                       if(npm02>0){V[(npm01+1):(npm01+npm02),1:npm01]<-V0102}
-                                       if(npm12>0){V[(npm01+npm02+1):npm,1:npm01]<-V0112}
-                                     }
-                                     if(npm02>0){
-                                       V[(npm01+1):(npm01+npm02),(npm01+1):(npm01+npm02)]<-V02
-                                       if(npm12>0){V[(npm01+npm02+1):npm,(npm01+1):(npm01+npm02)]<-V0212}
-                                     }
-                                     
-                                     if(npm12>0){
-                                       V[(npm01+npm02+1):npm,(npm01+npm02+1):(npm)]<-V12}
-                                     
-                                     V<-V+t(V)
-                                     diag(V)<-diag(V)/2
-                                     # hessian is - second derivatives 
+                                     diag(V) <- output[1:npm]
                                      V<--V
                                      V0<-V
                                    }else{
@@ -1571,8 +1510,6 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                              ca.validity=eval.validity,
                                              cb=eval.loglik,
                                              istop=istop,
-                                             gapath=gapath,
-                                             dapath=dapath,
                                              combine=combine))
                                }
     }
@@ -1767,9 +1704,6 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                    
                                  }
                                  
-                                 dapath[ite+1]<-da
-                                 gapath[ite+1]<-ga
-                                 
                                  
                                  if(idpos!=0){
                                    
@@ -1803,32 +1737,43 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                  
                                  betanew<-b[(6+1):size_V]
                                  
+                                 # penalised loglik see if inferior to previous
                                  res<-DYNidmlLikelihoodweibpena(b=b,
-                                                         npm=length(b),
-                                                         npar=size_V,
-                                                         bfix=1,
-                                                         fix=rep(0,size_V),
-                                                         ctime=ctime,
-                                                         no=N,
-                                                         ve01=ve01,
-                                                         ve02=ve02,
-                                                         ve12=ve12,
-                                                         dimnva01=dimnva01,
-                                                         dimnva02=dimnva02,
-                                                         dimnva12=dimnva12,
-                                                         nva01=nvat01,
-                                                         nva02=nvat02,
-                                                         nva12=nvat12,
-                                                         t0=t0,
-                                                         t1=t1,
-                                                         t2=t2,
-                                                         t3=t3,
-                                                         troncature=troncature,
-                                                         lambda=lambda[id.lambda,],
-                                                         alpha=alpha,
-                                                         penalty.factor=penalty.factor,
-                                                         penalty=penalty,
-                                                         gausspoint=gausspoint)
+                                                                npm=length(b),
+                                                                npar=size_V,
+                                                                bfix=1,
+                                                                fix=rep(0,size_V),
+                                                                ctime=ctime,
+                                                                no=N,
+                                                                ve01=ve01,
+                                                                ve02=ve02,
+                                                                ve12=ve12,
+                                                                dimnva01=dimnva01,
+                                                                dimnva02=dimnva02,
+                                                                dimnva12=dimnva12,
+                                                                nva01=nvat01,
+                                                                nva02=nvat02,
+                                                                nva12=nvat12,
+                                                                t0=t0,
+                                                                t1=t1,
+                                                                t2=t2,
+                                                                t3=t3,
+                                                                troncature=troncature,
+                                                                y01=y01k,
+                                                                y02=y02k,
+                                                                y12=y12k,
+                                                                p01=p01,
+                                                                p02=p02,
+                                                                p12=p12,
+                                                                dimp01=dimp01,
+                                                                dimp02=dimp02,
+                                                                dimp12=dimp12,
+                                                                Ntime=NtimesPoints,
+                                                                time=time,
+                                                                lambda=lambda[id.lambda,],
+                                                                alpha=alpha,
+                                                                penalty.factor=penalty.factor,
+                                                                penalty=penalty)
                                  
                                  
                                  # we want to maximise the loglik thus : 
@@ -1865,36 +1810,46 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                    # from mla package
                                    
                                    sears<-searpas(vw=vw,
-                                                   step=step,
-                                                   b=betanew,
-                                                   delta=delta,
-                                                   funcpa=DYNidmlLikelihoodweibpena,
-                                                   res.out.error=res.out.error,
-                                                   npm=length(beta),
-                                                   npar=size_V,
-                                                   bfix=s,
-                                                   fix=fix0,
-                                                   ctime=ctime,
-                                                   no=N,
-                                                   ve01=ve01,
-                                                   ve02=ve02,
-                                                   ve12=ve12,
-                                                   dimnva01=dimnva01,
-                                                   dimnva02=dimnva02,
-                                                   dimnva12=dimnva12,
-                                                   nva01=nvat01,
-                                                   nva02=nvat02,
-                                                   nva12=nvat12,
-                                                   t0=t0,
-                                                   t1=t1,
-                                                   t2=t2,
-                                                   t3=t3,
-                                                   troncature=troncature,
-                                                   lambda=lambda[id.lambda,],
-                                                   alpha=alpha,
+                                                  step=step,
+                                                  b=beta,
+                                                  delta=delta,
+                                                  funcpa=DYNidmlLikelihoodweibpena,
+                                                  res.out.error=res.out.error,
+                                                  npm=length(beta),
+                                                  npar=size_V,
+                                                  bfix=s,
+                                                  fix=fix0,
+                                                  ctime=ctime,
+                                                  no=N,
+                                                  ve01=ve01,
+                                                  ve02=ve02,
+                                                  ve12=ve12,
+                                                  dimnva01=dimnva01,
+                                                  dimnva02=dimnva02,
+                                                  dimnva12=dimnva12,
+                                                  nva01=nvat01,
+                                                  nva02=nvat02,
+                                                  nva12=nvat12,
+                                                  t0=t0,
+                                                  t1=t1,
+                                                  t2=t2,
+                                                  t3=t3,
+                                                  troncature=troncature,
+                                                  y01=y01k,
+                                                  y02=y02k,
+                                                  y12=y12k,
+                                                  p01=p01,
+                                                  p02=p02,
+                                                  p12=p12,
+                                                  dimp01=dimp01,
+                                                  dimp02=dimp02,
+                                                  dimp12=dimp12,
+                                                  Ntime=NtimesPoints,
+                                                  time=time,
+                                                  lambda=lambda[id.lambda,],
+                                                  alpha=alpha,
                                                   penalty.factor=penalty.factor,
-                                                  penalty=penalty,
-                                                  gausspoint=gausspoint)
+                                                  penalty=penalty)
                                    
                                    
                                    betanew<-beta+delta*sears$vw
@@ -1902,31 +1857,41 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                    
                                    
                                    res<-DYNidmlLikelihoodweibpena(b=b,
-                                                               npm=length(b),
-                                                               npar=size_V,
-                                                               bfix=1,
-                                                               fix=rep(0,size_V),
-                                                               ctime=ctime,
-                                                               no=N,
-                                                               ve01=ve01,
-                                                               ve02=ve02,
-                                                               ve12=ve12,
-                                                               dimnva01=dimnva01,
-                                                               dimnva02=dimnva02,
-                                                               dimnva12=dimnva12,
-                                                               nva01=nvat01,
-                                                               nva02=nvat02,
-                                                               nva12=nvat12,
-                                                               t0=t0,
-                                                               t1=t1,
-                                                               t2=t2,
-                                                               t3=t3,
-                                                               troncature=troncature,
-                                                               lambda=lambda[id.lambda,],
-                                                               alpha=alpha,
-                                                               penalty.factor=penalty.factor,
-                                                               penalty=penalty,
-                                                               gausspoint=gausspoint)
+                                                                  npm=length(b),
+                                                                  npar=size_V,
+                                                                  bfix=1,
+                                                                  fix=rep(0,size_V),
+                                                                  ctime=ctime,
+                                                                  no=N,
+                                                                  ve01=ve01,
+                                                                  ve02=ve02,
+                                                                  ve12=ve12,
+                                                                  dimnva01=dimnva01,
+                                                                  dimnva02=dimnva02,
+                                                                  dimnva12=dimnva12,
+                                                                  nva01=nvat01,
+                                                                  nva02=nvat02,
+                                                                  nva12=nvat12,
+                                                                  t0=t0,
+                                                                  t1=t1,
+                                                                  t2=t2,
+                                                                  t3=t3,
+                                                                  troncature=troncature,
+                                                                  y01=y01k,
+                                                                  y02=y02k,
+                                                                  y12=y12k,
+                                                                  p01=p01,
+                                                                  p02=p02,
+                                                                  p12=p12,
+                                                                  dimp01=dimp01,
+                                                                  dimp02=dimp02,
+                                                                  dimp12=dimp12,
+                                                                  Ntime=NtimesPoints,
+                                                                  time=time,
+                                                                  lambda=lambda[id.lambda,],
+                                                                  alpha=alpha,
+                                                                  penalty.factor=penalty.factor,
+                                                                  penalty=penalty)
                                    
                                  }
                                  # if not better or do not exist need to readjust
@@ -1953,48 +1918,83 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                            
                                  
                                  output.mla<- marqLevAlg::mla(b=b,
-                                                  fn=DYNidmlLikelihoodweib,
-                                                  epsa=epsa,
-                                                  epsb=epsb,
-                                                  epsd=epsd,
-                                                  maxiter=maxiter.pena,
-                                                  minimize=F,
-                                                  npm=length(b),
-                                                  npar=size_V,
-                                                  bfix=bfix,
-                                                  fix=fix0.beta,
-                                                  ctime=ctime,
-                                                  no=N,
-                                                  ve01=ve01,
-                                                  ve02=ve02,
-                                                  ve12=ve12,
-                                                  dimnva01=dimnva01,
-                                                  dimnva02=dimnva02,
-                                                  dimnva12=dimnva12,
-                                                  nva01=nvat01,
-                                                  nva02=nvat02,
-                                                  nva12=nvat12,
-                                                  t0=t0,
-                                                  t1=t1,
-                                                  t2=t2,
-                                                  t3=t3,
-                                                  troncature=troncature,
-                                                  gausspoint=gausspoint)
+                                                              fn=DYNidmlLikelihoodweib,
+                                                              epsa=epsa,
+                                                              epsb=epsb,
+                                                              epsd=epsd,
+                                                              maxiter=maxiter.pena,
+                                                              minimize=F,
+                                                              npm=length(b),
+                                                              npar=size_V,
+                                                              bfix=bfix,
+                                                              fix=fix0.beta,
+                                                              ctime=ctime,
+                                                              no=N,
+                                                              ve01=ve01,
+                                                              ve02=ve02,
+                                                              ve12=ve12,
+                                                              dimnva01=dimnva01,
+                                                              dimnva02=dimnva02,
+                                                              dimnva12=dimnva12,
+                                                              nva01=nvat01,
+                                                              nva02=nvat02,
+                                                              nva12=nvat12,
+                                                              t0=t0,
+                                                              t1=t1,
+                                                              t2=t2,
+                                                              t3=t3,
+                                                              troncature=troncature,
+                                                              y01=y01k,
+                                                              y02=y02k,
+                                                              y12=y12k,
+                                                              p01=p01,
+                                                              p02=p02,
+                                                              p12=p12,
+                                                              dimp01=dimp01,
+                                                              dimp02=dimp02,
+                                                              dimp12=dimp12,
+                                                              Ntime=NtimesPoints,
+                                                              time=time)
                                  
                                  # look at convergence for each lambda :
                                  
                                  # new values for splines:
                                  snew<-s
                                  snew[fix00[1:6]==0]<-output.mla$b
-                                 if(nvat01>0){
-                                 b01<-betanew[1:nvat01][penalty.factor[1:nvat01]==1]
-                                 }else{b01<-0}
-                                 if(nvat02>0){
-                                 b02<-betanew[(nvat01+1):(nvat01+nvat02)][penalty.factor[(nvat01+1):(nvat01+nvat02)]==1]
-                                 }else{b02<-0}
-                                 if(nvat12>0){
-                                 b12<-betanew[(nvat01+nvat02+1):length(betanew)][penalty.factor[(nvat01+nvat02+1):length(betanew)]==1]
-                                 }else{b12<-0}
+                                 if(nva01t>0){
+                                   b01<-betanew[1:nva01t][penalty.factor[1:nva01t]==1]
+                                   if(p01>0){
+                                     b01<-c(b01,betanew[(nva01t+nva02t+nva12t+1):(nva01t+nva02t+nva12t+p01)][penalty.factor[(nva01t+nva02t+nva12t+1):(nva01t+nva02t+nva12t+p01)]==1])
+                                   }
+                                 }else{
+                                   if(p01>0){
+                                     b01<-betanew[(nva01t+nva02t+nva12t+1):(nva01t+nva02t+nva12t+p01)][penalty.factor[(nva01t+nva02t+nva12t+1):(nva01t+nva02t+nva12t+p01)]==1]
+                                   }else{
+                                     b01<-0
+                                   }
+                                 }
+                                 
+                                 if(nva02t>0){
+                                   b02<-betanew[(nva01t+1):(nva01t+nva02t)][penalty.factor[(nva01t+1):(nva01t+nva02t)]==1]
+                                   if(p02>0){
+                                     b02<-c(b02,betanew[(nva01t+nva02t+nva12t+p01+1):(nva01t+nva02t+nva12t+p01+p02)][penalty.factor[(nva01t+nva02t+nva12t+p01+1):(nva01t+nva02t+nva12t+p01+p02)]==1])
+                                   }
+                                 }else{
+                                   if(p02>0){
+                                     b02<-betanew[(nva01t+nva02t+nva12t+p01+1):(nva01t+nva02t+nva12t+p01+p02)][penalty.factor[(nva01t+nva02t+nva12t+p01+1):(nva01t+nva02t+nva12t+p01+p02)]==1]
+                                   }else{b02<-0}
+                                 }
+                                 
+                                 if(nva12t>0){
+                                   b12<-betanew[(nva01t+nva02t+1):(nvat01+nvat02+nvat12)][penalty.factor[(nva01t+nva02t+1):(nva01t+nva02t+nva12t)]==1]
+                                   if(p12>0){
+                                     b12<-c(b12,betanew[(nva01t+nva02t+nva12t+p01+p02+1):(nva01t+nva02t+nva12t+p01+p02+p12)][penalty.factor[(nva01t+nva02t+nva12t+p01+p02+1):(nva01t+nva02t+nva12t+p01+p02+p12)]==1])
+                                   }
+                                 }else{
+                                   if(p12>0){
+                                     b12<-betanew[(nva01t+nva02t+nva12t+p01+p02+1):(nva01t+nva02t+nva12t+p01+p02+p12)][penalty.factor[(nva01t+nva02t+nva12t+p01+p02+1):(nva01t+nva02t+nva12t+p01+p02+p12)]==1]
+                                   }else{b12<-0}
+                                 }
                                  # maximisation issue : lpen =l - pen
                                  if(penalty%in%c("lasso","ridge","elasticnet","corrected.elasticnet")){
                                    fn.valuenew<-output.mla$fn.value-lambda[id.lambda,1]*alpha*sum(abs(b01))-lambda[id.lambda,1]*(1-alpha)*sum(b01*b01)
@@ -2076,77 +2076,46 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                    bfix<-b[fix0==1]
                                    b<-b[fix0==0]
                                    
-                                   output<-derivaweib(b=b,
-                                                      npm=length(b),
-                                                      npar=size_V,
-                                                      bfix=bfix,
-                                                      fix=fix0,
-                                                      ctime=ctime,
-                                                      no=N,
-                                                      ve01=ve01,
-                                                      ve02=ve02,
-                                                      ve12=ve12,
-                                                      dimnva01=dimnva01,
-                                                      dimnva02=dimnva02,
-                                                      dimnva12=dimnva12,
-                                                      nva01=nvat01,
-                                                      nva02=nvat02,
-                                                      nva12=nvat12,
-                                                      t0=t0,
-                                                      t1=t1,
-                                                      t2=t2,
-                                                      t3=t3,
-                                                      troncature=troncature)
-                                   min<-npm
-                                   V01<- matrix(0,npm01,npm01)
-                                   V01[lower.tri(V01,diag=TRUE)] <- output[(min+1):(min+npm01*(npm01+1)/2)]
+                                   output<-deriva(funcpa=DYNidmlLikelihoodweib,
+                                                  b=b,
+                                                  npm=length(b),
+                                                  npar=size_V,
+                                                  bfix=bfix,
+                                                  fix=fix0,
+                                                  ctime=ctime,
+                                                  no=N,
+                                                  ve01=ve01,
+                                                  ve02=ve02,
+                                                  ve12=ve12,
+                                                  dimnva01=dimnva01,
+                                                  dimnva02=dimnva02,
+                                                  dimnva12=dimnva12,
+                                                  nva01=nvat01,
+                                                  nva02=nvat02,
+                                                  nva12=nvat12,
+                                                  t0=t0,
+                                                  t1=t1,
+                                                  t2=t2,
+                                                  t3=t3,
+                                                  troncature=troncature,
+                                                  y01=y01k,
+                                                  y02=y02k,
+                                                  y12=y12k,
+                                                  p01=p01,
+                                                  p02=p02,
+                                                  p12=p12,
+                                                  dimp01=dimp01,
+                                                  dimp02=dimp02,
+                                                  dimp12=dimp12,
+                                                  Ntime=NtimesPoints,
+                                                  time=time)
                                    
+                                   min<-npm*(npm+1)/2
                                    
-                                   min<-min+(npm01*(npm01+1)/2)
-                                   if(npm01>0&npm02>0){
-                                     V0102<- matrix(data=output[(min+1):(min+npm02*npm01)],
-                                                    nrow=npm02,ncol=npm01)
-                                   }
-                                   
-                                   min<-min+npm02*npm01
-                                   
-                                   if(npm01>0&npm12>0){
-                                     V0112<- matrix(data=output[(min+1):(min+npm12*npm01)],
-                                                    nrow=npm12,ncol=npm01)
-                                   }
-                                   
-                                   
-                                   min<-min+npm12*npm01
-                                   V02<- matrix(0,npm02,npm02)
-                                   V02[lower.tri(V02,diag=TRUE)] <- output[(min+1):(min+npm02*(npm02+1)/2)]
-                                   
-                                   
-                                   min<-min+(npm02*(npm02+1)/2)
-                                   
-                                   if(npm02>0&npm12>0){
-                                     V0212<- matrix(data=output[(min+1):(min+npm12*npm02)],
-                                                    nrow=npm12,ncol=npm02)}
-                                   
-                                   
-                                   min<-min+npm12*npm02
-                                   V12<- matrix(0,npm12,npm12)
-                                   V12[lower.tri(V12,diag=TRUE)] <- output[(min+1):length(output)]
-                                   
+                                   fu <- output[(min+1):length(output)]
                                    
                                    V<- matrix(0,npm,npm)
-                                   if(npm01>0){
-                                     V[1:npm01,1:npm01]<-V01
-                                     if(npm02>0){V[(npm01+1):(npm01+npm02),1:npm01]<-V0102}
-                                     if(npm12>0){V[(npm01+npm02+1):npm,1:npm01]<-V0112}
-                                   }
-                                   if(npm02>0){
-                                     V[(npm01+1):(npm01+npm02),(npm01+1):(npm01+npm02)]<-V02
-                                     if(npm12>0){V[(npm01+npm02+1):npm,(npm01+1):(npm01+npm02)]<-V0212}
-                                   }
-                                   
-                                   if(npm12>0){
-                                     V[(npm01+npm02+1):npm,(npm01+npm02+1):(npm)]<-V12}
-                                   
+                                   V[lower.tri(diag=TRUE)] <- output[1:min]
                                    V<-V+t(V)
                                    diag(V)<-diag(V)/2
                                    # hessian is - second derivatives 
@@ -2174,8 +2143,6 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                            ca.validity=eval.validity,
                                            cb=eval.loglik,
                                            istop=istop,
-                                           dapath=dapath,
-                                           gapath=gapath,
                                            combine=combine))
                              }
     }else{output<-foreach::foreach(id.lambda=1:nlambda,
@@ -2355,10 +2322,6 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                            
                                          }
                                          
-                                         
-                                         dapath[ite+1]<-da
-                                         gapath[ite+1]<-ga
-                                         
                                          if(idpos!=0){
                                            
                                            warning("Hessian not defined positive")
@@ -2392,33 +2355,43 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                        
                                        betanew<-b[(6+1):size_V]
                                        
+                                       # penalised loglik see if inferior to previous
                                        res<-DYNidmlLikelihoodweibpena(b=b,
-                                                                   npm=length(b),
-                                                                   npar=size_V,
-                                                                   bfix=1,
-                                                                   fix=rep(0,size_V),
-                                                                   ctime=ctime,
-                                                                   no=N,
-                                                                   ve01=ve01,
-                                                                   ve02=ve02,
-                                                                   ve12=ve12,
-                                                                   dimnva01=dimnva01,
-                                                                   dimnva02=dimnva02,
-                                                                   dimnva12=dimnva12,
-                                                                   nva01=nvat01,
-                                                                   nva02=nvat02,
-                                                                   nva12=nvat12,
-                                                                   t0=t0,
-                                                                   t1=t1,
-                                                                   t2=t2,
-                                                                   t3=t3,
-                                                                   troncature=troncature,
-                                                                   lambda=lambda[id.lambda,],
-                                                                   alpha=alpha,
-                                                                   penalty.factor=penalty.factor,
-                                                                   penalty=penalty,
-                                                                   gausspoint=gausspoint)
-                                       
+                                                                      npm=length(b),
+                                                                      npar=size_V,
+                                                                      bfix=1,
+                                                                      fix=rep(0,size_V),
+                                                                      ctime=ctime,
+                                                                      no=N,
+                                                                      ve01=ve01,
+                                                                      ve02=ve02,
+                                                                      ve12=ve12,
+                                                                      dimnva01=dimnva01,
+                                                                      dimnva02=dimnva02,
+                                                                      dimnva12=dimnva12,
+                                                                      nva01=nvat01,
+                                                                      nva02=nvat02,
+                                                                      nva12=nvat12,
+                                                                      t0=t0,
+                                                                      t1=t1,
+                                                                      t2=t2,
+                                                                      t3=t3,
+                                                                      troncature=troncature,
+                                                                      y01=y01k,
+                                                                      y02=y02k,
+                                                                      y12=y12k,
+                                                                      p01=p01,
+                                                                      p02=p02,
+                                                                      p12=p12,
+                                                                      dimp01=dimp01,
+                                                                      dimp02=dimp02,
+                                                                      dimp12=dimp12,
+                                                                      Ntime=NtimesPoints,
+                                                                      time=time,
+                                                                      lambda=lambda[id.lambda,],
+                                                                      alpha=alpha,
+                                                                      penalty.factor=penalty.factor,
+                                                                      penalty=penalty)
                                        
                                        # we want to maximise the loglik thus : 
                                        # we have issue if res is NA or if not higher than previous one 
@@ -2454,7 +2427,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                          
                                          sears<-searpas(vw=vw,
                                                         step=step,
-                                                        b=betanew,
+                                                        b=beta,
                                                         delta=delta,
                                                         funcpa=DYNidmlLikelihoodweibpena,
                                                         res.out.error=res.out.error,
@@ -2478,11 +2451,21 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                         t2=t2,
                                                         t3=t3,
                                                         troncature=troncature,
+                                                        y01=y01k,
+                                                        y02=y02k,
+                                                        y12=y12k,
+                                                        p01=p01,
+                                                        p02=p02,
+                                                        p12=p12,
+                                                        dimp01=dimp01,
+                                                        dimp02=dimp02,
+                                                        dimp12=dimp12,
+                                                        Ntime=NtimesPoints,
+                                                        time=time,
                                                         lambda=lambda[id.lambda,],
                                                         alpha=alpha,
                                                         penalty.factor=penalty.factor,
-                                                        penalty=penalty,
-                                                        gausspoint=gausspoint)
+                                                        penalty=penalty)
                                          
                                          
                                          betanew<-beta+delta*sears$vw
@@ -2490,31 +2473,41 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                          
                                          
                                          res<-DYNidmlLikelihoodweibpena(b=b,
-                                                                     npm=length(b),
-                                                                     npar=size_V,
-                                                                     bfix=1,
-                                                                     fix=rep(0,size_V),
-                                                                     ctime=ctime,
-                                                                     no=N,
-                                                                     ve01=ve01,
-                                                                     ve02=ve02,
-                                                                     ve12=ve12,
-                                                                     dimnva01=dimnva01,
-                                                                     dimnva02=dimnva02,
-                                                                     dimnva12=dimnva12,
-                                                                     nva01=nvat01,
-                                                                     nva02=nvat02,
-                                                                     nva12=nvat12,
-                                                                     t0=t0,
-                                                                     t1=t1,
-                                                                     t2=t2,
-                                                                     t3=t3,
-                                                                     troncature=troncature,
-                                                                     lambda=lambda[id.lambda,],
-                                                                     alpha=alpha,
-                                                                     penalty.factor=penalty.factor,
-                                                                     penalty=penalty,
-                                                                     gausspoint=gausspoint)
+                                                                        npm=length(b),
+                                                                        npar=size_V,
+                                                                        bfix=1,
+                                                                        fix=rep(0,size_V),
+                                                                        ctime=ctime,
+                                                                        no=N,
+                                                                        ve01=ve01,
+                                                                        ve02=ve02,
+                                                                        ve12=ve12,
+                                                                        dimnva01=dimnva01,
+                                                                        dimnva02=dimnva02,
+                                                                        dimnva12=dimnva12,
+                                                                        nva01=nvat01,
+                                                                        nva02=nvat02,
+                                                                        nva12=nvat12,
+                                                                        t0=t0,
+                                                                        t1=t1,
+                                                                        t2=t2,
+                                                                        t3=t3,
+                                                                        troncature=troncature,
+                                                                        y01=y01k,
+                                                                        y02=y02k,
+                                                                        y12=y12k,
+                                                                        p01=p01,
+                                                                        p02=p02,
+                                                                        p12=p12,
+                                                                        dimp01=dimp01,
+                                                                        dimp02=dimp02,
+                                                                        dimp12=dimp12,
+                                                                        Ntime=NtimesPoints,
+                                                                        time=time,
+                                                                        lambda=lambda[id.lambda,],
+                                                                        alpha=alpha,
+                                                                        penalty.factor=penalty.factor,
+                                                                        penalty=penalty)
                                          
                                        }
                                        # if not better or do not exist need to readjust
@@ -2566,22 +2559,57 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                                     t2=t2,
                                                                     t3=t3,
                                                                     troncature=troncature,
-                                                                    gausspoint=gausspoint)
+                                                                    y01=y01k,
+                                                                    y02=y02k,
+                                                                    y12=y12k,
+                                                                    p01=p01,
+                                                                    p02=p02,
+                                                                    p12=p12,
+                                                                    dimp01=dimp01,
+                                                                    dimp02=dimp02,
+                                                                    dimp12=dimp12,
+                                                                    Ntime=NtimesPoints,
+                                                                    time=time)
                                        
                                        # look at convergence for each lambda :
                                        
                                        # new values for splines:
                                        snew<-s
                                        snew[fix00[1:6]==0]<-output.mla$b
-                                       if(nvat01>0){
-                                         b01<-betanew[1:nvat01][penalty.factor[1:nvat01]==1]
-                                       }else{b01<-0}
-                                       if(nvat02>0){
-                                         b02<-betanew[(nvat01+1):(nvat01+nvat02)][penalty.factor[(nvat01+1):(nvat01+nvat02)]==1]
-                                       }else{b02<-0}
-                                       if(nvat12>0){
-                                         b12<-betanew[(nvat01+nvat02+1):length(betanew)][penalty.factor[(nvat01+nvat02+1):length(betanew)]==1]
-                                       }else{b12<-0}
+                                       if(nva01t>0){
+                                         b01<-betanew[1:nva01t][penalty.factor[1:nva01t]==1]
+                                         if(p01>0){
+                                           b01<-c(b01,betanew[(nva01t+nva02t+nva12t+1):(nva01t+nva02t+nva12t+p01)][penalty.factor[(nva01t+nva02t+nva12t+1):(nva01t+nva02t+nva12t+p01)]==1])
+                                         }
+                                       }else{
+                                         if(p01>0){
+                                           b01<-betanew[(nva01t+nva02t+nva12t+1):(nva01t+nva02t+nva12t+p01)][penalty.factor[(nva01t+nva02t+nva12t+1):(nva01t+nva02t+nva12t+p01)]==1]
+                                         }else{
+                                           b01<-0
+                                         }
+                                       }
+                                       
+                                       if(nva02t>0){
+                                         b02<-betanew[(nva01t+1):(nva01t+nva02t)][penalty.factor[(nva01t+1):(nva01t+nva02t)]==1]
+                                         if(p02>0){
+                                           b02<-c(b02,betanew[(nva01t+nva02t+nva12t+p01+1):(nva01t+nva02t+nva12t+p01+p02)][penalty.factor[(nva01t+nva02t+nva12t+p01+1):(nva01t+nva02t+nva12t+p01+p02)]==1])
+                                         }
+                                       }else{
+                                         if(p02>0){
+                                           b02<-betanew[(nva01t+nva02t+nva12t+p01+1):(nva01t+nva02t+nva12t+p01+p02)][penalty.factor[(nva01t+nva02t+nva12t+p01+1):(nva01t+nva02t+nva12t+p01+p02)]==1]
+                                         }else{b02<-0}
+                                       }
+                                       
+                                       if(nva12t>0){
+                                         b12<-betanew[(nva01t+nva02t+1):(nvat01+nvat02+nvat12)][penalty.factor[(nva01t+nva02t+1):(nva01t+nva02t+nva12t)]==1]
+                                         if(p12>0){
+                                           b12<-c(b12,betanew[(nva01t+nva02t+nva12t+p01+p02+1):(nva01t+nva02t+nva12t+p01+p02+p12)][penalty.factor[(nva01t+nva02t+nva12t+p01+p02+1):(nva01t+nva02t+nva12t+p01+p02+p12)]==1])
+                                         }
+                                       }else{
+                                         if(p12>0){
+                                           b12<-betanew[(nva01t+nva02t+nva12t+p01+p02+1):(nva01t+nva02t+nva12t+p01+p02+p12)][penalty.factor[(nva01t+nva02t+nva12t+p01+p02+1):(nva01t+nva02t+nva12t+p01+p02+p12)]==1]
+                                         }else{b12<-0}
+                                       }
                                        # maximisation issue : lpen =l - pen
                                        if(penalty%in%c("lasso","ridge","elasticnet","corrected.elasticnet")){
                                          fn.valuenew<-output.mla$fn.value-lambda[id.lambda,1]*alpha*sum(abs(b01))-lambda[id.lambda,1]*(1-alpha)*sum(b01*b01)
@@ -2663,81 +2691,45 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                          bfix<-b[fix0==1]
                                          b<-b[fix0==0]
                                          
-                                         output<-derivaweib(b=b,
-                                                            npm=length(b),
-                                                            npar=size_V,
-                                                            bfix=bfix,
-                                                            fix=fix0,
-                                                            ctime=ctime,
-                                                            no=N,
-                                                            ve01=ve01,
-                                                            ve02=ve02,
-                                                            ve12=ve12,
-                                                            dimnva01=dimnva01,
-                                                            dimnva02=dimnva02,
-                                                            dimnva12=dimnva12,
-                                                            nva01=nvat01,
-                                                            nva02=nvat02,
-                                                            nva12=nvat12,
-                                                            t0=t0,
-                                                            t1=t1,
-                                                            t2=t2,
-                                                            t3=t3,
-                                                            troncature=troncature)
+                                         output<-derivadiag(funcpa=DYNidmlLikelihoodweib,
+                                                        b=b,
+                                                        npm=length(b),
+                                                        npar=size_V,
+                                                        bfix=bfix,
+                                                        fix=fix0,
+                                                        ctime=ctime,
+                                                        no=N,
+                                                        ve01=ve01,
+                                                        ve02=ve02,
+                                                        ve12=ve12,
+                                                        dimnva01=dimnva01,
+                                                        dimnva02=dimnva02,
+                                                        dimnva12=dimnva12,
+                                                        nva01=nvat01,
+                                                        nva02=nvat02,
+                                                        nva12=nvat12,
+                                                        t0=t0,
+                                                        t1=t1,
+                                                        t2=t2,
+                                                        t3=t3,
+                                                        troncature=troncature,
+                                                        y01=y01k,
+                                                        y02=y02k,
+                                                        y12=y12k,
+                                                        p01=p01,
+                                                        p02=p02,
+                                                        p12=p12,
+                                                        dimp01=dimp01,
+                                                        dimp02=dimp02,
+                                                        dimp12=dimp12,
+                                                        Ntime=NtimesPoints,
+                                                        time=time)
+                                         
                                          min<-npm
-                                         V01<- matrix(0,npm01,npm01)
-                                         V01[lower.tri(V01,diag=TRUE)] <- output[(min+1):(min+npm01*(npm01+1)/2)]
-                                         
-                                         
-                                         min<-min+(npm01*(npm01+1)/2)
-                                         if(npm01>0&npm02>0){
-                                           V0102<- matrix(data=output[(min+1):(min+npm02*npm01)],
-                                                          nrow=npm02,ncol=npm01)
-                                         }
-                                         
-                                         min<-min+npm02*npm01
-                                         
-                                         if(npm01>0&npm12>0){
-                                           V0112<- matrix(data=output[(min+1):(min+npm12*npm01)],
-                                                          nrow=npm12,ncol=npm01)
-                                         }
-                                         
-                                         
-                                         min<-min+npm12*npm01
-                                         V02<- matrix(0,npm02,npm02)
-                                         V02[lower.tri(V02,diag=TRUE)] <- output[(min+1):(min+npm02*(npm02+1)/2)]
-                                         
-                                         
-                                         min<-min+(npm02*(npm02+1)/2)
-                                         
-                                         if(npm02>0&npm12>0){
-                                           V0212<- matrix(data=output[(min+1):(min+npm12*npm02)],
-                                                          nrow=npm12,ncol=npm02)}
-                                         
-                                         
-                                         min<-min+npm12*npm02
-                                         V12<- matrix(0,npm12,npm12)
-                                         V12[lower.tri(V12,diag=TRUE)] <- output[(min+1):length(output)]
-                                         
+                                         fu <- output[(min+1):length(output)]
                                          
                                          V<- matrix(0,npm,npm)
-                                         if(npm01>0){
-                                           V[1:npm01,1:npm01]<-V01
-                                           if(npm02>0){V[(npm01+1):(npm01+npm02),1:npm01]<-V0102}
-                                           if(npm12>0){V[(npm01+npm02+1):npm,1:npm01]<-V0112}
-                                         }
-                                         if(npm02>0){
-                                           V[(npm01+1):(npm01+npm02),(npm01+1):(npm01+npm02)]<-V02
-                                           if(npm12>0){V[(npm01+npm02+1):npm,(npm01+1):(npm01+npm02)]<-V0212}
-                                         }
-                                         
-                                         if(npm12>0){
-                                           V[(npm01+npm02+1):npm,(npm01+npm02+1):(npm)]<-V12}
-                                         
-                                         
-                                         V<-V+t(V)
-                                         diag(V)<-diag(V)/2
-                                         # hessian is - second derivatives 
+                                         diag(V) <- output[1:npm]
                                          V<--V
                                          V0<-V
                                        }else{
@@ -2763,8 +2755,6 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                  ca.validity=eval.validity,
                                                  cb=eval.loglik,
                                                  istop=istop,
-                                                 dapath=dapath,
-                                                 gapath=gapath,
                                                  combine=combine))
                                    }}
   }

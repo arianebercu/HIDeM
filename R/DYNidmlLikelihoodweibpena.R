@@ -85,7 +85,7 @@ DYNidmlLikelihoodweibpena<-function(bb,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12
   if(nva01>0){
   b01<-b[(6+1):(6+nva01)][penalty.factor[1:nva01]==1]
   if(p01>0){
-    b01<-c(b,b[(nva01+nva02+nva12+7):(nva01+nva02+nva12+6+p01)][penalty.factor[(nva01+nva02+nva12+1):(nva01+nva02+nva12+p01)]==1])
+    b01<-c(b01,b[(nva01+nva02+nva12+7):(nva01+nva02+nva12+6+p01)][penalty.factor[(nva01+nva02+nva12+1):(nva01+nva02+nva12+p01)]==1])
   }
   }else{
     if(p01>0){
@@ -98,7 +98,7 @@ DYNidmlLikelihoodweibpena<-function(bb,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12
   if(nva02>0){
   b02<-b[(6+1+nva01):(6+nva01+nva02)][penalty.factor[(nva01+1):(nva01+nva02)]==1]
   if(p02>0){
-    b02<-c(b,b[(nva01+nva02+nva12+p01+7):(nva01+nva02+nva12+6+p01+p02)][penalty.factor[(nva01+nva02+nva12+p01+1):(nva01+nva02+nva12+p01+p02)]==1])
+    b02<-c(b02,b[(nva01+nva02+nva12+p01+7):(nva01+nva02+nva12+6+p01+p02)][penalty.factor[(nva01+nva02+nva12+p01+1):(nva01+nva02+nva12+p01+p02)]==1])
   }
   }else{
     if(p02>0){
@@ -109,7 +109,7 @@ DYNidmlLikelihoodweibpena<-function(bb,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12
   if(nva12>0){
   b12<-b[(6+1+nva01+nva02):npar][penalty.factor[(nva01+nva02+1):(nva01+nva02+nva12)]==1]
   if(p12>0){
-    b12<-c(b,b[(nva01+nva02+nva12+p01+p02+7):(nva01+nva02+nva12+6+p01+p02+p12)][penalty.factor[(nva01+nva02+nva12+p01+p02+1):(nva01+nva02+nva12+p01+p02+p12)]==1])
+    b12<-c(b12,b[(nva01+nva02+nva12+p01+p02+7):(nva01+nva02+nva12+6+p01+p02+p12)][penalty.factor[(nva01+nva02+nva12+p01+p02+1):(nva01+nva02+nva12+p01+p02+p12)]==1])
   }
   }else{
     if(p12>0){
