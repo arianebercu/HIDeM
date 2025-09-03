@@ -246,6 +246,89 @@ deriva <- function(nproc=1,b,funcpa,.packages=NULL,...){
 }
 
 
+derivadiag <- function(nproc=1,b,funcpa,.packages=NULL,...){
+  
+  m <- length(b)
+  bh2 <- bh <- rep(0,m)
+  v <- rep(0,2*m)
+  fcith <- fcith2 <- rep(0,m)
+  ## function 
+  rl <- funcpa(b,...)
+  
+  if(nproc>1)
+  {
+    ### remplacer les 2 boucles par une seule
+    h <- sapply(b,function(x){max(1E-7,(1E-4*abs(x)))})
+    
+    
+    ## derivees premieres:
+    ll <- foreach(k=(m+1):(2*m),
+                  .combine=cbind,
+                  .packages=.packages) %dopar%
+      {
+        bp <- b
+        bp[k] <- b[k]+h[k]
+        av <- funcpa(bp,...)
+        
+        bm <- b
+        bm[k] <- b[k]-h[k]
+        ar <- funcpa(bm,...)
+        
+        d <- (av-ar)/(2*h[k])
+        
+        c(av,d)
+      }
+    
+    fcith <- ll[1,]
+    v1 <- ll[2,] 
+    
+    ## derivees secondes:
+    v2 <- foreach(k=1:m,
+                  .combine=c,
+                  .packages=.packages) %dopar%
+      {
+        bij <- b
+        bij[k] <- 2*(bij[k]+h[k])
+        
+        res <- -(funcpa(bij,...)-2*fcith[k]+rl)/(h[k]*h[k])
+        res
+      }
+    
+    v <- c(v2,v1)
+    
+  }
+  else
+  {
+    ## gradient null
+    for(i in 1:m){
+      bh <- bh2 <- b
+      th <- max(1E-7,(1E-4*abs(b[i])))
+      bh[i] <- bh[i] + th
+      bh2[i] <- bh2[i] - th
+      
+      fcith[i] <- funcpa(bh,...)
+      fcith2[i] <- funcpa(bh2,...)
+    }
+    
+    k <- 0
+    l <- m
+    for(i in 1:m){
+      l <- l+1
+      bh <- b
+      thn <- - max(1E-7,(1E-4*abs(b[i])))
+      v[l] <- -(fcith[i]-fcith2[i])/(2*thn)
+      k <- k+1
+      bh[i] <- 2*(bh[i]-thn)
+      temp <-funcpa(bh,...)
+      v[k] <- -(temp-2*(fcith[i])+rl)/(thn*thn)
+      
+    }
+  }
+  
+  result <- list(v=v,rl=rl)
+  return(result)
+}
+
 
 grmlaweib<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
                       dimnva01,dimnva02,dimnva12,nva01,nva02,nva12,
