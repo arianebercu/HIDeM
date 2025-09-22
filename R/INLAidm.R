@@ -50,8 +50,7 @@ INLAidm<-function(timeVar,family,basRisk,assoc,
       familyinla<<-family[indice]
       basRiskinla<<-basRisk[indice]
       associnla<<-assoc[[indice]]
-      
-      browser()
+    
 
       INLAmodel<-tryCatch({ INLAjoint::joint(formSurv = formSurvinla,
                                        formLong = formLonginla,
@@ -68,7 +67,6 @@ INLAidm<-function(timeVar,family,basRisk,assoc,
       
       if(is.null(INLAmodel)){stop("The inla model for your marker could not be run, see above warnings.")}
       
-
       # attention cannot do parallel over parallel of predict in inla 
      if(Ypredmethod=="gauss"){
        
@@ -128,7 +126,6 @@ INLAidm<-function(timeVar,family,basRisk,assoc,
   
       }
 
-  browser()
   Yall<-do.call(rbind,Yall)
   print("End of running joint univarite models")
   Nsample<-NsampleHY*NsampleFE*NsampleRE

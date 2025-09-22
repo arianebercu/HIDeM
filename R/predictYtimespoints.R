@@ -45,6 +45,7 @@ gauss_kronrod_points <- function(lower.intdouble,
   
   # add integral points from 0 to end of study and need end.time value also (death or censoring): 
   # attention to take row by row t(x)
+  
   x<-c(t(x),0.5 * (end.time * gk15_nodes_ext + end.time)) 
   if(truncated==T){
     x<-c(x,0.5 * (entry.time * gk15_nodes + entry.time) )

@@ -52,7 +52,7 @@ DYNidm.weib<-function(b,fix0,size_V,
   
   
   Nsample<-dim(dataY)[2]-3
-  browser()
+
   
   if(Ypredmethod=="equi"){
   
@@ -118,6 +118,12 @@ DYNidm.weib<-function(b,fix0,size_V,
  # y01<-y01[!y01$ID%in%idd,]
  # y02<-y02[!y02$ID%in%idd,]
  # y12<-y12[!y12$ID%in%idd,]
+ 
+ #cl <- makeCluster(2)
+ #registerDoParallel(cl)
+ #stopCluster(cl)
+ 
+ #browser()
   for(k in 1:Nsample){
   
   out[[k]]<- tryCatch({ marqLevAlg::mla(b=b,
@@ -126,8 +132,8 @@ DYNidm.weib<-function(b,fix0,size_V,
                         epsb=epsb,
                         epsd=epsd,
                         nproc=nproc,
-                        clustertype=clustertype,
                         maxiter=maxiter,
+                        print.info=T,
                         minimize=F,
                         npm=npm,
                         npar=size_V,
@@ -172,6 +178,7 @@ DYNidm.weib<-function(b,fix0,size_V,
   }else{
     
     # check if predictions could be performed 
+    #browser()
     if(troncature==T){
       NtimePoints<-271
     }else{
@@ -180,7 +187,7 @@ DYNidm.weib<-function(b,fix0,size_V,
     
     for( k in outcome){
       subdata<-dataY[dataY$Outcome==k,]
-      x<-table(dataY[,colnames(dataY)%in%id])
+      x<-table(subdata[,colnames(subdata)%in%id])
       if(any(x!=NtimePoints)){stop("Prediction of marker ",k," could not be perform for each quadrature points, try Ypredmethod equi")}
       
     }
@@ -224,10 +231,10 @@ DYNidm.weib<-function(b,fix0,size_V,
     
     out<-list()
     length(out)<-Nsample
-k<-1
-    browser()
+#browser()
+
     for(k in 1:Nsample){
-      
+      print(paste0("Estimating illness-death model on sample ",k))
       out[[k]]<- tryCatch({ marqLevAlg::mla(b=b,
                                             fn=gaussDYNidmlLikelihoodweib,
                                             epsa=epsa,
@@ -237,6 +244,7 @@ k<-1
                                             clustertype=clustertype,
                                             maxiter=maxiter,
                                             minimize=F,
+                                            print.info = T,
                                             npm=npm,
                                             npar=size_V,
                                             bfix=bfix,
@@ -289,8 +297,4 @@ k<-1
   
   
 }
-
-
-
-
 

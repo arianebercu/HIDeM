@@ -51,15 +51,15 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                    t0,t1,t2,t3,troncature,
                    nlambda01,lambda01,nlambda02,lambda02,nlambda12,lambda12,
                    alpha,penalty.factor,penalty,partialH,
-                   dataY,Longitransition,NtimesPoints,
-                   outcome,outcome01,outcome02,outcome12,
+                   y01,y02,y12,NtimesPoints,time,
                    p01,p02,p12,
-                   dimp01,dimp02,dimp12){
+                   dimp01,dimp02,dimp12,Nsample){
   
 
 
   # need to keep original fix to calculate for beta 
   
+  browser()
   V0<-NA
   fix00<-fix0
   
@@ -128,112 +128,6 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
   fix0.beta<-fix00
   fix0.beta[(6+1):size_V]<-rep(1,size_V-6)
 
-  Nsample<-dim(dataY)[2]-3
-  
-  if(Ypredmethod=="equi"){
-    
-    # if prediction did not work 
-    # check which time to keep : 
-    time<-dataY[dataY$Outcome%in%ynames[1] & dataY[,colnames(dataY)%in%id]==unique(dataY[,colnames(dataY)%in%id])[1],colnames(dataY)%in%timeVar]
-    valid<-unlist(lapply(time,FUN=function(x){
-      dd<-dataY[dataY[,colnames(dataY)%in%timeVar]==x,]
-      if(dim(dd)[1]!=N*length(ynames)){return(F)}else{return(T)}
-    }))
-    
-    time<-time[valid]
-    NtimesPoints<-length(time)
-    
-    dataY<-dataY[dataY[,colnames(dataY)%in%timeVar]%in%time,]
-    dataY$Outcome<-as.character(dataY$Outcome)
-    # attention if NtimePoints equidistant with INLA then NtimePoints takes 
-    # need ID to be numeric -- then 
-    dataY[,colnames(dataY)%in%id]<-as.numeric(dataY[,colnames(dataY)%in%id])
-    # to keep tracks of time order for each individual 
-    dataY$order<-as.numeric(ave(dataY[,colnames(dataY)%in%id], cumsum(c(TRUE, diff(dataY[,colnames(dataY)%in%id]) != 0)), FUN = seq_along))
-    
-    if(length(outcome01)>=1){
-      y01<-dataY[dataY$Outcome%in%outcome01,]
-      # order  by individual and timeline 
-      y01<-y01[order(y01[,colnames(y01)%in%id],y01$order),]
-      
-      
-    }else{
-      y01<-as.double(rep(0,N*NtimesPoints))
-    }
-    
-    if(length(outcome02)>=1){
-      y02<-dataY[dataY$Outcome%in%outcome02,]
-      y02<-y02[order(y02$ID,y02$order),]
-      
-    }else{
-      y02<-as.double(rep(0,N*NtimesPoints))
-    }
-    
-    if(length(outcome12)>=1){
-      y12<-dataY[dataY$Outcome%in%outcome12,]
-      # order  by individual and timeline 
-      y12<-y12[order(y12$ID,y12$order),]
-      
-    }else{
-      y12<-as.double(rep(0,N*NtimesPoints))
-    }
-    
-    
-  }else{
-    
-    # check if predictions could be performed 
-    if(troncature==T){
-      NtimePoints<-271
-    }else{
-      NtimePoints<-256
-    }
-    
-    for( k in outcome){
-      subdata<-dataY[dataY$Outcome==k,]
-      x<-table(dataY[,colnames(dataY)%in%id])
-      if(any(x!=NtimePoints)){stop("Prediction of marker ",k," could not be perform for each quadrature points, try Ypredmethod equi")}
-      
-    }
-    
-    dataY$Outcome<-as.character(dataY$Outcome)
-    # attention if NtimePoints equidistant with INLA then NtimePoints takes 
-    # need ID to be numeric -- then 
-    dataY[,colnames(dataY)%in%id]<-as.numeric(dataY[,colnames(dataY)%in%id])
-    # to keep tracks of time order for each individual 
-    dataY$order<-as.numeric(ave(dataY[,colnames(dataY)%in%id], cumsum(c(TRUE, diff(dataY[,colnames(dataY)%in%id]) != 0)), FUN = seq_along))
-    
-    
-    if(length(outcome01)>=1){
-      y01<-dataY[dataY$Outcome%in%outcome01,]
-      # order  by individual and timeline 
-      y01<-y01[order(y01[,colnames(y01)%in%id],y01$order),]
-      
-      
-    }else{
-      y01<-as.double(rep(0,N*NtimesPoints))
-    }
-    
-    if(length(outcome02)>=1){
-      y02<-dataY[dataY$Outcome%in%outcome02,]
-      # order  by individual and timeline 
-      y02<-y02[order(y02$ID,y02$order),]
-      
-    }else{
-      y02<-as.double(rep(0,N*NtimesPoints))
-    }
-    
-    if(length(outcome12)>=1){
-      y12<-dataY[dataY$Outcome%in%outcome12,]
-      # order  by individual and timeline 
-      y12<-y12[order(y12$ID,y12$order),]
-      
-    }else{
-      y12<-as.double(rep(0,N*NtimesPoints))
-    }
-    
-  }
-  
-  
   npm<-sum(fix0==0)
   
   npm01<-ifelse(nvat01>0,sum(fix0[7:(7+nvat01-1)]==0),0)
@@ -252,6 +146,8 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
     y01k<-y01[,colnames(y01)%in%paste0("Sample_",idsample)]
     y02k<-y02[,colnames(y02)%in%paste0("Sample_",idsample)]
     y12k<-y12[,colnames(y12)%in%paste0("Sample_",idsample)]
+    
+   
     
   if(nproc >1){
     
@@ -279,6 +175,14 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                
                                beta<-beta.start
                                s<-s.start
+                               
+                               if(idsample==1){
+                                 beta<-beta.start
+                                 s<-s.start
+                               }else{
+                                 s<-outputNsample[[1]]$b[1:6,id.lambda]
+                                 beta<-outputNsample[[1]]$b[7:size_V,id.lambda]
+                              }
                                
                                converged<-F
                                ite<-0
@@ -336,6 +240,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                     Ntime=NtimesPoints,
                                                     time=time)
                                  
+                                 output<-output$v
                                  if(ite==0){# loglik penalised
                                    fn.value<-DYNidmlLikelihoodweibpena(b=b,
                                                                     npm=npm,
@@ -382,11 +287,10 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                      min<-npm*(npm+1)/2
                                      fu <- output[(min+1):length(output)]
                                      V<- matrix(0,npm,npm)
-                                     V[lower.tri(diag=TRUE)] <- output[1:min]
+                                     V[upper.tri(V,diag=TRUE)] <- output[1:min]
                                      V<-V+t(V)
                                      diag(V)<-diag(V)/2
-                                     # hessian is - second derivatives of loglik
-                                     V<--V
+                                     # deriva gives information matrix
                                      tr <- sum(diag(V))/npm
                                      V0<-V}
                                    ite<-ite+1
@@ -399,11 +303,10 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                  fu <- output[(min+1):length(output)]
                                  
                                  V<- matrix(0,npm,npm)
-                                 V[lower.tri(diag=TRUE)] <- output[1:min]
+                                 V[upper.tri(V,diag=TRUE)] <- output[1:min]
                                  V<-V+t(V)
                                  diag(V)<-diag(V)/2
-                                 # hessian is - second derivatives of loglik
-                                 V<--V
+                                 # deriva gives information matrix
                                  tr <- sum(diag(V))/npm
                                  V0<-V
                                  
@@ -454,7 +357,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                    
                                  }
                                  
-                                 
+                                
                                  if(idpos!=0){
                                    
                                    warning("Hessian not defined positive")
@@ -462,7 +365,6 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                    ite<-ite+1
                                    break
                                  }
-                                 
                                  
                                  
                                 # update for beta 
@@ -710,38 +612,38 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                
                                  
                                  
-                                 if(nva01t>0){
-                                   b01<-betanew[1:nva01t][penalty.factor[1:nva01t]==1]
+                                 if(nvat01>0){
+                                   b01<-betanew[1:nvat01][penalty.factor[1:nvat01]==1]
                                    if(p01>0){
-                                     b01<-c(b01,betanew[(nva01t+nva02t+nva12t+1):(nva01t+nva02t+nva12t+p01)][penalty.factor[(nva01t+nva02t+nva12t+1):(nva01t+nva02t+nva12t+p01)]==1])
+                                     b01<-c(b01,betanew[(nvat01+nvat02+nvat12+1):(nvat01+nvat02+nvat12+p01)][penalty.factor[(nvat01+nvat02+nvat12+1):(nvat01+nvat02+nvat12+p01)]==1])
                                    }
                                  }else{
                                    if(p01>0){
-                                     b01<-betanew[(nva01t+nva02t+nva12t+1):(nva01t+nva02t+nva12t+p01)][penalty.factor[(nva01t+nva02t+nva12t+1):(nva01t+nva02t+nva12t+p01)]==1]
+                                     b01<-betanew[(nvat01+nvat02+nvat12+1):(nvat01+nvat02+nvat12+p01)][penalty.factor[(nvat01+nvat02+nvat12+1):(nvat01+nvat02+nvat12+p01)]==1]
                                    }else{
                                      b01<-0
                                    }
                                  }
                                  
-                                 if(nva02t>0){
-                                   b02<-betanew[(nva01t+1):(nva01t+nva02t)][penalty.factor[(nva01t+1):(nva01t+nva02t)]==1]
+                                 if(nvat02>0){
+                                   b02<-betanew[(nvat01+1):(nvat01+nvat02)][penalty.factor[(nvat01+1):(nvat01+nvat02)]==1]
                                    if(p02>0){
-                                     b02<-c(b02,betanew[(nva01t+nva02t+nva12t+p01+1):(nva01t+nva02t+nva12t+p01+p02)][penalty.factor[(nva01t+nva02t+nva12t+p01+1):(nva01t+nva02t+nva12t+p01+p02)]==1])
+                                     b02<-c(b02,betanew[(nvat01+nvat02+nvat12+p01+1):(nvat01+nvat02+nvat12+p01+p02)][penalty.factor[(nvat01+nvat02+nvat12+p01+1):(nvat01+nvat02+nvat12+p01+p02)]==1])
                                    }
                                  }else{
                                    if(p02>0){
-                                     b02<-betanew[(nva01t+nva02t+nva12t+p01+1):(nva01t+nva02t+nva12t+p01+p02)][penalty.factor[(nva01t+nva02t+nva12t+p01+1):(nva01t+nva02t+nva12t+p01+p02)]==1]
+                                     b02<-betanew[(nvat01+nvat02+nvat12+p01+1):(nvat01+nvat02+nvat12+p01+p02)][penalty.factor[(nvat01+nvat02+nvat12+p01+1):(nvat01+nvat02+nvat12+p01+p02)]==1]
                                    }else{b02<-0}
                                  }
                                  
-                                 if(nva12t>0){
-                                   b12<-betanew[(nva01t+nva02t+1):(nvat01+nvat02+nvat12)][penalty.factor[(nva01t+nva02t+1):(nva01t+nva02t+nva12t)]==1]
+                                 if(nvat12>0){
+                                   b12<-betanew[(nvat01+nvat02+1):(nvat01+nvat02+nvat12)][penalty.factor[(nvat01+nvat02+1):(nvat01+nvat02+nvat12)]==1]
                                    if(p12>0){
-                                     b12<-c(b12,betanew[(nva01t+nva02t+nva12t+p01+p02+1):(nva01t+nva02t+nva12t+p01+p02+p12)][penalty.factor[(nva01t+nva02t+nva12t+p01+p02+1):(nva01t+nva02t+nva12t+p01+p02+p12)]==1])
+                                     b12<-c(b12,betanew[(nvat01+nvat02+nvat12+p01+p02+1):(nvat01+nvat02+nvat12+p01+p02+p12)][penalty.factor[(nvat01+nvat02+nvat12+p01+p02+1):(nvat01+nvat02+nvat12+p01+p02+p12)]==1])
                                    }
                                  }else{
                                    if(p12>0){
-                                     b12<-betanew[(nva01t+nva02t+nva12t+p01+p02+1):(nva01t+nva02t+nva12t+p01+p02+p12)][penalty.factor[(nva01t+nva02t+nva12t+p01+p02+1):(nva01t+nva02t+nva12t+p01+p02+p12)]==1]
+                                     b12<-betanew[(nvat01+nvat02+nvat12+p01+p02+1):(nvat01+nvat02+nvat12+p01+p02+p12)][penalty.factor[(nvat01+nvat02+nvat12+p01+p02+1):(nvat01+nvat02+nvat12+p01+p02+p12)]==1]
                                    }else{b12<-0}
                                  }
                                  
@@ -861,17 +763,16 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                   dimp12=dimp12,
                                                   Ntime=NtimesPoints,
                                                   time=time)
-                                   
+                                   output<-output$v
                                 min<-npm*(npm+1)/2
                                  
                                  fu <- output[(min+1):length(output)]
                                  
                                  V<- matrix(0,npm,npm)
-                                 V[lower.tri(diag=TRUE)] <- output[1:min]
+                                 V[upper.tri(V,diag=TRUE)] <- output[1:min]
                                  V<-V+t(V)
                                  diag(V)<-diag(V)/2
-                                   # hessian is - second derivatives 
-                                   V<--V
+                                 # deriva gives information matrix
                                    V0<-V
                                  }else{
                                    if(pbr_compu==1){istop<-3}
@@ -907,8 +808,13 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                  
                                  pbr_compu<-0
                                  
-                                 beta<-beta.start
-                                 s<-s.start
+                                 if(idsample==1){
+                                   beta<-beta.start
+                                   s<-s.start
+                                 }else{
+                                   s<-outputNsample[[1]]$b[1:6,id.lambda]
+                                   beta<-outputNsample[[1]]$b[7:size_V,id.lambda]
+                                 }
                                  
                                  converged<-F
                                  ite<-0
@@ -965,6 +871,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                               Ntime=NtimesPoints,
                                               time=time)
                                      
+                                     output<-output$v
                                      if(ite==0){# loglik penalised
                                        fn.value<-DYNidmlLikelihoodweibpena(b=b,
                                                                            npm=length(b),
@@ -1010,8 +917,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                          fu <- output[(npm+1):(npm*2)]
                                          V<- matrix(0,npm,npm)
                                          diag(V)<- output[1:npm]
-                                         # hessian is - second derivatives of loglik
-                                         V<--V
+                                         # deriva gives information matrix
                                          tr <- sum(diag(V))/npm
                                          V0<-V}
                                        ite<-ite+1
@@ -1024,8 +930,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                      
                                      V<- matrix(0,npm,npm)
                                      diag(V)<- output[1:npm]
-                                     # hessian is - second derivatives of loglik
-                                     V<--V
+                                     # deriva gives information matrix
                                      tr <- sum(diag(V))/npm
                                      V0<-V
                                      
@@ -1328,38 +1233,38 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                    # new values for splines:
                                    snew<-s
                                    snew[fix00[1:6]==0]<-output.mla$b
-                                   if(nva01t>0){
-                                     b01<-betanew[1:nva01t][penalty.factor[1:nva01t]==1]
+                                   if(nvat01>0){
+                                     b01<-betanew[1:nvat01][penalty.factor[1:nvat01]==1]
                                      if(p01>0){
-                                       b01<-c(b01,betanew[(nva01t+nva02t+nva12t+1):(nva01t+nva02t+nva12t+p01)][penalty.factor[(nva01t+nva02t+nva12t+1):(nva01t+nva02t+nva12t+p01)]==1])
+                                       b01<-c(b01,betanew[(nvat01+nvat02+nvat12+1):(nvat01+nvat02+nvat12+p01)][penalty.factor[(nvat01+nvat02+nvat12+1):(nvat01+nvat02+nvat12+p01)]==1])
                                      }
                                    }else{
                                      if(p01>0){
-                                       b01<-betanew[(nva01t+nva02t+nva12t+1):(nva01t+nva02t+nva12t+p01)][penalty.factor[(nva01t+nva02t+nva12t+1):(nva01t+nva02t+nva12t+p01)]==1]
+                                       b01<-betanew[(nvat01+nvat02+nvat12+1):(nvat01+nvat02+nvat12+p01)][penalty.factor[(nvat01+nvat02+nvat12+1):(nvat01+nvat02+nvat12+p01)]==1]
                                      }else{
                                        b01<-0
                                      }
                                    }
                                    
-                                   if(nva02t>0){
-                                     b02<-betanew[(nva01t+1):(nva01t+nva02t)][penalty.factor[(nva01t+1):(nva01t+nva02t)]==1]
+                                   if(nvat02>0){
+                                     b02<-betanew[(nvat01+1):(nvat01+nvat02)][penalty.factor[(nvat01+1):(nvat01+nvat02)]==1]
                                      if(p02>0){
-                                       b02<-c(b02,betanew[(nva01t+nva02t+nva12t+p01+1):(nva01t+nva02t+nva12t+p01+p02)][penalty.factor[(nva01t+nva02t+nva12t+p01+1):(nva01t+nva02t+nva12t+p01+p02)]==1])
+                                       b02<-c(b02,betanew[(nvat01+nvat02+nvat12+p01+1):(nvat01+nvat02+nvat12+p01+p02)][penalty.factor[(nvat01+nvat02+nvat12+p01+1):(nvat01+nvat02+nvat12+p01+p02)]==1])
                                      }
                                    }else{
                                      if(p02>0){
-                                       b02<-betanew[(nva01t+nva02t+nva12t+p01+1):(nva01t+nva02t+nva12t+p01+p02)][penalty.factor[(nva01t+nva02t+nva12t+p01+1):(nva01t+nva02t+nva12t+p01+p02)]==1]
+                                       b02<-betanew[(nvat01+nvat02+nvat12+p01+1):(nvat01+nvat02+nvat12+p01+p02)][penalty.factor[(nvat01+nvat02+nvat12+p01+1):(nvat01+nvat02+nvat12+p01+p02)]==1]
                                      }else{b02<-0}
                                    }
                                    
-                                   if(nva12t>0){
-                                     b12<-betanew[(nva01t+nva02t+1):(nvat01+nvat02+nvat12)][penalty.factor[(nva01t+nva02t+1):(nva01t+nva02t+nva12t)]==1]
+                                   if(nvat12>0){
+                                     b12<-betanew[(nvat01+nvat02+1):(nvat01+nvat02+nvat12)][penalty.factor[(nvat01+nvat02+1):(nvat01+nvat02+nvat12)]==1]
                                      if(p12>0){
-                                       b12<-c(b12,betanew[(nva01t+nva02t+nva12t+p01+p02+1):(nva01t+nva02t+nva12t+p01+p02+p12)][penalty.factor[(nva01t+nva02t+nva12t+p01+p02+1):(nva01t+nva02t+nva12t+p01+p02+p12)]==1])
+                                       b12<-c(b12,betanew[(nvat01+nvat02+nvat12+p01+p02+1):(nvat01+nvat02+nvat12+p01+p02+p12)][penalty.factor[(nvat01+nvat02+nvat12+p01+p02+1):(nvat01+nvat02+nvat12+p01+p02+p12)]==1])
                                      }
                                    }else{
                                      if(p12>0){
-                                       b12<-betanew[(nva01t+nva02t+nva12t+p01+p02+1):(nva01t+nva02t+nva12t+p01+p02+p12)][penalty.factor[(nva01t+nva02t+nva12t+p01+p02+1):(nva01t+nva02t+nva12t+p01+p02+p12)]==1]
+                                       b12<-betanew[(nvat01+nvat02+nvat12+p01+p02+1):(nvat01+nvat02+nvat12+p01+p02+p12)][penalty.factor[(nvat01+nvat02+nvat12+p01+p02+1):(nvat01+nvat02+nvat12+p01+p02+p12)]==1]
                                      }else{b12<-0}
                                    }
                                    
@@ -1479,13 +1384,13 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                         dimp12=dimp12,
                                                         Ntime=NtimesPoints,
                                                         time=time)
-                                     
+                                     output<-output$v
                                      min<-npm
                                      fu <- output[(min+1):length(output)]
                                      
                                      V<- matrix(0,npm,npm)
                                      diag(V) <- output[1:npm]
-                                     V<--V
+                                     # deriva gives information matrix
                                      V0<-V
                                    }else{
                                      if(pbr_compu==1){istop<-3}
@@ -1531,8 +1436,13 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                
                                pbr_compu<-0
                                
-                               beta<-beta.start
-                               s<-s.start
+                               if(idsample==1){
+                                 beta<-beta.start
+                                 s<-s.start
+                               }else{
+                                 s<-outputNsample[[1]]$b[1:6,id.lambda]
+                                 beta<-outputNsample[[1]]$b[7:size_V,id.lambda]
+                               }
                                
                                converged<-F
                                ite<-0
@@ -1552,9 +1462,9 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                  bfix<-b[fix0==1]
                                  b<-b[fix0==0]
                                  
-                                #browser()
+                                browser()
                                  output<-deriva(funcpa=DYNidmlLikelihoodweib,
-                                                b=b,
+                                                     b=b,
                                                      npm=length(b),
                                                      npar=size_V,
                                                      bfix=bfix,
@@ -1586,6 +1496,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                      dimp12=dimp12,
                                                      Ntime=NtimesPoints,
                                                      time=time)
+                                 output<-output$v
                                  
                                if(ite==0){
                                    fn.value<-DYNidmlLikelihoodweibpena(b=b,
@@ -1634,11 +1545,10 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                        min<-npm*(npm+1)/2
                                        fu <- output[(min+1):length(output)]
                                        V<- matrix(0,npm,npm)
-                                       V[lower.tri(diag=TRUE)] <- output[1:min]
+                                       V[upper.tri(V,diag=TRUE)] <- output[1:min]
                                        V<-V+t(V)
                                        diag(V)<-diag(V)/2
-                                       # hessian is - second derivatives of loglik
-                                       V<--V
+                                       # deriva gives information matrix
                                        tr <- sum(diag(V))/npm
                                        V0<-V}
                                      ite<-ite+1
@@ -1651,11 +1561,10 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                    fu <- output[(min+1):length(output)]
                                    
                                    V<- matrix(0,npm,npm)
-                                   V[lower.tri(diag=TRUE)] <- output[1:min]
+                                   V[upper.tri(V,diag=TRUE)] <- output[1:min]
                                    V<-V+t(V)
                                    diag(V)<-diag(V)/2
-                                   # hessian is - second derivatives of loglik
-                                   V<--V
+                                   # deriva gives information matrix
                                    tr <- sum(diag(V))/npm
                                    V0<-V
                                 
@@ -1668,7 +1577,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                  idpos0<-idpos
                                  
                                  ncount<-da<-ga<-0
-                                 
+                                 browser()
                                  while(idpos != 0){
                                    
                                    if(ncount==0){ 
@@ -1704,7 +1613,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                    
                                  }
                                  
-                                 
+                                 browser()
                                  if(idpos!=0){
                                    
                                    warning("Hessian not defined positive")
@@ -1713,6 +1622,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                    break
                                  }
                                  
+                                 browser()
                                  # update beta
                                  output.cv<-DYNcv.model(beta=beta,
                                                         nva01=npm01,
@@ -1732,7 +1642,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                  
                                  # verify validity of parameters update 
                                  # and that we are better than previous estimates 
-                                 
+                                 browser()
                                  b<-c(s,output.cv$b)
                                  
                                  betanew<-b[(6+1):size_V]
@@ -1780,6 +1690,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                  # we have issue if res is NA or if not higher than previous one 
                                  # if not better or do not exist need to readjust
                                  # value of beta 
+                                 browser()
                                 if(res %in%c(-1e9,1e9) | res < fn.value){
                                   
                                   print(paste0("needed update at ite :",ite))
@@ -1916,7 +1827,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                  # update modelPar
                                  
                            
-                                 
+                                 browser()
                                  output.mla<- marqLevAlg::mla(b=b,
                                                               fn=DYNidmlLikelihoodweib,
                                                               epsa=epsa,
@@ -1961,38 +1872,38 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                  # new values for splines:
                                  snew<-s
                                  snew[fix00[1:6]==0]<-output.mla$b
-                                 if(nva01t>0){
-                                   b01<-betanew[1:nva01t][penalty.factor[1:nva01t]==1]
+                                 if(nvat01>0){
+                                   b01<-betanew[1:nvat01][penalty.factor[1:nvat01]==1]
                                    if(p01>0){
-                                     b01<-c(b01,betanew[(nva01t+nva02t+nva12t+1):(nva01t+nva02t+nva12t+p01)][penalty.factor[(nva01t+nva02t+nva12t+1):(nva01t+nva02t+nva12t+p01)]==1])
+                                     b01<-c(b01,betanew[(nvat01+nvat02+nvat12+1):(nvat01+nvat02+nvat12+p01)][penalty.factor[(nvat01+nvat02+nvat12+1):(nvat01+nvat02+nvat12+p01)]==1])
                                    }
                                  }else{
                                    if(p01>0){
-                                     b01<-betanew[(nva01t+nva02t+nva12t+1):(nva01t+nva02t+nva12t+p01)][penalty.factor[(nva01t+nva02t+nva12t+1):(nva01t+nva02t+nva12t+p01)]==1]
+                                     b01<-betanew[(nvat01+nvat02+nvat12+1):(nvat01+nvat02+nvat12+p01)][penalty.factor[(nvat01+nvat02+nvat12+1):(nvat01+nvat02+nvat12+p01)]==1]
                                    }else{
                                      b01<-0
                                    }
                                  }
                                  
-                                 if(nva02t>0){
-                                   b02<-betanew[(nva01t+1):(nva01t+nva02t)][penalty.factor[(nva01t+1):(nva01t+nva02t)]==1]
+                                 if(nvat02>0){
+                                   b02<-betanew[(nvat01+1):(nvat01+nvat02)][penalty.factor[(nvat01+1):(nvat01+nvat02)]==1]
                                    if(p02>0){
-                                     b02<-c(b02,betanew[(nva01t+nva02t+nva12t+p01+1):(nva01t+nva02t+nva12t+p01+p02)][penalty.factor[(nva01t+nva02t+nva12t+p01+1):(nva01t+nva02t+nva12t+p01+p02)]==1])
+                                     b02<-c(b02,betanew[(nvat01+nvat02+nvat12+p01+1):(nvat01+nvat02+nvat12+p01+p02)][penalty.factor[(nvat01+nvat02+nvat12+p01+1):(nvat01+nvat02+nvat12+p01+p02)]==1])
                                    }
                                  }else{
                                    if(p02>0){
-                                     b02<-betanew[(nva01t+nva02t+nva12t+p01+1):(nva01t+nva02t+nva12t+p01+p02)][penalty.factor[(nva01t+nva02t+nva12t+p01+1):(nva01t+nva02t+nva12t+p01+p02)]==1]
+                                     b02<-betanew[(nvat01+nvat02+nvat12+p01+1):(nvat01+nvat02+nvat12+p01+p02)][penalty.factor[(nvat01+nvat02+nvat12+p01+1):(nvat01+nvat02+nvat12+p01+p02)]==1]
                                    }else{b02<-0}
                                  }
                                  
-                                 if(nva12t>0){
-                                   b12<-betanew[(nva01t+nva02t+1):(nvat01+nvat02+nvat12)][penalty.factor[(nva01t+nva02t+1):(nva01t+nva02t+nva12t)]==1]
+                                 if(nvat12>0){
+                                   b12<-betanew[(nvat01+nvat02+1):(nvat01+nvat02+nvat12)][penalty.factor[(nvat01+nvat02+1):(nvat01+nvat02+nvat12)]==1]
                                    if(p12>0){
-                                     b12<-c(b12,betanew[(nva01t+nva02t+nva12t+p01+p02+1):(nva01t+nva02t+nva12t+p01+p02+p12)][penalty.factor[(nva01t+nva02t+nva12t+p01+p02+1):(nva01t+nva02t+nva12t+p01+p02+p12)]==1])
+                                     b12<-c(b12,betanew[(nvat01+nvat02+nvat12+p01+p02+1):(nvat01+nvat02+nvat12+p01+p02+p12)][penalty.factor[(nvat01+nvat02+nvat12+p01+p02+1):(nvat01+nvat02+nvat12+p01+p02+p12)]==1])
                                    }
                                  }else{
                                    if(p12>0){
-                                     b12<-betanew[(nva01t+nva02t+nva12t+p01+p02+1):(nva01t+nva02t+nva12t+p01+p02+p12)][penalty.factor[(nva01t+nva02t+nva12t+p01+p02+1):(nva01t+nva02t+nva12t+p01+p02+p12)]==1]
+                                     b12<-betanew[(nvat01+nvat02+nvat12+p01+p02+1):(nvat01+nvat02+nvat12+p01+p02+p12)][penalty.factor[(nvat01+nvat02+nvat12+p01+p02+1):(nvat01+nvat02+nvat12+p01+p02+p12)]==1]
                                    }else{b12<-0}
                                  }
                                  # maximisation issue : lpen =l - pen
@@ -2065,6 +1976,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                  
                                  
                                }
+                               browser()
                                if(maxiter<=ite & converged==F){
                                  istop<-2
                                }else{
@@ -2109,17 +2021,17 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                   dimp12=dimp12,
                                                   Ntime=NtimesPoints,
                                                   time=time)
+                                   output<-output$v
                                    
                                    min<-npm*(npm+1)/2
                                    
                                    fu <- output[(min+1):length(output)]
                                    
                                    V<- matrix(0,npm,npm)
-                                   V[lower.tri(diag=TRUE)] <- output[1:min]
+                                   V[upper.tri(V,diag=TRUE)] <- output[1:min]
                                    V<-V+t(V)
                                    diag(V)<-diag(V)/2
-                                   # hessian is - second derivatives 
-                                   V<--V
+                                   # deriva gives information matrix
                                    V0<-V
                                  }else{
                                    if(pbr_compu==1){istop<-3}
@@ -2154,8 +2066,13 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                      
                                      pbr_compu<-0
                                      
-                                     beta<-beta.start
-                                     s<-s.start
+                                     if(idsample==1){
+                                       beta<-beta.start
+                                       s<-s.start
+                                     }else{
+                                       s<-outputNsample[[1]]$b[1:6,id.lambda]
+                                       beta<-outputNsample[[1]]$b[7:size_V,id.lambda]
+                                     }
                                      
                                      converged<-F
                                      ite<-0
@@ -2212,7 +2129,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                                    time=time)
                                          
                                        
-                                         
+                                         output<-output$v
                                          if(ite==0){
                                            fn.value<-DYNidmlLikelihoodweibpena(b=b,
                                                                                npm=length(b),
@@ -2258,8 +2175,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                              fu <- output[(npm+1):(npm*2)]
                                              V<- matrix(0,npm,npm)
                                              diag(V)<- output[1:npm]
-                                             # hessian is - second derivatives of loglik
-                                             V<--V
+                                             # deriva gives information matrix
                                              tr <- sum(diag(V))/npm
                                              V0<-V}
                                            ite<-ite+1
@@ -2272,8 +2188,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                          
                                          V<- matrix(0,npm,npm)
                                          diag(V)<- output[1:npm]
-                                         # hessian is - second derivatives of loglik
-                                         V<--V
+                                         # deriva gives information matrix
                                          tr <- sum(diag(V))/npm
                                          V0<-V
                                          
@@ -2576,38 +2491,38 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                        # new values for splines:
                                        snew<-s
                                        snew[fix00[1:6]==0]<-output.mla$b
-                                       if(nva01t>0){
-                                         b01<-betanew[1:nva01t][penalty.factor[1:nva01t]==1]
+                                       if(nvat01>0){
+                                         b01<-betanew[1:nvat01][penalty.factor[1:nvat01]==1]
                                          if(p01>0){
-                                           b01<-c(b01,betanew[(nva01t+nva02t+nva12t+1):(nva01t+nva02t+nva12t+p01)][penalty.factor[(nva01t+nva02t+nva12t+1):(nva01t+nva02t+nva12t+p01)]==1])
+                                           b01<-c(b01,betanew[(nvat01+nvat02+nvat12+1):(nvat01+nvat02+nvat12+p01)][penalty.factor[(nvat01+nvat02+nvat12+1):(nvat01+nvat02+nvat12+p01)]==1])
                                          }
                                        }else{
                                          if(p01>0){
-                                           b01<-betanew[(nva01t+nva02t+nva12t+1):(nva01t+nva02t+nva12t+p01)][penalty.factor[(nva01t+nva02t+nva12t+1):(nva01t+nva02t+nva12t+p01)]==1]
+                                           b01<-betanew[(nvat01+nvat02+nvat12+1):(nvat01+nvat02+nvat12+p01)][penalty.factor[(nvat01+nvat02+nvat12+1):(nvat01+nvat02+nvat12+p01)]==1]
                                          }else{
                                            b01<-0
                                          }
                                        }
                                        
-                                       if(nva02t>0){
-                                         b02<-betanew[(nva01t+1):(nva01t+nva02t)][penalty.factor[(nva01t+1):(nva01t+nva02t)]==1]
+                                       if(nvat02>0){
+                                         b02<-betanew[(nvat01+1):(nvat01+nvat02)][penalty.factor[(nvat01+1):(nvat01+nvat02)]==1]
                                          if(p02>0){
-                                           b02<-c(b02,betanew[(nva01t+nva02t+nva12t+p01+1):(nva01t+nva02t+nva12t+p01+p02)][penalty.factor[(nva01t+nva02t+nva12t+p01+1):(nva01t+nva02t+nva12t+p01+p02)]==1])
+                                           b02<-c(b02,betanew[(nvat01+nvat02+nvat12+p01+1):(nvat01+nvat02+nvat12+p01+p02)][penalty.factor[(nvat01+nvat02+nvat12+p01+1):(nvat01+nvat02+nvat12+p01+p02)]==1])
                                          }
                                        }else{
                                          if(p02>0){
-                                           b02<-betanew[(nva01t+nva02t+nva12t+p01+1):(nva01t+nva02t+nva12t+p01+p02)][penalty.factor[(nva01t+nva02t+nva12t+p01+1):(nva01t+nva02t+nva12t+p01+p02)]==1]
+                                           b02<-betanew[(nvat01+nvat02+nvat12+p01+1):(nvat01+nvat02+nvat12+p01+p02)][penalty.factor[(nvat01+nvat02+nvat12+p01+1):(nvat01+nvat02+nvat12+p01+p02)]==1]
                                          }else{b02<-0}
                                        }
                                        
-                                       if(nva12t>0){
-                                         b12<-betanew[(nva01t+nva02t+1):(nvat01+nvat02+nvat12)][penalty.factor[(nva01t+nva02t+1):(nva01t+nva02t+nva12t)]==1]
+                                       if(nvat12>0){
+                                         b12<-betanew[(nvat01+nvat02+1):(nvat01+nvat02+nvat12)][penalty.factor[(nvat01+nvat02+1):(nvat01+nvat02+nvat12)]==1]
                                          if(p12>0){
-                                           b12<-c(b12,betanew[(nva01t+nva02t+nva12t+p01+p02+1):(nva01t+nva02t+nva12t+p01+p02+p12)][penalty.factor[(nva01t+nva02t+nva12t+p01+p02+1):(nva01t+nva02t+nva12t+p01+p02+p12)]==1])
+                                           b12<-c(b12,betanew[(nvat01+nvat02+nvat12+p01+p02+1):(nvat01+nvat02+nvat12+p01+p02+p12)][penalty.factor[(nvat01+nvat02+nvat12+p01+p02+1):(nvat01+nvat02+nvat12+p01+p02+p12)]==1])
                                          }
                                        }else{
                                          if(p12>0){
-                                           b12<-betanew[(nva01t+nva02t+nva12t+p01+p02+1):(nva01t+nva02t+nva12t+p01+p02+p12)][penalty.factor[(nva01t+nva02t+nva12t+p01+p02+1):(nva01t+nva02t+nva12t+p01+p02+p12)]==1]
+                                           b12<-betanew[(nvat01+nvat02+nvat12+p01+p02+1):(nvat01+nvat02+nvat12+p01+p02+p12)][penalty.factor[(nvat01+nvat02+nvat12+p01+p02+1):(nvat01+nvat02+nvat12+p01+p02+p12)]==1]
                                          }else{b12<-0}
                                        }
                                        # maximisation issue : lpen =l - pen
@@ -2724,13 +2639,13 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                         dimp12=dimp12,
                                                         Ntime=NtimesPoints,
                                                         time=time)
-                                         
+                                         output<-output$v
                                          min<-npm
                                          fu <- output[(min+1):length(output)]
                                          
                                          V<- matrix(0,npm,npm)
                                          diag(V) <- output[1:npm]
-                                         V<--V
+                                         # deriva gives information matrix
                                          V0<-V
                                        }else{
                                          if(pbr_compu==1){istop<-3}

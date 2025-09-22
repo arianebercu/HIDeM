@@ -34,7 +34,7 @@
 #' 
 
 
-DYNidmlLikelihoodweibpena<-function(bb,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
+DYNidmlLikelihoodweibpena<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
                                     dimnva01,dimnva02,dimnva12,nva01,nva02,nva12,
                                     t0,t1,t2,t3,troncature,
                                     y01,y02,y12,p01,p02,p12,

@@ -31,8 +31,6 @@ DYNidm(
   B = NULL,
   posfix = NULL,
   gausspoint = 10,
-  step.sequential = F,
-  option.sequential = list(cutoff = 10^-3, min = 20, step = 10),
   lambda01 = NULL,
   lambda02 = NULL,
   lambda12 = NULL,
@@ -49,6 +47,7 @@ DYNidm(
   clustertype = "FORK",
   Ypredmethod = "gauss",
   NtimesPoints = 250,
+  dataY = NULL,
   envir = parent.frame()
 )
 }
@@ -137,11 +136,6 @@ second the parameters of explanatory variables in order  \code{0 --> 1}, \code{0
 This argument is only used for models with M-splines.}
 
 \item{posfix}{index of fixed parameters}
-
-\item{step.sequential}{should we use the optimisation version to fix splines}
-
-\item{option.sequential}{parameters to give if you want to do the optimisation version to
-fix splines}
 
 \item{lambda01}{Lambda on transition 0 --> 1}
 

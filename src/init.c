@@ -27,6 +27,13 @@ extern void F77_NAME(idmlikelihoodweibtimedep)(double *,int *, int *, double *,i
               int *,int *,int *,int *,int *,int *,int *,
               int *,int *,int *,int *,int *,int *, double *,double*, double *, double *,int *,double *);
 
+extern void F77_NAME(idmlikelihoodtimedep)(double *,int *, int *, double *,int*,
+			  double *, double *, double*, int*,
+              int *, int *,int *,int *,double *,double *, double *, 
+			  double *,double*, double *,
+              int *,int *,int *,int *,int *,int *,int *,
+              int *,int *,int *,int *,int *,int *, double *,double*, double *,
+			  double *,int *,double *);
 
 extern void F77_NAME(idmlikelihoodweibtimedepgrid)(double *,int *, int *, double *,int*,
               int *,int *, double *,double*, double *, double *,double*, double *,
@@ -97,6 +104,7 @@ static const R_FortranMethodDef FortranEntries[] = {
     {"idmlikelihood",(DL_FUNC) &F77_NAME(idmlikelihood),    29},
     {"idmlikelihoodweib",(DL_FUNC) &F77_NAME(idmlikelihoodweib),    23},
     {"idmlikelihoodweibtimedep",(DL_FUNC) &F77_NAME(idmlikelihoodweibtimedep),    32},
+	 {"idmlikelihoodtimedep",(DL_FUNC) &F77_NAME(idmlikelihoodtimedep),    38},
      {"idmlikelihoodweibtimedepgrid",(DL_FUNC) &F77_NAME(idmlikelihoodweibtimedepgrid),    33},
  {"causalidmlikelihoodweib",(DL_FUNC) &F77_NAME(causalidmlikelihoodweib),    24},
     {"derivaweib",(DL_FUNC) &F77_NAME(derivaweib),    22},

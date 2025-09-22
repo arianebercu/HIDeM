@@ -26,7 +26,7 @@ JMidm<-function(timeVar,
   
   set.seed(seed = seed)
   
- 
+
   if(Ypredmethod=="gauss"){
     
     idsubjects<-unique(dataSurv[,colnames(dataSurv)%in%id])
@@ -52,7 +52,7 @@ JMidm<-function(timeVar,
   Yall<-list()
   length(Yall)<-length(formLong)
   
-  #browser()
+
   for(indice in 1:length(formLong)){
 
     # need to have all elements of joint
@@ -67,9 +67,7 @@ JMidm<-function(timeVar,
   
     
     #if(is.null(JMmodel)){stop("The JMbayes2 model for your marker could not be run, see above warnings.")}
-    
-
-    
+  
   
     if(Ypredmethod=="gauss"){
    
@@ -192,29 +190,48 @@ JMidm<-function(timeVar,
       # K <- length(ind_RE)
       # M <- dim(b_mat)[3L]
       M<-dim(betas)[1]
-      idNsample<-sample(x=c(1:M),size=Nsample)
-      
       NtimesPoints<-ifelse(truncated==F,256,271)
       nn<-rep(NtimesPoints,N)
       ends   <- cumsum(nn)
       starts <- ends - nn + 1
-
       
+      if(Nsample>1){
+        
+      idNsample<-sample(x=c(1:M),size=Nsample-1)
+
       Fixed <- X %*% t(betas[idNsample, , drop = FALSE])   # (n x m)
       
       # Terme aléatoire, on remplit directement un tableau vide
-      Random_all <- matrix(0, nrow = nrow(Z), ncol = Nsample)
+      Random_all <- matrix(0, nrow = nrow(Z), ncol = Nsample-1)
+      Random_mean <- matrix(0,nrow=nrow(Z),ncol=1)
       
       for (j in seq_len(N)) {
         rows <- starts[j]:ends[j]
         Zj   <- Z[rows, , drop = FALSE]                        # (nn[j] x q)
         Bj   <- b_mat[j, , idNsample, drop = FALSE] # (q x m)
         Random_all[rows, ] <- Zj %*% Bj[1,,]
+        Random_mean[rows, ] <- Zj %*% JMmodel$statistics$Mean$b[j,]
       }
       
       PredYx <- Fixed + Random_all
       
-  
+      }else{
+        PredYx<-NULL
+        
+        # Terme aléatoire, on remplit directement un tableau vide
+        Random_mean <- matrix(0,nrow=nrow(Z),ncol=1)
+        
+        for (j in seq_len(N)) {
+          rows <- starts[j]:ends[j]
+          Zj   <- Z[rows, , drop = FALSE]
+          Random_mean[rows, ] <- Zj %*% JMmodel$statistics$Mean$b[j,]
+        }
+        
+        
+      }
+      
+      PredYmean<-X%*%as.matrix(JMmodel$statistics$Mean$betas1) + Random_mean
+      PredYx<-cbind(PredYmean,PredYx)
       # PredYxx <- do.call(cbind, lapply(idNsample, function(i) {
       #     fixed <- X %*% betas[i,]
       # 
@@ -330,25 +347,42 @@ JMidm<-function(timeVar,
       # K <- length(ind_RE)
       # M <- dim(b_mat)[3L]
       M<-dim(betas)[1]
-      idNsample<-sample(x=c(1:M),size=Nsample)
-      
       nn<-rep(NtimesPoints,N)
       ends   <- cumsum(nn)
       starts <- ends - nn + 1
       
-      Fixed <- X %*% t(betas[idNsample, , drop = FALSE])   # (n x m)
+      if(Nsample>1){
+      idNsample<-sample(x=c(1:M),size=Nsample-1)
       
-      # Terme aléatoire, on remplit directement un tableau vide
-      Random_all <- matrix(0, nrow = nrow(Z), ncol = Nsample)
+      Fixed <- X %*% t(betas[idNsample, , drop = FALSE])   # (n x m)
     
+      # Terme aléatoire, on remplit directement un tableau vide
+      Random_all <- matrix(0, nrow = nrow(Z), ncol = Nsample-1)
+      Random_mean <- matrix(0,nrow=nrow(Z),ncol=1)
       for (j in seq_len(N)) {
         rows <- starts[j]:ends[j]
         Zj   <- Z[rows, , drop = FALSE]                        # (nn[j] x q)
         Bj   <- b_mat[j, , idNsample, drop = FALSE] # (q x m)
         Random_all[rows, ] <- Zj %*% Bj[1,,]
+        Random_mean[rows, ] <- Zj %*% JMmodel$statistics$Mean$b[j,]
       }
      
       PredYx <- Fixed + Random_all
+      }else{
+        PredYx<-NULL
+        
+        Random_mean <- matrix(0,nrow=nrow(Z),ncol=1)
+        for (j in seq_len(N)) {
+          rows <- starts[j]:ends[j]
+          Zj   <- Z[rows, , drop = FALSE]
+          Random_mean[rows, ] <- Zj %*% JMmodel$statistics$Mean$b[j,]
+        }
+        }
+     
+      PredYmean<-X%*%as.matrix(JMmodel$statistics$Mean$betas1) + Random_mean
+      PredYx<-cbind(PredYmean,PredYx)
+      
+      #add mean value of fixed and random effects 
       
       
       # PredYxx <- do.call(cbind, lapply(idNsample, function(i) {

@@ -94,13 +94,10 @@
 #' @param penalty which penalty to consider
 #' @param penalty.factor which variable should be penalised
 #' computed for the Newton-Raphson path for the penalised regression parameter. If FALSE, the 
-#' complete hessian is computed.
-#' @param step.sequential should we use the optimisation version to fix splines 
+#' complete hessian is computed. 
 #' @param partialH True if should use only diagonal terms of the derivatives of beta
 #' @param clustertype in which cluster to work
 #' @param nproc number of cluster
-#' @param option.sequential parameters to give if you want to do the optimisation version to
-#'  fix splines
 #' @param envir working environment 
 #' @return
 #' \item{call}{the call that produced the result.} \item{coef}{regression
@@ -191,10 +188,6 @@ DYNidm <- function(formula01,
                 B=NULL,
                 posfix=NULL,
                 gausspoint=10,
-                step.sequential=F,
-                option.sequential=list(cutoff=10^-3,
-                                       min=20,
-                                       step=10),
                 lambda01=NULL,
                 lambda02=NULL,
                 lambda12=NULL,
@@ -212,6 +205,7 @@ DYNidm <- function(formula01,
                 clustertype="FORK",
                 Ypredmethod="gauss",
                 NtimesPoints=250,
+                dataY=NULL,
                 envir=parent.frame()){
   
 
@@ -223,6 +217,7 @@ DYNidm <- function(formula01,
   
     call <- match.call()
     ptm <- proc.time()
+    if(is.null(dataY)){
     if(missing(methodJM) & missing(methodINLA)){
       stop("Need to specify the method used for time-depend covariates by giving methodINLA or methodJM")
     }
@@ -232,6 +227,10 @@ DYNidm <- function(formula01,
     }else{
       methodlongi<-"JM"
       print("Time-dependent covariates estimation will be performed using JMBayes2")
+    }}else{
+      if(!inherits(dataY,"predYidm"))stop("The argument dataY must be a class 'predYidm' obtained using DYNpredY.")
+      methodlongi<-dataY$method
+      dataY<-as.data.frame(dataY$Y)
     }
     if(missing(formula01))stop("Argument formula01 is missing.")
     if(missing(formula02))stop("Argument formula02 is missing.")
@@ -252,11 +251,11 @@ DYNidm <- function(formula01,
 
     if(!inherits(data,"data.frame"))stop("Argument 'data' must be a data.frame")
     
+    if(is.null(dataY)){
     if(missing(dataLongi)) stop("Need a dataLongi frame.")
     if(sum(is.na(dataLongi))>0)stop("Need a longitudinal data frame with no missing data.")
     
-    if(!inherits(dataLongi,"data.frame"))stop("Argument 'dataLongi' must be a data.frame")
-
+    if(!inherits(dataLongi,"data.frame"))stop("Argument 'dataLongi' must be a data.frame")}
  
     ############################################################################
     ############################### get database defined by formulas ###########
@@ -271,7 +270,7 @@ DYNidm <- function(formula01,
     #################################################################################
     #################### dealing with missing data ##################################
     #################################################################################
-    browser()
+   
     if(anyNA(data)){
       variables=unique(c(all.vars(formula01),all.vars(formula02),all.vars(formula12)))
       data=data[,variables]
@@ -279,11 +278,13 @@ DYNidm <- function(formula01,
       m01[[2]] <- m02[[2]] <- m12[[2]] <- data
     }
 
+    if(is.null(dataY)){
     if(anyNA(dataLongi)){
       variables=unique(c(all.vars(formula01),all.vars(formula02),all.vars(formula12)))
       dataLongi=dataLongi[,variables]
       dataLongi=na.omit(dataLongi)
      # m01[[2]] <- m02[[2]] <- m12[[2]] <- data
+    }
     }
     m01 <- eval(m01,parent.frame())
     m02 <- eval(m02,parent.frame())
@@ -292,6 +293,7 @@ DYNidm <- function(formula01,
 
     responseTrans <- stats::model.response(m01)
     responseAbs <- stats::model.response(m02)
+    
     
     if(is.null(Longitransition)){
       Longitransition<-list()
@@ -319,6 +321,7 @@ DYNidm <- function(formula01,
       }
    
     }
+    
     
     #################################################################################
     #####################   extract covariates   ####################################
@@ -411,35 +414,20 @@ DYNidm <- function(formula01,
     #################################################################################
     
 
-      if(!inherits(option.sequential$cutoff,c("numeric","integer")))stop("The cutoff for spline has to a numeric or integer.")
+      
       if(!inherits(maxiter,c("numeric","integer"))|(maxiter!=floor(maxiter)))stop("Maxiter has to be an integer.")
     if(maxiter<0)stop("Maxiter has to be an integer greater or equal to 0.")
 
+    
     if(!inherits(NtimesPoints,c("numeric","integer"))|(NtimesPoints!=floor(NtimesPoints)))stop("NtimesPoints has to be an integer greater than 100.")
     if(NtimesPoints<100)stop("NtimesPoints has to be an integer greater than 100.")
+    
       if(!inherits(nproc,c("numeric","integer"))|(nproc!=floor(nproc)))stop("nproc has to be an integer.")
     
       # nbr of quadrature points for estimating integral in idm without penalisation
       if(!gausspoint%in%c(10,15,21,31,41,51,61))stop("Argument type.quantile has to a numeric : 10, 15, 21, 31, 51 or 61.")
-      if(!inherits(step.sequential,"logical"))stop("Argument step.sequential has to be TRUE or FALSE.")
+      
 
-    ###########################################################################
-    #################### if the user want to fix splines parameters put #######
-    #################### (step.sequential==T) #################################
-    ###########################################################################
-    
-      if(step.sequential==T){
-
-        if(!inherits(option.sequential$cutoff,c("numeric","integer")))stop("The cutoff for spline has to be a numeric or integer.")
-        if(!(inherits(option.sequential$step,c("numeric","integer")))|(option.sequential$step!=floor(option.sequential$step)))stop("The step has to be a integer.")
-        if(!(inherits(option.sequential$min,c("numeric","integer")))|(option.sequential$min!=floor(option.sequential$min)))stop("The min has to be a integer.")
-        if(option.sequential$step<=0)stop("Steps need to be at least of 1.")
-        if(option.sequential$min<=0)stop("The minimum of iteration must be at least 0")
-        if(option.sequential$cutoff<=0)stop("The cutoff for spline need to be positive.")
-        if(!(option.sequential$min<=maxiter))stop(paste0("The algorithm must do at least one iteration before reaching ",maxiter," , min inferior or equal to maxiter."))
-        if(!(option.sequential$step<=maxiter))stop(paste0("The step must be inferior or equal to ",maxiter))
-
-      }
 
     #################################################################################
     ########################### Define number of parameters per transitions #########
@@ -564,7 +552,7 @@ DYNidm <- function(formula01,
         }
       })
       ynames<-unlist(ynames)
-      browser()
+     
       for(m in 1:length(formLong)){
         if("value"%in%methodJM$functional_forms[[m]] & "slope"%in%methodJM$functional_forms[[m]]){
           CR_forms[[m]]<-as.formula(paste0("~value(",ynames[m],"):CR + slope(",ynames[m],"):CR"))
@@ -625,7 +613,7 @@ DYNidm <- function(formula01,
 
     size1<-size1+p01+p02+p12
     
-    browser()
+  
     if(method=="splines"){
       
       if (is.character(knots)){
@@ -848,7 +836,7 @@ DYNidm <- function(formula01,
       if(length(id)!=1){stop("id need to be a character")}
       if(!id%in%colnames(data)|!id%in%colnames(dataLongi)){stop("id need to be in data and dataLongi")}}
     
-browser()
+
 
 # competing risk definition 
 iddCR<-ifelse(idm==1,0,
@@ -856,6 +844,7 @@ iddCR<-ifelse(idm==1,0,
 TimeCR<-ifelse(idm==1,(t1+t2)/2,
                ifelse(idd==1 & t3<=t2+threshold,t3,t2))
     
+if(is.null(dataY)){
     if(methodlongi=="INLA"){
      
       
@@ -971,7 +960,8 @@ TimeCR<-ifelse(idm==1,(t1+t2)/2,
                    seed=methodJM$seed)
       
     }
-    browser()
+}
+   
                    
     
     ############################# scale explanatory variables #####################
@@ -989,7 +979,7 @@ TimeCR<-ifelse(idm==1,(t1+t2)/2,
         xm01<-attr(scaledx01,"scaled:center")
         xs01<-attr(scaledx01,"scaled:scale")
         x01[,which(namesx01=="numeric")]<-scaledx01
-        
+        ve01<-as.double(x01)
       }
       
       if(nvat02>0){
@@ -1006,6 +996,7 @@ TimeCR<-ifelse(idm==1,(t1+t2)/2,
         xm02<-attr(scaledx02,"scaled:center")
         xs02<-attr(scaledx02,"scaled:scale")
         x02[,which(namesx02=="numeric")]<-scaledx02
+        ve02<-as.double(x02)
       }
       
       if(nvat12>0){
@@ -1023,11 +1014,9 @@ TimeCR<-ifelse(idm==1,(t1+t2)/2,
         xm12<-attr(scaledx12,"scaled:center")
         xs12<-attr(scaledx12,"scaled:scale")
         x12[,which(namesx12=="numeric")]<-scaledx12
+        ve12<-as.double(x12)
       }
       
-      if(noVar[1]==1){ve01<-as.double(rep(0,N))}else{ve01<-as.double(x01)}
-      if(noVar[2]==1){ve02<-as.double(rep(0,N))}else{ve02<-as.double(x02)}
-      if(noVar[3]==1){ve12<-as.double(rep(0,N))}else{ve12<-as.double(x12)}
       
      ym <- do.call(rbind, lapply(split(dataY[, 4:dim(dataY)[2]], dataY$Outcome), function(x) {
         apply(x, 2, mean)
@@ -1092,9 +1081,7 @@ TimeCR<-ifelse(idm==1,(t1+t2)/2,
                          t2=t2,
                          t3=t3,
                          troncature=troncature,
-                         gausspoint=gausspoint,
-                         step.sequential=step.sequential,
-                         option.sequential=option.sequential)
+                         gausspoint=gausspoint)
   
       
 ############################## Output   ########################################
@@ -1247,97 +1234,9 @@ TimeCR<-ifelse(idm==1,(t1+t2)/2,
             
         
         
-        fix<-out$fix0
-        beta<-rep(NA,size_V)
-        beta[fix==0]<-out$b
-        beta[fix==1]<-out$bfix
-        npm<-sum(fix==0)
-        
-### if CV is true keep V and solve V to have inverse for confidence intervals###
-        CV<-out$istop
-        if(CV==1){
-          
-          
-          Vr <- matrix(0,npm,npm)
-          Vr[upper.tri(Vr,diag=TRUE)] <- out$v[1:(npm*(npm+1)/2)]
-          Vr <- t(Vr)
-          Vr[upper.tri(Vr,diag=TRUE)] <- out$v[1:(npm*(npm+1)/2)]
-          V <- matrix(0,size_V,size_V)
-          
-          posfix<-which(fix==1)
-          V[setdiff(1:size_V,posfix),setdiff(1:size_V,posfix)] <- Vr
-          
-          Hr<--solve(Vr)
-          H<- matrix(0,size_V,size_V)
-          H[setdiff(1:size_V,posfix),setdiff(1:size_V,posfix)] <- Hr
-          
-        }else{
-          Hr <- matrix(0,npm,npm)
-          Hr[upper.tri(Hr,diag=TRUE)] <- out$v[1:(npm*(npm+1)/2)]
-          Hr <- t(Hr)
-          Hr[upper.tri(Hr,diag=TRUE)] <- out$v[1:(npm*(npm+1)/2)]
-          H <- matrix(0,size_V,size_V)
-          
-          posfix<-which(fix==1)
-          H[setdiff(1:size_V,posfix),setdiff(1:size_V,posfix)] <- Hr
-          
-          V<- matrix(0,size_V,size_V)
-          
-          
-        }
-        # output of beta and HR 
-        if (sum(NC)>0){  
-          
-          # if at least one covariate
-          
-          betaCoef <- beta[(6+1):size_V]
-          names(betaCoef) <- c(Xnames01,Xnames02,Xnames12)
-          fit$coef <- betaCoef
-          fit$HR <- exp(betaCoef)
-          
-        }
-        
-        # weibull parameters
-        
-        theta_names <- c("modelPar1 01",
-                         "modelPar2 01",
-                         "modelPar1 02",
-                         "modelPar2 02",
-                         "modelPar1 12",
-                         "modelPar2 12")
-        
-        
-        
-        names(beta)<- c(theta_names,c(Xnames01,Xnames02,Xnames12))
-        names(fix)<- c(theta_names,c(Xnames01,Xnames02,Xnames12))
-        colnames(V) <- c(theta_names,c(Xnames01,Xnames02,Xnames12))
-        rownames(V) <- c(theta_names,c(Xnames01,Xnames02,Xnames12))
-        colnames(H) <- c(theta_names,c(Xnames01,Xnames02,Xnames12))
-        rownames(H) <- c(theta_names,c(Xnames01,Xnames02,Xnames12))
-        
-        
-        modelPar<-beta[1:6]
-        
-        # no value for BIC as no penalty
-        fit$BIC<-NULL
-        
-        cv<-list(ca=out$ca,cb=out$cb,rdm=out$rdm)
-        
-        
-        fit$modelPar <- modelPar
-
-        ############# on times to do prediction on #################################
-        fit$time <- matrix(NA,ncol=3,nrow=100)
-        fit$time[,1]<-seq(from=amin,to=amax,length.out=100)
-        fit$time[,2]<-seq(from=amin,to=amax,length.out=100)
-        fit$time[,3]<-seq(from=amin,to=amax,length.out=100)
-        
-        
+       
       }
       
-      # No value given by BIC as no penalty
-      lambda<-alpha<-fit$BIC<-fit$GCV<-NULL
-      fit$loglik <- c(out$fn.value,NULL)
       
     }else{
 
@@ -1347,14 +1246,14 @@ TimeCR<-ifelse(idm==1,(t1+t2)/2,
       ############################################################################
 
 #################################### penalty check #############################
-          if(nvat01==0 & nvat02==0 & nvat12==0)stop("To perform penalisation you need explanatory variables in each transition")
+          if(nvat01==0 & nvat02==0 & nvat12==0 & p01==0 & p02==0 & p12==0)stop("To perform penalisation you need explanatory variables in each transition")
           
           # permits to not penalise on some parameters
           if(is.null(penalty.factor)){
-            penalty.factor<-rep(1, nvat01+nvat02+nvat12)
+            penalty.factor<-rep(1, nvat01+nvat02+nvat12+p01+p02+p12)
           }else{
-            if(any(min(penalty.factor)<0) | any(max(penalty.factor)>1) | any(round(penalty.factor)!=penalty.factor) | length(penalty.factor)!=(nvat01+nvat02+nvat12)){
-              stop(paste0("Penalty.factor need to be a vector of 0 and 1 of length : ",nvat01+nvat02+nvat12))
+            if(any(min(penalty.factor)<0) | any(max(penalty.factor)>1) | any(round(penalty.factor)!=penalty.factor) | length(penalty.factor)!=(nvat01+nvat02+nvat12+p01+p02+p12)){
+              stop(paste0("Penalty.factor need to be a vector of 0 and 1 of length : ",nvat01+nvat02+nvat12+p01+p02+p12))
             }
           }
 
@@ -1386,6 +1285,111 @@ TimeCR<-ifelse(idm==1,(t1+t2)/2,
 ########################## perform penalty algorithm ###########################
 ##########################   with M-splines baseline risk ######################
 ################################################################################
+          
+          Nsample<-dim(dataY)[2]-3
+          
+          if(Ypredmethod=="equi"){
+            
+            # if prediction did not work 
+            # check which time to keep : 
+            time<-dataY[dataY$Outcome%in%ynames[1] & dataY[,colnames(dataY)%in%id]==unique(dataY[,colnames(dataY)%in%id])[1],colnames(dataY)%in%timeVar]
+            valid<-unlist(lapply(time,FUN=function(x){
+              dd<-dataY[dataY[,colnames(dataY)%in%timeVar]==x,]
+              if(dim(dd)[1]!=N*length(ynames)){return(F)}else{return(T)}
+            }))
+            
+            time<-time[valid]
+            NtimesPoints<-length(time)
+            
+            dataY<-dataY[dataY[,colnames(dataY)%in%timeVar]%in%time,]
+            dataY$Outcome<-as.character(dataY$Outcome)
+            # attention if NtimePoints equidistant with INLA then NtimePoints takes 
+            # need ID to be numeric -- then 
+            dataY[,colnames(dataY)%in%id]<-as.numeric(dataY[,colnames(dataY)%in%id])
+            # to keep tracks of time order for each individual 
+            dataY$order<-as.numeric(ave(dataY[,colnames(dataY)%in%id], cumsum(c(TRUE, diff(dataY[,colnames(dataY)%in%id]) != 0)), FUN = seq_along))
+            
+            if(length(outcome01)>=1){
+              y01<-dataY[dataY$Outcome%in%outcome01,]
+              # order  by individual and timeline 
+              y01<-y01[order(y01[,colnames(y01)%in%id],y01$order),]
+              
+              
+            }else{
+              y01<-as.double(rep(0,N*NtimesPoints))
+            }
+            
+            if(length(outcome02)>=1){
+              y02<-dataY[dataY$Outcome%in%outcome02,]
+              y02<-y02[order(y02$ID,y02$order),]
+              
+            }else{
+              y02<-as.double(rep(0,N*NtimesPoints))
+            }
+            
+            if(length(outcome12)>=1){
+              y12<-dataY[dataY$Outcome%in%outcome12,]
+              # order  by individual and timeline 
+              y12<-y12[order(y12$ID,y12$order),]
+              
+            }else{
+              y12<-as.double(rep(0,N*NtimesPoints))
+            }
+            
+            
+          }else{
+            
+            # check if predictions could be performed 
+            if(troncature==T){
+              NtimePoints<-271
+            }else{
+              NtimePoints<-256
+            }
+            
+            for( k in outcome){
+              subdata<-dataY[dataY$Outcome==k,]
+              x<-table(dataY[,colnames(dataY)%in%id])
+              if(any(x!=NtimePoints)){stop("Prediction of marker ",k," could not be perform for each quadrature points, try Ypredmethod equi")}
+              
+            }
+            
+            dataY$Outcome<-as.character(dataY$Outcome)
+            # attention if NtimePoints equidistant with INLA then NtimePoints takes 
+            # need ID to be numeric -- then 
+            dataY[,colnames(dataY)%in%id]<-as.numeric(dataY[,colnames(dataY)%in%id])
+            # to keep tracks of time order for each individual 
+            dataY$order<-as.numeric(ave(dataY[,colnames(dataY)%in%id], cumsum(c(TRUE, diff(dataY[,colnames(dataY)%in%id]) != 0)), FUN = seq_along))
+            
+            
+            if(length(outcome01)>=1){
+              y01<-dataY[dataY$Outcome%in%outcome01,]
+              # order  by individual and timeline 
+              y01<-y01[order(y01[,colnames(y01)%in%id],y01$order),]
+              
+              
+            }else{
+              y01<-as.double(rep(0,N*NtimesPoints))
+            }
+            
+            if(length(outcome02)>=1){
+              y02<-dataY[dataY$Outcome%in%outcome02,]
+              # order  by individual and timeline 
+              y02<-y02[order(y02$ID,y02$order),]
+              
+            }else{
+              y02<-as.double(rep(0,N*NtimesPoints))
+            }
+            
+            if(length(outcome12)>=1){
+              y12<-dataY[dataY$Outcome%in%outcome12,]
+              # order  by individual and timeline 
+              y12<-y12[order(y12$ID,y12$order),]
+              
+            }else{
+              y12<-as.double(rep(0,N*NtimesPoints))
+            }
+            
+          }
           
           if(method=="splines"){
             # if user did not specified the lambda values 
@@ -1688,43 +1692,6 @@ TimeCR<-ifelse(idm==1,(t1+t2)/2,
           if(method=="Weib"){
           
            
-              #	cat("------ Program Weibull ------ \n")
-############### some initial steps to have values for weibull parameters #########
-            output.mla<- marqLevAlg::mla(b=b[which(fix0[1:6]==0)],
-                             fn=idmlLikelihoodweib,
-                             epsa=epsa,
-                             epsb=epsb,
-                             epsd=epsd,
-                             nproc=nproc,
-                             clustertype = clustertype,
-                             maxiter=maxiter,
-                             minimize=F,
-                             npm=sum(fix0[1:6]==0),
-                             npar=size_V,
-                             bfix=c(b[which(fix0[1:6]==1)],b[7:size_V][which(fix0[7:size_V]==0)]),
-                             fix=c(fix0[1:6],rep(1,size_V-6)),
-                             ctime=ctime,
-                             no=N,
-                             ve01=ve01,
-                             ve02=ve02,
-                             ve12=ve12,
-                             dimnva01=dimnva01,
-                             dimnva02=dimnva02,
-                             dimnva12=dimnva12,
-                             nva01=nvat01,
-                             nva02=nvat02,
-                             nva12=nvat12,
-                             t0=t0,
-                             t1=t1,
-                             t2=t2,
-                             t3=t3,
-                             troncature=troncature,
-                             gausspoint=gausspoint)
-            
-            # take thoses values if converged only otherwise thoses
-            # by default or by the user
-            if(output.mla$istop==1){
-              b[which(fix0[1:6]==0)]<-output.mla$b}
             
             if(is.null(lambda01)|is.null(lambda02)|is.null(lambda12)){
               if(nproc>1){
@@ -1742,7 +1709,7 @@ TimeCR<-ifelse(idm==1,(t1+t2)/2,
               # value for lambda 
               output<-deriva.gradient(b=c(b[1:6],rep(0,size_V-6)),
                                   nproc=nproc,
-                                  funcpa=idmlLikelihoodweib,
+                                  funcpa=DYNidmlLikelihoodweib,
                                   npm=size_V,
                                   npar=size_V,
                                   bfix=1,
@@ -1763,7 +1730,17 @@ TimeCR<-ifelse(idm==1,(t1+t2)/2,
                                   t2=t2,
                                   t3=t3,
                                   troncature=troncature,
-                                  gausspoint=gausspoint)
+                                  y01=y01[,4],
+                                  y02=y02[,4],
+                                  y12=y12[,4],
+                                  p01=p01,
+                                  p02=p02,
+                                  p12=p12,
+                                  dimp01=dimp01,
+                                  dimp02=dimp02,
+                                  dimp12=dimp12,
+                                  Ntime=NtimesPoints,
+                                  time=time)
               
              
               if(nproc>1){parallel::stopCluster(clustpar)}
@@ -1780,7 +1757,7 @@ TimeCR<-ifelse(idm==1,(t1+t2)/2,
             }
             
             
-            if(nvat01>0){
+            if(nvat01>0 | p01>0){
             if(!is.null(lambda01)){
               nlambda01<-length(lambda01)
               if(length(lambda01)<1)stop("Penalisation can be performed for at least one lambda01 ")
@@ -1791,7 +1768,7 @@ TimeCR<-ifelse(idm==1,(t1+t2)/2,
             }
             }else{lambda01<-0.0001}
             
-            if(nvat02>0){
+            if(nvat02>0 | p02 >0){
             if(!is.null(lambda02)){
               nlambda02<-length(lambda02)
               if(length(lambda02)<1)stop("Penalisation can be performed for at least one lambda02 ")
@@ -1802,7 +1779,7 @@ TimeCR<-ifelse(idm==1,(t1+t2)/2,
             }
             }else{lambda02<-0.0001}
             
-            if(nvat12>0){
+            if(nvat12>0 | p12 >0){
             if(!is.null(lambda12)){
               nlambda12<-length(lambda12)
               if(length(lambda12)<1)stop("Penalisation can be performed for at least one lambda12 ")
@@ -1853,261 +1830,28 @@ TimeCR<-ifelse(idm==1,(t1+t2)/2,
                                penalty.factor=penalty.factor,
                                penalty=penalty,
                                partialH=partialH,
-                               dataY=dataY,
-                               Longitransition=Longitransition,
+                               y01=y01,
+                               y02=y02,
+                               y12=y12,
                                NtimesPoints=NtimesPoints,
-                               Ypredmethod=Ypredmethod,
-                               timeVar=timeVar,
-                               ynames=ynames,
-                               id=id)
+                               time=time,
+                               p01=p01,
+                               p02=p02,
+                               p12=p12,
+                               dimp01=dimp01,
+                               dimp02=dimp02,
+                               dimp12=dimp12,
+                               Nsample=Nsample)
             
               
               
 ######################### Output ###############################################
 ######################## on beta and HR ########################################
               
-              beta<-out$b
-              fix<-fix0
-              lambda<-out$lambda
-              alpha<-out$alpha
-              
-              H<-out$H
-              
-              beta<-as.matrix(beta)
-              lambda<-as.matrix(lambda)
-              
-              theta_names<-c("modelPar1 01",
-              "modelPar2 01",
-              "modelPar1 02",
-              "modelPar2 02",
-              "modelPar1 12",
-              "modelPar2 12")
-              rownames(beta) <-c(theta_names,Xnames01,Xnames02,Xnames12)
-              names(fix)<-c(theta_names,c(Xnames01,Xnames02,Xnames12))
-              rownames(lambda)<-c("lambda01","lambda02","lambda12")
-              
-              modelPar<-beta[1:6,]
-              betaCoef <- beta[7:size_V,]
-              betaCoef<-as.matrix(betaCoef)
-              fit$coef <- betaCoef
-              fit$HR <- exp(betaCoef)
-            
-              fit$ga<-out$gapath
-              fit$da<-out$dapath
-              
-              
-####################   calculate BIC    #######################################
-              if(dim(beta)[2]>1){
-                fit$BIC<--2*out$fn.value+log(N)*colSums(beta[7:size_V,]!=0)
-              }else{fit$BIC<--2*out$fn.value+log(N)*sum(beta[7:size_V,]!=0)}
-              
-              
-###################### calculate GCV and covariance matrix #####################
-              fit$GCV<-rep(NA,dim(lambda)[2])
-              
-              npm<-sum(fix0[7:size_V]==0)
-              npm01<-ifelse(nvat01>0,sum(fix0[7:(6+nvat01)]==0),0)
-              npm02<-ifelse(nvat02>0,sum(fix0[(7+nvat01):(6+nvat01+nvat02)]==0),0)
-              npm12<-ifelse(nvat12>0,sum(fix0[(7+nvat01+nvat02):size_V]==0),0)
-              
-              
-              V<-matrix(0,ncol=dim(lambda)[2]*npm,nrow=npm)
-
-          
-              
-              for(i in 1:dim(lambda)[2]){
-                id.keep<-which(betaCoef[fix0[7:size_V]==0,i]!=0)
-                if(length(id.keep)==0){
-                  fit$GCV[i]<--1/N*out$fn.value[i]
-                }else{
-                  lambda.matrix<-matrix(0,npm,npm)
-                  if(nvat01>0){
-                    
-                    if(penalty%in%c("none","lasso","ridge","elasticnet")){
-                      diag(lambda.matrix)[1:npm01]<-rep(2*(1-alpha[i])*lambda[1,i],npm01)}
-                    
-                    if(penalty=="mcp"){
-                      idbeta<-which(abs(betaCoef[1:npm01,i])<=alpha[i]*lambda[1,i])
-                      diag(lambda.matrix)[1:npm01]<-rep(0,npm01)
-                      diag(lambda.matrix)[idbeta]<--1/alpha[i]
-                      
-                    }
-                    if(penalty=="scad"){
-                      idbeta<-which((abs(betaCoef[1:npm01,i])>lambda[1,i])&(abs(betaCoef[1:npm01,i])<=lambda[1,i]*alpha[i]))
-                      diag(lambda.matrix)[1:npm01]<-rep(0,npm01)
-                      diag(lambda.matrix)[idbeta]<--1/(alpha[i]-1)
-                      
-                    }
-                  }
-                  if(nvat02>0){
-                    
-                    if(penalty%in%c("none","lasso","ridge","elasticnet")){
-                      diag(lambda.matrix)[(npm01+1):(npm01+npm02)]<-rep(2*(1-alpha[i])*lambda[2,i],npm02)}
-                    
-                    if(penalty=="mcp"){
-                      
-                      idbeta<-which(abs(betaCoef[(npm01+1):(npm01+npm02),i])<=alpha[i]*lambda[2,i])
-                      diag(lambda.matrix)[(npm01+1):(npm01+npm02)]<-rep(0,npm02)
-                      diag(lambda.matrix)[idbeta+npm01]<--1/alpha[i]
-                      
-                      
-                    }
-                    if(penalty=="scad"){
-                      
-                      idbeta<-which((abs(betaCoef[(npm01+1):(npm01+npm02):npm01,i])>lambda[2,i])&(abs(betaCoef[(npm01+1):(npm01+npm02),i])<=lambda[2,i]*alpha[i]))
-                      diag(lambda.matrix)[(npm01+1):(npm01+npm02)]<-rep(0,npm02)
-                      diag(lambda.matrix)[idbeta+npm01]<--1/(alpha[i]-1)
-                      
-                    }
-                  }
-                  if(nvat12>0){
-                    if(penalty%in%c("none","lasso","ridge","elasticnet")){
-                      diag(lambda.matrix)[(npm01+npm02+1):npm]<-rep(2*(1-alpha[i])*lambda[3,i],npm12)}
-                    
-                    
-                    if(penalty=="mcp"){
-                      idbeta<-which(abs(betaCoef[(npm01+npm02+1):npm,i])<=alpha[i]*lambda[3,i])
-                      diag(lambda.matrix)[(npm01+npm02+1):npm]<-rep(0,npm12)
-                      diag(lambda.matrix)[idbeta+npm01+npm02]<--1/alpha[i]
-                      
-                    }
-                    
-                    if(penalty=="scad"){
-                      idbeta<-which((abs(betaCoef[(npm01+npm02+1):npm,i])>lambda[3,i])&(abs(betaCoef[(npm01+npm02+1):npm,i])<=lambda[3,i]*alpha[i]))
-                      diag(lambda.matrix)[(npm01+npm02+1):npm]<-rep(0,npm12)
-                      diag(lambda.matrix)[idbeta+npm01+npm02]<--1/(alpha[i]-1)
-                      
-                    }
-                  }
-                  # only beta different from 0 
-                  lambda.matrix<-lambda.matrix[id.keep,id.keep,drop=FALSE]
-                  
-                  if(out$istop[i]==1){
-                    H_spec<-out$H[,(1+(i-1)*npm):(i*npm),drop=FALSE]
-                    # only beta different from 0 
-                    H_spec<-H_spec[id.keep,id.keep,drop=FALSE]
-                    
-                    if(!(any(is.na(H_spec))|any(H_spec==Inf) |any(H_spec==-Inf))){
-                    if(abs(det(H_spec))>1e-10 & kappa(H_spec)<1e10){
-                      #V[,(1+(i-1)*npm):(i*npm)]<-solve(out$H[,(1+(i-1)*npm):(i*npm),drop=FALSE])
-                      id.keepV<-(1+(i-1)*npm):(i*npm)
-                      id.keepV<-id.keepV[id.keepV%in%((i-1)*npm+id.keep)]
-                      
-                      V[id.keep,id.keepV]<-solve(H_spec)
-                      # maximisation issue thus : 10/04/24
-                      # as mla in maximisation return -second derivatives 
-                 
-                      H_pl<-H_spec+lambda.matrix
-                      trace_model<-lava::tr(solve(H_pl)%*%H_spec)
-                     
-                      fit$GCV[i]<--1/N*(out$fn.value[i]-trace_model)}
-                    }
-                  }
-                  
-                  
-                }
-              }
-                
              
-              cv<-list(ca.beta=out$ca.beta,ca.spline=out$ca.spline,ca.validity=out$ca.validity,
-                       cb=out$cb,rdm=NULL)
-             
-             
-              fit$modelPar<-as.matrix(modelPar)
-              
-############# on times to do prediction on #################################
-              fit$time <- matrix(NA,ncol=3,nrow=100)
-              fit$time[,1]<-seq(from=amin,to=amax,length.out=100)
-              fit$time[,2]<-seq(from=amin,to=amax,length.out=100)
-              fit$time[,3]<-seq(from=amin,to=amax,length.out=100)
-############# on times to do prediction on #################################
-              
-          }
-          
-          fit$loglik <- c(out$fn.value,out$fn.value.pena)
-          
-          
-
-
 
         }
 
-
-        fit$call <- call
-        fit$terms <- list("Formula01"=terms(formula01),
-                          "Formula02"=terms(formula02),
-                          "Formula12"=terms(formula12))
-        
-        fit$cv <- cv
-        fit$niter <- out$ni
-
-        fit$converged <- out$istop
-
-        fit$N <- N
-        fit$events1 <- sum(idm)
-        fit$events2 <- sum(idd)
-        fit$NC <- NC
-        fit$responseAbs <- responseAbs
-        fit$responseTrans <- responseTrans
-
-        fit$V <- V
-        fit$H <- H
-        fit$fix<-fix
-        fit$lambda<-lambda
-        fit$alpha<-alpha
-        fit$penalty<-penalty
-
-
-        if(NC01>0) fit$Xnames01 <- Xnames01
-        if(NC02>0) fit$Xnames02 <- Xnames02
-        if(NC12>0) fit$Xnames12 <- Xnames12
-        ########################################################################
-        ################## need to have levels for values binary/qualitative ###
-        ################## useful for prediction purpose #######################
-        ########################################################################
-        
-        var.level<-var.class<-list(NULL)
-        N_var<-c(all.vars(formula01)[all.vars(formula01)%in%labels(terms(formula01))],
-          all.vars(formula02)[all.vars(formula02)%in%labels(terms(formula02))],
-          all.vars(formula12)[all.vars(formula12)%in%labels(terms(formula12))])
-        length(var.level)<-length(var.class)<-length(N_var)
-        m<-1
-        if(NC01>0){
-        for(k in 2:dim(m01)[2]){
-          var.class[[m]]<-class(m01[,k])
-          if(class(m01[,k])[1]%in%c("character","factor")){
-          var.level[[m]]<-names(table(m01[,k]))}
-          m<-m+1
-        }
-        }
-        if(NC02>0){
-          for(k in 2:dim(m02)[2]){
-            var.class[[m]]<-class(m02[,k])
-            if(class(m02[,k])[1]%in%c("character","factor")){
-              var.level[[m]]<-names(table(m02[,k]))}
-            m<-m+1
-          }
-        }
-        
-        if(NC12>0){
-          for(k in 1:dim(m12)[2]){
-            var.class[[m]]<-class(m12[,k])
-            if(class(m12[,k])[1]%in%c("character","factor")){
-              var.level[[m]]<-names(table(m12[,k]))}
-            m<-m+1
-          }
-        }
-        
-        fit$levels<-list(values=var.level,
-                         class=var.class)
-        
-
-        fit$na.action <- "na.fail"
-
-
-        fit$maxtime <- amax
-        fit$mintime <- amin
-        class(fit) <- "idm"
-        fit$runtime <- proc.time()-ptm
-        return(fit)
+}
+        return(out)
 }

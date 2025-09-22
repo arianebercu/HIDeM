@@ -50,6 +50,7 @@ sim.idmModel <- function(x,
   T12<-dat$latent.waittime
   dat$illtime <- dat$latent.illtime
   dat$illstatus <- 1*((dat$illtime<dat$latent.lifetime)& (dat$illtime<dat$administrative.censoring))
+  
   #dat$illtime[dat$illtime>dat$latent.lifetime] <- 0
   # construct lifetime
   # for ill subjects as the sum of the time to illness (illtime) and
@@ -171,7 +172,7 @@ simdep.idmModel <- function(x,
   dat$lifetime <- dat$latent.lifetime
   dat$lifetime[dat$illstatus==1]<-dat$latent.waittime[dat$illstatus==1]
   id.nodem.death<-rep(0,n)
-  
+  #browser()
   #id<-which(T01<T02 & T01<18 & T12<18 & T01>dat$censtime)
   # interval censored illtime
   ipos <- grep("inspection[0-9]+",names(dat))
@@ -193,6 +194,7 @@ simdep.idmModel <- function(x,
       itimes <- itimes[itimes<dat$lifetime[i]]
       ## and those larger than the right censoring time
       itimes <- itimes[itimes<=dat$censtime[i]]
+     
       ## if all inspection times are censored
       ## set a single one at 0
       #if (length(itimes)==0) {
@@ -242,6 +244,7 @@ simdep.idmModel <- function(x,
           c(itimes[length(itimes)],itimes[length(itimes)],dat$lifetime[i],0,1)
         }else{
           
+          itimes<-itimes[itimes<=dat$administrative.censoring[i]]
           c(itimes[length(itimes)],itimes[length(itimes)],dat$administrative.censoring[i],0,0)}
       }
     }))
@@ -618,10 +621,11 @@ simulateDYNIDM <- function(n=100,
                            beta12=rep(0.5,10),
                            B=matrix(c(1,0,0,0,1,0,0,0,1),ncol=3),
                            sigma=1,
+                           scale.Y=F,
                            beta0=0.5, beta1=0.5,
-                           alpha0_01=0.5, alpha_y_01=0.5, alpha_slope_01=0,
-                           alpha0_02=0.5, alpha_y_02=0.5, alpha_slope_02=0,
-                           alpha0_12=0.5, alpha_y_12=0.5, alpha_slope_12=0){
+                           alpha_y_01=0.5, alpha_slope_01=0,
+                           alpha_y_02=0.5, alpha_slope_02=0,
+                           alpha_y_12=0.5, alpha_slope_12=0){
   
   ##############################################################################
   ####################### check entry parameters ###############################
@@ -755,6 +759,19 @@ simulateDYNIDM <- function(n=100,
     error1 <- matrix(rnorm(n.inspections*dim(B)[2]/2, mean = 0, sd = sigma),ncol=n.inspections,nrow=dim(B)[2]/2)
     
     y <- matrix(rep(beta0+b0,n.inspections),ncol=dim(B)[2]/2,nrow=n.inspections,byrow = T)+(visit)%*%t(beta1+b1) + t(error1)
+
+    if(scale.Y==T){
+      y<-apply(y,MARGIN=1,FUN=function(x){
+        
+            res<-x-(beta0+b0)
+            # we neglect covariance terms and reduce when t=0
+            sdy<-diag(B)
+            sdy<-sdy[seq(1,length(sdy),by=2)]
+            sdy<-sdy+sigma
+            res<-res/sqrt(sdy)
+            return(res)})
+      y<-t(y)
+    }
 
     colnames(y)<-paste0("Y",c(1:dim(y)[2]))
     data_long_i<-cbind(data_long_i,y)
