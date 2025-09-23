@@ -1047,7 +1047,7 @@ if(is.null(dataY)){
         }else{bfix<-1}
         
       
-        out<-idm.splines(b=b,
+        out<-DYNidm.splines(b=b,
                          clustertype=clustertype,
                          epsa=epsa,
                          epsb=epsb,
@@ -1081,7 +1081,22 @@ if(is.null(dataY)){
                          t2=t2,
                          t3=t3,
                          troncature=troncature,
-                         gausspoint=gausspoint)
+                         
+                         dataY=dataY,
+                         Longitransition=Longitransition,
+                         NtimesPoints=NtimesPoints,
+                         Ypredmethod=Ypredmethod,
+                         timeVar=timeVar,
+                         ynames=ynames,
+                         id=id,
+                         outcome=outcome,
+                         outcome01=outcome01,
+                         outcome02=outcome02,
+                         outcome12=outcome12,
+                         p01=p01,p02=p02,p12=p12,
+                         dimp01=dimp01,
+                         dimp02=dimp02,
+                         dimp12=dimp12)
   
       
 ############################## Output   ########################################
