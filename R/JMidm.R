@@ -20,7 +20,7 @@ JMidm<-function(timeVar,
                 nproc,t0,t1,t2,t3,idm,idd,
                 clustertype,
                 Ypredmethod,
-                NtimesPoints,seed){
+                NtimePoints,seed){
   
   # define timePoints of prediction : 
   
@@ -48,16 +48,16 @@ JMidm<-function(timeVar,
   N<-length(unique(dataLongi[,id]))
   newdataLongi<-timePointsdata
   colnames(newdataLongi)<-c(id,timeVar)
-  NtimesPoints<-ifelse(truncated==F,256,271)
+  NtimePoints<-ifelse(truncated==F,256,271)
   
   }else{
     
-    times<-seq(min(t0),max(dataLongi[,colnames(dataLongi)%in%timeVar]),length.out=NtimesPoints)
+    times<-seq(min(t0),max(dataLongi[,colnames(dataLongi)%in%timeVar]),length.out=NtimePoints)
     
     N<-length(unique(dataLongi[,id]))
     
     newdataLongi<-do.call(rbind,lapply(unique(dataLongi[,id]),FUN=function(x){
-      data.frame(id=rep(x,NtimesPoints),
+      data.frame(id=rep(x,NtimePoints),
                  time=times)}))
     colnames(newdataLongi)<-c(id,timeVar)
   }
@@ -109,7 +109,7 @@ JMidm<-function(timeVar,
       # M <- dim(b_mat)[3L]
       M<-dim(betas)[1]
       
-      nn<-rep(NtimesPoints,N)
+      nn<-rep(NtimePoints,N)
       ends   <- cumsum(nn)
       starts <- ends - nn + 1
       

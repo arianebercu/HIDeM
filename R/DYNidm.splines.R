@@ -44,7 +44,7 @@ DYNidm.splines<-function(b,clustertype,epsa,epsb,epsd,nproc,maxiter,size_V,size_
                          fix0,knots01,knots02,knots12,ctime,N,nknots01,nknots02,nknots12,
                          ve01,ve02,ve12,dimnva01,dimnva02,dimnva12,nvat01,nvat02,nvat12,
                          t0,t1,t2,t3,troncature,dataY,
-                         Longitransition,NtimesPoints,Ypredmethod,timeVar,ynames,id,
+                         Longitransition,NtimePoints,Ypredmethod,timeVar,ynames,id,
                          outcome,outcome01,outcome02,outcome12,
                          p01,p02,p12,dimp01,dimp02,dimp12){
   
@@ -70,7 +70,7 @@ DYNidm.splines<-function(b,clustertype,epsa,epsb,epsd,nproc,maxiter,size_V,size_
     }))
     
     time<-time[valid]
-    NtimesPoints<-length(time)
+    NtimePoints<-length(time)
     
     dataY<-dataY[dataY[,colnames(dataY)%in%timeVar]%in%time,]
     dataY$Outcome<-as.character(dataY$Outcome)
@@ -87,7 +87,7 @@ DYNidm.splines<-function(b,clustertype,epsa,epsb,epsd,nproc,maxiter,size_V,size_
       
       
     }else{
-      y01<-as.double(rep(0,N*NtimesPoints))
+      y01<-as.double(rep(0,N*NtimePoints))
     }
     
     if(length(outcome02)>=1){
@@ -95,7 +95,7 @@ DYNidm.splines<-function(b,clustertype,epsa,epsb,epsd,nproc,maxiter,size_V,size_
       y02<-y02[order(y02$ID,y02$order),]
       
     }else{
-      y02<-as.double(rep(0,N*NtimesPoints))
+      y02<-as.double(rep(0,N*NtimePoints))
     }
     
     if(length(outcome12)>=1){
@@ -104,7 +104,7 @@ DYNidm.splines<-function(b,clustertype,epsa,epsb,epsd,nproc,maxiter,size_V,size_
       y12<-y12[order(y12$ID,y12$order),]
       
     }else{
-      y12<-as.double(rep(0,N*NtimesPoints))
+      y12<-as.double(rep(0,N*NtimePoints))
     }
     
     
@@ -159,7 +159,7 @@ DYNidm.splines<-function(b,clustertype,epsa,epsb,epsd,nproc,maxiter,size_V,size_
     #                                         dimp01=dimp01,
     #                                         dimp02=dimp02,
     #                                         dimp12=dimp12,
-    #                                         Ntime=NtimesPoints,
+    #                                         Ntime=NtimePoints,
     #                                         time=time)
     #   }, error = function(e) {
     #     # Return NULL on error to skip this patient
@@ -202,7 +202,7 @@ DYNidm.splines<-function(b,clustertype,epsa,epsb,epsd,nproc,maxiter,size_V,size_
       
       
     }else{
-      y01<-as.double(rep(0,N*NtimesPoints))
+      y01<-as.double(rep(0,N*NtimePoints))
     }
     
     if(length(outcome02)>=1){
@@ -211,7 +211,7 @@ DYNidm.splines<-function(b,clustertype,epsa,epsb,epsd,nproc,maxiter,size_V,size_
       y02<-y02[order(y02$ID,y02$order),]
       
     }else{
-      y02<-as.double(rep(0,N*NtimesPoints))
+      y02<-as.double(rep(0,N*NtimePoints))
     }
     
     if(length(outcome12)>=1){
@@ -220,7 +220,7 @@ DYNidm.splines<-function(b,clustertype,epsa,epsb,epsd,nproc,maxiter,size_V,size_
       y12<-y12[order(y12$ID,y12$order),]
       
     }else{
-      y12<-as.double(rep(0,N*NtimesPoints))
+      y12<-as.double(rep(0,N*NtimePoints))
     }
     
     

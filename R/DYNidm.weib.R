@@ -39,7 +39,7 @@ DYNidm.weib<-function(b,fix0,size_V,
                       ve01,ve02,ve12,dimnva01,dimnva02,dimnva12,nvat01,nvat02,nvat12,
                       t0,t1,t2,t3,idd,idm,ts,troncature, dataY,
                       Longitransition,
-                      NtimesPoints,
+                      NtimePoints,
                       Ypredmethod,
                       timeVar,ynames,id,
                       outcome,outcome01,outcome02,outcome12,
@@ -65,7 +65,7 @@ DYNidm.weib<-function(b,fix0,size_V,
   }))
   
   time<-time[valid]
-  NtimesPoints<-length(time)
+  NtimePoints<-length(time)
   
   dataY<-dataY[dataY[,colnames(dataY)%in%timeVar]%in%time,]
   dataY$Outcome<-as.character(dataY$Outcome)
@@ -82,7 +82,7 @@ DYNidm.weib<-function(b,fix0,size_V,
   
   
   }else{
-    y01<-as.double(rep(0,N*NtimesPoints))
+    y01<-as.double(rep(0,N*NtimePoints))
   }
   
   if(length(outcome02)>=1){
@@ -90,7 +90,7 @@ DYNidm.weib<-function(b,fix0,size_V,
     y02<-y02[order(y02$ID,y02$order),]
     
   }else{
-    y02<-as.double(rep(0,N*NtimesPoints))
+    y02<-as.double(rep(0,N*NtimePoints))
   }
   
   if(length(outcome12)>=1){
@@ -99,7 +99,7 @@ DYNidm.weib<-function(b,fix0,size_V,
     y12<-y12[order(y12$ID,y12$order),]
     
   }else{
-    y12<-as.double(rep(0,N*NtimesPoints))
+    y12<-as.double(rep(0,N*NtimePoints))
   }
 
  
@@ -164,7 +164,7 @@ DYNidm.weib<-function(b,fix0,size_V,
                         dimp01=dimp01,
                         dimp02=dimp02,
                         dimp12=dimp12,
-                        Ntime=NtimesPoints,
+                        Ntime=NtimePoints,
                         time=time)
   }, error = function(e) {
     # Return NULL on error to skip this patient
@@ -207,7 +207,7 @@ DYNidm.weib<-function(b,fix0,size_V,
       
       
     }else{
-      y01<-as.double(rep(0,N*NtimesPoints))
+      y01<-as.double(rep(0,N*NtimePoints))
     }
     
     if(length(outcome02)>=1){
@@ -216,7 +216,7 @@ DYNidm.weib<-function(b,fix0,size_V,
       y02<-y02[order(y02$ID,y02$order),]
       
     }else{
-      y02<-as.double(rep(0,N*NtimesPoints))
+      y02<-as.double(rep(0,N*NtimePoints))
     }
     
     if(length(outcome12)>=1){
@@ -225,7 +225,7 @@ DYNidm.weib<-function(b,fix0,size_V,
       y12<-y12[order(y12$ID,y12$order),]
       
     }else{
-      y12<-as.double(rep(0,N*NtimesPoints))
+      y12<-as.double(rep(0,N*NtimePoints))
     }
     
     

@@ -204,7 +204,7 @@ DYNidm <- function(formula01,
                 partialH=F,
                 clustertype="FORK",
                 Ypredmethod="gauss",
-                NtimesPoints=250,
+                NtimePoints=250,
                 dataY=NULL,
                 envir=parent.frame()){
   
@@ -419,8 +419,8 @@ DYNidm <- function(formula01,
     if(maxiter<0)stop("Maxiter has to be an integer greater or equal to 0.")
 
     
-    if(!inherits(NtimesPoints,c("numeric","integer"))|(NtimesPoints!=floor(NtimesPoints)))stop("NtimesPoints has to be an integer greater than 100.")
-    if(NtimesPoints<100)stop("NtimesPoints has to be an integer greater than 100.")
+    if(!inherits(NtimePoints,c("numeric","integer"))|(NtimePoints!=floor(NtimePoints)))stop("NtimePoints has to be an integer greater than 100.")
+    if(NtimePoints<100)stop("NtimePoints has to be an integer greater than 100.")
     
       if(!inherits(nproc,c("numeric","integer"))|(nproc!=floor(nproc)))stop("nproc has to be an integer.")
     
@@ -902,7 +902,7 @@ if(is.null(dataY)){
                     idd=idd,
                     clustertype=clustertype,
                    Ypredmethod=Ypredmethod,
-                   NtimesPoints=NtimesPoints)
+                   NtimePoints=NtimePoints)
 
     
     }else{
@@ -955,7 +955,7 @@ if(is.null(dataY)){
                      idd=idd,
                      clustertype=clustertype,
                    Ypredmethod=Ypredmethod,
-                   NtimesPoints=NtimesPoints,
+                   NtimePoints=NtimePoints,
                    seed=methodJM$seed)
       
     }
@@ -1083,7 +1083,7 @@ if(is.null(dataY)){
                          
                          dataY=dataY,
                          Longitransition=Longitransition,
-                         NtimesPoints=NtimesPoints,
+                         NtimePoints=NtimePoints,
                          Ypredmethod=Ypredmethod,
                          timeVar=timeVar,
                          ynames=ynames,
@@ -1138,7 +1138,7 @@ if(is.null(dataY)){
                            
                         dataY=dataY,
                         Longitransition=Longitransition,
-                        NtimesPoints=NtimesPoints,
+                        NtimePoints=NtimePoints,
                         Ypredmethod=Ypredmethod,
                         timeVar=timeVar,
                         ynames=ynames,
@@ -1209,7 +1209,7 @@ if(is.null(dataY)){
 ################################################################################
           
           Nsample<-dim(dataY)[2]-3
-          
+          browser()
           if(Ypredmethod=="equi"){
             
             # if prediction did not work 
@@ -1221,7 +1221,7 @@ if(is.null(dataY)){
             }))
             
             time<-time[valid]
-            NtimesPoints<-length(time)
+            NtimePoints<-length(time)
             
             dataY<-dataY[dataY[,colnames(dataY)%in%timeVar]%in%time,]
             dataY$Outcome<-as.character(dataY$Outcome)
@@ -1238,7 +1238,7 @@ if(is.null(dataY)){
               
               
             }else{
-              y01<-as.double(rep(0,N*NtimesPoints))
+              y01<-as.double(rep(0,N*NtimePoints))
             }
             
             if(length(outcome02)>=1){
@@ -1246,7 +1246,7 @@ if(is.null(dataY)){
               y02<-y02[order(y02$ID,y02$order),]
               
             }else{
-              y02<-as.double(rep(0,N*NtimesPoints))
+              y02<-as.double(rep(0,N*NtimePoints))
             }
             
             if(length(outcome12)>=1){
@@ -1255,7 +1255,7 @@ if(is.null(dataY)){
               y12<-y12[order(y12$ID,y12$order),]
               
             }else{
-              y12<-as.double(rep(0,N*NtimesPoints))
+              y12<-as.double(rep(0,N*NtimePoints))
             }
             
             
@@ -1290,7 +1290,7 @@ if(is.null(dataY)){
               
               
             }else{
-              y01<-as.double(rep(0,N*NtimesPoints))
+              y01<-as.double(rep(0,N*NtimePoints))
             }
             
             if(length(outcome02)>=1){
@@ -1299,7 +1299,7 @@ if(is.null(dataY)){
               y02<-y02[order(y02$ID,y02$order),]
               
             }else{
-              y02<-as.double(rep(0,N*NtimesPoints))
+              y02<-as.double(rep(0,N*NtimePoints))
             }
             
             if(length(outcome12)>=1){
@@ -1308,7 +1308,7 @@ if(is.null(dataY)){
               y12<-y12[order(y12$ID,y12$order),]
               
             }else{
-              y12<-as.double(rep(0,N*NtimesPoints))
+              y12<-as.double(rep(0,N*NtimePoints))
             }
             
           }
@@ -1631,7 +1631,7 @@ if(is.null(dataY)){
               # value for lambda 
               output<-deriva.gradient(b=c(b[1:6],rep(0,size_V-6)),
                                   nproc=nproc,
-                                  funcpa=DYNidmlLikelihoodweib,
+                                  funcpa=gaussDYNidmlLikelihoodweib,
                                   npm=size_V,
                                   npar=size_V,
                                   bfix=1,
@@ -1661,8 +1661,7 @@ if(is.null(dataY)){
                                   dimp01=dimp01,
                                   dimp02=dimp02,
                                   dimp12=dimp12,
-                                  Ntime=NtimesPoints,
-                                  time=time)
+                                  Ntime=NtimePoints)
               
              
               if(nproc>1){parallel::stopCluster(clustpar)}
@@ -1755,8 +1754,7 @@ if(is.null(dataY)){
                                y01=y01,
                                y02=y02,
                                y12=y12,
-                               NtimesPoints=NtimesPoints,
-                               time=time,
+                               NtimePoints=NtimePoints,
                                p01=p01,
                                p02=p02,
                                p12=p12,

@@ -51,7 +51,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                    t0,t1,t2,t3,troncature,
                    nlambda01,lambda01,nlambda02,lambda02,nlambda12,lambda12,
                    alpha,penalty.factor,penalty,partialH,
-                   y01,y02,y12,NtimesPoints,time,
+                   y01,y02,y12,NtimePoints,
                    p01,p02,p12,
                    dimp01,dimp02,dimp12,Nsample){
   
@@ -143,10 +143,21 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
   
   for(idsample in 1:Nsample){
   
+    if(!is.null(dim(y01))){
     y01k<-y01[,colnames(y01)%in%paste0("Sample_",idsample)]
+    }else{
+      y01k<-y01
+    }
+    if(!is.null(dim(y02))){
     y02k<-y02[,colnames(y02)%in%paste0("Sample_",idsample)]
+    }else{
+      y02k<-y02
+    }
+    if(!is.null(dim(y12))){
     y12k<-y12[,colnames(y12)%in%paste0("Sample_",idsample)]
-    
+    }else{
+      y12k<-y12
+    }
    
     
   if(nproc >1){
@@ -237,7 +248,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                     dimp01=dimp01,
                                                     dimp02=dimp02,
                                                     dimp12=dimp12,
-                                                    Ntime=NtimesPoints)
+                                                    Ntime=NtimePoints)
                                  
                                  output<-output$v
                                  if(ite==0){# loglik penalised
@@ -271,7 +282,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                                     dimp01=dimp01,
                                                                     dimp02=dimp02,
                                                                     dimp12=dimp12,
-                                                                    Ntime=NtimesPoints,
+                                                                    Ntime=NtimePoints,
                                                                    
                                                                     lambda=lambda[id.lambda,],
                                                                     alpha=alpha,
@@ -421,7 +432,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                              dimp01=dimp01,
                                                              dimp02=dimp02,
                                                              dimp12=dimp12,
-                                                             Ntime=NtimesPoints,
+                                                             Ntime=NtimePoints,
                                                              lambda=lambda[id.lambda,],
                                                              alpha=alpha,
                                                              penalty.factor=penalty.factor,
@@ -492,7 +503,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                   dimp01=dimp01,
                                                   dimp02=dimp02,
                                                   dimp12=dimp12,
-                                                  Ntime=NtimesPoints,
+                                                  Ntime=NtimePoints,
                                                   lambda=lambda[id.lambda,],
                                                   alpha=alpha,
                                                   penalty.factor=penalty.factor,
@@ -533,7 +544,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                                dimp01=dimp01,
                                                                dimp02=dimp02,
                                                                dimp12=dimp12,
-                                                               Ntime=NtimesPoints,
+                                                               Ntime=NtimePoints,
                                                                lambda=lambda[id.lambda,],
                                                                alpha=alpha,
                                                                penalty.factor=penalty.factor,
@@ -597,7 +608,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                   dimp01=dimp01,
                                                   dimp02=dimp02,
                                                   dimp12=dimp12,
-                                                  Ntime=NtimesPoints)
+                                                  Ntime=NtimePoints)
                                  
                                  # look at convergence for each lambda :
                                  # mla output is loglik
@@ -756,7 +767,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                   dimp01=dimp01,
                                                   dimp02=dimp02,
                                                   dimp12=dimp12,
-                                                  Ntime=NtimesPoints)
+                                                  Ntime=NtimePoints)
                                    output<-output$v
                                 min<-npm*(npm+1)/2
                                  
@@ -862,7 +873,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                               dimp01=dimp01,
                                               dimp02=dimp02,
                                               dimp12=dimp12,
-                                              Ntime=NtimesPoints)
+                                              Ntime=NtimePoints)
                                      
                                      output<-output$v
                                      if(ite==0){# loglik penalised
@@ -896,7 +907,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                                            dimp01=dimp01,
                                                                            dimp02=dimp02,
                                                                            dimp12=dimp12,
-                                                                           Ntime=NtimesPoints,
+                                                                           Ntime=NtimePoints,
                                                                            
                                                                            lambda=lambda[id.lambda,],
                                                                            alpha=alpha,
@@ -1040,7 +1051,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                                   dimp01=dimp01,
                                                                   dimp02=dimp02,
                                                                   dimp12=dimp12,
-                                                                  Ntime=NtimesPoints,
+                                                                  Ntime=NtimePoints,
                                                                   
                                                                   lambda=lambda[id.lambda,],
                                                                   alpha=alpha,
@@ -1112,7 +1123,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                     dimp01=dimp01,
                                                     dimp02=dimp02,
                                                     dimp12=dimp12,
-                                                    Ntime=NtimesPoints,
+                                                    Ntime=NtimePoints,
                                                     lambda=lambda[id.lambda,],
                                                     alpha=alpha,
                                                     penalty.factor=penalty.factor,
@@ -1152,7 +1163,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                                     dimp01=dimp01,
                                                                     dimp02=dimp02,
                                                                     dimp12=dimp12,
-                                                                    Ntime=NtimesPoints,
+                                                                    Ntime=NtimePoints,
                                                                   
                                                                     lambda=lambda[id.lambda,],
                                                                     alpha=alpha,
@@ -1217,7 +1228,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                                 dimp01=dimp01,
                                                                 dimp02=dimp02,
                                                                 dimp12=dimp12,
-                                                                Ntime=NtimesPoints)
+                                                                Ntime=NtimePoints)
 
                                    # look at convergence for each lambda :
                                    # mla output is loglik
@@ -1373,7 +1384,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                         dimp01=dimp01,
                                                         dimp02=dimp02,
                                                         dimp12=dimp12,
-                                                        Ntime=NtimesPoints)
+                                                        Ntime=NtimePoints)
                                      output<-output$v
                                      min<-npm
                                      fu <- output[(min+1):length(output)]
@@ -1484,7 +1495,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                      dimp01=dimp01,
                                                      dimp02=dimp02,
                                                      dimp12=dimp12,
-                                                     Ntime=NtimesPoints)
+                                                     Ntime=NtimePoints)
                                  output<-output$v
                                  
                                if(ite==0){
@@ -1518,7 +1529,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                                        dimp01=dimp01,
                                                                        dimp02=dimp02,
                                                                        dimp12=dimp12,
-                                                                       Ntime=NtimesPoints,
+                                                                       Ntime=NtimePoints,
                                                                        
                                                                        lambda=lambda[id.lambda,],
                                                                        alpha=alpha,
@@ -1667,7 +1678,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                                 dimp01=dimp01,
                                                                 dimp02=dimp02,
                                                                 dimp12=dimp12,
-                                                                Ntime=NtimesPoints,
+                                                                Ntime=NtimePoints,
                                                                 lambda=lambda[id.lambda,],
                                                                 alpha=alpha,
                                                                 penalty.factor=penalty.factor,
@@ -1743,7 +1754,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                   dimp01=dimp01,
                                                   dimp02=dimp02,
                                                   dimp12=dimp12,
-                                                  Ntime=NtimesPoints,
+                                                  Ntime=NtimePoints,
                                                   lambda=lambda[id.lambda,],
                                                   alpha=alpha,
                                                   penalty.factor=penalty.factor,
@@ -1784,7 +1795,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                                   dimp01=dimp01,
                                                                   dimp02=dimp02,
                                                                   dimp12=dimp12,
-                                                                  Ntime=NtimesPoints,
+                                                                  Ntime=NtimePoints,
                                                                   lambda=lambda[id.lambda,],
                                                                   alpha=alpha,
                                                                   penalty.factor=penalty.factor,
@@ -1850,7 +1861,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                               dimp01=dimp01,
                                                               dimp02=dimp02,
                                                               dimp12=dimp12,
-                                                              Ntime=NtimesPoints)
+                                                              Ntime=NtimePoints)
                                  
                                  # look at convergence for each lambda :
                                  
@@ -2004,7 +2015,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                   dimp01=dimp01,
                                                   dimp02=dimp02,
                                                   dimp12=dimp12,
-                                                  Ntime=NtimesPoints)
+                                                  Ntime=NtimePoints)
                                    output<-output$v
                                    
                                    min<-npm*(npm+1)/2
@@ -2109,7 +2120,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                                    dimp01=dimp01,
                                                                    dimp02=dimp02,
                                                                    dimp12=dimp12,
-                                                                   Ntime=NtimesPoints)
+                                                                   Ntime=NtimePoints)
                                          
                                        
                                          output<-output$v
@@ -2144,7 +2155,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                                                dimp01=dimp01,
                                                                                dimp02=dimp02,
                                                                                dimp12=dimp12,
-                                                                               Ntime=NtimesPoints,
+                                                                               Ntime=NtimePoints,
                                                                                
                                                                                lambda=lambda[id.lambda,],
                                                                                alpha=alpha,
@@ -2284,7 +2295,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                                       dimp01=dimp01,
                                                                       dimp02=dimp02,
                                                                       dimp12=dimp12,
-                                                                      Ntime=NtimesPoints,
+                                                                      Ntime=NtimePoints,
                                                                      
                                                                       lambda=lambda[id.lambda,],
                                                                       alpha=alpha,
@@ -2358,7 +2369,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                         dimp01=dimp01,
                                                         dimp02=dimp02,
                                                         dimp12=dimp12,
-                                                        Ntime=NtimesPoints,
+                                                        Ntime=NtimePoints,
                                                         lambda=lambda[id.lambda,],
                                                         alpha=alpha,
                                                         penalty.factor=penalty.factor,
@@ -2399,7 +2410,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                                         dimp01=dimp01,
                                                                         dimp02=dimp02,
                                                                         dimp12=dimp12,
-                                                                        Ntime=NtimesPoints,
+                                                                        Ntime=NtimePoints,
                                                                        
                                                                         lambda=lambda[id.lambda,],
                                                                         alpha=alpha,
@@ -2465,7 +2476,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                                     dimp01=dimp01,
                                                                     dimp02=dimp02,
                                                                     dimp12=dimp12,
-                                                                    Ntime=NtimesPoints)
+                                                                    Ntime=NtimePoints)
                                        
                                        # look at convergence for each lambda :
                                        
@@ -2618,7 +2629,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                         dimp01=dimp01,
                                                         dimp02=dimp02,
                                                         dimp12=dimp12,
-                                                        Ntime=NtimesPoints)
+                                                        Ntime=NtimePoints)
                                          output<-output$v
                                          min<-npm
                                          fu <- output[(min+1):length(output)]

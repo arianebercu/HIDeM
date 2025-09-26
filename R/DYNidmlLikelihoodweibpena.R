@@ -176,10 +176,8 @@ gaussDYNidmlLikelihoodweibpena<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,
   
   res<-0
   b0<-b
-  #browser()
   
-  res<-0
-  .Fortran("idmlikelihoodweibtimedep",
+  res<-.Fortran("idmlikelihoodweibtimedep",
            ## input
            as.double(b),
            as.integer(npm),

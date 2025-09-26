@@ -74,7 +74,7 @@ DYNpredY <- function(formula01,
                    nproc=1,
                    clustertype="FORK",
                    Ypredmethod="gauss",
-                   NtimesPoints=250,
+                   NtimePoints=250,
                    envir=parent.frame()){
   
   
@@ -247,8 +247,8 @@ DYNpredY <- function(formula01,
   #################################################################################
   
   
-  if(!inherits(NtimesPoints,c("numeric","integer"))|(NtimesPoints!=floor(NtimesPoints)))stop("NtimesPoints has to be an integer greater than 100.")
-  if(NtimesPoints<100)stop("NtimesPoints has to be an integer greater than 100.")
+  if(!inherits(NtimePoints,c("numeric","integer"))|(NtimePoints!=floor(NtimePoints)))stop("NtimePoints has to be an integer greater than 100.")
+  if(NtimePoints<100)stop("NtimePoints has to be an integer greater than 100.")
   
   if(!inherits(nproc,c("numeric","integer"))|(nproc!=floor(nproc)))stop("nproc has to be an integer.")
 
@@ -480,7 +480,7 @@ DYNpredY <- function(formula01,
                      idd=idd,
                      clustertype=clustertype,
                      Ypredmethod=Ypredmethod,
-                     NtimesPoints=NtimesPoints)
+                     NtimePoints=NtimePoints)
       
       
     }else{
@@ -533,7 +533,7 @@ DYNpredY <- function(formula01,
                    idd=idd,
                    clustertype=clustertype,
                    Ypredmethod=Ypredmethod,
-                   NtimesPoints=NtimesPoints,
+                   NtimePoints=NtimePoints,
                    seed=methodJM$seed)
       
     }

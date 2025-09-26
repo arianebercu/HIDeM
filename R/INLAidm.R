@@ -7,7 +7,7 @@
 INLAidm<-function(timeVar,family,basRisk,assoc,
                   truncated,formLong,formSurv,dataSurv,dataLongi,id,
                   Nsample,nproc,t0,t1,t2,t3,
-                  idm,idd,clustertype,Ypredmethod,NtimesPoints){
+                  idm,idd,clustertype,Ypredmethod,NtimePoints){
   
   # define timePoints of prediction : 
 

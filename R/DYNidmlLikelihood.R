@@ -34,7 +34,7 @@
 gaussDYNidmlLikelihood<-function(b,npm,npar,bfix,fix,zi01,zi02,zi12,ctime,no,nz01,nz02,nz12,ve01,ve02,ve12,
                          dimnva01,dimnva02,dimnva12,nva01,nva02,nva12,
                          t0,t1,t2,t3,troncature,y01,y02,y12,
-                         p01,p02,p12,dimp01,dimp02,dimp12,NtimePoints){
+                         p01,p02,p12,dimp01,dimp02,dimp12,Ntime){
   res<-0
 
   .Fortran("idmlikelihoodtimedep",
@@ -64,7 +64,7 @@ gaussDYNidmlLikelihood<-function(b,npm,npar,bfix,fix,zi01,zi02,zi12,ctime,no,nz0
            as.integer(dimp01),
            as.integer(dimp02),
            as.integer(dimp12),
-           as.integer(NtimePoints),
+           as.integer(Ntime),
            as.integer(dimnva01),
            as.integer(dimnva12),
            as.integer(dimnva02),
