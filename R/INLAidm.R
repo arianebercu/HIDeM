@@ -11,7 +11,6 @@ INLAidm<-function(timeVar,family,basRisk,assoc,
   
   # define timePoints of prediction : 
 
-browser()
   idsubjects<-unique(dataSurv[,colnames(dataSurv)%in%id])
   
   if(Ypredmethod=="gauss"){
@@ -37,11 +36,10 @@ browser()
       return(data.frame(index=x,timePoints=seq(min(t0),max(dataLongi[,colnames(dataLongi)%in%timeVar]))))}))
   }
 
-  browser()
   
   ## augmentation of the data 
   colnames(timePointsdata)<-c(id,timeVar)
-  dataLongi_augmented<-merge(dataLongi,timePointsdata,by=c(id,timeVar),all.x=T,all.y=T)
+  dataLongi_augmented<-merge(timePointsdata,dataLongi,by=c(id,timeVar),all.x=T,all.y=T)
   rownames(dataLongi_augmented)<-NULL
   dataLongi_augmented<-dataLongi_augmented[order(dataLongi_augmented[,colnames(dataLongi_augmented)%in%id],
                                                  dataLongi_augmented[,colnames(dataLongi_augmented)%in%timeVar]),]
@@ -78,7 +76,6 @@ browser()
                                        control=list(int.strategy="eb"))
     
 
-      browser()
       
       if(is.null(INLAmodel)){stop("The inla model for your marker could not be run, see above warnings.")}
       
@@ -95,7 +92,8 @@ browser()
         key2 <- do.call(paste, c(timePointsdata, sep = "\r"))
         
         # Find indices of rows from data1 that are in data2
-        indices <- which(key1 %in% key2)
+        # while keeping order of key2
+        indices <- match(key2, key1)
         PredYx<-linPred[indices,]
         
         #add BLUP first column
@@ -117,7 +115,8 @@ browser()
         key2 <- do.call(paste, c(timePointsdata, sep = "\r"))
         
         # Find indices of rows from data1 that are in data2
-        indices <- which(key1 %in% key2)
+        # while keeping order of key2
+        indices <- match(key2, key1)
         #add BLUP first column
         #add informations 
         Outcome<-all.vars(terms(formLong[[indice]]))[1]

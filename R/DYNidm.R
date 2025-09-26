@@ -1270,7 +1270,7 @@ if(is.null(dataY)){
             
             for( k in outcome){
               subdata<-dataY[dataY$Outcome==k,]
-              x<-table(dataY[,colnames(dataY)%in%id])
+              x<-table(subdata[,colnames(subdata)%in%id])
               if(any(x!=NtimePoints)){stop("Prediction of marker ",k," could not be perform for each quadrature points, try Ypredmethod equi")}
               
             }

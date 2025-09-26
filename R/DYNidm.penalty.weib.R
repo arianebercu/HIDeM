@@ -206,7 +206,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                  b<-b[fix0==0]
                                  # derivative of loglik
                                  
-                                 output<-deriva(funcpa=DYNidmlLikelihoodweib,
+                                 output<-deriva(funcpa=gaussDYNidmlLikelihoodweib,
                                                   b=b,
                                                     npm=length(b),
                                                     npar=size_V,
@@ -237,12 +237,11 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                     dimp01=dimp01,
                                                     dimp02=dimp02,
                                                     dimp12=dimp12,
-                                                    Ntime=NtimesPoints,
-                                                    time=time)
+                                                    Ntime=NtimesPoints)
                                  
                                  output<-output$v
                                  if(ite==0){# loglik penalised
-                                   fn.value<-DYNidmlLikelihoodweibpena(b=b,
+                                   fn.value<-gaussDYNidmlLikelihoodweibpena(b=b,
                                                                     npm=npm,
                                                                     npar=size_V,
                                                                     bfix=bfix,
@@ -273,7 +272,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                                     dimp02=dimp02,
                                                                     dimp12=dimp12,
                                                                     Ntime=NtimesPoints,
-                                                                    time=time,
+                                                                   
                                                                     lambda=lambda[id.lambda,],
                                                                     alpha=alpha,
                                                                     penalty.factor=penalty.factor,
@@ -392,7 +391,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                  betanew<-b[(6+1):size_V]
                                  
                                  # penalised loglik see if inferior to previous
-                                 res<-DYNidmlLikelihoodweibpena(b=b,
+                                 res<-gaussDYNidmlLikelihoodweibpena(b=b,
                                                              npm=length(b),
                                                              npar=size_V,
                                                              bfix=1,
@@ -423,7 +422,6 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                              dimp02=dimp02,
                                                              dimp12=dimp12,
                                                              Ntime=NtimesPoints,
-                                                             time=time,
                                                              lambda=lambda[id.lambda,],
                                                              alpha=alpha,
                                                              penalty.factor=penalty.factor,
@@ -463,7 +461,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                   step=step,
                                                   b=beta,
                                                   delta=delta,
-                                                  funcpa=DYNidmlLikelihoodweibpena,
+                                                  funcpa=gaussDYNidmlLikelihoodweibpena,
                                                   res.out.error=res.out.error,
                                                   npm=length(beta),
                                                   npar=size_V,
@@ -495,7 +493,6 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                   dimp02=dimp02,
                                                   dimp12=dimp12,
                                                   Ntime=NtimesPoints,
-                                                  time=time,
                                                   lambda=lambda[id.lambda,],
                                                   alpha=alpha,
                                                   penalty.factor=penalty.factor,
@@ -506,7 +503,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                    b<-c(s,betanew)
                                    
                                    
-                                   res<-DYNidmlLikelihoodweibpena(b=b,
+                                   res<-gaussDYNidmlLikelihoodweibpena(b=b,
                                                                npm=length(b),
                                                                npar=size_V,
                                                                bfix=1,
@@ -537,7 +534,6 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                                dimp02=dimp02,
                                                                dimp12=dimp12,
                                                                Ntime=NtimesPoints,
-                                                               time=time,
                                                                lambda=lambda[id.lambda,],
                                                                alpha=alpha,
                                                                penalty.factor=penalty.factor,
@@ -566,7 +562,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                  # update for modelPar
                                  
                                  output.mla<- marqLevAlg::mla(b=b,
-                                                  fn=DYNidmlLikelihoodweib,
+                                                  fn=gaussDYNidmlLikelihoodweib,
                                                   epsa=epsa,
                                                   epsb=epsb,
                                                   epsd=epsd,
@@ -601,8 +597,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                   dimp01=dimp01,
                                                   dimp02=dimp02,
                                                   dimp12=dimp12,
-                                                  Ntime=NtimesPoints,
-                                                  time=time)
+                                                  Ntime=NtimesPoints)
                                  
                                  # look at convergence for each lambda :
                                  # mla output is loglik
@@ -730,7 +725,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                    bfix<-b[fix0==1]
                                    b<-b[fix0==0]
                                    
-                                   output<-deriva(funcpa=DYNidmlLikelihoodweib,
+                                   output<-deriva(funcpa=gaussDYNidmlLikelihoodweib,
                                                   b=b,
                                                   npm=length(b),
                                                   npar=size_V,
@@ -761,8 +756,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                   dimp01=dimp01,
                                                   dimp02=dimp02,
                                                   dimp12=dimp12,
-                                                  Ntime=NtimesPoints,
-                                                  time=time)
+                                                  Ntime=NtimesPoints)
                                    output<-output$v
                                 min<-npm*(npm+1)/2
                                  
@@ -837,7 +831,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                    # derivative of loglik
                                    
                                      
-                                     output<-derivadiag(funcpa=DYNidmlLikelihoodweib,
+                                     output<-derivadiag(funcpa=gaussDYNidmlLikelihoodweib,
                                                     b=b,
                                               npm=length(b),
                                               npar=size_V,
@@ -868,12 +862,11 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                               dimp01=dimp01,
                                               dimp02=dimp02,
                                               dimp12=dimp12,
-                                              Ntime=NtimesPoints,
-                                              time=time)
+                                              Ntime=NtimesPoints)
                                      
                                      output<-output$v
                                      if(ite==0){# loglik penalised
-                                       fn.value<-DYNidmlLikelihoodweibpena(b=b,
+                                       fn.value<-gaussDYNidmlLikelihoodweibpena(b=b,
                                                                            npm=length(b),
                                                                            npar=size_V,
                                                                            bfix=bfix,
@@ -904,7 +897,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                                            dimp02=dimp02,
                                                                            dimp12=dimp12,
                                                                            Ntime=NtimesPoints,
-                                                                           time=time,
+                                                                           
                                                                            lambda=lambda[id.lambda,],
                                                                            alpha=alpha,
                                                                            penalty.factor=penalty.factor,
@@ -1017,7 +1010,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                    betanew<-b[(6+1):size_V]
                                    
                                    # penalised loglik see if inferior to previous
-                                   res<-DYNidmlLikelihoodweibpena(b=b,
+                                   res<-gaussDYNidmlLikelihoodweibpena(b=b,
                                                                   npm=length(b),
                                                                   npar=size_V,
                                                                   bfix=1,
@@ -1048,7 +1041,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                                   dimp02=dimp02,
                                                                   dimp12=dimp12,
                                                                   Ntime=NtimesPoints,
-                                                                  time=time,
+                                                                  
                                                                   lambda=lambda[id.lambda,],
                                                                   alpha=alpha,
                                                                   penalty.factor=penalty.factor,
@@ -1088,7 +1081,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                     step=step,
                                                     b=beta,
                                                     delta=delta,
-                                                    funcpa=DYNidmlLikelihoodweibpena,
+                                                    funcpa=gaussDYNidmlLikelihoodweibpena,
                                                     res.out.error=res.out.error,
                                                     npm=length(beta),
                                                     npar=size_V,
@@ -1120,7 +1113,6 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                     dimp02=dimp02,
                                                     dimp12=dimp12,
                                                     Ntime=NtimesPoints,
-                                                    time=time,
                                                     lambda=lambda[id.lambda,],
                                                     alpha=alpha,
                                                     penalty.factor=penalty.factor,
@@ -1130,7 +1122,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                      b<-c(s,betanew)
                                      
                                      
-                                     res<-DYNidmlLikelihoodweibpena(b=b,
+                                     res<-gaussDYNidmlLikelihoodweibpena(b=b,
                                                                     npm=length(b),
                                                                     npar=size_V,
                                                                     bfix=1,
@@ -1161,7 +1153,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                                     dimp02=dimp02,
                                                                     dimp12=dimp12,
                                                                     Ntime=NtimesPoints,
-                                                                    time=time,
+                                                                  
                                                                     lambda=lambda[id.lambda,],
                                                                     alpha=alpha,
                                                                     penalty.factor=penalty.factor,
@@ -1190,7 +1182,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                    # update for modelPar
                                   
                                    output.mla<- marqLevAlg::mla(b=b,
-                                                                fn=DYNidmlLikelihoodweib,
+                                                                fn=gaussDYNidmlLikelihoodweib,
                                                                 epsa=epsa,
                                                                 epsb=epsb,
                                                                 epsd=epsd,
@@ -1225,8 +1217,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                                 dimp01=dimp01,
                                                                 dimp02=dimp02,
                                                                 dimp12=dimp12,
-                                                                Ntime=NtimesPoints,
-                                                                time=time)
+                                                                Ntime=NtimesPoints)
 
                                    # look at convergence for each lambda :
                                    # mla output is loglik
@@ -1351,7 +1342,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                      bfix<-b[fix0==1]
                                      b<-b[fix0==0]
                                      
-                                     output<-derivadiag(funcpa=DYNidmlLikelihoodweib,
+                                     output<-derivadiag(funcpa=gaussDYNidmlLikelihoodweib,
                                                         b=b,
                                                         npm=length(b),
                                                         npar=size_V,
@@ -1382,8 +1373,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                         dimp01=dimp01,
                                                         dimp02=dimp02,
                                                         dimp12=dimp12,
-                                                        Ntime=NtimesPoints,
-                                                        time=time)
+                                                        Ntime=NtimesPoints)
                                      output<-output$v
                                      min<-npm
                                      fu <- output[(min+1):length(output)]
@@ -1463,7 +1453,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                  b<-b[fix0==0]
                                  
                                 browser()
-                                 output<-deriva(funcpa=DYNidmlLikelihoodweib,
+                                 output<-deriva(funcpa=gaussDYNidmlLikelihoodweib,
                                                      b=b,
                                                      npm=length(b),
                                                      npar=size_V,
@@ -1494,12 +1484,11 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                      dimp01=dimp01,
                                                      dimp02=dimp02,
                                                      dimp12=dimp12,
-                                                     Ntime=NtimesPoints,
-                                                     time=time)
+                                                     Ntime=NtimesPoints)
                                  output<-output$v
                                  
                                if(ite==0){
-                                   fn.value<-DYNidmlLikelihoodweibpena(b=b,
+                                   fn.value<-gaussDYNidmlLikelihoodweibpena(b=b,
                                                                        npm=length(b),
                                                                        npar=size_V,
                                                                        bfix=bfix,
@@ -1530,7 +1519,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                                        dimp02=dimp02,
                                                                        dimp12=dimp12,
                                                                        Ntime=NtimesPoints,
-                                                                       time=time,
+                                                                       
                                                                        lambda=lambda[id.lambda,],
                                                                        alpha=alpha,
                                                                        penalty.factor=penalty.factor,
@@ -1648,7 +1637,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                  betanew<-b[(6+1):size_V]
                                  
                                  # penalised loglik see if inferior to previous
-                                 res<-DYNidmlLikelihoodweibpena(b=b,
+                                 res<-gaussDYNidmlLikelihoodweibpena(b=b,
                                                                 npm=length(b),
                                                                 npar=size_V,
                                                                 bfix=1,
@@ -1679,7 +1668,6 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                                 dimp02=dimp02,
                                                                 dimp12=dimp12,
                                                                 Ntime=NtimesPoints,
-                                                                time=time,
                                                                 lambda=lambda[id.lambda,],
                                                                 alpha=alpha,
                                                                 penalty.factor=penalty.factor,
@@ -1724,7 +1712,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                   step=step,
                                                   b=beta,
                                                   delta=delta,
-                                                  funcpa=DYNidmlLikelihoodweibpena,
+                                                  funcpa=gaussDYNidmlLikelihoodweibpena,
                                                   res.out.error=res.out.error,
                                                   npm=length(beta),
                                                   npar=size_V,
@@ -1756,7 +1744,6 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                   dimp02=dimp02,
                                                   dimp12=dimp12,
                                                   Ntime=NtimesPoints,
-                                                  time=time,
                                                   lambda=lambda[id.lambda,],
                                                   alpha=alpha,
                                                   penalty.factor=penalty.factor,
@@ -1767,7 +1754,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                    b<-c(s,betanew)
                                    
                                    
-                                   res<-DYNidmlLikelihoodweibpena(b=b,
+                                   res<-gaussDYNidmlLikelihoodweibpena(b=b,
                                                                   npm=length(b),
                                                                   npar=size_V,
                                                                   bfix=1,
@@ -1798,7 +1785,6 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                                   dimp02=dimp02,
                                                                   dimp12=dimp12,
                                                                   Ntime=NtimesPoints,
-                                                                  time=time,
                                                                   lambda=lambda[id.lambda,],
                                                                   alpha=alpha,
                                                                   penalty.factor=penalty.factor,
@@ -1829,7 +1815,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                            
                                  browser()
                                  output.mla<- marqLevAlg::mla(b=b,
-                                                              fn=DYNidmlLikelihoodweib,
+                                                              fn=gaussDYNidmlLikelihoodweib,
                                                               epsa=epsa,
                                                               epsb=epsb,
                                                               epsd=epsd,
@@ -1864,8 +1850,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                               dimp01=dimp01,
                                                               dimp02=dimp02,
                                                               dimp12=dimp12,
-                                                              Ntime=NtimesPoints,
-                                                              time=time)
+                                                              Ntime=NtimesPoints)
                                  
                                  # look at convergence for each lambda :
                                  
@@ -1988,7 +1973,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                    bfix<-b[fix0==1]
                                    b<-b[fix0==0]
                                    
-                                   output<-deriva(funcpa=DYNidmlLikelihoodweib,
+                                   output<-deriva(funcpa=gaussDYNidmlLikelihoodweib,
                                                   b=b,
                                                   npm=length(b),
                                                   npar=size_V,
@@ -2019,8 +2004,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                   dimp01=dimp01,
                                                   dimp02=dimp02,
                                                   dimp12=dimp12,
-                                                  Ntime=NtimesPoints,
-                                                  time=time)
+                                                  Ntime=NtimesPoints)
                                    output<-output$v
                                    
                                    min<-npm*(npm+1)/2
@@ -2094,7 +2078,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                        
                                  
                                          
-                                         output<-derivadiag(funcpa=DYNidmlLikelihoodweib,
+                                         output<-derivadiag(funcpa=gaussDYNidmlLikelihoodweib,
                                                         b=b,
                                                                    npm=length(b),
                                                                    npar=size_V,
@@ -2125,13 +2109,12 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                                    dimp01=dimp01,
                                                                    dimp02=dimp02,
                                                                    dimp12=dimp12,
-                                                                   Ntime=NtimesPoints,
-                                                                   time=time)
+                                                                   Ntime=NtimesPoints)
                                          
                                        
                                          output<-output$v
                                          if(ite==0){
-                                           fn.value<-DYNidmlLikelihoodweibpena(b=b,
+                                           fn.value<-gaussDYNidmlLikelihoodweibpena(b=b,
                                                                                npm=length(b),
                                                                                npar=size_V,
                                                                                bfix=bfix,
@@ -2162,7 +2145,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                                                dimp02=dimp02,
                                                                                dimp12=dimp12,
                                                                                Ntime=NtimesPoints,
-                                                                               time=time,
+                                                                               
                                                                                lambda=lambda[id.lambda,],
                                                                                alpha=alpha,
                                                                                penalty.factor=penalty.factor,
@@ -2271,7 +2254,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                        betanew<-b[(6+1):size_V]
                                        
                                        # penalised loglik see if inferior to previous
-                                       res<-DYNidmlLikelihoodweibpena(b=b,
+                                       res<-gaussDYNidmlLikelihoodweibpena(b=b,
                                                                       npm=length(b),
                                                                       npar=size_V,
                                                                       bfix=1,
@@ -2302,7 +2285,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                                       dimp02=dimp02,
                                                                       dimp12=dimp12,
                                                                       Ntime=NtimesPoints,
-                                                                      time=time,
+                                                                     
                                                                       lambda=lambda[id.lambda,],
                                                                       alpha=alpha,
                                                                       penalty.factor=penalty.factor,
@@ -2344,7 +2327,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                         step=step,
                                                         b=beta,
                                                         delta=delta,
-                                                        funcpa=DYNidmlLikelihoodweibpena,
+                                                        funcpa=gaussDYNidmlLikelihoodweibpena,
                                                         res.out.error=res.out.error,
                                                         npm=length(beta),
                                                         npar=size_V,
@@ -2376,7 +2359,6 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                         dimp02=dimp02,
                                                         dimp12=dimp12,
                                                         Ntime=NtimesPoints,
-                                                        time=time,
                                                         lambda=lambda[id.lambda,],
                                                         alpha=alpha,
                                                         penalty.factor=penalty.factor,
@@ -2387,7 +2369,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                          b<-c(s,betanew)
                                          
                                          
-                                         res<-DYNidmlLikelihoodweibpena(b=b,
+                                         res<-gaussDYNidmlLikelihoodweibpena(b=b,
                                                                         npm=length(b),
                                                                         npar=size_V,
                                                                         bfix=1,
@@ -2418,7 +2400,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                                         dimp02=dimp02,
                                                                         dimp12=dimp12,
                                                                         Ntime=NtimesPoints,
-                                                                        time=time,
+                                                                       
                                                                         lambda=lambda[id.lambda,],
                                                                         alpha=alpha,
                                                                         penalty.factor=penalty.factor,
@@ -2448,7 +2430,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                        
                                        
                                        output.mla<- marqLevAlg::mla(b=b,
-                                                                    fn=DYNidmlLikelihoodweib,
+                                                                    fn=gaussDYNidmlLikelihoodweib,
                                                                     epsa=epsa,
                                                                     epsb=epsb,
                                                                     epsd=epsd,
@@ -2483,8 +2465,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                                     dimp01=dimp01,
                                                                     dimp02=dimp02,
                                                                     dimp12=dimp12,
-                                                                    Ntime=NtimesPoints,
-                                                                    time=time)
+                                                                    Ntime=NtimesPoints)
                                        
                                        # look at convergence for each lambda :
                                        
@@ -2606,7 +2587,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                          bfix<-b[fix0==1]
                                          b<-b[fix0==0]
                                          
-                                         output<-derivadiag(funcpa=DYNidmlLikelihoodweib,
+                                         output<-derivadiag(funcpa=gaussDYNidmlLikelihoodweib,
                                                         b=b,
                                                         npm=length(b),
                                                         npar=size_V,
@@ -2637,8 +2618,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                         dimp01=dimp01,
                                                         dimp02=dimp02,
                                                         dimp12=dimp12,
-                                                        Ntime=NtimesPoints,
-                                                        time=time)
+                                                        Ntime=NtimesPoints)
                                          output<-output$v
                                          min<-npm
                                          fu <- output[(min+1):length(output)]

@@ -80,9 +80,6 @@ JMidm<-function(timeVar,
                              n_chains=n_chain, data_Surv = dataSurv,
                              cores=nproc,save_random_effects=T)
   
-    
-  browser()
- 
       
       
       terms_FE<-JMmodel$model_info$terms$terms_FE[[1]]
@@ -93,9 +90,9 @@ JMidm<-function(timeVar,
       
       
       # derivatives of Y(t) design matrix -- does not handle splines so far
-      dX <- make_dX(formula(formLong[[indice]]$call$fixed), X=X, timevar = timeVar)
+      dX <- make_dX(formula(formLong[[indice]]$call$fixed), X=X, timevar = timeVar,data=newdataLongi)
       bars<-findbars(formLong[[indice]]$call$random)
-      dZ <- make_dX(reformulate(deparse(bars[[1]][[2]])), X=Z, timevar = timeVar)
+      dZ <- make_dX(reformulate(deparse(bars[[1]][[2]])), X=Z, timevar = timeVar,data=newdataLongi)
       
       
       betas<-do.call(rbind,JMmodel$mcmc$betas1)
@@ -144,7 +141,7 @@ JMidm<-function(timeVar,
       
       PredYx <- Fixed + Random_all
       slopePredYx<-slopeFixed + slopeRandom_all
-      browser()
+
       }else{
         PredYx<-slopePredYx<-NULL
         
@@ -160,8 +157,7 @@ JMidm<-function(timeVar,
           dZj   <- dZ[rows, , drop = FALSE]
           slopeRandom_mean[rows, ] <- dZj %*% JMmodel$statistics$Mean$b[j,]
         }
-        
-        browser() 
+  
       }
       
       PredYmean<-X%*%as.matrix(JMmodel$statistics$Mean$betas1) + Random_mean
@@ -179,7 +175,6 @@ JMidm<-function(timeVar,
       colnames(PredYx)[4:(Nsample+3)]<-paste0("Sample_",c(1:Nsample))
       colnames(slopePredYx)[4:(Nsample+3)]<-paste0("Sample_",c(1:Nsample))
       
-      browser()
     Yall[[indice]]<- rbind(PredYx,slopePredYx)
   }
   
@@ -192,9 +187,9 @@ JMidm<-function(timeVar,
 
 
 
-make_dX <- function(formula, X, timevar, use_splines = FALSE, ...) {
+make_dX <- function(formula, X, timevar, data,use_splines = FALSE, ...) {
 
-  browser()
+
   # Identify terms
   terms_labels <- attr(terms(formula), "term.labels")
   
@@ -210,7 +205,7 @@ make_dX <- function(formula, X, timevar, use_splines = FALSE, ...) {
       # e.g. I(time^2)
       expr <- parse(text = gsub("I\\((.*)\\)", "\\1", lab))[[1]]
       dexpr <- D(expr, timevar)
-      dX[, lab] <- eval(dexpr,envir = newdataLongi)
+      dX[, lab] <- eval(dexpr,envir = data)
       
     } else if (use_splines && grepl("bs\\(|ns\\(", lab)) {
       

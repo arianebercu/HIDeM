@@ -159,6 +159,7 @@ simdep.idmModel <- function(x,
   # simulate latent data
   #class(x) <- "lvm"
   #dat <- lava::sim(x,n=n,...)
+
   dat<-x[x$num.visit==1,]
   T01<-dat$latent.illtime
   T02<-dat$latent.lifetime
@@ -172,7 +173,7 @@ simdep.idmModel <- function(x,
   dat$lifetime <- dat$latent.lifetime
   dat$lifetime[dat$illstatus==1]<-dat$latent.waittime[dat$illstatus==1]
   id.nodem.death<-rep(0,n)
-  #browser()
+
   #id<-which(T01<T02 & T01<18 & T12<18 & T01>dat$censtime)
   # interval censored illtime
   ipos <- grep("inspection[0-9]+",names(dat))
@@ -183,7 +184,6 @@ simdep.idmModel <- function(x,
     # of the previous inspection time
     iframe <- dat[,ipos]
     dat <- dat[,-ipos]
-    
     interval <- do.call("rbind",lapply(1:n,function(i){
       
       ## remove duplicates
@@ -255,6 +255,8 @@ simdep.idmModel <- function(x,
       dat <- dat[,-grep("latent\\.",names(dat))]
     if (keep.inspectiontimes) dat <- cbind(dat,iframe)
   }
+  
+
   id.nodem.death[which(dat$seen.ill==-1)]<-1
   dat$seen.ill[dat$seen.ill==-1]<-0
   
@@ -742,13 +744,16 @@ simulateDYNIDM <- function(n=100,
   
   data_long <- c()
   mu_sigma<- 0 #random error are normally distributed around 0 
-  
+  B0<-B1<-c()
   for( i in 1:n){
     
     #On tire les effets aléatoires
     random.effects <- mvtnorm::rmvnorm(n=1, sigma = B)
     b0 <- random.effects[seq(1,length(random.effects),by=2)]
     b1 <- random.effects[seq(2,length(random.effects),by=2)]
+    
+    B0<-rbind(B0,b0)
+    B1<-rbind(B1,b1)
     
     visit<-as.numeric(exogenous_data[i,(dim(exogenous_data)[2]-n.inspections+1):dim(exogenous_data)[2]])
     data_long_i <- c()
@@ -760,47 +765,64 @@ simulateDYNIDM <- function(n=100,
     
     y <- matrix(rep(beta0+b0,n.inspections),ncol=dim(B)[2]/2,nrow=n.inspections,byrow = T)+(visit)%*%t(beta1+b1) + t(error1)
 
-    if(scale.Y==T){
-      y<-apply(y,MARGIN=1,FUN=function(x){
-        
-            res<-x-(beta0+b0)
-            # we neglect covariance terms and reduce when t=0
-            sdy<-diag(B)
-            sdy<-sdy[seq(1,length(sdy),by=2)]
-            sdy<-sdy+sigma
-            res<-res/sqrt(sdy)
-            return(res)})
-      y<-t(y)
-    }
+    
 
     colnames(y)<-paste0("Y",c(1:dim(y)[2]))
-    data_long_i<-cbind(data_long_i,y)
+    data_long<-rbind(data_long,cbind(data_long_i,y))
+    
+  }
+  
+
+  meanY<-rep(0,(dim(B)[2]/2))
+  sdY<-rep(1,(dim(B)[2]/2))
+  
+  if(scale.Y==T){
+    k<-1
+    for(m in paste0("Y",c(1:(dim(B)[2]/2)))){
+      mm<-data_long[data_long$num.visit==1,colnames(data_long)%in% m]
+      meanY[k]<-beta0[k]
+      sdY[k]<-B[(k*2-1),(k*2-1)]+B[(k*2),(k*2)]+2*B[(k*2-1),(k*2)]
+    data_long[,colnames(data_long)%in% m]<-(data_long[,colnames(data_long)%in% m]-meanY[k])/sdY[k]
+      k<-k+1
+    }
+    
+  }
+  
+  
+  data_long$censtime<-NA
+  data_long$administrative.censoring<-NA
+  data_long$latent.illtime<-NA
+  data_long$latent.lifetime<-NA
+  data_long$latent.waittime<-NA
+  
+
+  for( i in 1:n){
    
     S_01_inv <- function(tstar){
      
       nodes <- (tstar/2) * (sk + 1) 
      
       (tstar/2)*sum(shape.illtime*(scale.illtime^shape.illtime)*wk*((nodes)^(shape.illtime-1))*exp(sum(X01[i,]*beta01)+
-                                                                                   sum(alpha_y_01*(beta0 + b0)) + colSums(alpha_y_01*(beta1+b1)%*%t(nodes)) +
-                                                                                   sum(alpha_slope_01*((beta1+b1)))
+                                                                                   sum(alpha_y_01*((beta0 + B0[i,]-meanY)/sdY)) + colSums((alpha_y_01*((beta1+B1[i,])/sdY)%*%t(nodes))) +
+                                                                                   sum(alpha_slope_01*((beta1+B1[i,]-meanY)/sdY))
       )) + log(U01[i])
       
       
     }
     T_01 <- try(expr = uniroot(S_01_inv,
-                               interval = c(0, max(visit)))$root,
+                               interval = c(0, max(data_long$visit[data_long$ID==i])))$root,
                 silent = TRUE)
     
     S_02_inv <- function(tstar){
       
       nodes <- (tstar/2) * (sk + 1) 
       (tstar/2)*sum(shape.lifetime*(scale.lifetime^shape.lifetime)*wk*(nodes^(shape.lifetime-1))*exp(sum(X02[i,]*beta02)+
-                                                                                     sum(alpha_y_02*(beta0 + b0)) + colSums(alpha_y_02*(beta1+b1)%*%t(nodes)) +
-                                                                                     sum(alpha_slope_02*((beta1+b1)))
+                                                                                     sum(alpha_y_02*((beta0 + B0[i,]-meanY)/sdY)) + colSums(alpha_y_02*((beta1+B1[i,])/sdY)%*%t(nodes)) +
+                                                                                     sum(alpha_slope_02*((beta1+B1[i,]-meanY)/sdY))
       )) + log(U02[i])
     }
     T_02 <- try(expr = uniroot(S_02_inv,
-                               interval = c(0, max(visit)))$root,
+                               interval = c(0, max(data_long$visit[data_long$ID==i])))$root,
                 silent = TRUE)
     
     if(inherits(T_01, "try-error")){
@@ -810,10 +832,11 @@ simulateDYNIDM <- function(n=100,
       T_02 <- 1000000
     }
     
-    data_long_i$latent.illtime<-T_01
-    data_long_i$latent.lifetime<-T_02
-    data_long_i$latent.waittime<-T_02
+    data_long$latent.illtime[data_long$ID==i]<-T_01
+    data_long$latent.lifetime[data_long$ID==i]<-T_02
+    data_long$latent.waittime[data_long$ID==i]<-T_02
     illstatus <-1*((T_01<T_02)&(T_01<administrative.censoring))
+   
     if(illstatus==1){
       S_12 <- function(tps){
         
@@ -821,8 +844,8 @@ simulateDYNIDM <- function(n=100,
         
         (tps/2)*sum(shape.waittime*wk*(scale.waittime^shape.waittime)*(nodes^(shape.waittime-1))*exp(sum(X12[i,]*beta12)+
                                                                                    
-                                                                                   sum(alpha_y_12*(beta0 + b0)) + colSums(alpha_y_12*(beta1+b1)%*%t(nodes)) +
-                                                                                   sum(alpha_slope_12*((beta1+b1)))
+                                                                                   sum(alpha_y_12*((beta0 + B0[i,]-meanY)/sdY)) + colSums(alpha_y_12*((beta1+B1[i,])/sdY)%*%t(nodes)) +
+                                                                                   sum(alpha_slope_12*((beta1+B1[i,]-meanY)/sdY))
         ))
       }
       u12_corrige <- U12[i]*exp(-S_12(T_01))
@@ -831,12 +854,12 @@ simulateDYNIDM <- function(n=100,
         nodes <- (tstar/2) * (sk + 1) 
         
         (tstar/2)*sum(shape.waittime*wk*(scale.waittime^shape.waittime)*(nodes^(shape.waittime-1))*exp(sum(X12[i,]*beta12)+
-                                                                                       sum(alpha_y_12*(beta0 + b0)) + colSums(alpha_y_12*(beta1+b1)%*%t(nodes)) +
-                                                                                       sum(alpha_slope_12*((beta1+b1)))
+                                                                                       sum(alpha_y_12*((beta0 + B0[i,]-meanY)/sdY)) + colSums(alpha_y_12*((beta1+B1[i,])/sdY)%*%t(nodes)) +
+                                                                                       sum(alpha_slope_12*((beta1+B1[i,]-meanY)/sdY))
         )) + log(u12_corrige)
       }
       T_12 <- try(expr = uniroot(S_12_inv,
-                                 interval = c(0, max(visit)))$root,
+                                 interval = c(0, max(data_long$visit[data_long$ID==i])))$root,
                   silent = TRUE)
       
       if(inherits(T_12, "try-error")){
@@ -844,31 +867,17 @@ simulateDYNIDM <- function(n=100,
       }
       
       
-      data_long_i$latent.waittime<-T_12
+      data_long$latent.waittime[data_long$ID==i]<-T_12
     }
     
-    data_long_i$censtime<-C[i]
-    data_long_i$administrative.censoring<-administrative.censoring
-    
-    data_long<-rbind(data_long,data_long_i)
-    
+    data_long$censtime[data_long$ID==i]<-C[i]
+    data_long$administrative.censoring[data_long$ID==i]<-administrative.censoring
+   
     
   }
 
   exogenous_data$ID<-c(1:n)
   data_long<-merge(x=data_long,exogenous_data,by="ID",all.x=T)
-  #for(i in 1:n){
-  #   if(illstatus[i]==1){
-  #     cv<-F
-  #     while(cv==F){
-  #       U12<-stats::runif(n=1)
-  #       latent.waittime[i]<-(((-log(U12)*exp(-X12%*%beta12))^(1/shape.waittime))/scale.waittime)[i]
-  #       if(latent.waittime[i]>latent.illtime[i]){cv<-T}
-  #     }
-  #   }else{
-  #     latent.waittime[i]<-latent.lifetime[i]
-  #   }
-  # }
   simdep.idmModel(x=data_long,n=n,plot=list(p2,surv01,p01,surv02,p02,surv12,p12))
   
 }
