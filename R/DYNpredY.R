@@ -414,7 +414,8 @@ DYNpredY <- function(formula01,
   if(missing(id)){
     stop("Need to specify id variable")
   }else{
-    if(!inherits(id,"character")){stop("id need to be a character")}
+    if(!inherits(id,"character")){stop("id need specify the column name")}
+    if(class(dataLongi[,colnames(dataLongi)%in%id])!="integer"){stop("ID for subject needs to be an integer ")}
     if(length(id)!=1){stop("id need to be a character")}
     if(!id%in%colnames(data)|!id%in%colnames(dataLongi)){stop("id need to be in data and dataLongi")}}
   
@@ -430,8 +431,8 @@ DYNpredY <- function(formula01,
       
       
       if(truncated==1){
-        formSurv<-list(inla.surv(time=TimeCR, event=idm,truncation=t0) ~ 1,
-                       inla.surv(time=TimeCR, event=iddCR,truncation=t0) ~ 1)
+        formSurv<-list(inla.surv(time=TimeCR, event=idm,truncation=t0) ~ -1,
+                       inla.surv(time=TimeCR, event=iddCR,truncation=t0) ~ -1)
       }else{
         formSurv<-list(inla.surv(time=TimeCR, event=idm) ~ 1,
                        inla.surv(time=TimeCR, event=iddCR) ~ 1)
@@ -454,12 +455,10 @@ DYNpredY <- function(formula01,
                            TimeCR=TimeCR)
       
       if(missing(Nsample)){
-        Nsample<-c(1,100,1)
-      }else{
-        if(!inherits(Nsample,c("numeric","integer")))stop("Nsample need to be a numeric of size 3")
-        if(length(Nsample)!=3)stop("Nsample need to be a numeric of size 3")
-      }
-      
+        Nsample<-100}else{
+          if(!inherits(Nsample,c("integer","numeric")))stop("Nsample need to be a numeric or integer")
+          if(length(Nsample)!=1)stop("Nsample need to be a numeric or integer")
+        }
       
       dataY<-INLAidm(timeVar = timeVar,
                      family = methodINLA$family,
@@ -471,9 +470,7 @@ DYNpredY <- function(formula01,
                      dataSurv=dataINLA,
                      dataLongi=dataLongi,
                      id=id,
-                     NsampleHY=Nsample[1],
-                     NsampleFE=Nsample[2],
-                     NsampleRE=Nsample[3],
+                     Nsample=Nsample,
                      nproc=nproc,
                      t0=t0,
                      t1=t1, 

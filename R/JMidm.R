@@ -45,6 +45,21 @@ JMidm<-function(timeVar,
     return(data.frame(index=x,timePoints=timePoints
                       ))}))
   
+  N<-length(unique(dataLongi[,id]))
+  newdataLongi<-timePointsdata
+  colnames(newdataLongi)<-c(id,timeVar)
+  NtimesPoints<-ifelse(truncated==F,256,271)
+  
+  }else{
+    
+    times<-seq(min(t0),max(dataLongi[,colnames(dataLongi)%in%timeVar]),length.out=NtimesPoints)
+    
+    N<-length(unique(dataLongi[,id]))
+    
+    newdataLongi<-do.call(rbind,lapply(unique(dataLongi[,id]),FUN=function(x){
+      data.frame(id=rep(x,NtimesPoints),
+                 time=times)}))
+    colnames(newdataLongi)<-c(id,timeVar)
   }
   
   print("Start running joint univarite models")
@@ -66,108 +81,9 @@ JMidm<-function(timeVar,
                              cores=nproc,save_random_effects=T)
   
     
-    #if(is.null(JMmodel)){stop("The JMbayes2 model for your marker could not be run, see above warnings.")}
-  
-  
-    if(Ypredmethod=="gauss"){
-   
-    # if(nproc==1){
-    # PredYx<-do.call(rbind,lapply(idsubjects,FUN=function(x){
-    #   print(x)
-    #   indexLongi<-which(dataLongi[,colnames(dataLongi)%in%id]==x)
-    #   datai<-dataLongi[indexLongi,]
-    #   
-    #   datai<-merge(x=datai,y=dataSurv,by=id,all.x=T)
-    #   timeJM<-timePointsdata[timePointsdata$index==x,colnames(timePointsdata)=="timePoints"]
-    #   
-    #   ND<-list(newdataL=dataLongi[indexLongi,],newdataE=datai)
-    #   
-    #   # we have no prediction if superior to visit times
-    #   if(any(timeJM>max(dataLongi$visit))){print("timeJM superior")}
-    #   
-    #   timeJM<-ifelse(timeJM>max(dataLongi$visit),max(dataLongi$visit),
-    #                  timeJM)
-    #   
-    #   predY<-predict(JMmodel, 
-    #                  newdata = ND,process="longitudinal",
-    #                  times=timeJM,
-    #                  #return_newdata=T,
-    #                  type_pred = "link",type="subject_specific",
-    #                  control=list(n_samples=Nsample,
-    #                               all_times=T,
-    #                               return_mcmc=T))
-    #     #$preds$y is the mean value over the n_samples
-    #     
-    #     Y<-data.frame(predY$newdata2$mcmc)
-    #     colnames(Y)<-paste0("Nsample",c(1:Nsample))
-    #     
-    #     Y$time<-timeJM
-    #     Y$ID<-x
-    #     
-    #    
-    #   return(Y)
-    #   
-    # }))
-    # }else{
-    #   
-    #     if(is.null(clustertype)){
-    #       clustpar <- parallel::makeCluster(nproc)#, outfile="")
-    #     }
-    #     else{
-    #       clustpar <- parallel::makeCluster(nproc, type=clustertype)#, outfile="")
-    #     }
-    # 
-    #   PredYx<-do.call(rbind,parLapply(cl=clustpar,idsubjects,fun=function(x){
-    #     print(x)
-    #     indexLongi<-which(dataLongi[,colnames(dataLongi)%in%id]==x)
-    #     datai<-dataLongi[indexLongi,]
-    #     
-    #     datai<-merge(x=datai,y=dataSurv,by=id,all.x=T)
-    #     timeJM<-timePointsdata[timePointsdata$index==x,colnames(timePointsdata)=="timePoints"]
-    #     
-    #     ND<-list(newdataL=dataLongi[indexLongi,],newdataE=datai)
-    #     
-    #     # we have no prediction if superior to visit times
-    #     if(any(timeJM>max(dataLongi$visit))){print("timeJM superior")}
-    #     
-    #     timeJM<-ifelse(timeJM>max(dataLongi$visit),max(dataLongi$visit),
-    #                    timeJM)
-    #     
-    #     predY<-predict(JMmodel, 
-    #                    newdata = ND,process="longitudinal",
-    #                    times=timeJM,
-    #                    #return_newdata=T,
-    #                    #type_pred = "link",
-    #                    type="subject_specific",
-    #                    control=list(n_samples=Nsample,
-    #                                 all_times=T,
-    #                                 return_mcmc=T))
-    #     #$preds$y is the mean value over the n_samples
-    #     
-    #     Y<-data.frame(predY$newdata2$mcmc)
-    #     colnames(Y)<-paste0("Nsample",c(1:Nsample))
-    #     
-    #     Y$time<-timeJM
-    #     Y$ID<-x
-    #     
-    #     
-    #     return(Y)
-    #     
-    #   }))
-    #  
-    # }
-    # 
-    # 
-    # PredYx$Outcome<-names(functional_forms)[[indice]]
-    # colnames(PredYx)[colnames(PredYx)%in%"ID"]<-id
-    # colnames(PredYx)[colnames(PredYx)%in%"time"]<-timeVar
-    # 
+  browser()
+ 
       
-     
-      
-      N<-length(unique(dataLongi[,id]))
-      newdataLongi<-timePointsdata
-      colnames(newdataLongi)<-c(id,timeVar)
       
       terms_FE<-JMmodel$model_info$terms$terms_FE[[1]]
       terms_RE<-JMmodel$model_info$terms$terms_RE[[1]]
@@ -175,9 +91,14 @@ JMidm<-function(timeVar,
       X<-model.matrix(reformulate(attr(terms(terms_FE), "term.labels")),data=newdataLongi)
       Z <- model.matrix(reformulate(attr(terms(terms_RE), "term.labels")),data=newdataLongi)
       
+      
+      # derivatives of Y(t) design matrix -- does not handle splines so far
+      dX <- make_dX(formula(formLong[[indice]]$call$fixed), X=X, timevar = timeVar)
+      bars<-findbars(formLong[[indice]]$call$random)
+      dZ <- make_dX(reformulate(deparse(bars[[1]][[2]])), X=Z, timevar = timeVar)
+      
+      
       betas<-do.call(rbind,JMmodel$mcmc$betas1)
-      # ind_RE <- JMmodel$model_data$ind_RE
-      # idd<-dataLongi[[JMmodel$model_info$var_names$idVar]]
       
       d1<-dim(JMmodel$mcmc$b[[1]])[3]
       d2<-JMmodel$control$n_chains
@@ -190,7 +111,7 @@ JMidm<-function(timeVar,
       # K <- length(ind_RE)
       # M <- dim(b_mat)[3L]
       M<-dim(betas)[1]
-      NtimesPoints<-ifelse(truncated==F,256,271)
+      
       nn<-rep(NtimesPoints,N)
       ends   <- cumsum(nn)
       starts <- ends - nn + 1
@@ -200,10 +121,14 @@ JMidm<-function(timeVar,
       idNsample<-sample(x=c(1:M),size=Nsample-1)
 
       Fixed <- X %*% t(betas[idNsample, , drop = FALSE])   # (n x m)
+      slopeFixed<-dX %*% t(betas[idNsample, , drop = FALSE])
       
       # Terme aléatoire, on remplit directement un tableau vide
       Random_all <- matrix(0, nrow = nrow(Z), ncol = Nsample-1)
       Random_mean <- matrix(0,nrow=nrow(Z),ncol=1)
+      
+      slopeRandom_all <- matrix(0, nrow = nrow(Z), ncol = Nsample-1)
+      slopeRandom_mean <- matrix(0,nrow=nrow(Z),ncol=1)
       
       for (j in seq_len(N)) {
         rows <- starts[j]:ends[j]
@@ -211,201 +136,51 @@ JMidm<-function(timeVar,
         Bj   <- b_mat[j, , idNsample, drop = FALSE] # (q x m)
         Random_all[rows, ] <- Zj %*% Bj[1,,]
         Random_mean[rows, ] <- Zj %*% JMmodel$statistics$Mean$b[j,]
+        
+        dZj   <- dZ[rows, , drop = FALSE]                
+        slopeRandom_all[rows, ] <- dZj %*% Bj[1,,]
+        slopeRandom_mean[rows, ] <- dZj %*% JMmodel$statistics$Mean$b[j,]
       }
       
       PredYx <- Fixed + Random_all
-      
+      slopePredYx<-slopeFixed + slopeRandom_all
+      browser()
       }else{
-        PredYx<-NULL
+        PredYx<-slopePredYx<-NULL
         
         # Terme aléatoire, on remplit directement un tableau vide
         Random_mean <- matrix(0,nrow=nrow(Z),ncol=1)
+        slopeRandom_mean <- matrix(0,nrow=nrow(Z),ncol=1)
         
         for (j in seq_len(N)) {
           rows <- starts[j]:ends[j]
           Zj   <- Z[rows, , drop = FALSE]
           Random_mean[rows, ] <- Zj %*% JMmodel$statistics$Mean$b[j,]
+          
+          dZj   <- dZ[rows, , drop = FALSE]
+          slopeRandom_mean[rows, ] <- dZj %*% JMmodel$statistics$Mean$b[j,]
         }
         
-        
+        browser() 
       }
       
       PredYmean<-X%*%as.matrix(JMmodel$statistics$Mean$betas1) + Random_mean
+      slopePredYmean<-dX%*%as.matrix(JMmodel$statistics$Mean$betas1) + slopeRandom_mean
+      
       PredYx<-cbind(PredYmean,PredYx)
-      # PredYxx <- do.call(cbind, lapply(idNsample, function(i) {
-      #     fixed <- X %*% betas[i,]
-      # 
-      #     # concaténer les contributions en une seule fois
-      #     random <- do.call(rbind, lapply(seq_along(starts), function(j) {
-      #       Z[starts[j]:ends[j], , drop = FALSE] %*% b_mat[j, , i]
-      #     }))
-      # 
-      #     fixed + random
-      #   }))
+      slopePredYx<-cbind(slopePredYmean,slopePredYx)
 
       Outcome<-names(functional_forms)[[indice]]
+      slopeOutcome<-paste0("slope_",names(functional_forms)[[indice]])
+      
       PredYx<-cbind(newdataLongi,Outcome,PredYx)
+      slopePredYx<-cbind(newdataLongi,slopeOutcome,slopePredYx)
+      
       colnames(PredYx)[4:(Nsample+3)]<-paste0("Sample_",c(1:Nsample))
+      colnames(slopePredYx)[4:(Nsample+3)]<-paste0("Sample_",c(1:Nsample))
       
-    
-    }else{
-      
-      # maxmimum need to not exceed time observed
-      
-      # times<-seq(min(t0),max(dataLongi[,colnames(dataLongi)%in%timeVar]),length.out=NtimesPoints)
-      # if(nproc==1){
-      # PredYx<-do.call(rbind,lapply(idsubjects,FUN=function(x){
-      # 
-      #   indexLongi<-which(dataLongi[,colnames(dataLongi)%in%id]==x)
-      #   datai<-dataLongi[indexLongi,]
-      #   
-      #   datai<-merge(x=datai,y=dataSurv,by=id,all.x=T)
-      #   
-      #   ND<-list(newdataL=dataLongi[indexLongi,],newdataE=datai)
-      #   
-      #   predY<-predict(JMmodel, 
-      #                  newdata = ND,
-      #                  process="longitudinal",
-      #                  times=times, #cannot put return_data=T with return mcm = T will create error
-      #                  #type_pred = "link",
-      #                  type="subject_specific",
-      #                  
-      #                  control=list(n_samples=Nsample,
-      #                               all_times=T, # do not forget to compute for all values
-      #                               return_mcmc=T))
-      #   #$preds$y is the mean value over the n_samples
-      #   
-      #   Y<-data.frame(predY$newdata2$mcmc)
-      #   colnames(Y)<-paste0("Nsample",c(1:Nsample))
-      #   Y$ID<-x
-      #   return(Y)
-      #   
-      # }))
-      # }else{
-      #   if(is.null(clustertype)){
-      #     clustpar <- parallel::makeCluster(nproc)#, outfile="")
-      #   }
-      #   else{
-      #     clustpar <- parallel::makeCluster(nproc, type=clustertype)#, outfile="")
-      #   }
-      #   
-      #   PredYx<-do.call(rbind,parLapply(cl=clustpar,idsubjects,fun=function(x){
-      #     
-      #     indexLongi<-which(dataLongi[,colnames(dataLongi)%in%id]==x)
-      #     datai<-dataLongi[indexLongi,]
-      #     
-      #     datai<-merge(x=datai,y=dataSurv,by=id,all.x=T)
-      #     
-      #     ND<-list(newdataL=dataLongi[indexLongi,],newdataE=datai)
-      #     
-      #     predY<-predict(JMmodel, 
-      #                    newdata = ND,
-      #                    process="longitudinal",
-      #                    times=times, #cannot put return_data=T with return mcm = T will create error
-      #                    #type_pred = "link",
-      #                    type="subject_specific",
-      #                    
-      #                    control=list(n_samples=Nsample,
-      #                                 all_times=T, # do not forget to compute for all values
-      #                                 return_mcmc=T))
-      #     #$preds$y is the mean value over the n_samples
-      #     
-      #     Y<-data.frame(predY$newdata2$mcmc)
-      #     colnames(Y)<-paste0("Nsample",c(1:Nsample))
-      #     Y$ID<-x
-      #     return(Y)
-      #     
-      #   }))
-      
-      times<-seq(min(t0),max(dataLongi[,colnames(dataLongi)%in%timeVar]),length.out=NtimesPoints)
-      
-      N<-length(unique(dataLongi[,id]))
-      
-      newdataLongi<-do.call(rbind,lapply(unique(dataLongi[,id]),FUN=function(x){
-        data.frame(id=rep(x,NtimesPoints),
-                   time=times)}))
-      colnames(newdataLongi)<-c(id,timeVar)
-      
-      terms_FE<-JMmodel$model_info$terms$terms_FE[[1]]
-      terms_RE<-JMmodel$model_info$terms$terms_RE[[1]]
-      
-      X<-model.matrix(reformulate(attr(terms(terms_FE), "term.labels")),data=newdataLongi)
-      Z <- model.matrix(reformulate(attr(terms(terms_RE), "term.labels")),data=newdataLongi)
-      
-      betas<-do.call(rbind,JMmodel$mcmc$betas1)
-      # ind_RE <- JMmodel$model_data$ind_RE
-      # idd<-dataLongi[[JMmodel$model_info$var_names$idVar]]
-      
-      d1<-dim(JMmodel$mcmc$b[[1]])[3]
-      d2<-JMmodel$control$n_chains
-      b_mat <- array(0.0, dim = c(dim(JMmodel$mcmc$b[[1]])[1:2], d1*d2))
-      b_mat[, , seq(1, d1)]<-JMmodel$mcmc$b[[1]]
-      for( i in 2:JMmodel$control$n_chains){
-        b_mat[, , seq(d1*(i-1)+1, d1*i)] <- JMmodel$mcmc$b[[i]]
-      }
-      
-      # K <- length(ind_RE)
-      # M <- dim(b_mat)[3L]
-      M<-dim(betas)[1]
-      nn<-rep(NtimesPoints,N)
-      ends   <- cumsum(nn)
-      starts <- ends - nn + 1
-      
-      if(Nsample>1){
-      idNsample<-sample(x=c(1:M),size=Nsample-1)
-      
-      Fixed <- X %*% t(betas[idNsample, , drop = FALSE])   # (n x m)
-    
-      # Terme aléatoire, on remplit directement un tableau vide
-      Random_all <- matrix(0, nrow = nrow(Z), ncol = Nsample-1)
-      Random_mean <- matrix(0,nrow=nrow(Z),ncol=1)
-      for (j in seq_len(N)) {
-        rows <- starts[j]:ends[j]
-        Zj   <- Z[rows, , drop = FALSE]                        # (nn[j] x q)
-        Bj   <- b_mat[j, , idNsample, drop = FALSE] # (q x m)
-        Random_all[rows, ] <- Zj %*% Bj[1,,]
-        Random_mean[rows, ] <- Zj %*% JMmodel$statistics$Mean$b[j,]
-      }
-     
-      PredYx <- Fixed + Random_all
-      }else{
-        PredYx<-NULL
-        
-        Random_mean <- matrix(0,nrow=nrow(Z),ncol=1)
-        for (j in seq_len(N)) {
-          rows <- starts[j]:ends[j]
-          Zj   <- Z[rows, , drop = FALSE]
-          Random_mean[rows, ] <- Zj %*% JMmodel$statistics$Mean$b[j,]
-        }
-        }
-     
-      PredYmean<-X%*%as.matrix(JMmodel$statistics$Mean$betas1) + Random_mean
-      PredYx<-cbind(PredYmean,PredYx)
-      
-      #add mean value of fixed and random effects 
-      
-      
-      # PredYxx <- do.call(cbind, lapply(idNsample, function(i) {
-      #     fixed <- X %*% betas[i,]
-      # 
-      #     # concaténer les contributions en une seule fois
-      #     random <- do.call(rbind, lapply(seq_along(starts), function(j) {
-      #       Z[starts[j]:ends[j], , drop = FALSE] %*% b_mat[j, , i]
-      #     }))
-      # 
-      #     fixed + random
-      #   }))
-
-      Outcome<-names(functional_forms)[[indice]]
-      PredYx<-cbind(newdataLongi,Outcome,PredYx)
-      colnames(PredYx)[4:(Nsample+3)]<-paste0("Sample_",c(1:Nsample))
-      
-     
-      }
-      
-      
-    
-    Yall[[indice]]<- PredYx
+      browser()
+    Yall[[indice]]<- rbind(PredYx,slopePredYx)
   }
   
   Yall<-do.call(rbind,Yall)
@@ -417,5 +192,42 @@ JMidm<-function(timeVar,
 
 
 
+make_dX <- function(formula, X, timevar, use_splines = FALSE, ...) {
 
+  browser()
+  # Identify terms
+  terms_labels <- attr(terms(formula), "term.labels")
+  
+  # Initialize derivative matrix
+  dX <- X * 0
+  
+  for (lab in terms_labels) {
+    if (lab == timevar) {
+      # simple linear time
+      dX[, lab] <- 1
+      
+    } else if (grepl("^I\\(", lab)) {
+      # e.g. I(time^2)
+      expr <- parse(text = gsub("I\\((.*)\\)", "\\1", lab))[[1]]
+      dexpr <- D(expr, timevar)
+      dX[, lab] <- eval(dexpr,envir = newdataLongi)
+      
+    } else if (use_splines && grepl("bs\\(|ns\\(", lab)) {
+      
+      # Extract knots etc. from the original call if needed
+      stop("Spline derivative not supported so far")
+      
+    } else {
+      # other covariates (not functions of time) → derivative is 0
+      dX[, lab] <- 0
+    }
+  }
+  
+  # Intercept derivative is always 0
+  if ("(Intercept)" %in% colnames(X)) {
+    dX[, "(Intercept)"] <- 0
+  }
+  
+  dX
+}
 

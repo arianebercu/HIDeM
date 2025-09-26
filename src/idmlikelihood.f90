@@ -2080,6 +2080,7 @@ else
 	allocate(b(np0),bfix(npar0-np0))
 	allocate(fix(npar0))
 	
+
 	troncature=troncature0
 
 	b=b0
@@ -2182,13 +2183,12 @@ else
 		res = 0.d0
 !---------- calcul de la vraisemblance ------------------
 
-	
+
          
                do i=1,no0
 			   
 			
-           write(6,*)'subject ',i
-		   
+         
                 vet01 = 0.d0
                 vet12 = 0.d0
                 vet02 = 0.d0
@@ -2288,14 +2288,14 @@ else
                 else
                 if(c(i).eq.2)then ! cpi 0-->1
 				
-			        write(6,*)'c=2 '
+			       
 						 call fonctdep(t3(i),the12,ri12,gl12,su12,y12t(241:256))
                          call  qgaussPL15weibtimedep(t1(i),t2(i),the01,the02,&
                          the12,res2,vet01,vet02,vet12,&
 						 y01t(1:240),y02t(1:240),y12t(1:240))
-						  write(6,*)'res2 ',res2
+						 
                         res1=res2*(su12**vet12)
-						 write(6,*)'res1 ',res1
+						
 						if(res1.ne.0) then 
 						res1=dLOG(res1)
 						end if 
@@ -2322,16 +2322,16 @@ else
                     else   
                        if(c(i).eq.4)then ! cpi 0-->1 et obs 1-->2
 					   
-					    write(6,*)'c=4 '
+					   
 						call fonctdep(t3(i),the12,ri12,gl12,&
 						su12,y12t(241:256))
                         call  qgaussPL15weibtimedep(t1(i),t2(i),&
 						the01,the02,the12,&
                         res2,vet01,vet02,vet12,&
 						y01t(1:240),y02t(1:240),y12t(1:240))
-						 write(6,*)'res2 ',res2
+						 
                         res1=res2*(su12**vet12)*ri12*vet12
-						 write(6,*)'res1 ',res1
+						 
 						if(res1.ne.0) then 
 						res1=dLOG(res1)
 						end if 
@@ -2361,7 +2361,7 @@ else
                          else
                             if(c(i).eq.6)then ! vivant ???
 						
-						 write(6,*)'c=6 '
+
 								call fonctdep(t3(i),the01,ri01,gl01,&
 								su01,y01t(241:256))
                                 call fonctdep(t3(i),the02,ri02,gl02,&
@@ -2372,18 +2372,17 @@ else
 								the01,the02,the12,res2,vet01,vet02,vet12,&
 								y01t(1:240),y02t(1:240),y12t(1:240))
 								
-								 write(6,*)'res2 ',res2
+								
                                 res1 = (res2*(su12**vet12))+&
                                 ((su01**vet01)*(su02**vet02))
-								 write(6,*)'res1 ',res1
+								
                                 
 								if(res1.ne.0) then 
 								res1=dLOG(res1)
 								end if 
 								
                             else ! passage 0-->2  
-								
-						 write(6,*)'c=7 '
+					
 				                call fonctdep(t3(i),the01,ri01,gl01,&
 								su01,y01t(241:256))
                                 call fonctdep(t3(i),the02,ri02,gl02,&
@@ -2396,10 +2395,10 @@ else
 								the01,the02,the12,res2,vet01,vet02,vet12,&
 								y01t(1:240),y02t(1:240),y12t(1:240))
 								
-								 write(6,*)'res2 ',res2
+								 
                                 res1 = (res2*(su12**vet12)*ri12*vet12)+&
                                 ((su01**vet01)*(su02**vet02)*ri02*vet02)
-								 write(6,*)'res1 ',res1
+								
                                 if(res1.ne.0) then 
 								res1=dLOG(res1)
 								end if 
@@ -2597,36 +2596,44 @@ if(dimp01.gt.0) then
 		nspline = nz01+nz12+nz02+6
 !---------- calcul de la vraisemblance ------------------
 
-
-
+  
         res = 0.d0
+		res2= 0.d0
         do i=1,no0
 
+  ! write(6,*)'subject ',i
+		  
                 vet01 = 0.d0
                 vet12 = 0.d0
                 vet02 = 0.d0
 
 
+                
+				y01t = 0
+                y12t = 0
+                y02t = 0
+
                 if(nva01.gt.0)then
                         do j=1,nva01
                                 vet01 =vet01 +&
-                                bh(npar0-nva01-nva12-nva02+j)*dble(ve01(i,j))
+                                bh(nspline+j)*dble(ve01(i,j))
                         end do
                 endif  
  
                 if(nva02.gt.0)then
                         do j=1,nva02
                                 vet02 =vet02 +&
-                                bh(npar0-nva02-nva12+j)*dble(ve02(i,j))
+                                bh(nspline+nva01+j)*dble(ve02(i,j))
                         end do
                 endif
 
                 if(nva12.gt.0)then
                         do j=1,nva12
                                 vet12 =vet12 +&
-                                bh(npar0-nva12+j)*dble(ve12(i,j))
+                                bh(nspline+nva01+nva02+j)*dble(ve12(i,j))
                         end do
                 endif
+				
 
 
 				if(p01.gt.0)then
@@ -2665,6 +2672,7 @@ if(dimp01.gt.0) then
 				y12t=dexp(y12t)
 				
 				
+				
                 vet01 = dexp(vet01)
                 vet12 = dexp(vet12)
                 vet02 = dexp(vet02)
@@ -2693,12 +2701,18 @@ if(dimp01.gt.0) then
                         res1 = (-gl01*vet01)-(gl02*vet02)
                 else
                 if(c(i).eq.2)then ! cpi 0-->1
+				   !write(6,*)'c=2'
+		  
                        
-                        	call qgaussPL15timedep(t1(i),t2(i),the01,the12,&
-                        	the02,res2,vet01,vet12,vet02, & 
+                        	call qgaussPL15timedep(t1(i),t2(i),the01,the02,&
+                        	the12,res2,vet01,vet02,vet12, & 
 							 y01t(1:240),y02t(1:240),y12t(1:240))
                           call suspdep(t3(i),the12,nz12,su12,ri12,zi12,gl12,y12t(241:256)) 
 						  
+						   res1=res2*(su12**vet12)
+						  !  write(6,*)'res1',res1
+						   ! write(6,*)'res2',res2
+							! write(6,*)'su12',su12
 						if(res1.ne.0) then 
 						res1=dLOG(res1)
 						end if 
@@ -2721,13 +2735,19 @@ if(dimp01.gt.0) then
 					   
                     else   
                        if(c(i).eq.4)then ! cpi 0-->1 et obs 1-->2
+					   !  write(6,*)'c=4'
                           call suspdep(t3(i),the12,nz12,su12,ri12,zi12,gl12, &
 						  y12t(241:256))
-                          call qgaussPL15timedep(t1(i),t2(i),the01,the12,the02,&
-                        	res2,vet01,vet12,vet02, & 
+                          call qgaussPL15timedep(t1(i),t2(i),the01,the02,the12,&
+                        	res2,vet01,vet02,vet12, & 
 							y01t(1:240),y02t(1:240),y12t(1:240))
                          
                         res1=res2*(su12**vet12)*ri12*vet12
+						
+						!  write(6,*)'res1',res1
+						!		   write(6,*)'res2',res2
+						!		   write(6,*)'su12',su12
+						!		   write(6,*)'ri12',ri12
 						if(res1.ne.0) then 
 						res1=dLOG(res1)
 						end if 
@@ -2758,8 +2778,9 @@ if(dimp01.gt.0) then
 
                          else
                             if(c(i).eq.6)then ! vivant ???
-                          		call qgaussPL15timedep(t1(i),t2(i),the01,the12,the02,&
-                              res2,vet01,vet12,vet02, &
+							!  write(6,*)'c=6'
+                          		call qgaussPL15timedep(t1(i),t2(i),the01,the02,the12,&
+                              res2,vet01,vet02,vet12, &
 							  y01t(1:240),y02t(1:240),y12t(1:240))
                               call suspdep(t3(i),the12,nz12,su12,ri12,zi12,gl12,&
 							  y12t(241:256))
@@ -2772,15 +2793,21 @@ if(dimp01.gt.0) then
 								res1 = (res2*(su12**vet12))+&
                                 ((su01**vet01)*(su02**vet02))
                                 
+							!	  write(6,*)'res1',res1
+							!	   write(6,*)'res2',res2
+							!	   write(6,*)'su12',su12
+							!	   write(6,*)'su02',su02
+							!	   write(6,*)'su01',su01
+								   
 								if(res1.ne.0) then 
 								res1=dLOG(res1)
 								end if 
 
                             else ! passage 0-->2  
 
-                                
-                        	    call qgaussPL15timedep(t1(i),t3(i),the01,the12,&
-                        		the02,res2,vet01,vet12,vet02, &
+                                !  write(6,*)'c=7'
+                        	    call qgaussPL15timedep(t1(i),t3(i),the01,the02,&
+                        		the12,res2,vet01,vet02,vet12, &
 							  y01t(1:240),y02t(1:240),y12t(1:240))
 							  call suspdep(t3(i),the12,nz12,su12,ri12,zi12,gl12,&
 								y12t(241:256))
@@ -2790,6 +2817,13 @@ if(dimp01.gt.0) then
 								y01t(241:256))
                                 res1=res2*ri12*vet12*(su12**vet12) +&
 				                ri02*vet02*(su02**vet02)*(su01**vet01)
+								
+								!  write(6,*)'res1',res1
+								 !  write(6,*)'res2',res2
+								  !  write(6,*)'su12',su12
+								  ! write(6,*)'su02',su02
+								  ! write(6,*)'su01',su01
+								  !  write(6,*)'ri12',ri12
 								if(res1.ne.0) then 
 								res1=dLOG(res1)
 								end if 
@@ -3557,13 +3591,12 @@ end subroutine idmlikelihoodweibtimedepgrid
 		gl1,gl2
         double precision,dimension(-2:(n+3))::zi
 		double precision,dimension(16)::y
-        double precision,dimension(-2:n-1)::the 
+        double precision,dimension(-2:(n-1))::the 
 		
 		double precision::a,b,dx,xm,xr,&
-		d1mach(5),epmach,uflow
+		d1mach(5),epmach,uflow,xx
 		double precision,dimension(8)::xgk,wgk
 	    double precision,dimension(4)::wg
-         double precision::xx
          save wgk,xgk
 		 
 		 D1MACH(1)=2.23D-308
@@ -3602,7 +3635,6 @@ end subroutine idmlikelihoodweibtimedepgrid
      
 		b=x
 		a=0
-
 		
 		
 		xm = 0.5d+00*(b+a)
@@ -3620,42 +3652,44 @@ end subroutine idmlikelihoodweibtimedepgrid
 		if(xm.ge.zi(n))then 
                 lam = 4.d0*the(n-1)/(zi(n)-zi(n-1))
         else
-        j = count(zi(1:(n-1)) <= xm)
-		
-        ht = xm-zi(j)
-        htm= xm-zi(j-1)
-        h2t= xm-zi(j+2)
-        ht2 = zi(j+1)-xm
-        ht3 = zi(j+3)-xm
-        hht = xm-zi(j-2)
-						
-        h = zi(j+1)-zi(j)
-        hh= zi(j+1)-zi(j-1)
-        h2= zi(j+2)-zi(j)
-        h3= zi(j+3)-zi(j)
-        h4= zi(j+4)-zi(j)
-        h3m= zi(j+3)-zi(j-1)
-        h2n=zi(j+2)-zi(j-1)
-        hn= zi(j+1)-zi(j-2)
-        hh3 = zi(j+1)-zi(j-3)
-        hh2 = zi(j+2)-zi(j-2)
-						
-        mm3 = ((4.d0*ht2*ht2*ht2)/(h*hh*hn*hh3))
-        mm2 = ((4.d0*hht*ht2*ht2)/(hh2*hh*h*hn))+((-4.d0*h2t*htm &
-                        *ht2)/(hh2*h2n*hh*h))+((4.d0*h2t*h2t*ht)/(hh2*h2*h*h2n))
-        mm1 = (4.d0*(htm*htm*ht2)/(h3m*h2n*hh*h))+((-4.d0*htm*ht* &
-                        h2t)/(h3m*h2*h*h2n))+((4.d0*ht3*ht*ht)/(h3m*h3*h2*h))
-        mm  = 4.d0*(ht*ht*ht)/(h4*h3*h2*h)
-						
-						
-        lam = (the(j-3)*mm3)+(the(j-2)*mm2)+(the(j-1)*mm1)+(the(j)*mm)
-        end if 
+		 if (xm < zi(1)) then
+		  lam = 0.d0
+		  else 
+			j = count(zi(1:(n-1)) <= xm)
+			
+			ht = xm-zi(j)
+			htm= xm-zi(j-1)
+			h2t= xm-zi(j+2)
+			ht2 = zi(j+1)-xm
+			ht3 = zi(j+3)-xm
+			hht = xm-zi(j-2)
+							
+			h = zi(j+1)-zi(j)
+			hh= zi(j+1)-zi(j-1)
+			h2= zi(j+2)-zi(j)
+			h3= zi(j+3)-zi(j)
+			h4= zi(j+4)-zi(j)
+			h3m= zi(j+3)-zi(j-1)
+			h2n=zi(j+2)-zi(j-1)
+			hn= zi(j+1)-zi(j-2)
+			hh3 = zi(j+1)-zi(j-3)
+			hh2 = zi(j+2)-zi(j-2)
+							
+			mm3 = ((4.d0*ht2*ht2*ht2)/(h*hh*hn*hh3))
+			mm2 = ((4.d0*hht*ht2*ht2)/(hh2*hh*h*hn))+((-4.d0*h2t*htm &
+							*ht2)/(hh2*h2n*hh*h))+((4.d0*h2t*h2t*ht)/(hh2*h2*h*h2n))
+			mm1 = (4.d0*(htm*htm*ht2)/(h3m*h2n*hh*h))+((-4.d0*htm*ht* &
+							h2t)/(h3m*h2*h*h2n))+((4.d0*ht3*ht*ht)/(h3m*h3*h2*h))
+			mm  = 4.d0*(ht*ht*ht)/(h4*h3*h2*h)
+							
+			
+			lam = (the(j-3)*mm3)+(the(j-2)*mm2)+(the(j-1)*mm1)+(the(j)*mm)
+			end if 
+		end if 
         
 		    
 		gl = lam*y(1)*wgk(8) 
-		
-		
-		
+
 		jtwm1 = 4*2-1
         dx=xr*xgk(jtwm1)
         xx = xm+dx
@@ -3663,7 +3697,10 @@ end subroutine idmlikelihoodweibtimedepgrid
         if(xx.ge.zi(n))then 
                 lam = 4.d0*the(n-1)/(zi(n)-zi(n-1))
         else
-		j = count(zi(1:(n-1)) <= xx)
+		if (xx< zi(1)) then
+		  lam = 0.d0
+		  else 
+		  j = count(zi(1:(n-1)) <= xx)
 		
         ht = xx-zi(j)
         htm= xx-zi(j-1)
@@ -3693,12 +3730,16 @@ end subroutine idmlikelihoodweibtimedepgrid
 						
         lam = (the(j-3)*mm3)+(the(j-2)*mm2)+(the(j-1)*mm1)+(the(j)*mm)
         end if 
+		end if 
         
 		gl1=lam*y(3) 
         xx = xm-dx
         if(xx.ge.zi(n))then 
                 lam = 4.d0*the(n-1)/(zi(n)-zi(n-1))
         else
+		if (xx< zi(1)) then
+		  lam = 0.d0
+		  else 
 		j = count(zi(1:(n-1)) <= xx)
 						
         ht = xx-zi(j)
@@ -3729,6 +3770,7 @@ end subroutine idmlikelihoodweibtimedepgrid
 						
         lam = (the(j-3)*mm3)+(the(j-2)*mm2)+(the(j-1)*mm1)+(the(j)*mm)
         end if 
+		end if 
         
 		gl2=lam*y(2)   ! svgrd valeurs fct f a drte du centre
 	       
@@ -3740,6 +3782,9 @@ end subroutine idmlikelihoodweibtimedepgrid
         if(xx.ge.zi(n))then 
                 lam = 4.d0*the(n-1)/(zi(n)-zi(n-1))
         else
+		if (xx< zi(1)) then
+		  lam = 0.d0
+		  else 
 		j = count(zi(1:(n-1)) <= xx)
 		
         ht = xx-zi(j)
@@ -3770,11 +3815,15 @@ end subroutine idmlikelihoodweibtimedepgrid
 						
         lam = (the(j-3)*mm3)+(the(j-2)*mm2)+(the(j-1)*mm1)+(the(j)*mm)
         end if 
+		end if 
         gl1=lam*y(5)
         xx = xm-dx
         if(xx.ge.zi(n))then 
                 lam = 4.d0*the(n-1)/(zi(n)-zi(n-1))
         else
+		if (xx< zi(1)) then
+		  lam = 0.d0
+		  else 
 		j = count(zi(1:(n-1)) <= xx)
 						
         ht = xx-zi(j)
@@ -3805,6 +3854,7 @@ end subroutine idmlikelihoodweibtimedepgrid
 						
         lam = (the(j-3)*mm3)+(the(j-2)*mm2)+(the(j-1)*mm1)+(the(j)*mm)
         end if 
+		end if 
         gl2=lam*y(4)   ! svgrd valeurs fct f a drte du centre
 	       
 		gl=gl+wgk(jtwm1)*(gl1+gl2)
@@ -3815,6 +3865,9 @@ end subroutine idmlikelihoodweibtimedepgrid
         if(xx.ge.zi(n))then 
                 lam = 4.d0*the(n-1)/(zi(n)-zi(n-1))
         else
+		if (xx< zi(1)) then
+		  lam = 0.d0
+		  else 
 		j = count(zi(1:(n-1)) <= xx)
 						
         ht = xx-zi(j)
@@ -3845,11 +3898,16 @@ end subroutine idmlikelihoodweibtimedepgrid
 						
         lam = (the(j-3)*mm3)+(the(j-2)*mm2)+(the(j-1)*mm1)+(the(j)*mm)
         end if 
+		end if 
+		
         gl1=lam*y(7) 
         xx = xm-dx
         if(xx.ge.zi(n))then 
                 lam = 4.d0*the(n-1)/(zi(n)-zi(n-1))
         else
+		if (xx< zi(1)) then
+		  lam = 0.d0
+		  else 
 		j = count(zi(1:(n-1)) <= xx)
 		
         ht = xx-zi(j)
@@ -3880,6 +3938,7 @@ end subroutine idmlikelihoodweibtimedepgrid
 						
         lam = (the(j-3)*mm3)+(the(j-2)*mm2)+(the(j-1)*mm1)+(the(j)*mm)
         end if 
+		end if 
         gl2=lam*y(6)   ! svgrd valeurs fct f a drte du centre
 	    gl=gl+wgk(jtwm1)*(gl1+gl2)
 		   
@@ -3889,6 +3948,9 @@ end subroutine idmlikelihoodweibtimedepgrid
         if(xx.ge.zi(n))then 
                 lam = 4.d0*the(n-1)/(zi(n)-zi(n-1))
         else
+		if (xx< zi(1)) then
+		  lam = 0.d0
+		  else 
 		j = count(zi(1:(n-1)) <= xx)
 						
         ht = xx-zi(j)
@@ -3919,11 +3981,16 @@ end subroutine idmlikelihoodweibtimedepgrid
 						
         lam = (the(j-3)*mm3)+(the(j-2)*mm2)+(the(j-1)*mm1)+(the(j)*mm)
         end if 
+		end if 
+		
         gl1=lam*y(9)
         xx = xm-dx
         if(xx.ge.zi(n))then 
                 lam = 4.d0*the(n-1)/(zi(n)-zi(n-1))
         else
+		if (xx< zi(1)) then
+		  lam = 0.d0
+		  else 
 		j = count(zi(1:(n-1)) <= xx)
 		
         ht = xx-zi(j)
@@ -3954,6 +4021,8 @@ end subroutine idmlikelihoodweibtimedepgrid
 						
         lam = (the(j-3)*mm3)+(the(j-2)*mm2)+(the(j-1)*mm1)+(the(j)*mm)
         end if 
+		end if 
+		
         gl2=lam*y(8)   ! svgrd valeurs fct f a drte du centre
 	    gl=gl+wgk(jtwm1)*(gl1+gl2)
 		
@@ -3963,6 +4032,9 @@ end subroutine idmlikelihoodweibtimedepgrid
         if(xx.ge.zi(n))then 
                 lam = 4.d0*the(n-1)/(zi(n)-zi(n-1))
         else
+		if (xx< zi(1)) then
+		  lam = 0.d0
+		  else 
 		j = count(zi(1:(n-1)) <= xx)
 						
         ht = xx-zi(j)
@@ -3993,11 +4065,15 @@ end subroutine idmlikelihoodweibtimedepgrid
 						
         lam = (the(j-3)*mm3)+(the(j-2)*mm2)+(the(j-1)*mm1)+(the(j)*mm)
         end if 
+		end if 
 		gl1=lam*y(11) 
         xx = xm-dx
         if(xx.ge.zi(n))then 
                 lam = 4.d0*the(n-1)/(zi(n)-zi(n-1))
         else
+		if (xx< zi(1)) then
+		  lam = 0.d0
+		  else 
 		j = count(zi(1:(n-1)) <= xx)
 						
         ht = xx-zi(j)
@@ -4028,6 +4104,7 @@ end subroutine idmlikelihoodweibtimedepgrid
 						
         lam = (the(j-3)*mm3)+(the(j-2)*mm2)+(the(j-1)*mm1)+(the(j)*mm)
         end if 
+		end if 
 	    gl2=lam*y(10)   ! svgrd valeurs fct f a drte du centre
 	    gl=gl+wgk(jtwm1)*(gl1+gl2)
 		   
@@ -4037,6 +4114,9 @@ end subroutine idmlikelihoodweibtimedepgrid
         if(xx.ge.zi(n))then 
                 lam = 4.d0*the(n-1)/(zi(n)-zi(n-1))
         else
+		if (xx< zi(1)) then
+		  lam = 0.d0
+		  else 
 		j = count(zi(1:(n-1)) <= xx)
 						
         ht = xx-zi(j)
@@ -4067,11 +4147,16 @@ end subroutine idmlikelihoodweibtimedepgrid
 						
         lam = (the(j-3)*mm3)+(the(j-2)*mm2)+(the(j-1)*mm1)+(the(j)*mm)
         end if 
+		end if 
+		
         gl1=lam*y(13) 
         xx = xm-dx
         if(xx.ge.zi(n))then 
                 lam = 4.d0*the(n-1)/(zi(n)-zi(n-1))
         else
+		if (xx< zi(1)) then
+		  lam = 0.d0
+		  else 
 		j = count(zi(1:(n-1)) <= xx)
 						
         ht = xx-zi(j)
@@ -4102,6 +4187,8 @@ end subroutine idmlikelihoodweibtimedepgrid
 						
         lam = (the(j-3)*mm3)+(the(j-2)*mm2)+(the(j-1)*mm1)+(the(j)*mm)
         end if 
+		end if 
+		
         gl2=lam*y(12)   ! svgrd valeurs fct f a drte du centre
 	    gl=gl+wgk(jtwm1)*(gl1+gl2)
 		   
@@ -4111,6 +4198,9 @@ end subroutine idmlikelihoodweibtimedepgrid
         if(xx.ge.zi(n))then 
                 lam = 4.d0*the(n-1)/(zi(n)-zi(n-1))
         else
+		if (xx< zi(1)) then
+		  lam = 0.d0
+		  else 
 		j = count(zi(1:(n-1)) <= xx)
 						
         ht = xx-zi(j)
@@ -4141,11 +4231,16 @@ end subroutine idmlikelihoodweibtimedepgrid
 						
         lam = (the(j-3)*mm3)+(the(j-2)*mm2)+(the(j-1)*mm1)+(the(j)*mm)
         end if 
+		end if 
+		
 	    gl1=lam*y(15) 
         xx = xm-dx
         if(xx.ge.zi(n))then 
                 lam = 4.d0*the(n-1)/(zi(n)-zi(n-1))
         else
+		if (xx< zi(1)) then
+		  lam = 0.d0
+		  else 
 		j = count(zi(1:(n-1)) <= xx)
 						
         ht = xx-zi(j)
@@ -4176,6 +4271,8 @@ end subroutine idmlikelihoodweibtimedepgrid
 						
         lam = (the(j-3)*mm3)+(the(j-2)*mm2)+(the(j-1)*mm1)+(the(j)*mm)
         end if 
+		end if 
+		
 	    gl2=lam*y(14)   ! svgrd valeurs fct f a drte du centre
 	       
 		gl=gl+wgk(jtwm1)*(gl1+gl2)
@@ -4188,6 +4285,9 @@ end subroutine idmlikelihoodweibtimedepgrid
 		if(xx.ge.zi(n))then 
                 lam = 4.d0*the(n-1)/(zi(n)-zi(n-1))
         else
+		if (xx< zi(1)) then
+		  lam = 0.d0
+		  else 
 		j = count(zi(1:(n-1)) <= xx)
 						
         ht = xx-zi(j)
@@ -4218,6 +4318,8 @@ end subroutine idmlikelihoodweibtimedepgrid
 						
         lam = (the(j-3)*mm3)+(the(j-2)*mm2)+(the(j-1)*mm1)+(the(j)*mm)
         end if 
+		end if 
+		
 		lam=lam*y(16)
 		
 		
@@ -6120,6 +6222,7 @@ subroutine qgaussPL15weibtimedep(a,b,the01,the02,the12,res,&
 !=============================================================================================  
 !==== QGAUS15 out a 15 point Gauss-Kronrod quadrature rule for splines  =========================
 !=============================================================================================  
+
 subroutine qgaussPL15timedep(a,b,the01,the02,the12,res,&
        v01,v02,v12,y01,y02,y12)
          
@@ -6176,9 +6279,9 @@ subroutine qgaussPL15timedep(a,b,the01,the02,the12,res,&
 
         xm = 0.5d+00*(b+a)
         xr = 0.5d+00*(b-a)
-        call fonctdep(xm,the01,ri01,gl01,su01,y01(1:16))
-        call fonctdep(xm,the02,ri02,gl02,su02,y02(1:16))
-        call fonctdep(xm,the12,ri12,gl12,su12,y12(1:16))
+        call suspdep(xm,the01,nz01,su01,ri01,zi01,gl01,y01(1:16))
+        call suspdep(xm,the02,nz02,su02,ri02,zi02,gl02,y02(1:16))
+        call suspdep(xm,the12,nz12,su12,ri12,zi12,gl12,y12(1:16))
         fc = (su01**v01)*(su02**v02)*ri01*v01/(su12**v12)  ! valeur fct f au milieu de intervalle (a,b), cas pnt 0
 
     	

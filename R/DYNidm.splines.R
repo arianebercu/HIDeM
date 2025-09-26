@@ -47,8 +47,11 @@ DYNidm.splines<-function(b,clustertype,epsa,epsb,epsd,nproc,maxiter,size_V,size_
                          Longitransition,NtimesPoints,Ypredmethod,timeVar,ynames,id,
                          outcome,outcome01,outcome02,outcome12,
                          p01,p02,p12,dimp01,dimp02,dimp12){
-  bfix<-b[fix0==1]
-  b<-b[fix0==0]
+  
+
+  
+  #bfix<-b[fix0==1]
+  #b<-b[fix0==0]
   npm<-size_V-sum(fix0)
   
   
@@ -223,7 +226,7 @@ DYNidm.splines<-function(b,clustertype,epsa,epsb,epsd,nproc,maxiter,size_V,size_
     
     out<-list()
     length(out)<-Nsample
-    browser()
+
     
     for(k in 1:Nsample){
       print(paste0("Estimating illness-death model on sample ",k))

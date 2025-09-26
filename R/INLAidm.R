@@ -6,14 +6,15 @@
 
 INLAidm<-function(timeVar,family,basRisk,assoc,
                   truncated,formLong,formSurv,dataSurv,dataLongi,id,
-                  NsampleHY,NsampleFE,NsampleRE,nproc,t0,t1,t2,t3,
+                  Nsample,nproc,t0,t1,t2,t3,
                   idm,idd,clustertype,Ypredmethod,NtimesPoints){
   
   # define timePoints of prediction : 
 
-
-  if(Ypredmethod=="gauss"){
+browser()
   idsubjects<-unique(dataSurv[,colnames(dataSurv)%in%id])
+  
+  if(Ypredmethod=="gauss"){
   
   timePointsdata<-do.call(rbind, lapply(idsubjects,FUN=function(x){
     index<-which(dataSurv[,colnames(dataSurv)%in%id]==x)
@@ -27,100 +28,104 @@ INLAidm<-function(timeVar,family,basRisk,assoc,
                                      truncated=truncated,
                                      entry.time=t0[index])
     return(data.frame(index=x,timePoints=timePoints))}))
+  
+  
+  }else{
+    
+  
+    timePointsdata<-do.call(rbind, lapply(idsubjects,FUN=function(x){
+      return(data.frame(index=x,timePoints=seq(min(t0),max(dataLongi[,colnames(dataLongi)%in%timeVar]))))}))
   }
 
-    
+  browser()
+  
+  ## augmentation of the data 
+  colnames(timePointsdata)<-c(id,timeVar)
+  dataLongi_augmented<-merge(dataLongi,timePointsdata,by=c(id,timeVar),all.x=T,all.y=T)
+  rownames(dataLongi_augmented)<-NULL
+  dataLongi_augmented<-dataLongi_augmented[order(dataLongi_augmented[,colnames(dataLongi_augmented)%in%id],
+                                                 dataLongi_augmented[,colnames(dataLongi_augmented)%in%timeVar]),]
+  
   print("Start running joint univarite models")
 
   Yall<-list()
   length(Yall)<-length(formLong)
+  dataSurv<-dataSurv[order(dataSurv[,colnames(dataSurv)%in%id]),]
   
-  formSurvinla<<-formSurv
-  dataLongiinla<<-dataLongi
-  dataSurvinla<<-dataSurv
-  idinla<<-id
-  timeVarinla<<-timeVar
+ # formSurvinla<<-formSurv
+#  dataLongiinla<<-dataLongi_augmented
+#  dataSurvinla<<-dataSurv
+#  idinla<<-id
+#  timeVarinla<<-timeVar
   
 
     for(indice in 1:length(formLong)){
 
       # need to have all elements of joint
       # global variables otherwise error in predict
-      formLonginla<<-formLong[[indice]]
-      familyinla<<-family[indice]
-      basRiskinla<<-basRisk[indice]
-      associnla<<-assoc[[indice]]
+     # formLonginla<<-formLong[[indice]]
+    #  familyinla<<-family[indice]
+    #  basRiskinla<<-basRisk[indice]
+    #  associnla<<-assoc[[indice]]
+    
+      # cannot have lightmode as need BLUP
+
+      INLAmodel<-INLAjoint::joint(formSurv = formSurv,
+                                       formLong = formLong[[indice]],
+                                       dataLong = dataLongi_augmented, dataSurv=dataSurv, id = id, timeVar = timeVar,
+                                       family = family[indice],
+                                       basRisk = basRisk[indice], NbasRisk = 15, assoc = assoc[[indice]],
+                                       control=list(int.strategy="eb"))
     
 
-      INLAmodel<-tryCatch({ INLAjoint::joint(formSurv = formSurvinla,
-                                       formLong = formLonginla,
-                                       dataLong = dataLongiinla, dataSurv=dataSurvinla, id = idinla, timeVar = timeVarinla,
-                                       family = familyinla,
-                                       basRisk = basRiskinla, NbasRisk = 15, assoc = associnla,
-                                       control=list(int.strategy="eb",lightmode=1))
-      }, error = function(e) {
-        # Return NULL on error to skip this patient
-        NULL
-      })
-      
-
+      browser()
       
       if(is.null(INLAmodel)){stop("The inla model for your marker could not be run, see above warnings.")}
       
-      # attention cannot do parallel over parallel of predict in inla 
-     if(Ypredmethod=="gauss"){
-       
-      PredYx<-do.call(rbind,lapply(idsubjects,FUN=function(x){
-        
-        indexLongi<-which(dataLongi[,colnames(dataLongi)%in%id]==x)
-        datai<-dataLongi[indexLongi,]
-        datai<-merge(x=datai,y=dataSurv,by=id,all.x=T)
-        timeinla<<-timePointsdata[timePointsdata$index==x,colnames(timePointsdata)=="timePoints"]
-
-        Pred<-tryCatch({
-          
-            # error if idm==1 thus : 
-            # visit in datai needs to have a timePoints greater than its 
-            # maximum value --> add one point and erase it after
-            # needs to be in timePoints as well as horizon 
-            res<-predict(INLAmodel,
-                         newData = datai,
-                         NtimesPoints=length(timeinla)+1,
-                         timePoints = c(timeinla,max(timeinla)+0.1),
-                         startTime=0,
-                         horizon = max(timeinla)+0.1,
-                         NsampleHY =  NsampleHY,
-                         NsampleFE =  NsampleFE,
-                         NsampleRE =  NsampleRE,
-                         return.samples=TRUE)$PredL
-          res<-res[-dim(res)[1],]
-          res<-res[match(timeinla,res[,colnames(res)%in%timeVar]),]
-          res
-        }, error = function(e) {
-          # Return NULL on error to skip this patient
-          NULL
-        })
-        return(Pred)
-        
-      }))
       
+      if(Nsample>1){
+        
+        #samples 
+        SMP <- inla.posterior.sample(Nsample-1, INLAmodel)
+        linPred <- sapply(SMP, function(x) x$latent) 
 
-     }else{
-       
-       PredYx<-predict(INLAmodel,
-                   newData = dataLongi,
-                   NtimesPoints=NtimesPoints,
-                   timePoints =seq(min(t0),max(dataLongi[,colnames(dataLongi)%in%timeVar]),length.out=NtimesPoints),
-                   startTime=0,
-                   horizon = max(t3),
-                   NsampleHY =  NsampleHY,
-                   NsampleFE =  NsampleFE,
-                   NsampleRE =  NsampleRE,
-                   return.samples=TRUE)$PredL
-       
-       
-     }
-      
+        # keep only indice we want: 
+        # Collapse each row into a string
+        key1 <- do.call(paste, c(dataLongi_augmented[,colnames(dataLongi_augmented)%in%c(id,timeVar)], sep = "\r"))
+        key2 <- do.call(paste, c(timePointsdata, sep = "\r"))
+        
+        # Find indices of rows from data1 that are in data2
+        indices <- which(key1 %in% key2)
+        PredYx<-linPred[indices,]
+        
+        #add BLUP first column
+        PredYx<-cbind(INLAmodel$summary.linear.predictor$mean[indices],PredYx)
+        #add informations 
+        Outcome<-all.vars(terms(formLong[[indice]]))[1]
+        PredYx<-cbind(timePointsdata,Outcome,PredYx)
+        colnames(PredYx)[4:(Nsample+3)]<-paste0("Sample_",c(1:Nsample))
+        
+        
+        
+        
+        
+      }else{
+        
+        # keep only indice we want: 
+        # Collapse each row into a string
+        key1 <- do.call(paste, c(dataLongi_augmented[,colnames(dataLongi_augmented)%in%c(id,timeVar)], sep = "\r"))
+        key2 <- do.call(paste, c(timePointsdata, sep = "\r"))
+        
+        # Find indices of rows from data1 that are in data2
+        indices <- which(key1 %in% key2)
+        #add BLUP first column
+        #add informations 
+        Outcome<-all.vars(terms(formLong[[indice]]))[1]
+        PredYx<-cbind(timePointsdata,Outcome,INLAmodel$summary.linear.predictor$mean[indices])
+        colnames(PredYx)[4:(Nsample+3)]<-paste0("Sample_",c(1:Nsample))
+        
+      }
+
       Yall[[indice]]<-PredYx
       
   
@@ -128,7 +133,6 @@ INLAidm<-function(timeVar,family,basRisk,assoc,
 
   Yall<-do.call(rbind,Yall)
   print("End of running joint univarite models")
-  Nsample<-NsampleHY*NsampleFE*NsampleRE
   return(Yall[,colnames(Yall)%in%c(id,timeVar,"Outcome",paste0("Sample_",c(1:Nsample)))])
   
 }

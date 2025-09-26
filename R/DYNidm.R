@@ -832,7 +832,8 @@ DYNidm <- function(formula01,
     if(missing(id)){
       stop("Need to specify id variable")
     }else{
-      if(!inherits(id,"character")){stop("id need to be a character")}
+      if(!inherits(id,"character")){stop("id need specify the column name")}
+      if(class(dataLongi[,colnames(dataLongi)%in%id])!="integer"){stop("ID for subject needs to be an integer ")}
       if(length(id)!=1){stop("id need to be a character")}
       if(!id%in%colnames(data)|!id%in%colnames(dataLongi)){stop("id need to be in data and dataLongi")}}
     
@@ -846,15 +847,17 @@ TimeCR<-ifelse(idm==1,(t1+t2)/2,
     
 if(is.null(dataY)){
     if(methodlongi=="INLA"){
+      
+      
      
       
       
       if(truncated==1){
-        formSurv<-list(inla.surv(time=TimeCR, event=idm,truncation=t0) ~ 1,
-                       inla.surv(time=TimeCR, event=iddCR,truncation=t0) ~ 1)
+        formSurv<-list(inla.surv(time=TimeCR, event=idm,truncation=t0) ~ -1,
+                       inla.surv(time=TimeCR, event=iddCR,truncation=t0) ~ -1)
       }else{
-        formSurv<-list(inla.surv(time=TimeCR, event=idm) ~ 1,
-                       inla.surv(time=TimeCR, event=iddCR) ~ 1)
+        formSurv<-list(inla.surv(time=TimeCR, event=idm) ~ -1,
+                       inla.surv(time=TimeCR, event=iddCR) ~ -1)
       }
       
       # set right environement for formulas 
@@ -872,13 +875,11 @@ if(is.null(dataY)){
                          idm=idm,
                          iddCR=iddCR,
                          TimeCR=TimeCR)
-    
     if(missing(Nsample)){
-      Nsample<-c(1,100,1)
-    }else{
-      if(!inherits(Nsample,c("numeric","integer")))stop("Nsample need to be a numeric of size 3")
-      if(length(Nsample)!=3)stop("Nsample need to be a numeric of size 3")
-    }
+      Nsample<-100}else{
+        if(!inherits(Nsample,c("integer","numeric")))stop("Nsample need to be a numeric or integer")
+        if(length(Nsample)!=1)stop("Nsample need to be a numeric or integer")
+      }
     
     
     dataY<-INLAidm(timeVar = timeVar,
@@ -891,9 +892,7 @@ if(is.null(dataY)){
                     dataSurv=dataINLA,
                     dataLongi=dataLongi,
                     id=id,
-                    NsampleHY=Nsample[1],
-                    NsampleFE=Nsample[2],
-                    NsampleRE=Nsample[3],
+                    Nsample=Nsample,
                     nproc=nproc,
                     t0=t0,
                     t1=t1, 
@@ -1046,7 +1045,7 @@ if(is.null(dataY)){
           b<-b[fix0==0]
         }else{bfix<-1}
         
-      
+    
         out<-DYNidm.splines(b=b,
                          clustertype=clustertype,
                          epsa=epsa,
@@ -1097,107 +1096,15 @@ if(is.null(dataY)){
                          dimp01=dimp01,
                          dimp02=dimp02,
                          dimp12=dimp12)
+      }
   
       
-############################## Output   ########################################
-        fix<-out$fix0
-        
-        beta<-rep(NA,size_V)
-        beta[fix==0]<-out$b
-        beta[fix==1]<-out$bfix
-        npm<-sum(fix==0)
-        
-######################### on covariance matrix #################################
-### if CV is true keep V and solve V to have inverse for confidence intervals###
-        CV<-out$istop
-        if(CV==1){
-          
-          
-          Vr <- matrix(0,npm,npm)
-          Vr[upper.tri(Vr,diag=TRUE)] <- out$v[1:(npm*(npm+1)/2)]
-          Vr <- t(Vr)
-          Vr[upper.tri(Vr,diag=TRUE)] <- out$v[1:(npm*(npm+1)/2)]
-          V <- matrix(0,size_V,size_V)
-          
-          posfix<-which(fix==1)
-          V[setdiff(1:size_V,posfix),setdiff(1:size_V,posfix)] <- Vr
-          
-          Hr<--solve(Vr)
-          H<- matrix(0,size_V,size_V)
-          H[setdiff(1:size_V,posfix),setdiff(1:size_V,posfix)] <- Hr
-          
-        }else{ #otherwise put 0
-          Hr <- matrix(0,npm,npm)
-          Hr[upper.tri(Hr,diag=TRUE)] <- out$v[1:(npm*(npm+1)/2)]
-          Hr <- t(Hr)
-          Hr[upper.tri(Hr,diag=TRUE)] <- out$v[1:(npm*(npm+1)/2)]
-          H <- matrix(0,size_V,size_V)
-          
-          posfix<-which(fix==1)
-          H[setdiff(1:size_V,posfix),setdiff(1:size_V,posfix)] <- Hr
-          
-          V<- matrix(0,size_V,size_V)
-          
-          
-        }
-        
-############################### on beta and HR #################################
-        if (sum(NC)>0){  
-          
-          # if at least one covariate
-          
-          betaCoef <- beta[(size_spline+1):size_V]
-          names(betaCoef) <- c(Xnames01,Xnames02,Xnames12)
-          fit$coef <- betaCoef
-          fit$HR <- exp(betaCoef)
-          
-        }
-        
-        
-############################ on splines parameters values ######################
-        theta_names <- cbind(c(rep("theta01",(nknots01+2)),rep("theta02",(nknots02+2)),rep("theta12",(nknots12+2))),c((1:(nknots01+2)),(1:(nknots02+2)),(1:(nknots12+2))))
-        theta_names <- as.vector(apply(theta_names,1,paste,collapse=" "))
-        
-        
-        names(beta)<- c(theta_names,c(Xnames01,Xnames02,Xnames12))
-        names(fix)<-c(theta_names,c(Xnames01,Xnames02,Xnames12))
-        colnames(V) <- c(theta_names,c(Xnames01,Xnames02,Xnames12))
-        rownames(V) <- c(theta_names,c(Xnames01,Xnames02,Xnames12))
-        colnames(H) <- c(theta_names,c(Xnames01,Xnames02,Xnames12))
-        rownames(H) <- c(theta_names,c(Xnames01,Xnames02,Xnames12))
-        
-        theta01<-beta[1:(nknots01+2)]
-        theta02<-beta[(nknots01+3):(nknots01+nknots02+4)]
-        theta12<-beta[(nknots01+nknots02+5):(nknots01+nknots12+nknots02+6)]
-        
-        
-        
-        cv<-list(ca=out$ca,cb=out$cb,rdm=out$rdm)
-        
-        fit$knots01 <- knots01
-        fit$knots02 <- knots02
-        fit$knots12 <- knots12
-        fit$nknots01 <- nknots01
-        fit$nknots02 <- nknots02
-        fit$nknots12 <- nknots12
-        fit$theta01 <- theta01
-        fit$theta02 <- theta02
-        fit$theta12 <- theta12
-        
-        
-############# on times to do prediction on #################################
-        fit$time <- matrix(NA,ncol=3,nrow=100)
-        fit$time[,1]<-seq(from=knots01[1],to=knots01[length(knots01)],length.out=100)
-        fit$time[,2]<-seq(from=knots02[1],to=knots02[length(knots02)],length.out=100)
-        fit$time[,3]<-seq(from=knots12[1],to=knots12[length(knots12)],length.out=100)
-        
-        
-      }
+
 ######################### with weibull baseline risk ###########################
       
       if(method=="Weib"){
 
-        #browser()
+   
         #save(ctime,file="testctime.RData")
         
         out <- DYNidm.weib(b=b,
