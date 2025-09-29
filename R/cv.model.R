@@ -216,7 +216,6 @@ DYNcv.model<-function(beta,
                    lambda,
                    alpha){
   
-  #browser()
   
   # add to do base::which for CRAN check 
   BETA<-beta[fix==0]

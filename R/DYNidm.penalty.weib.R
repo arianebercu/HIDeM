@@ -250,7 +250,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                     dimp12=dimp12,
                                                     Ntime=NtimePoints)
                                  
-                                 output<-output$v
+                                 output<--output$v
                                  if(ite==0){# loglik penalised
                                    fn.value<-gaussDYNidmlLikelihoodweibpena(b=b,
                                                                     npm=npm,
@@ -297,7 +297,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                      min<-npm*(npm+1)/2
                                      fu <- output[(min+1):length(output)]
                                      V<- matrix(0,npm,npm)
-                                     V[upper.tri(V,diag=TRUE)] <- output[1:min]
+                                     V[lower.tri(V,diag=TRUE)] <- output[1:min]
                                      V<-V+t(V)
                                      diag(V)<-diag(V)/2
                                      # deriva gives information matrix
@@ -313,7 +313,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                  fu <- output[(min+1):length(output)]
                                  
                                  V<- matrix(0,npm,npm)
-                                 V[upper.tri(V,diag=TRUE)] <- output[1:min]
+                                 V[lower.tri(V,diag=TRUE)] <- output[1:min]
                                  V<-V+t(V)
                                  diag(V)<-diag(V)/2
                                  # deriva gives information matrix
@@ -443,7 +443,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                  # we have issue if res is NA or if not higher than previous one 
                                  # if not better or do not exist need to readjust
                                  # value of beta 
-                                 if(res %in%c(-1e9,1e9) | res < fn.value){
+                                 if(res %in%c(-1e9,1e9) | abs(res) < abs(fn.value)){
                                    
                                    th<-1e-5
                                    step<-log(1.5)
@@ -717,7 +717,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                  fn.value<-fn.valuenew
                                  
                                  # eval.cv beta valid only if validity.param=T
-                                 if(eval.cv.beta[ite]<epsa & eval.cv.spline[ite]<epsa & eval.cv.loglik[ite]<epsb & validity==T){
+                                 if(((eval.cv.beta[ite]<epsa + eval.cv.spline[ite])<epsa) & eval.cv.loglik[ite]<epsb & validity==T){
                                    converged<-T}
                                  
                                  
@@ -768,13 +768,13 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                   dimp02=dimp02,
                                                   dimp12=dimp12,
                                                   Ntime=NtimePoints)
-                                   output<-output$v
+                                   output<--output$v
                                 min<-npm*(npm+1)/2
                                  
                                  fu <- output[(min+1):length(output)]
                                  
                                  V<- matrix(0,npm,npm)
-                                 V[upper.tri(V,diag=TRUE)] <- output[1:min]
+                                 V[lower.tri(V,diag=TRUE)] <- output[1:min]
                                  V<-V+t(V)
                                  diag(V)<-diag(V)/2
                                  # deriva gives information matrix
@@ -1063,7 +1063,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                    # we have issue if res is NA or if not higher than previous one 
                                    # if not better or do not exist need to readjust
                                    # value of beta 
-                                   if(res %in%c(-1e9,1e9) | res < fn.value){
+                                   if(res %in%c(-1e9,1e9) | abs(res) < abs(fn.value)){
                                      
                                      th<-1e-5
                                      step<-log(1.5)
@@ -1334,7 +1334,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                    fn.value<-fn.valuenew
                                    
                                    # eval.cv beta valid only if validity.param=T
-                                   if(eval.cv.beta[ite]<epsa & eval.cv.spline[ite]<epsa & eval.cv.loglik[ite]<epsb & validity==T){
+                                   if(((eval.cv.beta[ite]<epsa + eval.cv.spline[ite])<epsa) & eval.cv.loglik[ite]<epsb & validity==T){
                                      converged<-T}
                                    
                                    
@@ -1496,7 +1496,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                      dimp02=dimp02,
                                                      dimp12=dimp12,
                                                      Ntime=NtimePoints)
-                                 output<-output$v
+                                 output<--output$v
                                  
                                if(ite==0){
                                    fn.value<-gaussDYNidmlLikelihoodweibpena(b=b,
@@ -1545,7 +1545,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                        min<-npm*(npm+1)/2
                                        fu <- output[(min+1):length(output)]
                                        V<- matrix(0,npm,npm)
-                                       V[upper.tri(V,diag=TRUE)] <- output[1:min]
+                                       V[lower.tri(V,diag=TRUE)] <- output[1:min]
                                        V<-V+t(V)
                                        diag(V)<-diag(V)/2
                                        # deriva gives information matrix
@@ -1561,7 +1561,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                    fu <- output[(min+1):length(output)]
                                    
                                    V<- matrix(0,npm,npm)
-                                   V[upper.tri(V,diag=TRUE)] <- output[1:min]
+                                   V[lower.tri(V,diag=TRUE)] <- output[1:min]
                                    V<-V+t(V)
                                    diag(V)<-diag(V)/2
                                    # deriva gives information matrix
@@ -1690,7 +1690,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                  # if not better or do not exist need to readjust
                                  # value of beta 
                                  browser()
-                                if(res %in%c(-1e9,1e9) | res < fn.value){
+                                if(res %in%c(-1e9,1e9) | abs(res) < abs(fn.value)){
                                   
                                   print(paste0("needed update at ite :",ite))
                                    th<-1e-5
@@ -1967,7 +1967,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                  fn.value<-fn.valuenew
                                  
                                  # eval.cv beta valid only if validity.param=T
-                                 if(eval.cv.beta[ite]<epsa & eval.cv.spline[ite]<epsa & eval.cv.loglik[ite]<epsb & validity==T){
+                                 if(((eval.cv.beta[ite]+eval.cv.spline[ite])<epsa) & eval.cv.loglik[ite]<epsb & validity==T){
                                    converged<-T}
                                  
                                  
@@ -2016,14 +2016,14 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                   dimp02=dimp02,
                                                   dimp12=dimp12,
                                                   Ntime=NtimePoints)
-                                   output<-output$v
+                                   output<--output$v
                                    
                                    min<-npm*(npm+1)/2
                                    
                                    fu <- output[(min+1):length(output)]
                                    
                                    V<- matrix(0,npm,npm)
-                                   V[upper.tri(V,diag=TRUE)] <- output[1:min]
+                                   V[lower.tri(V,diag=TRUE)] <- output[1:min]
                                    V<-V+t(V)
                                    diag(V)<-diag(V)/2
                                    # deriva gives information matrix
@@ -2306,7 +2306,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                        # we have issue if res is NA or if not higher than previous one 
                                        # if not better or do not exist need to readjust
                                        # value of beta 
-                                       if(res %in%c(-1e9,1e9) | res < fn.value){
+                                       if(res %in%c(-1e9,1e9) | abs(res) < abs(fn.value)){
                                          
                                          th<-1e-5
                                          step<-log(1.5)
@@ -2582,7 +2582,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                        fn.value<-fn.valuenew
                                        
                                        # eval.cv beta valid only if validity.param=T
-                                       if(eval.cv.beta[ite]<epsa & eval.cv.spline[ite]<epsa & eval.cv.loglik[ite]<epsb & validity==T){
+                                       if(((eval.cv.beta[ite]<epsa + eval.cv.spline[ite])<epsa) & eval.cv.loglik[ite]<epsb & validity==T){
                                          converged<-T}
                                        
                                        
