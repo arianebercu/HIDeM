@@ -82,7 +82,8 @@ DYNidm.weib<-function(b,fix0,size_V,
   
   
   }else{
-    y01<-as.double(rep(0,N*NtimePoints))
+    y01<-matrix(0,ncol=Nsample,nrow=N*NtimePoints)
+    colnames(y01)<-paste0("Sample_",c(1:Nsample))
   }
   
   if(length(outcome02)>=1){
@@ -90,7 +91,8 @@ DYNidm.weib<-function(b,fix0,size_V,
     y02<-y02[order(y02$ID,y02$order),]
     
   }else{
-    y02<-as.double(rep(0,N*NtimePoints))
+    y02<-matrix(0,ncol=Nsample,nrow=N*NtimePoints)
+    colnames(y02)<-paste0("Sample_",c(1:Nsample))
   }
   
   if(length(outcome12)>=1){
@@ -99,7 +101,8 @@ DYNidm.weib<-function(b,fix0,size_V,
     y12<-y12[order(y12$ID,y12$order),]
     
   }else{
-    y12<-as.double(rep(0,N*NtimePoints))
+    y12<-matrix(0,ncol=Nsample,nrow=N*NtimePoints)
+    colnames(y12)<-paste0("Sample_",c(1:Nsample))
   }
 
  
@@ -207,7 +210,8 @@ DYNidm.weib<-function(b,fix0,size_V,
       
       
     }else{
-      y01<-as.double(rep(0,N*NtimePoints))
+      y01<-matrix(0,ncol=Nsample,nrow=N*NtimePoints)
+      colnames(y01)<-paste0("Sample_",c(1:Nsample))
     }
     
     if(length(outcome02)>=1){
@@ -216,7 +220,8 @@ DYNidm.weib<-function(b,fix0,size_V,
       y02<-y02[order(y02$ID,y02$order),]
       
     }else{
-      y02<-as.double(rep(0,N*NtimePoints))
+      y02<-matrix(0,ncol=Nsample,nrow=N*NtimePoints)
+      colnames(y02)<-paste0("Sample_",c(1:Nsample))
     }
     
     if(length(outcome12)>=1){
@@ -225,13 +230,14 @@ DYNidm.weib<-function(b,fix0,size_V,
       y12<-y12[order(y12$ID,y12$order),]
       
     }else{
-      y12<-as.double(rep(0,N*NtimePoints))
+      y12<-matrix(0,ncol=Nsample,nrow=N*NtimePoints)
+      colnames(y12)<-paste0("Sample_",c(1:Nsample))
     }
     
     
     out<-list()
     length(out)<-Nsample
-#browser()
+ browser()
 
     for(k in 1:Nsample){
       print(paste0("Estimating illness-death model on sample ",k))

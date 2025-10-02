@@ -1,5 +1,5 @@
 ### Code:
-##' @title Penalised Illness-death model algorithm with weibull baseline risk
+##' @title Penalised Illness-death model algorithm with M-spline baseline risk
 ##' @param b  parameters not fixed
 ##' @param size_V number of parameters
 ##' @param fix0 indicators of fixed and unfixed parameters
@@ -44,11 +44,12 @@
 #' @useDynLib HIDeM
 
 
-DYNidm.penalty.weib<-function(b,fix0,size_V,
+DYNidm.penalty.splines<-function(b,fix0,size_V,
                    clustertype,epsa,epsb,epsd,eps.eigen,nproc,maxiter,maxiter.pena,
                    ctime,N,
                    ve01,ve02,ve12,dimnva01,dimnva02,dimnva12,nvat01,nvat02,nvat12,
-                   t0,t1,t2,t3,troncature,
+                   t0,t1,t2,t3,troncature,knots01,knots02,knots12,
+                   nknots01,nknots02,nknots12,
                    nlambda01,lambda01,nlambda02,lambda02,nlambda12,lambda12,
                    alpha,penalty.factor,penalty,partialH,
                    y01,y02,y12,NtimePoints,
@@ -59,7 +60,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
 
   # need to keep original fix to calculate for beta 
   
-
+  browser()
   V0<-NA
   fix00<-fix0
   
@@ -112,31 +113,32 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
   # need to check that same variable in each transition :
   
   # Initiate value of spline
-  
-   s.start<-b[1:6]
+  nspline<-nknots01+nknots02+nknots12+6
+   s.start<-b[1:nspline]
   
   # Initiate value of eta : all the same for each lambda
   
-  beta.start<-b[(6+1):(size_V)]
+  beta.start<-b[(nspline+1):(size_V)]
   
   
   combine<-0
   
   # fix0 will be used to calculate derivatives and second derivatives only
   # for Beta and not modelPar01,02,12
-  fix0[1:6]<-rep(1,6)
+  fix0[1:nspline]<-rep(1,nspline)
   fix0.beta<-fix00
-  fix0.beta[(6+1):size_V]<-rep(1,size_V-6)
+  fix0.beta[(nspline+1):size_V]<-rep(1,size_V-nspline)
 
   npm<-sum(fix0==0)
-  npmweib<-sum(fix00[1:6]==0)
+  npmspline<-sum(fix00[1:nspline]==0)
   
-  npm01<-ifelse(nvat01>0,sum(fix0[7:(7+nvat01-1)]==0),0)
-  npm01Y<-ifelse(p01>0,sum(fix0[(7+nvat01+nvat02+nvat12):(6+nvat01+nvat02+nvat12+p01)]==0),0)
-  npm02<-ifelse(nvat02>0,sum(fix0[(7+nvat01):(6+nvat01+nvat02)]==0),0)
-  npm02Y<-ifelse(p02>0,sum(fix0[(7+nvat01+nvat02+nvat12+p01):(6+nvat01+nvat02+nvat12+p01+p02)]==0),0)
-  npm12<-ifelse(nvat12>0,sum(fix0[(7+nvat01+nvat02):(7+nvat01+nvat02+nvat12)]==0),0)
-  npm12Y<-ifelse(p12>0,sum(fix0[(7+nvat01+nvat02+nvat12+p01+p02):(6+nvat01+nvat02+nvat12+p01+p12+p02)]==0),0)
+  npm01<-ifelse(nvat01>0,sum(fix0[(nspline+1):(nspline+nvat01)]==0),0)
+  npm01Y<-ifelse(p01>0,sum(fix0[(nspline+1+nvat01+nvat02+nvat12):(nspline+nvat01+nvat02+nvat12+p01)]==0),0)
+  
+  npm02<-ifelse(nvat02>0,sum(fix0[(nspline+1+nvat01):(nspline+nvat01+nvat02)]==0),0)
+  npm02Y<-ifelse(p02>0,sum(fix0[(nspline+1+nvat01+nvat02+nvat12+p01):(nspline+nvat01+nvat02+nvat12+p01+p02)]==0),0)
+  npm12<-ifelse(nvat12>0,sum(fix0[(nspline+1+nvat01+nvat02):(nspline+1+nvat01+nvat02+nvat12)]==0),0)
+  npm12Y<-ifelse(p12>0,sum(fix0[(nspline+1+nvat01+nvat02+nvat12+p01+p02):(nspline+nvat01+nvat02+nvat12+p01+p12+p02)]==0),0)
   
   if(partialH==F){
     min<-(npm*(npm+1))/2
@@ -147,7 +149,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
   outputNsample<-list()
   length(outputNsample)<-Nsample
   
-  
+  browser()
   for(idsample in 1:Nsample){
   
     if(!is.null(dim(y01))){
@@ -165,7 +167,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
     }else{
       y12k<-y12
     }
-   
+    browser()
     
   if(nproc >1){
     
@@ -198,8 +200,8 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                  beta<-beta.start
                                  s<-s.start
                                }else{
-                                 s<-outputNsample[[1]]$b[1:6,id.lambda]
-                                 beta<-outputNsample[[1]]$b[7:size_V,id.lambda]
+                                 s<-outputNsample[[1]]$b[1:nspline,id.lambda]
+                                 beta<-outputNsample[[1]]$b[(nspline+1):size_V,id.lambda]
                               }
                                
                                converged<-F
@@ -224,15 +226,21 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                  b<-b[fix0==0]
                                  # derivative of loglik
                                  
-                                 output<-deriva(funcpa=gaussDYNidmlLikelihoodweib,
+                                 output<-deriva(funcpa=gaussDYNidmlLikelihood,
                                                   b=b,
                                                 h=1e-8,
                                                     npm=npm,
                                                     npar=size_V,
                                                     bfix=bfix,
                                                     fix=fix0,
+                                                    zi01=knots01,
+                                                    zi02=knots02,
+                                                    zi12=knots12,
                                                     ctime=ctime,
                                                     no=N,
+                                                    nz01=nknots01,
+                                                    nz02=nknots02,
+                                                    nz12=nknots12,
                                                     ve01=ve01,
                                                     ve02=ve02,
                                                     ve12=ve12,
@@ -260,13 +268,19 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                  output<-output$v
                                 
                                  if(ite==0){# loglik penalised
-                                   fn.value<-gaussDYNidmlLikelihoodweibpena(b=b,
+                                   fn.value<-gaussDYNidmlLikelihoodpena(b=b,
                                                                     npm=npm,
                                                                     npar=size_V,
                                                                     bfix=bfix,
                                                                     fix=fix0,
+                                                                    zi01=knots01,
+                                                                    zi02=knots02,
+                                                                    zi12=knots12,
                                                                     ctime=ctime,
                                                                     no=N,
+                                                                    nz01=nknots01,
+                                                                    nz02=nknots02,
+                                                                    nz12=nknots12,
                                                                     ve01=ve01,
                                                                     ve02=ve02,
                                                                     ve12=ve12,
@@ -392,7 +406,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                      nva01Y=npm01Y,
                                                      nva02Y=npm02Y,
                                                      nva12Y=npm12Y,
-                                                     fix=fix0[7:size_V],
+                                                     fix=fix0[(nspline+1):size_V],
                                                      penalty.factor=penalty.factor,
                                                      penalty=penalty,
                                                      v=V,
@@ -406,16 +420,22 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                  
                                  b<-c(s,output.cv$b)
                                  
-                                 betanew<-b[(6+1):size_V]
+                                 betanew<-b[(nspline+1):size_V]
                                  
                                  # penalised loglik see if inferior to previous
-                                 res<-gaussDYNidmlLikelihoodweibpena(b=b,
+                                 res<-gaussDYNidmlLikelihoodpena(b=b,
                                                              npm=size_V,
                                                              npar=size_V,
                                                              bfix=1,
                                                              fix=rep(0,size_V),
+                                                             zi01=knots01,
+                                                             zi02=knots02,
+                                                             zi12=knots12,
                                                              ctime=ctime,
                                                              no=N,
+                                                             nz01=nknots01,
+                                                             nz02=nknots02,
+                                                             nz12=nknots12,
                                                              ve01=ve01,
                                                              ve02=ve02,
                                                              ve12=ve12,
@@ -479,14 +499,20 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                   step=step,
                                                   b=beta,
                                                   delta=delta,
-                                                  funcpa=gaussDYNidmlLikelihoodweibpena,
+                                                  funcpa=gaussDYNidmlLikelihoodpena,
                                                   res.out.error=res.out.error,
                                                   npm=npm,
                                                   npar=size_V,
                                                   bfix=s,
                                                   fix=fix0,
+                                                  zi01=knots01,
+                                                  zi02=knots02,
+                                                  zi12=knots12,
                                                   ctime=ctime,
                                                   no=N,
+                                                  nz01=nknots01,
+                                                  nz02=nknots02,
+                                                  nz12=nknots12,
                                                   ve01=ve01,
                                                   ve02=ve02,
                                                   ve12=ve12,
@@ -521,13 +547,19 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                    b<-c(s,betanew)
                                    
                                    
-                                   res<-gaussDYNidmlLikelihoodweibpena(b=b,
+                                   res<-gaussDYNidmlLikelihoodpena(b=b,
                                                                npm=size_V,
                                                                npar=size_V,
                                                                bfix=1,
                                                                fix=rep(0,size_V),
+                                                               zi01=knots01,
+                                                               zi02=knots02,
+                                                               zi12=knots12,
                                                                ctime=ctime,
                                                                no=N,
+                                                               nz01=nknots01,
+                                                               nz02=nknots02,
+                                                               nz12=nknots12,
                                                                ve01=ve01,
                                                                ve02=ve02,
                                                                ve12=ve12,
@@ -580,18 +612,24 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                  # update for modelPar
                                  
                                  output.mla<- marqLevAlg::mla(b=b,
-                                                  fn=gaussDYNidmlLikelihoodweib,
+                                                  fn=gaussDYNidmlLikelihood,
                                                   epsa=epsa,
                                                   epsb=epsb,
                                                   epsd=epsd,
                                                   maxiter=maxiter.pena,
                                                   minimize=F,
-                                                  npm= npmweib,
+                                                  npm= npmspline,
                                                   npar=size_V,
                                                   bfix=bfix,
                                                   fix=fix0.beta,
+                                                  zi01=knots01,
+                                                  zi02=knots02,
+                                                  zi12=knots12,
                                                   ctime=ctime,
                                                   no=N,
+                                                  nz01=nknots01,
+                                                  nz02=nknots02,
+                                                  nz12=nknots12,
                                                   ve01=ve01,
                                                   ve02=ve02,
                                                   ve12=ve12,
@@ -621,7 +659,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                  # mla output is loglik
                                  # new values for splines:
                                  snew<-s
-                                 snew[fix00[1:6]==0]<-output.mla$b
+                                 snew[fix00[1:nspline]==0]<-output.mla$b
                                
                                  
                                  
@@ -743,15 +781,21 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                    bfix<-b[fix0==1]
                                    b<-b[fix0==0]
                                    
-                                   output<-deriva(funcpa=gaussDYNidmlLikelihoodweib,
+                                   output<-deriva(funcpa=gaussDYNidmlLikelihood,
                                                   b=b,
                                                   h=1e-8,
                                                   npm=npm,
                                                   npar=size_V,
                                                   bfix=bfix,
                                                   fix=fix0,
+                                                  zi01=knots01,
+                                                  zi02=knots02,
+                                                  zi12=knots12,
                                                   ctime=ctime,
                                                   no=N,
+                                                  nz01=nknots01,
+                                                  nz02=nknots02,
+                                                  nz12=nknots12,
                                                   ve01=ve01,
                                                   ve02=ve02,
                                                   ve12=ve12,
@@ -825,8 +869,8 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                    beta<-beta.start
                                    s<-s.start
                                  }else{
-                                   s<-outputNsample[[1]]$b[1:6,id.lambda]
-                                   beta<-outputNsample[[1]]$b[7:size_V,id.lambda]
+                                   s<-outputNsample[[1]]$b[1:nspline,id.lambda]
+                                   beta<-outputNsample[[1]]$b[(nspline+1):size_V,id.lambda]
                                  }
                                  
                                  converged<-F
@@ -850,14 +894,20 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                    # derivative of loglik
                                    
                                      
-                                     output<-derivadiag(funcpa=gaussDYNidmlLikelihoodweib,
+                                     output<-derivadiag(funcpa=gaussDYNidmlLikelihood,
                                                     b=b,
                                               npm=npm,
                                               npar=size_V,
                                               bfix=bfix,
                                               fix=fix0,
+                                              zi01=knots01,
+                                              zi02=knots02,
+                                              zi12=knots12,
                                               ctime=ctime,
                                               no=N,
+                                              nz01=nknots01,
+                                              nz02=nknots02,
+                                              nz12=nknots12,
                                               ve01=ve01,
                                               ve02=ve02,
                                               ve12=ve12,
@@ -885,13 +935,19 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                      output<-output$v
                                    
                                      if(ite==0){# loglik penalised
-                                       fn.value<-gaussDYNidmlLikelihoodweibpena(b=b,
+                                       fn.value<-gaussDYNidmlLikelihoodpena(b=b,
                                                                            npm=npm,
                                                                            npar=size_V,
                                                                            bfix=bfix,
                                                                            fix=fix0,
+                                                                           zi01=knots01,
+                                                                           zi02=knots02,
+                                                                           zi12=knots12,
                                                                            ctime=ctime,
                                                                            no=N,
+                                                                           nz01=nknots01,
+                                                                           nz02=nknots02,
+                                                                           nz12=nknots12,
                                                                            ve01=ve01,
                                                                            ve02=ve02,
                                                                            ve12=ve12,
@@ -1013,7 +1069,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                           nva01Y=npm01Y,
                                                           nva02Y=npm02Y,
                                                           nva12Y=npm12Y,
-                                                          fix=fix0[7:size_V],
+                                                          fix=fix0[(nspline+1):size_V],
                                                           penalty.factor=penalty.factor,
                                                           penalty=penalty,
                                                           v=V,
@@ -1027,16 +1083,22 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                    
                                    b<-c(s,output.cv$b)
                                    
-                                   betanew<-b[(6+1):size_V]
+                                   betanew<-b[(nspline+1):size_V]
                                    
                                    # penalised loglik see if inferior to previous
-                                   res<-gaussDYNidmlLikelihoodweibpena(b=b,
+                                   res<-gaussDYNidmlLikelihoodpena(b=b,
                                                                   npm=size_V,
                                                                   npar=size_V,
                                                                   bfix=1,
                                                                   fix=rep(0,size_V),
+                                                                  zi01=knots01,
+                                                                  zi02=knots02,
+                                                                  zi12=knots12,
                                                                   ctime=ctime,
                                                                   no=N,
+                                                                  nz01=nknots01,
+                                                                  nz02=nknots02,
+                                                                  nz12=nknots12,
                                                                   ve01=ve01,
                                                                   ve02=ve02,
                                                                   ve12=ve12,
@@ -1101,14 +1163,20 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                     step=step,
                                                     b=beta,
                                                     delta=delta,
-                                                    funcpa=gaussDYNidmlLikelihoodweibpena,
+                                                    funcpa=gaussDYNidmlLikelihoodpena,
                                                     res.out.error=res.out.error,
                                                     npm=npm,
                                                     npar=size_V,
                                                     bfix=s,
                                                     fix=fix0,
+                                                    zi01=knots01,
+                                                    zi02=knots02,
+                                                    zi12=knots12,
                                                     ctime=ctime,
                                                     no=N,
+                                                    nz01=nknots01,
+                                                    nz02=nknots02,
+                                                    nz12=nknots12,
                                                     ve01=ve01,
                                                     ve02=ve02,
                                                     ve12=ve12,
@@ -1142,13 +1210,19 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                      b<-c(s,betanew)
                                      
                                      
-                                     res<-gaussDYNidmlLikelihoodweibpena(b=b,
+                                     res<-gaussDYNidmlLikelihoodpena(b=b,
                                                                     npm=size_V,
                                                                     npar=size_V,
                                                                     bfix=1,
                                                                     fix=rep(0,size_V),
+                                                                    zi01=knots01,
+                                                                    zi02=knots02,
+                                                                    zi12=knots12,
                                                                     ctime=ctime,
                                                                     no=N,
+                                                                    nz01=nknots01,
+                                                                    nz02=nknots02,
+                                                                    nz12=nknots12,
                                                                     ve01=ve01,
                                                                     ve02=ve02,
                                                                     ve12=ve12,
@@ -1202,18 +1276,24 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                    # update for modelPar
                                   
                                    output.mla<- marqLevAlg::mla(b=b,
-                                                                fn=gaussDYNidmlLikelihoodweib,
+                                                                fn=gaussDYNidmlLikelihood,
                                                                 epsa=epsa,
                                                                 epsb=epsb,
                                                                 epsd=epsd,
                                                                 maxiter=maxiter.pena,
                                                                 minimize=F,
-                                                                npm=npmweib,
+                                                                npm=npmspline,
                                                                 npar=size_V,
                                                                 bfix=bfix,
                                                                 fix=fix0.beta,
+                                                                zi01=knots01,
+                                                                zi02=knots02,
+                                                                zi12=knots12,
                                                                 ctime=ctime,
                                                                 no=N,
+                                                                nz01=nknots01,
+                                                                nz02=nknots02,
+                                                                nz12=nknots12,
                                                                 ve01=ve01,
                                                                 ve02=ve02,
                                                                 ve12=ve12,
@@ -1243,7 +1323,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                    # mla output is loglik
                                    # new values for splines:
                                    snew<-s
-                                   snew[fix00[1:6]==0]<-output.mla$b
+                                   snew[fix00[1:nspline]==0]<-output.mla$b
                                    if(nvat01>0){
                                      b01<-betanew[1:nvat01][penalty.factor[1:nvat01]==1]
                                      if(p01>0){
@@ -1362,14 +1442,20 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                      bfix<-b[fix0==1]
                                      b<-b[fix0==0]
                                      
-                                     output<-derivadiag(funcpa=gaussDYNidmlLikelihoodweib,
+                                     output<-derivadiag(funcpa=gaussDYNidmlLikelihood,
                                                         b=b,
                                                         npm=npm,
                                                         npar=size_V,
                                                         bfix=bfix,
                                                         fix=fix0,
+                                                        zi01=knots01,
+                                                        zi02=knots02,
+                                                        zi12=knots12,
                                                         ctime=ctime,
                                                         no=N,
+                                                        nz01=nknots01,
+                                                        nz02=nknots02,
+                                                        nz12=nknots12,
                                                         ve01=ve01,
                                                         ve02=ve02,
                                                         ve12=ve12,
@@ -1450,8 +1536,8 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                  beta<-beta.start
                                  s<-s.start
                                }else{
-                                 s<-outputNsample[[1]]$b[1:6,id.lambda]
-                                 beta<-outputNsample[[1]]$b[7:size_V,id.lambda]
+                                 s<-outputNsample[[1]]$b[1:nspline,id.lambda]
+                                 beta<-outputNsample[[1]]$b[(nspline+1):size_V,id.lambda]
                                }
                                
                                converged<-F
@@ -1465,24 +1551,30 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                eval.loglik<-rep(NA,maxiter+1)
                                eval.validity<-rep(NA,maxiter+1)
                                
-                               
+                               browser()
                                while(converged==F & ite<=maxiter){
                                
-                                 
+                                 browser()
                                  b<-c(s,beta)
                                  bfix<-b[fix0==1]
                                  b<-b[fix0==0]
                                
-                                 output<-deriva(funcpa=gaussDYNidmlLikelihoodweib,
+                                 output<-deriva(funcpa=gaussDYNidmlLikelihood,
                                                 #h=.Machine$double.eps,
                                                 h=1e-8,
-                                                      b=b,
-                                                        npm=npm,
-                                                        npar=size_V,
-                                                        bfix=bfix,
-                                                        fix=fix0,
-                                                        ctime=ctime,
-                                                        no=N,
+                                                b=b,
+                                                npm=npm,
+                                                npar=size_V,
+                                                bfix=bfix,
+                                                fix=fix0,
+                                                zi01=knots01,
+                                                zi02=knots02,
+                                                zi12=knots12,
+                                                ctime=ctime,
+                                                no=N,
+                                                nz01=nknots01,
+                                                nz02=nknots02,
+                                                nz12=nknots12,
                                                         ve01=ve01,
                                                         ve02=ve02,
                                                         ve12=ve12,
@@ -1516,13 +1608,19 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                 
                                  
                                if(ite==0){
-                                   fn.value<-gaussDYNidmlLikelihoodweibpena(b=b,
+                                   fn.value<-gaussDYNidmlLikelihoodpena(b=b,
                                                                        npm=npm,
                                                                        npar=size_V,
                                                                        bfix=bfix,
                                                                        fix=fix0,
+                                                                       zi01=knots01,
+                                                                       zi02=knots02,
+                                                                       zi12=knots12,
                                                                        ctime=ctime,
                                                                        no=N,
+                                                                       nz01=nknots01,
+                                                                       nz02=nknots02,
+                                                                       nz12=nknots12,
                                                                        ve01=ve01,
                                                                        ve02=ve02,
                                                                        ve12=ve12,
@@ -1571,7 +1669,8 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                      pbr_compu<-1
                                      break
                                    }
-                                   
+                                  
+                                 browser() 
                                  fu<-output[(min+1):length(output)]
                                  V<-matrix(0,nrow=npm,ncol=npm)
                                  V[upper.tri(V,diag=T)]<-output[1:min]
@@ -1653,7 +1752,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                  
                             
                                  # update beta
-                                
+                                 browser()
                                  output.cv<-DYNcv.model(beta=beta,
                                                         nva01=npm01,
                                                         nva02=npm02,
@@ -1661,7 +1760,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                         nva01Y=npm01Y,
                                                         nva02Y=npm02Y,
                                                         nva12Y=npm12Y,
-                                                        fix=fix0[7:size_V],
+                                                        fix=fix0[(nspline+1):size_V],
                                                         penalty.factor=penalty.factor,
                                                         penalty=penalty,
                                                         v=V,
@@ -1675,16 +1774,22 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                
                                  b<-c(s,output.cv$b)
                                  
-                                 betanew<-b[(6+1):size_V]
+                                 betanew<-b[(nspline+1):size_V]
                                  
                                  # penalised loglik see if inferior to previous
-                                 res<-gaussDYNidmlLikelihoodweibpena(b=b,
+                                 res<-gaussDYNidmlLikelihoodpena(b=b,
                                                                 npm=size_V,
                                                                 npar=size_V,
                                                                 bfix=1,
                                                                 fix=rep(0,size_V),
+                                                                zi01=knots01,
+                                                                zi02=knots02,
+                                                                zi12=knots12,
                                                                 ctime=ctime,
                                                                 no=N,
+                                                                nz01=nknots01,
+                                                                nz02=nknots02,
+                                                                nz12=nknots12,
                                                                 ve01=ve01,
                                                                 ve02=ve02,
                                                                 ve12=ve12,
@@ -1719,7 +1824,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                  # we have issue if res is NA or if not higher than previous one 
                                  # if not better or do not exist need to readjust
                                  # value of beta 
-                              
+                                 browser()
                               
                                 if(res %in%c(-1e9,1e9) | res < fn.value){
                                   
@@ -1754,14 +1859,20 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                   step=step,
                                                   b=beta,
                                                   delta=delta,
-                                                  funcpa=gaussDYNidmlLikelihoodweibpena,
+                                                  funcpa=gaussDYNidmlLikelihoodpena,
                                                   res.out.error=res.out.error,
                                                   npm=npm,
                                                   npar=size_V,
                                                   bfix=s,
                                                   fix=fix0,
+                                                  zi01=knots01,
+                                                  zi02=knots02,
+                                                  zi12=knots12,
                                                   ctime=ctime,
                                                   no=N,
+                                                  nz01=nknots01,
+                                                  nz02=nknots02,
+                                                  nz12=nknots12,
                                                   ve01=ve01,
                                                   ve02=ve02,
                                                   ve12=ve12,
@@ -1796,13 +1907,19 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                    b<-c(s,betanew)
                                    
                                    
-                                   res<-gaussDYNidmlLikelihoodweibpena(b=b,
+                                   res<-gaussDYNidmlLikelihoodpena(b=b,
                                                                   npm=size_V,
                                                                   npar=size_V,
                                                                   bfix=1,
                                                                   fix=rep(0,size_V),
+                                                                  zi01=knots01,
+                                                                  zi02=knots02,
+                                                                  zi12=knots12,
                                                                   ctime=ctime,
                                                                   no=N,
+                                                                  nz01=nknots01,
+                                                                  nz02=nknots02,
+                                                                  nz12=nknots12,
                                                                   ve01=ve01,
                                                                   ve02=ve02,
                                                                   ve12=ve12,
@@ -1853,21 +1970,27 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                  bfix<-b[fix0.beta==1]
                                  b<-b[fix0.beta==0]
                                  # update modelPar
-                                 
+                                 browser()
                                 
                                  output.mla<- marqLevAlg::mla(b=b,
-                                                              fn=gaussDYNidmlLikelihoodweib,
+                                                              fn=gaussDYNidmlLikelihood,
                                                               epsa=epsa,
                                                               epsb=epsb,
                                                               epsd=epsd,
                                                               maxiter=maxiter.pena,
                                                               minimize=F,
-                                                              npm=npmweib,
+                                                              npm=npmspline,
                                                               npar=size_V,
                                                               bfix=bfix,
                                                               fix=fix0.beta,
+                                                              zi01=knots01,
+                                                              zi02=knots02,
+                                                              zi12=knots12,
                                                               ctime=ctime,
                                                               no=N,
+                                                              nz01=nknots01,
+                                                              nz02=nknots02,
+                                                              nz12=nknots12,
                                                               ve01=ve01,
                                                               ve02=ve02,
                                                               ve12=ve12,
@@ -1897,7 +2020,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                  
                                  # new values for splines:
                                  snew<-s
-                                 snew[fix00[1:6]==0]<-output.mla$b
+                                 snew[fix00[1:nspline]==0]<-output.mla$b
                                  if(nvat01>0){
                                    b01<-betanew[1:nvat01][penalty.factor[1:nvat01]==1]
                                    if(p01>0){
@@ -1995,7 +2118,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                  s<-snew
                                  beta<-betanew
                                  fn.value<-fn.valuenew
-                                 
+                                 browser()
                                  # eval.cv beta valid only if validity.param=T
                                  # add ite >1 so that do not stop at first ite ?
                                  if(((eval.cv.beta[ite]+eval.cv.spline[ite])<epsa) & eval.cv.loglik[ite]<epsb & validity==T & ite>1){
@@ -2015,15 +2138,21 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                    bfix<-b[fix0==1]
                                    b<-b[fix0==0]
                                    
-                                   output<-deriva(funcpa=gaussDYNidmlLikelihoodweib,
+                                   output<-deriva(funcpa=gaussDYNidmlLikelihood,
                                                   b=b,
                                                   h=1e-8,
                                                   npm=npm,
                                                   npar=size_V,
                                                   bfix=bfix,
                                                   fix=fix0,
+                                                  zi01=knots01,
+                                                  zi02=knots02,
+                                                  zi12=knots12,
                                                   ctime=ctime,
                                                   no=N,
+                                                  nz01=nknots01,
+                                                  nz02=nknots02,
+                                                  nz12=nknots12,
                                                   ve01=ve01,
                                                   ve02=ve02,
                                                   ve12=ve12,
@@ -2094,8 +2223,8 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                        beta<-beta.start
                                        s<-s.start
                                      }else{
-                                       s<-outputNsample[[1]]$b[1:6,id.lambda]
-                                       beta<-outputNsample[[1]]$b[7:size_V,id.lambda]
+                                       s<-outputNsample[[1]]$b[1:nspline,id.lambda]
+                                       beta<-outputNsample[[1]]$b[(nspline+1):size_V,id.lambda]
                                      }
                                      
                                      converged<-F
@@ -2118,14 +2247,20 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                        
                                  
                                          
-                                         output<-derivadiag(funcpa=gaussDYNidmlLikelihoodweib,
+                                         output<-derivadiag(funcpa=gaussDYNidmlLikelihood,
                                                         b=b,
                                                                    npm=npm,
                                                                    npar=size_V,
                                                                    bfix=bfix,
                                                                    fix=fix0,
-                                                                   ctime=ctime,
-                                                                   no=N,
+                                                        zi01=knots01,
+                                                        zi02=knots02,
+                                                        zi12=knots12,
+                                                        ctime=ctime,
+                                                        no=N,
+                                                        nz01=nknots01,
+                                                        nz02=nknots02,
+                                                        nz12=nknots12,
                                                                    ve01=ve01,
                                                                    ve02=ve02,
                                                                    ve12=ve12,
@@ -2154,13 +2289,19 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                        
                                          output<-output$v
                                          if(ite==0){
-                                           fn.value<-gaussDYNidmlLikelihoodweibpena(b=b,
+                                           fn.value<-gaussDYNidmlLikelihoodpena(b=b,
                                                                                npm=npm,
                                                                                npar=size_V,
                                                                                bfix=bfix,
                                                                                fix=fix0,
+                                                                               zi01=knots01,
+                                                                               zi02=knots02,
+                                                                               zi12=knots12,
                                                                                ctime=ctime,
                                                                                no=N,
+                                                                               nz01=nknots01,
+                                                                               nz02=nknots02,
+                                                                               nz12=nknots12,
                                                                                ve01=ve01,
                                                                                ve02=ve02,
                                                                                ve12=ve12,
@@ -2277,7 +2418,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                               nva01Y=npm01Y,
                                                               nva02Y=npm02Y,
                                                               nva12Y=npm12Y,
-                                                              fix=fix0[7:size_V],
+                                                              fix=fix0[(nspline+1):size_V],
                                                               penalty.factor=penalty.factor,
                                                               penalty=penalty,
                                                               v=V,
@@ -2291,16 +2432,22 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                        
                                        b<-c(s,output.cv$b)
                                        
-                                       betanew<-b[(6+1):size_V]
+                                       betanew<-b[(nspline+1):size_V]
                                        
                                        # penalised loglik see if inferior to previous
-                                       res<-gaussDYNidmlLikelihoodweibpena(b=b,
+                                       res<-gaussDYNidmlLikelihoodpena(b=b,
                                                                       npm=size_V,
                                                                       npar=size_V,
                                                                       bfix=1,
                                                                       fix=rep(0,size_V),
+                                                                      zi01=knots01,
+                                                                      zi02=knots02,
+                                                                      zi12=knots12,
                                                                       ctime=ctime,
                                                                       no=N,
+                                                                      nz01=nknots01,
+                                                                      nz02=nknots02,
+                                                                      nz12=nknots12,
                                                                       ve01=ve01,
                                                                       ve02=ve02,
                                                                       ve12=ve12,
@@ -2368,14 +2515,20 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                         step=step,
                                                         b=beta,
                                                         delta=delta,
-                                                        funcpa=gaussDYNidmlLikelihoodweibpena,
+                                                        funcpa=gaussDYNidmlLikelihoodpena,
                                                         res.out.error=res.out.error,
                                                         npm=npm,
                                                         npar=size_V,
                                                         bfix=s,
                                                         fix=fix0,
+                                                        zi01=knots01,
+                                                        zi02=knots02,
+                                                        zi12=knots12,
                                                         ctime=ctime,
                                                         no=N,
+                                                        nz01=nknots01,
+                                                        nz02=nknots02,
+                                                        nz12=nknots12,
                                                         ve01=ve01,
                                                         ve02=ve02,
                                                         ve12=ve12,
@@ -2410,13 +2563,19 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                          b<-c(s,betanew)
                                          
                                          
-                                         res<-gaussDYNidmlLikelihoodweibpena(b=b,
+                                         res<-gaussDYNidmlLikelihoodpena(b=b,
                                                                         npm=size_V,
                                                                         npar=size_V,
                                                                         bfix=1,
                                                                         fix=rep(0,size_V),
+                                                                        zi01=knots01,
+                                                                        zi02=knots02,
+                                                                        zi12=knots12,
                                                                         ctime=ctime,
                                                                         no=N,
+                                                                        nz01=nknots01,
+                                                                        nz02=nknots02,
+                                                                        nz12=nknots12,
                                                                         ve01=ve01,
                                                                         ve02=ve02,
                                                                         ve12=ve12,
@@ -2471,18 +2630,24 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                        
                                        
                                        output.mla<- marqLevAlg::mla(b=b,
-                                                                    fn=gaussDYNidmlLikelihoodweib,
+                                                                    fn=gaussDYNidmlLikelihood,
                                                                     epsa=epsa,
                                                                     epsb=epsb,
                                                                     epsd=epsd,
                                                                     maxiter=maxiter.pena,
                                                                     minimize=F,
-                                                                    npm=npmweib,
+                                                                    npm=npmspline,
                                                                     npar=size_V,
                                                                     bfix=bfix,
                                                                     fix=fix0.beta,
+                                                                    zi01=knots01,
+                                                                    zi02=knots02,
+                                                                    zi12=knots12,
                                                                     ctime=ctime,
                                                                     no=N,
+                                                                    nz01=nknots01,
+                                                                    nz02=nknots02,
+                                                                    nz12=nknots12,
                                                                     ve01=ve01,
                                                                     ve02=ve02,
                                                                     ve12=ve12,
@@ -2512,7 +2677,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                        
                                        # new values for splines:
                                        snew<-s
-                                       snew[fix00[1:6]==0]<-output.mla$b
+                                       snew[fix00[1:nspline]==0]<-output.mla$b
                                        if(nvat01>0){
                                          b01<-betanew[1:nvat01][penalty.factor[1:nvat01]==1]
                                          if(p01>0){
@@ -2628,14 +2793,20 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                          bfix<-b[fix0==1]
                                          b<-b[fix0==0]
                                          
-                                         output<-derivadiag(funcpa=gaussDYNidmlLikelihoodweib,
+                                         output<-derivadiag(funcpa=gaussDYNidmlLikelihood,
                                                         b=b,
                                                         npm=npm,
                                                         npar=size_V,
                                                         bfix=bfix,
                                                         fix=fix0,
+                                                        zi01=knots01,
+                                                        zi02=knots02,
+                                                        zi12=knots12,
                                                         ctime=ctime,
                                                         no=N,
+                                                        nz01=nknots01,
+                                                        nz02=nknots02,
+                                                        nz12=nknots12,
                                                         ve01=ve01,
                                                         ve02=ve02,
                                                         ve12=ve12,

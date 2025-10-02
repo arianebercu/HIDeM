@@ -2108,7 +2108,7 @@ else
 	end if 
 	
 	
-	if(dimp01.gt.0) then 
+	if(p01.gt.0) then 
 		allocate(y01(no0*p01*Ntime))
 		y01=y010
 	else 
@@ -2116,7 +2116,7 @@ else
 		y01=0
 	end if 
 	
-	if(dimp02.gt.0) then 
+	if(p02.gt.0) then 
 		allocate(y02(no0*p02*Ntime))
 		y02=y020
 	else 
@@ -2124,7 +2124,7 @@ else
 		y02=0
 	end if 
 
-	if(dimp12.gt.0) then 
+	if(p12.gt.0) then 
 		allocate(y12(no0*p12*Ntime))
 		y12=y120
 	else 
@@ -2224,8 +2224,8 @@ else
 			
 				if(p01.gt.0)then
 					do l=1,Ntime
-                        do j=1,dimp01
-								k = (i-1)*Ntime*dimp01+(l-1)*dimp01+j
+                        do j=1,p01
+								k = (i-1)*Ntime*p01+(l-1)*p01+j
 						
                                 y01t(l) =y01t(l) +&
                                 bh(6+nva01+nva02+nva12+j)*y01(k)
@@ -2235,20 +2235,20 @@ else
  
                 if(p02.gt.0)then
 					do l=1,Ntime
-                        do j=1,dimp02
-								k = (i-1)*Ntime*dimp02+ (l-1)*dimp02+j
+                        do j=1,p02
+								k = (i-1)*Ntime*p02+ (l-1)*p02+j
                                 y02t(l) =y02t(l) +&
-                                bh(6+nva01+nva02+nva12+dimp01+j)*y02(k)
+                                bh(6+nva01+nva02+nva12+p01+j)*y02(k)
                         end do
 					end do 
                 endif  
 
                  if(p12.gt.0)then
 					do l=1,Ntime
-                        do j=1,dimp12
-								k = (i-1)*Ntime*dimp12+(l-1)*dimp12+j
+                        do j=1,p12
+								k = (i-1)*Ntime*p12+(l-1)*p12+j
                                 y12t(l) =y12t(l) +&
-                                bh(6+nva01+nva02+nva12+dimp01+dimp02+j)*y12(k)
+                                bh(6+nva01+nva02+nva12+p01+p02+j)*y12(k)
                         end do
 					end do 
                 endif  
@@ -2521,7 +2521,7 @@ end subroutine idmlikelihoodweibtimedep
 	end if 
 
 
-if(dimp01.gt.0) then 
+if(p01.gt.0) then 
 		allocate(y01(no0*p01*Ntime))
 		y01=y010
 	else 
@@ -2529,7 +2529,7 @@ if(dimp01.gt.0) then
 		y01=0
 	end if 
 	
-	if(dimp02.gt.0) then 
+	if(p02.gt.0) then 
 		allocate(y02(no0*p02*Ntime))
 		y02=y020
 	else 
@@ -2537,7 +2537,7 @@ if(dimp01.gt.0) then
 		y02=0
 	end if 
 
-	if(dimp12.gt.0) then 
+	if(p12.gt.0) then 
 		allocate(y12(no0*p12*Ntime))
 		y12=y120
 	else 
@@ -2638,8 +2638,8 @@ if(dimp01.gt.0) then
 
 				if(p01.gt.0)then
 					do l=1,Ntime
-                        do j=1,dimp01
-								k = (i-1)*Ntime*dimp01+(l-1)*dimp01+j
+                        do j=1,p01
+								k = (i-1)*Ntime*p01+(l-1)*p01+j
                                 y01t(l) =y01t(l) +&
                                 bh(nspline+nva01+nva02+nva12+j)*y01(k)
 
@@ -2649,20 +2649,20 @@ if(dimp01.gt.0) then
  
                 if(p02.gt.0)then
 					do l=1,Ntime
-                        do j=1,dimp02
-								k = (i-1)*Ntime*dimp02+ (l-1)*dimp02+j
+                        do j=1,p02
+								k = (i-1)*Ntime*p02+ (l-1)*p02+j
                                 y02t(l) =y02t(l) +&
-                                bh(nspline+nva01+nva02+nva12+dimp01+j)*y02(k)
+                                bh(nspline+nva01+nva02+nva12+p01+j)*y02(k)
                         end do
 					end do 
                 endif  
 
                  if(p12.gt.0)then
 					do l=1,Ntime
-                        do j=1,dimp12
-								k = (i-1)*Ntime*dimp12+(l-1)*dimp12+j
+                        do j=1,p12
+								k = (i-1)*Ntime*p12+(l-1)*p12+j
                                 y12t(l) =y12t(l) +&
-                                bh(nspline+nva01+nva02+nva12+dimp01+dimp02+j)*y12(k)
+                                bh(nspline+nva01+nva02+nva12+p01+p02+j)*y12(k)
                         end do
 					end do 
                 endif  

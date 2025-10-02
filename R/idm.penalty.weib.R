@@ -512,7 +512,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                  # we have issue if res is NA or if not higher than previous one 
                                  # if not better or do not exist need to readjust
                                  # value of beta 
-                                 if(res %in%c(-1e9,1e9) | abs(res) < abs(fn.value)){
+                                 if(res %in%c(-1e9,1e9) | res < fn.value){
                                    
                                    th<-1e-5
                                    step<-log(1.5)
@@ -1116,7 +1116,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                    # we have issue if res is NA or if not higher than previous one 
                                    # if not better or do not exist need to readjust
                                    # value of beta 
-                                   if(res %in%c(-1e9,1e9) | abs(res) < abs(fn.value)){
+                                   if(res %in%c(-1e9,1e9) | res < fn.value){
                                      
                                      th<-1e-5
                                      step<-log(1.5)
@@ -1827,7 +1827,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                  # we have issue if res is NA or if not higher than previous one 
                                  # if not better or do not exist need to readjust
                                  # value of beta 
-                                if(res %in%c(-1e9,1e9) | abs(res) < abs(fn.value)){
+                                if(res %in%c(-1e9,1e9) | res < fn.value){
                                   
                                   print(paste0("needed update at ite :",ite))
                                    th<-1e-5
@@ -2433,7 +2433,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                        # we have issue if res is NA or if not higher than previous one 
                                        # if not better or do not exist need to readjust
                                        # value of beta 
-                                       if(res %in%c(-1e9,1e9) | abs(res) < abs(fn.value)){
+                                       if(res %in%c(-1e9,1e9) | res < fn.value){
                                          
                                          th<-1e-5
                                          step<-log(1.5)

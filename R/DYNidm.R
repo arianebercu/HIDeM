@@ -1209,7 +1209,7 @@ if(is.null(dataY)){
 ################################################################################
           
           Nsample<-dim(dataY)[2]-3
-          browser()
+        
           if(Ypredmethod=="equi"){
             
             # if prediction did not work 
@@ -1408,7 +1408,7 @@ if(is.null(dataY)){
 ##########################   with M-splines baseline risk ######################
 ################################################################################
             
-            out<-idm.penalty.splines(b=b,
+            out<-DYNidm.penalty.splines(b=b,
                              fix0=fix0,
                              size_V=size_V,
                              size_spline=size_spline,
@@ -1452,157 +1452,24 @@ if(is.null(dataY)){
                              alpha=alpha,
                              penalty.factor=penalty.factor,
                              penalty=penalty,
-                                    analytics=analytics,
-                             partialH=partialH)
+                             partialH=partialH,
+                             y01=y01,
+                             y02=y02,
+                             y12=y12,
+                             NtimePoints=NtimePoints,
+                             p01=p01,
+                             p02=p02,
+                             p12=p12,
+                             dimp01=dimp01,
+                             dimp02=dimp02,
+                             dimp12=dimp12,
+                             Nsample=Nsample)
             
 ############################## Output   ########################################
 ############################## on beta and HR   ################################
             
            
-            lambda<-out$lambda
-            alpha<-out$alpha
-            
-            H<-out$H
-            
-            beta<-as.matrix(out$b)
-            fix<-as.matrix(out$fix)
-            lambda<-as.matrix(lambda)
-            
-            theta_names <- cbind(c(rep("theta01",(nknots01+2)),rep("theta02",(nknots02+2)),rep("theta12",(nknots12+2))),c((1:(nknots01+2)),(1:(nknots02+2)),(1:(nknots12+2))))
-            theta_names <- as.vector(apply(theta_names,1,paste,collapse=" "))
-            rownames(beta) <-c(theta_names,c(Xnames01,Xnames02,Xnames12))
-            rownames(fix)<-c(theta_names,c(Xnames01,Xnames02,Xnames12))
-            rownames(lambda)<-c("lambda01","lambda02","lambda12")
-            
-            theta01<-beta[1:(nknots01+2),]
-            theta02<-beta[(nknots01+3):(nknots01+nknots02+4),]
-            theta12<-beta[(nknots01+nknots02+5):(nknots01+nknots12+nknots02+6),]
-            betaCoef <- beta[(size_spline+1):size_V,]
-            betaCoef<-as.matrix(betaCoef)
-            fit$coef <- betaCoef
-            fit$HR <- exp(betaCoef)
-            
-########################## on  BIC and GCV #####################################
-            if(dim(beta)[2]>1){
-              fit$BIC<--2*out$fn.value+log(N)*colSums(beta[(size_spline+1):size_V,]!=0)
-            }else{fit$BIC<--2*out$fn.value+log(N)*sum(beta[(size_spline+1):size_V,]!=0)}
-            
-            
-            fit$GCV<-rep(NA,dim(lambda)[2])
-            
-########################## on  covariance matrix ###############################           
-            npm<-sum(fix0[(size_spline+1):size_V]==0)
-            npm01<-ifelse(nvat01>0,sum(fix0[(size_spline+1):(size_spline+nvat01)]==0),0)
-            npm02<-ifelse(nvat02>0,sum(fix0[(size_spline+nvat01+1):(size_spline+nvat01+nvat02)]==0),0)
-            npm12<-ifelse(nvat12>0,sum(fix0[(size_spline+nvat01+nvat02+1):size_V]==0),0)
-            
-            V<-matrix(0,ncol=dim(lambda)[2]*npm,nrow=npm)
-          
-            for(i in 1:dim(lambda)[2]){
-              id.keep<-which(betaCoef[fix0[(size_spline+1):size_V]==0,i]!=0)
-              if(length(id.keep)==0){
-                fit$GCV[i]<--1/N*out$fn.value[i]
-              }else{
-                lambda.matrix<-matrix(0,npm,npm)
-                if(nvat01>0){
-                  
-                  if(penalty%in%c("none","lasso","ridge","elasticnet")){
-                    diag(lambda.matrix)[1:npm01]<-rep(2*(1-alpha[i])*lambda[1,i],npm01)}
-                  
-                  if(penalty=="mcp"){
-                    idbeta<-which(abs(betaCoef[1:npm01,i])<=alpha[i]*lambda[1,i])
-                    diag(lambda.matrix)[1:npm01]<-rep(0,npm01)
-                    diag(lambda.matrix)[idbeta]<--1/alpha[i]
-                    
-                  }
-                  if(penalty=="scad"){
-                    idbeta<-which((abs(betaCoef[1:npm01,i])>lambda[1,i])&(abs(betaCoef[1:npm01,i])<=lambda[1,i]*alpha[i]))
-                    diag(lambda.matrix)[1:npm01]<-rep(0,npm01)
-                    diag(lambda.matrix)[idbeta]<--1/(alpha[i]-1)
-                    
-                  }
-                }
-                if(nvat02>0){
-                  
-                  if(penalty%in%c("none","lasso","ridge","elasticnet")){
-                    diag(lambda.matrix)[(npm01+1):(npm01+npm02)]<-rep(2*(1-alpha[i])*lambda[2,i],npm02)}
-                  
-                  if(penalty=="mcp"){
-                    
-                    idbeta<-which(abs(betaCoef[(npm01+1):(npm01+npm02),i])<=alpha[i]*lambda[2,i])
-                    diag(lambda.matrix)[(npm01+1):(npm01+npm02)]<-rep(0,npm02)
-                    diag(lambda.matrix)[idbeta+npm01]<--1/alpha[i]
-                    
-                    
-                  }
-                  if(penalty=="scad"){
-                    
-                    idbeta<-which((abs(betaCoef[(npm01+1):(npm01+npm02):npm01,i])>lambda[2,i])&(abs(betaCoef[(npm01+1):(npm01+npm02),i])<=lambda[2,i]*alpha[i]))
-                    diag(lambda.matrix)[(npm01+1):(npm01+npm02)]<-rep(0,npm02)
-                    diag(lambda.matrix)[idbeta+npm01]<--1/(alpha[i]-1)
-                    
-                  }
-                }
-                if(nvat12>0){
-                  if(penalty%in%c("none","lasso","ridge","elasticnet")){
-                    diag(lambda.matrix)[(npm01+npm02+1):npm]<-rep(2*(1-alpha[i])*lambda[3,i],npm12)}
-                  
-                  
-                  if(penalty=="mcp"){
-                    idbeta<-which(abs(betaCoef[(npm01+npm02+1):npm,i])<=alpha[i]*lambda[3,i])
-                    diag(lambda.matrix)[(npm01+npm02+1):npm]<-rep(0,npm12)
-                    diag(lambda.matrix)[idbeta+npm01+npm02]<--1/alpha[i]
-                    
-                  }
-                  
-                  if(penalty=="scad"){
-                    idbeta<-which((abs(betaCoef[(npm01+npm02+1):npm,i])>lambda[3,i])&(abs(betaCoef[(npm01+npm02+1):npm,i])<=lambda[3,i]*alpha[i]))
-                    diag(lambda.matrix)[(npm01+npm02+1):npm]<-rep(0,npm12)
-                    diag(lambda.matrix)[idbeta+npm01+npm02]<--1/(alpha[i]-1)
-                    
-                  }
-                }
-                # only beta different from 0 
-                lambda.matrix<-lambda.matrix[id.keep,id.keep,drop=FALSE]
-                
-                if(out$istop[i]==1){
-                  H_spec<-out$H[,(1+(i-1)*npm):(i*npm),drop=FALSE]
-                  # only beta different from 0 
-                  H_spec<-H_spec[id.keep,id.keep,drop=FALSE]
-                  if(!(any(is.na(H_spec))|any(H_spec==Inf) |any(H_spec==-Inf))){
-                  if(abs(det(H_spec))>1e-10 & kappa(H_spec)<1e10){
-                    id.keepV<-(1+(i-1)*npm):(i*npm)
-                    id.keepV<-id.keepV[id.keepV%in%((i-1)*npm+id.keep)]
-                    V[id.keep,id.keepV]<-solve(H_spec)
-                    # maximisation issue thus : 10/04/24
-                    #H_pl<-H_spec+lambda.matrix
-                    # as mla return v=-second derivatives when maximisation^-1
-                    H_pl<-H_spec+lambda.matrix
-                    trace_model<-lava::tr(solve(H_pl)%*%H_spec)
-                    fit$GCV[i]<--1/N*(out$fn.value[i]-trace_model)}
-                  }
-                }
-                
-              }
-            }
-            cv<-list(ca.beta=out$ca.beta,ca.spline=out$ca.spline,ca.validity=out$ca.validity,
-                     cb=out$cb,rdm=NULL)
-            
-            fit$knots01 <- knots01
-            fit$knots02 <- knots02
-            fit$knots12 <- knots12
-            fit$nknots01 <- nknots01
-            fit$nknots02 <- nknots02
-            fit$nknots12 <- nknots12
-            fit$theta01 <- as.matrix(theta01)
-            fit$theta02 <- as.matrix(theta02)
-            fit$theta12 <- as.matrix(theta12)
-
-############# on times to do prediction on #################################
-            fit$time <- matrix(NA,ncol=3,nrow=100)
-            fit$time[,1]<-seq(from=knots01[1],to=knots01[length(knots01)],length.out=100)
-            fit$time[,2]<-seq(from=knots02[1],to=knots02[length(knots02)],length.out=100)
-            fit$time[,3]<-seq(from=knots12[1],to=knots12[length(knots12)],length.out=100)
+           
             
           }
           
@@ -1763,7 +1630,7 @@ if(is.null(dataY)){
                                dimp12=dimp12,
                                Nsample=Nsample)
             
-              
+             
               
 ######################### Output ###############################################
 ######################## on beta and HR ########################################

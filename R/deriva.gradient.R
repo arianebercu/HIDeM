@@ -148,7 +148,8 @@ deriva.hessianweib <- function(nproc=1,b,fix,funcpa,.packages=NULL,...){
       return(VmodelPar)
 }
 
-deriva <- function(nproc=1,b,funcpa,.packages=NULL,...){
+# attention before max(1e-7,(1e-4*abs(x))) created issues --> better this : 
+deriva <- function(nproc=1,b,h,funcpa,.packages=NULL,...){
   
   m <- length(b)
   bh2 <- bh <- rep(0,m)
@@ -156,13 +157,14 @@ deriva <- function(nproc=1,b,funcpa,.packages=NULL,...){
   fcith <- fcith2 <- rep(0,m)
   ## function 
   rl <- funcpa(b,...)
+  eps<-h^(1/2)
   
   if(nproc>1)
   {
     ### remplacer les 2 boucles par une seule
     grid <- cbind(c(rep(1:m,1:m),1:m),c(unlist(sapply(1:m,function(k) seq(1,k))),rep(0,m)))
     mm <- nrow(grid)
-    h <- sapply(b,function(x){max(1E-7,(1E-4*abs(x)))})
+    h <- sapply(b,function(x){max(eps,(eps*abs(x)))})
     
     
     ## derivees premieres:
@@ -211,7 +213,7 @@ deriva <- function(nproc=1,b,funcpa,.packages=NULL,...){
     ## gradient null
     for(i in 1:m){
       bh <- bh2 <- b
-      th <- max(1E-7,(1E-4*abs(b[i])))
+      th <- max(eps,(eps*abs(b[i])))
       bh[i] <- bh[i] + th
       bh2[i] <- bh2[i] - th
       
@@ -225,13 +227,13 @@ deriva <- function(nproc=1,b,funcpa,.packages=NULL,...){
     for(i in 1:m){
       l <- l+1
       bh <- b
-      thn <- - max(1E-7,(1E-4*abs(b[i])))
+      thn <- - max(eps,(eps*abs(b[i])))
       v[l] <- -(fcith[i]-fcith2[i])/(2*thn)
       for(j in 1:i){
         bh <- b
         k <- k+1
-        thi <- max(1E-7,(1E-4*abs(b[i])))
-        thj <- max(1E-7,(1E-4*abs(b[j])))
+        thi <- max(eps,(eps*abs(b[i])))
+        thj <- max(eps,(eps*abs(b[j])))
         th <- thi * thj
         bh[i] <- bh[i]+thi
         bh[j] <- bh[j]+thj
@@ -245,6 +247,131 @@ deriva <- function(nproc=1,b,funcpa,.packages=NULL,...){
   return(result)
 }
 
+fderivcentral<- function(f,x,n=1,h=0,...){
+  if (length(x) == 0) return(c())
+  if (!is.numeric(x))
+    stop("Argument 'x' must be a number or a numeric vector.")
+  n <- floor(n)
+  if (n < 0)
+    stop("The order of the derivative, 'n', can only be between 0 and 8.")
+  if (n > 2)
+    warning("Numerical derivatives of order 'n > 2' will be very inexact.")
+  
+  method <- match.arg(method)
+  
+  fun <- match.fun(f)
+  f <- function(x) fun(x, ...)
+  
+  fx <- f(x)
+  if (length(fx) != length(x))
+    stop("Function 'f' must first be vectorized: Vectorize(f).")
+  
+  if (n == 0) return(f(x))
+  
+  if (h == 0) {
+    h <- .Machine$double.eps^(1/(n+2))
+  }
+  
+
+    if (n == 1) {
+      .df <- (f(x+h) - f(x-h)) / (2*h)
+    } else if (n == 2) {
+      .df <- (f(x+h) - 2*f(x) + f(x-h)) / h^2
+    } 
+  
+  return(.df)
+    
+}
+
+# if adaptative step creates not definite matrix
+# keep not adaptative
+hessiancentral <- function(f, x0, h = .Machine$double.eps^(1/4), ...) {
+  if (!is.numeric(x0))
+    stop("Argument 'x0' must be a numeric vector.")
+  
+  fun <- match.fun(f)
+  f <- function(x) fun(x, ...)
+  f0 <- f(x0)
+  n <- length(x0)
+  
+  if (length(f(x0)) != 1)
+    stop("Function 'f' must be a univariate function of n variables.")
+  
+  if (n == 1)
+    return(list(V=matrix(fderivcentral(f, x0, n = 2, h = h), nrow = 1, ncol = 1),
+                fu=fderivcentral(f, x0, n = 1, h = h)))
+  
+  # adaptive step sizes per coordinate
+  hi <- pmax(h * abs(x0), h)
+  
+  if (n == 1) {
+    f1 <- f(x0 + hi)
+    f2 <- f(x0 - hi)
+    grad <- (f1 - f2) / (2*hi)
+    H <- matrix((f1 - 2*f0 + f2) / hi^2, 1, 1)
+    return(list(V = H, fu = grad))
+  }
+  
+  H <- matrix(NA, nrow = n, ncol = n)
+  fu<- rep(NA,n)
+  hh <- diag(1, n)
+  
+  for (i in 1:(n-1)) {
+    hii <- hh[, i]
+    f1<-f(x0-hii*hi)
+    f2<-f(x0+hii*hi)
+    H[i, i] <- (f1 - 2*f0 + f2) / (hi[i]^2)
+    fu[i]<-(f2-f1)/(2*hi[i])
+    for (j in (i+1):n) {
+      hj <- hh[, j]
+      H[i, j] <- (f(x0+hii*hi[i]+hj*hi[j]) - f(x0+hii*hi[i]-hj*hi[j]) - f(x0-hii*hi[i]+hj*hi[j]) + f(x0-hii*hi[i]-hj*hi[j])) / (4*hi[i]*hi[j])
+      H[j, i] <- H[i, j]
+    }
+  }
+  hii <- hh[, n]
+  f1<-f(x0-hii*hi[n])
+  f2<-f(x0+hii*hi[n])
+  H[n, n] <- (f1 - 2*f(x0) + f2) / h^2
+  fu[n]<-(f2-f1)/(2*hi[n])
+  
+  return(list(V=H,
+              fu=fu))
+}
+
+hessiancentraldiag <- function(f, x0, h = .Machine$double.eps^(1/4), ...) {
+  if (!is.numeric(x0))
+    stop("Argument 'x0' must be a numeric vector.")
+  
+  fun <- match.fun(f)
+  f <- function(x) fun(x, ...)
+  
+  n <- length(x0)
+  if (length(f(x0)) != 1)
+    stop("Function 'f' must be a univariate function of n variables.")
+  
+  if (n == 1)
+    return(list(V=matrix(fderivcentral(f, x0, n = 2, h = h), nrow = 1, ncol = 1),
+                fu=fderivcentral(f, x0, n = 1, h = h)))
+  
+  H <- matrix(0, nrow = n, ncol = n)
+  fu<- rep(NA,n)
+  hh <- diag(h, n)
+  for (i in 1:(n-1)) {
+    hi <- hh[, i]
+    f1<-f(x0-hi)
+    f2<-f(x0+hi)
+    H[i, i] <- (f1 - 2*f(x0) + f2) / h^2
+    fu[i]<-(f2-f1)/(2*h)
+  }
+  hi <- hh[, n]
+  f1<-f(x0-hi)
+  f2<-f(x0+hi)
+  H[n, n] <- (f1 - 2*f(x0) + f2) / h^2
+  fu[n]<-(f2-f1)/(2*h)
+  
+  return(list(V=H,
+              fu=fu))
+}
 
 derivadiag <- function(nproc=1,b,funcpa,.packages=NULL,...){
   
@@ -254,11 +381,12 @@ derivadiag <- function(nproc=1,b,funcpa,.packages=NULL,...){
   fcith <- fcith2 <- rep(0,m)
   ## function 
   rl <- funcpa(b,...)
+  eps<-.Machine$double.eps^(1/4)
   
   if(nproc>1)
   {
     ### remplacer les 2 boucles par une seule
-    h <- sapply(b,function(x){max(1E-7,(1E-4*abs(x)))})
+    h <- sapply(b,function(x){max(eps,(eps*abs(x)))})
     
     
     ## derivees premieres:
@@ -302,7 +430,7 @@ derivadiag <- function(nproc=1,b,funcpa,.packages=NULL,...){
     ## gradient null
     for(i in 1:m){
       bh <- bh2 <- b
-      th <- max(1E-7,(1E-4*abs(b[i])))
+      th <- max(eps,(eps*abs(b[i])))
       bh[i] <- bh[i] + th
       bh2[i] <- bh2[i] - th
       
@@ -315,7 +443,7 @@ derivadiag <- function(nproc=1,b,funcpa,.packages=NULL,...){
     for(i in 1:m){
       l <- l+1
       bh <- b
-      thn <- - max(1E-7,(1E-4*abs(b[i])))
+      thn <- - max(eps,(eps*abs(b[i])))
       v[l] <- -(fcith[i]-fcith2[i])/(2*thn)
       k <- k+1
       bh[i] <- 2*(bh[i]-thn)

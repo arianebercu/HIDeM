@@ -781,7 +781,7 @@ simulateDYNIDM <- function(n=100,
     for(m in paste0("Y",c(1:(dim(B)[2]/2)))){
       mm<-data_long[data_long$num.visit==1,colnames(data_long)%in% m]
       meanY[k]<-beta0[k]
-      sdY[k]<-B[(k*2-1),(k*2-1)]+B[(k*2),(k*2)]+2*B[(k*2-1),(k*2)]
+      sdY[k]<-sqrt(B[(k*2-1),(k*2-1)]+B[(k*2),(k*2)]+2*B[(k*2-1),(k*2)])
     data_long[,colnames(data_long)%in% m]<-(data_long[,colnames(data_long)%in% m]-meanY[k])/sdY[k]
       k<-k+1
     }

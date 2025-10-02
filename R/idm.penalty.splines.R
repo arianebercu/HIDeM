@@ -478,7 +478,7 @@ idm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                  
                                  # if not better or do not exist need to readjust
                                  # value of beta 
-                                 if(res %in%c(-1e9,1e9) | abs(res) < abs(fn.value)){
+                                 if(res %in%c(-1e9,1e9) | res < fn.value){
                                    th<-1e-5
                                    step<-log(1.5)
                                    delta<-output.cv$b-c(beta)
@@ -1122,7 +1122,7 @@ idm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                    
                                    # if not better or do not exist need to readjust
                                    # value of beta 
-                                   if(res %in%c(-1e9,1e9) | abs(res) < abs(fn.value)){
+                                   if(res %in%c(-1e9,1e9) | res < fn.value){
                                      th<-1e-5
                                      step<-log(1.5)
                                      delta<-output.cv$b-c(beta)
@@ -1866,7 +1866,7 @@ idm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                  
                                  # if not better or do not exist need to readjust
                                  # value of beta 
-                                 if(res %in%c(-1e9,1e9) | abs(res) < abs(fn.value)){
+                                 if(res %in%c(-1e9,1e9) | res < fn.value){
                                    th<-1e-5
                                    step<-log(1.5)
                                    delta<-output.cv$b-c(beta)
@@ -2135,6 +2135,7 @@ idm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                  beta<-betanew
                                  fn.value<-fn.valuenew
                                  
+                              
                                  
                                  # eval.cv beta valid only if validity.param=T
                                  if(((eval.cv.beta[ite]+ eval.cv.spline[ite])<epsa) & eval.cv.loglik[ite]<epsb & validity==T){
@@ -2501,7 +2502,7 @@ idm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                    
                                    # if not better or do not exist need to readjust
                                    # value of beta 
-                                   if(res %in%c(-1e9,1e9) | abs(res) < abs(fn.value)){
+                                   if(res %in%c(-1e9,1e9) | res < fn.value){
                                      th<-1e-5
                                      step<-log(1.5)
                                      delta<-output.cv$b-c(beta)

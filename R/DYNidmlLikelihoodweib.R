@@ -121,3 +121,7 @@ gaussDYNidmlLikelihoodweib<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12
 }
 
 
+
+
+
+
