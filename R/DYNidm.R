@@ -1407,7 +1407,7 @@ if(is.null(dataY)){
 ########################## perform penalty algorithm ###########################
 ##########################   with M-splines baseline risk ######################
 ################################################################################
-            
+            browser()
             out<-DYNidm.penalty.splines(b=b,
                              fix0=fix0,
                              size_V=size_V,
@@ -1442,7 +1442,6 @@ if(is.null(dataY)){
                              t2=t2,
                              t3=t3,
                              troncature=troncature,
-                             gausspoint=gausspoint,
                              nlambda01=nlambda01,
                              lambda01=lambda01,
                              nlambda02=nlambda02,

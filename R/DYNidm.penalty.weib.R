@@ -1998,7 +1998,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                  
                                  # eval.cv beta valid only if validity.param=T
                                  # add ite >1 so that do not stop at first ite ?
-                                 if(((eval.cv.beta[ite]+eval.cv.spline[ite])<epsa) & eval.cv.loglik[ite]<epsb & validity==T & ite>1){
+                                 if(((eval.cv.beta[ite]+eval.cv.spline[ite])<epsa) & eval.cv.loglik[ite]<epsb & validity==T ){
                                    converged<-T}
                                  
                                  

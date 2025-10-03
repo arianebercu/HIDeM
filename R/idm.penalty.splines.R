@@ -2135,7 +2135,6 @@ idm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                  beta<-betanew
                                  fn.value<-fn.valuenew
                                  
-                              
                                  
                                  # eval.cv beta valid only if validity.param=T
                                  if(((eval.cv.beta[ite]+ eval.cv.spline[ite])<epsa) & eval.cv.loglik[ite]<epsb & validity==T){

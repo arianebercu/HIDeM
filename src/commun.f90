@@ -18,9 +18,12 @@ module commun
         integer::nz01,nz12,nz02
 !-------------------  ve1 -------------------------------------------
         double precision,dimension(:,:),allocatable,save::ve01,ve12,ve02,ve01nofix, &
-	ve02nofix,ve12nofix,ve01square,ve02square,ve12square
+	ve02nofix,ve12nofix,ve01square,ve02square,ve12square,logy01,logy02,logy12
+
 	double precision,dimension(:),allocatable,save::tronc01, tronc02, & 
-	tronc01square, tronc02square,y01,y02,y12
+	tronc01square, tronc02square,y01,y02,y12,tronc01Y,tronc02Y, &
+	res201numY,res202numY,res212numY
+
 	double precision,dimension(:),allocatable,save::troncweib01011beta01,&
 	troncweib01012beta01,troncweib02021beta02,troncweib02022beta02
 

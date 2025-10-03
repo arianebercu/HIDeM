@@ -2268,8 +2268,8 @@ else
                         if(t0(i).eq.0.d0)then
                                 tronc = 0.d0
                         else 
-                                call fonctdept0(t0(i),the01,gl01,y01t(257:271))
-                                call fonctdept0(t0(i),the02,gl02,y02t(257:271))
+                                call fonctdep0(t0(i),the01,gl01,y01t(257:271))
+                                call fonctdep0(t0(i),the02,gl02,y02t(257:271))
                                 tronc=(gl01*vet01)+(gl02*vet02)
                         end if
                 else
@@ -3090,9 +3090,9 @@ if(p01.gt.0) then
                         if(t0(i).eq.0.d0)then
                                 tronc = 0.d0
                         else 
-                                call fonctdept0grid(t0(i),the01,gl01,&
+                                call fonctdep0grid(t0(i),the01,gl01,&
 								y01t,Ntime,time)
-                                call fonctdept0grid(t0(i),the02,gl02,&
+                                call fonctdep0grid(t0(i),the02,gl02,&
 								y02t,Ntime,time)
                                 tronc=(gl01*vet01)+(gl02*vet02)
                         end if
@@ -5362,6 +5362,7 @@ subroutine fonctdep(x,p,risq,glam,surv,y)
 end subroutine fonctdep
 
 
+
 subroutine fonctdepgrid(x,p,risq,glam,surv,y,ntp,tpx)
 
         implicit none
@@ -5462,7 +5463,7 @@ subroutine fonctdepgrid(x,p,risq,glam,surv,y,ntp,tpx)
 end subroutine fonctdepgrid
 
 
-subroutine fonctdept0(x,p,glam,y)
+subroutine fonctdep0(x,p,glam,y)
 
         implicit none
 
@@ -5623,10 +5624,11 @@ subroutine fonctdept0(x,p,glam,y)
          
         
 
-end subroutine fonctdept0
+end subroutine fonctdep0
 
 
-subroutine fonctdept0grid(x,p,glam,y,nn,tp)
+
+subroutine fonctdep0grid(x,p,glam,y,nn,tp)
 
         implicit none
 
@@ -5708,7 +5710,7 @@ subroutine fonctdept0grid(x,p,glam,y,nn,tp)
          
         
 
-end subroutine fonctdept0grid
+end subroutine fonctdep0grid
 
 !============================================================================================= 
 !================================  causal QGAUS for weib : CHEBYCHEV   =============================
@@ -31356,3 +31358,1447 @@ subroutine derivasplinessecondderiv(b0,np0,npar0,bfix0,fix0,zi010,zi120,&
 
 
 
+
+
+subroutine fonctdepfirstderiv(x,p,risq,glam,surv,inty,y,logy,nY)
+
+        implicit none
+        double precision,dimension(2)::p
+		double precision,dimension(16)::y
+        double precision::x,surv,risq,glam,ri,gl,su,gl1,gl2
+		integer::j,jtw,jtwm1,nY
+		double precision::logy(16,nY)
+		double precision,intent(out)::inty(nY)
+		double precision::inty1(nY),inty2(nY)
+        double precision::a,b,dx,xm,xr,&
+		d1mach(5),epmach,uflow
+		double precision,dimension(8)::xgk,wgk
+	    double precision,dimension(4)::wg
+         double precision::xx
+         save wgk,xgk
+		 
+		 D1MACH(1)=2.23D-308
+    	D1MACH(2)=1.79D+308
+    	D1MACH(3)=1.11D-16
+    	D1MACH(4)=2.22D-16
+    	D1MACH(5)=0.301029995663981195D0
+
+    	epmach = d1mach(4)
+    	uflow = d1mach(1)
+		
+		
+		
+		wg(1)=0.129484966168869693270611432679082d0
+		wg(2)=0.279705391489276667901467771423780d0
+    	wg(3)=0.381830050505118944950369775488975d0
+    	wg(4)=0.417959183673469387755102040816327d0
+
+    	xgk(1)=0.991455371120812639206854697526329d0
+    	xgk(2)=0.949107912342758524526189684047851d0
+    	xgk(3)=0.864864423359769072789712788640926d0
+    	xgk(4)=0.741531185599394439863864773280788d0
+    	xgk(5)=0.586087235467691130294144838258730d0
+    	xgk(6)=0.405845151377397166906606412076961d0
+    	xgk(7)=0.207784955007898467600689403773245d0
+    	xgk(8)=0.000000000000000000000000000000000d0
+
+    	wgk(1)=0.022935322010529224963732008058970d0
+    	wgk(2)=0.063092092629978553290700663189204d0
+    	wgk(3)=0.104790010322250183839876322541518d0
+    	wgk(4)=0.140653259715525918745189590510238d0
+    	wgk(5)=0.169004726639267902826583426598550d0
+    	wgk(6)=0.190350578064785409913256402421014d0
+    	wgk(7)=0.204432940075298892414161999234649d0
+    	wgk(8)=0.209482141084727828012999174891714d0
+     
+		b=x
+		a=0
+
+		
+		
+		xm = 0.5d+00*(b+a)
+        xr = 0.5d+00*(b-a)
+        call fonctrisq(xm,p,ri)
+        
+		glam = ri*y(1)*wgk(8)   !integral over 0 to x of base risk
+        inty=glam*logy(1,1:nY)
+
+		  if(a.eq.b)then
+               surv = 1.d0
+                glam = 0.d0
+                risq = 0.d0
+				inty = 0.d0
+            else
+			
+			
+			j=4
+			
+			jtwm1 = j*2-1
+               dx=xr*xgk(jtwm1)
+               xx = xm+dx
+               call fonctrisq(xx,p,ri)
+               gl1=ri*y(3) 
+			   inty1=gl1*logy(3,1:nY) 
+               xx = xm-dx
+               call fonctrisq(xx,p,ri)
+               gl2=ri*y(2)   ! svgrd valeurs fct f a drte du centre
+			   inty2=gl2*logy(2,1:nY) 
+	       
+		  glam=glam+wgk(jtwm1)*(gl1+gl2)
+		  inty=inty+wgk(jtwm1)*(inty1+inty2)
+		   
+		   j=3
+		   
+		   jtwm1 = j*2
+               dx=xr*xgk(jtwm1)
+               xx = xm+dx
+               call fonctrisq(xx,p,ri)
+               gl1=ri*y(5)
+			   inty1=gl1*logy(5,1:nY) 
+               xx = xm-dx
+               call fonctrisq(xx,p,ri)
+               gl2=ri*y(4)   ! svgrd valeurs fct f a drte du centre
+			   inty2=gl2*logy(4,1:nY) 
+	       
+		  glam=glam+wgk(jtwm1)*(gl1+gl2)
+		  inty=inty+wgk(jtwm1)*(inty1+inty2)
+		   
+		    jtwm1 = j*2-1
+               dx=xr*xgk(jtwm1)
+               xx = xm+dx
+               call fonctrisq(xx,p,ri)
+               gl1=ri*y(7) 
+			   inty1=gl1*logy(7,1:nY) 
+               xx = xm-dx
+               call fonctrisq(xx,p,ri)
+               gl2=ri*y(6)   ! svgrd valeurs fct f a drte du centre
+			   inty2=gl2*logy(6,1:nY) 
+	       
+		  glam=glam+wgk(jtwm1)*(gl1+gl2)
+		  inty=inty+wgk(jtwm1)*(inty1+inty2)
+		   
+		   
+		   j=2
+		   
+		    jtwm1 = j*2
+               dx=xr*xgk(jtwm1)
+               xx = xm+dx
+               call fonctrisq(xx,p,ri)
+               gl1=ri*y(9)
+			   inty1=gl1*logy(9,1:nY) 
+               xx = xm-dx
+               call fonctrisq(xx,p,ri)
+               gl2=ri*y(8)   ! svgrd valeurs fct f a drte du centre
+			   inty2=gl2*logy(8,1:nY) 
+	       
+		   glam=glam+wgk(jtwm1)*(gl1+gl2)
+		   inty=inty+wgk(jtwm1)*(inty1+inty2)
+		   
+		    jtwm1 = j*2-1
+               dx=xr*xgk(jtwm1)
+               xx = xm+dx
+               call fonctrisq(xx,p,ri)
+				gl1=ri*y(11) 
+				inty1=gl1*logy(11,1:nY) 
+               xx = xm-dx
+               call fonctrisq(xx,p,ri)
+				gl2=ri*y(10)   ! svgrd valeurs fct f a drte du centre
+				inty2=gl2*logy(10,1:nY) 
+	       
+			glam=glam+wgk(jtwm1)*(gl1+gl2)
+			inty=inty+wgk(jtwm1)*(inty1+inty2)
+		   
+		   j=1
+		   
+		    jtwm1 = j*2
+               dx=xr*xgk(jtwm1)
+               xx = xm+dx
+               call fonctrisq(xx,p,ri)
+               gl1=ri*y(13) 
+			   inty1=gl1*logy(13,1:nY) 
+               xx = xm-dx
+               call fonctrisq(xx,p,ri)
+               gl2=ri*y(12)   ! svgrd valeurs fct f a drte du centre
+			   inty2=gl2*logy(12,1:nY) 
+	       
+		 glam=glam+wgk(jtwm1)*(gl1+gl2)
+		 inty=inty+wgk(jtwm1)*(inty1+inty2)
+		   
+		    jtwm1 = j*2-1
+               dx=xr*xgk(jtwm1)
+               xx = xm+dx
+               call fonctrisq(xx,p,ri)
+			   gl1=ri*y(15) 
+			   inty1=gl1*logy(15,1:nY) 
+               xx = xm-dx
+               call fonctrisq(xx,p,ri)
+			   gl2=ri*y(14)   ! svgrd valeurs fct f a drte du centre
+			   inty2=gl2*logy(14,1:nY) 
+	       
+		glam=glam+wgk(jtwm1)*(gl1+gl2)
+		inty=inty+wgk(jtwm1)*(inty1+inty2)
+
+	!	risq = xr*risq
+	!	surv = xr*surv
+		glam = xr*glam
+		inty=xr*inty
+		surv=dexp(-glam)
+		call fonctrisq(b,p,ri)
+		risq=ri*y(16)
+		
+        
+		
+		end if 
+         
+        return
+
+end subroutine fonctdepfirstderiv
+
+subroutine fonctdep0firstderiv(x,p,glam,inty,y,logy,nY)
+
+        implicit none
+
+        double precision,dimension(2)::p
+		double precision,dimension(15)::y
+        double precision::x,surv,glam,ri,gl,gl1,gl2
+		integer::j,jtw,jtwm1,nY
+        double precision::a,b,dx,xm,xr,d1mach(5),epmach,uflow
+		double precision,dimension(8)::xgk,wgk
+	    double precision,dimension(4)::wg
+         double precision::xx
+		 double precision::logy(15,nY)
+		 double precision::inty(nY),inty1(nY),inty2(nY)
+         save wgk,xgk
+		 
+		 
+		 D1MACH(1)=2.23D-308
+    	D1MACH(2)=1.79D+308
+    	D1MACH(3)=1.11D-16
+    	D1MACH(4)=2.22D-16
+    	D1MACH(5)=0.301029995663981195D0
+
+    	epmach = d1mach(4)
+    	uflow = d1mach(1)
+		
+		
+		
+		wg(1)=0.129484966168869693270611432679082d0
+		wg(2)=0.279705391489276667901467771423780d0
+    	wg(3)=0.381830050505118944950369775488975d0
+    	wg(4)=0.417959183673469387755102040816327d0
+
+    	xgk(1)=0.991455371120812639206854697526329d0
+    	xgk(2)=0.949107912342758524526189684047851d0
+    	xgk(3)=0.864864423359769072789712788640926d0
+    	xgk(4)=0.741531185599394439863864773280788d0
+    	xgk(5)=0.586087235467691130294144838258730d0
+    	xgk(6)=0.405845151377397166906606412076961d0
+    	xgk(7)=0.207784955007898467600689403773245d0
+    	xgk(8)=0.000000000000000000000000000000000d0
+
+    	wgk(1)=0.022935322010529224963732008058970d0
+    	wgk(2)=0.063092092629978553290700663189204d0
+    	wgk(3)=0.104790010322250183839876322541518d0
+    	wgk(4)=0.140653259715525918745189590510238d0
+    	wgk(5)=0.169004726639267902826583426598550d0
+    	wgk(6)=0.190350578064785409913256402421014d0
+    	wgk(7)=0.204432940075298892414161999234649d0
+    	wgk(8)=0.209482141084727828012999174891714d0
+     
+		b=x
+		a=0
+
+		
+		
+		xm = 0.5d+00*(b+a)
+        xr = 0.5d+00*(b-a)
+        call fonctrisq(xm,p,ri)
+        
+		glam = ri*y(1)*wgk(8)   !integral over 0 to x of base risk
+		inty=glam*logy(1,:)
+       
+
+		  if(a.eq.b)then
+                glam = 0.d0
+            else
+			
+			
+			j=4
+			
+			jtwm1 = j*2-1
+               dx=xr*xgk(jtwm1)
+               xx = xm+dx
+               call fonctrisq(xx,p,ri)
+               gl1=ri*y(3) 
+			   inty1=gl1*logy(3,:)
+               xx = xm-dx
+               call fonctrisq(xx,p,ri)
+               gl2=ri*y(2)   ! svgrd valeurs fct f a drte du centre
+			    inty2=gl2*logy(2,:)
+				
+		  glam=glam+wgk(jtwm1)*(gl1+gl2)
+		  inty=inty+wgk(jtwm1)*(inty1+inty2)
+		   j=3
+		   
+		   jtwm1 = j*2
+               dx=xr*xgk(jtwm1)
+               xx = xm+dx
+               call fonctrisq(xx,p,ri)
+               gl1=ri*y(5)
+			   inty1=gl1*logy(5,:)
+               xx = xm-dx
+               call fonctrisq(xx,p,ri)
+               gl2=ri*y(4)   ! svgrd valeurs fct f a drte du centre
+	        inty2=gl2*logy(4,:)
+		  glam=glam+wgk(jtwm1)*(gl1+gl2)
+		  inty=inty+wgk(jtwm1)*(inty1+inty2)
+		   
+		    jtwm1 = j*2-1
+               dx=xr*xgk(jtwm1)
+               xx = xm+dx
+               call fonctrisq(xx,p,ri)
+               gl1=ri*y(7) 
+			   inty1=gl1*logy(7,:)
+               xx = xm-dx
+               call fonctrisq(xx,p,ri)
+               gl2=ri*y(6)   ! svgrd valeurs fct f a drte du centre
+			    inty2=gl2*logy(6,:)
+	       
+		  glam=glam+wgk(jtwm1)*(gl1+gl2)
+		  inty=inty+wgk(jtwm1)*(inty1+inty2)
+		   
+		   
+		   j=2
+		   
+		    jtwm1 = j*2
+               dx=xr*xgk(jtwm1)
+               xx = xm+dx
+               call fonctrisq(xx,p,ri)
+               gl1=ri*y(9)
+			   inty1=gl1*logy(9,:)
+               xx = xm-dx
+               call fonctrisq(xx,p,ri)
+               gl2=ri*y(8)   ! svgrd valeurs fct f a drte du centre
+			    inty2=gl2*logy(8,:)
+	       
+		   glam=glam+wgk(jtwm1)*(gl1+gl2)
+		   inty=inty+wgk(jtwm1)*(inty1+inty2)
+		   
+		    jtwm1 = j*2-1
+               dx=xr*xgk(jtwm1)
+               xx = xm+dx
+               call fonctrisq(xx,p,ri)
+				gl1=ri*y(11) 
+				inty1=gl1*logy(11,:)
+               xx = xm-dx
+               call fonctrisq(xx,p,ri)
+				gl2=ri*y(10)   ! svgrd valeurs fct f a drte du centre
+				 inty2=gl2*logy(10,:)
+	       
+			glam=glam+wgk(jtwm1)*(gl1+gl2)
+			inty=inty+wgk(jtwm1)*(inty1+inty2)
+		   
+		   j=1
+		   
+		    jtwm1 = j*2
+               dx=xr*xgk(jtwm1)
+               xx = xm+dx
+               call fonctrisq(xx,p,ri)
+               gl1=ri*y(13) 
+			   inty1=gl1*logy(13,:)
+               xx = xm-dx
+               call fonctrisq(xx,p,ri)
+               gl2=ri*y(12)   ! svgrd valeurs fct f a drte du centre
+			    inty2=gl2*logy(12,:)
+	       
+		 glam=glam+wgk(jtwm1)*(gl1+gl2)
+		 inty=inty+wgk(jtwm1)*(inty1+inty2)
+		   
+		    jtwm1 = j*2-1
+               dx=xr*xgk(jtwm1)
+               xx = xm+dx
+               call fonctrisq(xx,p,ri)
+         gl1=ri*y(15) 
+		 inty1=gl1*logy(15,:)
+               xx = xm-dx
+               call fonctrisq(xx,p,ri)
+         gl2=ri*y(14)   ! svgrd valeurs fct f a drte du centre
+		  inty2=gl2*logy(14,:)
+	       
+		glam=glam+wgk(jtwm1)*(gl1+gl2)
+		inty=inty+wgk(jtwm1)*(inty1+inty2)
+
+
+		glam = xr*glam
+		inty=xr*inty
+		
+		
+		
+		
+		end if 
+         
+        return
+
+end subroutine fonctdep0firstderiv
+
+
+!=============================================================================================        
+!================================  qgaussweibderiv  ==========================================
+!=== for derivatives approximation out a 15 point Gauss-Kronrod quadrature rule for weib =====
+!========================= looking only at diag hessian of beta paramters  ===================
+!========================= and first derivatives of beta parameters ==========================
+!=============================================================================================  
+
+
+subroutine qgaussweibfirstderivtimedep(a,b,the01,the02,the12,resdenum,&
+res01num,res02num,res12num,res01numY,res02numY,res12numY, &
+v01,v02,v12,y01,y02,y12,nY01,nY02,nY12,&
+logy01,logy02,logy12)
+
+        implicit none
+        ! arguments
+    double precision:: a, b
+    double precision:: the01(2), the02(2), the12(2)
+    double precision :: resdenum, res01num, res02num, res12num
+    double precision :: v01, v02, v12
+    integer :: nY01, nY02, nY12
+
+    ! 1D arrays of fixed length 240
+    double precision:: y01(240), y02(240), y12(240)
+
+    ! 2D arrays, fixed first dim = 240, second = nYxx (passed from caller)
+    double precision :: logy01(240,nY01), logy02(240,nY02), logy12(240,nY12)
+
+    ! results in Y-space
+    double precision:: res01numY(nY01), res02numY(nY02), res12numY(nY12)
+
+    ! locals
+    double precision :: dx,xm,xr,xx
+    double precision :: reskdenum,resk01num,resk02num,resk12num
+    double precision :: f1denum,f2denum
+    double precision :: f101num,f102num,f112num
+    double precision :: f201num,f202num,f212num
+    double precision :: su01,ri01,gl01,su02,ri02,gl02,su12,ri12,gl12
+    double precision :: fcdenum,fc01num,fc02num,fc12num
+
+    ! Y-dependent temporaries
+    double precision :: resk01numY(nY01), resk02numY(nY02), resk12numY(nY12)
+    double precision :: f101numY(nY01), f201numY(nY01)
+    double precision :: f102numY(nY02), f202numY(nY02)
+    double precision :: f112numY(nY12), f212numY(nY12)
+    double precision :: fc01numY(nY01), fc02numY(nY02), fc12numY(nY12)
+
+    ! integration storage
+    double precision :: inty01(nY01), inty02(nY02), inty12(nY12)
+
+    integer :: j,jtw,jtwm1,m
+
+    double precision, dimension(8) :: xgk,wgk
+    double precision, dimension(4) :: wg
+
+    ! machine constants
+    double precision :: epmach,uflow
+    double precision :: d1mach(5)
+
+    ! save quadrature nodes/weights
+    save xgk,wgk
+
+   	D1MACH(1)=2.23D-308
+    	D1MACH(2)=1.79D+308
+    	D1MACH(3)=1.11D-16
+    	D1MACH(4)=2.22D-16
+    	D1MACH(5)=0.301029995663981195D0
+
+    	epmach = d1mach(4)
+    	uflow = d1mach(1)
+
+	wg(1)=0.129484966168869693270611432679082d0
+   	wg(2)=0.279705391489276667901467771423780d0
+    	wg(3)=0.381830050505118944950369775488975d0
+    	wg(4)=0.417959183673469387755102040816327d0
+
+    	xgk(1)=0.991455371120812639206854697526329d0
+    	xgk(2)=0.949107912342758524526189684047851d0
+    	xgk(3)=0.864864423359769072789712788640926d0
+    	xgk(4)=0.741531185599394439863864773280788d0
+    	xgk(5)=0.586087235467691130294144838258730d0
+    	xgk(6)=0.405845151377397166906606412076961d0
+    	xgk(7)=0.207784955007898467600689403773245d0
+    	xgk(8)=0.000000000000000000000000000000000d0
+
+    	wgk(1)=0.022935322010529224963732008058970d0
+    	wgk(2)=0.063092092629978553290700663189204d0
+    	wgk(3)=0.104790010322250183839876322541518d0
+    	wgk(4)=0.140653259715525918745189590510238d0
+    	wgk(5)=0.169004726639267902826583426598550d0
+    	wgk(6)=0.190350578064785409913256402421014d0
+    	wgk(7)=0.204432940075298892414161999234649d0
+    	wgk(8)=0.209482141084727828012999174891714d0
+
+
+
+            resdenum = 0.d0
+	    res01num = 0.d0
+	    res02num = 0.d0
+	    res12num = 0.d0
+		res01numY = 0.d0
+	    res02numY = 0.d0
+	    res12numY = 0.d0
+	
+
+		if(a.ne.b) then
+		xm = 0.5d+00*(b+a)
+        xr = 0.5d+00*(b-a)
+        
+		m=16
+    	call fonctdepfirstderiv(xm,the01,ri01,gl01,su01,inty01,y01(1:m),logy01(1:m,:),nY01)
+        call fonctdepfirstderiv(xm,the02,ri02,gl02,su02,inty02,y02(1:m),logy02(1:m,:),nY02)
+   		call fonctdepfirstderiv(xm,the12,ri12,gl12,su12,inty12,y12(1:m),logy12(1:m,:),nY12)
+
+    	fcdenum =(su01**v01)*(su02**v02)*ri01*v01/(su12**v12)  ! valeur fct f au milieu de intervalle (a,b), cas pnt 0
+    	fc01num=(su01**v01)*(su02**v02)*ri01*v01*(1-(gl01*v01))/(su12**v12)
+		fc02num=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02/(su12**v12) 
+		fc12num=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12/(su12**v12) 
+		
+		fc01numY=(su01**v01)*(su02**v02)*ri01*v01*(logy01(m,:)-inty01*v01)/(su12**v12)
+		fc02numY=(su01**v01)*(su02**v02)*ri01*v01*inty02*v02/(su12**v12) 
+		fc12numY=(su01**v01)*(su02**v02)*ri01*v01*inty12*v12/(su12**v12) 
+		
+        	reskdenum = fcdenum*wgk(8)       ! init res Kronrod   ! fc * 8e poids Kronrod
+        	resk01num = fc01num*wgk(8)       ! init res Kronrod   ! fc * 8e poids Kronrod
+        	resk02num = fc02num*wgk(8)       ! init res Kronrod   ! fc * 8e poids Kronrod
+        	resk12num = fc12num*wgk(8)       ! init res Kronrod   ! fc * 8e poids Kronrod
+			resk01numY = fc01numY*wgk(8)       ! init res Kronrod   ! fc * 8e poids Kronrod
+        	resk02numY = fc02numY*wgk(8)       ! init res Kronrod   ! fc * 8e poids Kronrod
+        	resk12numY = fc12numY*wgk(8)       ! init res Kronrod   ! fc * 8e poids Kronrod
+        	
+		m=193
+		do j=1,3
+	       		jtw = j*2
+               		dx=xr*xgk(jtw)
+               		xx = xm+dx
+               		call fonctdepfirstderiv(xx,the01,ri01,gl01,su01,inty01,y01(m:(m+15)),logy01(m:(m+15),:),nY01)
+               		call fonctdepfirstderiv(xx,the02,ri02,gl02,su02,inty02,y02(m:(m+15)),logy02(m:(m+15),:),nY02)
+	       		call fonctdepfirstderiv(xx,the12,ri12,gl12,su12,inty12,y12(m:(m+15)),logy12(m:(m+15),:),nY12)
+                        
+			f1denum =(su01**v01)*(su02**v02)*ri01*v01/(su12**v12)
+			f101num=(su01**v01)*(su02**v02)*ri01*v01*(1-(gl01*v01))/(su12**v12)
+			f102num=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02/(su12**v12) 
+			f112num=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12/(su12**v12) 
+			
+			f101numY=(su01**v01)*(su02**v02)*ri01*v01*(logy01((m+15),:)-inty01*v01)/(su12**v12)
+			f102numY=(su01**v01)*(su02**v02)*ri01*v01*inty02*v02/(su12**v12) 
+			f112numY=(su01**v01)*(su02**v02)*ri01*v01*inty12*v12/(su12**v12) 
+			
+               		xx = xm-dx
+               		call fonctdepfirstderiv(xx,the01,ri01,gl01,su01,inty01,y01((m-16):(m-1)),logy01((m-16):(m-1),:),nY01)
+               		call fonctdepfirstderiv(xx,the02,ri02,gl02,su02,inty02,y02((m-16):(m-1)),logy02((m-16):(m-1),:),nY02)
+	       		call fonctdepfirstderiv(xx,the12,ri12,gl12,su12,inty12,y12((m-16):(m-1)),logy12((m-16):(m-1),:),nY12)
+				
+                        f2denum =(su01**v01)*(su02**v02)*ri01*v01/(su12**v12)
+			f201num=(su01**v01)*(su02**v02)*ri01*v01*(1-(gl01*v01))/(su12**v12)
+			f202num=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02/(su12**v12) 
+			f212num=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12/(su12**v12) 
+			
+			f201numY=(su01**v01)*(su02**v02)*ri01*v01*(logy01((m-1),:)-inty01*v01)/(su12**v12)
+			f202numY=(su01**v01)*(su02**v02)*ri01*v01*inty02*v02/(su12**v12) 
+			f212numY=(su01**v01)*(su02**v02)*ri01*v01*inty12*v12/(su12**v12) 
+
+
+               		reskdenum = reskdenum + wgk(jtw)*(f1denum+f2denum)
+
+               		resk01num = resk01num + wgk(jtw)*(f101num+f201num)
+					resk02num = resk02num + wgk(jtw)*(f102num+f202num)
+               		resk12num = resk12num + wgk(jtw)*(f112num+f212num)
+					
+					resk01numY = resk01numY + wgk(jtw)*(f101numY+f201numY)
+					resk02numY = resk02numY + wgk(jtw)*(f102numY+f202numY)
+               		resk12numY = resk12numY + wgk(jtw)*(f112numY+f212numY)
+               		
+			m=m-64
+			
+         	end do
+		m=225
+	 	do j=1,4
+			jtwm1 = j*2-1
+               		dx=xr*xgk(jtwm1)
+               		xx = xm+dx
+               		call fonctdepfirstderiv(xx,the01,ri01,gl01,su01,inty01,y01(m:(m+15)),logy01(m:(m+15),:),nY01)
+               		call fonctdepfirstderiv(xx,the02,ri02,gl02,su02,inty02,y02(m:(m+15)),logy02(m:(m+15),:),nY02)
+	       		call fonctdepfirstderiv(xx,the12,ri12,gl12,su12,inty12,y12(m:(m+15)),logy12(m:(m+15),:),nY12)
+      			
+			f1denum =(su01**v01)*(su02**v02)*ri01*v01/(su12**v12)
+			f101num=(su01**v01)*(su02**v02)*ri01*v01*(1-(gl01*v01))/(su12**v12)
+			f102num=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02/(su12**v12) 
+			f112num=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12/(su12**v12) 
+			
+			f101numY=(su01**v01)*(su02**v02)*ri01*v01*(logy01((m+15),:)-inty01*v01)/(su12**v12)
+			f102numY=(su01**v01)*(su02**v02)*ri01*v01*inty02*v02/(su12**v12) 
+			f112numY=(su01**v01)*(su02**v02)*ri01*v01*inty12*v12/(su12**v12) 
+			
+               		xx = xm-dx
+               		call fonctdepfirstderiv(xx,the01,ri01,gl01,su01,inty01,y01((m-16):(m-1)),logy01((m-16):(m-1),:),nY01)
+               		call fonctdepfirstderiv(xx,the02,ri02,gl02,su02,inty02,y02((m-16):(m-1)),logy02((m-16):(m-1),:),nY02)
+	       		call fonctdepfirstderiv(xx,the12,ri12,gl12,su12,inty12,y12((m-16):(m-1)),logy12((m-16):(m-1),:),nY12)
+
+      			f2denum =(su01**v01)*(su02**v02)*ri01*v01/(su12**v12)
+			f201num=(su01**v01)*(su02**v02)*ri01*v01*(1-(gl01*v01))/(su12**v12)
+			f202num=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02/(su12**v12) 
+			f212num=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12/(su12**v12) 
+			
+			f201numY=(su01**v01)*(su02**v02)*ri01*v01*(logy01((m-1),:)-inty01*v01)/(su12**v12)
+			f202numY=(su01**v01)*(su02**v02)*ri01*v01*inty02*v02/(su12**v12) 
+			f212numY=(su01**v01)*(su02**v02)*ri01*v01*inty12*v12/(su12**v12) 
+			
+	       		reskdenum = reskdenum + wgk(jtwm1)*(f1denum+f2denum)
+               		
+	       		resk01num = resk01num + wgk(jtwm1)*(f101num+f201num)
+               	resk02num = resk02num + wgk(jtwm1)*(f102num+f202num)
+	       		resk12num = resk12num + wgk(jtwm1)*(f112num+f212num)
+				
+				
+				resk01numY = resk01numY + wgk(jtwm1)*(f101numY+f201numY)
+				resk02numY = resk02numY + wgk(jtwm1)*(f102numY+f202numY)
+               	resk12numY = resk12numY + wgk(jtwm1)*(f112numY+f212numY)
+				
+				m=m-64
+               		
+
+         	end do
+
+    		resdenum = xr*reskdenum
+    		res01num = xr*resk01num 
+    		res02num = xr*resk02num
+    		res12num = xr*resk12num 
+	
+         endif
+              
+          end subroutine qgaussweibfirstderivtimedep
+
+!============================================================================================= 
+!========================    caculate first deriva only of====================================
+!======================== regression parameters ==============================================
+!========================    with baseline weibull and time dependent covariates  ============
+!======================== using gaussian quadrature 15 points ================================
+!============================================================================================= 
+
+
+
+      subroutine firstderivaidmlikelihoodweibtimedep(b0,np0,npar0,bfix0,fix0,c0,&
+      no0,ve010,ve120,ve020,y010,y020,y120, &
+	  p01,p02,p12,dimp01,dimp02,dimp12, Ntime, &
+	  dimnva01,dimnva12,dimnva02,nva01,&
+      nva12,nva02,t00,t10,t20,t30,troncature0,likelihood_deriv)
+
+	    use commun
+        implicit none
+         
+    double precision::vet01,vet12,vet02,res2denum,res201num,&
+		res202num,res212num,u1,v,u2,u3
+
+        integer::np0,i,j,l,w,k,m,npar0,nva01,nva12,nva02,no0, &
+	troncature0,dimnva01,dimnva02,dimnva12, &
+	p01,p02,p12,dimp01,dimp02,dimp12,Ntime, &
+	nva0102,nvamax,nva01nofix,nva01nofixY,nva02nofix, &
+	nva02nofixY,nva12nofix,nva12nofixY, nvamax01Y,nvamax02Y, &
+	nY01,nY02,nY12,sizespline,lfix
+
+	double precision,dimension(np0),intent(inout)::likelihood_deriv
+	double precision,dimension(np0)::b0,res,resk,res1
+        double precision,dimension(npar0)::bh
+	double precision,dimension(npar0-np0)::bfix0
+	integer,dimension(npar0)::fix0
+	double precision,dimension(2)::the01
+	double precision,dimension(2)::the12
+	double precision,dimension(2)::the02
+    
+	double precision,dimension(no0,dimnva01)::ve010
+	double precision,dimension(no0,dimnva02)::ve020
+	double precision,dimension(no0,dimnva12)::ve120
+	
+	
+	double precision,dimension(no0*dimp01*Ntime)::y010
+	double precision,dimension(no0*dimp02*Ntime)::y020
+	double precision,dimension(no0*dimp12*Ntime)::y120
+	
+	
+	double precision,dimension(Ntime)::y01t,y02t
+	double precision,dimension(Ntime)::logy01t,logy02t
+	double precision,dimension(Ntime)::y12t
+
+!	integer, dimension(16) :: indices
+	
+    double precision::su01,ri01,su12,ri12,su02,ri02,gl01,gl02,gl12
+	double precision,dimension(no0)::t00,t10,t20,t30
+	integer,dimension(no0)::c0
+
+	allocate(b(np0),bfix(npar0-np0))
+	allocate(fix(npar0))
+	
+
+	sizespline=6
+
+	if(nva01.gt.0) then 
+	  nva01nofix=nva01-sum(fix((sizespline+1):(nva01+sizespline)))
+	else 
+	  nva01nofix=0
+	end if 
+
+    i=nva01+sizespline
+	if(nva02.gt.0) then 
+          nva02nofix=nva02-sum(fix((i+1):(nva02+i)))
+	else 
+	   nva02nofix=0
+	end if 
+	
+	i=nva01+nva02+sizespline
+
+	if(nva12.gt.0) then 
+	  nva12nofix=nva12-sum(fix((i+1):(i+nva12)))
+	else 
+	  nva12nofix=0
+	end if 
+	
+	i=nva01+nva02+sizespline + nva12
+	
+	if(p01.gt.0) then 
+		nva01nofixY=p01-sum(fix((i+1):(i+p01)))
+	else 
+	  nva01nofixY=0
+	end if 
+	
+	i=nva01+nva02+sizespline+nva12+p01
+	
+	if(p02.gt.0) then 
+		nva02nofixY=p02-sum(fix((i+1):(i+p02)))
+	else 
+	  nva02nofixY=0
+	end if 
+	
+	i=nva01+nva02+sizespline+nva12+p01+p02
+	
+	if(p12.gt.0) then 
+		nva12nofixY=p12-sum(fix((i+1):(i+p12)))
+	else 
+	  nva12nofixY=0
+	end if 
+
+	nva0102=nva01nofix+nva02nofix
+	nvamax=nva01nofix+nva02nofix+nva12nofix
+	nvamax01Y=nvamax+nva01nofixY
+	nvamax02Y=nvamax01Y+nva02nofixY
+	
+
+	if(nva01.gt.0) then 
+		allocate(ve01(no0,nva01))
+		allocate(ve01nofix(no0,nva01nofix))
+		allocate(tronc01(nva01nofix))
+		
+	else 
+		allocate(ve01(no0,1))
+		allocate(ve01nofix(no0,1))
+		ve01nofix=0
+		allocate(tronc01(1))
+	end if 
+	
+	if(nva02.gt.0) then 
+		allocate(ve02(no0,nva02))
+		allocate(ve02nofix(no0,nva02nofix))
+		allocate(tronc02(nva02nofix))
+		
+	else 
+		allocate(ve02(no0,1))
+		allocate(ve02nofix(no0,1))
+		ve02nofix=0
+		allocate(tronc02(1))
+	end if 
+
+	if(nva12.gt.0) then 
+		allocate(ve12(no0,nva12))
+		allocate(ve12nofix(no0,nva12nofix))
+		
+	else 
+		allocate(ve12(no0,1))
+		allocate(ve12nofix(no0,1))
+		ve12nofix=0
+	end if 
+	
+	
+	if(p01.gt.0) then 
+		allocate(y01(no0*p01*Ntime))
+		allocate(logy01(Ntime,nva01nofixY))
+		allocate(res201numY(1:nva01nofixY))
+		allocate(tronc01Y(1:nva01nofixY))
+		y01=y010
+		nY01=nva01nofixY
+		
+	else 
+		allocate(y01(no0*Ntime))
+		allocate(logy01(Ntime,1))
+		y01=0
+		allocate(res201numY(1:1))
+		nY01=1
+		allocate(tronc01Y(1:1))
+	end if 
+	
+	if(p02.gt.0) then 
+		allocate(y02(no0*p02*Ntime))
+		y02=y020
+		allocate(logy02(Ntime,nva02nofixY))
+		allocate(res202numY(1:nva02nofixY))
+		allocate(tronc02Y(1:nva02nofixY))
+		nY02=nva02nofixY
+		
+	else 
+		allocate(y02(no0*Ntime))
+		allocate(logy02(Ntime,1))
+		y02=0
+		allocate(res202numY(1:1))
+		nY02=1
+		allocate(tronc02Y(1:1))
+	end if 
+	
+	if(p12.gt.0) then 
+		allocate(y12(no0*p12*Ntime))
+		allocate(logy12(Ntime,nva12nofixY))
+		allocate(res212numY(1:nva12nofixY))
+		y12=y120
+		nY12=nva12nofixY
+		
+	else 
+		allocate(y12(no0*Ntime))
+		allocate(logy12(Ntime,1))
+		y12=0
+		allocate(res212numY(1:1))
+		nY12=1
+	end if 
+
+
+	ve01=ve010
+	ve02=ve020
+	ve12=ve120
+
+
+	allocate(t0(no0),t1(no0),t2(no0),t3(no0),c(no0))
+	c=c0
+	t0=t00
+	t1=t10
+	t2=t20
+	t3=t30
+
+         
+        ! we need to put bh at its original values if in posfix 
+
+
+       l=0
+       lfix=0
+       w=0
+
+	if(nva01.gt.0) then
+	do k=1,nva01
+	   if(fix((sizespline+k)).eq.0) then 
+		lfix=lfix+1
+		ve01nofix(:,lfix)=ve01(:,k)
+	   end if 
+	end do
+	end if 
+
+	lfix=0
+
+	if(nva02.gt.0) then 
+	do k=1,nva02
+	   if(fix((sizespline+nva01+k)).eq.0) then 
+		lfix=lfix+1
+		ve02nofix(:,lfix)=ve02(:,k)
+	   end if 
+	end do
+	end if 
+	
+	lfix=0
+
+	if(nva12.gt.0) then 
+	do k=1,nva12
+	   if(fix((sizespline+nva01+nva02+k)).eq.0) then 
+		lfix=lfix+1
+		ve12nofix(:,lfix)=ve12(:,k)
+	   end if 
+	end do
+	end if
+	
+	l=0
+       lfix=0
+       w=0
+
+     do k=1,npar0 
+         if(fix(k).eq.0) then
+            l=l+1
+            bh(k)=b(l)
+	 end if 
+         if(fix(k).eq.1) then
+            w=w+1
+            bh(k)=bfix(w)
+         end if
+      end do
+
+   
+	
+
+
+
+         do i=1,2
+            the01(i)=(bh(i))*(bh(i))
+         end do
+         do i=1,2
+            j = 2+i
+            the02(i)=(bh(j))*(bh(j))
+         end do
+         do i=1,2
+            j = 4+i
+            the12(i)=(bh(j))*(bh(j))
+         end do
+	
+
+	allocate(t0(no0),t1(no0),t2(no0),t3(no0),c(no0))
+	c=c0
+	t0=t00
+	t1=t10
+	t2=t20
+	t3=t30
+
+         
+        ! we need to put bh at its original values if in posfix 
+
+! attention here so far Y dependent of time cannot be fixed 
+! fix = 0 
+       l=0
+       w=0
+
+       do k=1,(np0+sum(fix))
+         if(fix(k).eq.0) then
+            l=l+1
+            bh(k)=b(l)
+         end if
+         if(fix(k).eq.1) then
+            w=w+1
+            bh(k)=bfix(w)
+         end if
+      end do
+ 
+	
+
+
+         do i=1,2
+            the01(i)=(bh(i))*(bh(i))
+         end do
+         do i=1,2
+            j = 2+i
+            the02(i)=(bh(j))*(bh(j))
+         end do
+         do i=1,2
+            j = 4+i
+            the12(i)=(bh(j))*(bh(j))
+         end do
+
+
+		res = 0.d0
+!---------- calcul de la vraisemblance ------------------
+
+
+         
+               do i=1,no0
+			   
+			
+         
+                vet01 = 0.d0
+                vet12 = 0.d0
+                vet02 = 0.d0
+
+				y01t = 0
+                y12t = 0
+                y02t = 0
+				
+				logy01 = 0
+                logy12 = 0
+                logy02 = 0
+				
+			
+
+               
+				! ---- nva01 ----
+				if (nva01.gt.0) then
+					vet01 = vet01 + dot_product( bh(6+1 : 6+nva01), dble(ve01(i,1:nva01)) )
+				endif
+
+				! ---- nva02 ----
+				if (nva02.gt.0) then
+					vet02 = vet02 + dot_product( bh(6+nva01+1 : 6+nva01+nva02), dble(ve02(i,1:nva02)) )
+				endif
+
+				! ---- nva12 ----
+				if (nva12.gt.0) then
+					vet12 = vet12 + dot_product( bh(6+nva01+nva02+1 : 6+nva01+nva02+nva12), dble(ve12(i,1:nva12)) )
+				endif
+
+				
+				! ---- p01 ----
+				m=nva01+nva02+sizespline +nva12
+				if (p01 .gt. 0) then
+						j = (i-1)*Ntime*p01
+						k = 6 + nva01 + nva02 + nva12
+						do l = 1, Ntime
+							w = j + (l-1)*p01
+							! produit scalaire entre bh et y01(k)
+							y01t(l) = y01t(l) + dot_product( bh(k+1:k+p01), y01(w+1:w+p01) )
+							! copie vectorisée
+							logy01(l,1:p01) =  pack(y01(w+1:w+p01),mask=(fix((m+1):(m+p01))==0))
+						end do
+				endif
+
+                ! ---- p02 ----
+				m=nva01+nva02+sizespline+nva12+p01
+				if (p02.gt.0) then
+					j  = (i-1)*Ntime*p02
+					k = 6 + nva01 + nva02 + nva12 + p01
+
+					do l = 1, Ntime
+						w = j + (l-1)*p02
+
+						! produit scalaire
+						y02t(l) = y02t(l) + dot_product( bh(k+1:k+p02), y02(w+1:w+p02) )
+
+						! copie vectorisée
+						logy02(l,1:p02) = pack(y02(w+1:w+p02),mask=(fix((m+1):(m+p02))==0))
+					end do
+				endif
+
+
+				! ---- p12 ----
+				m=nva01+nva02+sizespline+nva12+p01+p02
+				if (p12.gt.0) then
+					j  = (i-1)*Ntime*p12
+					k = 6 + nva01 + nva02 + nva12 + p01 + p02
+
+					do l = 1, Ntime
+						w = j + (l-1)*p12
+
+						! produit scalaire
+						y12t(l) = y12t(l) + dot_product( bh(k+1:k+p12), y12(w+1:w+p12) )
+
+						! copie vectorisée
+						logy12(l,1:p12) = pack(y12(w+1:w+p12),mask=(fix((m+1):(m+p12))==0))
+					end do
+				endif
+				
+				y01t=dexp(y01t)
+				y02t=dexp(y02t)
+				y12t=dexp(y12t)
+
+                vet01 = dexp(vet01)
+                vet12 = dexp(vet12)
+                vet02 = dexp(vet02)
+
+
+                res1 = 0.d0
+                
+				
+				 if(troncature.eq.1)then
+                        if(t0(i).eq.0.d0)then
+                                tronc01 = 0
+								tronc02 =  0
+								tronc01Y = 0
+								tronc02Y =  0
+                        else 
+				call fonctdep0firstderiv(t0(i),the01,gl01,res201numY,y01t(257:271),logy01(257:271,:),nY01)
+				call fonctdep0firstderiv(t0(i),the02,gl02,res202numY,y02t(257:271),logy02(257:271,:),nY02)
+                            tronc01=ve01nofix(i,:)*gl01*vet01
+                        	tronc02=ve02nofix(i,:)*gl02*vet02
+							tronc01Y=res201numY*vet01
+                        	tronc02Y=res202numY*vet02
+                        end if
+                else
+                    tronc01 = 0
+                  	tronc02 = 0
+					tronc01Y = 0
+                  	tronc02Y = 0
+                end if
+				
+
+				
+		
+                if(c(i).eq.1)then ! cad 0-->1 et 0-->2
+
+			       
+					   
+                else
+                if(c(i).eq.2)then ! cpi 0-->1
+				
+
+			call fonctdep(t3(i),the12,ri12,gl12,su12,y12t(241:256))
+			v=(su12**vet12)
+			call  qgaussweibfirstderivtimedep(t1(i),t2(i),the01,the02,&
+                         the12,res2denum,res201num,&
+						res202num,res212num,res201numY,res202numY,res212numY, &
+						 vet01,vet02,vet12,&
+						 y01t(1:240),y02t(1:240),y12t(1:240),&
+						 nY01,nY02,nY12, &
+						 logy01(1:240,:),logy02(1:240,:),logy12(1:240,:))
+						 
+				
+                        
+			v=v*res2denum
+
+			if(nva01nofix.gt.0) then
+
+			u1=res201num*(su12**vet12)
+			
+      		res1(1:nva01nofix)=&
+			ve01nofix(i,:)*u1/v
+			res1(1:nva01nofix)=res1(1:nva01nofix)+tronc01
+			end if 
+
+			
+			if(nva02nofix.gt.0) then
+
+			u2=-res202num*(su12**vet12)
+			res1((nva01nofix+1):nva0102)=&
+			ve02nofix(i,:)*u2/v
+			res1((nva01nofix+1):nva0102)=&
+			res1((nva01nofix+1):nva0102)+&
+			tronc02
+			end if 
+
+			
+			if(nva12nofix.gt.0) then 
+
+			u3=res212num-gl12*vet12*res2denum
+			u3=u3*(su12**vet12)
+
+			res1((nva0102+1):nvamax)=&
+			ve12nofix(i,:)*u3/v
+			end if 
+			
+			v=res2denum
+
+			if(nva01nofixY.gt.0) then 
+			
+			res1((nvamax+1):nvamax01Y)= res201numY/v
+			res1((nvamax+1):nvamax01Y)=res1((nvamax+1):nvamax01Y)+ &
+			tronc01Y
+			
+			end if 
+			
+			if(nva02nofixY.gt.0) then 
+			
+			res1((nvamax01Y+1):nvamax02Y)= -res202numY/v
+			res1((nvamax01Y+1):nvamax02Y)=res1((nvamax01Y+1):nvamax02Y)+ &
+			tronc02Y
+			
+			end if 
+			
+			if(nva12nofixY.gt.0) then 
+			
+			res1((nvamax02Y+1):np0)= res212numY/v
+			
+			call fonctdepfirstderiv(t3(i),the12,ri12,gl12,su12,res212numY,y12t(241:256),logy12(241:256,:),nY12)
+			res1((nvamax02Y+1):np0)=res1((nvamax02Y+1):np0)-&
+			res212numY*vet12
+			
+			end if 
+						
+                else  
+                    if(c(i).eq.3)then ! obs 0-->1
+			             
+                    else   
+                       if(c(i).eq.4)then ! cpi 0-->1 et obs 1-->2
+					   
+					   
+					  call fonctdep(t3(i),the12,ri12,gl12,su12,y12t(241:256))
+					   v=(su12**vet12)*ri12*vet12
+						call  qgaussweibfirstderivtimedep(t1(i),t2(i),the01,the02,&
+                         the12,res2denum,res201num,&
+						res202num,res212num,res201numY,res202numY,res212numY, &
+						 vet01,vet02,vet12,&
+						 y01t(1:240),y02t(1:240),y12t(1:240),&
+						 nY01,nY02,nY12, &
+						 logy01(1:240,:),logy02(1:240,:),logy12(1:240,:))
+						 
+				
+                        
+			v=v*res2denum
+
+			if(nva01nofix.gt.0) then 
+			u1=res201num*(su12**vet12)*ri12*vet12
+			
+			res1(1:nva01nofix)=&
+			ve01nofix(i,:)*u1/v
+			res1(1:nva01nofix)=res1(1:nva01nofix)+tronc01
+			end if 
+
+			
+			if(nva02nofix.gt.0) then 
+
+			u2=-res202num*(su12**vet12)*ri12*vet12
+			
+			res1((nva01nofix+1):(nva01nofix+nva02nofix))=&
+			ve02nofix(i,:)*u2/v
+			res1((nva01nofix+1):nva0102)=&
+			res1((nva01nofix+1):nva0102)+&
+			tronc02
+			end if 
+
+
+			
+			if(nva12nofix.gt.0) then 
+
+			u3=res212num+&
+			(1-gl12*vet12)*res2denum
+			u3=u3*(su12**vet12)*ri12*vet12
+			
+			res1((nva0102+1):nvamax)=&
+			ve12nofix(i,:)*u3/v
+
+			end if 
+			
+			v=res2denum
+			if(nva01nofixY.gt.0) then 
+			
+			res1((nvamax+1):nvamax01Y)= res201numY/v
+			res1((nvamax+1):nvamax01Y)=res1((nvamax+1):nvamax01Y)+ &
+			tronc01Y
+			
+			end if 
+			
+			if(nva02nofixY.gt.0) then 
+			
+			res1((nvamax01Y+1):nvamax02Y)= -res202numY/v
+			res1((nvamax01Y+1):nvamax02Y)=res1((nvamax01Y+1):nvamax02Y)+ &
+			tronc02Y
+			
+			end if 
+			
+			if(nva12nofixY.gt.0) then 
+			
+			res1((nvamax02Y+1):np0)= res212numY/v
+			
+			call fonctdepfirstderiv(t3(i),the12,ri12,gl12,su12,res212numY,y12t(241:256),logy12(241:256,:),nY12)
+			res1((nvamax02Y+1):np0)=res1((nvamax02Y+1):np0)-&
+			res212numY*vet12+logy12(256,:)
+			
+			end if 
+						
+                       else
+                         if(c(i).eq.5)then ! obs 0-->1 et obs 1-->2
+								
+                         else
+                            if(c(i).eq.6)then ! vivant ???
+						
+
+								call fonctdep(t3(i),the01,ri01,gl01,&
+								su01,y01t(241:256))
+                                call fonctdep(t3(i),the02,ri02,gl02,&
+								su02,y02t(241:256))
+                                call fonctdep(t3(i),the12,ri12,gl12,&
+								su12,y12t(241:256))
+          
+								
+								call  qgaussweibfirstderivtimedep(t1(i),t3(i),the01,the02,&
+                         the12,res2denum,res201num,&
+						res202num,res212num,res201numY,res202numY,res212numY, &
+						 vet01,vet02,vet12,&
+						 y01t(1:240),y02t(1:240),y12t(1:240),&
+						 nY01,nY02,nY12, &
+						 logy01(1:240,:),logy02(1:240,:),logy12(1:240,:))
+						 
+				
+                        
+								v=(su12**vet12)*res2denum+&
+								(su01**vet01)*(su02**vet02)
+
+								if(nva01nofix.gt.0) then 
+
+								u1=(-gl01*vet01)*(su01**vet01)*(su02**vet02)+&
+								(su12**vet12)*res201num
+									res1(1:nva01nofix)=&
+								ve01nofix(i,:)*u1/v
+								res1(1:nva01nofix)=&
+								res1(1:nva01nofix)+tronc01
+								end if 
+								
+								if(nva02nofix.gt.0) then 
+
+								u2=-gl02*vet02*(su01**vet01)*(su02**vet02)
+								u2=u2-(su12**vet12)*res202num
+								res1((nva01nofix+1):nva0102)=&
+								ve02nofix(i,:)*u2/v
+								res1((nva01nofix+1):nva0102)=&
+								res1((nva01nofix+1):nva0102)+&
+								tronc02
+								end if 
+
+								if(nva12nofix.gt.0) then 
+								
+								u3=-gl12*vet12*(su12**vet12)*res2denum+&
+								(su12**vet12)*res212num
+								res1((nva0102+1):nvamax)=&
+								ve12nofix(i,:)*u3/v
+								end if 
+								
+								
+								u1=(su01**vet01)*(su02**vet02)
+								
+								if(nva01nofixY.gt.0) then 
+								
+								res1((nvamax+1):nvamax01Y)= res201numY*(su12**vet12)
+								call fonctdepfirstderiv(t3(i),the01,ri01,gl01,su01,res201numY,y01t(241:256),logy01(241:256,:),nY01)
+								res1((nvamax+1):nvamax01Y)=res1((nvamax+1):nvamax01Y)-&
+								res201numY*u1
+								res1((nvamax+1):nvamax01Y)=res1((nvamax+1):nvamax01Y)/v
+								res1((nvamax+1):nvamax01Y)=res1((nvamax+1):nvamax01Y)+ &
+								tronc01Y
+								
+								end if 
+								
+								if(nva02nofixY.gt.0) then 
+								
+								res1((nvamax01Y+1):nvamax02Y)= -res202numY*(su12**vet12)
+								call fonctdepfirstderiv(t3(i),the02,ri02,gl02,su02,res202numY,y02t(241:256),logy02(241:256,:),nY02)
+								res1((nvamax01Y+1):nvamax02Y)=res1((nvamax01Y+1):nvamax02Y)-&
+								res202numY*u1
+								res1((nvamax01Y+1):nvamax02Y)=res1((nvamax01Y+1):nvamax02Y)/v
+								res1((nvamax01Y+1):nvamax02Y)=res1((nvamax01Y+1):nvamax02Y)+ &
+								tronc02Y
+								
+								end if 
+								
+								if(nva12nofixY.gt.0) then 
+								
+								res1((nvamax02Y+1):np0)= res212numY*(su12**vet12)
+								call fonctdepfirstderiv(t3(i),the12,ri12,gl12,su12,res212numY,y12t(241:256),logy12(241:256,:),nY12)
+								res1((nvamax02Y+1):np0)=res1((nvamax02Y+1):np0)-&
+								res212numY*res2denum*(su12**vet12)
+								res1((nvamax02Y+1):np0)=res1((nvamax02Y+1):np0)/v
+
+								end if 
+								
+                            else ! passage 0-->2  
+					
+				                call fonctdep(t3(i),the01,ri01,gl01,&
+								su01,y01t(241:256))
+                                call fonctdep(t3(i),the02,ri02,gl02,&
+								su02,y02t(241:256))
+                                call fonctdep(t3(i),the12,ri12,gl12,&
+								su12,y12t(241:256))
+          
+								
+								call  qgaussweibfirstderivtimedep(t1(i),t3(i),the01,the02,&
+                         the12,res2denum,res201num,&
+						res202num,res212num,res201numY,res202numY,res212numY, &
+						 vet01,vet02,vet12,&
+						 y01t(1:240),y02t(1:240),y12t(1:240),&
+						 nY01,nY02,nY12, &
+						 logy01(1:240,:),logy02(1:240,:),logy12(1:240,:))
+						 
+						
+							   v=(su12**vet12)*ri12*vet12*res2denum+&
+								(su01**vet01)*(su02**vet02)*ri02*vet02
+
+								if(nva01nofix.gt.0) then 
+
+								u1=-gl01*vet01*(su01**vet01)
+								u1=u1*(su02**vet02)*ri02*vet02
+								u1=u1+(su12**vet12)*ri12*vet12*res201num
+
+								
+								res1(1:nva01nofix)=&
+								ve01nofix(i,:)*u1/v
+								res1(1:nva01nofix)=res1(1:nva01nofix)+tronc01
+								end if 
+
+								if(nva02nofix.gt.0) then 
+
+								u2=-(su12**vet12)*ri12*vet12*res202num+&
+								(1-gl02*vet02)*(su01**vet01)*(su02**vet02)*ri02*vet02
+
+								res1((nva01nofix+1):nva0102)=&
+								ve02nofix(i,:)*u2/v
+								res1((nva01nofix+1):nva0102)=&
+								res1((nva01nofix+1):nva0102)+&
+								tronc02
+
+								end if 
+
+								if(nva12nofix.gt.0) then 
+
+								u3=res212num+(1-gl12*vet12)*res2denum
+								u3=u3*(su12**vet12)*ri12*vet12
+
+								res1((nva0102+1):nvamax)=&
+								ve12nofix(i,:)*u3/v
+
+								end if 
+												
+								
+								u1=(su01**vet01)*(su02**vet02)
+								
+								if(nva01nofixY.gt.0) then 
+								
+								res1((nvamax+1):nvamax01Y)= res201numY*(su12**vet12)*ri12*vet12
+								call fonctdepfirstderiv(t3(i),the01,ri01,gl01,su01,res201numY,y01t(241:256),logy01(241:256,:),nY01)
+								res1((nvamax+1):nvamax01Y)=res1((nvamax+1):nvamax01Y)-&
+								res201numY*u1*ri02*vet02
+								res1((nvamax+1):nvamax01Y)=res1((nvamax+1):nvamax01Y)/v
+								res1((nvamax+1):nvamax01Y)=res1((nvamax+1):nvamax01Y)+ &
+								tronc01Y
+								
+								end if 
+								
+								if(nva02nofixY.gt.0) then 
+								
+								res1((nvamax01Y+1):nvamax02Y)= -res202numY*(su12**vet12)*ri12*vet12
+								call fonctdepfirstderiv(t3(i),the02,ri02,gl02,su02,res202numY,y02t(241:256),logy02(241:256,:),nY02)
+								res1((nvamax01Y+1):nvamax02Y)= res1((nvamax01Y+1):nvamax02Y)+&
+								(logy02(256,:)-res202numY)*u1*ri02*vet02
+								res1((nvamax01Y+1):nvamax02Y)=res1((nvamax01Y+1):nvamax02Y)/v
+								res1((nvamax01Y+1):nvamax02Y)=res1((nvamax01Y+1):nvamax02Y)+ &
+								tronc02Y
+								
+								end if 
+								
+								if(nva12nofixY.gt.0) then 
+								
+								res1((nvamax02Y+1):np0)= res212numY*su12**vet12*ri12*vet12
+								call fonctdepfirstderiv(t3(i),the12,ri12,gl12,su12,res212numY,y12t(241:256),logy12(241:256,:),nY12)
+								res1((nvamax02Y+1):np0)=res1((nvamax02Y+1):np0)-&
+								res212numY*res2denum*(su12**vet12)+&
+								(su12**vet12)*ri12*vet12*logy12(256,:)*res2denum
+								res1((nvamax02Y+1):np0)=res1((nvamax02Y+1):np0)/v
+
+								end if 
+								
+						
+                            endif
+                         endif                        
+                      endif
+                   endif   
+                endif   
+                endif  				
+
+			
+                res = res + res1 
+
+
+        end do   
+ 
+
+
+        likelihood_deriv = res
+
+
+123     continue 
+
+	deallocate(b,bfix,fix,ve01,ve02,ve12,y01,y02,y12, & 
+	t0,t1,t2,t3,c,ve01nofix,ve02nofix,ve12nofix,&
+	logy01,logy02,logy12,res201numY,&
+	res202numY,res212numY,tronc01Y,tronc01,tronc02Y,tronc02)
+
+end subroutine firstderivaidmlikelihoodweibtimedep

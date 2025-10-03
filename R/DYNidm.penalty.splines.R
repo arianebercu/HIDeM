@@ -44,7 +44,7 @@
 #' @useDynLib HIDeM
 
 
-DYNidm.penalty.splines<-function(b,fix0,size_V,
+DYNidm.penalty.splines<-function(b,fix0,size_V,size_spline,
                    clustertype,epsa,epsb,epsd,eps.eigen,nproc,maxiter,maxiter.pena,
                    ctime,N,
                    ve01,ve02,ve12,dimnva01,dimnva02,dimnva12,nvat01,nvat02,nvat12,
@@ -57,10 +57,9 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,
                    dimp01,dimp02,dimp12,Nsample){
   
 
-
+browser()
   # need to keep original fix to calculate for beta 
-  
-  browser()
+
   V0<-NA
   fix00<-fix0
   
@@ -113,32 +112,31 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,
   # need to check that same variable in each transition :
   
   # Initiate value of spline
-  nspline<-nknots01+nknots02+nknots12+6
-   s.start<-b[1:nspline]
+   s.start<-b[1:size_spline]
   
   # Initiate value of eta : all the same for each lambda
   
-  beta.start<-b[(nspline+1):(size_V)]
+  beta.start<-b[(size_spline+1):(size_V)]
   
   
   combine<-0
   
   # fix0 will be used to calculate derivatives and second derivatives only
   # for Beta and not modelPar01,02,12
-  fix0[1:nspline]<-rep(1,nspline)
+  fix0[1:size_spline]<-rep(1,size_spline)
   fix0.beta<-fix00
-  fix0.beta[(nspline+1):size_V]<-rep(1,size_V-nspline)
+  fix0.beta[(size_spline+1):size_V]<-rep(1,size_V-size_spline)
 
   npm<-sum(fix0==0)
-  npmspline<-sum(fix00[1:nspline]==0)
+  npmspline<-sum(fix00[1:size_spline]==0)
   
-  npm01<-ifelse(nvat01>0,sum(fix0[(nspline+1):(nspline+nvat01)]==0),0)
-  npm01Y<-ifelse(p01>0,sum(fix0[(nspline+1+nvat01+nvat02+nvat12):(nspline+nvat01+nvat02+nvat12+p01)]==0),0)
+  npm01<-ifelse(nvat01>0,sum(fix0[(size_spline+1):(size_spline+nvat01)]==0),0)
+  npm01Y<-ifelse(p01>0,sum(fix0[(size_spline+1+nvat01+nvat02+nvat12):(size_spline+nvat01+nvat02+nvat12+p01)]==0),0)
   
-  npm02<-ifelse(nvat02>0,sum(fix0[(nspline+1+nvat01):(nspline+nvat01+nvat02)]==0),0)
-  npm02Y<-ifelse(p02>0,sum(fix0[(nspline+1+nvat01+nvat02+nvat12+p01):(nspline+nvat01+nvat02+nvat12+p01+p02)]==0),0)
-  npm12<-ifelse(nvat12>0,sum(fix0[(nspline+1+nvat01+nvat02):(nspline+1+nvat01+nvat02+nvat12)]==0),0)
-  npm12Y<-ifelse(p12>0,sum(fix0[(nspline+1+nvat01+nvat02+nvat12+p01+p02):(nspline+nvat01+nvat02+nvat12+p01+p12+p02)]==0),0)
+  npm02<-ifelse(nvat02>0,sum(fix0[(size_spline+1+nvat01):(size_spline+nvat01+nvat02)]==0),0)
+  npm02Y<-ifelse(p02>0,sum(fix0[(size_spline+1+nvat01+nvat02+nvat12+p01):(size_spline+nvat01+nvat02+nvat12+p01+p02)]==0),0)
+  npm12<-ifelse(nvat12>0,sum(fix0[(size_spline+1+nvat01+nvat02):(size_spline+1+nvat01+nvat02+nvat12)]==0),0)
+  npm12Y<-ifelse(p12>0,sum(fix0[(size_spline+1+nvat01+nvat02+nvat12+p01+p02):(size_spline+nvat01+nvat02+nvat12+p01+p12+p02)]==0),0)
   
   if(partialH==F){
     min<-(npm*(npm+1))/2
@@ -149,7 +147,7 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,
   outputNsample<-list()
   length(outputNsample)<-Nsample
   
-  browser()
+
   for(idsample in 1:Nsample){
   
     if(!is.null(dim(y01))){
@@ -167,7 +165,7 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,
     }else{
       y12k<-y12
     }
-    browser()
+  
     
   if(nproc >1){
     
@@ -200,8 +198,8 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,
                                  beta<-beta.start
                                  s<-s.start
                                }else{
-                                 s<-outputNsample[[1]]$b[1:nspline,id.lambda]
-                                 beta<-outputNsample[[1]]$b[(nspline+1):size_V,id.lambda]
+                                 s<-outputNsample[[1]]$b[1:size_spline,id.lambda]
+                                 beta<-outputNsample[[1]]$b[(size_spline+1):size_V,id.lambda]
                               }
                                
                                converged<-F
@@ -406,7 +404,7 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,
                                                      nva01Y=npm01Y,
                                                      nva02Y=npm02Y,
                                                      nva12Y=npm12Y,
-                                                     fix=fix0[(nspline+1):size_V],
+                                                     fix=fix0[(size_spline+1):size_V],
                                                      penalty.factor=penalty.factor,
                                                      penalty=penalty,
                                                      v=V,
@@ -420,7 +418,7 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,
                                  
                                  b<-c(s,output.cv$b)
                                  
-                                 betanew<-b[(nspline+1):size_V]
+                                 betanew<-b[(size_spline+1):size_V]
                                  
                                  # penalised loglik see if inferior to previous
                                  res<-gaussDYNidmlLikelihoodpena(b=b,
@@ -659,7 +657,7 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,
                                  # mla output is loglik
                                  # new values for splines:
                                  snew<-s
-                                 snew[fix00[1:nspline]==0]<-output.mla$b
+                                 snew[fix00[1:size_spline]==0]<-output.mla$b
                                
                                  
                                  
@@ -869,8 +867,8 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,
                                    beta<-beta.start
                                    s<-s.start
                                  }else{
-                                   s<-outputNsample[[1]]$b[1:nspline,id.lambda]
-                                   beta<-outputNsample[[1]]$b[(nspline+1):size_V,id.lambda]
+                                   s<-outputNsample[[1]]$b[1:size_spline,id.lambda]
+                                   beta<-outputNsample[[1]]$b[(size_spline+1):size_V,id.lambda]
                                  }
                                  
                                  converged<-F
@@ -1069,7 +1067,7 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,
                                                           nva01Y=npm01Y,
                                                           nva02Y=npm02Y,
                                                           nva12Y=npm12Y,
-                                                          fix=fix0[(nspline+1):size_V],
+                                                          fix=fix0[(size_spline+1):size_V],
                                                           penalty.factor=penalty.factor,
                                                           penalty=penalty,
                                                           v=V,
@@ -1083,7 +1081,7 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,
                                    
                                    b<-c(s,output.cv$b)
                                    
-                                   betanew<-b[(nspline+1):size_V]
+                                   betanew<-b[(size_spline+1):size_V]
                                    
                                    # penalised loglik see if inferior to previous
                                    res<-gaussDYNidmlLikelihoodpena(b=b,
@@ -1323,7 +1321,7 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,
                                    # mla output is loglik
                                    # new values for splines:
                                    snew<-s
-                                   snew[fix00[1:nspline]==0]<-output.mla$b
+                                   snew[fix00[1:size_spline]==0]<-output.mla$b
                                    if(nvat01>0){
                                      b01<-betanew[1:nvat01][penalty.factor[1:nvat01]==1]
                                      if(p01>0){
@@ -1536,8 +1534,8 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,
                                  beta<-beta.start
                                  s<-s.start
                                }else{
-                                 s<-outputNsample[[1]]$b[1:nspline,id.lambda]
-                                 beta<-outputNsample[[1]]$b[(nspline+1):size_V,id.lambda]
+                                 s<-outputNsample[[1]]$b[1:size_spline,id.lambda]
+                                 beta<-outputNsample[[1]]$b[(size_spline+1):size_V,id.lambda]
                                }
                                
                                converged<-F
@@ -1551,10 +1549,10 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,
                                eval.loglik<-rep(NA,maxiter+1)
                                eval.validity<-rep(NA,maxiter+1)
                                
-                               browser()
+                              
                                while(converged==F & ite<=maxiter){
                                
-                                 browser()
+                                
                                  b<-c(s,beta)
                                  bfix<-b[fix0==1]
                                  b<-b[fix0==0]
@@ -1670,7 +1668,7 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,
                                      break
                                    }
                                   
-                                 browser() 
+                                 
                                  fu<-output[(min+1):length(output)]
                                  V<-matrix(0,nrow=npm,ncol=npm)
                                  V[upper.tri(V,diag=T)]<-output[1:min]
@@ -1752,7 +1750,7 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,
                                  
                             
                                  # update beta
-                                 browser()
+                                
                                  output.cv<-DYNcv.model(beta=beta,
                                                         nva01=npm01,
                                                         nva02=npm02,
@@ -1760,7 +1758,7 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,
                                                         nva01Y=npm01Y,
                                                         nva02Y=npm02Y,
                                                         nva12Y=npm12Y,
-                                                        fix=fix0[(nspline+1):size_V],
+                                                        fix=fix0[(size_spline+1):size_V],
                                                         penalty.factor=penalty.factor,
                                                         penalty=penalty,
                                                         v=V,
@@ -1774,7 +1772,7 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,
                                
                                  b<-c(s,output.cv$b)
                                  
-                                 betanew<-b[(nspline+1):size_V]
+                                 betanew<-b[(size_spline+1):size_V]
                                  
                                  # penalised loglik see if inferior to previous
                                  res<-gaussDYNidmlLikelihoodpena(b=b,
@@ -1824,7 +1822,7 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,
                                  # we have issue if res is NA or if not higher than previous one 
                                  # if not better or do not exist need to readjust
                                  # value of beta 
-                                 browser()
+                                
                               
                                 if(res %in%c(-1e9,1e9) | res < fn.value){
                                   
@@ -1970,7 +1968,7 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,
                                  bfix<-b[fix0.beta==1]
                                  b<-b[fix0.beta==0]
                                  # update modelPar
-                                 browser()
+                              
                                 
                                  output.mla<- marqLevAlg::mla(b=b,
                                                               fn=gaussDYNidmlLikelihood,
@@ -2020,7 +2018,7 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,
                                  
                                  # new values for splines:
                                  snew<-s
-                                 snew[fix00[1:nspline]==0]<-output.mla$b
+                                 snew[fix00[1:size_spline]==0]<-output.mla$b
                                  if(nvat01>0){
                                    b01<-betanew[1:nvat01][penalty.factor[1:nvat01]==1]
                                    if(p01>0){
@@ -2118,10 +2116,10 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,
                                  s<-snew
                                  beta<-betanew
                                  fn.value<-fn.valuenew
-                                 browser()
+                               
                                  # eval.cv beta valid only if validity.param=T
                                  # add ite >1 so that do not stop at first ite ?
-                                 if(((eval.cv.beta[ite]+eval.cv.spline[ite])<epsa) & eval.cv.loglik[ite]<epsb & validity==T & ite>1){
+                                 if(((eval.cv.beta[ite]+eval.cv.spline[ite])<epsa) & eval.cv.loglik[ite]<epsb & validity==T){
                                    converged<-T}
                                  
                                  
@@ -2223,8 +2221,8 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,
                                        beta<-beta.start
                                        s<-s.start
                                      }else{
-                                       s<-outputNsample[[1]]$b[1:nspline,id.lambda]
-                                       beta<-outputNsample[[1]]$b[(nspline+1):size_V,id.lambda]
+                                       s<-outputNsample[[1]]$b[1:size_spline,id.lambda]
+                                       beta<-outputNsample[[1]]$b[(size_spline+1):size_V,id.lambda]
                                      }
                                      
                                      converged<-F
@@ -2418,7 +2416,7 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,
                                                               nva01Y=npm01Y,
                                                               nva02Y=npm02Y,
                                                               nva12Y=npm12Y,
-                                                              fix=fix0[(nspline+1):size_V],
+                                                              fix=fix0[(size_spline+1):size_V],
                                                               penalty.factor=penalty.factor,
                                                               penalty=penalty,
                                                               v=V,
@@ -2432,7 +2430,7 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,
                                        
                                        b<-c(s,output.cv$b)
                                        
-                                       betanew<-b[(nspline+1):size_V]
+                                       betanew<-b[(size_spline+1):size_V]
                                        
                                        # penalised loglik see if inferior to previous
                                        res<-gaussDYNidmlLikelihoodpena(b=b,
@@ -2677,7 +2675,7 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,
                                        
                                        # new values for splines:
                                        snew<-s
-                                       snew[fix00[1:nspline]==0]<-output.mla$b
+                                       snew[fix00[1:size_spline]==0]<-output.mla$b
                                        if(nvat01>0){
                                          b01<-betanew[1:nvat01][penalty.factor[1:nvat01]==1]
                                          if(p01>0){
