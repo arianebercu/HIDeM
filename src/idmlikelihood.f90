@@ -32948,8 +32948,7 @@ subroutine suspdepfirstderiv(x,p,z,n,risq,glam,surv,inty,y,logy,nY)
         implicit none
 		integer::n
 		double precision,dimension(16)::y
-        double precision::x,surv,risq,glam,ri,gl,su,gl1,gl2,&
-		ri
+        double precision::x,surv,risq,glam,ri,gl,su,gl1,gl2
 		integer::j,jtw,jtwm1,nY
 		double precision::logy(:,:)
 		double precision,intent(out)::inty(:)
@@ -33006,7 +33005,6 @@ subroutine suspdepfirstderiv(x,p,z,n,risq,glam,surv,inty,y,logy,nY)
 		xm = 0.5d+00*(b+a)
         xr = 0.5d+00*(b-a)
         call susp(xm,p,n,su,ri,z,gl)
-        susp(t3(i),the01,nz01,su01,ri01,zi01,gl01)
 		glam = ri*y(1)*wgk(8)   !integral over 0 to x of base risk
         inty=glam*logy(1,1:nY)
 
@@ -33146,7 +33144,7 @@ subroutine suspdep0firstderiv(x,p,z,n,glam,inty,y,logy,nY)
         implicit none
 
 		double precision,dimension(15)::y
-        double precision::x,surv,glam,ri,gl,gl1,gl2
+        double precision::x,surv,glam,ri,gl,gl1,gl2,su
 		integer::j,jtw,jtwm1,nY,n
         double precision::a,b,dx,xm,xr,d1mach(5),epmach,uflow
 		double precision,dimension(8)::xgk,wgk
@@ -33625,8 +33623,7 @@ end module
 !======================== using gaussian quadrature 15 points ================================
 !============================================================================================= 
 
-
-
+		
       subroutine firstderivaidmlikelihoodsplinetimedep(b0,np0,npar0,bfix0,fix0, &
 	  zi010,zi120,zi020, c0,&
       no0,nz010,nz120,nz020,ve010,ve120,ve020,y010,y020,y120, &
@@ -33646,7 +33643,7 @@ end module
 	p01,p02,p12,dimp01,dimp02,dimp12,Ntime, &
 	nva0102,nvamax,nva01nofix,nva01nofixY,nva02nofix, &
 	nva02nofixY,nva12nofix,nva12nofixY, nvamax01Y,nvamax02Y, &
-	nY01,nY02,nY12,sizespline,lfix,nz01,nz02,nz12
+	nY01,nY02,nY12,sizespline,lfix,nz010,nz020,nz120
 
 	double precision,dimension(np0),intent(inout)::likelihood_deriv
 	double precision,dimension(np0)::b0,res,resk,res1
@@ -34105,8 +34102,10 @@ end module
 								tronc02Y =  0
                         else 
 					
-				call suspdep0firstderiv(t0(i),the01,zi01,nz01,gl01,res201numY,y01t(257:271),logy01(257:271,:),nY01)
-				call suspdep0firstderiv(t0(i),the02,zi02,nz02,gl02,res202numY,y02t(257:271),logy02(257:271,:),nY02)
+				call suspdep0firstderiv(t0(i),the01,zi01,nz01,gl01,&
+				res201numY,y01t(257:271),logy01(257:271,:),nY01)
+				call suspdep0firstderiv(t0(i),the02,zi02,nz02,&
+				gl02,res202numY,y02t(257:271),logy02(257:271,:),nY02)
                             tronc01=ve01nofix(i,:)*gl01*vet01
                         	tronc02=ve02nofix(i,:)*gl02*vet02
 							tronc01Y=res201numY*vet01
@@ -34209,7 +34208,8 @@ end module
 			
 			res1((nvamax02Y+1):np0)= res212numY/v
 			
-			call suspdepfirstderiv(t3(i),the12,ri12,gl12,su12,res212numY,y12t(241:256),logy12(241:256,:),nY12)
+			call suspdepfirstderiv(t3(i),the12,zi12,nz12,ri12,gl12,su12,&
+			res212numY,y12t(241:256),logy12(241:256,:),nY12)
 			res1((nvamax02Y+1):np0)=res1((nvamax02Y+1):np0)-&
 			res212numY*vet12
 			
@@ -34305,7 +34305,8 @@ end module
 			
 			res1((nvamax02Y+1):np0)= res212numY/v
 			
-			call suspdepfirstderiv(t3(i),the12,ri12,gl12,su12,res212numY,y12t(241:256),logy12(241:256,:),nY12)
+			call suspdepfirstderiv(t3(i),the12,zi12,nz12,ri12,&
+			gl12,su12,res212numY,y12t(241:256),logy12(241:256,:),nY12)
 			res1((nvamax02Y+1):np0)=res1((nvamax02Y+1):np0)-&
 			res212numY*vet12+logy12(256,:)
 			
@@ -34386,7 +34387,8 @@ end module
 								if(nva01nofixY.gt.0) then 
 								
 								res1((nvamax+1):nvamax01Y)= res201numY*(su12**vet12)
-								call suspdepfirstderiv(t3(i),the01,ri01,gl01,su01,res201numY,y01t(241:256),logy01(241:256,:),nY01)
+								call suspdepfirstderiv(t3(i),the01,zi01,nz01,ri01,&
+								gl01,su01,res201numY,y01t(241:256),logy01(241:256,:),nY01)
 								res1((nvamax+1):nvamax01Y)=res1((nvamax+1):nvamax01Y)-&
 								res201numY*u1*vet01
 								res1((nvamax+1):nvamax01Y)=res1((nvamax+1):nvamax01Y)/v
@@ -34398,7 +34400,8 @@ end module
 								if(nva02nofixY.gt.0) then 
 								
 								res1((nvamax01Y+1):nvamax02Y)= -res202numY*(su12**vet12)
-								call suspdepfirstderiv(t3(i),the02,ri02,gl02,su02,res202numY,y02t(241:256),logy02(241:256,:),nY02)
+								call suspdepfirstderiv(t3(i),the02,zi02,nz02,ri02,gl02,&
+								su02,res202numY,y02t(241:256),logy02(241:256,:),nY02)
 								res1((nvamax01Y+1):nvamax02Y)=res1((nvamax01Y+1):nvamax02Y)-&
 								res202numY*u1*vet02
 								res1((nvamax01Y+1):nvamax02Y)=res1((nvamax01Y+1):nvamax02Y)/v
@@ -34410,7 +34413,8 @@ end module
 								if(nva12nofixY.gt.0) then 
 								
 								res1((nvamax02Y+1):np0)= res212numY*(su12**vet12)
-								call suspdepfirstderiv(t3(i),the12,ri12,gl12,su12,res212numY,y12t(241:256),logy12(241:256,:),nY12)
+								call suspdepfirstderiv(t3(i),the12,zi12,nz12,ri12,gl12,&
+								su12,res212numY,y12t(241:256),logy12(241:256,:),nY12)
 								res1((nvamax02Y+1):np0)=res1((nvamax02Y+1):np0)-&
 								res212numY*res2denum*(su12**vet12)*vet12
 								res1((nvamax02Y+1):np0)=res1((nvamax02Y+1):np0)/v
@@ -34496,7 +34500,8 @@ end module
 								if(nva01nofixY.gt.0) then 
 								
 								res1((nvamax+1):nvamax01Y)= res201numY*(su12**vet12)*ri12*vet12
-								call suspdepfirstderiv(t3(i),the01,ri01,gl01,su01,res201numY,y01t(241:256),logy01(241:256,:),nY01)
+								call suspdepfirstderiv(t3(i),the01,zi01,nz01,ri01,gl01,&
+								su01,res201numY,y01t(241:256),logy01(241:256,:),nY01)
 								res1((nvamax+1):nvamax01Y)=res1((nvamax+1):nvamax01Y)-&
 								res201numY*u1*ri02*vet02*vet01
 								res1((nvamax+1):nvamax01Y)=res1((nvamax+1):nvamax01Y)/v
@@ -34508,7 +34513,8 @@ end module
 								if(nva02nofixY.gt.0) then 
 								
 								res1((nvamax01Y+1):nvamax02Y)= -res202numY*(su12**vet12)*ri12*vet12
-								call suspdepfirstderiv(t3(i),the02,ri02,gl02,su02,res202numY,y02t(241:256),logy02(241:256,:),nY02)
+								call suspdepfirstderiv(t3(i),the02,zi02,nz02,ri02,gl02,su02,&
+								res202numY,y02t(241:256),logy02(241:256,:),nY02)
 								res1((nvamax01Y+1):nvamax02Y)= res1((nvamax01Y+1):nvamax02Y)+&
 								(logy02(256,:)-res202numY*vet02)*u1*ri02*vet02
 								res1((nvamax01Y+1):nvamax02Y)=res1((nvamax01Y+1):nvamax02Y)/v
@@ -34520,7 +34526,8 @@ end module
 								if(nva12nofixY.gt.0) then 
 								
 								res1((nvamax02Y+1):np0)= res212numY*(su12**vet12)*ri12*vet12
-								call suspdepfirstderiv(t3(i),the12,ri12,gl12,su12,res212numY,y12t(241:256),logy12(241:256,:),nY12)
+								call suspdepfirstderiv(t3(i),the12,zi12,nz12,ri12,gl12,&
+								su12,res212numY,y12t(241:256),logy12(241:256,:),nY12)
 								res1((nvamax02Y+1):np0)=res1((nvamax02Y+1):np0)+&
 								(su12**vet12)*ri12*vet12*res2denum*(logy12(256,:)-res212numY*vet12)
 								res1((nvamax02Y+1):np0)=res1((nvamax02Y+1):np0)/v
