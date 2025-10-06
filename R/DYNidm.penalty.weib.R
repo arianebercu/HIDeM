@@ -224,9 +224,8 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                  b<-b[fix0==0]
                                  # derivative of loglik
                                  
-                                 output<-deriva(funcpa=gaussDYNidmlLikelihoodweib,
+                                 output<-DYNderivaweib( h=1e-8,
                                                   b=b,
-                                                h=1e-8,
                                                     npm=npm,
                                                     npar=size_V,
                                                     bfix=bfix,
@@ -743,9 +742,8 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                    bfix<-b[fix0==1]
                                    b<-b[fix0==0]
                                    
-                                   output<-deriva(funcpa=gaussDYNidmlLikelihoodweib,
+                                   output<-DYNderivaweib( h=1e-8,
                                                   b=b,
-                                                  h=1e-8,
                                                   npm=npm,
                                                   npar=size_V,
                                                   bfix=bfix,
@@ -850,7 +848,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                    # derivative of loglik
                                    
                                      
-                                     output<-derivadiag(funcpa=gaussDYNidmlLikelihoodweib,
+                                     output<-DYNderivaweibdiag( h=1e-8,
                                                     b=b,
                                               npm=npm,
                                               npar=size_V,
@@ -1362,7 +1360,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                      bfix<-b[fix0==1]
                                      b<-b[fix0==0]
                                      
-                                     output<-derivadiag(funcpa=gaussDYNidmlLikelihoodweib,
+                                     output<-DYNderivaweibdiag( h=1e-8,
                                                         b=b,
                                                         npm=npm,
                                                         npar=size_V,
@@ -1473,42 +1471,41 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                  bfix<-b[fix0==1]
                                  b<-b[fix0==0]
                                
-                                 output<-deriva(funcpa=gaussDYNidmlLikelihoodweib,
-                                                #h=.Machine$double.eps,
-                                                h=1e-8,
-                                                      b=b,
-                                                        npm=npm,
-                                                        npar=size_V,
-                                                        bfix=bfix,
-                                                        fix=fix0,
-                                                        ctime=ctime,
-                                                        no=N,
-                                                        ve01=ve01,
-                                                        ve02=ve02,
-                                                        ve12=ve12,
-                                                        dimnva01=dimnva01,
-                                                        dimnva02=dimnva02,
-                                                        dimnva12=dimnva12,
-                                                        nva01=nvat01,
-                                                        nva02=nvat02,
-                                                        nva12=nvat12,
-                                                        t0=t0,
-                                                        t1=t1,
-                                                        t2=t2,
-                                                        t3=t3,
-                                                        troncature=troncature,
-                                                        y01=y01k,
-                                                        y02=y02k,
-                                                        y12=y12k,
-                                                        p01=p01,
-                                                        p02=p02,
-                                                        p12=p12,
-                                                        dimp01=dimp01,
-                                                        dimp02=dimp02,
-                                                        dimp12=dimp12,
-                                                        Ntime=NtimePoints)
                                  
                                 
+                                 output<-DYNderivaweib( h=1e-8,b=b,
+                                                npm=npm,
+                                                npar=size_V,
+                                                bfix=bfix,
+                                                fix=fix0,
+                                                ctime=ctime,
+                                                no=N,
+                                                ve01=ve01,
+                                                ve02=ve02,
+                                                ve12=ve12,
+                                                dimnva01=dimnva01,
+                                                dimnva02=dimnva02,
+                                                dimnva12=dimnva12,
+                                                nva01=nvat01,
+                                                nva02=nvat02,
+                                                nva12=nvat12,
+                                                t0=t0,
+                                                t1=t1,
+                                                t2=t2,
+                                                t3=t3,
+                                                troncature=troncature,
+                                                y01=y01k,
+                                                y02=y02k,
+                                                y12=y12k,
+                                                p01=p01,
+                                                p02=p02,
+                                                p12=p12,
+                                                dimp01=dimp01,
+                                                dimp02=dimp02,
+                                                dimp12=dimp12,
+                                                Ntime=NtimePoints)
+                                 
+                                 
                                  #sparseHessianFD
                                  # h=1e-16 --> problem in hessian evaluation
                                  # h=1e-8 --> no issue
@@ -2015,9 +2012,8 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                    bfix<-b[fix0==1]
                                    b<-b[fix0==0]
                                    
-                                   output<-deriva(funcpa=gaussDYNidmlLikelihoodweib,
+                                   output<-DYNderivaweib( h=1e-8,
                                                   b=b,
-                                                  h=1e-8,
                                                   npm=npm,
                                                   npar=size_V,
                                                   bfix=bfix,
@@ -2118,7 +2114,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                        
                                  
                                          
-                                         output<-derivadiag(funcpa=gaussDYNidmlLikelihoodweib,
+                                         output<-DYNderivaweibdiag( h=1e-8,
                                                         b=b,
                                                                    npm=npm,
                                                                    npar=size_V,
@@ -2628,7 +2624,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                          bfix<-b[fix0==1]
                                          b<-b[fix0==0]
                                          
-                                         output<-derivadiag(funcpa=gaussDYNidmlLikelihoodweib,
+                                         output<-DYNderivaweibdiag( h=1e-8,
                                                         b=b,
                                                         npm=npm,
                                                         npar=size_V,

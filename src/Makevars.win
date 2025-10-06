@@ -1,18 +1,26 @@
 PKG_LIBS = $(BLAS_LIBS) $(FLIBS)
-FCFLAGS = -mtune=native -O3 -Wall -pedantic -flto=10
 
-FMODSRC = commun.f90 
-FSRC = idmlikelihood.f90 
-CSRC= init.c
+# Default to optimized build if BUILD_TYPE is not set
+BUILD_TYPE ?= OPT
 
-# Define the order of compilation
+ifeq ($(BUILD_TYPE),DEBUG)
+  # Debug / Detailed build
+  FCFLAGS = -g -O0 -fcheck=all -fbacktrace -Wall -Wextra -pedantic
+else
+  # Optimized build
+  FCFLAGS = -mtune=native -O3 -Wall -pedantic -flto=10
+endif
+
+# Sources
+FMODSRC = commun.f90
+FSRC = idmlikelihood.f90
+CSRC = init.c
+
+# Objects
 OBJECTS = $(FMODSRC:.f90=.o) $(FSRC:.f90=.o) $(CSRC:.c=.o)
 
+# Default target
 $(SHLIB): $(OBJECTS)
 
-# Setup dependencies for parallel make
-
-
-idmlikelihood.o: commun.o 
-
-
+# Dependencies
+idmlikelihood.o: commun.o
