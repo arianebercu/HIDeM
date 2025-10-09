@@ -154,7 +154,6 @@
 DYNidm <- function(formula01,
                 formula02,
                 formula12,
-                
                 data,
                 formLong,
                 Longitransition,
@@ -163,21 +162,9 @@ DYNidm <- function(formula01,
                 timeVar,
                 id,
                 Nsample,
-                
-                
-                methodJM=list(functional_forms,
-                              n_iter=3500, 
-                              n_burnin=500,
-                              n_thin=1,
-                              n_chains=3,
-                              seed=1234),
-                
-                methodINLA=list(family="gaussian",
-                                basRisk= "rw1",
-                                assoc=NULL),
-                
                 method="Weib",
                 scale.X=T,
+                BLUP=T,
                 maxiter=100,
                 maxiter.pena=10,
                 eps=c(5,5,3),
@@ -203,9 +190,8 @@ DYNidm <- function(formula01,
                 analytics=T,
                 partialH=F,
                 clustertype="FORK",
-                Ypredmethod="gauss",
-                NtimePoints=250,
-                dataY=NULL,
+                modelY=NULL,
+                seed=123,
                 envir=parent.frame()){
   
 
@@ -217,28 +203,25 @@ DYNidm <- function(formula01,
   
     call <- match.call()
     ptm <- proc.time()
-    if(is.null(dataY)){
-    if(missing(methodJM) & missing(methodINLA)){
-      stop("Need to specify the method used for time-depend covariates by giving methodINLA or methodJM")
-    }
-    if(!missing(methodINLA)){
-      methodlongi<-"INLA"
-      print("Time-dependent covariates estimation will be performed using INLA")
-    }else{
-      methodlongi<-"JM"
-      print("Time-dependent covariates estimation will be performed using JMBayes2")
-    }}else{
-      if(!inherits(dataY,"predYidm"))stop("The argument dataY must be a class 'predYidm' obtained using DYNpredY.")
-      methodlongi<-dataY$method
-      dataY<-as.data.frame(dataY$Y)
-    }
+    if(is.null(modelY)){stop("First need to run univariate joint model for the longitudinal markers.")}
+    
+    if(!inherits(modelY,"predYidm"))stop("The argument modelY must be a class 'predYidm' obtained using DYNpredY.")
+      
+    if(!BLUP%in%c(T,F))stop("Argument BLUP needs to be T or F")
+    if(missing(Nsample))stop("Need to specify the number of samples in Nsample")
+    if(!(inherits(Nsample,"integer")|inherits(Nsample,"numeric")))stop("The argument Nsample must be a class 'integer' or 'numeric.")
+    if(!(inherits(seed,"integer")|inherits(seed,"numeric")))stop("The argument seed must be a class 'integer' or 'numeric.")
+    if(seed!=floor(seed))stop("The argument seed must be a class 'integer'.")
+    
+    if(Nsample!=floor(Nsample))stop("The argument Nsample must be a class 'integer'.")
+    
     if(missing(formula01))stop("Argument formula01 is missing.")
     if(missing(formula02))stop("Argument formula02 is missing.")
     if(!inherits(formula01,"formula"))stop("The argument formula01 must be a class 'formula'.")
     if(!inherits(formula02,"formula"))stop("The argument formula02 must be a class 'formula'.")
     
     if(!method%in%c("Weib","splines"))stop("The argument method needs to be either splines or Weib")
-    if(!Ypredmethod%in%c("gauss","equi"))stop("The argument Ypredmethod needs to be either gauss or equi")
+    
     
     if(length(analytics)!=1)stop("The argument analytics must be either T or F")
     if(!analytics%in%c(T,F))stop("The argument analytics must be either T or F")
@@ -251,7 +234,7 @@ DYNidm <- function(formula01,
 
     if(!inherits(data,"data.frame"))stop("Argument 'data' must be a data.frame")
     
-    if(is.null(dataY)){
+    if(is.null(modelY)){
     if(missing(dataLongi)) stop("Need a dataLongi frame.")
     if(sum(is.na(dataLongi))>0)stop("Need a longitudinal data frame with no missing data.")
     
@@ -278,14 +261,7 @@ DYNidm <- function(formula01,
       m01[[2]] <- m02[[2]] <- m12[[2]] <- data
     }
 
-    if(is.null(dataY)){
-    if(anyNA(dataLongi)){
-      variables=unique(c(all.vars(formula01),all.vars(formula02),all.vars(formula12)))
-      dataLongi=dataLongi[,variables]
-      dataLongi=na.omit(dataLongi)
-     # m01[[2]] <- m02[[2]] <- m12[[2]] <- data
-    }
-    }
+
     m01 <- eval(m01,parent.frame())
     m02 <- eval(m02,parent.frame())
     m12 <- eval(m12,parent.frame())
@@ -419,9 +395,6 @@ DYNidm <- function(formula01,
     if(maxiter<0)stop("Maxiter has to be an integer greater or equal to 0.")
 
     
-    if(!inherits(NtimePoints,c("numeric","integer"))|(NtimePoints!=floor(NtimePoints)))stop("NtimePoints has to be an integer greater than 100.")
-    if(NtimePoints<100)stop("NtimePoints has to be an integer greater than 100.")
-    
       if(!inherits(nproc,c("numeric","integer"))|(nproc!=floor(nproc)))stop("nproc has to be an integer.")
     
       # nbr of quadrature points for estimating integral in idm without penalisation
@@ -509,7 +482,7 @@ DYNidm <- function(formula01,
     #####################         and initiate values         ##################
     ############################################################################
     
-    if(methodlongi=="INLA"){
+    if(modelY$method=="INLA"){
     
       
       if(!inherits(formLong,"list")){stop("formLong should be a list of equation")}
@@ -552,20 +525,6 @@ DYNidm <- function(formula01,
         }
       })
       ynames<-unlist(ynames)
-     
-      for(m in 1:length(formLong)){
-        if("value"%in%methodJM$functional_forms[[m]] & "slope"%in%methodJM$functional_forms[[m]]){
-          CR_forms[[m]]<-as.formula(paste0("~value(",ynames[m],"):CR + slope(",ynames[m],"):CR"))
-        }else{
-          if("value"%in%methodJM$functional_forms[[m]]){
-            CR_forms[[m]]<-as.formula(paste0("~value(",ynames[m],"):CR"))
-          }else{
-            CR_forms[[m]]<-as.formula(paste0("~slope(",ynames[m],"):CR"))
-          }
-        }
-      }
-      names(CR_forms)<-ynames
-      
       
     }
     
@@ -839,130 +798,34 @@ DYNidm <- function(formula01,
     
 
 
-# competing risk definition 
-iddCR<-ifelse(idm==1,0,
+    # competing risk definition 
+    iddCR<-ifelse(idm==1,0,
               ifelse(idd==1 & t3<=t2+threshold,1,0))
-TimeCR<-ifelse(idm==1,(t1+t2)/2,
+    TimeCR<-ifelse(idm==1,(t1+t2)/2,
                ifelse(idd==1 & t3<=t2+threshold,t3,t2))
     
-if(is.null(dataY)){
-    if(methodlongi=="INLA"){
-      
-      
-     
-      
-      
-      if(truncated==1){
-        formSurv<-list(inla.surv(time=TimeCR, event=idm,truncation=t0) ~ -1,
-                       inla.surv(time=TimeCR, event=iddCR,truncation=t0) ~ -1)
-      }else{
-        formSurv<-list(inla.surv(time=TimeCR, event=idm) ~ -1,
-                       inla.surv(time=TimeCR, event=iddCR) ~ -1)
-      }
-      
-      # set right environement for formulas 
-      formSurv <- lapply(formSurv, function(f) {
-        environment(f) <-envir
-        f
-      })
-      
-      formLong <- lapply(formLong, function(f) {
-        environment(f) <- envir
-        f
-      })
-      
-    dataINLA<-data.frame(ID=data[,colnames(data)%in%id],
-                         idm=idm,
-                         iddCR=iddCR,
-                         TimeCR=TimeCR)
-    if(missing(Nsample)){
-      Nsample<-100}else{
-        if(!inherits(Nsample,c("integer","numeric")))stop("Nsample need to be a numeric or integer")
-        if(length(Nsample)!=1)stop("Nsample need to be a numeric or integer")
-      }
-    
-    
-    dataY<-INLAidm(timeVar = timeVar,
-                   family = methodINLA$family,
-                    basRisk = methodINLA$basRisk,
-                    assoc = methodINLA$assoc,
-                    truncated=truncated,
-                    formLong=formLong,
-                    formSurv=formSurv,
-                    dataSurv=dataINLA,
-                    dataLongi=dataLongi,
-                    id=id,
-                    Nsample=Nsample,
-                    nproc=nproc,
-                    t0=t0,
-                    t1=t1, 
-                    t2=t2, 
-                    t3=t3,
-                    idm=idm, 
-                    idd=idd,
-                    clustertype=clustertype,
-                   Ypredmethod=Ypredmethod,
-                   NtimePoints=NtimePoints)
 
     
+    if(modelY$method=="INLA"){
+      
+      dataSurvCR<-data.frame(ID=data[,colnames(data)%in%id],
+                           idm=idm,
+                           iddCR=iddCR,
+                           TimeCR=TimeCR)
+
     }else{
-
       
-     
-      dataJM<-data.frame(ID=data[,colnames(data)%in%id],
+      
+      dataSurvCR<-data.frame(ID=data[,colnames(data)%in%id],
                          status=ifelse(idm==1,1,
                                        ifelse(iddCR==1,2,0)),
                          TimeCR=TimeCR)
-      colnames(dataJM)[1]<-id
-
-      
-      dataJM$status<-as.factor(dataJM$status)
-      dataJM<-JMbayes2::crisk_setup(dataJM, statusVar = "status", censLevel = "0", 
-                            nameStrata = "CR")
-      
-
-      
-      CoxFit_CR <- coxph(Surv(TimeCR, status2) ~ strata(CR),
-                         data = dataJM)
-      
-      
-        
-      if(missing(Nsample)){
-        Nsample<-100}else{
-          if(!inherits(Nsample,c("integer","numeric")))stop("Nsample need to be a numeric or integer")
-          if(length(Nsample)!=1)stop("Nsample need to be a numeric or integer")
-        }
-      
-      dataY<-JMidm(timeVar = timeVar,
-                     functional_forms = CR_forms, 
-                     truncated=truncated,
-                     formLong=formLong,
-                     formSurv=CoxFit_CR ,
-                     dataSurv=dataJM,
-                     dataLongi=dataLongi,
-                     id=id,
-                     Nsample=Nsample,
-                     n_iter=methodJM$n_iter,
-                     n_burnin=methodJM$n_burnin,
-                     n_thin=methodJM$n_thin,
-                     n_chain=methodJM$n_chain,
-                     nproc=nproc,
-                     t0=t0,
-                     t1=t1, 
-                     t2=t2, 
-                     t3=t3,
-                     idm=idm, 
-                     idd=idd,
-                     clustertype=clustertype,
-                   Ypredmethod=Ypredmethod,
-                   NtimePoints=NtimePoints,
-                   seed=methodJM$seed)
-      
+      colnames(dataSurvCR)[1]<-id
+      dataSurvCR$status<-as.factor(dataSurvCR$status)
+      dataSurvCR<-JMbayes2::crisk_setup(dataSurvCR, statusVar = "status", censLevel = "0", 
+                                    nameStrata = "CR")
+ 
     }
-}
-   
-                   
-    
     ############################# scale explanatory variables #####################
     if(scale.X==T){
       # to know which variable to center and reduces : 
@@ -1017,22 +880,17 @@ if(is.null(dataY)){
       }
       
       
-     ym <- do.call(rbind, lapply(split(dataY[, 4:dim(dataY)[2]], dataY$Outcome), function(x) {
-        apply(x, 2, mean)
-      }))
       
-      # sds per group
-      ys <- do.call(rbind, lapply(split(dataY[, 4:dim(dataY)[2]], dataY$Outcome), function(x) {
-        apply(x, 2, sd)
-      }))
-      
-      dataY[, 4:dim(dataY)[2]] <- do.call(rbind,
-                                  lapply(split( dataY[, 4:dim(dataY)[2]], dataY$Outcome), function(x) {
-                                    apply(x, 2, function(col) (col - min(col)) / (max(col) - min(col)))
-                                  })
-      )
-      
-      
+    }
+    
+    if(BLUP==T){
+      Nsample <-1 
+    }
+    
+    if(troncature==T){
+      NtimePoints<-271
+    }else{
+      NtimePoints<-256
     }
     
     if(penalty=="none"){
@@ -1080,14 +938,16 @@ if(is.null(dataY)){
                          t2=t2,
                          t3=t3,
                          troncature=troncature,
-                         
-                         dataY=dataY,
-                         Longitransition=Longitransition,
+                         modelY=modelY,
+                         dataLongi=dataLongi,
+                         dataSurv=dataSurvCR,
+                         Nsample=Nsample,
+                         BLUP=BLUP,
+                         seed=seed,
                          NtimePoints=NtimePoints,
-                         Ypredmethod=Ypredmethod,
                          timeVar=timeVar,
-                         ynames=ynames,
                          id=id,
+                         formLong=formLong,
                          outcome=outcome,
                          outcome01=outcome01,
                          outcome02=outcome02,
@@ -1095,7 +955,8 @@ if(is.null(dataY)){
                          p01=p01,p02=p02,p12=p12,
                          dimp01=dimp01,
                          dimp02=dimp02,
-                         dimp12=dimp12)
+                         dimp12=dimp12,
+                         scale.X=scale.X)
       }
   
       
@@ -1136,13 +997,16 @@ if(is.null(dataY)){
                                     ts=ts,
                                     troncature=troncature,
                            
-                        dataY=dataY,
-                        Longitransition=Longitransition,
+                        modelY=modelY,
+                        dataLongi=dataLongi,
+                        dataSurv=dataSurvCR,
+                        Nsample=Nsample,
+                        BLUP=BLUP,
+                        seed=seed,
                         NtimePoints=NtimePoints,
-                        Ypredmethod=Ypredmethod,
                         timeVar=timeVar,
-                        ynames=ynames,
                         id=id,
+                        formLong=formLong,
                         outcome=outcome,
                         outcome01=outcome01,
                         outcome02=outcome02,
@@ -1150,7 +1014,8 @@ if(is.null(dataY)){
                         p01=p01,p02=p02,p12=p12,
                         dimp01=dimp01,
                         dimp02=dimp02,
-                        dimp12=dimp12)
+                        dimp12=dimp12,
+                        scale.X=scale.X)
         
         
             
@@ -1208,70 +1073,13 @@ if(is.null(dataY)){
 ##########################   with M-splines baseline risk ######################
 ################################################################################
           
-          Nsample<-dim(dataY)[2]-3
-        
-          if(Ypredmethod=="equi"){
-            
-            # if prediction did not work 
-            # check which time to keep : 
-            time<-dataY[dataY$Outcome%in%ynames[1] & dataY[,colnames(dataY)%in%id]==unique(dataY[,colnames(dataY)%in%id])[1],colnames(dataY)%in%timeVar]
-            valid<-unlist(lapply(time,FUN=function(x){
-              dd<-dataY[dataY[,colnames(dataY)%in%timeVar]==x,]
-              if(dim(dd)[1]!=N*length(ynames)){return(F)}else{return(T)}
-            }))
-            
-            time<-time[valid]
-            NtimePoints<-length(time)
-            
-            dataY<-dataY[dataY[,colnames(dataY)%in%timeVar]%in%time,]
-            dataY$Outcome<-as.character(dataY$Outcome)
-            # attention if NtimePoints equidistant with INLA then NtimePoints takes 
-            # need ID to be numeric -- then 
-            dataY[,colnames(dataY)%in%id]<-as.numeric(dataY[,colnames(dataY)%in%id])
-            # to keep tracks of time order for each individual 
-            dataY$order<-as.numeric(ave(dataY[,colnames(dataY)%in%id], cumsum(c(TRUE, diff(dataY[,colnames(dataY)%in%id]) != 0)), FUN = seq_along))
-            
-            if(length(outcome01)>=1){
-              y01<-dataY[dataY$Outcome%in%outcome01,]
-              # order  by individual and timeline 
-              y01<-y01[order(y01[,colnames(y01)%in%id],y01$order),]
-              
-              
-            }else{
-              y01<-as.double(rep(0,N*NtimePoints))
-            }
-            
-            if(length(outcome02)>=1){
-              y02<-dataY[dataY$Outcome%in%outcome02,]
-              y02<-y02[order(y02$ID,y02$order),]
-              
-            }else{
-              y02<-as.double(rep(0,N*NtimePoints))
-            }
-            
-            if(length(outcome12)>=1){
-              y12<-dataY[dataY$Outcome%in%outcome12,]
-              # order  by individual and timeline 
-              y12<-y12[order(y12$ID,y12$order),]
-              
-            }else{
-              y12<-as.double(rep(0,N*NtimePoints))
-            }
-            
-            
-          }else{
-            
             # check if predictions could be performed 
-            if(troncature==T){
-              NtimePoints<-271
-            }else{
-              NtimePoints<-256
-            }
             
+           
             for( k in outcome){
               subdata<-dataY[dataY$Outcome==k,]
               x<-table(subdata[,colnames(subdata)%in%id])
-              if(any(x!=NtimePoints)){stop("Prediction of marker ",k," could not be perform for each quadrature points, try Ypredmethod equi")}
+              if(any(x!=NtimePoints)){stop("Prediction of marker ",k," could not be perform for each quadrature points.")}
               
             }
             
@@ -1311,65 +1119,13 @@ if(is.null(dataY)){
               y12<-as.double(rep(0,N*NtimePoints))
             }
             
-          }
+          
           
           if(method=="splines"){
             # if user did not specified the lambda values 
             if(is.null(lambda01)|is.null(lambda02)|is.null(lambda12)){
-              
-              if(nproc>1){
-                if(is.null(clustertype)){
-                  clustpar <- parallel::makeCluster(nproc)#, outfile="")
-                }
-                else{
-                  clustpar <- parallel::makeCluster(nproc, type=clustertype)#, outfile="")
-                }
-                
-                doParallel::registerDoParallel(clustpar)
-                
-              }
-             # calculate derivatives when all beta=0 to 
-             # estimate range of values for lambda
-              output<-deriva.gradient(b=c(b[1:size_spline],rep(0,size_V-size_spline)),
-                                  nproc=nproc,
-                                  funcpa=idmlLikelihood,
-                                  npm=size_V,
-                                  npar=size_V,
-                                  bfix=1,
-                                  fix=rep(0,size_V),
-                                  zi01=knots01,
-                                  zi02=knots02,
-                                  zi12=knots12,
-                                  ctime=ctime,
-                                  no=N,
-                                  nz01=nknots01,
-                                  nz02=nknots02,
-                                  nz12=nknots12,
-                                  ve01=ve01,
-                                  ve02=ve02,
-                                  ve12=ve12,
-                                  dimnva01=dimnva01,
-                                  dimnva02=dimnva02,
-                                  dimnva12=dimnva12,
-                                  nva01=nvat01,
-                                  nva02=nvat02,
-                                  nva12=nvat12,
-                                  t0=t0,
-                                  t1=t1,
-                                  t2=t2,
-                                  t3=t3,
-                                  troncature=troncature,
-                                  gausspoint=gausspoint)
-              
-              if(nproc>1){parallel::stopCluster(clustpar)}
-              ## what should we do if max(output$v) == 0
-              # take maximum of absolute derivatives
-              if(penalty%in%c("ridge","mcp","scad")){
-                #lambda.max<-ifelse(max(output$v)==0,0.001,max(output$v))
-                lambda.max<-ifelse(max(abs(output$v))==0,0.001,max(abs(output$v)))
-              }else{
-                lambda.max<-ifelse(max(abs(output$v))==0,0.001,max(abs(output$v))/alpha)
-              }
+              stop("Need to specify all lambda values")
+             
             }
             
             if(nvat01>0){
@@ -1407,7 +1163,7 @@ if(is.null(dataY)){
 ########################## perform penalty algorithm ###########################
 ##########################   with M-splines baseline risk ######################
 ################################################################################
-            browser()
+         
             out<-DYNidm.penalty.splines(b=b,
                              fix0=fix0,
                              size_V=size_V,
@@ -1452,17 +1208,26 @@ if(is.null(dataY)){
                              penalty.factor=penalty.factor,
                              penalty=penalty,
                              partialH=partialH,
-                             y01=y01,
-                             y02=y02,
-                             y12=y12,
+                             modelY=modelY,
+                             dataLongi=dataLongi,
+                             dataSurv=dataSurvCR,
+                             Nsample=Nsample,
+                             outcome01=outcome01,
+                             outcome02=outcome02,
+                             outcome12=outcome12,
+                             BLUP=BLUP,
+                             seed=seed,
                              NtimePoints=NtimePoints,
+                             timeVar=timeVar,
+                             id=id,
+                             formLong=formLong,
                              p01=p01,
                              p02=p02,
                              p12=p12,
                              dimp01=dimp01,
                              dimp02=dimp02,
                              dimp12=dimp12,
-                             Nsample=Nsample)
+                             scale.X=scale.X)
             
 ############################## Output   ########################################
 ############################## on beta and HR   ################################
@@ -1482,64 +1247,7 @@ if(is.null(dataY)){
            
             
             if(is.null(lambda01)|is.null(lambda02)|is.null(lambda12)){
-              if(nproc>1){
-                if(is.null(clustertype)){
-                  clustpar <- parallel::makeCluster(nproc)#, outfile="")
-                }
-                else{
-                  clustpar <- parallel::makeCluster(nproc, type=clustertype)#, outfile="")
-                }
-                
-                doParallel::registerDoParallel(clustpar)
-                
-              }
-              # calculate derivatives at beta=0, to have a range of 
-              # value for lambda 
-              output<-deriva.gradient(b=c(b[1:6],rep(0,size_V-6)),
-                                  nproc=nproc,
-                                  funcpa=gaussDYNidmlLikelihoodweib,
-                                  npm=size_V,
-                                  npar=size_V,
-                                  bfix=1,
-                                  fix=rep(0,size_V),
-                                  ctime=ctime,
-                                  no=N,
-                                  ve01=ve01,
-                                  ve02=ve02,
-                                  ve12=ve12,
-                                  dimnva01=dimnva01,
-                                  dimnva02=dimnva02,
-                                  dimnva12=dimnva12,
-                                  nva01=nvat01,
-                                  nva02=nvat02,
-                                  nva12=nvat12,
-                                  t0=t0,
-                                  t1=t1,
-                                  t2=t2,
-                                  t3=t3,
-                                  troncature=troncature,
-                                  y01=y01[,4],
-                                  y02=y02[,4],
-                                  y12=y12[,4],
-                                  p01=p01,
-                                  p02=p02,
-                                  p12=p12,
-                                  dimp01=dimp01,
-                                  dimp02=dimp02,
-                                  dimp12=dimp12,
-                                  Ntime=NtimePoints)
-              
-             
-              if(nproc>1){parallel::stopCluster(clustpar)}
-              
-              
-              ## what should we do if max(output$v) == 0
-              if(penalty%in%c("ridge","mcp","scad")){
-                #lambda.max<-ifelse(max(output$v)==0,0.001,max(output$v))
-                lambda.max<-ifelse(max(abs(output$v))==0,0.001,max(abs(output$v)))
-              }else{
-                lambda.max<-ifelse(max(abs(output$v))==0,0.001,max(abs(output$v))/alpha)
-              }
+              stop("All lambda parameters need to be specified")
               
             }
             
@@ -1617,17 +1325,26 @@ if(is.null(dataY)){
                                penalty.factor=penalty.factor,
                                penalty=penalty,
                                partialH=partialH,
-                               y01=y01,
-                               y02=y02,
-                               y12=y12,
+                               modelY=modelY,
+                               dataLongi=dataLongi,
+                               dataSurv=dataSurvCR,
+                               Nsample=Nsample, 
+                               outcome01=outcome01,
+                               outcome02=outcome02,
+                               outcome12=outcome12,
+                               BLUP=BLUP,
+                               seed=seed,
                                NtimePoints=NtimePoints,
+                               timeVar=timeVar,
+                               id=id,
+                               formLong=formLong,
                                p01=p01,
                                p02=p02,
                                p12=p12,
                                dimp01=dimp01,
                                dimp02=dimp02,
                                dimp12=dimp12,
-                               Nsample=Nsample)
+                               scale.X=scale.X)
             
              
               

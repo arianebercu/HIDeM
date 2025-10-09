@@ -73,7 +73,6 @@ DYNpredY <- function(formula01,
                                    assoc=NULL),
                    nproc=1,
                    clustertype="FORK",
-                   Ypredmethod="gauss",
                    NtimePoints=250,
                    envir=parent.frame()){
   
@@ -102,8 +101,7 @@ DYNpredY <- function(formula01,
   if(missing(formula02))stop("Argument formula02 is missing.")
   if(!inherits(formula01,"formula"))stop("The argument formula01 must be a class 'formula'.")
   if(!inherits(formula02,"formula"))stop("The argument formula02 must be a class 'formula'.")
-  
-  if(!Ypredmethod%in%c("gauss","equi"))stop("The argument Ypredmethod needs to be either gauss or equi")
+ 
   
   ## if(missing(formula02)) formula02 <- formula01
   if(missing(formula12)) formula12 <- formula02
@@ -479,7 +477,6 @@ DYNpredY <- function(formula01,
                      idm=idm, 
                      idd=idd,
                      clustertype=clustertype,
-                     Ypredmethod=Ypredmethod,
                      NtimePoints=NtimePoints)
       
       
@@ -532,7 +529,6 @@ DYNpredY <- function(formula01,
                    idm=idm, 
                    idd=idd,
                    clustertype=clustertype,
-                   Ypredmethod=Ypredmethod,
                    NtimePoints=NtimePoints,
                    seed=methodJM$seed)
       

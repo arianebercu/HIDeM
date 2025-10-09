@@ -6,14 +6,14 @@
 
 INLAidm<-function(timeVar,family,basRisk,assoc,
                   truncated,formLong,formSurv,dataSurv,dataLongi,id,
-                  Nsample,nproc,t0,t1,t2,t3,
-                  idm,idd,clustertype,Ypredmethod,NtimePoints){
+                  nproc,t0,t1,t2,t3,
+                  idm,idd,clustertype){
   
   # define timePoints of prediction : 
 
   idsubjects<-unique(dataSurv[,colnames(dataSurv)%in%id])
   
-  if(Ypredmethod=="gauss"){
+
   
   timePointsdata<-do.call(rbind, lapply(idsubjects,FUN=function(x){
     index<-which(dataSurv[,colnames(dataSurv)%in%id]==x)
@@ -29,12 +29,7 @@ INLAidm<-function(timeVar,family,basRisk,assoc,
     return(data.frame(index=x,timePoints=timePoints))}))
   
   
-  }else{
-    
   
-    timePointsdata<-do.call(rbind, lapply(idsubjects,FUN=function(x){
-      return(data.frame(index=x,timePoints=seq(min(t0),max(dataLongi[,colnames(dataLongi)%in%timeVar]))))}))
-  }
 
   
   ## augmentation of the data 
@@ -44,10 +39,12 @@ INLAidm<-function(timeVar,family,basRisk,assoc,
   dataLongi_augmented<-dataLongi_augmented[order(dataLongi_augmented[,colnames(dataLongi_augmented)%in%id],
                                                  dataLongi_augmented[,colnames(dataLongi_augmented)%in%timeVar]),]
   
+ 
   print("Start running joint univarite models")
-
-  Yall<-list()
-  length(Yall)<-length(formLong)
+  
+  modelY<-list()
+  length(modelY)<-length(formLong)
+  
   dataSurv<-dataSurv[order(dataSurv[,colnames(dataSurv)%in%id]),]
   
  # formSurvinla<<-formSurv
@@ -67,6 +64,12 @@ INLAidm<-function(timeVar,family,basRisk,assoc,
     #  associnla<<-assoc[[indice]]
     
       # cannot have lightmode as need BLUP
+      
+      
+      #start with run = False -- have structure for slopes
+    
+      print(paste0("For marker: ",names(functional_forms)[[indice]]))
+      
 
       INLAmodel<-INLAjoint::joint(formSurv = formSurv,
                                        formLong = formLong[[indice]],
@@ -74,64 +77,14 @@ INLAidm<-function(timeVar,family,basRisk,assoc,
                                        family = family[indice],
                                        basRisk = basRisk[indice], NbasRisk = 15, assoc = assoc[[indice]],
                                        control=list(int.strategy="eb"))
-    
-
       
-      if(is.null(INLAmodel)){stop("The inla model for your marker could not be run, see above warnings.")}
-      
-      
-      if(Nsample>1){
-        
-        #samples 
-        SMP <- inla.posterior.sample(Nsample-1, INLAmodel)
-        linPred <- sapply(SMP, function(x) x$latent) 
-
-        # keep only indice we want: 
-        # Collapse each row into a string
-        key1 <- do.call(paste, c(dataLongi_augmented[,colnames(dataLongi_augmented)%in%c(id,timeVar)], sep = "\r"))
-        key2 <- do.call(paste, c(timePointsdata, sep = "\r"))
-        
-        # Find indices of rows from data1 that are in data2
-        # while keeping order of key2
-        indices <- match(key2, key1)
-        PredYx<-linPred[indices,]
-        
-        #add BLUP first column
-        PredYx<-cbind(INLAmodel$summary.linear.predictor$mean[indices],PredYx)
-        #add informations 
-        Outcome<-all.vars(terms(formLong[[indice]]))[1]
-        PredYx<-cbind(timePointsdata,Outcome,PredYx)
-        colnames(PredYx)[4:(Nsample+3)]<-paste0("Sample_",c(1:Nsample))
-        
-        
-        
-        
-        
-      }else{
-        
-        # keep only indice we want: 
-        # Collapse each row into a string
-        key1 <- do.call(paste, c(dataLongi_augmented[,colnames(dataLongi_augmented)%in%c(id,timeVar)], sep = "\r"))
-        key2 <- do.call(paste, c(timePointsdata, sep = "\r"))
-        
-        # Find indices of rows from data1 that are in data2
-        # while keeping order of key2
-        indices <- match(key2, key1)
-        #add BLUP first column
-        #add informations 
-        Outcome<-all.vars(terms(formLong[[indice]]))[1]
-        PredYx<-cbind(timePointsdata,Outcome,INLAmodel$summary.linear.predictor$mean[indices])
-        colnames(PredYx)[4:(Nsample+3)]<-paste0("Sample_",c(1:Nsample))
-        
-      }
-
-      Yall[[indice]]<-PredYx
-      
+     
+      modelY[[indice]]<-INLAmodel
+    }
+  print("End of running univarite models")
+  return(modelY)
+  }
   
-      }
+      
 
-  Yall<-do.call(rbind,Yall)
-  print("End of running joint univarite models")
-  return(Yall[,colnames(Yall)%in%c(id,timeVar,"Outcome",paste0("Sample_",c(1:Nsample)))])
-  
-}
+
