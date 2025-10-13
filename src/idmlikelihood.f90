@@ -10329,7 +10329,8 @@ res0202num,res1212num,v01,v02,v12)
 		    fc12num=(ri12*v12)*(su01**v01)*(su02**v02)*ri01*v01*gl12*v12*(su12**v12) 
 
 		
-		fc0101num=(ri12*v12)*(su01**v01)*(su02**v02)*ri01*v01*(((1-gl01*v01)**2)-&
+		fc0101num=(su01**v01)*(su02**v02)*ri01*v01*(((1-gl01*v01)**2)-&
+			gl01*v01)*(ri12*v12)*(su12**v12)
 		fc0202num=(ri12*v12)*(su01**v01)*(su02**v02)*ri01*v01*gl02*v02*gl02*v02*(su12**v12)
 		fc1212num=(ri12*v12)*(su01**v01)*(su02**v02)*ri01*v01*gl12*v12*gl12*v12*(su12**v12)
 		
@@ -28159,6 +28160,7 @@ subroutine derivaweibdiag(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 !=============================================================================================  
 !======================= Calculate derivatives of loglik with weibull baseline risk ==========
 !======================= only diagonal terms for second derivatives of beta parameters             ==========
+!======================= in semi markov =======================================================
 !=============================================================================================  
 
 
@@ -28471,7 +28473,7 @@ subroutine derivaweibdiagsemimark(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve0
 
 			if(nva01nofix.gt.0) then
 
-			u1=res201num*(su12**vet12)
+			u1=res201num
 			
       			res1(1:nva01nofix)=&
 			ve01nofix(i,:)*u1/v
@@ -28691,7 +28693,7 @@ subroutine derivaweibdiagsemimark(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve0
 				call fonct(t3(i),the01,ri01,gl01,su01)
 				call fonct(t3(i),the02,ri02,gl02,su02)
 				
-				call qgaussweibderivdiagsemimark(c(i),t1(i),t3(i),t3(i)the01,&
+				call qgaussweibderivdiagsemimark(c(i),t1(i),t3(i),t3(i),the01,&
 				the02,the12,res2denum,res201num,res202num,&
 				res212num,res20101num,res20202num,&
 				res21212num,vet01,vet02,vet12)
@@ -28903,6 +28905,7 @@ subroutine derivaweibdiagsemimark(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve0
     end subroutine derivaweibdiagsemimark
 
 !attention commencer une ligne par (- non possible 
+
 
 !=============================================================================================  
 !======================= Calculate derivatives of loglik with M-splines baseline risk ========

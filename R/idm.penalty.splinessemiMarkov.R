@@ -1483,7 +1483,7 @@ idm.penalty.splinessemiMarkov<-function(b,fix0,size_V,size_spline,
                                  
                                  pbr_compu<-0
                                  
-                                 browser()
+                                 
                                  output<-derivasplinesemiMarkov(b=b,
                                                       npm=length(b),
                                                       npar=size_V,
@@ -1512,34 +1512,6 @@ idm.penalty.splinessemiMarkov<-function(b,fix0,size_V,size_spline,
                                                       t3=t3,
                                                       troncature=troncature)
                                  
-                                 
-                                 outputb<-deriva(b=b,funcpa=idmlLikelihoodsemiMarkov,h=1e-8,
-                                                                npm=length(b),
-                                                                npar=size_V,
-                                                                bfix=bfix,
-                                                                fix=fix0,
-                                                                zi01=knots01,
-                                                                zi02=knots02,
-                                                                zi12=knots12,
-                                                                ctime=ctime,
-                                                                no=N,
-                                                                nz01=nknots01,
-                                                                nz02=nknots02,
-                                                                nz12=nknots12,
-                                                                ve01=ve01,
-                                                                ve02=ve02,
-                                                                ve12=ve12,
-                                                                dimnva01=dimnva01,
-                                                                dimnva02=dimnva02,
-                                                                dimnva12=dimnva12,
-                                                                nva01=nvat01,
-                                                                nva02=nvat02,
-                                                                nva12=nvat12,
-                                                                t0=t0,
-                                                                t1=t1,
-                                                                t2=t2,
-                                                                t3=t3,
-                                                                troncature=troncature)
                                  
                                  if(ite==0){ # take value of loglik at initialisation
                                    
@@ -1591,13 +1563,15 @@ idm.penalty.splinessemiMarkov<-function(b,fix0,size_V,size_spline,
                                      
                                      if(npm01>0&npm02){
                                        V0102<- matrix(data=output[(min+1):(min+npm02*npm01)],
-                                                      nrow=npm02,ncol=npm01)}
+                                                      nrow=npm02,ncol=npm01)
+                                       }
                                      
                                      min<-min+npm02*npm01
                                      
                                      if(npm01>0&npm12>0){
                                        V0112<- matrix(data=output[(min+1):(min+npm12*npm01)],
-                                                      nrow=npm12,ncol=npm01)}
+                                                      nrow=npm12,ncol=npm01)
+                                       }
                                      
                                      
                                      min<-min+npm12*npm01
@@ -1609,7 +1583,8 @@ idm.penalty.splinessemiMarkov<-function(b,fix0,size_V,size_spline,
                                      
                                      if(npm02>0&npm12>0){
                                        V0212<- matrix(data=output[(min+1):(min+npm12*npm02)],
-                                                      nrow=npm12,ncol=npm02)}
+                                                      nrow=npm12,ncol=npm02)
+                                       }
                                      
                                      
                                      min<-min+npm12*npm02

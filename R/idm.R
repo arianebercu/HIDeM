@@ -688,7 +688,7 @@ idm <- function(formula01,
     ########################       log-likelihodd        #######################
     ############################################################################
     if(penalty=="none"){
- browser()
+
 ######################### with M-spline baseline risk  #########################
       if(method=="splines" & semiMarkov==F){
         

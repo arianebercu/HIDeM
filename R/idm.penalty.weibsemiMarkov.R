@@ -1429,8 +1429,7 @@ idm.penalty.weibsemiMarkov<-function(b,fix0,size_V,
                                  b<-c(s,beta)
                                  bfix<-b[fix0==1]
                                  b<-b[fix0==0]
-                                 
-                                browser()
+                               
                                  output<-derivaweibsemiMarkov(b=b,
                                                     npm=length(b),
                                                     npar=size_V,
@@ -1452,6 +1451,9 @@ idm.penalty.weibsemiMarkov<-function(b,fix0,size_V,
                                                     t2=t2,
                                                     t3=t3,
                                                     troncature=troncature)
+                                 
+                                 
+                                 
                                
                                  
                                if(ite==0){
@@ -1515,7 +1517,8 @@ idm.penalty.weibsemiMarkov<-function(b,fix0,size_V,
                                      
                                      if(npm02>0&npm12>0){
                                        V0212<- matrix(data=output[(min+1):(min+npm12*npm02)],
-                                                      nrow=npm12,ncol=npm02)}
+                                                      nrow=npm12,ncol=npm02)
+                                       }
                                      
                                      
                                      min<-min+npm12*npm02
@@ -1535,7 +1538,8 @@ idm.penalty.weibsemiMarkov<-function(b,fix0,size_V,
                                      }
                                      
                                      if(npm12>0){
-                                       V[(npm01+npm02+1):npm,(npm01+npm02+1):(npm)]<-V12}
+                                       V[(npm01+npm02+1):npm,(npm01+npm02+1):(npm)]<-V12
+                                       }
                                      
                                      V<-V+t(V)
                                      diag(V)<-diag(V)/2
