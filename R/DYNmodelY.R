@@ -70,7 +70,9 @@ DYNmodelY <- function(formula01,
                                    basRisk= "rw1",
                                    assoc=NULL),
                    nproc=1,
+                   prediction,
                    clustertype="FORK",
+                  lightmode=T,
                    envir=parent.frame()){
   
   
@@ -84,6 +86,7 @@ DYNmodelY <- function(formula01,
   ptm <- proc.time()
   
 
+    if(missing(prediction))stop("Need to specify prediction parameter")
     if(missing(methodJM) & missing(methodINLA)){
       stop("Need to specify the method used for time-depend covariates by giving methodINLA or methodJM")
     }
@@ -98,8 +101,19 @@ DYNmodelY <- function(formula01,
   if(missing(formula02))stop("Argument formula02 is missing.")
   if(!inherits(formula01,"formula"))stop("The argument formula01 must be a class 'formula'.")
   if(!inherits(formula02,"formula"))stop("The argument formula02 must be a class 'formula'.")
+ if(!inherits(prediction,"list"))stop("The argument prediction needs to be a list")
+
  
+  if(length(prediction)!=length(formLong))stop(paste0("The argument prediction needs to be a list of size ",length(formLong)))
   
+  for(k in 1:length(prediction)){
+    if(!inherits(prediction[[k]], "character")){
+      stop("Each element of the list prediction must be a character")
+    }
+    if(any(!prediction[[k]]%in%c("value","slope"))){
+      stop("Each element of the list prediction must be a character taking values in : value or slope")
+    }
+  }
   ## if(missing(formula02)) formula02 <- formula01
   if(missing(formula12)) formula12 <- formula02
   # }}}
@@ -108,7 +122,7 @@ DYNmodelY <- function(formula01,
   if(sum(is.na(data))>0)stop("Need a survival data frame with no missing data.")
   
   if(!inherits(data,"data.frame"))stop("Argument 'data' must be a data.frame")
-  
+  if(!lightmode%in%c(T,F))stop("Argument lightmode must be T or F ")
  
     if(missing(dataLongi)) stop("Need a dataLongi frame.")
     if(sum(is.na(dataLongi))>0)stop("Need a longitudinal data frame with no missing data.")
@@ -241,10 +255,7 @@ DYNmodelY <- function(formula01,
   ####################### check entry parameters ##################################
   #################################################################################
   
-  
-  if(!inherits(NtimePoints,c("numeric","integer"))|(NtimePoints!=floor(NtimePoints)))stop("NtimePoints has to be an integer greater than 100.")
-  if(NtimePoints<100)stop("NtimePoints has to be an integer greater than 100.")
-  
+
   if(!inherits(nproc,c("numeric","integer"))|(nproc!=floor(nproc)))stop("nproc has to be an integer.")
 
   troncature<-ifelse(truncated==T,1,0)
@@ -352,47 +363,6 @@ DYNmodelY <- function(formula01,
     
   }
   
-  
-  outcome<-ynames
-  outcome01<-  ynames[unlist(lapply(Longitransition,FUN=function(x){
-    if("01"%in%x){
-      return(T)}else{return(F)}
-  }))]
-  outcome02<-  ynames[unlist(lapply(Longitransition,FUN=function(x){
-    if("02"%in%x){
-      return(T)}else{return(F)}
-  }))]
-  
-  outcome12<-  ynames[unlist(lapply(Longitransition,FUN=function(x){
-    if("12"%in%x){
-      return(T)}else{return(F)}
-  }))]
-  
-  if(length(outcome01)>=1){
-    p01<-length(outcome01)
-    dimp01<-length(outcome01)
-  }else{
-    p01<-0
-    dimp01<-1
-  }
-  
-  if(length(outcome02)>=1){
-    p02<-length(outcome02)
-    dimp02<-length(outcome02)
-  }else{
-    p02<-0
-    dimp02<-1
-  }
-  
-  if(length(outcome12)>=1){
-    p12<-length(outcome12)
-    dimp12<-length(outcome12)
-    
-  }else{
-    p12<-0
-    dimp12<-1
-  }
-  
 
   ################################################################################
   ############################## RUN INLA or JM MODEL ################################## ################################################################################
@@ -467,7 +437,9 @@ DYNmodelY <- function(formula01,
                      t3=t3,
                      idm=idm, 
                      idd=idd,
-                     clustertype=clustertype)
+                     clustertype=clustertype,
+                     lightmode=lightmode,
+                     prediction=prediction)
       
       
     }else{
@@ -513,7 +485,8 @@ DYNmodelY <- function(formula01,
                    t3=t3,
                    idm=idm, 
                    idd=idd,
-                   clustertype=clustertype)
+                   clustertype=clustertype,
+                   lightmode=lightmode)
       
     }
   res<-list(modelY=modelY,

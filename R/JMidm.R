@@ -17,7 +17,7 @@ JMidm<-function(timeVar,
                 n_thin,
                 n_chain,
                 nproc,t0,t1,t2,t3,idm,idd,
-                clustertype){
+                clustertype,lightmode){
   
 
   
@@ -39,7 +39,13 @@ JMidm<-function(timeVar,
                              n_chains=n_chain, data_Surv = dataSurv,
                              cores=nproc,save_random_effects=T)
   
-      
+  #keep only necessary info#
+    if(lightmode==T){
+    JMmodel<-list(model_info=JMmodel$model_info,
+                     mcmc=JMmodel$mcmc,
+                     control=JMmodel$control,
+                     statistics=JMmodel$statistics)
+    }
     modelY[[indice]]<-JMmodel
   }
   

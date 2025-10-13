@@ -688,9 +688,9 @@ idm <- function(formula01,
     ########################       log-likelihodd        #######################
     ############################################################################
     if(penalty=="none"){
- 
+ browser()
 ######################### with M-spline baseline risk  #########################
-      if(method=="splines"){
+      if(method=="splines" & semiMarkov==F){
         
         if(sum(fix0)>0){
           bfix<-b[fix0==1]
@@ -833,7 +833,7 @@ idm <- function(formula01,
       }
 ######################### with weibull baseline risk ###########################
       
-      if(method=="Weib"){
+      if(method=="Weib" & semiMarkov==F){
 
         #browser()
         #save(ctime,file="testctime.RData")
@@ -1001,6 +1001,317 @@ idm <- function(formula01,
         
       }
       
+    
+      
+      
+      if(method=="splines" & semiMarkov==T){
+        
+        if(sum(fix0)>0){
+          bfix<-b[fix0==1]
+          b<-b[fix0==0]
+        }else{bfix<-1}
+        
+        
+        out<-idm.splinessemiMarkov(b=b,
+                         clustertype=clustertype,
+                         epsa=epsa,
+                         epsb=epsb,
+                         epsd=epsd,
+                         nproc=nproc,
+                         maxiter=maxiter,
+                         size_V=size_V,
+                         size_spline=size_spline,
+                         noVar=noVar,
+                         bfix=bfix,
+                         fix0=fix0,
+                         knots01=knots01,
+                         knots02=knots02,
+                         knots12=knots12,
+                         ctime=ctime,
+                         N=N,
+                         nknots01=nknots01,
+                         nknots02=nknots02,
+                         nknots12=nknots12,
+                         ve01=ve01,
+                         ve02=ve02,
+                         ve12=ve12,
+                         dimnva01=dimnva01,
+                         dimnva02=dimnva02,
+                         dimnva12=dimnva12,
+                         nvat01=nvat01,
+                         nvat02=nvat02,
+                         nvat12=nvat12,
+                         t0=t0,
+                         t1=t1,
+                         t2=t2,
+                         t3=t3,
+                         troncature=troncature,
+                         step.sequential=step.sequential,
+                         option.sequential=option.sequential)
+        
+        
+        ############################## Output   ########################################
+        fix<-out$fix0
+        
+        beta<-rep(NA,size_V)
+        beta[fix==0]<-out$b
+        beta[fix==1]<-out$bfix
+        npm<-sum(fix==0)
+        
+        ######################### on covariance matrix #################################
+        ### if CV is true keep V and solve V to have inverse for confidence intervals###
+        CV<-out$istop
+        if(CV==1){
+          
+          
+          Vr <- matrix(0,npm,npm)
+          Vr[upper.tri(Vr,diag=TRUE)] <- out$v[1:(npm*(npm+1)/2)]
+          Vr <- t(Vr)
+          Vr[upper.tri(Vr,diag=TRUE)] <- out$v[1:(npm*(npm+1)/2)]
+          V <- matrix(0,size_V,size_V)
+          
+          posfix<-which(fix==1)
+          V[setdiff(1:size_V,posfix),setdiff(1:size_V,posfix)] <- Vr
+          
+          Hr<--solve(Vr)
+          H<- matrix(0,size_V,size_V)
+          H[setdiff(1:size_V,posfix),setdiff(1:size_V,posfix)] <- Hr
+          
+        }else{ #otherwise put 0
+          Hr <- matrix(0,npm,npm)
+          Hr[upper.tri(Hr,diag=TRUE)] <- out$v[1:(npm*(npm+1)/2)]
+          Hr <- t(Hr)
+          Hr[upper.tri(Hr,diag=TRUE)] <- out$v[1:(npm*(npm+1)/2)]
+          H <- matrix(0,size_V,size_V)
+          
+          posfix<-which(fix==1)
+          H[setdiff(1:size_V,posfix),setdiff(1:size_V,posfix)] <- Hr
+          
+          V<- matrix(0,size_V,size_V)
+          
+          
+        }
+        
+        ############################### on beta and HR #################################
+        if (sum(NC)>0){  
+          
+          # if at least one covariate
+          
+          betaCoef <- beta[(size_spline+1):size_V]
+          names(betaCoef) <- c(Xnames01,Xnames02,Xnames12)
+          fit$coef <- betaCoef
+          fit$HR <- exp(betaCoef)
+          
+        }
+        
+        
+        ############################ on splines parameters values ######################
+        theta_names <- cbind(c(rep("theta01",(nknots01+2)),rep("theta02",(nknots02+2)),rep("theta12",(nknots12+2))),c((1:(nknots01+2)),(1:(nknots02+2)),(1:(nknots12+2))))
+        theta_names <- as.vector(apply(theta_names,1,paste,collapse=" "))
+        
+        
+        names(beta)<- c(theta_names,c(Xnames01,Xnames02,Xnames12))
+        names(fix)<-c(theta_names,c(Xnames01,Xnames02,Xnames12))
+        colnames(V) <- c(theta_names,c(Xnames01,Xnames02,Xnames12))
+        rownames(V) <- c(theta_names,c(Xnames01,Xnames02,Xnames12))
+        colnames(H) <- c(theta_names,c(Xnames01,Xnames02,Xnames12))
+        rownames(H) <- c(theta_names,c(Xnames01,Xnames02,Xnames12))
+        
+        theta01<-beta[1:(nknots01+2)]
+        theta02<-beta[(nknots01+3):(nknots01+nknots02+4)]
+        theta12<-beta[(nknots01+nknots02+5):(nknots01+nknots12+nknots02+6)]
+        
+        
+        
+        cv<-list(ca=out$ca,cb=out$cb,rdm=out$rdm)
+        
+        fit$knots01 <- knots01
+        fit$knots02 <- knots02
+        fit$knots12 <- knots12
+        fit$nknots01 <- nknots01
+        fit$nknots02 <- nknots02
+        fit$nknots12 <- nknots12
+        fit$theta01 <- theta01
+        fit$theta02 <- theta02
+        fit$theta12 <- theta12
+        
+        
+        ############# on times to do prediction on #################################
+        fit$time <- matrix(NA,ncol=3,nrow=100)
+        fit$time[,1]<-seq(from=knots01[1],to=knots01[length(knots01)],length.out=100)
+        fit$time[,2]<-seq(from=knots02[1],to=knots02[length(knots02)],length.out=100)
+        fit$time[,3]<-seq(from=knots12[1],to=knots12[length(knots12)],length.out=100)
+        
+        
+      }
+      ######################### with weibull baseline risk ###########################
+      
+      if(method=="Weib" & semiMarkov==T){
+        
+        #browser()
+        #save(ctime,file="testctime.RData")
+        if(nvat12dep==1){
+          out <- causal.idm.weib(b=b,
+                                 fix0=fix0,
+                                 size_V=size_V,
+                                 clustertype=clustertype,
+                                 epsa=epsa,
+                                 epsb=epsb,
+                                 epsd=epsd,
+                                 eps.eigen=eps.eigen,
+                                 nproc=nproc,
+                                 maxiter=maxiter,
+                                 ctime=ctime,
+                                 N=N,
+                                 ve01=ve01,
+                                 ve02=ve02,
+                                 ve12=ve12,
+                                 dimnva01=dimnva01,
+                                 dimnva02=dimnva02,
+                                 dimnva12=dimnva12,
+                                 nvat01=nvat01,
+                                 nvat02=nvat02,
+                                 nvat12=nvat12,
+                                 nvat12dep=nvat12dep,
+                                 semiMark = semiMark,
+                                 t0=t0,
+                                 t1=t1,
+                                 t2=t2,
+                                 t3=t3,
+                                 idm=idm,
+                                 idd=idd,
+                                 ts=ts,
+                                 troncature=troncature)
+        }else{
+          out <- idm.weibsemiMarkov(b=b,
+                          fix0=fix0,
+                          size_V=size_V,
+                          clustertype=clustertype,
+                          epsa=epsa,
+                          epsb=epsb,
+                          epsd=epsd,
+                          nproc=nproc,
+                          maxiter=maxiter,
+                          ctime=ctime,
+                          N=N,
+                          ve01=ve01,
+                          ve02=ve02,
+                          ve12=ve12,
+                          dimnva01=dimnva01,
+                          dimnva02=dimnva02,
+                          dimnva12=dimnva12,
+                          nvat01=nvat01,
+                          nvat02=nvat02,
+                          nvat12=nvat12,
+                          t0=t0,
+                          t1=t1,
+                          t2=t2,
+                          t3=t3,
+                          idm=idm,
+                          idd=idd,
+                          ts=ts,
+                          troncature=troncature)}
+        
+        
+        
+        fix<-out$fix0
+        beta<-rep(NA,size_V)
+        beta[fix==0]<-out$b
+        beta[fix==1]<-out$bfix
+        npm<-sum(fix==0)
+        
+        ### if CV is true keep V and solve V to have inverse for confidence intervals###
+        CV<-out$istop
+        if(CV==1){
+          
+          
+          Vr <- matrix(0,npm,npm)
+          Vr[upper.tri(Vr,diag=TRUE)] <- out$v[1:(npm*(npm+1)/2)]
+          Vr <- t(Vr)
+          Vr[upper.tri(Vr,diag=TRUE)] <- out$v[1:(npm*(npm+1)/2)]
+          V <- matrix(0,size_V,size_V)
+          
+          posfix<-which(fix==1)
+          V[setdiff(1:size_V,posfix),setdiff(1:size_V,posfix)] <- Vr
+          
+          Hr<--solve(Vr)
+          H<- matrix(0,size_V,size_V)
+          H[setdiff(1:size_V,posfix),setdiff(1:size_V,posfix)] <- Hr
+          
+        }else{
+          Hr <- matrix(0,npm,npm)
+          Hr[upper.tri(Hr,diag=TRUE)] <- out$v[1:(npm*(npm+1)/2)]
+          Hr <- t(Hr)
+          Hr[upper.tri(Hr,diag=TRUE)] <- out$v[1:(npm*(npm+1)/2)]
+          H <- matrix(0,size_V,size_V)
+          
+          posfix<-which(fix==1)
+          H[setdiff(1:size_V,posfix),setdiff(1:size_V,posfix)] <- Hr
+          
+          V<- matrix(0,size_V,size_V)
+          
+          
+        }
+        # output of beta and HR 
+        if (sum(NC)>0){  
+          
+          # if at least one covariate
+          
+          betaCoef <- beta[(6+1):size_V]
+          names(betaCoef) <- c(Xnames01,Xnames02,Xnames12)
+          fit$coef <- betaCoef
+          fit$HR <- exp(betaCoef)
+          
+        }
+        
+        # weibull parameters
+        
+        theta_names <- c("modelPar1 01",
+                         "modelPar2 01",
+                         "modelPar1 02",
+                         "modelPar2 02",
+                         "modelPar1 12",
+                         "modelPar2 12")
+        
+        if(nvat12dep==1){
+          XnamesTemp <- c(Xnames01,Xnames02,Xnames12)
+          # if (timedep12) XnamesTemp <- c(Xnames01,Xnames02,Xnames12,"IllnessTime")
+          
+          names(beta)<- c(theta_names,XnamesTemp)
+          names(fix)<- c(theta_names,XnamesTemp)
+          colnames(V) <- c(theta_names,XnamesTemp)
+          rownames(V) <- c(theta_names,XnamesTemp)
+          colnames(H) <- c(theta_names,XnamesTemp)
+          rownames(H) <- c(theta_names,XnamesTemp)
+        }else{
+          
+          names(beta)<- c(theta_names,c(Xnames01,Xnames02,Xnames12))
+          names(fix)<- c(theta_names,c(Xnames01,Xnames02,Xnames12))
+          colnames(V) <- c(theta_names,c(Xnames01,Xnames02,Xnames12))
+          rownames(V) <- c(theta_names,c(Xnames01,Xnames02,Xnames12))
+          colnames(H) <- c(theta_names,c(Xnames01,Xnames02,Xnames12))
+          rownames(H) <- c(theta_names,c(Xnames01,Xnames02,Xnames12))}
+        
+        
+        modelPar<-beta[1:6]
+        
+        # no value for BIC as no penalty
+        fit$BIC<-NULL
+        
+        cv<-list(ca=out$ca,cb=out$cb,rdm=out$rdm)
+        
+        
+        fit$modelPar <- modelPar
+        
+        ############# on times to do prediction on #################################
+        fit$time <- matrix(NA,ncol=3,nrow=100)
+        fit$time[,1]<-seq(from=amin,to=amax,length.out=100)
+        fit$time[,2]<-seq(from=amin,to=amax,length.out=100)
+        fit$time[,3]<-seq(from=amin,to=amax,length.out=100)
+        
+        
+      }
+      
       # No value given by BIC as no penalty
       lambda<-alpha<-fit$BIC<-fit$GCV<-NULL
       fit$loglik <- c(out$fn.value,NULL)
@@ -1110,7 +1421,7 @@ idm <- function(formula01,
 ##########################   with M-splines baseline risk ######################
 ################################################################################
           
-          if(method=="splines"){
+          if(method=="splines" & semiMarkov==F){
             # if user did not specified the lambda values 
             if(is.null(lambda01)|is.null(lambda02)|is.null(lambda12)){
               
@@ -1408,7 +1719,7 @@ idm <- function(formula01,
           ##########################   with weibull baseline risk ######################
           ################################################################################
           
-          if(method=="Weib"){
+          if(method=="Weib"  & semiMarkov==F){
           
            
               #	cat("------ Program Weibull ------ \n")
@@ -1740,6 +2051,639 @@ idm <- function(formula01,
               fit$time[,3]<-seq(from=amin,to=amax,length.out=100)
 ############# on times to do prediction on #################################
               
+          }
+          
+          
+          ################################################################################
+          ########################## perform penalty algorithm ###########################
+          ##########################   with M-splines baseline risk ######################
+          ########################## with semi markov model         ######################
+          ################################################################################
+          
+          if(method=="splines" & semiMarkov==T){
+            # if user did not specified the lambda values 
+            if(is.null(lambda01)|is.null(lambda02)|is.null(lambda12)){
+              
+              if(nproc>1){
+                if(is.null(clustertype)){
+                  clustpar <- parallel::makeCluster(nproc)#, outfile="")
+                }
+                else{
+                  clustpar <- parallel::makeCluster(nproc, type=clustertype)#, outfile="")
+                }
+                
+                doParallel::registerDoParallel(clustpar)
+                
+              }
+              # calculate derivatives when all beta=0 to 
+              # estimate range of values for lambda
+              output<-deriva.gradient(b=c(b[1:size_spline],rep(0,size_V-size_spline)),
+                                      nproc=nproc,
+                                      funcpa=idmlLikelihoodsemiMarkov,
+                                      npm=size_V,
+                                      npar=size_V,
+                                      bfix=1,
+                                      fix=rep(0,size_V),
+                                      zi01=knots01,
+                                      zi02=knots02,
+                                      zi12=knots12,
+                                      ctime=ctime,
+                                      no=N,
+                                      nz01=nknots01,
+                                      nz02=nknots02,
+                                      nz12=nknots12,
+                                      ve01=ve01,
+                                      ve02=ve02,
+                                      ve12=ve12,
+                                      dimnva01=dimnva01,
+                                      dimnva02=dimnva02,
+                                      dimnva12=dimnva12,
+                                      nva01=nvat01,
+                                      nva02=nvat02,
+                                      nva12=nvat12,
+                                      t0=t0,
+                                      t1=t1,
+                                      t2=t2,
+                                      t3=t3,
+                                      troncature=troncature)
+              
+              if(nproc>1){parallel::stopCluster(clustpar)}
+              ## what should we do if max(output$v) == 0
+              # take maximum of absolute derivatives
+              if(penalty%in%c("ridge","mcp","scad")){
+                #lambda.max<-ifelse(max(output$v)==0,0.001,max(output$v))
+                lambda.max<-ifelse(max(abs(output$v))==0,0.001,max(abs(output$v)))
+              }else{
+                lambda.max<-ifelse(max(abs(output$v))==0,0.001,max(abs(output$v))/alpha)
+              }
+            }
+            
+            if(nvat01>0){
+              if(!is.null(lambda01)){
+                nlambda01<-length(lambda01)
+                if(length(lambda01)<1)stop("Penalisation can be performed for at least one lambda01 ")
+                if(min(lambda01)<=0)stop("Lambda01 must be composed of strictly positive values ")
+              }else{
+                
+                lambda01<-lambda.max*((pace.lambda)^(c(1:nlambda01)/nlambda01))
+              }
+            }else{lambda01<-0.0001}
+            
+            if(nvat02>0){
+              if(!is.null(lambda02)){
+                nlambda02<-length(lambda02)
+                if(length(lambda02)<1)stop("Penalisation can be performed for at least one lambda02 ")
+                if(min(lambda02)<=0)stop("Lambda02 must be composed of strictly positive values ")
+              }else{
+                lambda02<-lambda.max*((pace.lambda)^(c(1:nlambda02)/nlambda02))
+              }
+            }else{lambda02<-0.0001}
+            
+            if(nvat12>0){
+              if(!is.null(lambda12)){
+                nlambda12<-length(lambda12)
+                if(length(lambda12)<1)stop("Penalisation can be performed for at least one lambda12 ")
+                if(min(lambda12)<=0)stop("Lambda12 must be composed of strictly positive values ")
+              }else{
+                lambda12<-lambda.max*((pace.lambda)^(c(1:nlambda12)/nlambda12))
+              }
+            }else{lambda12<-0.0001}
+            
+            ################################################################################
+            ########################## perform penalty algorithm ###########################
+            ##########################   with M-splines baseline risk ######################
+            ################################################################################
+            
+            out<-idm.penalty.splinessemiMarkov(b=b,
+                                     fix0=fix0,
+                                     size_V=size_V,
+                                     size_spline=size_spline,
+                                     clustertype=clustertype,
+                                     epsa=epsa,
+                                     epsb=epsb,
+                                     epsd=epsd,
+                                     eps.eigen=eps.eigen,
+                                     nproc=nproc,
+                                     maxiter=maxiter,
+                                     maxiter.pena=maxiter.pena,
+                                     knots01=knots01,
+                                     knots02=knots02,
+                                     knots12=knots12,
+                                     ctime=ctime,
+                                     N=N,
+                                     nknots01=nknots01,
+                                     nknots02=nknots02,
+                                     nknots12=nknots12,
+                                     ve01=ve01,
+                                     ve02=ve02,
+                                     ve12=ve12,
+                                     dimnva01=dimnva01,
+                                     dimnva02=dimnva02,
+                                     dimnva12=dimnva12,
+                                     nvat01=nvat01,
+                                     nvat02=nvat02,
+                                     nvat12=nvat12,
+                                     t0=t0,
+                                     t1=t1,
+                                     t2=t2,
+                                     t3=t3,
+                                     troncature=troncature,
+                                     nlambda01=nlambda01,
+                                     lambda01=lambda01,
+                                     nlambda02=nlambda02,
+                                     lambda02=lambda02,
+                                     nlambda12=nlambda12,
+                                     lambda12=lambda12,
+                                     alpha=alpha,
+                                     penalty.factor=penalty.factor,
+                                     penalty=penalty,
+                                     partialH=partialH)
+            
+            ############################## Output   ########################################
+            ############################## on beta and HR   ################################
+            
+            
+            lambda<-out$lambda
+            alpha<-out$alpha
+            
+            H<-out$H
+            
+            beta<-as.matrix(out$b)
+            fix<-as.matrix(out$fix)
+            lambda<-as.matrix(lambda)
+            
+            theta_names <- cbind(c(rep("theta01",(nknots01+2)),rep("theta02",(nknots02+2)),rep("theta12",(nknots12+2))),c((1:(nknots01+2)),(1:(nknots02+2)),(1:(nknots12+2))))
+            theta_names <- as.vector(apply(theta_names,1,paste,collapse=" "))
+            rownames(beta) <-c(theta_names,c(Xnames01,Xnames02,Xnames12))
+            rownames(fix)<-c(theta_names,c(Xnames01,Xnames02,Xnames12))
+            rownames(lambda)<-c("lambda01","lambda02","lambda12")
+            
+            theta01<-beta[1:(nknots01+2),]
+            theta02<-beta[(nknots01+3):(nknots01+nknots02+4),]
+            theta12<-beta[(nknots01+nknots02+5):(nknots01+nknots12+nknots02+6),]
+            betaCoef <- beta[(size_spline+1):size_V,]
+            betaCoef<-as.matrix(betaCoef)
+            fit$coef <- betaCoef
+            fit$HR <- exp(betaCoef)
+            
+            ########################## on  BIC and GCV #####################################
+            if(dim(beta)[2]>1){
+              fit$BIC<--2*out$fn.value+log(N)*colSums(beta[(size_spline+1):size_V,]!=0)
+            }else{fit$BIC<--2*out$fn.value+log(N)*sum(beta[(size_spline+1):size_V,]!=0)}
+            
+            
+            fit$GCV<-rep(NA,dim(lambda)[2])
+            
+            ########################## on  covariance matrix ###############################           
+            npm<-sum(fix0[(size_spline+1):size_V]==0)
+            npm01<-ifelse(nvat01>0,sum(fix0[(size_spline+1):(size_spline+nvat01)]==0),0)
+            npm02<-ifelse(nvat02>0,sum(fix0[(size_spline+nvat01+1):(size_spline+nvat01+nvat02)]==0),0)
+            npm12<-ifelse(nvat12>0,sum(fix0[(size_spline+nvat01+nvat02+1):size_V]==0),0)
+            
+            V<-matrix(0,ncol=dim(lambda)[2]*npm,nrow=npm)
+            
+            for(i in 1:dim(lambda)[2]){
+              id.keep<-which(betaCoef[fix0[(size_spline+1):size_V]==0,i]!=0)
+              if(length(id.keep)==0){
+                fit$GCV[i]<--1/N*out$fn.value[i]
+              }else{
+                lambda.matrix<-matrix(0,npm,npm)
+                if(nvat01>0){
+                  
+                  if(penalty%in%c("none","lasso","ridge","elasticnet")){
+                    diag(lambda.matrix)[1:npm01]<-rep(2*(1-alpha[i])*lambda[1,i],npm01)}
+                  
+                  if(penalty=="mcp"){
+                    idbeta<-which(abs(betaCoef[1:npm01,i])<=alpha[i]*lambda[1,i])
+                    diag(lambda.matrix)[1:npm01]<-rep(0,npm01)
+                    diag(lambda.matrix)[idbeta]<--1/alpha[i]
+                    
+                  }
+                  if(penalty=="scad"){
+                    idbeta<-which((abs(betaCoef[1:npm01,i])>lambda[1,i])&(abs(betaCoef[1:npm01,i])<=lambda[1,i]*alpha[i]))
+                    diag(lambda.matrix)[1:npm01]<-rep(0,npm01)
+                    diag(lambda.matrix)[idbeta]<--1/(alpha[i]-1)
+                    
+                  }
+                }
+                if(nvat02>0){
+                  
+                  if(penalty%in%c("none","lasso","ridge","elasticnet")){
+                    diag(lambda.matrix)[(npm01+1):(npm01+npm02)]<-rep(2*(1-alpha[i])*lambda[2,i],npm02)}
+                  
+                  if(penalty=="mcp"){
+                    
+                    idbeta<-which(abs(betaCoef[(npm01+1):(npm01+npm02),i])<=alpha[i]*lambda[2,i])
+                    diag(lambda.matrix)[(npm01+1):(npm01+npm02)]<-rep(0,npm02)
+                    diag(lambda.matrix)[idbeta+npm01]<--1/alpha[i]
+                    
+                    
+                  }
+                  if(penalty=="scad"){
+                    
+                    idbeta<-which((abs(betaCoef[(npm01+1):(npm01+npm02):npm01,i])>lambda[2,i])&(abs(betaCoef[(npm01+1):(npm01+npm02),i])<=lambda[2,i]*alpha[i]))
+                    diag(lambda.matrix)[(npm01+1):(npm01+npm02)]<-rep(0,npm02)
+                    diag(lambda.matrix)[idbeta+npm01]<--1/(alpha[i]-1)
+                    
+                  }
+                }
+                if(nvat12>0){
+                  if(penalty%in%c("none","lasso","ridge","elasticnet")){
+                    diag(lambda.matrix)[(npm01+npm02+1):npm]<-rep(2*(1-alpha[i])*lambda[3,i],npm12)}
+                  
+                  
+                  if(penalty=="mcp"){
+                    idbeta<-which(abs(betaCoef[(npm01+npm02+1):npm,i])<=alpha[i]*lambda[3,i])
+                    diag(lambda.matrix)[(npm01+npm02+1):npm]<-rep(0,npm12)
+                    diag(lambda.matrix)[idbeta+npm01+npm02]<--1/alpha[i]
+                    
+                  }
+                  
+                  if(penalty=="scad"){
+                    idbeta<-which((abs(betaCoef[(npm01+npm02+1):npm,i])>lambda[3,i])&(abs(betaCoef[(npm01+npm02+1):npm,i])<=lambda[3,i]*alpha[i]))
+                    diag(lambda.matrix)[(npm01+npm02+1):npm]<-rep(0,npm12)
+                    diag(lambda.matrix)[idbeta+npm01+npm02]<--1/(alpha[i]-1)
+                    
+                  }
+                }
+                # only beta different from 0 
+                lambda.matrix<-lambda.matrix[id.keep,id.keep,drop=FALSE]
+                
+                if(out$istop[i]==1){
+                  H_spec<-out$H[,(1+(i-1)*npm):(i*npm),drop=FALSE]
+                  # only beta different from 0 
+                  H_spec<-H_spec[id.keep,id.keep,drop=FALSE]
+                  if(!(any(is.na(H_spec))|any(H_spec==Inf) |any(H_spec==-Inf))){
+                    if(abs(det(H_spec))>1e-10 & kappa(H_spec)<1e10){
+                      id.keepV<-(1+(i-1)*npm):(i*npm)
+                      id.keepV<-id.keepV[id.keepV%in%((i-1)*npm+id.keep)]
+                      V[id.keep,id.keepV]<-solve(H_spec)
+                      # maximisation issue thus : 10/04/24
+                      #H_pl<-H_spec+lambda.matrix
+                      # as mla return v=-second derivatives when maximisation^-1
+                      H_pl<-H_spec+lambda.matrix
+                      trace_model<-lava::tr(solve(H_pl)%*%H_spec)
+                      fit$GCV[i]<--1/N*(out$fn.value[i]-trace_model)}
+                  }
+                }
+                
+              }
+            }
+            cv<-list(ca.beta=out$ca.beta,ca.spline=out$ca.spline,ca.validity=out$ca.validity,
+                     cb=out$cb,rdm=NULL)
+            
+            fit$knots01 <- knots01
+            fit$knots02 <- knots02
+            fit$knots12 <- knots12
+            fit$nknots01 <- nknots01
+            fit$nknots02 <- nknots02
+            fit$nknots12 <- nknots12
+            fit$theta01 <- as.matrix(theta01)
+            fit$theta02 <- as.matrix(theta02)
+            fit$theta12 <- as.matrix(theta12)
+            
+            ############# on times to do prediction on #################################
+            fit$time <- matrix(NA,ncol=3,nrow=100)
+            fit$time[,1]<-seq(from=knots01[1],to=knots01[length(knots01)],length.out=100)
+            fit$time[,2]<-seq(from=knots02[1],to=knots02[length(knots02)],length.out=100)
+            fit$time[,3]<-seq(from=knots12[1],to=knots12[length(knots12)],length.out=100)
+            
+          }
+          
+          ################################################################################
+          ########################## perform penalty algorithm ###########################
+          ##########################   with weibull baseline risk ######################
+          ########################## with semi markov model         ######################
+          ################################################################################
+          
+          if(method=="Weib"  & semiMarkov==T){
+            
+            
+            #	cat("------ Program Weibull ------ \n")
+            ############### some initial steps to have values for weibull parameters #########
+            output.mla<- marqLevAlg::mla(b=b[which(fix0[1:6]==0)],
+                                         fn=idmlLikelihoodweibsemiMarkov,
+                                         epsa=epsa,
+                                         epsb=epsb,
+                                         epsd=epsd,
+                                         nproc=nproc,
+                                         clustertype = clustertype,
+                                         maxiter=maxiter,
+                                         minimize=F,
+                                         npm=sum(fix0[1:6]==0),
+                                         npar=size_V,
+                                         bfix=c(b[which(fix0[1:6]==1)],b[7:size_V][which(fix0[7:size_V]==0)]),
+                                         fix=c(fix0[1:6],rep(1,size_V-6)),
+                                         ctime=ctime,
+                                         no=N,
+                                         ve01=ve01,
+                                         ve02=ve02,
+                                         ve12=ve12,
+                                         dimnva01=dimnva01,
+                                         dimnva02=dimnva02,
+                                         dimnva12=dimnva12,
+                                         nva01=nvat01,
+                                         nva02=nvat02,
+                                         nva12=nvat12,
+                                         t0=t0,
+                                         t1=t1,
+                                         t2=t2,
+                                         t3=t3,
+                                         troncature=troncature)
+            
+            # take thoses values if converged only otherwise thoses
+            # by default or by the user
+            if(output.mla$istop==1){
+              b[which(fix0[1:6]==0)]<-output.mla$b}
+            
+            if(is.null(lambda01)|is.null(lambda02)|is.null(lambda12)){
+              if(nproc>1){
+                if(is.null(clustertype)){
+                  clustpar <- parallel::makeCluster(nproc)#, outfile="")
+                }
+                else{
+                  clustpar <- parallel::makeCluster(nproc, type=clustertype)#, outfile="")
+                }
+                
+                doParallel::registerDoParallel(clustpar)
+                
+              }
+              # calculate derivatives at beta=0, to have a range of 
+              # value for lambda 
+              output<-deriva.gradient(b=c(b[1:6],rep(0,size_V-6)),
+                                      nproc=nproc,
+                                      funcpa=idmlLikelihoodweibsemiMarkov,
+                                      npm=size_V,
+                                      npar=size_V,
+                                      bfix=1,
+                                      fix=rep(0,size_V),
+                                      ctime=ctime,
+                                      no=N,
+                                      ve01=ve01,
+                                      ve02=ve02,
+                                      ve12=ve12,
+                                      dimnva01=dimnva01,
+                                      dimnva02=dimnva02,
+                                      dimnva12=dimnva12,
+                                      nva01=nvat01,
+                                      nva02=nvat02,
+                                      nva12=nvat12,
+                                      t0=t0,
+                                      t1=t1,
+                                      t2=t2,
+                                      t3=t3,
+                                      troncature=troncature)
+              
+              
+              if(nproc>1){parallel::stopCluster(clustpar)}
+              
+              
+              ## what should we do if max(output$v) == 0
+              if(penalty%in%c("ridge","mcp","scad")){
+                #lambda.max<-ifelse(max(output$v)==0,0.001,max(output$v))
+                lambda.max<-ifelse(max(abs(output$v))==0,0.001,max(abs(output$v)))
+              }else{
+                lambda.max<-ifelse(max(abs(output$v))==0,0.001,max(abs(output$v))/alpha)
+              }
+              
+            }
+            
+            
+            if(nvat01>0){
+              if(!is.null(lambda01)){
+                nlambda01<-length(lambda01)
+                if(length(lambda01)<1)stop("Penalisation can be performed for at least one lambda01 ")
+                if(min(lambda01)<=0)stop("Lambda01 must be composed of strictly positive values ")
+              }else{
+                
+                lambda01<-lambda.max*((pace.lambda)^(c(1:nlambda01)/nlambda01))
+              }
+            }else{lambda01<-0.0001}
+            
+            if(nvat02>0){
+              if(!is.null(lambda02)){
+                nlambda02<-length(lambda02)
+                if(length(lambda02)<1)stop("Penalisation can be performed for at least one lambda02 ")
+                if(min(lambda02)<=0)stop("Lambda02 must be composed of strictly positive values ")
+              }else{
+                
+                lambda02<-lambda.max*((pace.lambda)^(c(1:nlambda02)/nlambda02))
+              }
+            }else{lambda02<-0.0001}
+            
+            if(nvat12>0){
+              if(!is.null(lambda12)){
+                nlambda12<-length(lambda12)
+                if(length(lambda12)<1)stop("Penalisation can be performed for at least one lambda12 ")
+                if(min(lambda12)<=0)stop("Lambda12 must be composed of strictly positive values ")
+              }else{
+                
+                lambda12<-lambda.max*((pace.lambda)^(c(1:nlambda12)/nlambda12))
+              }
+            }else{lambda12<-0.0001}
+            
+            
+            
+            
+            out <- idm.penalty.weibsemiMarkov(b=b,
+                                    fix0=fix0,
+                                    size_V=size_V,
+                                    clustertype=clustertype,
+                                    epsa=epsa,
+                                    epsb=epsb,
+                                    epsd=epsd,
+                                    eps.eigen=eps.eigen,
+                                    nproc=nproc,
+                                    maxiter=maxiter,
+                                    maxiter.pena=maxiter.pena,
+                                    ctime=ctime,
+                                    N=N,
+                                    ve01=ve01,
+                                    ve02=ve02,
+                                    ve12=ve12,
+                                    dimnva01=dimnva01,
+                                    dimnva02=dimnva02,
+                                    dimnva12=dimnva12,
+                                    nvat01=nvat01,
+                                    nvat02=nvat02,
+                                    nvat12=nvat12,
+                                    t0=t0,
+                                    t1=t1,
+                                    t2=t2,
+                                    t3=t3,
+                                    troncature=troncature,
+                                    nlambda01=nlambda01,
+                                    lambda01=lambda01,
+                                    nlambda02=nlambda02,
+                                    lambda02=lambda02,
+                                    nlambda12=nlambda12,
+                                    lambda12=lambda12,
+                                    alpha=alpha,
+                                    penalty.factor=penalty.factor,
+                                    penalty=penalty,
+                                    partialH=partialH)
+            
+            
+            
+            ######################### Output ###############################################
+            ######################## on beta and HR ########################################
+            
+            beta<-out$b
+            fix<-fix0
+            lambda<-out$lambda
+            alpha<-out$alpha
+            
+            H<-out$H
+            
+            beta<-as.matrix(beta)
+            lambda<-as.matrix(lambda)
+            
+            theta_names<-c("modelPar1 01",
+                           "modelPar2 01",
+                           "modelPar1 02",
+                           "modelPar2 02",
+                           "modelPar1 12",
+                           "modelPar2 12")
+            rownames(beta) <-c(theta_names,Xnames01,Xnames02,Xnames12)
+            names(fix)<-c(theta_names,c(Xnames01,Xnames02,Xnames12))
+            rownames(lambda)<-c("lambda01","lambda02","lambda12")
+            
+            modelPar<-beta[1:6,]
+            betaCoef <- beta[7:size_V,]
+            betaCoef<-as.matrix(betaCoef)
+            fit$coef <- betaCoef
+            fit$HR <- exp(betaCoef)
+            
+            fit$ga<-out$gapath
+            fit$da<-out$dapath
+            
+            
+            ####################   calculate BIC    #######################################
+            if(dim(beta)[2]>1){
+              fit$BIC<--2*out$fn.value+log(N)*colSums(beta[7:size_V,]!=0)
+            }else{fit$BIC<--2*out$fn.value+log(N)*sum(beta[7:size_V,]!=0)}
+            
+            
+            ###################### calculate GCV and covariance matrix #####################
+            fit$GCV<-rep(NA,dim(lambda)[2])
+            
+            npm<-sum(fix0[7:size_V]==0)
+            npm01<-ifelse(nvat01>0,sum(fix0[7:(6+nvat01)]==0),0)
+            npm02<-ifelse(nvat02>0,sum(fix0[(7+nvat01):(6+nvat01+nvat02)]==0),0)
+            npm12<-ifelse(nvat12>0,sum(fix0[(7+nvat01+nvat02):size_V]==0),0)
+            
+            
+            V<-matrix(0,ncol=dim(lambda)[2]*npm,nrow=npm)
+            
+            
+            
+            for(i in 1:dim(lambda)[2]){
+              id.keep<-which(betaCoef[fix0[7:size_V]==0,i]!=0)
+              if(length(id.keep)==0){
+                fit$GCV[i]<--1/N*out$fn.value[i]
+              }else{
+                lambda.matrix<-matrix(0,npm,npm)
+                if(nvat01>0){
+                  
+                  if(penalty%in%c("none","lasso","ridge","elasticnet")){
+                    diag(lambda.matrix)[1:npm01]<-rep(2*(1-alpha[i])*lambda[1,i],npm01)}
+                  
+                  if(penalty=="mcp"){
+                    idbeta<-which(abs(betaCoef[1:npm01,i])<=alpha[i]*lambda[1,i])
+                    diag(lambda.matrix)[1:npm01]<-rep(0,npm01)
+                    diag(lambda.matrix)[idbeta]<--1/alpha[i]
+                    
+                  }
+                  if(penalty=="scad"){
+                    idbeta<-which((abs(betaCoef[1:npm01,i])>lambda[1,i])&(abs(betaCoef[1:npm01,i])<=lambda[1,i]*alpha[i]))
+                    diag(lambda.matrix)[1:npm01]<-rep(0,npm01)
+                    diag(lambda.matrix)[idbeta]<--1/(alpha[i]-1)
+                    
+                  }
+                }
+                if(nvat02>0){
+                  
+                  if(penalty%in%c("none","lasso","ridge","elasticnet")){
+                    diag(lambda.matrix)[(npm01+1):(npm01+npm02)]<-rep(2*(1-alpha[i])*lambda[2,i],npm02)}
+                  
+                  if(penalty=="mcp"){
+                    
+                    idbeta<-which(abs(betaCoef[(npm01+1):(npm01+npm02),i])<=alpha[i]*lambda[2,i])
+                    diag(lambda.matrix)[(npm01+1):(npm01+npm02)]<-rep(0,npm02)
+                    diag(lambda.matrix)[idbeta+npm01]<--1/alpha[i]
+                    
+                    
+                  }
+                  if(penalty=="scad"){
+                    
+                    idbeta<-which((abs(betaCoef[(npm01+1):(npm01+npm02):npm01,i])>lambda[2,i])&(abs(betaCoef[(npm01+1):(npm01+npm02),i])<=lambda[2,i]*alpha[i]))
+                    diag(lambda.matrix)[(npm01+1):(npm01+npm02)]<-rep(0,npm02)
+                    diag(lambda.matrix)[idbeta+npm01]<--1/(alpha[i]-1)
+                    
+                  }
+                }
+                if(nvat12>0){
+                  if(penalty%in%c("none","lasso","ridge","elasticnet")){
+                    diag(lambda.matrix)[(npm01+npm02+1):npm]<-rep(2*(1-alpha[i])*lambda[3,i],npm12)}
+                  
+                  
+                  if(penalty=="mcp"){
+                    idbeta<-which(abs(betaCoef[(npm01+npm02+1):npm,i])<=alpha[i]*lambda[3,i])
+                    diag(lambda.matrix)[(npm01+npm02+1):npm]<-rep(0,npm12)
+                    diag(lambda.matrix)[idbeta+npm01+npm02]<--1/alpha[i]
+                    
+                  }
+                  
+                  if(penalty=="scad"){
+                    idbeta<-which((abs(betaCoef[(npm01+npm02+1):npm,i])>lambda[3,i])&(abs(betaCoef[(npm01+npm02+1):npm,i])<=lambda[3,i]*alpha[i]))
+                    diag(lambda.matrix)[(npm01+npm02+1):npm]<-rep(0,npm12)
+                    diag(lambda.matrix)[idbeta+npm01+npm02]<--1/(alpha[i]-1)
+                    
+                  }
+                }
+                # only beta different from 0 
+                lambda.matrix<-lambda.matrix[id.keep,id.keep,drop=FALSE]
+                
+                if(out$istop[i]==1){
+                  H_spec<-out$H[,(1+(i-1)*npm):(i*npm),drop=FALSE]
+                  # only beta different from 0 
+                  H_spec<-H_spec[id.keep,id.keep,drop=FALSE]
+                  
+                  if(!(any(is.na(H_spec))|any(H_spec==Inf) |any(H_spec==-Inf))){
+                    if(abs(det(H_spec))>1e-10 & kappa(H_spec)<1e10){
+                      #V[,(1+(i-1)*npm):(i*npm)]<-solve(out$H[,(1+(i-1)*npm):(i*npm),drop=FALSE])
+                      id.keepV<-(1+(i-1)*npm):(i*npm)
+                      id.keepV<-id.keepV[id.keepV%in%((i-1)*npm+id.keep)]
+                      
+                      V[id.keep,id.keepV]<-solve(H_spec)
+                      # maximisation issue thus : 10/04/24
+                      # as mla in maximisation return -second derivatives 
+                      
+                      H_pl<-H_spec+lambda.matrix
+                      trace_model<-lava::tr(solve(H_pl)%*%H_spec)
+                      
+                      fit$GCV[i]<--1/N*(out$fn.value[i]-trace_model)}
+                  }
+                }
+                
+                
+              }
+            }
+            
+            
+            cv<-list(ca.beta=out$ca.beta,ca.spline=out$ca.spline,ca.validity=out$ca.validity,
+                     cb=out$cb,rdm=NULL)
+            
+            
+            fit$modelPar<-as.matrix(modelPar)
+            
+            ############# on times to do prediction on #################################
+            fit$time <- matrix(NA,ncol=3,nrow=100)
+            fit$time[,1]<-seq(from=amin,to=amax,length.out=100)
+            fit$time[,2]<-seq(from=amin,to=amax,length.out=100)
+            fit$time[,3]<-seq(from=amin,to=amax,length.out=100)
+            ############# on times to do prediction on #################################
+            
           }
           
           fit$loglik <- c(out$fn.value,out$fn.value.pena)

@@ -57,6 +57,9 @@ INLAidmpredY<-function(timeVar,truncated,formLong,dataSurv,dataLongi,id,
       if(BLUP==F){
         
         #samples seed=seed cannot do parallel estimation on it 
+        
+
+        
         SMP <- inla.posterior.sample(Nsample, INLAmodel,seed=seed)
         linPred <- sapply(SMP, function(x) x$latent) 
 

@@ -22,6 +22,15 @@ extern void F77_NAME(idmlikelihoodweib)(double *,int *, int *, double *,int*,
               int *,int *, double *,double*, double *,
               int *,int *,int *,int *,int *,int *, double *,double*, double *, double *,int *,int *,double *);
 
+
+extern void F77_NAME(idmlikelihoodsemimark)(double *,int *, int *, double *,int*, double *,double *,double *,
+              int *,int *,int *,int *, int *, double *,double*, double *,
+              int *,int *,int *,int *,int *,int *, double *,double*, double *, double *,int *,double *);
+
+extern void F77_NAME(idmlikelihoodweibsemimark)(double *,int *, int *, double *,int*,
+              int *,int *, double *,double*, double *,
+              int *,int *,int *,int *,int *,int *, double *,double*, double *, double *,int *,double *);
+
 extern void F77_NAME(idmlikelihoodweibtimedep)(double *,int *, int *, double *,int*,
               int *,int *, double *,double*, double *, double *,double*, double *,
               int *,int *,int *,int *,int *,int *,int *,
@@ -48,15 +57,12 @@ extern void F77_NAME(firstderivaidmlikelihoodsplinetimedep)(double *,int *, int 
               int *,int *,int *,int *,int *,int *, double *,double*, double *,
 			  double *,int *,double *);
 
-extern void F77_NAME(idmlikelihoodweibtimedepgrid)(double *,int *, int *, double *,int*,
-              int *,int *, double *,double*, double *, double *,double*, double *,
-              int *,int *,int *,int *,int *,int *,int *, double *,
-              int *,int *,int *,int *,int *,int *, double *,double*, double *, double *,int *,double *);
-
-
-
 
 extern void F77_NAME(derivaweib)(double *,int *, int *, double *,int*,
+              int *,int *, double *,double*, double *,
+              int *,int *,int *,int *,int *,int *, double *,double*, double *, double *,int *,double *);
+
+extern void F77_NAME(derivaweibsemimark)(double *,int *, int *, double *,int*,
               int *,int *, double *,double*, double *,
               int *,int *,int *,int *,int *,int *, double *,double*, double *, double *,int *,double *);
 
@@ -76,6 +82,10 @@ extern void F77_NAME(derivaweibdiag)(double *,int *, int *, double *,int*,
               int *,int *, double *,double*, double *,
               int *,int *,int *,int *,int *,int *, double *,double*, double *, double *,int *,double *);
 
+extern void F77_NAME(derivaweibdiagsemimark)(double *,int *, int *, double *,int*,
+              int *,int *, double *,double*, double *,
+              int *,int *,int *,int *,int *,int *, double *,double*, double *, double *,int *,double *);
+
 extern void F77_NAME(firstderivaweib)(double *,int *, int *, double *,int*,
               int *,int *, double *,double*, double *,
               int *,int *,int *,int *,int *,int *, double *,double*, double *, double *,int *,double *);
@@ -85,7 +95,15 @@ extern void F77_NAME(derivaspline)(double *,int *, int *, double *,int*, double 
                      int *,int *,int *,int *, int *, double *,double*, double *,
                      int *,int *,int *,int *,int *,int *, double *,double*, double *, double *,int *,double *);
 
+extern void F77_NAME(derivasplinesemimark)(double *,int *, int *, double *,int*, double *,double *,double *,
+                     int *,int *,int *,int *, int *, double *,double*, double *,
+                     int *,int *,int *,int *,int *,int *, double *,double*, double *, double *,int *,double *);
+
 extern void F77_NAME(derivasplinediag)(double *,int *, int *, double *,int*, double *,double *,double *,
+                     int *,int *,int *,int *, int *, double *,double*, double *,
+                     int *,int *,int *,int *,int *,int *, double *,double*, double *, double *,int *,double *);
+
+extern void F77_NAME(derivasplinediagsemimark)(double *,int *, int *, double *,int*, double *,double *,double *,
                      int *,int *,int *,int *, int *, double *,double*, double *,
                      int *,int *,int *,int *,int *,int *, double *,double*, double *, double *,int *,double *);
 
@@ -116,22 +134,27 @@ extern void F77_NAME(derivasplinessecondderiv)(double *,int *, int *, double *,i
 static const R_FortranMethodDef FortranEntries[] = {
     {"idmlikelihood",(DL_FUNC) &F77_NAME(idmlikelihood),    29},
     {"idmlikelihoodweib",(DL_FUNC) &F77_NAME(idmlikelihoodweib),    23},
+    {"idmlikelihoodsemimark",(DL_FUNC) &F77_NAME(idmlikelihoodsemimark),    28},
+    {"idmlikelihoodweibsemimark",(DL_FUNC) &F77_NAME(idmlikelihoodweibsemimark),    22},
     {"idmlikelihoodweibtimedep",(DL_FUNC) &F77_NAME(idmlikelihoodweibtimedep),    32},
      {"firstderivaidmlikelihoodweibtimedep",(DL_FUNC) &F77_NAME(firstderivaidmlikelihoodweibtimedep),    32},
 	 {"idmlikelihoodtimedep",(DL_FUNC) &F77_NAME(idmlikelihoodtimedep),    38},
      {"firstderivaidmlikelihoodsplinetimedep",(DL_FUNC) &F77_NAME(firstderivaidmlikelihoodsplinetimedep),    38},
-     {"idmlikelihoodweibtimedepgrid",(DL_FUNC) &F77_NAME(idmlikelihoodweibtimedepgrid),    33},
- {"causalidmlikelihoodweib",(DL_FUNC) &F77_NAME(causalidmlikelihoodweib),    24},
+    {"causalidmlikelihoodweib",(DL_FUNC) &F77_NAME(causalidmlikelihoodweib),    24},
     {"derivaweib",(DL_FUNC) &F77_NAME(derivaweib),    22},
+     {"derivaweibsemimark",(DL_FUNC) &F77_NAME(derivaweibsemimark),    22},
     {"derivaweiballpara",(DL_FUNC) &F77_NAME(derivaweiballpara),    22},
  {"derivaweibsecondderiv",(DL_FUNC) &F77_NAME(derivaweibsecondderiv),    22},
     {"derivaweiballparadiag",(DL_FUNC) &F77_NAME(derivaweiballparadiag),    22},
     {"derivaweiballparafirstderiv",(DL_FUNC) &F77_NAME(derivaweiballparafirstderiv),    22},
  {"derivaweibfirstderiv",(DL_FUNC) &F77_NAME(derivaweibfirstderiv),    22},
     {"derivaweibdiag",(DL_FUNC) &F77_NAME(derivaweibdiag),    22},
+    {"derivaweibdiagsemimark",(DL_FUNC) &F77_NAME(derivaweibdiagsemimark),    22},
     {"firstderivaweib",(DL_FUNC) &F77_NAME(firstderivaweib),    22},
     {"derivaspline",(DL_FUNC) &F77_NAME(derivaspline),    28},
+    {"derivasplinesemimark",(DL_FUNC) &F77_NAME(derivasplinesemimark),    28},
     {"derivasplinediag",(DL_FUNC) &F77_NAME(derivasplinediag),    28},
+     {"derivasplinediagsemimark",(DL_FUNC) &F77_NAME(derivasplinediagsemimark),    28},
     {"firstderivaspline",(DL_FUNC) &F77_NAME(firstderivaspline),    28},
   {"derivasplinesfirstderiv",(DL_FUNC) &F77_NAME(derivasplinesfirstderiv),    28},
 {"derivasplinessecondderiv",(DL_FUNC) &F77_NAME(derivasplinessecondderiv),    28},

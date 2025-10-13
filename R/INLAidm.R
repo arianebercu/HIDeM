@@ -7,7 +7,7 @@
 INLAidm<-function(timeVar,family,basRisk,assoc,
                   truncated,formLong,formSurv,dataSurv,dataLongi,id,
                   nproc,t0,t1,t2,t3,
-                  idm,idd,clustertype){
+                  idm,idd,clustertype,lightmode,prediction){
   
   # define timePoints of prediction : 
 
@@ -53,7 +53,7 @@ INLAidm<-function(timeVar,family,basRisk,assoc,
 #  idinla<<-id
 #  timeVarinla<<-timeVar
   
-
+browser()
     for(indice in 1:length(formLong)){
 
       # need to have all elements of joint
@@ -68,9 +68,14 @@ INLAidm<-function(timeVar,family,basRisk,assoc,
       
       #start with run = False -- have structure for slopes
     
-      print(paste0("For marker: ",names(functional_forms)[[indice]]))
+      predk<-prediction[[indice]]
+      predk<-unique(predk)
       
-
+      print(paste0("For marker: ",formLong[[indice]][[2]]))
+      
+      if(length(predk)==1){
+        if(predk=="value"){
+      
       INLAmodel<-INLAjoint::joint(formSurv = formSurv,
                                        formLong = formLong[[indice]],
                                        dataLong = dataLongi_augmented, dataSurv=dataSurv, id = id, timeVar = timeVar,
@@ -78,13 +83,56 @@ INLAidm<-function(timeVar,family,basRisk,assoc,
                                        basRisk = basRisk[indice], NbasRisk = 15, assoc = assoc[[indice]],
                                        control=list(int.strategy="eb"))
       
+      
+      if(lightmode==T){
+        erase<-c(".args","marginals.random","dic","waic","mode","residuals",
+                 "summary.random","logfile","selection","internal.marginals.hyperpar",
+                 "marginals.hyperpar","size.random","priors_used","marginals.fixed",
+                 "internal.summary.hyperpar","joint.hyper","formLong","summary.fixed",
+                 "summary.hyperpar","formSurv","SurvInfo","cpu.intern","call",
+                 "size.linear.predictor","version","mlik","gcpo","cpo","cpu.used",
+                 "model.random","basRisk","survOutcome","REstruc","assoc","names.fixed",
+                 "assoc_Names","famLongi","fixRE","timeVar","id","longOutcome","cureVar",
+                 "dataSurv","dataLong","corRE","mat_k","range","control.link","corLong",
+                 "NbasRisk","variant","run","nhyper","survFacChar","lonFacChar",
+                 "marginals.fitted.values","marginals.linear.predictor",
+                 "summary.fitted.values","po","all.hyper")
+        
+        nameINLA<-names(INLAmodel)
+        classINLA<-class(INLAmodel)
+        INLAmodel<-INLAmodel[-which(nameINLA%in%erase)]
+        class(INLAmodel)<-classINLA
+        
+      }
+      
      
+        }else{
+        #need slope also 
+          
+          # INLAmodel_cr<-INLAjoint::joint(formSurv = formSurv,
+          #                             formLong = formLong[[indice]],
+          #                             dataLong = dataLongi_augmented, dataSurv=dataSurv, id = id, timeVar = timeVar,
+          #                             family = family[indice],
+          #                             basRisk = basRisk[indice], NbasRisk = 15, assoc = assoc[[indice]],
+          #                             control=list(int.strategy="eb"),run=FALSE)
+          # 
+          # dX<-make_dXINLA(formLong[[indice]],timevar = timeVar,data=dataLongi_augmented,id=id,
+          #                 N=length(idsubjects))
+          # 
+          # lincomb_listX<-as.list(as.data.frame(dX$dX))
+          # lincomb_list<-c(lincomb_listX,dX$dXRE)
+          # 
+          # lincomb_inla <- do.call(inla.make.lincombs, lincomb_list)
+          stop("INLA model cannot perform prediction of slope of Y")
+        }
+      }else{ # need value and slope 
+        stop("INLA model cannot perform prediction of slope of Y")
+      }
       modelY[[indice]]<-INLAmodel
     }
   print("End of running univarite models")
+
   return(modelY)
   }
   
       
-
-
