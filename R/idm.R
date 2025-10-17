@@ -372,14 +372,14 @@ idm <- function(formula01,
         amax <- max(alltimes)
         amin <- min(alltimes)
         amin12<-0
-        amax12<-max(alltimes-Ltime)
+        amax12<-max(abstime-Ltime)
       }
       else{
         alltimes <- sort(unique(c(Ltime, Rtime,abstime)))
         amax <- max(alltimes)
         amin <- 0
         amin12<-0
-        amax12<-max(alltimes-Ltime)
+        amax12<-max(abstime-Ltime)
       }
     }
     
@@ -517,6 +517,7 @@ idm <- function(formula01,
         if (!knots%in%c("quantile","equidistant"))stop("Knots need to be either 'equidistant', 'quantile' or directly its values")
         if(!type.quantile%in%c(1,2,3,4))stop("Argument type.quantile has to a numeric : 1, 2, 3 or 4.")
         
+       
         if(semiMarkov==F){
         if (knots=="quantile" & type.quantile==1){
           
@@ -583,9 +584,10 @@ idm <- function(formula01,
             knots01 <- quantile(approx.illtimes,seq(0,1,1/(nknots01-1)))
             
             death.time<-responseAbs[responseAbs[,"status"]%in%c(1,2),"time"]
+            time12<-responseAbs[,"time"]-(Rtime+Ltime)/2
             # Look only at time of events of death when already diagnose
             knots02 <- quantile(death.time,seq(0,1,1/(nknots02-1)))
-            knots12 <- quantile(death.time-approx.illtimes,seq(0,1,1/(nknots12-1)))
+            knots12 <- quantile(time12,seq(0,1,1/(nknots12-1)))
           }
           
           if (knots=="quantile" & type.quantile==2){
@@ -593,9 +595,10 @@ idm <- function(formula01,
             #approx.illtimes <- Rtime[idm==1]
             knots01 <- quantile(approx.illtimes,seq(0,1,1/(nknots01-1)))
             
+            time12<-responseAbs[,"time"]-(Rtime+Ltime)/2
             # Look only at time of events of death when already diagnose
             knots02 <- quantile(abstime,seq(0,1,1/(nknots02-1)))
-            knots12 <- quantile(abstime-approx.illtimes,seq(0,1,1/(nknots12-1)))
+            knots12 <- quantile(time12,seq(0,1,1/(nknots12-1)))
           }
           
           if (knots=="quantile" & type.quantile==3){
@@ -603,11 +606,12 @@ idm <- function(formula01,
             #approx.illtimes <- Rtime[idm==1]
             knots01 <- quantile(approx.illtimes,seq(0,1,1/(nknots01-1)))
             
+            time12<-responseAbs[,"time"]-(Rtime+Ltime)/2
             # Look only at time of events of death when already diagnose
             # responseTrans = data frame with statut =1 or 2 when dementia
             # responseAbs = data frame with statut =1 or 2 when death
-            illdeathtimes <- responseAbs[responseTrans[,"status"]%in%c(1,2) & responseAbs[,"status"]%in%c(1,2),"time"]
-            knots12 <- quantile(illdeathtimes-approx.illtimes,seq(0,1,1/(nknots12-1)))
+            
+            knots12 <- quantile(time12,seq(0,1,1/(nknots12-1)))
             
             # Look only at time of events of death when not diagnose
             deathtimes <- responseAbs[responseTrans[,"status"]==0 & responseAbs[,"status"]%in%c(1,2),"time"]
@@ -620,8 +624,8 @@ idm <- function(formula01,
             knots01 <- quantile(approx.illtimes,seq(0,1,1/(nknots01-1)))
             
             # Look only at time of events of death when already diagnose
-            illdeathtimes <- responseAbs[responseTrans[,"status"]%in%c(1,2) & responseAbs[,"status"]%in%c(1,2),"time"]
-            knots12 <- quantile(illdeathtimes-approx.illtimes,seq(0,1,1/(nknots12-1)))
+            time12<-responseAbs[,"time"]-(Rtime+Ltime)/2
+            knots12 <- quantile(time12,seq(0,1,1/(nknots12-1)))
             
             # Look only at time of events of death when not diagnose
             deathtimes <- responseAbs[responseTrans[,"status"]==0 & responseAbs[,"status"]%in%c(1,2),"time"]
