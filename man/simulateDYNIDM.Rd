@@ -32,15 +32,13 @@ simulateDYNIDM(
   beta12 = rep(0.5, 10),
   B = matrix(c(1, 0, 0, 0, 1, 0, 0, 0, 1), ncol = 3),
   sigma = 1,
+  scale.Y = F,
   beta0 = 0.5,
   beta1 = 0.5,
-  alpha0_01 = 0.5,
   alpha_y_01 = 0.5,
   alpha_slope_01 = 0,
-  alpha0_02 = 0.5,
   alpha_y_02 = 0.5,
   alpha_slope_02 = 0,
-  alpha0_12 = 0.5,
   alpha_y_12 = 0.5,
   alpha_slope_12 = 0
 )

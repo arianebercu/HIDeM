@@ -13,7 +13,6 @@ JMidm(
   dataSurv,
   dataLongi,
   id,
-  Nsample,
   n_iter,
   n_burnin,
   n_thin,
@@ -26,9 +25,7 @@ JMidm(
   idm,
   idd,
   clustertype,
-  Ypredmethod,
-  NtimesPoints,
-  seed
+  lightmode
 )
 }
 \description{
