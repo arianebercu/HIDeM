@@ -29,7 +29,6 @@
 ##' @param penalty.factor which variable should be penalised
 ##' @param gausspoint number of points in gauss quadrature
 #' @useDynLib HIDeM
-##' @export
 #' @author R: Ariane Bercu <ariane.bercu@@u-bordeaux.fr> 
 #' 
 

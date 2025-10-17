@@ -31,7 +31,7 @@
 #' @param data A data frame in which to interpret the variables of
 #' \code{formula01}, \code{formula02} and \code{formula12}.
 #' @param maxiter Maximum number of iterations. The default is 200.
-#' @param maxiter.pena Maximum number of iterations for penalised coefficients
+#' @param maxiter.pena Maximum number of iterations for penalized likelihood at the update of the baseline intensity parameters.
 #' @param eps A vector of 3 integers >0 used to define the power of
 #' three convergence criteria: 1. for the regression parameters,
 #' 2. for the likelihood, 3. for the second derivatives. The default
@@ -40,75 +40,68 @@
 #' parameters and likelihood) and \eqn{10^{-3}} for the second
 #' derivatives between two iterations.
 #' @param n.knots For \code{method="splines"} only, a vector of length
-#' 3 specifing the number of knots, one for each transition, for the
+#' 3 specifying the number of knots, one for each transition, for the
 #' M-splines estimate of the baseline intensities in the order \code{0
-#' --> 1}, \code{0 --> 2}, \code{1 --> 2}. The default is c(7,7,7). When \code{knots}
+#' --> 1}, \code{0 --> 2}, \code{1 --> 2}. The default is c(3,3,3). When \code{knots}
 #' are specified as a list this argument is ignored.
-#' The algorithm needs least 5 knots and at most 20 knots.
-#' @param knots Argument only active for the penalized likelihood approach \code{method="Splines"}.
-#' There are three ways to control the placement of the knots between the smallest and the largest
+#' The algorithm needs least 3 knots and at most 20 knots.
+#' @param knots Argument only active for the likelihood approach with M-spline basis \code{method="Splines"}. There are three ways to control the placement of the knots between the smallest and the largest
 #' of all time points:
 #' \describe{
-#'  \item{\code{knots="equidistant"}}{Knots are placed with same distance on the time scale.}
+#'  \item{\code{knots="equidistant"}}{Knots are placed with same distance on the time scale, time of death, last vital status or censoring.}
 #'  \item{\code{knots="quantile"}}{Knots are placed such that the number of observations is roughly the same between knots.}
 #' \item{knots=list()}{List of 1 or 2 or three vectors. The list elements are the actual placements
 #' (timepoints) of the knots for the M-spline. The list may contain
 #' one vector of placements for each transition in the order \code{0 --> 1}, \code{0 --> 2}, \code{1 --> 2}.
-#' If only vector is specifified the knots are used for all transitions. If only 2 vectors are specifified, the
+#' If only vector is specified the knots are used for all transitions. If only 2 vectors are specifified, the
 #' knots for the \code{0 --> 1} transition are also used for the \code{1 --> 2} transition.}
 #' }
 #' The algorithm needs at least 3 knots in spline and allows no more than 20 knots.
-#' @param type.quantile Argument only active for the likelihood approach \code{method="splines"}.
-#' There are three ways to control the placement of the knots  according to the time considered between states :=
+#' @param type.quantile Argument only active for the likelihood approach with M-spline basis \code{method="splines"}. There are three ways to control the placement of the knots  according to the time considered between states :
 #' \describe{
-#'  \item{\code{type.quantile=1}}{Time for \code{0 --> 1} is the imputed to the middle of the interval left and right for demence . Time for \code{0 --> 2}
-#'  and \code{1 --> 2} is the same t, time of news. }
-#'  \item{\code{type.quantile=2}}{Time for \code{0 --> 1} is the imputed to the middle of the interval left and right. Time for \code{0 --> 2}
-#'  and \code{1 --> 2} is the same t, time of news. }
-#' \item{\code{type.quantile=3}}{Time for \code{0 --> 1} is the imputed to the middle of the interval left and right. Time for \code{0 --> 2}
-#'  is time of death for non demented sujects only. Time for \code{1 --> 2} is time of death for suject diagnose with dementia. }
-#' \item{\code{type.quantile=4}}{Time for \code{0 --> 1} is left and right. Time for \code{0 --> 2}
-#'  is time of death for non demented sujects only. Time for \code{1 --> 2} is time of death for suject diagnose with dementia. }
+#'  \item{\code{type.quantile=1}}{Time for \code{0 --> 1} is the imputed to the midpoint between the last illness-free visit and the diagnosis visit. Time for \code{0 --> 2}
+#'  and \code{1 --> 2} is the same t, time of death. }
+#'  \item{\code{type.quantile=2}}{Time for \code{0 --> 1} is the imputed to the midpoint between the last illness-free visit and the diagnosis visit. Time for \code{0 --> 2}
+#'  and \code{1 --> 2} is the same t, time of death or time of vital status. }
+#' \item{\code{type.quantile=3}}{Time for \code{0 --> 1} is the imputed to the midpoint between the last illness-free visit and the diagnosis visit. Time for \code{0 --> 2}
+#'  is time of death for individual illness-free. Time for \code{1 --> 2} is time of death for ill individuals. }
+#' \item{\code{type.quantile=4}}{Time for \code{0 --> 1} is the last illness-free visit or the diagnosis visit. Time for \code{0 --> 2}
+#'  is time of death for individual illness-free. Time for \code{1 --> 2} is time of death for ill individuals. }
 #' }
-#' @param B vector of size the number of parameters, in the following order, first the parameters of splines \code{0 --> 1}, \code{0 --> 2}, \code{1 --> 2},
-#' second the parameters of explanatory variables in order  \code{0 --> 1}, \code{0 --> 2}, \code{1 --> 2}.
-#' This argument is only used for models with M-splines.
-#' @param method type of estimation method: "splines" for a likelihood approach with approximation of the transition
-#' intensities by M-splines, "Weib" for a parametric approach with a
-#' Weibull distribution on the transition intensities. Default is
+#' Note that if semiMarkov is TRUE then transition the time transition for \code{1 --> 2} needs to be adjusted for the time transition from \code{0 --> 1} such that time of \code{1 --> 2} becomes time of \code{1 --> 2} minus time of \code{0 --> 1}.
+#' @param B  A vector of size the number of parameters, firstly the parameters associated to the baseline transition intensities in order \code{0 --> 1}, \code{0 --> 2}, \code{1 --> 2}, secondly the parameters of explanatory variables in order  \code{0 --> 1}, \code{0 --> 2}, \code{1 --> 2}.
+#' @param method The type of estimation method: "splines" for a likelihood with baseline transition intensities using M-splines basis, "Weib" for a parametric approach with a
+#' Weibull distribution on the baseline transition intensities. Default is
 #' "Weib".
-#' @param na.action how NAs are treated. The default is first, any
+#' @param na.action How NAs are treated. The default is first, any
 #' na.action attribute of data, second a na.action setting of options,
 #' and third 'na.fail' if that is unset. The 'factory-fresh' default
 #' is na.omit. Another possible value is NULL.
-#' @param scale.X do you want to center and reduce your explanatory variables
-#' @param posfix index of fixed parameters 
-#' @param timedep12 TRUE if time dependent on 1 --> 2 otherwise FALSE (default)
+#' @param scale.X TRUE (default), if you want to center and reduce your explanatory variables.
+#' @param posfix The index of parameters that we want to fix, by default no parameters are fixed.
+#' @param timedep12 TRUE if time dependent on 1 --> 2 otherwise FALSE (default).
 #' @param semiMarkov TRUE if semi Markov on 1 --> 2 otherwise FALSE (default)
-#' @param gausspoint gauss quadrature points in the approximation of integrals in the likelihood
+#' @param gausspoint Gauss quadrature points in the approximation of integrals in the likelihood (only active if no penalty)
 #' @param lambda01 Lambda on transition 0 --> 1
 #' @param lambda02 Lambda on transition 0 --> 2
 #' @param lambda12 Lambda on transition 1 --> 2
-#' @param nlambda01 number of Lambda on transition 0 --> 1
-#' @param nlambda02 number of Lambda on transition 0 --> 2
-#' @param nlambda12 number of Lambda on transition 1 --> 2
-#' @param alpha alpha on all transitions 
-#' @param penalty which penalty to consider
-#' @param penalty.factor which variable should be penalised
-#' computed for the Newton-Raphson path for the penalised regression parameter. If FALSE, the 
-#' complete hessian is computed.
-#' @param step.sequential should we use the optimisation version to fix splines 
-#' @param partialH True if should use only diagonal terms of the derivatives of beta
-#' @param clustertype in which cluster to work
-#' @param nproc number of cluster
-#' @param option.sequential parameters to give if you want to do the optimisation version to
-#'  fix splines
-#' @param envir working environment 
+#' @param nlambda01 Number of Lambda on transition 0 --> 1
+#' @param nlambda02 Number of Lambda on transition 0 --> 2
+#' @param nlambda12 Number of Lambda on transition 1 --> 2
+#' @param alpha The elastic-net threshold parameter between ridge and lasso on all transitions.
+#' @param penalty Which penalty to consider, either "lasso","elasticnet","mcp" or "scad".
+#' @param penalty.factor A vector of size the number of explanatory variables, each element value 1 (default) if we should apply the penalization on the regression parameters associated, otherwise 0.
+#' @param step.sequential TRUE, if we want to fix some M-splines parameters if their value is too close to 0, otherwise FALSE (default).
+#' @param partialH TRUE, if only the diagonal terms of the second derivatives of the regression parameters should be used, otherwise FALSE (default). 
+#' @param clustertype In which cluster to work
+#' @param nproc Number of cluster
+#' @param option.sequential Parameters to give step.sequential=TRUE, the cutoff underwhich the M-spline parameter is fixed to 0, min the minimum number of iteration at start, step the number of iteration to perform after stopping to fix some parameters.
+#' @param envir The working environment 
 #' @return
 #' \item{call}{the call that produced the result.} \item{coef}{regression
 #' parameters.} \item{loglik}{vector containing the log-likelihood and
-#' the penalised log-likelihood} \item{cv}{vector containing the convergence criteria based on 
-#' stability of parameters, log-likelihood (or penalised) and relative distance to minimum/maximum}
+#' the penalized log-likelihood} \item{cv}{vector containing the convergence criteria based on 
+#' stability of parameters, log-likelihood (or penalized) and relative distance to minimum/maximum}
 #' \item{niter}{number of iterations.} \item{converged}{integer equal to 1 when
 #' the model converged, 2, 3 or 4 otherwise.} \item{modelPar}{Weibull
 #' parameters.} \item{N}{number of subjects.} \item{events1}{number of events 0
@@ -120,7 +113,7 @@
 #' \item{time}{times for which transition intensities have been evaluated for
 #' plotting.} \item{maxtime}{times of last follow-up or event} \item{mintime}{times of first follow-up or event}
 #'  \item{HR}{vector of hazard risks.}
-#' \item{V}{variance-covariance matrix derived from the Hessian of the log-likelihood or penalised
+#' \item{V}{variance-covariance matrix derived from the Hessian of the log-likelihood or penalized
 #' log-likelihood}\item{Xnames01}{names of covariates on 0 --> 1.}
 #' \item{Xnames02}{names of covariates on 0 --> 2.} \item{Xnames12}{names of
 #' covariates on 1 --> 2.} \item{knots01}{knots to approximate by M-splines the
@@ -133,13 +126,13 @@
 #' \item{theta01}{square root of splines coefficients for transition 0 --> 1.}
 #' \item{theta02}{square root of splines coefficients for transition 0 --> 2.}
 #' \item{theta12}{square root of splines coefficients for transition 1 --> 2.}
-#' \item{alpha}{penalty parameter alpha on all transitions}
+#' \item{alpha}{the elastic-net threshold parameter between ridge and lasso used on all transitions.}
 #' \item{lambda}{matrix of lambda penalty parameters, first line for 0 --> 1, second 
 #' line for 0 --> 2 and third line for 1 --> 2}
 #' \item{BIC}{Bayesian Information Criterion} 
 #' \item{GCV}{Generalised Cross-Validation approximation}
 #' \item{levels}{a list containing the type of the variable on all transitions and its level, 
-#' useful for prediction on new-dataset.}
+#' useful for prediction on a new data set.}
 #' \item{runtime}{running time in seconds of the function.}
 #' @seealso \code{\link{print.idm}}
 #' \code{\link{summary.idm}}
@@ -201,7 +194,7 @@ idm <- function(formula01,
                 posfix=NULL,
 
                 timedep12=FALSE,
-                semiMarkov=TRUE,
+                semiMarkov=FALSE,
                 gausspoint=10,
                 step.sequential=F,
                 option.sequential=list(cutoff=10^-3,
@@ -360,6 +353,7 @@ idm <- function(formula01,
         Rtime[idm==0] <- abstime[idm==0]
     }
     ## find time boundaries 
+    if(semiMarkov==F){
     if (length(entrytime)>0){
         alltimes <- sort(unique(c(Ltime, Rtime,entrytime,abstime)))
         amax <- max(alltimes)
@@ -369,6 +363,24 @@ idm <- function(formula01,
         alltimes <- sort(unique(c(Ltime, Rtime,abstime)))
         amax <- max(alltimes)
         amin <- 0
+    }
+      amin12<-amin
+      amax12<-amax
+    }else{
+      if (length(entrytime)>0){
+        alltimes <- sort(unique(c(Ltime, Rtime,entrytime,abstime)))
+        amax <- max(alltimes)
+        amin <- min(alltimes)
+        amin12<-0
+        amax12<-max(alltimes-Ltime)
+      }
+      else{
+        alltimes <- sort(unique(c(Ltime, Rtime,abstime)))
+        amax <- max(alltimes)
+        amin <- 0
+        amin12<-0
+        amax12<-max(alltimes-Ltime)
+      }
     }
     
     
@@ -505,6 +517,7 @@ idm <- function(formula01,
         if (!knots%in%c("quantile","equidistant"))stop("Knots need to be either 'equidistant', 'quantile' or directly its values")
         if(!type.quantile%in%c(1,2,3,4))stop("Argument type.quantile has to a numeric : 1, 2, 3 or 4.")
         
+        if(semiMarkov==F){
         if (knots=="quantile" & type.quantile==1){
           
           approx.illtimes <- (Rtime[idm==1]+Ltime[idm==1])/2
@@ -560,8 +573,66 @@ idm <- function(formula01,
           warning("Unknown specification of knots. Fall back to equidistant.")
           knots01 <- seq(amin,amax,(amax-amin)/(nknots01-1))
           knots02 <- seq(amin,amax,(amax-amin)/(nknots02-1))
-          knots12 <- seq(amin,amax,(amax-amin)/(nknots12-1))}
-        
+          knots12 <- seq(amin12,amax12,(amax12-amin12)/(nknots12-1))}
+        }else{
+          
+          if (knots=="quantile" & type.quantile==1){
+            
+            approx.illtimes <- (Rtime[idm==1]+Ltime[idm==1])/2
+            #approx.illtimes <- Rtime[idm==1]
+            knots01 <- quantile(approx.illtimes,seq(0,1,1/(nknots01-1)))
+            
+            death.time<-responseAbs[responseAbs[,"status"]%in%c(1,2),"time"]
+            # Look only at time of events of death when already diagnose
+            knots02 <- quantile(death.time,seq(0,1,1/(nknots02-1)))
+            knots12 <- quantile(death.time-approx.illtimes,seq(0,1,1/(nknots12-1)))
+          }
+          
+          if (knots=="quantile" & type.quantile==2){
+            approx.illtimes <- (Rtime[idm==1]+Ltime[idm==1])/2
+            #approx.illtimes <- Rtime[idm==1]
+            knots01 <- quantile(approx.illtimes,seq(0,1,1/(nknots01-1)))
+            
+            # Look only at time of events of death when already diagnose
+            knots02 <- quantile(abstime,seq(0,1,1/(nknots02-1)))
+            knots12 <- quantile(abstime-approx.illtimes,seq(0,1,1/(nknots12-1)))
+          }
+          
+          if (knots=="quantile" & type.quantile==3){
+            approx.illtimes <- (Rtime[idm==1] + Ltime[idm==1])/2
+            #approx.illtimes <- Rtime[idm==1]
+            knots01 <- quantile(approx.illtimes,seq(0,1,1/(nknots01-1)))
+            
+            # Look only at time of events of death when already diagnose
+            # responseTrans = data frame with statut =1 or 2 when dementia
+            # responseAbs = data frame with statut =1 or 2 when death
+            illdeathtimes <- responseAbs[responseTrans[,"status"]%in%c(1,2) & responseAbs[,"status"]%in%c(1,2),"time"]
+            knots12 <- quantile(illdeathtimes-approx.illtimes,seq(0,1,1/(nknots12-1)))
+            
+            # Look only at time of events of death when not diagnose
+            deathtimes <- responseAbs[responseTrans[,"status"]==0 & responseAbs[,"status"]%in%c(1,2),"time"]
+            knots02 <- quantile(deathtimes,seq(0,1,1/(nknots02-1)))
+          }
+          
+          if (knots=="quantile" & type.quantile==4){
+            approx.illtimes <- c(Rtime[idm==1],Ltime[idm==1])
+            #approx.illtimes <- Rtime[idm==1]
+            knots01 <- quantile(approx.illtimes,seq(0,1,1/(nknots01-1)))
+            
+            # Look only at time of events of death when already diagnose
+            illdeathtimes <- responseAbs[responseTrans[,"status"]%in%c(1,2) & responseAbs[,"status"]%in%c(1,2),"time"]
+            knots12 <- quantile(illdeathtimes-approx.illtimes,seq(0,1,1/(nknots12-1)))
+            
+            # Look only at time of events of death when not diagnose
+            deathtimes <- responseAbs[responseTrans[,"status"]==0 & responseAbs[,"status"]%in%c(1,2),"time"]
+            knots02 <- quantile(deathtimes,seq(0,1,1/(nknots02-1)))
+          }
+          if(knots=="equidistant"){
+            warning("Unknown specification of knots. Fall back to equidistant.")
+            knots01 <- seq(amin,amax,(amax-amin)/(nknots01-1))
+            knots02 <- seq(amin,amax,(amax-amin)/(nknots02-1))
+            knots12 <- seq(amin12,amax12,(amax12-amin12)/(nknots12-1))}
+        }
         
       }else{## user specified knots
         if (!is.list(knots) || length(knots)==1)
@@ -577,8 +648,8 @@ idm <- function(formula01,
         if (!is.null(knots01)){if (knots01[length(knots01)]> amax) stop(paste("Transition 0->1: Largest knot should not be larger than the time point:",amax))}
         if (!is.null(knots02)){if (knots02[1]< amin) stop(paste("Transition 0->2: Smallest knot should not be smaller than the time point:",amin))}
         if (!is.null(knots02)){if (knots02[length(knots02)]> amax) stop(paste("Transition 0->2: Largest knot should not be larger than the time point:",amax))}
-        if (!is.null(knots12)){if (knots12[1]< amin) stop(paste("Transition 1->2: Smallest knot should not be smaller than the time point:",amin))}
-        if (!is.null(knots12)){if (knots12[length(knots12)]> amax) stop(paste("Transition 1->2: Largest knot should not be larger than the time point:",amax))}
+        if (!is.null(knots12)){if (knots12[1]< amin12) stop(paste("Transition 1->2: Smallest knot should not be smaller than the time point:",amin12))}
+        if (!is.null(knots12)){if (knots12[length(knots12)]> amax12) stop(paste("Transition 1->2: Largest knot should not be larger than the time point:",amax12))}
         ## FIXME: check if knots within amin, amax
         ## if (knots01[[1]] < amin) stop("Smallest knot ")
         nknots01 <- length(knots01)
@@ -600,8 +671,8 @@ idm <- function(formula01,
       if (min(knots02)>amin) knots02[1] <- amin
       if (max(knots02)<amax) knots02[length(knots02)] <- amax
       ## 1 -- 2
-      if (min(knots12)>amin) knots12[1] <- amin
-      if (max(knots12)<amax) knots12[length(knots12)] <- amax
+      if (min(knots12)>amin12) knots12[1] <- amin12
+      if (max(knots12)<amax12) knots12[length(knots12)] <- amax12
       
       
       ## make fake knots needed for M-splines
@@ -683,6 +754,7 @@ idm <- function(formula01,
     
 
     fit <- NULL
+
     ############################################################################
     ######################## Start algorithm to maximise #######################
     ########################       log-likelihodd        #######################
@@ -996,7 +1068,7 @@ idm <- function(formula01,
         fit$time <- matrix(NA,ncol=3,nrow=100)
         fit$time[,1]<-seq(from=amin,to=amax,length.out=100)
         fit$time[,2]<-seq(from=amin,to=amax,length.out=100)
-        fit$time[,3]<-seq(from=amin,to=amax,length.out=100)
+        fit$time[,3]<-seq(from=amin12,to=amax12,length.out=100)
         
         
       }
@@ -1307,7 +1379,7 @@ idm <- function(formula01,
         fit$time <- matrix(NA,ncol=3,nrow=100)
         fit$time[,1]<-seq(from=amin,to=amax,length.out=100)
         fit$time[,2]<-seq(from=amin,to=amax,length.out=100)
-        fit$time[,3]<-seq(from=amin,to=amax,length.out=100)
+        fit$time[,3]<-seq(from=amin12,to=amax12,length.out=100)
         
         
       }
@@ -2048,7 +2120,7 @@ idm <- function(formula01,
               fit$time <- matrix(NA,ncol=3,nrow=100)
               fit$time[,1]<-seq(from=amin,to=amax,length.out=100)
               fit$time[,2]<-seq(from=amin,to=amax,length.out=100)
-              fit$time[,3]<-seq(from=amin,to=amax,length.out=100)
+              fit$time[,3]<-seq(from=amin12,to=amax12,length.out=100)
 ############# on times to do prediction on #################################
               
           }
@@ -2681,7 +2753,7 @@ idm <- function(formula01,
             fit$time <- matrix(NA,ncol=3,nrow=100)
             fit$time[,1]<-seq(from=amin,to=amax,length.out=100)
             fit$time[,2]<-seq(from=amin,to=amax,length.out=100)
-            fit$time[,3]<-seq(from=amin,to=amax,length.out=100)
+            fit$time[,3]<-seq(from=amin12,to=amax12,length.out=100)
             ############# on times to do prediction on #################################
             
           }

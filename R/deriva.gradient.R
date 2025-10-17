@@ -18,8 +18,7 @@
 #' at point b}
 #' @references Donald W. Marquardt An algorithm for Least-Squares Estimation of Nonlinear Parameters. Journal of the Society for Industrial and Applied Mathematics, Vol. 11, No. 2. (Jun, 1963), pp. 431-441.
 #'@useDynLib HIDeM
-#' @export
-#'
+
 
 
 deriva.gradient <- function(nproc=1,b,funcpa,.packages=NULL,...){

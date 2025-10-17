@@ -25,7 +25,6 @@
 ##' @param gausspoint number of gausspoint quadrature
 ##' @param weib the form of the weibull parameters 
 #' @useDynLib HIDeM
-##' @export
 #' @author R: Ariane Bercu <ariane.bercu@@u-bordeaux.fr> 
 #' 
 idmlLikelihoodweib<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,

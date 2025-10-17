@@ -29,7 +29,6 @@
 ##' @param troncature indicator if troncature or not
 ##' @param gausspoint number of gausspoint quadrature
 #' @useDynLib HIDeM
-##' @export
 #' @author R: Ariane Bercu <ariane.bercu@@u-bordeaux.fr> 
 idmlLikelihoodsemiMarkov<-function(b,npm,npar,bfix,fix,zi01,zi02,zi12,ctime,no,nz01,nz02,nz12,ve01,ve02,ve12,
                          dimnva01,dimnva02,dimnva12,nva01,nva02,nva12,

@@ -1,10 +1,10 @@
 ### Code:
-#' @title Fit an dynamic illness-death model with limited and numerous explanatory variables, including time dependent covariates
+#' @title Fit an illness-death model with limited and numerous time-dependent explanatory variables
 #' @description
-#' Fit an illness-death model with a limited number of explanatory variables
+#' Fit an illness-death model with a limited number of time-dependent explanatory variables
 #'  using semi-parametric approach with a linear combination of M-splines or 
 #'  Weibull distribution on the transition intensities. 
-#' Fit an illness-death model with a large number of explanatory variables 
+#' Fit an illness-death model with a large number of time-dependent explanatory variables 
 #' using regularization approach of the log-likelihood, i.e. lasso, elastic-net,
 #'  MCP or SCAD penalty.
 #' Left-truncated, right-censored, and interval-censored data are allowed.
@@ -28,11 +28,10 @@
 #' \code{1 --> 2} transition from the transient state to the absorbing
 #' state.  operator is not required. If missing it is set to
 #' \code{formula01}.
-#' @param data A survival data frame in which to interpret the variables of
+#' @param data A data frame in which to interpret the variables of
 #' \code{formula01}, \code{formula02} and \code{formula12}.
-#' @param dataLongi A longitudinal data frame for the time dependent covariates
 #' @param maxiter Maximum number of iterations. The default is 200.
-#' @param maxiter.pena Maximum number of iterations for penalised coefficients
+#' @param maxiter.pena Maximum number of iterations for penalized likelihood at the update of the baseline intensity parameters.
 #' @param eps A vector of 3 integers >0 used to define the power of
 #' three convergence criteria: 1. for the regression parameters,
 #' 2. for the likelihood, 3. for the second derivatives. The default
@@ -41,69 +40,68 @@
 #' parameters and likelihood) and \eqn{10^{-3}} for the second
 #' derivatives between two iterations.
 #' @param n.knots For \code{method="splines"} only, a vector of length
-#' 3 specifing the number of knots, one for each transition, for the
+#' 3 specifying the number of knots, one for each transition, for the
 #' M-splines estimate of the baseline intensities in the order \code{0
-#' --> 1}, \code{0 --> 2}, \code{1 --> 2}. The default is c(7,7,7). When \code{knots}
+#' --> 1}, \code{0 --> 2}, \code{1 --> 2}. The default is c(3,3,3). When \code{knots}
 #' are specified as a list this argument is ignored.
-#' The algorithm needs least 5 knots and at most 20 knots.
-#' @param knots Argument only active for the penalized likelihood approach \code{method="Splines"}.
-#' There are three ways to control the placement of the knots between the smallest and the largest
+#' The algorithm needs least 3 knots and at most 20 knots.
+#' @param knots Argument only active for the likelihood approach with M-spline basis \code{method="Splines"}. There are three ways to control the placement of the knots between the smallest and the largest
 #' of all time points:
 #' \describe{
-#'  \item{\code{knots="equidistant"}}{Knots are placed with same distance on the time scale.}
+#'  \item{\code{knots="equidistant"}}{Knots are placed with same distance on the time scale, time of death, last vital status or censoring.}
 #'  \item{\code{knots="quantile"}}{Knots are placed such that the number of observations is roughly the same between knots.}
 #' \item{knots=list()}{List of 1 or 2 or three vectors. The list elements are the actual placements
 #' (timepoints) of the knots for the M-spline. The list may contain
 #' one vector of placements for each transition in the order \code{0 --> 1}, \code{0 --> 2}, \code{1 --> 2}.
-#' If only vector is specifified the knots are used for all transitions. If only 2 vectors are specifified, the
+#' If only vector is specified the knots are used for all transitions. If only 2 vectors are specifified, the
 #' knots for the \code{0 --> 1} transition are also used for the \code{1 --> 2} transition.}
 #' }
 #' The algorithm needs at least 3 knots in spline and allows no more than 20 knots.
-#' @param type.quantile Argument only active for the likelihood approach \code{method="splines"}.
-#' There are three ways to control the placement of the knots  according to the time considered between states :=
+#' @param type.quantile Argument only active for the likelihood approach with M-spline basis \code{method="splines"}. There are three ways to control the placement of the knots  according to the time considered between states :
 #' \describe{
-#'  \item{\code{type.quantile=1}}{Time for \code{0 --> 1} is the imputed to the middle of the interval left and right for demence . Time for \code{0 --> 2}
-#'  and \code{1 --> 2} is the same t, time of news. }
-#'  \item{\code{type.quantile=2}}{Time for \code{0 --> 1} is the imputed to the middle of the interval left and right. Time for \code{0 --> 2}
-#'  and \code{1 --> 2} is the same t, time of news. }
-#' \item{\code{type.quantile=3}}{Time for \code{0 --> 1} is the imputed to the middle of the interval left and right. Time for \code{0 --> 2}
-#'  is time of death for non demented sujects only. Time for \code{1 --> 2} is time of death for suject diagnose with dementia. }
-#' \item{\code{type.quantile=4}}{Time for \code{0 --> 1} is left and right. Time for \code{0 --> 2}
-#'  is time of death for non demented sujects only. Time for \code{1 --> 2} is time of death for suject diagnose with dementia. }
+#'  \item{\code{type.quantile=1}}{Time for \code{0 --> 1} is the imputed to the midpoint between the last illness-free visit and the diagnosis visit. Time for \code{0 --> 2}
+#'  and \code{1 --> 2} is the same t, time of death. }
+#'  \item{\code{type.quantile=2}}{Time for \code{0 --> 1} is the imputed to the midpoint between the last illness-free visit and the diagnosis visit. Time for \code{0 --> 2}
+#'  and \code{1 --> 2} is the same t, time of death or time of vital status. }
+#' \item{\code{type.quantile=3}}{Time for \code{0 --> 1} is the imputed to the midpoint between the last illness-free visit and the diagnosis visit. Time for \code{0 --> 2}
+#'  is time of death for individual illness-free. Time for \code{1 --> 2} is time of death for ill individuals. }
+#' \item{\code{type.quantile=4}}{Time for \code{0 --> 1} is the last illness-free visit or the diagnosis visit. Time for \code{0 --> 2}
+#'  is time of death for individual illness-free. Time for \code{1 --> 2} is time of death for ill individuals. }
 #' }
-#' @param B vector of size the number of parameters, in the following order, first the parameters of splines \code{0 --> 1}, \code{0 --> 2}, \code{1 --> 2},
-#' second the parameters of explanatory variables in order  \code{0 --> 1}, \code{0 --> 2}, \code{1 --> 2}.
-#' This argument is only used for models with M-splines.
-#' @param method type of estimation method: "splines" for a likelihood approach with approximation of the transition
-#' intensities by M-splines, "Weib" for a parametric approach with a
-#' Weibull distribution on the transition intensities. Default is
+#' Note that if semiMarkov is TRUE then transition the time transition for \code{1 --> 2} needs to be adjusted for the time transition from \code{0 --> 1} such that time of \code{1 --> 2} becomes time of \code{1 --> 2} minus time of \code{0 --> 1}.
+#' @param B  A vector of size the number of parameters, firstly the parameters associated to the baseline transition intensities in order \code{0 --> 1}, \code{0 --> 2}, \code{1 --> 2}, secondly the parameters of explanatory variables in order  \code{0 --> 1}, \code{0 --> 2}, \code{1 --> 2}.
+#' @param method The type of estimation method: "splines" for a likelihood with baseline transition intensities using M-splines basis, "Weib" for a parametric approach with a
+#' Weibull distribution on the baseline transition intensities. Default is
 #' "Weib".
-#' @param na.action how NAs are treated. The default is first, any
+#' @param na.action How NAs are treated. The default is first, any
 #' na.action attribute of data, second a na.action setting of options,
 #' and third 'na.fail' if that is unset. The 'factory-fresh' default
 #' is na.omit. Another possible value is NULL.
-#' @param scale.X do you want to center and reduce your explanatory variables
-#' @param posfix index of fixed parameters 
+#' @param scale.X TRUE (default), if you want to center and reduce your explanatory variables.
+#' @param posfix The index of parameters that we want to fix, by default no parameters are fixed.
+#' @param timedep12 TRUE if time dependent on 1 --> 2 otherwise FALSE (default).
+#' @param semiMarkov TRUE if semi Markov on 1 --> 2 otherwise FALSE (default)
+#' @param gausspoint Gauss quadrature points in the approximation of integrals in the likelihood (only active if no penalty)
 #' @param lambda01 Lambda on transition 0 --> 1
 #' @param lambda02 Lambda on transition 0 --> 2
 #' @param lambda12 Lambda on transition 1 --> 2
-#' @param nlambda01 number of Lambda on transition 0 --> 1
-#' @param nlambda02 number of Lambda on transition 0 --> 2
-#' @param nlambda12 number of Lambda on transition 1 --> 2
-#' @param alpha alpha on all transitions 
-#' @param penalty which penalty to consider
-#' @param penalty.factor which variable should be penalised
-#' computed for the Newton-Raphson path for the penalised regression parameter. If FALSE, the 
-#' complete hessian is computed. 
-#' @param partialH True if should use only diagonal terms of the derivatives of beta
-#' @param clustertype in which cluster to work
-#' @param nproc number of cluster
-#' @param envir working environment 
+#' @param nlambda01 Number of Lambda on transition 0 --> 1
+#' @param nlambda02 Number of Lambda on transition 0 --> 2
+#' @param nlambda12 Number of Lambda on transition 1 --> 2
+#' @param alpha The elastic-net threshold parameter between ridge and lasso on all transitions.
+#' @param penalty Which penalty to consider, either "lasso","elasticnet","mcp" or "scad".
+#' @param penalty.factor A vector of size the number of explanatory variables, each element value 1 (default) if we should apply the penalization on the regression parameters associated, otherwise 0.
+#' @param step.sequential TRUE, if we want to fix some M-splines parameters if their value is too close to 0, otherwise FALSE (default).
+#' @param partialH TRUE, if only the diagonal terms of the second derivatives of the regression parameters should be used, otherwise FALSE (default). 
+#' @param clustertype In which cluster to work
+#' @param nproc Number of cluster
+#' @param option.sequential Parameters to give step.sequential=TRUE, the cutoff underwhich the M-spline parameter is fixed to 0, min the minimum number of iteration at start, step the number of iteration to perform after stopping to fix some parameters.
+#' @param envir The working environment 
 #' @return
 #' \item{call}{the call that produced the result.} \item{coef}{regression
 #' parameters.} \item{loglik}{vector containing the log-likelihood and
-#' the penalised log-likelihood} \item{cv}{vector containing the convergence criteria based on 
-#' stability of parameters, log-likelihood (or penalised) and relative distance to minimum/maximum}
+#' the penalized log-likelihood} \item{cv}{vector containing the convergence criteria based on 
+#' stability of parameters, log-likelihood (or penalized) and relative distance to minimum/maximum}
 #' \item{niter}{number of iterations.} \item{converged}{integer equal to 1 when
 #' the model converged, 2, 3 or 4 otherwise.} \item{modelPar}{Weibull
 #' parameters.} \item{N}{number of subjects.} \item{events1}{number of events 0
@@ -115,7 +113,7 @@
 #' \item{time}{times for which transition intensities have been evaluated for
 #' plotting.} \item{maxtime}{times of last follow-up or event} \item{mintime}{times of first follow-up or event}
 #'  \item{HR}{vector of hazard risks.}
-#' \item{V}{variance-covariance matrix derived from the Hessian of the log-likelihood or penalised
+#' \item{V}{variance-covariance matrix derived from the Hessian of the log-likelihood or penalized
 #' log-likelihood}\item{Xnames01}{names of covariates on 0 --> 1.}
 #' \item{Xnames02}{names of covariates on 0 --> 2.} \item{Xnames12}{names of
 #' covariates on 1 --> 2.} \item{knots01}{knots to approximate by M-splines the
@@ -128,13 +126,13 @@
 #' \item{theta01}{square root of splines coefficients for transition 0 --> 1.}
 #' \item{theta02}{square root of splines coefficients for transition 0 --> 2.}
 #' \item{theta12}{square root of splines coefficients for transition 1 --> 2.}
-#' \item{alpha}{penalty parameter alpha on all transitions}
+#' \item{alpha}{the elastic-net threshold parameter between ridge and lasso used on all transitions.}
 #' \item{lambda}{matrix of lambda penalty parameters, first line for 0 --> 1, second 
 #' line for 0 --> 2 and third line for 1 --> 2}
 #' \item{BIC}{Bayesian Information Criterion} 
 #' \item{GCV}{Generalised Cross-Validation approximation}
 #' \item{levels}{a list containing the type of the variable on all transitions and its level, 
-#' useful for prediction on new-dataset.}
+#' useful for prediction on a new data set.}
 #' \item{runtime}{running time in seconds of the function.}
 #' @seealso \code{\link{print.idm}}
 #' \code{\link{summary.idm}}
@@ -144,6 +142,34 @@
 #' of nonlinear parameters.  \emph{SIAM Journal of Applied Mathematics},
 #' 431-441.
 #' @keywords illness-death
+#'
+##' @examples
+##' {
+##' \dontrun{
+##' library(lava)
+##' library(prodlim)
+##' set.seed(17)
+##' d <- simulateIDM(n=1000)$data
+##' fitweib <- idm(formula01=Hist(time=list(L,R),event=seen.ill)~X1+X2,
+##'               formula02=Hist(time=observed.lifetime,event=seen.exit)~X1+X2,
+##'               formula12=Hist(time=observed.lifetime,event=seen.exit)~X1+X2,
+##'               data=d)
+##'               
+##' d <- simulateIDM(n=1000,
+##'                  beta01=c(1,1,0,0.5,0.5,rep(0,5)),
+##'                  beta02=c(1,0,0,0,0.5,rep(0,5)),
+##'                  beta12=c(1,0,0,0,0.5,rep(0,5)))$data
+##'                  
+##' fitpenweib <- idm(formula01=Hist(time=list(L,R),
+##' event=seen.ill)~X1+X2+X3+X4+X5+X6+X7+X8+X9+X10,
+##'                   formula02=Hist(time=observed.lifetime,
+##'                   event=seen.exit)~X1+X2+X3+X4+X5+X6+X7+X8+X9+X10,
+##'                   formula12=~X1+X2+X3+X4+X5+X6+X7+X8+X9+X10,
+##'                   data=d,penalty="lasso",
+##'                   lambda01 = c(10,20),
+##'                   lambda02 = 10, lambda12 = 10)
+##' }
+##' }
 ##'@importFrom grDevices col2rgb
 ##'@importFrom graphics lines
 ##'@importFrom graphics par
@@ -948,7 +974,6 @@ DYNidm <- function(formula01,
                          timeVar=timeVar,
                          id=id,
                          formLong=formLong,
-                         outcome=outcome,
                          outcome01=outcome01,
                          outcome02=outcome02,
                          outcome12=outcome12,
@@ -1007,7 +1032,6 @@ DYNidm <- function(formula01,
                         timeVar=timeVar,
                         id=id,
                         formLong=formLong,
-                        outcome=outcome,
                         outcome01=outcome01,
                         outcome02=outcome02,
                         outcome12=outcome12,

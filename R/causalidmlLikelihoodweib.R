@@ -39,7 +39,6 @@
 ##' @param t3 time of event/out
 ##' @param troncature indicator if troncature or not
 #' @useDynLib HIDeM
-##' @export
 #' @author R: Ariane Bercu, Celia Touraine <Celia.Touraine@@isped.u-bordeaux2.fr> and Thomas Alexander Gerds <tag@@biostat.ku.dk>
 #' Fortran: Pierre Joly <Pierre.Joly@@isped.u-bordeaux2.fr>
 #' 

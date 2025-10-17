@@ -53,7 +53,7 @@ INLAidm<-function(timeVar,family,basRisk,assoc,
 #  idinla<<-id
 #  timeVarinla<<-timeVar
   
-browser()
+
     for(indice in 1:length(formLong)){
 
       # need to have all elements of joint
