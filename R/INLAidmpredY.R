@@ -51,6 +51,9 @@ INLAidmpredY<-function(timeVar,truncated,formLong,dataSurv,dataLongi,id,
 
       INLAmodel<-modelY$modelY[[indice]]
       
+      # data structure
+      ct <- INLAmodel$misc$configs$contents
+      
       if(is.null(INLAmodel)){stop("The inla model for your marker could not be run, see above warnings.")}
       
       
@@ -61,6 +64,8 @@ INLAidmpredY<-function(timeVar,truncated,formLong,dataSurv,dataLongi,id,
 
         
         SMP <- inla.posterior.sample(Nsample, INLAmodel,seed=seed)
+        
+        make_dXINLA(formula=formLong[[indice]], X=attr(SMP, ".contents")$A, timevar=timevar, data=dataLongi_augmented,ct=ct,id=id) 
         linPred <- sapply(SMP, function(x) x$latent) 
 
         # keep only indice we want: 
@@ -113,42 +118,150 @@ INLAidmpredY<-function(timeVar,truncated,formLong,dataSurv,dataLongi,id,
   
 }
 
-
-make_dXINLA <- function(formula, X, timevar, data,use_splines = FALSE, ...) {
+make_XINLA <- function(formula, X, timevar, data,use_splines = FALSE,ct,id, ...) {
   
   
-  # Identify terms
   terms_labels <- attr(terms(formula), "term.labels")
+  terms_fixed <- terms_labels[grepl(id, terms_labels)==F]
+  
+  terms_RE <- terms_labels[grepl(id, terms_labels)==T][1]
+  terms_RE <- gsub("\\|.*", "", terms_RE)
+  terms_RE <- as.formula(paste("~", terms_RE))
+  terms_RE <- attr(terms(terms_RE), "term.labels")
+  
+  eval(dexpr, envir = data)
+  browser()
+  # Identify terms
   
   # Initialize derivative matrix
-  dX <- X * 0
+  X <- NULL
   
-  for (lab in terms_labels) {
+  for (lab in terms_fixed) {
     if (lab == timevar) {
       # simple linear time
-      dX[, lab] <- 1
+      Xlab <- matrix(data[,colnames(data)%in%timevar],nrow=dim(data)[1],ncol=1)
+      colnames(Xlab)<-paste0(lab,"_L1")
       
-    } else if (grepl("^I\\(", lab)) {
-      # e.g. I(time^2)
-      expr <- parse(text = gsub("I\\((.*)\\)", "\\1", lab))[[1]]
-      dexpr <- D(expr, timevar)
-      dX[, lab] <- eval(dexpr,envir = data)
+    } else if (grepl("\\(", lab) && grepl(timevar, lab)) {
+      #INLA takes only function no : I(time^2)
+      expr <- parse(text = lab)[[1]]
+      Xlab <- matrix(eval(expr, envir = data),ncol=1,nrow=dim(data)[1])
+      colnames(dXlab)<-paste0(gsub("[())]","",lab),"_L1")
       
     } else if (use_splines && grepl("bs\\(|ns\\(", lab)) {
       
       # Extract knots etc. from the original call if needed
       stop("Spline derivative not supported so far")
       
-    } else {
-      # other covariates (not functions of time) → derivative is 0
-      dX[, lab] <- 0
-    }
+    } 
+    X<-cbind(X,Xlab)
   }
   
-  # Intercept derivative is always 0
-  if ("(Intercept)" %in% colnames(X)) {
-    dX[, "(Intercept)"] <- 0
+  XRE <- NULL
+  k<-1
+  for (lab in terms_RE) {
+    if (lab == timevar) {
+      # simple linear time
+      Xlab <- matrix(data[,colnames(data)%in%timevar],nrow=dim(data)[1],ncol=1)
+      nameX<-paste0("ID",lab,"_L1")
+      
+    } else if (grepl("\\(", lab) && grepl(timevar, lab)) {
+      #INLA takes only function no : I(time^2)
+      
+      expr <- parse(text = lab)[[1]]
+      Xlab <- matrix(eval(expr, envir = data),ncol=1,nrow=dim(data)[1])
+      nameX<-paste0("ID",gsub("[())]","",lab),"_L1")
+      
+    } else if (use_splines && grepl("bs\\(|ns\\(", lab)) {
+      
+      # Extract knots etc. from the original call if needed
+      stop("Spline derivative not supported so far")
+      
+    } 
+    XRE<-cbind(XRE,Xlab)
+    colnames(XRE)[k]<-nameX
+    k<-k+1
   }
   
-  dX
+  return(list(X=X,XRE=XRE))
+}
+
+make_dXINLA <- function(formula, X, timevar, data,use_splines = FALSE,ct,id, ...) {
+  
+  
+  terms_labels <- attr(terms(formula), "term.labels")
+  terms_fixed <- terms_labels[grepl(id, terms_labels)==F]
+  
+  terms_RE <- terms_labels[grepl(id, terms_labels)==T][1]
+  terms_RE <- gsub("\\|.*", "", terms_RE)
+  terms_RE <- as.formula(paste("~", terms_RE))
+  terms_RE <- attr(terms(terms_RE), "term.labels")
+  
+  browser()
+  # Identify terms
+  
+  # Initialize derivative matrix
+  dX <- X * 0
+  
+  for (lab in terms_fixed) {
+    if (lab == timevar) {
+      # simple linear time
+      dXlab <- matrix(1,nrow=dim(data)[1],ncol=1)
+      colnames(dXlab)<-paste0(lab,"_L1")
+      
+    } else if (grepl("\\(", lab) && grepl(timevar, lab)) {
+      #INLA takes only function no : I(time^2)
+      expr <- parse(text = lab)[[1]]
+      dexpr <- Deriv::Deriv(expr, timevar)
+      dXlab <- matrix(eval(dexpr, envir = data),ncol=1,nrow=dim(data)[1])
+      colnames(dXlab)<-paste0(gsub("[())]","",lab),"_L1")
+      
+    } else if (use_splines && grepl("bs\\(|ns\\(", lab)) {
+      
+      # Extract knots etc. from the original call if needed
+      stop("Spline derivative not supported so far")
+      
+    } 
+    dX<-cbind(dX,dXlab)
+  }
+  
+  dXRE <- list()
+  length(dXRE)<-length(terms_RE)
+  k<-1
+  idd<-unique(data[,colnames(data)%in% id])
+  for (lab in terms_RE) {
+    if (lab == timevar) {
+      # simple linear time
+      dXlab <- do.call(cbind,lapply(idd,FUN=function(x){
+        vec<-rep(0,dim(data)[1])
+        vec[which(data[,colnames(data)%in%id]==x)]<-1
+        return(vec)
+      }))
+      nameX<-paste0("ID",lab,"_L1")
+      
+    } else if (grepl("\\(", lab) && grepl(timevar, lab)) {
+      #INLA takes only function no : I(time^2)
+      
+      expr <- parse(text = lab)[[1]]
+      dexpr <- Deriv::Deriv(expr, timevar)
+      xx<-eval(dexpr, envir = data)
+      dXlab <- do.call(cbind,lapply(idd,FUN=function(x){
+        vec<-rep(0,dim(data)[1])
+        vec[which(data[,colnames(data)%in%id]==x)]<-xx[which(data[,colnames(data)%in%id]==x)]
+        return(vec)
+      }))
+      nameX<-paste0("ID",gsub("[())]","",lab),"_L1")
+      
+    } else if (use_splines && grepl("bs\\(|ns\\(", lab)) {
+      
+      # Extract knots etc. from the original call if needed
+      stop("Spline derivative not supported so far")
+      
+    } 
+    dXRE[[k]]<-dXlab
+    names(dXRE)[k]<-nameX
+    k<-k+1
+  }
+  
+  return(list(dX=dX,dXRE=dXRE))
 }

@@ -667,6 +667,7 @@ idm <- function(formula01,
         stop("Cannot handle more than 20 knots.")
       }
       
+     
       ## AB : add min and max
       ## 0 -- 1
       if (min(knots01)>amin) knots01[1] <- amin

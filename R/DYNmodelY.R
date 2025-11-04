@@ -169,9 +169,8 @@ DYNmodelY <- function(formula01,
                                    basRisk= "rw1",
                                    assoc=NULL),
                    nproc=1,
-                   prediction,
                    clustertype="FORK",
-                  lightmode=T,
+                   lightmode=T,
                    envir=parent.frame()){
   
   
@@ -185,7 +184,7 @@ DYNmodelY <- function(formula01,
   ptm <- proc.time()
   
 
-    if(missing(prediction))stop("Need to specify prediction parameter")
+
     if(missing(methodJM) & missing(methodINLA)){
       stop("Need to specify the method used for time-depend covariates by giving methodINLA or methodJM")
     }
@@ -200,19 +199,7 @@ DYNmodelY <- function(formula01,
   if(missing(formula02))stop("Argument formula02 is missing.")
   if(!inherits(formula01,"formula"))stop("The argument formula01 must be a class 'formula'.")
   if(!inherits(formula02,"formula"))stop("The argument formula02 must be a class 'formula'.")
- if(!inherits(prediction,"list"))stop("The argument prediction needs to be a list")
-
  
-  if(length(prediction)!=length(formLong))stop(paste0("The argument prediction needs to be a list of size ",length(formLong)))
-  
-  for(k in 1:length(prediction)){
-    if(!inherits(prediction[[k]], "character")){
-      stop("Each element of the list prediction must be a character")
-    }
-    if(any(!prediction[[k]]%in%c("value","slope"))){
-      stop("Each element of the list prediction must be a character taking values in : value or slope")
-    }
-  }
   ## if(missing(formula02)) formula02 <- formula01
   if(missing(formula12)) formula12 <- formula02
   # }}}
@@ -498,8 +485,8 @@ DYNmodelY <- function(formula01,
         formSurv<-list(inla.surv(time=TimeCR, event=idm,truncation=t0) ~ -1,
                        inla.surv(time=TimeCR, event=iddCR,truncation=t0) ~ -1)
       }else{
-        formSurv<-list(inla.surv(time=TimeCR, event=idm) ~ 1,
-                       inla.surv(time=TimeCR, event=iddCR) ~ 1)
+        formSurv<-list(inla.surv(time=TimeCR, event=idm) ~ -1,
+                       inla.surv(time=TimeCR, event=iddCR) ~ -1)
       }
       
       # set right environement for formulas 
@@ -537,8 +524,7 @@ DYNmodelY <- function(formula01,
                      idm=idm, 
                      idd=idd,
                      clustertype=clustertype,
-                     lightmode=lightmode,
-                     prediction=prediction)
+                     lightmode=lightmode)
       
       
     }else{

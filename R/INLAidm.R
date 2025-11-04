@@ -7,7 +7,7 @@
 INLAidm<-function(timeVar,family,basRisk,assoc,
                   truncated,formLong,formSurv,dataSurv,dataLongi,id,
                   nproc,t0,t1,t2,t3,
-                  idm,idd,clustertype,lightmode,prediction){
+                  idm,idd,clustertype,lightmode){
   
   # define timePoints of prediction : 
 
@@ -68,14 +68,11 @@ INLAidm<-function(timeVar,family,basRisk,assoc,
       
       #start with run = False -- have structure for slopes
     
-      predk<-prediction[[indice]]
-      predk<-unique(predk)
       
       print(paste0("For marker: ",formLong[[indice]][[2]]))
-      
-      if(length(predk)==1){
-        if(predk=="value"){
-      
+     
+     
+      #int.strategy="eb" in previous version later 4.5.1
       INLAmodel<-INLAjoint::joint(formSurv = formSurv,
                                        formLong = formLong[[indice]],
                                        dataLong = dataLongi_augmented, dataSurv=dataSurv, id = id, timeVar = timeVar,
@@ -105,29 +102,7 @@ INLAidm<-function(timeVar,family,basRisk,assoc,
         
       }
       
-     
-        }else{
-        #need slope also 
-          
-          # INLAmodel_cr<-INLAjoint::joint(formSurv = formSurv,
-          #                             formLong = formLong[[indice]],
-          #                             dataLong = dataLongi_augmented, dataSurv=dataSurv, id = id, timeVar = timeVar,
-          #                             family = family[indice],
-          #                             basRisk = basRisk[indice], NbasRisk = 15, assoc = assoc[[indice]],
-          #                             control=list(int.strategy="eb"),run=FALSE)
-          # 
-          # dX<-make_dXINLA(formLong[[indice]],timevar = timeVar,data=dataLongi_augmented,id=id,
-          #                 N=length(idsubjects))
-          # 
-          # lincomb_listX<-as.list(as.data.frame(dX$dX))
-          # lincomb_list<-c(lincomb_listX,dX$dXRE)
-          # 
-          # lincomb_inla <- do.call(inla.make.lincombs, lincomb_list)
-          stop("INLA model cannot perform prediction of slope of Y")
-        }
-      }else{ # need value and slope 
-        stop("INLA model cannot perform prediction of slope of Y")
-      }
+
       modelY[[indice]]<-INLAmodel
     }
   print("End of running univarite models")
