@@ -83,9 +83,9 @@ INLAidm<-function(timeVar,family,basRisk,assoc,
       
       if(lightmode==T){
         erase<-c(".args","marginals.random","dic","waic","mode","residuals",
-                 "summary.random","logfile","selection","internal.marginals.hyperpar",
+                 "logfile","selection","internal.marginals.hyperpar",
                  "marginals.hyperpar","size.random","priors_used","marginals.fixed",
-                 "internal.summary.hyperpar","joint.hyper","formLong","summary.fixed",
+                 "internal.summary.hyperpar","joint.hyper","formLong",
                  "summary.hyperpar","formSurv","SurvInfo","cpu.intern","call",
                  "size.linear.predictor","version","mlik","gcpo","cpo","cpu.used",
                  "model.random","basRisk","survOutcome","REstruc","assoc","names.fixed",
@@ -94,7 +94,7 @@ INLAidm<-function(timeVar,family,basRisk,assoc,
                  "NbasRisk","variant","run","nhyper","survFacChar","lonFacChar",
                  "marginals.fitted.values","marginals.linear.predictor",
                  "summary.fitted.values","po","all.hyper")
-        
+        # for BLUP need : "summary.random","summary.fixed"
         nameINLA<-names(INLAmodel)
         classINLA<-class(INLAmodel)
         INLAmodel<-INLAmodel[-which(nameINLA%in%erase)]

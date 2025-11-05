@@ -150,7 +150,7 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,size_spline,
   outputall<-list()
   length(outputall)<-Nsample
   
-
+browser()
   if(nlambda>1){
   for(idsample in 1:Nsample){
     

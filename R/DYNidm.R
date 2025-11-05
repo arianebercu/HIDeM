@@ -1100,50 +1100,50 @@ DYNidm <- function(formula01,
             # check if predictions could be performed 
             
            
-            for( k in outcome){
-              subdata<-dataY[dataY$Outcome==k,]
-              x<-table(subdata[,colnames(subdata)%in%id])
-              if(any(x!=NtimePoints)){stop("Prediction of marker ",k," could not be perform for each quadrature points.")}
-              
-            }
-            
-            dataY$Outcome<-as.character(dataY$Outcome)
-            # attention if NtimePoints equidistant with INLA then NtimePoints takes 
-            # need ID to be numeric -- then 
-            dataY[,colnames(dataY)%in%id]<-as.numeric(dataY[,colnames(dataY)%in%id])
-            # to keep tracks of time order for each individual 
-            dataY$order<-as.numeric(ave(dataY[,colnames(dataY)%in%id], cumsum(c(TRUE, diff(dataY[,colnames(dataY)%in%id]) != 0)), FUN = seq_along))
-            
-            
-            if(length(outcome01)>=1){
-              y01<-dataY[dataY$Outcome%in%outcome01,]
-              # order  by individual and timeline 
-              y01<-y01[order(y01[,colnames(y01)%in%id],y01$order),]
-              
-              
-            }else{
-              y01<-as.double(rep(0,N*NtimePoints))
-            }
-            
-            if(length(outcome02)>=1){
-              y02<-dataY[dataY$Outcome%in%outcome02,]
-              # order  by individual and timeline 
-              y02<-y02[order(y02$ID,y02$order),]
-              
-            }else{
-              y02<-as.double(rep(0,N*NtimePoints))
-            }
-            
-            if(length(outcome12)>=1){
-              y12<-dataY[dataY$Outcome%in%outcome12,]
-              # order  by individual and timeline 
-              y12<-y12[order(y12$ID,y12$order),]
-              
-            }else{
-              y12<-as.double(rep(0,N*NtimePoints))
-            }
-            
-          
+            # for( k in outcome){
+            #   subdata<-dataY[dataY$Outcome==k,]
+            #   x<-table(subdata[,colnames(subdata)%in%id])
+            #   if(any(x!=NtimePoints)){stop("Prediction of marker ",k," could not be perform for each quadrature points.")}
+            #   
+            # }
+            # 
+            # dataY$Outcome<-as.character(dataY$Outcome)
+            # # attention if NtimePoints equidistant with INLA then NtimePoints takes 
+            # # need ID to be numeric -- then 
+            # dataY[,colnames(dataY)%in%id]<-as.numeric(dataY[,colnames(dataY)%in%id])
+            # # to keep tracks of time order for each individual 
+            # dataY$order<-as.numeric(ave(dataY[,colnames(dataY)%in%id], cumsum(c(TRUE, diff(dataY[,colnames(dataY)%in%id]) != 0)), FUN = seq_along))
+            # 
+            # 
+            # if(length(outcome01)>=1){
+            #   y01<-dataY[dataY$Outcome%in%outcome01,]
+            #   # order  by individual and timeline 
+            #   y01<-y01[order(y01[,colnames(y01)%in%id],y01$order),]
+            #   
+            #   
+            # }else{
+            #   y01<-as.double(rep(0,N*NtimePoints))
+            # }
+            # 
+            # if(length(outcome02)>=1){
+            #   y02<-dataY[dataY$Outcome%in%outcome02,]
+            #   # order  by individual and timeline 
+            #   y02<-y02[order(y02$ID,y02$order),]
+            #   
+            # }else{
+            #   y02<-as.double(rep(0,N*NtimePoints))
+            # }
+            # 
+            # if(length(outcome12)>=1){
+            #   y12<-dataY[dataY$Outcome%in%outcome12,]
+            #   # order  by individual and timeline 
+            #   y12<-y12[order(y12$ID,y12$order),]
+            #   
+            # }else{
+            #   y12<-as.double(rep(0,N*NtimePoints))
+            # }
+            # 
+            # 
           
           if(method=="splines"){
             # if user did not specified the lambda values 
