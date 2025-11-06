@@ -90,15 +90,18 @@ JMidmpredY<-function(timeVar,
       slopeFixed<-dX %*% t(betas[idNsample, , drop = FALSE])
       
       # Terme aléatoire, on remplit directement un tableau vide
-      Random_all <- matrix(0, nrow = nrow(Z), ncol = Nsample)
+      Random<-Random_all <- matrix(0, nrow = nrow(Z), ncol = Nsample)
       
       slopeRandom_all <- matrix(0, nrow = nrow(Z), ncol = Nsample)
       
       for (j in seq_len(N)) {
+        
         rows <- starts[j]:ends[j]
         Zj   <- Z[rows, , drop = FALSE]                        # (nn[j] x q)
         Bj   <- b_mat[j, , idNsample, drop = FALSE] # (q x m)
+        
         Random_all[rows, ] <- Zj %*% Bj[1,,]
+        Random[rows,]<-diag(1,nrow=dim(Zj)[1])%*% JMmodel$statistics$Mean$b[j,]
         
         dZj   <- dZ[rows, , drop = FALSE]                
         slopeRandom_all[rows, ] <- dZj %*% Bj[1,,]
@@ -106,29 +109,35 @@ JMidmpredY<-function(timeVar,
       
       PredYx <- Fixed + Random_all
       slopePredYx<-slopeFixed + slopeRandom_all
+      REPredYx<-Random
+      
        browser()
       Outcome<-names(functional_forms)[[indice]]
       slopeOutcome<-paste0("slope_",names(functional_forms)[[indice]])
+      REOutcome<-paste0("RE_",names(functional_forms)[[indice]])
       
-      PredYx<-cbind(newdataLongi,Outcome,PredYx)
-      slopePredYx<-cbind(newdataLongi,slopeOutcome,slopePredYx)
+      PredYx<-cbind(newdataLongi,Outcome=Outcome,PredYx)
+      slopePredYx<-cbind(newdataLongi,Outcome=slopeOutcome,slopePredYx)
+      REPredYx<-cbind(newdataLongi,Outcome=REOutcome,REPredYx)
       
       colnames(PredYx)[4:(Nsample+3)]<-paste0("Sample_",c(1:Nsample))
       colnames(slopePredYx)[4:(Nsample+3)]<-paste0("Sample_",c(1:Nsample))
+      colnames(REPredYx)[4:(Nsample+3)]<-paste0("Sample_",c(1:Nsample))
       
-      Yall[[indice]]<- rbind(PredYx,slopePredYx)
+      Yall[[indice]]<- rbind(PredYx,slopePredYx,REPredYx)
 
       }else{
-        PredYx<-slopePredYx<-NULL
+        REPredYx<-PredYx<-slopePredYx<-NULL
         
         # Terme aléatoire, on remplit directement un tableau vide
-        Random_mean <- matrix(0,nrow=nrow(Z),ncol=1)
+        Random<-Random_mean <- matrix(0,nrow=nrow(Z),ncol=1)
         slopeRandom_mean <- matrix(0,nrow=nrow(Z),ncol=1)
         
         for (j in seq_len(N)) {
           rows <- starts[j]:ends[j]
           Zj   <- Z[rows, , drop = FALSE]
           Random_mean[rows, ] <- Zj %*% JMmodel$statistics$Mean$b[j,]
+          Random[rows,]<-diag(1,nrow=dim(Zj)[1])%*% JMmodel$statistics$Mean$b[j,]
           
           dZj   <- dZ[rows, , drop = FALSE]
           slopeRandom_mean[rows, ] <- dZj %*% JMmodel$statistics$Mean$b[j,]
@@ -136,18 +145,21 @@ JMidmpredY<-function(timeVar,
         
         PredYmean<-X%*%as.matrix(JMmodel$statistics$Mean$betas1) + Random_mean
         slopePredYmean<-dX%*%as.matrix(JMmodel$statistics$Mean$betas1) + slopeRandom_mean
-        
+        REPredYmean<- Random
         
         Outcome<-names(functional_forms)[[indice]]
         slopeOutcome<-paste0("slope_",names(functional_forms)[[indice]])
+        REOutcome<-paste0("RE_",names(functional_forms)[[indice]])
         
-        PredYx<-cbind(newdataLongi,Outcome,PredYmean)
-        slopePredYx<-cbind(newdataLongi,slopeOutcome,slopePredYmean)
+        PredYx<-cbind(newdataLongi,Outcome=Outcome,PredYmean)
+        slopePredYx<-cbind(newdataLongi,Outcome=slopeOutcome,slopePredYmean)
+        REPredYx<-cbind(newdataLongi,Outcome=REOutcome,REPredYxmean)
         
         colnames(PredYx)[4]<-"Sample_1"
         colnames(slopePredYx)[4]<-"Sample_1"
+        colnames(REPredYx)[4]<-"Sample_1"
         
-        Yall[[indice]]<- rbind(PredYx,slopePredYx)
+        Yall[[indice]]<- rbind(PredYx,slopePredYx,REPredYx)
         
       }
       

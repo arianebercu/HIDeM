@@ -72,6 +72,8 @@ INLAidmpredY<-function(timeVar,truncated,formLong,dataSurv,dataLongi,id,
                     lapply(c(1:Nsample),FUN=function(x){make_dXINLA(formula=formLong[[indice]], timeVar=timeVar, data=dataLongi_augmented,ct=ct,id=id,SMP=SMP[[x]])}))
         Y<-do.call(cbind,
                    lapply(c(1:Nsample),FUN=function(x){make_XINLA(formula=formLong[[indice]], timeVar=timeVar, data=dataLongi_augmented,ct=ct,id=id,SMP=SMP[[x]])}))
+        REY<-do.call(cbind,
+                    lapply(c(1:Nsample),FUN=function(x){make_REXINLA(formula=formLong[[indice]], timeVar=timeVar, data=dataLongi_augmented,ct=ct,id=id,SMP=SMP[[x]])}))
         
         
         # keep only indice we want: 
@@ -85,20 +87,24 @@ INLAidmpredY<-function(timeVar,truncated,formLong,dataSurv,dataLongi,id,
 
         Y<-Y[indices,]
         dY<-dY[indices,]
+        REY<-REY[indices,]
         #add BLUP first column
         
         #add informations 
         Outcome<-all.vars(terms(formLong[[indice]]))[1]
         slopeOutcome<-paste0("slope_",Outcome)
+        REOutcome<-paste0("RE_",Outcome)
         
  
         PredYx<-cbind(timePointsdata,Outcome=Outcome,Y)
         slopePredYx<-cbind(timePointsdata,Outcome=slopeOutcome,dY)
+        REPredYx<-cbind(timePointsdata,Outcome=REOutcome,REY)
         
         colnames(PredYx)[4:(Nsample+3)]<-paste0("Sample_",c(1:Nsample))
         colnames(slopePredYx)[4:(Nsample+3)]<-paste0("Sample_",c(1:Nsample))
+        colnames(REPredYx)[4:(Nsample+3)]<-paste0("Sample_",c(1:Nsample))
         
-        Yall[[indice]]<- rbind(PredYx,slopePredYx)
+        Yall[[indice]]<- rbind(PredYx,slopePredYx,REPredYx)
         
         
         
@@ -107,6 +113,7 @@ INLAidmpredY<-function(timeVar,truncated,formLong,dataSurv,dataLongi,id,
         Nsample<-1
         dY<-as.matrix(make_dXINLA_BLUP(formula=formLong[[indice]], timeVar=timeVar, data=dataLongi_augmented,ct=ct,id=id,SMP=INLAmodel))
         Y<-as.matrix(make_XINLA_BLUP(formula=formLong[[indice]], timeVar=timeVar, data=dataLongi_augmented,ct=ct,id=id,SMP=INLAmodel))
+        REY<-as.matrix(make_REXINLA_BLUP(formula=formLong[[indice]], timeVar=timeVar, data=dataLongi_augmented,ct=ct,id=id,SMP=INLAmodel))
         
         
         # keep only indice we want: 
@@ -120,20 +127,24 @@ INLAidmpredY<-function(timeVar,truncated,formLong,dataSurv,dataLongi,id,
         
         Y<-Y[indices,]
         dY<-dY[indices,]
+        REY<-REY[indices,]
         #add BLUP first column
         
         #add informations 
         Outcome<-all.vars(terms(formLong[[indice]]))[1]
         slopeOutcome<-paste0("slope_",Outcome)
+        REOutcome<-paste0("RE_",Outcome)
         
         
         PredYx<-cbind(timePointsdata,Outcome=Outcome,Y)
         slopePredYx<-cbind(timePointsdata,Outcome=slopeOutcome,dY)
+        REPredYx<-cbind(timePointsdata,Outcome=REOutcome,REY)
         
         colnames(PredYx)[4:(Nsample+3)]<-paste0("Sample_",c(1:Nsample))
         colnames(slopePredYx)[4:(Nsample+3)]<-paste0("Sample_",c(1:Nsample))
+        colnames(REPredYx)[4:(Nsample+3)]<-paste0("Sample_",c(1:Nsample))
         
-        Yall[[indice]]<- rbind(PredYx,slopePredYx)
+        Yall[[indice]]<- rbind(PredYx,slopePredYx,REPredYx)
         
         
         
@@ -179,7 +190,8 @@ INLAidmpredY<-function(timeVar,truncated,formLong,dataSurv,dataLongi,id,
                                        lapply(c(1:Nsample),FUN=function(x){make_dXINLA(formula=formLong[[indice]], timeVar=timeVar, data=dataLongi_augmented,ct=ct,id=id,SMP=SMP[[x]])}))
                            Y<-do.call(cbind,
                                       lapply(c(1:Nsample),FUN=function(x){make_XINLA(formula=formLong[[indice]], timeVar=timeVar, data=dataLongi_augmented,ct=ct,id=id,SMP=SMP[[x]])}))
-                           
+                           REY<-do.call(cbind,
+                                       lapply(c(1:Nsample),FUN=function(x){make_REXINLA(formula=formLong[[indice]], timeVar=timeVar, data=dataLongi_augmented,ct=ct,id=id,SMP=SMP[[x]])}))
                            
                            # keep only indice we want: 
                            # Collapse each row into a string
@@ -192,20 +204,24 @@ INLAidmpredY<-function(timeVar,truncated,formLong,dataSurv,dataLongi,id,
                            
                            Y<-Y[indices,]
                            dY<-dY[indices,]
+                           REY<-REY[indices,]
                            #add BLUP first column
                            
                            #add informations 
                            Outcome<-all.vars(terms(formLong[[indice]]))[1]
                            slopeOutcome<-paste0("slope_",Outcome)
+                           REOutcome<-paste0("RE_",Outcome)
                            
                            
                            PredYx<-cbind(timePointsdata,Outcome=Outcome,Y)
                            slopePredYx<-cbind(timePointsdata,Outcome=slopeOutcome,dY)
+                           REPredYx<-cbind(timePointsdata,Outcome=REOutcome,REY)
                            
                            colnames(PredYx)[4:(Nsample+3)]<-paste0("Sample_",c(1:Nsample))
                            colnames(slopePredYx)[4:(Nsample+3)]<-paste0("Sample_",c(1:Nsample))
+                           colnames(REPredYx)[4:(Nsample+3)]<-paste0("Sample_",c(1:Nsample))
                            
-                           return(rbind(PredYx,slopePredYx))
+                           return(rbind(PredYx,slopePredYx,REPredYx))
                            
                            
                            
@@ -214,6 +230,7 @@ INLAidmpredY<-function(timeVar,truncated,formLong,dataSurv,dataLongi,id,
                            Nsample<-1
                            dY<-as.matrix(make_dXINLA_BLUP(formula=formLong[[indice]], timeVar=timeVar, data=dataLongi_augmented,ct=ct,id=id,SMP=INLAmodel))
                            Y<-as.matrix(make_XINLA_BLUP(formula=formLong[[indice]], timeVar=timeVar, data=dataLongi_augmented,ct=ct,id=id,SMP=INLAmodel))
+                           REY<-as.matrix(make_REXINLA_BLUP(formula=formLong[[indice]], timeVar=timeVar, data=dataLongi_augmented,ct=ct,id=id,SMP=INLAmodel))
                            
                            
                            # keep only indice we want: 
@@ -227,20 +244,24 @@ INLAidmpredY<-function(timeVar,truncated,formLong,dataSurv,dataLongi,id,
                            
                            Y<-Y[indices,]
                            dY<-dY[indices,]
+                           REY<-REY[indices,]
                            #add BLUP first column
                            
                            #add informations 
                            Outcome<-all.vars(terms(formLong[[indice]]))[1]
                            slopeOutcome<-paste0("slope_",Outcome)
+                           REOutcome<-paste0("RE_",Outcome)
                            
                            
                            PredYx<-cbind(timePointsdata,Outcome=Outcome,Y)
                            slopePredYx<-cbind(timePointsdata,Outcome=slopeOutcome,dY)
+                           REPredYx<-cbind(timePointsdata,Outcome=REOutcome,REY)
                            
                            colnames(PredYx)[4:(Nsample+3)]<-paste0("Sample_",c(1:Nsample))
                            colnames(slopePredYx)[4:(Nsample+3)]<-paste0("Sample_",c(1:Nsample))
+                           colnames(REPredYx)[4:(Nsample+3)]<-paste0("Sample_",c(1:Nsample))
                            
-                           result<-rbind(PredYx,slopePredYx)
+                           result<-rbind(PredYx,slopePredYx,REPredYx)
                            return(result)
                          }
                            
@@ -389,6 +410,80 @@ make_XINLA <- function(formula, timeVar, data,use_splines = FALSE,ct,id,SMP, ...
   Y<-X_RE*B_RE + X*B
   Y<-rowSums(Y)
   
+  return(Y)
+}
+
+make_REXINLA <- function(formula, timeVar, data,use_splines = FALSE,ct,id,SMP, ...) {
+  
+  
+  terms_labels <- attr(terms(formula), "term.labels")
+  
+  terms_RE <- terms_labels[grepl(id, terms_labels)==T][1]
+  terms_RE <- gsub("\\|.*", "", terms_RE)
+  terms_RE <- as.formula(paste("~", terms_RE))
+  terms_RE <- attr(terms(terms_RE), "term.labels")
+  
+  
+  # Identify terms
+  if(paste0(id,"Intercept_L1")%in%ct$tag){
+    terms_RE<-c("Intercept",terms_RE)
+  }
+  
+  idd<-unique(data[,colnames(data)%in% id])
+  B_RE<-matrix(0,nrow=dim(data)[1],ncol=length(terms_RE))
+  n_id<-length(unique(data[,colnames(data)%in%id]))
+  j<-0
+  k<-1
+  for (lab in terms_RE) {
+    
+    if(lab=="Intercept"){
+      
+      start<-ct$start[which(ct$tag==paste0(id,lab,"_L1"))]
+      start<-start+j*n_id
+      end<-start+n_id-1
+      B_RE[,k]<-matrix(do.call(c,lapply(c(start:end),FUN=function(x){
+        nn<-x-start+1
+        nn<-sum(data[,colnames(data)%in%id]%in%idd[nn])
+        return(rep(SMP$latent[x],nn))
+      })),nrow=dim(data)[1],ncol=1)
+      
+    } else if (lab == timeVar) {
+      # simple linear time
+      start<-ct$start[which(ct$tag==paste0(id,lab,"_L1"))]
+      start<-start+j*n_id
+      end<-start+n_id-1
+      B_RE[,k]<-matrix(do.call(c,lapply(c(start:end),FUN=function(x){
+        nn<-x-start+1
+        nn<-sum(data[,colnames(data)%in%id]%in%idd[nn])
+        return(rep(SMP$latent[x],nn))
+      })),nrow=dim(data)[1],ncol=1)
+      
+    } else if (grepl("\\(", lab) && grepl(timeVar, lab)) {
+      #INLA takes only function no : I(time^2)
+      
+      start<-ct$start[which(ct$tag==paste0(id,gsub("[())]","",lab),"_L1"))]
+      start<-start+j*n_id
+      end<-start+n_id-1
+      B_RE[,k]<-matrix(do.call(c,lapply(c(start:end),FUN=function(x){
+        nn<-x-start+1
+        nn<-sum(data[,colnames(data)%in%id]%in%idd[nn])
+        return(rep(SMP$latent[x],nn))
+      })),nrow=dim(data)[1],ncol=1)
+      
+      
+    } else if (use_splines && grepl("bs\\(|ns\\(", lab)) {
+      
+      # Extract knots etc. from the original call if needed
+      stop("Spline not supported so far")
+      
+    } 
+
+    k<-k+1
+    j<-j+1
+  }
+  
+  Y<-B_RE 
+
   return(Y)
 }
 
@@ -630,6 +725,79 @@ make_XINLA_BLUP <- function(formula, timeVar, data,use_splines = FALSE,ct,id,SMP
   
   Y<-X_RE*B_RE + X*B
   Y<-rowSums(Y)
+  
+  return(Y)
+}
+
+make_REXINLA_BLUP <- function(formula, timeVar, data,use_splines = FALSE,ct,id,SMP, ...) {
+  
+  
+  terms_labels <- attr(terms(formula), "term.labels")
+  
+  terms_RE <- terms_labels[grepl(id, terms_labels)==T][1]
+  terms_RE <- gsub("\\|.*", "", terms_RE)
+  terms_RE <- as.formula(paste("~", terms_RE))
+  terms_RE <- attr(terms(terms_RE), "term.labels")
+  
+  
+  # Identify terms
+  if(paste0(id,"Intercept_L1")%in%ct$tag){
+    terms_RE<-c("Intercept",terms_RE)
+  }
+
+  
+  idd<-unique(data[,colnames(data)%in% id])
+  B_RE<-matrix(0,nrow=dim(data)[1],ncol=length(terms_RE))
+  n_id<-length(unique(data[,colnames(data)%in%id]))
+  j<-0
+  k<-1
+  for (lab in terms_RE) {
+    
+    if(lab=="Intercept"){
+      
+      start<-which(names(SMP$summary.random)==paste0(id,lab,"_L1"))
+      
+      B_RE[,k]<-matrix(do.call(c,lapply(c(1:n_id),FUN=function(x){
+        nn<-sum(data[,colnames(data)%in%id]%in%idd[x])
+        return(rep(SMP$summary.random[[start]][x,"mode"],nn))
+      })),nrow=dim(data)[1],ncol=1)
+      
+      
+    } else if (lab == timeVar) {
+      # simple linear time
+
+      start<-which(names(SMP$summary.random)==paste0(id,lab,"_L1"))
+      
+      B_RE[,k]<-matrix(do.call(c,lapply(c(1:n_id),FUN=function(x){
+        nn<-sum(data[,colnames(data)%in%id]%in%idd[x])
+        return(rep(SMP$summary.random[[start]][x,"mode"],nn))
+      })),nrow=dim(data)[1],ncol=1)
+      
+      
+    } else if (grepl("\\(", lab) && grepl(timeVar, lab)) {
+      #INLA takes only function no : I(time^2)
+      
+      
+      start<-which(names(SMP$summary.random)==paste0(id,gsub("[())]","",lab),"_L1"))
+      
+      B_RE[,k]<-matrix(do.call(c,lapply(c(1:n_id),FUN=function(x){
+        nn<-sum(data[,colnames(data)%in%id]%in%idd[x])
+        return(rep(SMP$summary.random[[start]][x,"mode"],nn))
+      })),nrow=dim(data)[1],ncol=1)
+      
+      
+      
+    } else if (use_splines && grepl("bs\\(|ns\\(", lab)) {
+      
+      # Extract knots etc. from the original call if needed
+      stop("Spline not supported so far")
+      
+    } 
+    k<-k+1
+    j<-j+1
+  }
+  
+  Y<-B_RE 
   
   return(Y)
 }
