@@ -1,0 +1,219 @@
+### Code:
+##' @title Illness-death model algorithm with weibull baseline risk
+##' @param b  parameters not fixed
+##' @param size_V number of parameters
+##' @param fix0 indicators of fixed and unfixed parameters
+##' @param ctime classification of subject according to their observations
+##' @param N number of subjects
+##' @param ve01 variables for transition 0 -->1 
+##' @param ve02 variables for transition 0 -->2
+##' @param ve12 variables for transition 1 -->2
+##' @param dimnva01 number of variables for transition 0 -->1 
+##' @param dimnva02 number of variables for transition 0 -->2
+##' @param dimnva12 number of variables for transition 1 -->2
+##' @param nvat01 number of variables for transition 0 -->1 
+##' @param nvat02 number of variables for transition 0 -->2
+##' @param nvat12 number of variables for transition 1 -->2
+##' @param t0 time entry
+##' @param t1 time L
+##' @param t2 time R
+##' @param t3 time of event/out
+##' @param epsa control convergence parameter for beta 
+##' @param epsb control convergence parameter for loglik
+##' @param epsd control convergence for distance to minimum rdm
+##' @param clustertype in which cluster to work
+##' @param nproc number of cluster
+##' @param maxiter Maximum number of iterations. The default is 200.
+##' @param troncature indicator if troncature or not
+##' @param idd number of subjects that died
+##' @param idm number of subjects that had illness
+##' @param ts delay in the study
+##' @param gausspoint number of points in gauss quadrature
+##' @param weib the form of the weibull parameters 
+#' @author R: Ariane Bercu <ariane.bercu@@u-bordeaux.fr> 
+#' @useDynLib HIDeM
+
+DYNidmRE.weib<-function(b,fix0,size_V,
+                      clustertype,epsa,epsb,epsd,nproc,maxiter,
+                      ctime,N,
+                      ve01,ve02,ve12,dimnva01,dimnva02,dimnva12,nvat01,nvat02,nvat12,
+                      t0,t1,t2,t3,idd,idm,ts,troncature, modelY,
+                      dataLongi,dataSurv,
+                      Nsample,BLUP,seed,timeVar,id,formLong,
+                      outcome01,outcome02,
+                      outcome12,NtimePoints,
+                      p01,p02,p12,
+                      dimp01,dimp02,dimp12,scale.X){
+  
+  bfix<-b[fix0==1]
+  b<-b[fix0==0]
+  npm<-size_V-sum(fix0)
+  
+    
+    out<-list()
+    length(out)<-Nsample
+ browser()
+ 
+ size_spline<-6
+ 
+ npm01<-ifelse(nvat01>0,sum(fix0[(size_spline+1):(size_spline+nvat01)]==0),0)
+ npm01Y<-ifelse(p01>0,sum(fix0[(size_spline+1+nvat01+nvat02+nvat12):(size_spline+nvat01+nvat02+nvat12+p01)]==0),0)
+ 
+ npm02<-ifelse(nvat02>0,sum(fix0[(size_spline+1+nvat01):(size_spline+nvat01+nvat02)]==0),0)
+ npm02Y<-ifelse(p02>0,sum(fix0[(size_spline+1+nvat01+nvat02+nvat12+p01):(size_spline+nvat01+nvat02+nvat12+p01+p02)]==0),0)
+ 
+ npm12<-ifelse(nvat12>0,sum(fix0[(size_spline+1+nvat01+nvat02):(size_spline+1+nvat01+nvat02+nvat12)]==0),0)
+ npm12Y<-ifelse(p12>0,sum(fix0[(size_spline+1+nvat01+nvat02+nvat12+p01+p02):(size_spline+nvat01+nvat02+nvat12+p01+p12+p02)]==0),0)
+ 
+ # update nvat and dimnva
+ nvat01<-npm01+npm01Y
+ nvat02<-npm02+npm02Y
+ nvat12<-npm12+npm12Y
+ 
+ dimnva01<-ifelse(nvat01==0,1,nvat01)
+ dimnva02<-ifelse(nvat02==0,1,nvat02)
+ dimnva12<-ifelse(nvat12==0,1,nvat12)
+
+    for(k in 1:Nsample){
+      print(paste0("Estimating illness-death model on sample ",k))
+      
+      if(dataY$method=="INLA"){
+        
+        dataY<-INLAidmpredY(timeVar=timeVar,
+                            truncated=troncature,
+                            formLong=formLong,
+                            dataSurv=dataSurv,
+                            dataLongi=dataLongi,
+                            id=id,
+                            Nsample=1,
+                            t0=t0,t1=t1,t2=t2,t3=t3,
+                            ctime=ctime,
+                            modelY=modelY,
+                            seed=seed+k,
+                            BLUP=BLUP,
+                            nproc=1,
+                            clustertype=clustertype)
+      }else{
+        
+        dataY<-JMidmpredY(timeVar=timeVar,
+                          truncated=troncature,
+                          formLong=formLong,
+                          dataSurv=dataSurv,
+                          dataLongi=dataLongi,
+                          id=id,
+                          Nsample=1,
+                          t0=t0,t1=t1,t2=t2,t3=t3,
+                          ctime=ctime,
+                          modelY=modelY,
+                          seed=seed+k,
+                          BLUP=BLUP)
+      }
+      
+      for( m in unique(c(outcome01,outcome02,outcome12))){
+        subdata<-dataY[dataY$Outcome==m,]
+        x<-table(subdata[,colnames(subdata)%in%id])
+        if(any(x!=NtimePoints)){stop("Prediction of marker ",m," could not be perform for each quadrature points, try Ypredmethod equi")}
+        
+      }
+      
+      dataY$Outcome<-as.character(dataY$Outcome)
+      # attention if NtimePoints equidistant with INLA then NtimePoints takes 
+      # need ID to be numeric -- then 
+      dataY[,colnames(dataY)%in%id]<-as.numeric(dataY[,colnames(dataY)%in%id])
+      # to keep tracks of time order for each individual 
+      dataY$order<-as.numeric(ave(dataY[,colnames(dataY)%in%id], cumsum(c(TRUE, diff(dataY[,colnames(dataY)%in%id]) != 0)), FUN = seq_along))
+      
+      if(scale.X==T){
+        
+        # Compute group means and sds
+        ym <- tapply(dataY[[4]], dataY$Outcome, mean)
+        ys <- tapply(dataY[[4]], dataY$Outcome, sd)
+        
+        # Normalize (min-max) within each group
+        dataY[[4]] <- ave(dataY[[4]], dataY$Outcome,
+                          FUN = function(x) (x - min(x)) / (max(x) - min(x)))
+        
+      }
+      
+      
+      if(length(outcome01)>=1){
+        y01<-dataY[dataY$Outcome%in%outcome01,]
+        # order  by individual and timeline 
+        y01<-y01[order(y01[,colnames(y01)%in%id],y01$order),4]
+        ve01k<-c(ve01,y01k)
+        
+      }else{
+        ve01k<-ve01
+      }
+      
+      if(length(outcome02)>=1){
+        y02<-dataY[dataY$Outcome%in%outcome02,]
+        # order  by individual and timeline 
+        y02<-y02[order(y02[,colnames(y02)%in%id],y02$order),]
+        ve02k<-c(ve02,y02k)
+      }else{
+        ve02k<-ve02
+      }
+      
+      if(length(outcome12)>=1){
+        y12<-dataY[dataY$Outcome%in%outcome12,]
+        # order  by individual and timeline 
+        y12<-y12[order(y12[,colnames(y12)%in%id],y12$order),4]
+        ve12k<-c(ve12,y12k)
+      }else{
+        ve12k<-ve12
+      }
+      
+      out[[k]]<- tryCatch({ marqLevAlg::mla(b=b,
+                                            fn=idmlLikelihoodweib,
+                                            epsa=epsa,
+                                            epsb=epsb,
+                                            epsd=epsd,
+                                            nproc=nproc,
+                                            clustertype=clustertype,
+                                            maxiter=maxiter,
+                                            minimize=F,
+                                            print.info = T,
+                                            npm=npm,
+                                            npar=size_V,
+                                            bfix=bfix,
+                                            fix=fix0,
+                                            ctime=ctime,
+                                            no=N,
+                                            ve01=ve01k,
+                                            ve02=ve02k,
+                                            ve12=ve12k,
+                                            dimnva01=dimnva01,
+                                            dimnva02=dimnva02,
+                                            dimnva12=dimnva12,
+                                            nva01=nvat01,
+                                            nva02=nvat02,
+                                            nva12=nvat12,
+                                            t0=t0,
+                                            t1=t1,
+                                            t2=t2,
+                                            t3=t3,
+                                            troncature=troncature,
+                                            gausspoint=15)
+      }, error = function(e) {
+        # Return NULL on error to skip this patient
+        NULL
+      })
+      if(out[[k]]$istop==1){
+        b<-out[[k]]$b
+      }
+      
+    }
+    
+  
+  
+  
+  
+  return(out)
+  
+  
+  
+  
+  
+}
+

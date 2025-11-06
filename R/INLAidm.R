@@ -1,6 +1,7 @@
 ### Code:
 ##' @title Calculate predictions for time-depend covariates using INLA
 #' @useDynLib HIDeM
+#' @importFrom INLAjoint joint
 #' @author R: Ariane Bercu <ariane.bercu@@u-bordeaux.fr>  
 
 

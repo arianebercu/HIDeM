@@ -1,6 +1,8 @@
 ### Code:
 ##' @title Calculate predictions for time-depend covariates using INLA
 #' @useDynLib HIDeM
+#' @importFrom stats D
+#' 
 #' @author R: Ariane Bercu <ariane.bercu@@u-bordeaux.fr>  
 
 
@@ -178,7 +180,7 @@ make_dX <- function(formula, X, timevar, data,use_splines = FALSE, ...) {
     } else if (grepl("^I\\(", lab)) {
       # e.g. I(time^2)
       expr <- parse(text = gsub("I\\((.*)\\)", "\\1", lab))[[1]]
-      dexpr <- D(expr, timevar)
+      dexpr <- stats::D(expr, timevar)
       dX[, lab] <- eval(dexpr,envir = data)
       
     } else if (use_splines && grepl("bs\\(|ns\\(", lab)) {

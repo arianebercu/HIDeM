@@ -27,10 +27,14 @@ Imports:
     grDevices, 
     stats, 
     ggplot2,
-    pracma
+    pracma,
+    Deriv, 
+    INLA (>= 25.10.19), 
+    INLAjoint (>= 25.10.7),  
+    JMbayes2 (>= 0.5.7) 
 Maintainer: Ariane Bercu <ariane.bercu@u-bordeaux.fr>
 License: GPL (>= 2)
-RoxygenNote: 7.3.2
+RoxygenNote: 7.3.3
 Encoding: UTF-8
 Suggests: 
     knitr, 

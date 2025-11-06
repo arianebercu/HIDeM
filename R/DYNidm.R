@@ -183,6 +183,7 @@ DYNidm <- function(formula01,
                 data,
                 formLong,
                 Longitransition,
+                assoc,
                 threshold,
                 dataLongi,
                 timeVar,
@@ -324,6 +325,37 @@ DYNidm <- function(formula01,
    
     }
     
+    verifRE<-0
+    if(is.null(assoc)){
+      assoc<-list()
+    length(assoc)<-length(formLong)
+     assoc<-lapply(assoc, function(x) list(c("value"),c("value"),c("value")))
+    }else{
+      
+      if (!inherits(assoc, "list")){
+        cli_abort(c(
+          "{.var assoc} must be a list object",
+          "x" = "You've supplied a {.cls {class(Longitransition)}} object"
+        ))
+      }
+      if(length(assoc)!=length(formLong)){
+        stop(paste0("Assoc must be a list object of length ",length(formLong)))
+      }
+      
+      for(k in 1:length(assoc)){
+        if(!inherits(assoc[[k]], "list")){
+          stop("Each element of the list Assoc must be a list")
+        }
+        if(length(assoc[[k]])!=3){
+          stop("Each element of the list Assoc must be a list of length 3")
+        }
+        if(any(!na.omit(unlist(assoc[[k]]))%in%c("value","slope","RE"))){
+          stop("Each element of the list Assoc must be taking values in : RE, value or/and slope")
+        }
+        if(unlist(assoc[[k]])%in%"RE" & !unlist(assoc[[k]])%in%c("value","slope")){verifRE<-verifRE+1}
+      }
+      
+    }
     
     #################################################################################
     #####################   extract covariates   ####################################
@@ -571,6 +603,20 @@ DYNidm <- function(formula01,
     }))]
     
     if(length(outcome01)>=1){
+      outcome01<-unlist(lapply(c(1:length(assoc)),FUN=function(x){
+        res<-NULL
+        if("value"%in%assoc[[x]][[1]]){
+          res<-c(res,ynames[x])
+        }
+        if("slope"%in%assoc[[x]][[1]]){
+          res<-c(res,paste0("slope_",ynames[x]))
+        }
+        if("RE"%in%assoc[[x]][[1]]){
+          res<-c(res,paste0("RE_",ynames[x]))
+        }
+        return(res)
+      }))
+    
       p01<-length(outcome01)
       dimp01<-length(outcome01)
     }else{
@@ -579,6 +625,20 @@ DYNidm <- function(formula01,
     }
     
     if(length(outcome02)>=1){
+      
+      outcome02<-unlist(lapply(c(1:length(assoc)),FUN=function(x){
+        res<-NULL
+        if("value"%in%assoc[[x]][[2]]){
+          res<-c(res,ynames[x])
+        }
+        if("slope"%in%assoc[[x]][[2]]){
+          res<-c(res,paste0("slope_",ynames[x]))
+        }
+        if("RE"%in%assoc[[x]][[2]]){
+          res<-c(res,paste0("RE_",ynames[x]))
+        }
+        return(res)
+      }))
       p02<-length(outcome02)
       dimp02<-length(outcome02)
     }else{
@@ -587,6 +647,21 @@ DYNidm <- function(formula01,
     }
     
     if(length(outcome12)>=1){
+      
+      outcome12<-unlist(lapply(c(1:length(assoc)),FUN=function(x){
+        res<-NULL
+        if("value"%in%assoc[[x]][[3]]){
+          res<-c(res,ynames[x])
+        }
+        if("slope"%in%assoc[[x]][[3]]){
+          res<-c(res,paste0("slope_",ynames[x]))
+        }
+        
+        if("RE"%in%assoc[[x]][[3]]){
+          res<-c(res,paste0("RE_",ynames[x]))
+        }
+        return(res)
+      }))
       p12<-length(outcome12)
       dimp12<-length(outcome12)
       
@@ -929,7 +1004,62 @@ DYNidm <- function(formula01,
           b<-b[fix0==0]
         }else{bfix<-1}
         
-    
+######################### if only RE we go back to classic analysis ############
+        if(verifRE==length(assoc)){
+          
+          out<-DYNidmRE.splines(b=b,
+                              clustertype=clustertype,
+                              epsa=epsa,
+                              epsb=epsb,
+                              epsd=epsd,
+                              nproc=nproc,
+                              maxiter=maxiter,
+                              size_V=size_V,
+                              size_spline=size_spline,
+                              noVar=noVar,
+                              bfix=bfix,
+                              fix0=fix0,
+                              knots01=knots01,
+                              knots02=knots02,
+                              knots12=knots12,
+                              ctime=ctime,
+                              N=N,
+                              nknots01=nknots01,
+                              nknots02=nknots02,
+                              nknots12=nknots12,
+                              ve01=ve01,
+                              ve02=ve02,
+                              ve12=ve12,
+                              dimnva01=dimnva01,
+                              dimnva02=dimnva02,
+                              dimnva12=dimnva12,
+                              nvat01=nvat01,
+                              nvat02=nvat02,
+                              nvat12=nvat12,
+                              t0=t0,
+                              t1=t1,
+                              t2=t2,
+                              t3=t3,
+                              troncature=troncature,
+                              modelY=modelY,
+                              dataLongi=dataLongi,
+                              dataSurv=dataSurvCR,
+                              Nsample=Nsample,
+                              BLUP=BLUP,
+                              seed=seed,
+                              NtimePoints=NtimePoints,
+                              timeVar=timeVar,
+                              id=id,
+                              formLong=formLong,
+                              outcome01=outcome01,
+                              outcome02=outcome02,
+                              outcome12=outcome12,
+                              p01=p01,p02=p02,p12=p12,
+                              dimp01=dimp01,
+                              dimp02=dimp02,
+                              dimp12=dimp12,
+                              scale.X=scale.X)
+        }else{
         out<-DYNidm.splines(b=b,
                          clustertype=clustertype,
                          epsa=epsa,
@@ -982,6 +1112,7 @@ DYNidm <- function(formula01,
                          dimp02=dimp02,
                          dimp12=dimp12,
                          scale.X=scale.X)
+        }
       }
   
       
@@ -993,6 +1124,55 @@ DYNidm <- function(formula01,
    
         #save(ctime,file="testctime.RData")
         
+        if(verifRE==length(assoc)){
+          out <- DYNidmRE.weib(b=b,
+                             fix0=fix0,
+                             size_V=size_V,
+                             clustertype=clustertype,
+                             epsa=epsa,
+                             epsb=epsb,
+                             epsd=epsd,
+                             nproc=nproc,
+                             maxiter=maxiter,
+                             ctime=ctime,
+                             N=N,
+                             ve01=ve01,
+                             ve02=ve02,
+                             ve12=ve12,
+                             dimnva01=dimnva01,
+                             dimnva02=dimnva02,
+                             dimnva12=dimnva12,
+                             nvat01=nvat01,
+                             nvat02=nvat02,
+                             nvat12=nvat12,
+                             t0=t0,
+                             t1=t1,
+                             t2=t2,
+                             t3=t3,
+                             idm=idm,
+                             idd=idd,
+                             ts=ts,
+                             troncature=troncature,
+                             
+                             modelY=modelY,
+                             dataLongi=dataLongi,
+                             dataSurv=dataSurvCR,
+                             Nsample=Nsample,
+                             BLUP=BLUP,
+                             seed=seed,
+                             NtimePoints=NtimePoints,
+                             timeVar=timeVar,
+                             id=id,
+                             formLong=formLong,
+                             outcome01=outcome01,
+                             outcome02=outcome02,
+                             outcome12=outcome12,
+                             p01=p01,p02=p02,p12=p12,
+                             dimp01=dimp01,
+                             dimp02=dimp02,
+                             dimp12=dimp12,
+                             scale.X=scale.X)
+        }else{
         out <- DYNidm.weib(b=b,
                                     fix0=fix0,
                                     size_V=size_V,
@@ -1040,6 +1220,7 @@ DYNidm <- function(formula01,
                         dimp02=dimp02,
                         dimp12=dimp12,
                         scale.X=scale.X)
+        }
         
         
             
@@ -1097,54 +1278,6 @@ DYNidm <- function(formula01,
 ##########################   with M-splines baseline risk ######################
 ################################################################################
           
-            # check if predictions could be performed 
-            
-           
-            # for( k in outcome){
-            #   subdata<-dataY[dataY$Outcome==k,]
-            #   x<-table(subdata[,colnames(subdata)%in%id])
-            #   if(any(x!=NtimePoints)){stop("Prediction of marker ",k," could not be perform for each quadrature points.")}
-            #   
-            # }
-            # 
-            # dataY$Outcome<-as.character(dataY$Outcome)
-            # # attention if NtimePoints equidistant with INLA then NtimePoints takes 
-            # # need ID to be numeric -- then 
-            # dataY[,colnames(dataY)%in%id]<-as.numeric(dataY[,colnames(dataY)%in%id])
-            # # to keep tracks of time order for each individual 
-            # dataY$order<-as.numeric(ave(dataY[,colnames(dataY)%in%id], cumsum(c(TRUE, diff(dataY[,colnames(dataY)%in%id]) != 0)), FUN = seq_along))
-            # 
-            # 
-            # if(length(outcome01)>=1){
-            #   y01<-dataY[dataY$Outcome%in%outcome01,]
-            #   # order  by individual and timeline 
-            #   y01<-y01[order(y01[,colnames(y01)%in%id],y01$order),]
-            #   
-            #   
-            # }else{
-            #   y01<-as.double(rep(0,N*NtimePoints))
-            # }
-            # 
-            # if(length(outcome02)>=1){
-            #   y02<-dataY[dataY$Outcome%in%outcome02,]
-            #   # order  by individual and timeline 
-            #   y02<-y02[order(y02$ID,y02$order),]
-            #   
-            # }else{
-            #   y02<-as.double(rep(0,N*NtimePoints))
-            # }
-            # 
-            # if(length(outcome12)>=1){
-            #   y12<-dataY[dataY$Outcome%in%outcome12,]
-            #   # order  by individual and timeline 
-            #   y12<-y12[order(y12$ID,y12$order),]
-            #   
-            # }else{
-            #   y12<-as.double(rep(0,N*NtimePoints))
-            # }
-            # 
-            # 
-          
           if(method=="splines"){
             # if user did not specified the lambda values 
             if(is.null(lambda01)|is.null(lambda02)|is.null(lambda12)){
@@ -1152,7 +1285,7 @@ DYNidm <- function(formula01,
              
             }
             
-            if(nvat01>0){
+            if(nvat01>0 | p01>0){
             if(!is.null(lambda01)){
               nlambda01<-length(lambda01)
               if(length(lambda01)<1)stop("Penalisation can be performed for at least one lambda01 ")
@@ -1163,7 +1296,7 @@ DYNidm <- function(formula01,
             }
             }else{lambda01<-0.0001}
             
-            if(nvat02>0){
+            if(nvat02>0 | p02 >0){
             if(!is.null(lambda02)){
               nlambda02<-length(lambda02)
               if(length(lambda02)<1)stop("Penalisation can be performed for at least one lambda02 ")
@@ -1173,7 +1306,7 @@ DYNidm <- function(formula01,
             }
             }else{lambda02<-0.0001}
             
-            if(nvat12>0){
+            if(nvat12>0 | p12>0){
             if(!is.null(lambda12)){
               nlambda12<-length(lambda12)
               if(length(lambda12)<1)stop("Penalisation can be performed for at least one lambda12 ")
@@ -1188,6 +1321,72 @@ DYNidm <- function(formula01,
 ##########################   with M-splines baseline risk ######################
 ################################################################################
          
+            if(verifRE==length(assoc)){
+              out<-DYNidmRE.penalty.splines(b=b,
+                                          fix0=fix0,
+                                          size_V=size_V,
+                                          size_spline=size_spline,
+                                          clustertype=clustertype,
+                                          epsa=epsa,
+                                          epsb=epsb,
+                                          epsd=epsd,
+                                          eps.eigen=eps.eigen,
+                                          nproc=nproc,
+                                          maxiter=maxiter,
+                                          maxiter.pena=maxiter.pena,
+                                          knots01=knots01,
+                                          knots02=knots02,
+                                          knots12=knots12,
+                                          ctime=ctime,
+                                          N=N,
+                                          nknots01=nknots01,
+                                          nknots02=nknots02,
+                                          nknots12=nknots12,
+                                          ve01=ve01,
+                                          ve02=ve02,
+                                          ve12=ve12,
+                                          dimnva01=dimnva01,
+                                          dimnva02=dimnva02,
+                                          dimnva12=dimnva12,
+                                          nvat01=nvat01,
+                                          nvat02=nvat02,
+                                          nvat12=nvat12,
+                                          t0=t0,
+                                          t1=t1,
+                                          t2=t2,
+                                          t3=t3,
+                                          troncature=troncature,
+                                          nlambda01=nlambda01,
+                                          lambda01=lambda01,
+                                          nlambda02=nlambda02,
+                                          lambda02=lambda02,
+                                          nlambda12=nlambda12,
+                                          lambda12=lambda12,
+                                          alpha=alpha,
+                                          penalty.factor=penalty.factor,
+                                          penalty=penalty,
+                                          partialH=partialH,
+                                          modelY=modelY,
+                                          dataLongi=dataLongi,
+                                          dataSurv=dataSurvCR,
+                                          Nsample=Nsample,
+                                          outcome01=outcome01,
+                                          outcome02=outcome02,
+                                          outcome12=outcome12,
+                                          BLUP=BLUP,
+                                          seed=seed,
+                                          NtimePoints=NtimePoints,
+                                          timeVar=timeVar,
+                                          id=id,
+                                          formLong=formLong,
+                                          p01=p01,
+                                          p02=p02,
+                                          p12=p12,
+                                          dimp01=dimp01,
+                                          dimp02=dimp02,
+                                          dimp12=dimp12,
+                                          scale.X=scale.X)
+            }else{
             out<-DYNidm.penalty.splines(b=b,
                              fix0=fix0,
                              size_V=size_V,
@@ -1252,6 +1451,7 @@ DYNidm <- function(formula01,
                              dimp02=dimp02,
                              dimp12=dimp12,
                              scale.X=scale.X)
+            }
             
 ############################## Output   ########################################
 ############################## on beta and HR   ################################
@@ -1311,8 +1511,8 @@ DYNidm <- function(formula01,
             
             
             
-           
-              out <- DYNidm.penalty.weib(b=b,
+            if(verifRE==length(assoc)){
+              out <- DYNidmRE.penalty.weib(b=b,
                                fix0=fix0,
                                size_V=size_V,
                                clustertype=clustertype,
@@ -1369,6 +1569,65 @@ DYNidm <- function(formula01,
                                dimp02=dimp02,
                                dimp12=dimp12,
                                scale.X=scale.X)
+            }else{
+              out <- DYNidmRE.penalty.weib(b=b,
+                                           fix0=fix0,
+                                           size_V=size_V,
+                                           clustertype=clustertype,
+                                           epsa=epsa,
+                                           epsb=epsb,
+                                           epsd=epsd,
+                                           eps.eigen=eps.eigen,
+                                           nproc=nproc,
+                                           maxiter=maxiter,
+                                           maxiter.pena=maxiter.pena,
+                                           ctime=ctime,
+                                           N=N,
+                                           ve01=ve01,
+                                           ve02=ve02,
+                                           ve12=ve12,
+                                           dimnva01=dimnva01,
+                                           dimnva02=dimnva02,
+                                           dimnva12=dimnva12,
+                                           nvat01=nvat01,
+                                           nvat02=nvat02,
+                                           nvat12=nvat12,
+                                           t0=t0,
+                                           t1=t1,
+                                           t2=t2,
+                                           t3=t3,
+                                           troncature=troncature,
+                                           nlambda01=nlambda01,
+                                           lambda01=lambda01,
+                                           nlambda02=nlambda02,
+                                           lambda02=lambda02,
+                                           nlambda12=nlambda12,
+                                           lambda12=lambda12,
+                                           alpha=alpha,
+                                           penalty.factor=penalty.factor,
+                                           penalty=penalty,
+                                           partialH=partialH,
+                                           modelY=modelY,
+                                           dataLongi=dataLongi,
+                                           dataSurv=dataSurvCR,
+                                           Nsample=Nsample, 
+                                           outcome01=outcome01,
+                                           outcome02=outcome02,
+                                           outcome12=outcome12,
+                                           BLUP=BLUP,
+                                           seed=seed,
+                                           NtimePoints=NtimePoints,
+                                           timeVar=timeVar,
+                                           id=id,
+                                           formLong=formLong,
+                                           p01=p01,
+                                           p02=p02,
+                                           p12=p12,
+                                           dimp01=dimp01,
+                                           dimp02=dimp02,
+                                           dimp12=dimp12,
+                                           scale.X=scale.X)
+            }
             
              
               

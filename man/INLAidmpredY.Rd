@@ -19,7 +19,9 @@ INLAidmpredY(
   ctime,
   modelY,
   seed,
-  BLUP
+  BLUP,
+  nproc,
+  clustertype
 )
 }
 \description{

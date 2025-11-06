@@ -70,7 +70,9 @@ DYNidm.weib<-function(b,fix0,size_V,
                             ctime=ctime,
                             modelY=modelY,
                             seed=seed+k,
-                            BLUP=BLUP)
+                            BLUP=BLUP,
+                            nproc=1,
+                            clustertype=clustertype)
       }else{
         
         dataY<-JMidmpredY(timeVar=timeVar,

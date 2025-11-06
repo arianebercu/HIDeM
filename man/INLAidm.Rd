@@ -23,8 +23,7 @@ INLAidm(
   idm,
   idd,
   clustertype,
-  lightmode,
-  prediction
+  lightmode
 )
 }
 \description{

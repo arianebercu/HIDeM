@@ -19,7 +19,6 @@ DYNmodelY(
     3),
   methodINLA = list(family = "gaussian", basRisk = "rw1", assoc = NULL),
   nproc = 1,
-  prediction,
   clustertype = "FORK",
   lightmode = T,
   envir = parent.frame()

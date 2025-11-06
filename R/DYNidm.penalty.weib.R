@@ -171,7 +171,9 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                           ctime=ctime,
                           modelY=modelY,
                           seed=seed+idsample,
-                          BLUP=BLUP)
+                          BLUP=BLUP,
+                          nproc=1,
+                          clustertype=clustertype)
     }else{
       
       dataY<-JMidmpredY(timeVar=timeVar,
@@ -2826,7 +2828,9 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                               ctime=ctime,
                               modelY=modelY,
                               seed=seed+idsample,
-                              BLUP=BLUP)
+                              BLUP=BLUP,
+                              nproc=1,
+                              clustertype=clustertype)
         }else{
           
           dataY<-JMidmpredY(timeVar=timeVar,
@@ -4198,7 +4202,9 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                          ctime=ctime,
                                                          modelY=modelY,
                                                          seed=seed+idsample,
-                                                         BLUP=BLUP)
+                                                         BLUP=BLUP,
+                                                         nproc=1,
+                                                         clustertype=clustertype)
                                    }else{
                                      
                                      dataY<-JMidmpredY(timeVar=timeVar,

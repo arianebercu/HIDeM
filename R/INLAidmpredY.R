@@ -1,14 +1,17 @@
 ### Code:
 ##' @title Calculate predictions for time-depend covariates using INLA
+#' @importFrom foreach "%do%"
+#' @importFrom foreach "%dopar%"
+#' @importFrom Deriv "Deriv"
+#' @importFrom INLA "inla.posterior.sample"
 #' @useDynLib HIDeM
 #' @author R: Ariane Bercu <ariane.bercu@@u-bordeaux.fr>  
 
 
 INLAidmpredY<-function(timeVar,truncated,formLong,dataSurv,dataLongi,id,
                   Nsample,t0,t1,t2,t3,
-                  ctime,modelY,seed,BLUP){
-  
-  browser()
+                  ctime,modelY,seed,BLUP,nproc,clustertype){
+
   
   # define timePoints of prediction : 
 
@@ -48,7 +51,7 @@ INLAidmpredY<-function(timeVar,truncated,formLong,dataSurv,dataLongi,id,
   
   NtimePoints<-ifelse(truncated==F,256,271)
   
-
+  if(nproc==1){
     for(indice in 1:length(formLong)){
 
 
@@ -63,7 +66,7 @@ INLAidmpredY<-function(timeVar,truncated,formLong,dataSurv,dataLongi,id,
       if(BLUP==F){
         
         #samples seed=seed cannot do parallel estimation on it 
-        SMP <- inla.posterior.sample(Nsample, INLAmodel,seed=seed)
+        SMP <- INLA::inla.posterior.sample(Nsample, INLAmodel,seed=seed)
         
         dY<-do.call(cbind,
                     lapply(c(1:Nsample),FUN=function(x){make_dXINLA(formula=formLong[[indice]], timeVar=timeVar, data=dataLongi_augmented,ct=ct,id=id,SMP=SMP[[x]])}))
@@ -101,11 +104,9 @@ INLAidmpredY<-function(timeVar,truncated,formLong,dataSurv,dataLongi,id,
         
       }else{
         
-        
-        SMP <- inla.posterior.sample(Nsample, INLAmodel,seed=seed)
-        
-        dY<-as.matrix(make_dXINLA(formula=formLong[[indice]], timeVar=timeVar, data=dataLongi_augmented,ct=ct,id=id,SMP=INLAmodel))
-        Y<-as.matrix(make_XINLA(formula=formLong[[indice]], timeVar=timeVar, data=dataLongi_augmented,ct=ct,id=id,SMP=INLAmodel)})
+        Nsample<-1
+        dY<-as.matrix(make_dXINLA_BLUP(formula=formLong[[indice]], timeVar=timeVar, data=dataLongi_augmented,ct=ct,id=id,SMP=INLAmodel))
+        Y<-as.matrix(make_XINLA_BLUP(formula=formLong[[indice]], timeVar=timeVar, data=dataLongi_augmented,ct=ct,id=id,SMP=INLAmodel))
         
         
         # keep only indice we want: 
@@ -135,31 +136,125 @@ INLAidmpredY<-function(timeVar,truncated,formLong,dataSurv,dataLongi,id,
         Yall[[indice]]<- rbind(PredYx,slopePredYx)
         
         
-        # keep only indice we want: 
-        # Collapse each row into a string
-        key1 <- do.call(paste, c(dataLongi_augmented[,colnames(dataLongi_augmented)%in%c(id,timeVar)], sep = "\r"))
-        key2 <- do.call(paste, c(timePointsdata, sep = "\r"))
-        
-        # Find indices of rows from data1 that are in data2
-        # while keeping order of key2
-        indices <- match(key2, key1)
-        #add BLUP first column
-        #add informations 
-        PredYx<-cbind(INLAmodel$summary.linear.predictor$mean[indices],PredYx)
-        Outcome<-all.vars(terms(formLong[[indice]]))[1]
-        PredYx<-cbind(timePointsdata,Outcome,INLAmodel$summary.linear.predictor$mean[indices])
-        colnames(PredYx)[4]<-paste0("Sample_1")
         
       }
 
-      Yall[[indice]]<-PredYx
       
   
       }
 
   Yall<-do.call(rbind,Yall)
+  }else{
+    
+  
+      if(is.null(clustertype)){
+        clustpar <- parallel::makeCluster(nproc)#, outfile="")
+      }
+      else{
+        clustpar <- parallel::makeCluster(nproc, type=clustertype)#, outfile="")
+      }
+      
+      doParallel::registerDoParallel(clustpar)
+      
+      
+      Yall<-foreach::foreach(indice=4:length(formLong),
+                       .combine = 'list',
+                       packages=c("INLA","Deriv","HIDeM"))%dopar%{
+                         
+                         
+                         INLAmodel<-modelY$modelY[[indice]]
+                         
+                         # data structure
+                         ct <- INLAmodel$misc$configs$contents
+                         
+                         if(is.null(INLAmodel)){stop("The inla model for your marker could not be run, see above warnings.")}
+                         
+                         
+                         if(BLUP==F){
+                           
+                           #samples seed=seed cannot do parallel estimation on it 
+                           SMP <- INLA::inla.posterior.sample(Nsample, INLAmodel,seed=seed)
+                           
+                           dY<-do.call(cbind,
+                                       lapply(c(1:Nsample),FUN=function(x){make_dXINLA(formula=formLong[[indice]], timeVar=timeVar, data=dataLongi_augmented,ct=ct,id=id,SMP=SMP[[x]])}))
+                           Y<-do.call(cbind,
+                                      lapply(c(1:Nsample),FUN=function(x){make_XINLA(formula=formLong[[indice]], timeVar=timeVar, data=dataLongi_augmented,ct=ct,id=id,SMP=SMP[[x]])}))
+                           
+                           
+                           # keep only indice we want: 
+                           # Collapse each row into a string
+                           key1 <- do.call(paste, c(dataLongi_augmented[,colnames(dataLongi_augmented)%in%c(id,timeVar)], sep = "\r"))
+                           key2 <- do.call(paste, c(timePointsdata, sep = "\r"))
+                           
+                           # Find indices of rows from data1 that are in data2
+                           # while keeping order of key2
+                           indices <- match(key2, key1)
+                           
+                           Y<-Y[indices,]
+                           dY<-dY[indices,]
+                           #add BLUP first column
+                           
+                           #add informations 
+                           Outcome<-all.vars(terms(formLong[[indice]]))[1]
+                           slopeOutcome<-paste0("slope_",Outcome)
+                           
+                           
+                           PredYx<-cbind(timePointsdata,Outcome=Outcome,Y)
+                           slopePredYx<-cbind(timePointsdata,Outcome=slopeOutcome,dY)
+                           
+                           colnames(PredYx)[4:(Nsample+3)]<-paste0("Sample_",c(1:Nsample))
+                           colnames(slopePredYx)[4:(Nsample+3)]<-paste0("Sample_",c(1:Nsample))
+                           
+                           return(rbind(PredYx,slopePredYx))
+                           
+                           
+                           
+                         }else{
+                           
+                           Nsample<-1
+                           dY<-as.matrix(make_dXINLA_BLUP(formula=formLong[[indice]], timeVar=timeVar, data=dataLongi_augmented,ct=ct,id=id,SMP=INLAmodel))
+                           Y<-as.matrix(make_XINLA_BLUP(formula=formLong[[indice]], timeVar=timeVar, data=dataLongi_augmented,ct=ct,id=id,SMP=INLAmodel))
+                           
+                           
+                           # keep only indice we want: 
+                           # Collapse each row into a string
+                           key1 <- do.call(paste, c(dataLongi_augmented[,colnames(dataLongi_augmented)%in%c(id,timeVar)], sep = "\r"))
+                           key2 <- do.call(paste, c(timePointsdata, sep = "\r"))
+                           
+                           # Find indices of rows from data1 that are in data2
+                           # while keeping order of key2
+                           indices <- match(key2, key1)
+                           
+                           Y<-Y[indices,]
+                           dY<-dY[indices,]
+                           #add BLUP first column
+                           
+                           #add informations 
+                           Outcome<-all.vars(terms(formLong[[indice]]))[1]
+                           slopeOutcome<-paste0("slope_",Outcome)
+                           
+                           
+                           PredYx<-cbind(timePointsdata,Outcome=Outcome,Y)
+                           slopePredYx<-cbind(timePointsdata,Outcome=slopeOutcome,dY)
+                           
+                           colnames(PredYx)[4:(Nsample+3)]<-paste0("Sample_",c(1:Nsample))
+                           colnames(slopePredYx)[4:(Nsample+3)]<-paste0("Sample_",c(1:Nsample))
+                           
+                           result<-rbind(PredYx,slopePredYx)
+                           return(result)
+                         }
+                           
+                         
+                         
+                       }
+      
+      
+      parallel::stopCluster(clustpar)
+  }
   
   return(Yall[,colnames(Yall)%in%c(id,timeVar,"Outcome",paste0("Sample_",c(1:Nsample)))])
+  
+
   
 }
 
@@ -433,7 +528,7 @@ make_XINLA_BLUP <- function(formula, timeVar, data,use_splines = FALSE,ct,id,SMP
       Xlab <- matrix(1,nrow=dim(data)[1],ncol=1)
       colnames(Xlab)<-paste0(lab,"_L1")
       
-      start<-which(rownames(M_cr$summary.fixed)==paste0(lab,"_L1"))
+      start<-which(rownames(SMP$summary.fixed)==paste0(lab,"_L1"))
       B[,k]<-matrix(SMP$summary.fixed[start,"mode"],nrow=dim(data)[1],ncol=1)
       
       
@@ -444,7 +539,7 @@ make_XINLA_BLUP <- function(formula, timeVar, data,use_splines = FALSE,ct,id,SMP
       Xlab<-matrix(eval(expr, envir = data),ncol=1,nrow=dim(data)[1])
       colnames(Xlab)<-paste0(lab,"_L1")
       
-      start<-which(rownames(M_cr$summary.fixed)==paste0(lab,"_L1"))
+      start<-which(rownames(SMP$summary.fixed)==paste0(lab,"_L1"))
       B[,k]<-matrix(SMP$summary.fixed[start,"mode"],nrow=dim(data)[1],ncol=1)
       
       
@@ -455,7 +550,7 @@ make_XINLA_BLUP <- function(formula, timeVar, data,use_splines = FALSE,ct,id,SMP
       Xlab<-matrix(eval(expr, envir = data),ncol=1,nrow=dim(data)[1])
       colnames(Xlab)<-paste0(gsub("[())]","",lab),"_L1")
       
-      start<-which(rownames(M_cr$summary.fixed)==paste0(gsub("[())]","",lab),"_L1"))
+      start<-which(rownames(SMP$summary.fixed)==paste0(gsub("[())]","",lab),"_L1"))
       B[,k]<-matrix(SMP$summary.fixed[start,"mode"],nrow=dim(data)[1],ncol=1)
       
       
@@ -483,7 +578,7 @@ make_XINLA_BLUP <- function(formula, timeVar, data,use_splines = FALSE,ct,id,SMP
       Xlab <- matrix(1,nrow=dim(data)[1],ncol=1)
       colnames(Xlab)<-paste0(id,lab,"_L1")
       
-      start<-which(names(M_cr$summary.random)==paste0(id,lab,"_L1"))
+      start<-which(names(SMP$summary.random)==paste0(id,lab,"_L1"))
       
       B_RE[,k]<-matrix(do.call(c,lapply(c(1:n_id),FUN=function(x){
         nn<-sum(data[,colnames(data)%in%id]%in%idd[x])
@@ -497,7 +592,7 @@ make_XINLA_BLUP <- function(formula, timeVar, data,use_splines = FALSE,ct,id,SMP
       Xlab<-matrix(eval(expr, envir = data),ncol=1,nrow=dim(data)[1])
       colnames(Xlab)<-paste0(id,lab,"_L1")
       
-      start<-which(names(M_cr$summary.random)==paste0(id,lab,"_L1"))
+      start<-which(names(SMP$summary.random)==paste0(id,lab,"_L1"))
       
       B_RE[,k]<-matrix(do.call(c,lapply(c(1:n_id),FUN=function(x){
         nn<-sum(data[,colnames(data)%in%id]%in%idd[x])
@@ -513,7 +608,7 @@ make_XINLA_BLUP <- function(formula, timeVar, data,use_splines = FALSE,ct,id,SMP
       colnames(Xlab)<-paste0(id,gsub("[())]","",lab),"_L1")
       
 
-      start<-which(names(M_cr$summary.random)==paste0(id,gsub("[())]","",lab),"_L1"))
+      start<-which(names(SMP$summary.random)==paste0(id,gsub("[())]","",lab),"_L1"))
       
       B_RE[,k]<-matrix(do.call(c,lapply(c(1:n_id),FUN=function(x){
         nn<-sum(data[,colnames(data)%in%id]%in%idd[x])
@@ -562,7 +657,7 @@ make_dXINLA_BLUP <- function(formula,timeVar, data,use_splines = FALSE,ct,id,SMP
       Xlab <- matrix(1,nrow=dim(data)[1],ncol=1)
       colnames(Xlab)<-paste0(lab,"_L1")
       
-      start<-which(rownames(M_cr$summary.fixed)==paste0(lab,"_L1"))
+      start<-which(rownames(SMP$summary.fixed)==paste0(lab,"_L1"))
       B[,k]<-matrix(SMP$summary.fixed[start,"mode"],nrow=dim(data)[1],ncol=1)
       
     } else if (grepl("\\(", lab) && grepl(timeVar, lab)) {
@@ -572,7 +667,7 @@ make_dXINLA_BLUP <- function(formula,timeVar, data,use_splines = FALSE,ct,id,SMP
       
       Xlab<-matrix(eval(dexpr, envir = data),ncol=1,nrow=dim(data)[1])
       colnames(Xlab)<-paste0(gsub("[())]","",lab),"_L1")
-      start<-which(rownames(M_cr$summary.fixed)==paste0(gsub("[())]","",lab),"_L1"))
+      start<-which(rownames(SMP$summary.fixed)==paste0(gsub("[())]","",lab),"_L1"))
       B[,k]<-matrix(SMP$summary.fixed[start,"mode"],nrow=dim(data)[1],ncol=1)
       
     } else if (use_splines && grepl("bs\\(|ns\\(", lab)) {
@@ -600,7 +695,7 @@ make_dXINLA_BLUP <- function(formula,timeVar, data,use_splines = FALSE,ct,id,SMP
       Xlab <- matrix(1,nrow=dim(data)[1],ncol=1)
       colnames(Xlab)<-paste0(id,lab,"_L1")
       
-      start<-which(names(M_cr$summary.random)==paste0(id,lab,"_L1"))
+      start<-which(names(SMP$summary.random)==paste0(id,lab,"_L1"))
       
       B_RE[,k]<-matrix(do.call(c,lapply(c(1:n_id),FUN=function(x){
         nn<-sum(data[,colnames(data)%in%id]%in%idd[x])
@@ -615,7 +710,7 @@ make_dXINLA_BLUP <- function(formula,timeVar, data,use_splines = FALSE,ct,id,SMP
       Xlab<-matrix(eval(dexpr, envir = data),ncol=1,nrow=dim(data)[1])
       colnames(Xlab)<-paste0(id,gsub("[())]","",lab),"_L1")
       
-      start<-which(names(M_cr$summary.random)==paste0(id,gsub("[())]","",lab),"_L1"))
+      start<-which(names(SMP$summary.random)==paste0(id,gsub("[())]","",lab),"_L1"))
       
       B_RE[,k]<-matrix(do.call(c,lapply(c(1:n_id),FUN=function(x){
         nn<-sum(data[,colnames(data)%in%id]%in%idd[x])

@@ -155,7 +155,7 @@ browser()
   for(idsample in 1:Nsample){
     
     if(modelY$method=="INLA"){
-      
+      # so far cannot do nproc > 1 as not enough memory
       dataY<-INLAidmpredY(timeVar=timeVar,
                           truncated=troncature,
                           formLong=formLong,
@@ -167,7 +167,9 @@ browser()
                           ctime=ctime,
                           modelY=modelY,
                           seed=seed+idsample,
-                          BLUP=BLUP)
+                          BLUP=BLUP,
+                          nproc=1,
+                          clustertype=clustertype)
     }else{
       
       dataY<-JMidmpredY(timeVar=timeVar,
@@ -2964,7 +2966,9 @@ browser()
                               ctime=ctime,
                               modelY=modelY,
                               seed=seed+idsample,
-                              BLUP=BLUP)
+                              BLUP=BLUP,
+                              nproc=1,
+                              clustertype=clustertype)
         }else{
           
           dataY<-JMidmpredY(timeVar=timeVar,
@@ -4418,7 +4422,9 @@ browser()
                                                        ctime=ctime,
                                                        modelY=modelY,
                                                        seed=seed+idsample,
-                                                       BLUP=BLUP)
+                                                       BLUP=BLUP,
+                                                       nproc=1,
+                                                       clustertype=clustertype)
                                  }else{
                                    
                                    dataY<-JMidmpredY(timeVar=timeVar,
