@@ -9,7 +9,7 @@
 
 
 INLAidmpredY<-function(timeVar,truncated,formLong,dataSurv,dataLongi,id,
-                  Nsample,t0,t1,t2,t3,
+                  Nsample,t0,t1,t2,t3,assoc,
                   ctime,modelY,seed,BLUP,nproc,clustertype){
 
   
@@ -52,99 +52,115 @@ INLAidmpredY<-function(timeVar,truncated,formLong,dataSurv,dataLongi,id,
   NtimePoints<-ifelse(truncated==F,256,271)
   
   if(nproc==1){
+    
+    
     for(indice in 1:length(formLong)){
 
 
+      browser()
       INLAmodel<-modelY$modelY[[indice]]
       
       # data structure
       ct <- INLAmodel$misc$configs$contents
       
       if(is.null(INLAmodel)){stop("The inla model for your marker could not be run, see above warnings.")}
+      choiceY<-na.omit(unlist(assoc[[indice]]))
       
       
       if(BLUP==F){
         
+        
         #samples seed=seed cannot do parallel estimation on it 
         SMP <- INLA::inla.posterior.sample(Nsample, INLAmodel,seed=seed)
         
-        dY<-do.call(cbind,
-                    lapply(c(1:Nsample),FUN=function(x){make_dXINLA(formula=formLong[[indice]], timeVar=timeVar, data=dataLongi_augmented,ct=ct,id=id,SMP=SMP[[x]])}))
-        Y<-do.call(cbind,
-                   lapply(c(1:Nsample),FUN=function(x){make_XINLA(formula=formLong[[indice]], timeVar=timeVar, data=dataLongi_augmented,ct=ct,id=id,SMP=SMP[[x]])}))
-        REY<-do.call(cbind,
-                    lapply(c(1:Nsample),FUN=function(x){make_REXINLA(formula=formLong[[indice]], timeVar=timeVar, data=dataLongi_augmented,ct=ct,id=id,SMP=SMP[[x]])}))
-        
-        
-        # keep only indice we want: 
-        # Collapse each row into a string
+        res<-NULL
         key1 <- do.call(paste, c(dataLongi_augmented[,colnames(dataLongi_augmented)%in%c(id,timeVar)], sep = "\r"))
         key2 <- do.call(paste, c(timePointsdata, sep = "\r"))
+        # keep only indice we want: 
+        # Collapse each row into a string
         
         # Find indices of rows from data1 that are in data2
         # while keeping order of key2
         indices <- match(key2, key1)
-
+        
+        if("value"%in% choiceY){
+        
+        Y<-do.call(cbind,
+                     lapply(c(1:Nsample),FUN=function(x){make_XINLA(formula=formLong[[indice]], timeVar=timeVar, data=dataLongi_augmented,ct=ct,id=id,SMP=SMP[[x]])}))
         Y<-Y[indices,]
-        dY<-dY[indices,]
-        REY<-REY[indices,]
-        #add BLUP first column
-        
-        #add informations 
         Outcome<-all.vars(terms(formLong[[indice]]))[1]
-        slopeOutcome<-paste0("slope_",Outcome)
-        REOutcome<-paste0("RE_",Outcome)
-        
- 
         PredYx<-cbind(timePointsdata,Outcome=Outcome,Y)
-        slopePredYx<-cbind(timePointsdata,Outcome=slopeOutcome,dY)
-        REPredYx<-cbind(timePointsdata,Outcome=REOutcome,REY)
-        
         colnames(PredYx)[4:(Nsample+3)]<-paste0("Sample_",c(1:Nsample))
-        colnames(slopePredYx)[4:(Nsample+3)]<-paste0("Sample_",c(1:Nsample))
-        colnames(REPredYx)[4:(Nsample+3)]<-paste0("Sample_",c(1:Nsample))
+        res<-rbind(res,PredYx)
+        }
         
-        Yall[[indice]]<- rbind(PredYx,slopePredYx,REPredYx)
+        if("slope"%in% choiceY){
+        dY<-do.call(cbind,
+                    lapply(c(1:Nsample),FUN=function(x){make_dXINLA(formula=formLong[[indice]], timeVar=timeVar, data=dataLongi_augmented,ct=ct,id=id,SMP=SMP[[x]])}))
+        dY<-dY[indices,]
+        slopeOutcome<-paste0("slope_",Outcome)
+        slopePredYx<-cbind(timePointsdata,Outcome=slopeOutcome,dY)
+        colnames(slopePredYx)[4:(Nsample+3)]<-paste0("Sample_",c(1:Nsample))
+        res<-rbind(res,slopePredYx)
+        }
+        
+        if("RE"%in% choiceY){
+          
+        REY<-do.call(cbind,
+                    lapply(c(1:Nsample),FUN=function(x){make_REXINLA(formula=formLong[[indice]], timeVar=timeVar, data=dataLongi_augmented,ct=ct,id=id,SMP=SMP[[x]])}))
+       REY<-REY[indices,]
+       REOutcome<-paste0("RE_",Outcome)
+       REPredYx<-cbind(timePointsdata,Outcome=REOutcome,REY)
+       colnames(REPredYx)[4:(Nsample+3)]<-paste0("Sample_",c(1:Nsample))
+       res<-rbind(res,REPredYx)
+        }
+        
+        Yall[[indice]]<- res
         
         
         
       }else{
         
         Nsample<-1
-        dY<-as.matrix(make_dXINLA_BLUP(formula=formLong[[indice]], timeVar=timeVar, data=dataLongi_augmented,ct=ct,id=id,SMP=INLAmodel))
-        Y<-as.matrix(make_XINLA_BLUP(formula=formLong[[indice]], timeVar=timeVar, data=dataLongi_augmented,ct=ct,id=id,SMP=INLAmodel))
-        REY<-as.matrix(make_REXINLA_BLUP(formula=formLong[[indice]], timeVar=timeVar, data=dataLongi_augmented,ct=ct,id=id,SMP=INLAmodel))
         
-        
-        # keep only indice we want: 
-        # Collapse each row into a string
+        res<-NULL
         key1 <- do.call(paste, c(dataLongi_augmented[,colnames(dataLongi_augmented)%in%c(id,timeVar)], sep = "\r"))
         key2 <- do.call(paste, c(timePointsdata, sep = "\r"))
+        # keep only indice we want: 
+        # Collapse each row into a string
         
         # Find indices of rows from data1 that are in data2
         # while keeping order of key2
         indices <- match(key2, key1)
         
-        Y<-Y[indices,]
+        if("value"%in% choiceY){
+          Y<-as.matrix(make_XINLA_BLUP(formula=formLong[[indice]], timeVar=timeVar, data=dataLongi_augmented,ct=ct,id=id,SMP=INLAmodel))
+          Y<-Y[indices,]
+          Outcome<-all.vars(terms(formLong[[indice]]))[1]
+          PredYx<-cbind(timePointsdata,Outcome=Outcome,Y)
+          colnames(PredYx)[4:(Nsample+3)]<-paste0("Sample_",c(1:Nsample))
+          res<-rbind(res,PredYx)
+        }
+        
+        if("slope"%in% choiceY){
+        dY<-as.matrix(make_dXINLA_BLUP(formula=formLong[[indice]], timeVar=timeVar, data=dataLongi_augmented,ct=ct,id=id,SMP=INLAmodel))
         dY<-dY[indices,]
-        REY<-REY[indices,]
-        #add BLUP first column
-        
-        #add informations 
-        Outcome<-all.vars(terms(formLong[[indice]]))[1]
         slopeOutcome<-paste0("slope_",Outcome)
-        REOutcome<-paste0("RE_",Outcome)
-        
-        
-        PredYx<-cbind(timePointsdata,Outcome=Outcome,Y)
         slopePredYx<-cbind(timePointsdata,Outcome=slopeOutcome,dY)
-        REPredYx<-cbind(timePointsdata,Outcome=REOutcome,REY)
-        
-        colnames(PredYx)[4:(Nsample+3)]<-paste0("Sample_",c(1:Nsample))
         colnames(slopePredYx)[4:(Nsample+3)]<-paste0("Sample_",c(1:Nsample))
-        colnames(REPredYx)[4:(Nsample+3)]<-paste0("Sample_",c(1:Nsample))
+        res<-rbind(res,slopePredYx)
+        }
         
-        Yall[[indice]]<- rbind(PredYx,slopePredYx,REPredYx)
+        if("RE"%in% choiceY){
+        REY<-as.matrix(make_REXINLA_BLUP(formula=formLong[[indice]], timeVar=timeVar, data=dataLongi_augmented,ct=ct,id=id,SMP=INLAmodel))
+        REY<-REY[indices,]
+        REOutcome<-paste0("RE_",Outcome)
+        REPredYx<-cbind(timePointsdata,Outcome=REOutcome,REY)
+        colnames(REPredYx)[4:(Nsample+3)]<-paste0("Sample_",c(1:Nsample))
+        res<-rbind(res,REPredYx)
+        }
+        
+        Yall[[indice]]<- res
         
         
         
@@ -178,91 +194,108 @@ INLAidmpredY<-function(timeVar,truncated,formLong,dataSurv,dataLongi,id,
                          # data structure
                          ct <- INLAmodel$misc$configs$contents
                          
+                         choiceY<-na.omit(unlist(assoc[[indice]]))
+                         
                          if(is.null(INLAmodel)){stop("The inla model for your marker could not be run, see above warnings.")}
                          
                          
                          if(BLUP==F){
                            
+                           
                            #samples seed=seed cannot do parallel estimation on it 
                            SMP <- INLA::inla.posterior.sample(Nsample, INLAmodel,seed=seed)
                            
-                           dY<-do.call(cbind,
-                                       lapply(c(1:Nsample),FUN=function(x){make_dXINLA(formula=formLong[[indice]], timeVar=timeVar, data=dataLongi_augmented,ct=ct,id=id,SMP=SMP[[x]])}))
-                           Y<-do.call(cbind,
-                                      lapply(c(1:Nsample),FUN=function(x){make_XINLA(formula=formLong[[indice]], timeVar=timeVar, data=dataLongi_augmented,ct=ct,id=id,SMP=SMP[[x]])}))
-                           REY<-do.call(cbind,
-                                       lapply(c(1:Nsample),FUN=function(x){make_REXINLA(formula=formLong[[indice]], timeVar=timeVar, data=dataLongi_augmented,ct=ct,id=id,SMP=SMP[[x]])}))
-                           
-                           # keep only indice we want: 
-                           # Collapse each row into a string
+                           res<-NULL
                            key1 <- do.call(paste, c(dataLongi_augmented[,colnames(dataLongi_augmented)%in%c(id,timeVar)], sep = "\r"))
                            key2 <- do.call(paste, c(timePointsdata, sep = "\r"))
+                           # keep only indice we want: 
+                           # Collapse each row into a string
                            
                            # Find indices of rows from data1 that are in data2
                            # while keeping order of key2
                            indices <- match(key2, key1)
                            
-                           Y<-Y[indices,]
-                           dY<-dY[indices,]
-                           REY<-REY[indices,]
-                           #add BLUP first column
+                           if("value"%in% choiceY){
+                             
+                             Y<-do.call(cbind,
+                                        lapply(c(1:Nsample),FUN=function(x){make_XINLA(formula=formLong[[indice]], timeVar=timeVar, data=dataLongi_augmented,ct=ct,id=id,SMP=SMP[[x]])}))
+                             Y<-Y[indices,]
+                             Outcome<-all.vars(terms(formLong[[indice]]))[1]
+                             PredYx<-cbind(timePointsdata,Outcome=Outcome,Y)
+                             colnames(PredYx)[4:(Nsample+3)]<-paste0("Sample_",c(1:Nsample))
+                             res<-rbind(res,PredYx)
+                           }
                            
-                           #add informations 
-                           Outcome<-all.vars(terms(formLong[[indice]]))[1]
-                           slopeOutcome<-paste0("slope_",Outcome)
-                           REOutcome<-paste0("RE_",Outcome)
+                           if("slope"%in% choiceY){
+                             dY<-do.call(cbind,
+                                         lapply(c(1:Nsample),FUN=function(x){make_dXINLA(formula=formLong[[indice]], timeVar=timeVar, data=dataLongi_augmented,ct=ct,id=id,SMP=SMP[[x]])}))
+                             dY<-dY[indices,]
+                             slopeOutcome<-paste0("slope_",Outcome)
+                             slopePredYx<-cbind(timePointsdata,Outcome=slopeOutcome,dY)
+                             colnames(slopePredYx)[4:(Nsample+3)]<-paste0("Sample_",c(1:Nsample))
+                             res<-rbind(res,slopePredYx)
+                           }
                            
+                           if("RE"%in% choiceY){
+                             
+                             REY<-do.call(cbind,
+                                          lapply(c(1:Nsample),FUN=function(x){make_REXINLA(formula=formLong[[indice]], timeVar=timeVar, data=dataLongi_augmented,ct=ct,id=id,SMP=SMP[[x]])}))
+                             REY<-REY[indices,]
+                             REOutcome<-paste0("RE_",Outcome)
+                             REPredYx<-cbind(timePointsdata,Outcome=REOutcome,REY)
+                             colnames(REPredYx)[4:(Nsample+3)]<-paste0("Sample_",c(1:Nsample))
+                             res<-rbind(res,REPredYx)
+                           }
                            
-                           PredYx<-cbind(timePointsdata,Outcome=Outcome,Y)
-                           slopePredYx<-cbind(timePointsdata,Outcome=slopeOutcome,dY)
-                           REPredYx<-cbind(timePointsdata,Outcome=REOutcome,REY)
-                           
-                           colnames(PredYx)[4:(Nsample+3)]<-paste0("Sample_",c(1:Nsample))
-                           colnames(slopePredYx)[4:(Nsample+3)]<-paste0("Sample_",c(1:Nsample))
-                           colnames(REPredYx)[4:(Nsample+3)]<-paste0("Sample_",c(1:Nsample))
-                           
-                           return(rbind(PredYx,slopePredYx,REPredYx))
+                           return(res)
                            
                            
                            
                          }else{
                            
                            Nsample<-1
-                           dY<-as.matrix(make_dXINLA_BLUP(formula=formLong[[indice]], timeVar=timeVar, data=dataLongi_augmented,ct=ct,id=id,SMP=INLAmodel))
-                           Y<-as.matrix(make_XINLA_BLUP(formula=formLong[[indice]], timeVar=timeVar, data=dataLongi_augmented,ct=ct,id=id,SMP=INLAmodel))
-                           REY<-as.matrix(make_REXINLA_BLUP(formula=formLong[[indice]], timeVar=timeVar, data=dataLongi_augmented,ct=ct,id=id,SMP=INLAmodel))
                            
-                           
-                           # keep only indice we want: 
-                           # Collapse each row into a string
+                           res<-NULL
                            key1 <- do.call(paste, c(dataLongi_augmented[,colnames(dataLongi_augmented)%in%c(id,timeVar)], sep = "\r"))
                            key2 <- do.call(paste, c(timePointsdata, sep = "\r"))
+                           # keep only indice we want: 
+                           # Collapse each row into a string
                            
                            # Find indices of rows from data1 that are in data2
                            # while keeping order of key2
                            indices <- match(key2, key1)
                            
-                           Y<-Y[indices,]
-                           dY<-dY[indices,]
-                           REY<-REY[indices,]
-                           #add BLUP first column
+                           if("value"%in% choiceY){
+                             Y<-as.matrix(make_XINLA_BLUP(formula=formLong[[indice]], timeVar=timeVar, data=dataLongi_augmented,ct=ct,id=id,SMP=INLAmodel))
+                             Y<-Y[indices,]
+                             Outcome<-all.vars(terms(formLong[[indice]]))[1]
+                             PredYx<-cbind(timePointsdata,Outcome=Outcome,Y)
+                             colnames(PredYx)[4:(Nsample+3)]<-paste0("Sample_",c(1:Nsample))
+                             res<-rbind(res,PredYx)
+                           }
                            
-                           #add informations 
-                           Outcome<-all.vars(terms(formLong[[indice]]))[1]
-                           slopeOutcome<-paste0("slope_",Outcome)
-                           REOutcome<-paste0("RE_",Outcome)
+                           if("slope"%in% choiceY){
+                             dY<-as.matrix(make_dXINLA_BLUP(formula=formLong[[indice]], timeVar=timeVar, data=dataLongi_augmented,ct=ct,id=id,SMP=INLAmodel))
+                             dY<-dY[indices,]
+                             slopeOutcome<-paste0("slope_",Outcome)
+                             slopePredYx<-cbind(timePointsdata,Outcome=slopeOutcome,dY)
+                             colnames(slopePredYx)[4:(Nsample+3)]<-paste0("Sample_",c(1:Nsample))
+                             res<-rbind(res,slopePredYx)
+                           }
+                           
+                           if("RE"%in% choiceY){
+                             REY<-as.matrix(make_REXINLA_BLUP(formula=formLong[[indice]], timeVar=timeVar, data=dataLongi_augmented,ct=ct,id=id,SMP=INLAmodel))
+                             REY<-REY[indices,]
+                             REOutcome<-paste0("RE_",Outcome)
+                             REPredYx<-cbind(timePointsdata,Outcome=REOutcome,REY)
+                             colnames(REPredYx)[4:(Nsample+3)]<-paste0("Sample_",c(1:Nsample))
+                             res<-rbind(res,REPredYx)
+                           }
+                           
+                           return(res)
                            
                            
-                           PredYx<-cbind(timePointsdata,Outcome=Outcome,Y)
-                           slopePredYx<-cbind(timePointsdata,Outcome=slopeOutcome,dY)
-                           REPredYx<-cbind(timePointsdata,Outcome=REOutcome,REY)
                            
-                           colnames(PredYx)[4:(Nsample+3)]<-paste0("Sample_",c(1:Nsample))
-                           colnames(slopePredYx)[4:(Nsample+3)]<-paste0("Sample_",c(1:Nsample))
-                           colnames(REPredYx)[4:(Nsample+3)]<-paste0("Sample_",c(1:Nsample))
-                           
-                           result<-rbind(PredYx,slopePredYx,REPredYx)
-                           return(result)
                          }
                            
                          
@@ -434,6 +467,8 @@ make_REXINLA <- function(formula, timeVar, data,use_splines = FALSE,ct,id,SMP, .
   n_id<-length(unique(data[,colnames(data)%in%id]))
   j<-0
   k<-1
+  names_RE<-rep(NA,length(terms_RE))
+
   for (lab in terms_RE) {
     
     if(lab=="Intercept"){
@@ -447,6 +482,7 @@ make_REXINLA <- function(formula, timeVar, data,use_splines = FALSE,ct,id,SMP, .
         return(rep(SMP$latent[x],nn))
       })),nrow=dim(data)[1],ncol=1)
       
+      names_RE[k]<-lab
     } else if (lab == timeVar) {
       # simple linear time
       start<-ct$start[which(ct$tag==paste0(id,lab,"_L1"))]
@@ -457,6 +493,8 @@ make_REXINLA <- function(formula, timeVar, data,use_splines = FALSE,ct,id,SMP, .
         nn<-sum(data[,colnames(data)%in%id]%in%idd[nn])
         return(rep(SMP$latent[x],nn))
       })),nrow=dim(data)[1],ncol=1)
+      
+      names_RE[k]<-lab
       
     } else if (grepl("\\(", lab) && grepl(timeVar, lab)) {
       #INLA takes only function no : I(time^2)
@@ -470,6 +508,7 @@ make_REXINLA <- function(formula, timeVar, data,use_splines = FALSE,ct,id,SMP, .
         return(rep(SMP$latent[x],nn))
       })),nrow=dim(data)[1],ncol=1)
       
+      names_RE[k]<-lab
       
     } else if (use_splines && grepl("bs\\(|ns\\(", lab)) {
       
@@ -482,7 +521,7 @@ make_REXINLA <- function(formula, timeVar, data,use_splines = FALSE,ct,id,SMP, .
     j<-j+1
   }
   
-  Y<-B_RE 
+  colnames(B_RE)<-names_RE
 
   return(Y)
 }
@@ -751,8 +790,10 @@ make_REXINLA_BLUP <- function(formula, timeVar, data,use_splines = FALSE,ct,id,S
   n_id<-length(unique(data[,colnames(data)%in%id]))
   j<-0
   k<-1
+
+  names_RE<-rep(NA,length(terms_RE))
   for (lab in terms_RE) {
-    
+    browser()
     if(lab=="Intercept"){
       
       start<-which(names(SMP$summary.random)==paste0(id,lab,"_L1"))
@@ -762,7 +803,7 @@ make_REXINLA_BLUP <- function(formula, timeVar, data,use_splines = FALSE,ct,id,S
         return(rep(SMP$summary.random[[start]][x,"mode"],nn))
       })),nrow=dim(data)[1],ncol=1)
       
-      
+      names_RE[k]<-lab
     } else if (lab == timeVar) {
       # simple linear time
 
@@ -772,6 +813,8 @@ make_REXINLA_BLUP <- function(formula, timeVar, data,use_splines = FALSE,ct,id,S
         nn<-sum(data[,colnames(data)%in%id]%in%idd[x])
         return(rep(SMP$summary.random[[start]][x,"mode"],nn))
       })),nrow=dim(data)[1],ncol=1)
+      
+      names_RE[k]<-lab
       
       
     } else if (grepl("\\(", lab) && grepl(timeVar, lab)) {
@@ -784,6 +827,7 @@ make_REXINLA_BLUP <- function(formula, timeVar, data,use_splines = FALSE,ct,id,S
         nn<-sum(data[,colnames(data)%in%id]%in%idd[x])
         return(rep(SMP$summary.random[[start]][x,"mode"],nn))
       })),nrow=dim(data)[1],ncol=1)
+      names_RE[k]<-lab
       
       
       
@@ -796,8 +840,8 @@ make_REXINLA_BLUP <- function(formula, timeVar, data,use_splines = FALSE,ct,id,S
     k<-k+1
     j<-j+1
   }
-  
-  Y<-B_RE 
+  browser()
+  colnames(B_RE)<-names_RE
   
   return(Y)
 }

@@ -6,6 +6,7 @@
 #' @author R: Ariane Bercu <ariane.bercu@@u-bordeaux.fr>  
 
 
+## RE NOT OK NEED TO SEE AGAIN
 JMidmpredY<-function(timeVar,
                 truncated,
                 formLong,
@@ -101,11 +102,12 @@ JMidmpredY<-function(timeVar,
         Bj   <- b_mat[j, , idNsample, drop = FALSE] # (q x m)
         
         Random_all[rows, ] <- Zj %*% Bj[1,,]
-        Random[rows,]<-diag(1,nrow=dim(Zj)[1])%*% JMmodel$statistics$Mean$b[j,]
+        Random[rows,]<-Bj[1,,]
         
         dZj   <- dZ[rows, , drop = FALSE]                
         slopeRandom_all[rows, ] <- dZj %*% Bj[1,,]
       }
+      colnames(Random)<-paste0("RE_",c(1:dim(Random)[2]),"_",names(functional_forms)[[indice]])
       
       PredYx <- Fixed + Random_all
       slopePredYx<-slopeFixed + slopeRandom_all
@@ -142,6 +144,8 @@ JMidmpredY<-function(timeVar,
           dZj   <- dZ[rows, , drop = FALSE]
           slopeRandom_mean[rows, ] <- dZj %*% JMmodel$statistics$Mean$b[j,]
         }
+        
+        colnames(Random)<-paste0("RE_",c(1:dim(Random)[2]),"_",names(functional_forms)[[indice]])
         
         PredYmean<-X%*%as.matrix(JMmodel$statistics$Mean$betas1) + Random_mean
         slopePredYmean<-dX%*%as.matrix(JMmodel$statistics$Mean$betas1) + slopeRandom_mean

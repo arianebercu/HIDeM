@@ -48,7 +48,8 @@ DYNidm.splines<-function(b,clustertype,epsa,epsb,epsd,nproc,maxiter,size_V,size_
                          Nsample,BLUP,seed,timeVar,id,formLong,
                          outcome01,outcome02,
                          outcome12,NtimePoints,
-                         p01,p02,p12,dimp01,dimp02,dimp12,scale.X){
+                         p01,p02,p12,assoc,
+                         dimp01,dimp02,dimp12,scale.X){
   
 
   
@@ -72,6 +73,7 @@ DYNidm.splines<-function(b,clustertype,epsa,epsb,epsd,nproc,maxiter,size_V,size_
                             id=id,
                             Nsample=1,
                             t0=t0,t1=t1,t2=t2,t3=t3,
+                            assoc=assoc,
                             ctime=ctime,
                             modelY=modelY,
                             seed=seed+k,

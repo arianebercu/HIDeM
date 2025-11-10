@@ -56,7 +56,7 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,size_spline,
                    Nsample,BLUP,seed,timeVar,id,formLong,
                    outcome01,outcome02,
                    outcome12,NtimePoints,
-                   p01,p02,p12,
+                   p01,p02,p12, assoc,
                    dimp01,dimp02,dimp12,scale.X){
   
 
@@ -164,6 +164,7 @@ browser()
                           id=id,
                           Nsample=1,
                           t0=t0,t1=t1,t2=t2,t3=t3,
+                          assoc=assoc,
                           ctime=ctime,
                           modelY=modelY,
                           seed=seed+idsample,
@@ -2963,6 +2964,7 @@ browser()
                               id=id,
                               Nsample=1,
                               t0=t0,t1=t1,t2=t2,t3=t3,
+                              assoc=assoc,
                               ctime=ctime,
                               modelY=modelY,
                               seed=seed+idsample,
@@ -4419,6 +4421,7 @@ browser()
                                                        id=id,
                                                        Nsample=1,
                                                        t0=t0,t1=t1,t2=t2,t3=t3,
+                                                       assoc=assoc,
                                                        ctime=ctime,
                                                        modelY=modelY,
                                                        seed=seed+idsample,
