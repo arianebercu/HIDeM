@@ -51,6 +51,7 @@ INLAidmpredY<-function(timeVar,truncated,formLong,dataSurv,dataLongi,id,
   
   NtimePoints<-ifelse(truncated==F,256,271)
   
+  browser()
   if(nproc==1){
     
     
@@ -109,8 +110,11 @@ INLAidmpredY<-function(timeVar,truncated,formLong,dataSurv,dataLongi,id,
         REY<-do.call(cbind,
                     lapply(c(1:Nsample),FUN=function(x){make_REXINLA(formula=formLong[[indice]], timeVar=timeVar, data=dataLongi_augmented,ct=ct,id=id,SMP=SMP[[x]])}))
        REY<-REY[indices,]
-       REOutcome<-paste0("RE_",Outcome)
-       REPredYx<-cbind(timePointsdata,Outcome=REOutcome,REY)
+       namesREY<-unlist(lapply(1:dim(REY)[2],FUN=function(x){
+         rep(paste0("RE_",colnames(REY)[x],"_",Outcome),dim(REY)[1])
+       }))
+       dataREY<- do.call(rbind, replicate(dim(REY)[2], timePointsdata, simplify = FALSE))
+       REPredYx<-cbind(dataREY,Outcome=namesREY,as.vector(REY))
        colnames(REPredYx)[4:(Nsample+3)]<-paste0("Sample_",c(1:Nsample))
        res<-rbind(res,REPredYx)
         }
@@ -154,8 +158,11 @@ INLAidmpredY<-function(timeVar,truncated,formLong,dataSurv,dataLongi,id,
         if("RE"%in% choiceY){
         REY<-as.matrix(make_REXINLA_BLUP(formula=formLong[[indice]], timeVar=timeVar, data=dataLongi_augmented,ct=ct,id=id,SMP=INLAmodel))
         REY<-REY[indices,]
-        REOutcome<-paste0("RE_",Outcome)
-        REPredYx<-cbind(timePointsdata,Outcome=REOutcome,REY)
+        namesREY<-unlist(lapply(1:dim(REY)[2],FUN=function(x){
+          rep(paste0("RE_",colnames(REY)[x],"_",Outcome),dim(REY)[1])
+        }))
+        dataREY<- do.call(rbind, replicate(dim(REY)[2], timePointsdata, simplify = FALSE))
+        REPredYx<-cbind(dataREY,Outcome=namesREY,as.vector(REY))
         colnames(REPredYx)[4:(Nsample+3)]<-paste0("Sample_",c(1:Nsample))
         res<-rbind(res,REPredYx)
         }
@@ -241,8 +248,11 @@ INLAidmpredY<-function(timeVar,truncated,formLong,dataSurv,dataLongi,id,
                              REY<-do.call(cbind,
                                           lapply(c(1:Nsample),FUN=function(x){make_REXINLA(formula=formLong[[indice]], timeVar=timeVar, data=dataLongi_augmented,ct=ct,id=id,SMP=SMP[[x]])}))
                              REY<-REY[indices,]
-                             REOutcome<-paste0("RE_",Outcome)
-                             REPredYx<-cbind(timePointsdata,Outcome=REOutcome,REY)
+                             namesREY<-unlist(lapply(1:dim(REY)[2],FUN=function(x){
+                               rep(paste0("RE_",colnames(REY)[x],"_",Outcome),dim(REY)[1])
+                             }))
+                             dataREY<- do.call(rbind, replicate(dim(REY)[2], timePointsdata, simplify = FALSE))
+                             REPredYx<-cbind(dataREY,Outcome=namesREY,as.vector(REY))
                              colnames(REPredYx)[4:(Nsample+3)]<-paste0("Sample_",c(1:Nsample))
                              res<-rbind(res,REPredYx)
                            }
@@ -286,8 +296,11 @@ INLAidmpredY<-function(timeVar,truncated,formLong,dataSurv,dataLongi,id,
                            if("RE"%in% choiceY){
                              REY<-as.matrix(make_REXINLA_BLUP(formula=formLong[[indice]], timeVar=timeVar, data=dataLongi_augmented,ct=ct,id=id,SMP=INLAmodel))
                              REY<-REY[indices,]
-                             REOutcome<-paste0("RE_",Outcome)
-                             REPredYx<-cbind(timePointsdata,Outcome=REOutcome,REY)
+                             namesREY<-unlist(lapply(1:dim(REY)[2],FUN=function(x){
+                               rep(paste0("RE_",colnames(REY)[x],"_",Outcome),dim(REY)[1])
+                             }))
+                             dataREY<- do.call(rbind, replicate(dim(REY)[2], timePointsdata, simplify = FALSE))
+                             REPredYx<-cbind(dataREY,Outcome=namesREY,as.vector(REY))
                              colnames(REPredYx)[4:(Nsample+3)]<-paste0("Sample_",c(1:Nsample))
                              res<-rbind(res,REPredYx)
                            }
@@ -312,637 +325,496 @@ INLAidmpredY<-function(timeVar,truncated,formLong,dataSurv,dataLongi,id,
   
 }
 
-make_XINLA <- function(formula, timeVar, data,use_splines = FALSE,ct,id,SMP, ...) {
-  
-  
-  terms_labels <- attr(terms(formula), "term.labels")
-  terms_fixed <- terms_labels[grepl(id, terms_labels)==F]
-  
-  terms_RE <- terms_labels[grepl(id, terms_labels)==T][1]
-  terms_RE <- gsub("\\|.*", "", terms_RE)
-  terms_RE <- as.formula(paste("~", terms_RE))
-  terms_RE <- attr(terms(terms_RE), "term.labels")
 
+make_XINLA <- function(formula, timeVar, data, use_splines = FALSE, ct, id, SMP, ...) {
+  n <- nrow(data)
   
-  # Identify terms
- if(paste0(id,"Intercept_L1")%in%ct$tag){
-   terms_RE<-c("Intercept",terms_RE)
- }
-  if("Intercept_L1"%in%ct$tag){
-    terms_fixed<-c("Intercept",terms_fixed)
+  # Extract terms
+  terms_labels <- attr(terms(formula), "term.labels")
+  terms_fixed <- terms_labels[!grepl(id, terms_labels)]
+  
+  terms_RE <- terms_labels[grepl(id, terms_labels)][1]
+  terms_RE <- gsub("\\|.*", "", terms_RE)
+  terms_RE <- attr(terms(as.formula(paste("~", terms_RE))), "term.labels")
+  
+  # Handle intercepts
+  if (paste0(id, "Intercept_L1") %in% ct$tag) terms_RE <- c("Intercept", terms_RE)
+  if ("Intercept_L1" %in% ct$tag) terms_fixed <- c("Intercept", terms_fixed)
+  
+  # Precompute
+  ct_start <- setNames(ct$start, ct$tag)
+  latent <- SMP$latent
+  id_values <- data[[id]]
+  id_levels <- unique(id_values)
+  n_id <- length(id_levels)
+  
+  # --- Fixed effects ---
+  n_fixed <- length(terms_fixed)
+  X <- matrix(NA_real_, nrow = n, ncol = n_fixed)
+  B <- matrix(0, nrow = n, ncol = n_fixed)
+  colnames(X) <- paste0(terms_fixed, "_L1")
+  
+  for (k in seq_along(terms_fixed)) {
+    lab <- terms_fixed[k]
+    tag <- paste0(gsub("[()]", "", lab), "_L1")
     
+    if (lab == "Intercept") {
+      X[, k] <- 1
+    } else {
+      expr <- if (grepl("\\(", lab)) str2lang(lab) else as.symbol(lab)
+      X[, k] <- eval(expr, data)
+    }
+    
+    if (!is.na(ct_start[tag])) {
+      B[, k] <- latent[ct_start[tag]]
+    }
   }
   
-  X<-NULL
-  B<-matrix(0,nrow=dim(data)[1],ncol=length(terms_fixed))
-  k<-1
-  for (lab in terms_fixed) {
+  # --- Random effects ---
+  n_re <- length(terms_RE)
+  X_RE <- matrix(NA_real_, nrow = n, ncol = n_re)
+  B_RE <- matrix(0, nrow = n, ncol = n_re)
+  colnames(X_RE) <- paste0(id, terms_RE, "_L1")
+  
+  for (k in seq_along(terms_RE)) {
+    lab <- terms_RE[k]
+    tag <- paste0(id, gsub("[()]", "", lab), "_L1")
+    base_start <- ct_start[tag]
+    if (is.na(base_start)) next
     
-    if(lab=="Intercept"){
-      
-      Xlab <- matrix(1,nrow=dim(data)[1],ncol=1)
-      colnames(Xlab)<-paste0(lab,"_L1")
-      
-      start<-ct$start[which(ct$tag==paste0(lab,"_L1"))]
-      B[,k]<-matrix(SMP$latent[start],nrow=dim(data)[1],ncol=1)
-      
-    } else if (lab == timeVar) {
-      # simple linear time
-      expr <- parse(text = lab)[[1]]
-      
-      Xlab<-matrix(eval(expr, envir = data),ncol=1,nrow=dim(data)[1])
-      colnames(Xlab)<-paste0(lab,"_L1")
-      start<-ct$start[which(ct$tag==paste0(lab,"_L1"))]
-      B[,k]<-matrix(SMP$latent[start],nrow=dim(data)[1],ncol=1)
-      
-    } else if (grepl("\\(", lab) && grepl(timeVar, lab)) {
-      #INLA takes only function no : I(time^2)
-      expr <- parse(text = lab)[[1]]
-      
-      Xlab<-matrix(eval(expr, envir = data),ncol=1,nrow=dim(data)[1])
-      colnames(Xlab)<-paste0(gsub("[())]","",lab),"_L1")
-      start<-ct$start[which(ct$tag==paste0(gsub("[())]","",lab),"_L1"))]
-      B[,k]<-matrix(SMP$latent[start],nrow=dim(data)[1],ncol=1)
-      
-    } else if (use_splines && grepl("bs\\(|ns\\(", lab)) {
-      
-      # Extract knots etc. from the original call if needed
-      stop("Spline not supported so far")
-      
-    } 
-    X<-cbind(X,Xlab)
-    k<-k+1
+    # Design part
+    if (lab == "Intercept") {
+      X_RE[, k] <- 1
+    } else {
+      expr <- if (grepl("\\(", lab)) str2lang(lab) else as.symbol(lab)
+      X_RE[, k] <- eval(expr, data)
+    }
+    
+    # <- THIS WAS THE MISSING PART!
+    j_offset <- (k - 1) * n_id
+    start <- base_start + j_offset
+    end <- start + n_id - 1
+    
+    latents_for_ids <- latent[start:end]
+    id_to_latent <- setNames(latents_for_ids, id_levels)
+    B_RE[, k] <- unname(id_to_latent[id_values])
   }
   
-  
-  idd<-unique(data[,colnames(data)%in% id])
-  X_RE<-NULL
-  B_RE<-matrix(0,nrow=dim(data)[1],ncol=length(terms_RE))
-  n_id<-length(unique(data[,colnames(data)%in%id]))
-  j<-0
-  k<-1
-  for (lab in terms_RE) {
-    
-    if(lab=="Intercept"){
-      
-      Xlab <- matrix(1,nrow=dim(data)[1],ncol=1)
-      colnames(Xlab)<-paste0(id,lab,"_L1")
-      
-      start<-ct$start[which(ct$tag==paste0(id,lab,"_L1"))]
-      start<-start+j*n_id
-      end<-start+n_id-1
-      B_RE[,k]<-matrix(do.call(c,lapply(c(start:end),FUN=function(x){
-        nn<-x-start+1
-        nn<-sum(data[,colnames(data)%in%id]%in%idd[nn])
-        return(rep(SMP$latent[x],nn))
-      })),nrow=dim(data)[1],ncol=1)
-      
-    } else if (lab == timeVar) {
-      # simple linear time
-      expr <- parse(text = lab)[[1]]
-      Xlab<-matrix(eval(expr, envir = data),ncol=1,nrow=dim(data)[1])
-      colnames(Xlab)<-paste0(id,lab,"_L1")
-      
-      start<-ct$start[which(ct$tag==paste0(id,lab,"_L1"))]
-      start<-start+j*n_id
-      end<-start+n_id-1
-      B_RE[,k]<-matrix(do.call(c,lapply(c(start:end),FUN=function(x){
-        nn<-x-start+1
-        nn<-sum(data[,colnames(data)%in%id]%in%idd[nn])
-        return(rep(SMP$latent[x],nn))
-      })),nrow=dim(data)[1],ncol=1)
-      
-    } else if (grepl("\\(", lab) && grepl(timeVar, lab)) {
-      #INLA takes only function no : I(time^2)
-      
-      expr <- parse(text = lab)[[1]]
-      Xlab<-matrix(eval(expr, envir = data),ncol=1,nrow=dim(data)[1])
-      colnames(Xlab)<-paste0(id,gsub("[())]","",lab),"_L1")
-      
-      start<-ct$start[which(ct$tag==paste0(id,gsub("[())]","",lab),"_L1"))]
-      start<-start+j*n_id
-      end<-start+n_id-1
-      B_RE[,k]<-matrix(do.call(c,lapply(c(start:end),FUN=function(x){
-        nn<-x-start+1
-        nn<-sum(data[,colnames(data)%in%id]%in%idd[nn])
-        return(rep(SMP$latent[x],nn))
-      })),nrow=dim(data)[1],ncol=1)
-      
-      
-    } else if (use_splines && grepl("bs\\(|ns\\(", lab)) {
-      
-      # Extract knots etc. from the original call if needed
-      stop("Spline not supported so far")
-      
-    } 
-    X_RE<-cbind(X_RE,Xlab)
-    k<-k+1
-    j<-j+1
-  }
-  
-  Y<-X_RE*B_RE + X*B
-  Y<-rowSums(Y)
-  
+  # Combine
+  Y <- rowSums(X * B + X_RE * B_RE)
   return(Y)
 }
 
-make_REXINLA <- function(formula, timeVar, data,use_splines = FALSE,ct,id,SMP, ...) {
+make_REXINLA <- function(formula, timeVar, data, use_splines = FALSE, ct, id, SMP, ...) {
+  n <- nrow(data)
   
-  
+  # --- Extract random-effect terms ---
   terms_labels <- attr(terms(formula), "term.labels")
-  
-  terms_RE <- terms_labels[grepl(id, terms_labels)==T][1]
+  terms_RE <- terms_labels[grepl(id, terms_labels)][1]
   terms_RE <- gsub("\\|.*", "", terms_RE)
-  terms_RE <- as.formula(paste("~", terms_RE))
-  terms_RE <- attr(terms(terms_RE), "term.labels")
+  terms_RE <- attr(terms(as.formula(paste("~", terms_RE))), "term.labels")
   
-  
-  # Identify terms
-  if(paste0(id,"Intercept_L1")%in%ct$tag){
-    terms_RE<-c("Intercept",terms_RE)
+  # Add intercept if present in ct
+  if (paste0(id, "Intercept_L1") %in% ct$tag) {
+    terms_RE <- c("Intercept", terms_RE)
   }
   
-  idd<-unique(data[,colnames(data)%in% id])
-  B_RE<-matrix(0,nrow=dim(data)[1],ncol=length(terms_RE))
-  n_id<-length(unique(data[,colnames(data)%in%id]))
-  j<-0
-  k<-1
-  names_RE<-rep(NA,length(terms_RE))
-
-  for (lab in terms_RE) {
+  # Precompute
+  ct_start <- setNames(ct$start, ct$tag)
+  latent <- SMP$latent
+  id_values <- data[[id]]
+  id_levels <- unique(id_values)
+  n_id <- length(id_levels)
+  
+  # --- Allocate output ---
+  n_re <- length(terms_RE)
+  B_RE <- matrix(0, nrow = n, ncol = n_re)
+  colnames(B_RE) <- terms_RE
+  
+  # --- Main loop (vectorized) ---
+  for (k in seq_along(terms_RE)) {
+    lab <- terms_RE[k]
     
-    if(lab=="Intercept"){
-      
-      start<-ct$start[which(ct$tag==paste0(id,lab,"_L1"))]
-      start<-start+j*n_id
-      end<-start+n_id-1
-      B_RE[,k]<-matrix(do.call(c,lapply(c(start:end),FUN=function(x){
-        nn<-x-start+1
-        nn<-sum(data[,colnames(data)%in%id]%in%idd[nn])
-        return(rep(SMP$latent[x],nn))
-      })),nrow=dim(data)[1],ncol=1)
-      
-      names_RE[k]<-lab
-    } else if (lab == timeVar) {
-      # simple linear time
-      start<-ct$start[which(ct$tag==paste0(id,lab,"_L1"))]
-      start<-start+j*n_id
-      end<-start+n_id-1
-      B_RE[,k]<-matrix(do.call(c,lapply(c(start:end),FUN=function(x){
-        nn<-x-start+1
-        nn<-sum(data[,colnames(data)%in%id]%in%idd[nn])
-        return(rep(SMP$latent[x],nn))
-      })),nrow=dim(data)[1],ncol=1)
-      
-      names_RE[k]<-lab
-      
-    } else if (grepl("\\(", lab) && grepl(timeVar, lab)) {
-      #INLA takes only function no : I(time^2)
-      
-      start<-ct$start[which(ct$tag==paste0(id,gsub("[())]","",lab),"_L1"))]
-      start<-start+j*n_id
-      end<-start+n_id-1
-      B_RE[,k]<-matrix(do.call(c,lapply(c(start:end),FUN=function(x){
-        nn<-x-start+1
-        nn<-sum(data[,colnames(data)%in%id]%in%idd[nn])
-        return(rep(SMP$latent[x],nn))
-      })),nrow=dim(data)[1],ncol=1)
-      
-      names_RE[k]<-lab
-      
-    } else if (use_splines && grepl("bs\\(|ns\\(", lab)) {
-      
-      # Extract knots etc. from the original call if needed
-      stop("Spline not supported so far")
-      
-    } 
-
-    k<-k+1
-    j<-j+1
+    # Match correct ct tag
+    base_tag <- if (grepl("\\(", lab)) {
+      paste0(id, gsub("[())]", "", lab), "_L1")
+    } else {
+      paste0(id, lab, "_L1")
+    }
+    base_start <- ct_start[base_tag]
+    if (is.na(base_start)) next
+    
+    # Account for offset (important!)
+    j_offset <- (k - 1) * n_id
+    start <- base_start + j_offset
+    end <- start + n_id - 1
+    
+    # Latent values for each ID level
+    latents_for_ids <- latent[start:end]
+    
+    # Map each data row to its corresponding latent
+    id_to_latent <- setNames(latents_for_ids, id_levels)
+    B_RE[, k] <- unname(id_to_latent[id_values])
   }
   
-  colnames(B_RE)<-names_RE
-
-  return(Y)
+  return(B_RE)
 }
 
-make_dXINLA <- function(formula,timeVar, data,use_splines = FALSE,ct,id,SMP, ...) {
+make_dXINLA<- function(formula, timeVar, data, use_splines = FALSE, ct, id, SMP, ...) {
+  n <- nrow(data)
   
-  
+  # --- Extract fixed and random terms ---
   terms_labels <- attr(terms(formula), "term.labels")
-  terms_fixed <- terms_labels[grepl(id, terms_labels)==F]
+  terms_fixed <- terms_labels[!grepl(id, terms_labels)]
   
-  terms_RE <- terms_labels[grepl(id, terms_labels)==T][1]
+  terms_RE <- terms_labels[grepl(id, terms_labels)][1]
   terms_RE <- gsub("\\|.*", "", terms_RE)
-  terms_RE <- as.formula(paste("~", terms_RE))
-  terms_RE <- attr(terms(terms_RE), "term.labels")
+  terms_RE <- attr(terms(as.formula(paste("~", terms_RE))), "term.labels")
   
-
-  # Identify terms
-  X<-NULL
-  B<-matrix(0,nrow=dim(data)[1],ncol=length(terms_fixed))
-
-  k<-1
-  for (lab in terms_fixed) {
+  # --- Precompute ---
+  ct_start <- setNames(ct$start, ct$tag)
+  latent <- SMP$latent
+  id_values <- data[[id]]
+  id_levels <- unique(id_values)
+  n_id <- length(id_levels)
+  
+  # --- Fixed effects part ---
+  n_fixed <- length(terms_fixed)
+  X <- matrix(NA_real_, nrow = n, ncol = n_fixed)
+  B <- matrix(0, nrow = n, ncol = n_fixed)
+  colnames(X) <- paste0(terms_fixed, "_L1")
+  
+  for (k in seq_along(terms_fixed)) {
+    lab <- terms_fixed[k]
+    tag <- paste0(gsub("[()]", "", lab), "_L1")
+    
+    # Handle derivative wrt time
     if (lab == timeVar) {
-      # simple linear time
-      Xlab <- matrix(1,nrow=dim(data)[1],ncol=1)
-      colnames(Xlab)<-paste0(lab,"_L1")
-      
-      start<-ct$start[which(ct$tag==paste0(lab,"_L1"))]
-      B[,k]<-matrix(SMP$latent[start],nrow=dim(data)[1],ncol=1)
+      X[, k] <- 1
+      if (!is.na(ct_start[tag])) B[, k] <- latent[ct_start[tag]]
       
     } else if (grepl("\\(", lab) && grepl(timeVar, lab)) {
-      #INLA takes only function no : I(time^2)
-      expr <- parse(text = lab)[[1]]
+      expr <- str2lang(lab)
       dexpr <- Deriv::Deriv(expr, timeVar)
-      
-      Xlab<-matrix(eval(dexpr, envir = data),ncol=1,nrow=dim(data)[1])
-      colnames(Xlab)<-paste0(gsub("[())]","",lab),"_L1")
-      start<-ct$start[which(ct$tag==paste0(gsub("[())]","",lab),"_L1"))]
-      B[,k]<-matrix(SMP$latent[start],nrow=dim(data)[1],ncol=1)
-      
-    } else if (use_splines && grepl("bs\\(|ns\\(", lab)) {
-      
-      # Extract knots etc. from the original call if needed
-      stop("Spline not supported so far")
-      
-    } 
-    X<-cbind(X,Xlab)
-    k<-k+1
+      X[, k] <- eval(dexpr, data)
+      colnames(X)[k] <- paste0(gsub("[())]", "", lab), "_L1")
+      if (!is.na(ct_start[tag])) B[, k] <- latent[ct_start[tag]]
+    }
   }
   
-
-  idd<-unique(data[,colnames(data)%in% id])
-  X_RE<-NULL
-  B_RE<-matrix(0,nrow=dim(data)[1],ncol=length(terms_RE))
-  n_id<-length(unique(data[,colnames(data)%in%id]))
-  j<-ifelse(paste0(id,"Intercept_L1")%in%ct$tag,1,0)
-
-  k<-1
-  for (lab in terms_RE) {
+  # --- Random effects part ---
+  n_re <- length(terms_RE)
+  X_RE <- matrix(NA_real_, nrow = n, ncol = n_re)
+  B_RE <- matrix(0, nrow = n, ncol = n_re)
+  colnames(X_RE) <- paste0(id, terms_RE, "_L1")
+  
+  j_offset_base <- ifelse(paste0(id, "Intercept_L1") %in% ct$tag, 1, 0)
+  
+  for (k in seq_along(terms_RE)) {
+    lab <- terms_RE[k]
+    tag <- paste0(id, gsub("[()]", "", lab), "_L1")
+    base_start <- ct_start[tag]
+    if (is.na(base_start)) next
     
     if (lab == timeVar) {
-      # simple linear time
-      Xlab <- matrix(1,nrow=dim(data)[1],ncol=1)
-      colnames(Xlab)<-paste0(id,lab,"_L1")
-      
-      start<-ct$start[which(ct$tag==paste0(id,lab,"_L1"))]
-      start<-start+j*n_id
-      end<-start+n_id-1
-      B_RE[,k]<-matrix(do.call(c,lapply(c(start:end),FUN=function(x){
-        nn<-x-start+1
-        nn<-sum(data[,colnames(data)%in%id]%in%idd[nn])
-        return(rep(SMP$latent[x],nn))
-      })),nrow=dim(data)[1],ncol=1)
+      X_RE[, k] <- 1
       
     } else if (grepl("\\(", lab) && grepl(timeVar, lab)) {
-      #INLA takes only function no : I(time^2)
-      
-      expr <- parse(text = lab)[[1]]
+      expr <- str2lang(lab)
       dexpr <- Deriv::Deriv(expr, timeVar)
-      Xlab<-matrix(eval(dexpr, envir = data),ncol=1,nrow=dim(data)[1])
-      colnames(Xlab)<-paste0(id,gsub("[())]","",lab),"_L1")
-      
-      start<-ct$start[which(ct$tag==paste0(id,gsub("[())]","",lab),"_L1"))]
-      start<-start+j*n_id
-      end<-start+n_id-1
-      B_RE[,k]<-matrix(do.call(c,lapply(c(start:end),FUN=function(x){
-        nn<-x-start+1
-        nn<-sum(data[,colnames(data)%in%id]%in%idd[nn])
-        return(rep(SMP$latent[x],nn))
-      })),nrow=dim(data)[1],ncol=1)
-      
-      
-    } else if (use_splines && grepl("bs\\(|ns\\(", lab)) {
-      
-      # Extract knots etc. from the original call if needed
-      stop("Spline not supported so far")
-      
-    } 
-    X_RE<-cbind(X_RE,Xlab)
-    k<-k+1
-    j<-j+1
+      X_RE[, k] <- eval(dexpr, data)
+      colnames(X_RE)[k] <- paste0(id, gsub("[())]", "", lab), "_L1")
+    }
+    
+    # Offset logic identical to original
+    j_offset <- (j_offset_base + (k - 1)) * n_id
+    start <- base_start + j_offset
+    end <- start + n_id - 1
+    
+    latents_for_ids <- latent[start:end]
+    id_to_latent <- setNames(latents_for_ids, id_levels)
+    B_RE[, k] <- unname(id_to_latent[id_values])
   }
   
-  dY<-X_RE*B_RE + X*B
-  dY<-rowSums(dY)
-  
+  # --- Combine fixed and random derivatives ---
+  dY <- rowSums(X * B + X_RE * B_RE)
   return(dY)
 }
 
-make_XINLA_BLUP <- function(formula, timeVar, data,use_splines = FALSE,ct,id,SMP, ...) {
+make_XINLA_BLUP <- function(formula, timeVar, data, use_splines = FALSE, ct, id, SMP, ...) {
+  n <- nrow(data)
   
-  
+  # --- parse terms ---
   terms_labels <- attr(terms(formula), "term.labels")
-  terms_fixed <- terms_labels[grepl(id, terms_labels)==F]
-  
-  terms_RE <- terms_labels[grepl(id, terms_labels)==T][1]
+  terms_fixed <- terms_labels[!grepl(id, terms_labels)]
+  terms_RE <- terms_labels[grepl(id, terms_labels)][1]
   terms_RE <- gsub("\\|.*", "", terms_RE)
-  terms_RE <- as.formula(paste("~", terms_RE))
-  terms_RE <- attr(terms(terms_RE), "term.labels")
+  terms_RE <- attr(terms(as.formula(paste("~", terms_RE))), "term.labels")
   
-  
-  # Identify terms
-  if(paste0(id,"Intercept_L1")%in%ct$tag){
-    terms_RE<-c("Intercept",terms_RE)
+  # intercept handling
+  if (paste0(id, "Intercept_L1") %in% ct$tag) {
+    terms_RE <- c("Intercept", terms_RE)
   }
-  if("Intercept_L1"%in%ct$tag){
-    terms_fixed<-c("Intercept",terms_fixed)
-    
+  if ("Intercept_L1" %in% ct$tag) {
+    terms_fixed <- c("Intercept", terms_fixed)
   }
   
-  X<-NULL
-  B<-matrix(0,nrow=dim(data)[1],ncol=length(terms_fixed))
-  k<-1
-  for (lab in terms_fixed) {
+  # --- prepare lookups ---
+  # fixed summary modes by rowname
+  sf <- SMP$summary.fixed
+  fixed_mode <- if (!is.null(sf)) setNames(sf[, "mode"], rownames(sf)) else numeric(0)
+  
+  # random summary list names
+  sr_names <- names(SMP$summary.random)
+  sr_list <- SMP$summary.random
+  
+  id_values <- data[[id]]
+  id_levels <- unique(id_values)        # preserves original order (like your idd)
+  n_id <- length(id_levels)
+  id_index <- match(id_values, id_levels) # vector of positions 1..n_id for each row
+  
+  # --- Fixed effects (design X and coefficient B) ---
+  n_fixed <- length(terms_fixed)
+  X <- matrix(NA_real_, nrow = n, ncol = n_fixed)
+  B <- matrix(0, nrow = n, ncol = n_fixed)
+  colnames(X) <- paste0(terms_fixed, "_L1")
+  
+  for (k in seq_along(terms_fixed)) {
+    lab <- terms_fixed[k]
+    tag <- paste0(gsub("[()]", "", lab), "_L1")
     
-    if(lab=="Intercept"){
-      
-      Xlab <- matrix(1,nrow=dim(data)[1],ncol=1)
-      colnames(Xlab)<-paste0(lab,"_L1")
-      
-      start<-which(rownames(SMP$summary.fixed)==paste0(lab,"_L1"))
-      B[,k]<-matrix(SMP$summary.fixed[start,"mode"],nrow=dim(data)[1],ncol=1)
-      
-      
+    if (lab == "Intercept") {
+      X[, k] <- 1
     } else if (lab == timeVar) {
-      # simple linear time
-      expr <- parse(text = lab)[[1]]
-      
-      Xlab<-matrix(eval(expr, envir = data),ncol=1,nrow=dim(data)[1])
-      colnames(Xlab)<-paste0(lab,"_L1")
-      
-      start<-which(rownames(SMP$summary.fixed)==paste0(lab,"_L1"))
-      B[,k]<-matrix(SMP$summary.fixed[start,"mode"],nrow=dim(data)[1],ncol=1)
-      
-      
+      # linear time
+      expr <- if (grepl("\\(", lab)) str2lang(lab) else as.name(lab)
+      X[, k] <- eval(expr, data)
     } else if (grepl("\\(", lab) && grepl(timeVar, lab)) {
-      #INLA takes only function no : I(time^2)
-      expr <- parse(text = lab)[[1]]
-      
-      Xlab<-matrix(eval(expr, envir = data),ncol=1,nrow=dim(data)[1])
-      colnames(Xlab)<-paste0(gsub("[())]","",lab),"_L1")
-      
-      start<-which(rownames(SMP$summary.fixed)==paste0(gsub("[())]","",lab),"_L1"))
-      B[,k]<-matrix(SMP$summary.fixed[start,"mode"],nrow=dim(data)[1],ncol=1)
-      
-      
-    } else if (use_splines && grepl("bs\\(|ns\\(", lab)) {
-      
-      # Extract knots etc. from the original call if needed
-      stop("Spline not supported so far")
-      
-    } 
-    X<-cbind(X,Xlab)
-    k<-k+1
-  }
-  
-  
-  idd<-unique(data[,colnames(data)%in% id])
-  X_RE<-NULL
-  B_RE<-matrix(0,nrow=dim(data)[1],ncol=length(terms_RE))
-  n_id<-length(unique(data[,colnames(data)%in%id]))
-  j<-0
-  k<-1
-  for (lab in terms_RE) {
+      expr <- str2lang(lab)
+      X[, k] <- eval(expr, data)
+      colnames(X)[k] <- paste0(gsub("[())]", "", lab), "_L1")
+    } else {
+      # other fixed terms (if any)
+      X[, k] <- data[[lab]]
+    }
     
-    if(lab=="Intercept"){
-      
-      Xlab <- matrix(1,nrow=dim(data)[1],ncol=1)
-      colnames(Xlab)<-paste0(id,lab,"_L1")
-      
-      start<-which(names(SMP$summary.random)==paste0(id,lab,"_L1"))
-      
-      B_RE[,k]<-matrix(do.call(c,lapply(c(1:n_id),FUN=function(x){
-        nn<-sum(data[,colnames(data)%in%id]%in%idd[x])
-        return(rep(SMP$summary.random[[start]][x,"mode"],nn))
-      })),nrow=dim(data)[1],ncol=1)
-      
-      
-    } else if (lab == timeVar) {
-      # simple linear time
-      expr <- parse(text = lab)[[1]]
-      Xlab<-matrix(eval(expr, envir = data),ncol=1,nrow=dim(data)[1])
-      colnames(Xlab)<-paste0(id,lab,"_L1")
-      
-      start<-which(names(SMP$summary.random)==paste0(id,lab,"_L1"))
-      
-      B_RE[,k]<-matrix(do.call(c,lapply(c(1:n_id),FUN=function(x){
-        nn<-sum(data[,colnames(data)%in%id]%in%idd[x])
-        return(rep(SMP$summary.random[[start]][x,"mode"],nn))
-      })),nrow=dim(data)[1],ncol=1)
-      
-      
-    } else if (grepl("\\(", lab) && grepl(timeVar, lab)) {
-      #INLA takes only function no : I(time^2)
-      
-      expr <- parse(text = lab)[[1]]
-      Xlab<-matrix(eval(expr, envir = data),ncol=1,nrow=dim(data)[1])
-      colnames(Xlab)<-paste0(id,gsub("[())]","",lab),"_L1")
-      
-
-      start<-which(names(SMP$summary.random)==paste0(id,gsub("[())]","",lab),"_L1"))
-      
-      B_RE[,k]<-matrix(do.call(c,lapply(c(1:n_id),FUN=function(x){
-        nn<-sum(data[,colnames(data)%in%id]%in%idd[x])
-        return(rep(SMP$summary.random[[start]][x,"mode"],nn))
-      })),nrow=dim(data)[1],ncol=1)
-      
-      
-      
-    } else if (use_splines && grepl("bs\\(|ns\\(", lab)) {
-      
-      # Extract knots etc. from the original call if needed
-      stop("Spline not supported so far")
-      
-    } 
-    X_RE<-cbind(X_RE,Xlab)
-    k<-k+1
-    j<-j+1
+    if (tag %in% names(fixed_mode)) {
+      B[, k] <- fixed_mode[tag]
+    }
   }
   
-  Y<-X_RE*B_RE + X*B
-  Y<-rowSums(Y)
+  # --- Random effects (B_RE) ---
+  n_re <- length(terms_RE)
+  X_RE <- matrix(NA_real_, nrow = n, ncol = n_re)
+  B_RE <- matrix(0, nrow = n, ncol = n_re)
+  colnames(X_RE) <- paste0(id, terms_RE, "_L1")
   
+  for (k in seq_along(terms_RE)) {
+    lab <- terms_RE[k]
+    # form summary.random tag name exactly like original
+    if (lab == "Intercept") {
+      sr_tag <- paste0(id, lab, "_L1")
+    } else if (grepl("\\(", lab) && grepl(timeVar, lab)) {
+      sr_tag <- paste0(id, gsub("[())]", "", lab), "_L1")
+    } else {
+      sr_tag <- paste0(id, lab, "_L1")
+    }
+    
+    pos <- which(sr_names == sr_tag)
+    if (length(pos) == 0) {
+      # no random summary for that term -> leave zeros
+      # still compute X_RE if needed
+      if (lab == "Intercept") X_RE[, k] <- 1
+      else if (lab == timeVar) X_RE[, k] <- eval(str2lang(lab), data)
+      else if (grepl("\\(", lab) && grepl(timeVar, lab)) X_RE[, k] <- eval(str2lang(lab), data)
+      next
+    }
+    
+    # design column
+    if (lab == "Intercept") {
+      X_RE[, k] <- 1
+    } else if (lab == timeVar) {
+      X_RE[, k] <- eval(str2lang(lab), data)
+    } else if (grepl("\\(", lab) && grepl(timeVar, lab)) {
+      X_RE[, k] <- eval(str2lang(lab), data)
+      colnames(X_RE)[k] <- paste0(id, gsub("[())]", "", lab), "_L1")
+    } else {
+      X_RE[, k] <- data[[lab]]
+    }
+    
+    # extract modes for each id (rows in the summary.random element)
+    modes_vec <- sr_list[[pos]][, "mode"]
+    # names correspond to id_levels order only if sr was built that way; original code used idd order (unique(data[[id]]))
+    # so we set names using id_levels to replicate original replication logic
+    names(modes_vec) <- id_levels
+    B_RE[, k] <- unname(modes_vec[id_values])
+  }
+  
+  # --- combine and return ---
+  Y <- rowSums(X * B + X_RE * B_RE)
   return(Y)
 }
 
-make_REXINLA_BLUP <- function(formula, timeVar, data,use_splines = FALSE,ct,id,SMP, ...) {
-  
-  
+make_REXINLA_BLUP <- function(formula, timeVar, data, use_splines = FALSE, ct, id, SMP, ...) {
+  # --- parse random-effect terms ---
   terms_labels <- attr(terms(formula), "term.labels")
-  
-  terms_RE <- terms_labels[grepl(id, terms_labels)==T][1]
+  terms_RE <- terms_labels[grepl(id, terms_labels)][1]
   terms_RE <- gsub("\\|.*", "", terms_RE)
-  terms_RE <- as.formula(paste("~", terms_RE))
-  terms_RE <- attr(terms(terms_RE), "term.labels")
+  terms_RE <- attr(terms(as.formula(paste("~", terms_RE))), "term.labels")
   
+  # add intercept if present in ct$tag
+  if (paste0(id, "Intercept_L1") %in% ct$tag)
+    terms_RE <- c("Intercept", terms_RE)
   
-  # Identify terms
-  if(paste0(id,"Intercept_L1")%in%ct$tag){
-    terms_RE<-c("Intercept",terms_RE)
-  }
-
+  # --- precompute ID mapping ---
+  id_values <- data[[id]]
+  id_levels <- unique(id_values)       # preserve original order (like your idd)
+  n <- nrow(data)
+  n_id <- length(id_levels)
+  id_index <- match(id_values, id_levels) # each row gets an index 1..n_id
   
-  idd<-unique(data[,colnames(data)%in% id])
-  B_RE<-matrix(0,nrow=dim(data)[1],ncol=length(terms_RE))
-  n_id<-length(unique(data[,colnames(data)%in%id]))
-  j<-0
-  k<-1
-
-  names_RE<-rep(NA,length(terms_RE))
-  for (lab in terms_RE) {
-    browser()
-    if(lab=="Intercept"){
-      
-      start<-which(names(SMP$summary.random)==paste0(id,lab,"_L1"))
-      
-      B_RE[,k]<-matrix(do.call(c,lapply(c(1:n_id),FUN=function(x){
-        nn<-sum(data[,colnames(data)%in%id]%in%idd[x])
-        return(rep(SMP$summary.random[[start]][x,"mode"],nn))
-      })),nrow=dim(data)[1],ncol=1)
-      
-      names_RE[k]<-lab
-    } else if (lab == timeVar) {
-      # simple linear time
-
-      start<-which(names(SMP$summary.random)==paste0(id,lab,"_L1"))
-      
-      B_RE[,k]<-matrix(do.call(c,lapply(c(1:n_id),FUN=function(x){
-        nn<-sum(data[,colnames(data)%in%id]%in%idd[x])
-        return(rep(SMP$summary.random[[start]][x,"mode"],nn))
-      })),nrow=dim(data)[1],ncol=1)
-      
-      names_RE[k]<-lab
-      
-      
+  # --- prepare output matrix ---
+  n_re <- length(terms_RE)
+  B_RE <- matrix(0, nrow = n, ncol = n_re)
+  names_RE <- character(n_re)
+  
+  # --- get list names once ---
+  sr_names <- names(SMP$summary.random)
+  sr_list  <- SMP$summary.random
+  
+  # --- main loop (vectorized per term) ---
+  for (k in seq_along(terms_RE)) {
+    lab <- terms_RE[k]
+    
+    # Build tag name for summary.random lookup
+    if (lab == "Intercept") {
+      sr_tag <- paste0(id, lab, "_L1")
     } else if (grepl("\\(", lab) && grepl(timeVar, lab)) {
-      #INLA takes only function no : I(time^2)
-      
-      
-      start<-which(names(SMP$summary.random)==paste0(id,gsub("[())]","",lab),"_L1"))
-      
-      B_RE[,k]<-matrix(do.call(c,lapply(c(1:n_id),FUN=function(x){
-        nn<-sum(data[,colnames(data)%in%id]%in%idd[x])
-        return(rep(SMP$summary.random[[start]][x,"mode"],nn))
-      })),nrow=dim(data)[1],ncol=1)
-      names_RE[k]<-lab
-      
-      
-      
-    } else if (use_splines && grepl("bs\\(|ns\\(", lab)) {
-      
-      # Extract knots etc. from the original call if needed
-      stop("Spline not supported so far")
-      
-    } 
-    k<-k+1
-    j<-j+1
+      sr_tag <- paste0(id, gsub("[())]", "", lab), "_L1")
+    } else {
+      sr_tag <- paste0(id, lab, "_L1")
+    }
+    
+    pos <- which(sr_names == sr_tag)
+    if (length(pos) == 0) next  # skip missing RE terms
+    
+    # Extract BLUP modes for each ID
+    modes_vec <- sr_list[[pos]][, "mode"]
+    names(modes_vec) <- id_levels  # align with unique(data[[id]]) order
+    
+    # Vectorized mapping
+    B_RE[, k] <- unname(modes_vec[id_values])
+    
+    names_RE[k] <- lab
   }
-  browser()
-  colnames(B_RE)<-names_RE
   
-  return(Y)
+  colnames(B_RE) <- names_RE
+  return(B_RE)
 }
-
-make_dXINLA_BLUP <- function(formula,timeVar, data,use_splines = FALSE,ct,id,SMP, ...) {
+make_dXINLA_BLUP <- function(formula, timeVar, data, use_splines = FALSE, ct, id, SMP, ...) {
+  n <- nrow(data)
   
-  
+  # parse terms
   terms_labels <- attr(terms(formula), "term.labels")
-  terms_fixed <- terms_labels[grepl(id, terms_labels)==F]
-  
-  terms_RE <- terms_labels[grepl(id, terms_labels)==T][1]
+  terms_fixed <- terms_labels[!grepl(id, terms_labels)]
+  terms_RE <- terms_labels[grepl(id, terms_labels)][1]
   terms_RE <- gsub("\\|.*", "", terms_RE)
-  terms_RE <- as.formula(paste("~", terms_RE))
-  terms_RE <- attr(terms(terms_RE), "term.labels")
+  terms_RE <- attr(terms(as.formula(paste("~", terms_RE))), "term.labels")
   
+  # precompute lookups
+  sf <- SMP$summary.fixed
+  fixed_mode <- if (!is.null(sf)) setNames(sf[, "mode"], rownames(sf)) else numeric(0)
+  sr_names <- names(SMP$summary.random)
+  sr_list  <- SMP$summary.random
   
-  # Identify terms
-  X<-NULL
-  B<-matrix(0,nrow=dim(data)[1],ncol=length(terms_fixed))
+  id_values <- data[[id]]
+  id_levels <- unique(id_values)      # preserve original order (like idd)
+  n_id <- length(id_levels)
   
-  k<-1
-  for (lab in terms_fixed) {
-    if (lab == timeVar) {
-      # simple linear time
-      Xlab <- matrix(1,nrow=dim(data)[1],ncol=1)
-      colnames(Xlab)<-paste0(lab,"_L1")
-      
-      start<-which(rownames(SMP$summary.fixed)==paste0(lab,"_L1"))
-      B[,k]<-matrix(SMP$summary.fixed[start,"mode"],nrow=dim(data)[1],ncol=1)
-      
-    } else if (grepl("\\(", lab) && grepl(timeVar, lab)) {
-      #INLA takes only function no : I(time^2)
-      expr <- parse(text = lab)[[1]]
-      dexpr <- Deriv::Deriv(expr, timeVar)
-      
-      Xlab<-matrix(eval(dexpr, envir = data),ncol=1,nrow=dim(data)[1])
-      colnames(Xlab)<-paste0(gsub("[())]","",lab),"_L1")
-      start<-which(rownames(SMP$summary.fixed)==paste0(gsub("[())]","",lab),"_L1"))
-      B[,k]<-matrix(SMP$summary.fixed[start,"mode"],nrow=dim(data)[1],ncol=1)
-      
-    } else if (use_splines && grepl("bs\\(|ns\\(", lab)) {
-      
-      # Extract knots etc. from the original call if needed
-      stop("Spline not supported so far")
-      
-    } 
-    X<-cbind(X,Xlab)
-    k<-k+1
-  }
+  # --- Fixed effects derivative (X and B) ---
+  n_fixed <- length(terms_fixed)
+  X <- matrix(NA_real_, nrow = n, ncol = n_fixed)
+  B <- matrix(0, nrow = n, ncol = n_fixed)
+  colnames(X) <- paste0(terms_fixed, "_L1")
   
-  
-  idd<-unique(data[,colnames(data)%in% id])
-  X_RE<-NULL
-  B_RE<-matrix(0,nrow=dim(data)[1],ncol=length(terms_RE))
-  n_id<-length(unique(data[,colnames(data)%in%id]))
-  j<-ifelse(paste0(id,"Intercept_L1")%in%ct$tag,1,0)
-  
-  k<-1
-  for (lab in terms_RE) {
+  for (k in seq_along(terms_fixed)) {
+    lab <- terms_fixed[k]
+    tag <- paste0(gsub("[()]", "", lab), "_L1")
     
     if (lab == timeVar) {
-      # simple linear time
-      Xlab <- matrix(1,nrow=dim(data)[1],ncol=1)
-      colnames(Xlab)<-paste0(id,lab,"_L1")
-      
-      start<-which(names(SMP$summary.random)==paste0(id,lab,"_L1"))
-      
-      B_RE[,k]<-matrix(do.call(c,lapply(c(1:n_id),FUN=function(x){
-        nn<-sum(data[,colnames(data)%in%id]%in%idd[x])
-        return(rep(SMP$summary.random[[start]][x,"mode"],nn))
-      })),nrow=dim(data)[1],ncol=1)
+      # derivative of linear time is 1
+      X[, k] <- 1
+      if (tag %in% names(fixed_mode)) B[, k] <- fixed_mode[tag]
       
     } else if (grepl("\\(", lab) && grepl(timeVar, lab)) {
-      #INLA takes only function no : I(time^2)
-      
-      expr <- parse(text = lab)[[1]]
+      # derivative of function of time
+      expr <- str2lang(lab)
       dexpr <- Deriv::Deriv(expr, timeVar)
-      Xlab<-matrix(eval(dexpr, envir = data),ncol=1,nrow=dim(data)[1])
-      colnames(Xlab)<-paste0(id,gsub("[())]","",lab),"_L1")
+      X[, k] <- eval(dexpr, envir = data)
+      colnames(X)[k] <- paste0(gsub("[())]", "", lab), "_L1")
+      if (tag %in% names(fixed_mode)) B[, k] <- fixed_mode[tag]
       
-      start<-which(names(SMP$summary.random)==paste0(id,gsub("[())]","",lab),"_L1"))
-      
-      B_RE[,k]<-matrix(do.call(c,lapply(c(1:n_id),FUN=function(x){
-        nn<-sum(data[,colnames(data)%in%id]%in%idd[x])
-        return(rep(SMP$summary.random[[start]][x,"mode"],nn))
-      })),nrow=dim(data)[1],ncol=1)
-      
-      
-    } else if (use_splines && grepl("bs\\(|ns\\(", lab)) {
-      
-      # Extract knots etc. from the original call if needed
-      stop("Spline not supported so far")
-      
-    } 
-    X_RE<-cbind(X_RE,Xlab)
-    k<-k+1
-    j<-j+1
+    } else {
+      # other fixed (not depending on time) -> derivative 0 (leave X as NA? original didn't handle else)
+      # original only treated timeVar or function of time; keep behavior by leaving NA -> treat as 0 contribution
+      X[, k] <- 0
+      if (tag %in% names(fixed_mode)) B[, k] <- fixed_mode[tag]
+    }
   }
   
-  dY<-X_RE*B_RE + X*B
-  dY<-rowSums(dY)
+  # --- Random effects derivative (X_RE and B_RE) ---
+  n_re <- length(terms_RE)
+  X_RE <- matrix(NA_real_, nrow = n, ncol = n_re)
+  B_RE <- matrix(0, nrow = n, ncol = n_re)
+  colnames(X_RE) <- paste0(id, terms_RE, "_L1")
   
+  for (k in seq_along(terms_RE)) {
+    lab <- terms_RE[k]
+    
+    # build summary.random tag exactly as original
+    if (lab == "Intercept") {
+      sr_tag <- paste0(id, lab, "_L1")
+    } else if (grepl("\\(", lab) && grepl(timeVar, lab)) {
+      sr_tag <- paste0(id, gsub("[())]", "", lab), "_L1")
+    } else {
+      sr_tag <- paste0(id, lab, "_L1")
+    }
+    
+    pos <- which(sr_names == sr_tag)
+    if (length(pos) == 0) {
+      # no summary.random for term -> X_RE maybe computed, B_RE remains zero
+      if (lab == "Intercept") X_RE[, k] <- 1
+      else if (lab == timeVar) X_RE[, k] <- 1
+      else if (grepl("\\(", lab) && grepl(timeVar, lab)) {
+        expr <- str2lang(lab)
+        dexpr <- Deriv::Deriv(expr, timeVar)
+        X_RE[, k] <- eval(dexpr, envir = data)
+      } else X_RE[, k] <- 0
+      next
+    }
+    
+    # design derivative
+    if (lab == "Intercept") {
+      X_RE[, k] <- 1
+    } else if (lab == timeVar) {
+      X_RE[, k] <- 1
+    } else if (grepl("\\(", lab) && grepl(timeVar, lab)) {
+      expr <- str2lang(lab)
+      dexpr <- Deriv::Deriv(expr, timeVar)
+      X_RE[, k] <- eval(dexpr, envir = data)
+      colnames(X_RE)[k] <- paste0(id, gsub("[())]", "", lab), "_L1")
+    } else {
+      X_RE[, k] <- 0
+    }
+    
+    # extract BLUP modes for each id (the sr_list[[pos]] rows correspond to ids in original order)
+    modes_vec <- sr_list[[pos]][, "mode"]
+    # align names to id_levels so mapping equals original replication logic
+    names(modes_vec) <- id_levels
+    B_RE[, k] <- unname(modes_vec[id_values])
+  }
+  
+  # combine
+  dY <- rowSums(X * B + X_RE * B_RE)
   return(dY)
 }
