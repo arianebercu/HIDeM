@@ -71,7 +71,6 @@ DYNidm.splines<-function(b,clustertype,epsa,epsb,epsd,nproc,maxiter,size_V,size_
                             dataSurv=dataSurv,
                             dataLongi=dataLongi,
                             id=id,
-                            Nsample=1,
                             t0=t0,t1=t1,t2=t2,t3=t3,
                             assoc=assoc,
                             ctime=ctime,
@@ -86,7 +85,6 @@ DYNidm.splines<-function(b,clustertype,epsa,epsb,epsd,nproc,maxiter,size_V,size_
                           dataSurv=dataSurv,
                           dataLongi=dataLongi,
                           id=id,
-                          Nsample=1,
                           t0=t0,t1=t1,t2=t2,t3=t3,
                           ctime=ctime,
                           modelY=modelY,
@@ -134,7 +132,7 @@ DYNidm.splines<-function(b,clustertype,epsa,epsb,epsd,nproc,maxiter,size_V,size_
       if(length(outcome02)>=1){
         y02<-dataY[dataY$Outcome%in%outcome02,]
         # order  by individual and timeline 
-        y02<-y02[order(y02[,colnames(y02)%in%id],y02$order),]
+        y02<-y02[order(y02[,colnames(y02)%in%id],y02$order),4]
         
       }else{
         y02<-rep(0,N*NtimePoints)

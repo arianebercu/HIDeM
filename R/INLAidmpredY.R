@@ -9,7 +9,7 @@
 
 
 INLAidmpredY<-function(timeVar,truncated,formLong,dataSurv,dataLongi,id,
-                  Nsample,t0,t1,t2,t3,assoc,
+                  t0,t1,t2,t3,assoc,
                   ctime,modelY,seed,BLUP,nproc,clustertype){
 
   
@@ -69,7 +69,7 @@ INLAidmpredY<-function(timeVar,truncated,formLong,dataSurv,dataLongi,id,
         
         
         #samples seed=seed cannot do parallel estimation on it 
-        SMP <- INLA::inla.posterior.sample(Nsample, INLAmodel,seed=seed)
+        SMP <- INLA::inla.posterior.sample(1, INLAmodel,seed=seed)
         
         res<-NULL
         key1 <- do.call(paste, c(dataLongi_augmented[,colnames(dataLongi_augmented)%in%c(id,timeVar)], sep = "\r"))
@@ -83,36 +83,33 @@ INLAidmpredY<-function(timeVar,truncated,formLong,dataSurv,dataLongi,id,
         
         if("value"%in% choiceY){
         
-        Y<-do.call(cbind,
-                     lapply(c(1:Nsample),FUN=function(x){make_XINLA(formula=formLong[[indice]], timeVar=timeVar, data=dataLongi_augmented,ct=ct,id=id,SMP=SMP[[x]])}))
+        Y<-make_XINLA(formula=formLong[[indice]], timeVar=timeVar, data=dataLongi_augmented,ct=ct,id=id,SMP=SMP[[x]])
         Y<-Y[indices,]
         Outcome<-all.vars(terms(formLong[[indice]]))[1]
         PredYx<-cbind(timePointsdata,Outcome=Outcome,Y)
-        colnames(PredYx)[4:(Nsample+3)]<-paste0("Sample_",c(1:Nsample))
+        colnames(PredYx)[4]<-"Sample_1"
         res<-rbind(res,PredYx)
         }
         
         if("slope"%in% choiceY){
-        dY<-do.call(cbind,
-                    lapply(c(1:Nsample),FUN=function(x){make_dXINLA(formula=formLong[[indice]], timeVar=timeVar, data=dataLongi_augmented,ct=ct,id=id,SMP=SMP[[x]])}))
+        dY<-make_dXINLA(formula=formLong[[indice]], timeVar=timeVar, data=dataLongi_augmented,ct=ct,id=id,SMP=SMP[[x]])
         dY<-dY[indices,]
         slopeOutcome<-paste0("slope_",Outcome)
         slopePredYx<-cbind(timePointsdata,Outcome=slopeOutcome,dY)
-        colnames(slopePredYx)[4:(Nsample+3)]<-paste0("Sample_",c(1:Nsample))
+        colnames(slopePredYx)[4]<-"Sample_1"
         res<-rbind(res,slopePredYx)
         }
         
         if("RE"%in% choiceY){
           
-        REY<-do.call(cbind,
-                    lapply(c(1:Nsample),FUN=function(x){make_REXINLA(formula=formLong[[indice]], timeVar=timeVar, data=dataLongi_augmented,ct=ct,id=id,SMP=SMP[[x]])}))
+        REY<-make_REXINLA(formula=formLong[[indice]], timeVar=timeVar, data=dataLongi_augmented,ct=ct,id=id,SMP=SMP[[x]])
        REY<-REY[indices,]
        namesREY<-unlist(lapply(1:dim(REY)[2],FUN=function(x){
          rep(paste0("RE_",colnames(REY)[x],"_",Outcome),dim(REY)[1])
        }))
        dataREY<- do.call(rbind, replicate(dim(REY)[2], timePointsdata, simplify = FALSE))
        REPredYx<-cbind(dataREY,Outcome=namesREY,as.vector(REY))
-       colnames(REPredYx)[4:(Nsample+3)]<-paste0("Sample_",c(1:Nsample))
+       colnames(REPredYx)[4]<-"Sample_1"
        res<-rbind(res,REPredYx)
         }
         
@@ -122,7 +119,6 @@ INLAidmpredY<-function(timeVar,truncated,formLong,dataSurv,dataLongi,id,
         
       }else{
         
-        Nsample<-1
         
         res<-NULL
         key1 <- do.call(paste, c(dataLongi_augmented[,colnames(dataLongi_augmented)%in%c(id,timeVar)], sep = "\r"))
@@ -139,7 +135,7 @@ INLAidmpredY<-function(timeVar,truncated,formLong,dataSurv,dataLongi,id,
           Y<-Y[indices,]
           Outcome<-all.vars(terms(formLong[[indice]]))[1]
           PredYx<-cbind(timePointsdata,Outcome=Outcome,Y)
-          colnames(PredYx)[4:(Nsample+3)]<-paste0("Sample_",c(1:Nsample))
+          colnames(PredYx)[4]<-"Sample_1"
           res<-rbind(res,PredYx)
         }
         
@@ -148,7 +144,7 @@ INLAidmpredY<-function(timeVar,truncated,formLong,dataSurv,dataLongi,id,
         dY<-dY[indices,]
         slopeOutcome<-paste0("slope_",Outcome)
         slopePredYx<-cbind(timePointsdata,Outcome=slopeOutcome,dY)
-        colnames(slopePredYx)[4:(Nsample+3)]<-paste0("Sample_",c(1:Nsample))
+        colnames(slopePredYx)[4]<-"Sample_1"
         res<-rbind(res,slopePredYx)
         }
         
@@ -160,7 +156,7 @@ INLAidmpredY<-function(timeVar,truncated,formLong,dataSurv,dataLongi,id,
         }))
         dataREY<- do.call(rbind, replicate(dim(REY)[2], timePointsdata, simplify = FALSE))
         REPredYx<-cbind(dataREY,Outcome=namesREY,as.vector(REY))
-        colnames(REPredYx)[4:(Nsample+3)]<-paste0("Sample_",c(1:Nsample))
+        colnames(REPredYx)[4]<-"Sample_1"
         res<-rbind(res,REPredYx)
         }
         
@@ -188,7 +184,7 @@ INLAidmpredY<-function(timeVar,truncated,formLong,dataSurv,dataLongi,id,
       doParallel::registerDoParallel(clustpar)
       
       
-      Yall<-foreach::foreach(indice=4:length(formLong),
+      Yall<-foreach::foreach(indice=1:length(formLong),
                        .combine = 'list',
                        packages=c("INLA","Deriv","HIDeM"))%dopar%{
                          
@@ -207,7 +203,7 @@ INLAidmpredY<-function(timeVar,truncated,formLong,dataSurv,dataLongi,id,
                            
                            
                            #samples seed=seed cannot do parallel estimation on it 
-                           SMP <- INLA::inla.posterior.sample(Nsample, INLAmodel,seed=seed)
+                           SMP <- INLA::inla.posterior.sample(1, INLAmodel,seed=seed)
                            
                            res<-NULL
                            key1 <- do.call(paste, c(dataLongi_augmented[,colnames(dataLongi_augmented)%in%c(id,timeVar)], sep = "\r"))
@@ -221,36 +217,33 @@ INLAidmpredY<-function(timeVar,truncated,formLong,dataSurv,dataLongi,id,
                            
                            if("value"%in% choiceY){
                              
-                             Y<-do.call(cbind,
-                                        lapply(c(1:Nsample),FUN=function(x){make_XINLA(formula=formLong[[indice]], timeVar=timeVar, data=dataLongi_augmented,ct=ct,id=id,SMP=SMP[[x]])}))
+                             Y<-make_XINLA(formula=formLong[[indice]], timeVar=timeVar, data=dataLongi_augmented,ct=ct,id=id,SMP=SMP[[x]])
                              Y<-Y[indices,]
                              Outcome<-all.vars(terms(formLong[[indice]]))[1]
                              PredYx<-cbind(timePointsdata,Outcome=Outcome,Y)
-                             colnames(PredYx)[4:(Nsample+3)]<-paste0("Sample_",c(1:Nsample))
+                             colnames(PredYx)[4]<-"Sample_1"
                              res<-rbind(res,PredYx)
                            }
                            
                            if("slope"%in% choiceY){
-                             dY<-do.call(cbind,
-                                         lapply(c(1:Nsample),FUN=function(x){make_dXINLA(formula=formLong[[indice]], timeVar=timeVar, data=dataLongi_augmented,ct=ct,id=id,SMP=SMP[[x]])}))
+                             dY<-make_dXINLA(formula=formLong[[indice]], timeVar=timeVar, data=dataLongi_augmented,ct=ct,id=id,SMP=SMP[[x]])
                              dY<-dY[indices,]
                              slopeOutcome<-paste0("slope_",Outcome)
                              slopePredYx<-cbind(timePointsdata,Outcome=slopeOutcome,dY)
-                             colnames(slopePredYx)[4:(Nsample+3)]<-paste0("Sample_",c(1:Nsample))
+                             colnames(slopePredYx)[4]<-"Sample_1"
                              res<-rbind(res,slopePredYx)
                            }
                            
                            if("RE"%in% choiceY){
                              
-                             REY<-do.call(cbind,
-                                          lapply(c(1:Nsample),FUN=function(x){make_REXINLA(formula=formLong[[indice]], timeVar=timeVar, data=dataLongi_augmented,ct=ct,id=id,SMP=SMP[[x]])}))
+                             REY<-make_REXINLA(formula=formLong[[indice]], timeVar=timeVar, data=dataLongi_augmented,ct=ct,id=id,SMP=SMP[[x]])
                              REY<-REY[indices,]
                              namesREY<-unlist(lapply(1:dim(REY)[2],FUN=function(x){
                                rep(paste0("RE_",colnames(REY)[x],"_",Outcome),dim(REY)[1])
                              }))
                              dataREY<- do.call(rbind, replicate(dim(REY)[2], timePointsdata, simplify = FALSE))
                              REPredYx<-cbind(dataREY,Outcome=namesREY,as.vector(REY))
-                             colnames(REPredYx)[4:(Nsample+3)]<-paste0("Sample_",c(1:Nsample))
+                             colnames(REPredYx)[4]<-"Sample_1"
                              res<-rbind(res,REPredYx)
                            }
                            
@@ -259,8 +252,6 @@ INLAidmpredY<-function(timeVar,truncated,formLong,dataSurv,dataLongi,id,
                            
                            
                          }else{
-                           
-                           Nsample<-1
                            
                            res<-NULL
                            key1 <- do.call(paste, c(dataLongi_augmented[,colnames(dataLongi_augmented)%in%c(id,timeVar)], sep = "\r"))
@@ -277,7 +268,7 @@ INLAidmpredY<-function(timeVar,truncated,formLong,dataSurv,dataLongi,id,
                              Y<-Y[indices,]
                              Outcome<-all.vars(terms(formLong[[indice]]))[1]
                              PredYx<-cbind(timePointsdata,Outcome=Outcome,Y)
-                             colnames(PredYx)[4:(Nsample+3)]<-paste0("Sample_",c(1:Nsample))
+                             colnames(PredYx)[4]<-"Sample_1"
                              res<-rbind(res,PredYx)
                            }
                            
@@ -286,7 +277,7 @@ INLAidmpredY<-function(timeVar,truncated,formLong,dataSurv,dataLongi,id,
                              dY<-dY[indices,]
                              slopeOutcome<-paste0("slope_",Outcome)
                              slopePredYx<-cbind(timePointsdata,Outcome=slopeOutcome,dY)
-                             colnames(slopePredYx)[4:(Nsample+3)]<-paste0("Sample_",c(1:Nsample))
+                             colnames(slopePredYx)[4]<-"Sample_1"
                              res<-rbind(res,slopePredYx)
                            }
                            
@@ -298,7 +289,7 @@ INLAidmpredY<-function(timeVar,truncated,formLong,dataSurv,dataLongi,id,
                              }))
                              dataREY<- do.call(rbind, replicate(dim(REY)[2], timePointsdata, simplify = FALSE))
                              REPredYx<-cbind(dataREY,Outcome=namesREY,as.vector(REY))
-                             colnames(REPredYx)[4:(Nsample+3)]<-paste0("Sample_",c(1:Nsample))
+                             colnames(REPredYx)[4]<-"Sample_1"
                              res<-rbind(res,REPredYx)
                            }
                            
@@ -316,7 +307,7 @@ INLAidmpredY<-function(timeVar,truncated,formLong,dataSurv,dataLongi,id,
       parallel::stopCluster(clustpar)
   }
   
-  return(Yall[,colnames(Yall)%in%c(id,timeVar,"Outcome",paste0("Sample_",c(1:Nsample)))])
+  return(Yall[,colnames(Yall)%in%c(id,timeVar,"Outcome","Sample_1")])
   
 
   

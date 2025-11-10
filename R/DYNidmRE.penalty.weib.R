@@ -100,7 +100,6 @@ DYNidmRE.penalty.weib<-function(b,fix0,size_V,
                           dataSurv=dataSurv,
                           dataLongi=dataLongi,
                           id=id,
-                          Nsample=1,
                           t0=t0,t1=t1,t2=t2,t3=t3,
                           assoc=assoc,
                           ctime=ctime,
@@ -117,7 +116,6 @@ DYNidmRE.penalty.weib<-function(b,fix0,size_V,
                           dataSurv=dataSurv,
                           dataLongi=dataLongi,
                           id=id,
-                          Nsample=1,
                           t0=t0,t1=t1,t2=t2,t3=t3,
                           ctime=ctime,
                           modelY=modelY,
@@ -165,7 +163,7 @@ DYNidmRE.penalty.weib<-function(b,fix0,size_V,
     if(length(outcome02)>=1){
       y02k<-dataY[dataY$Outcome%in%outcome02,]
       # order  by individual and timeline 
-      y02k<-y02k[order(y02k[,colnames(y02k)%in%id],y02k$order),]
+      y02k<-y02k[order(y02k[,colnames(y02k)%in%id],y02k$order),4]
       ve02k<-c(ve02,y02k)
     }else{
       ve02k<-ve02
@@ -237,7 +235,6 @@ DYNidmRE.penalty.weib<-function(b,fix0,size_V,
                               dataSurv=dataSurv,
                               dataLongi=dataLongi,
                               id=id,
-                              Nsample=1,
                               t0=t0,t1=t1,t2=t2,t3=t3,
                               assoc=assoc,
                               ctime=ctime,
@@ -254,7 +251,6 @@ DYNidmRE.penalty.weib<-function(b,fix0,size_V,
                             dataSurv=dataSurv,
                             dataLongi=dataLongi,
                             id=id,
-                            Nsample=1,
                             t0=t0,t1=t1,t2=t2,t3=t3,
                             ctime=ctime,
                             modelY=modelY,
@@ -302,7 +298,7 @@ DYNidmRE.penalty.weib<-function(b,fix0,size_V,
         if(length(outcome02)>=1){
           y02k<-dataY[dataY$Outcome%in%outcome02,]
           # order  by individual and timeline 
-          y02k<-y02k[order(y02k[,colnames(y02k)%in%id],y02k$order),]
+          y02k<-y02k[order(y02k[,colnames(y02k)%in%id],y02k$order),4]
           ve02k<-c(ve02,y02k)
         }else{
           ve02k<-ve02
@@ -381,7 +377,6 @@ DYNidmRE.penalty.weib<-function(b,fix0,size_V,
                                                          dataSurv=dataSurv,
                                                          dataLongi=dataLongi,
                                                          id=id,
-                                                         Nsample=1,
                                                          t0=t0,t1=t1,t2=t2,t3=t3,
                                                          assoc=assoc,
                                                          ctime=ctime,
@@ -398,7 +393,6 @@ DYNidmRE.penalty.weib<-function(b,fix0,size_V,
                                                        dataSurv=dataSurv,
                                                        dataLongi=dataLongi,
                                                        id=id,
-                                                       Nsample=1,
                                                        t0=t0,t1=t1,t2=t2,t3=t3,
                                                        ctime=ctime,
                                                        modelY=modelY,
@@ -446,7 +440,7 @@ DYNidmRE.penalty.weib<-function(b,fix0,size_V,
                                    if(length(outcome02)>=1){
                                      y02k<-dataY[dataY$Outcome%in%outcome02,]
                                      # order  by individual and timeline 
-                                     y02k<-y02k[order(y02k[,colnames(y02k)%in%id],y02k$order),]
+                                     y02k<-y02k[order(y02k[,colnames(y02k)%in%id],y02k$order),4]
                                      ve02k<-c(ve02,y02k)
                                    }else{
                                      ve02k<-ve02

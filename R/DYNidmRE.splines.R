@@ -90,7 +90,6 @@ DYNidmRE.splines<-function(b,clustertype,epsa,epsb,epsd,nproc,maxiter,size_V,siz
                             dataSurv=dataSurv,
                             dataLongi=dataLongi,
                             id=id,
-                            Nsample=1,
                             t0=t0,t1=t1,t2=t2,t3=t3,
                             assoc=assoc,
                             ctime=ctime,
@@ -107,7 +106,6 @@ DYNidmRE.splines<-function(b,clustertype,epsa,epsb,epsd,nproc,maxiter,size_V,siz
                           dataSurv=dataSurv,
                           dataLongi=dataLongi,
                           id=id,
-                          Nsample=1,
                           t0=t0,t1=t1,t2=t2,t3=t3,
                           ctime=ctime,
                           modelY=modelY,
@@ -155,7 +153,7 @@ DYNidmRE.splines<-function(b,clustertype,epsa,epsb,epsd,nproc,maxiter,size_V,siz
       if(length(outcome02)>=1){
         y02<-dataY[dataY$Outcome%in%outcome02,]
         # order  by individual and timeline 
-        y02<-y02[order(y02[,colnames(y02)%in%id],y02$order),]
+        y02<-y02[order(y02[,colnames(y02)%in%id],y02$order),4]
         ve02k<-c(ve02,y02k)
       }else{
         ve02k<-ve02

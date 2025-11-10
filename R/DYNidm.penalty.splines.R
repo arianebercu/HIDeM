@@ -62,7 +62,7 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,size_spline,
 
 
   # need to keep original fix to calculate for beta 
-
+browser()
   V0<-NA
   fix00<-fix0
   
@@ -149,7 +149,6 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,size_spline,
   
   outputall<-list()
   length(outputall)<-Nsample
-  
 browser()
   if(nlambda>1){
   for(idsample in 1:Nsample){
@@ -162,7 +161,6 @@ browser()
                           dataSurv=dataSurv,
                           dataLongi=dataLongi,
                           id=id,
-                          Nsample=1,
                           t0=t0,t1=t1,t2=t2,t3=t3,
                           assoc=assoc,
                           ctime=ctime,
@@ -179,9 +177,9 @@ browser()
                         dataSurv=dataSurv,
                         dataLongi=dataLongi,
                         id=id,
-                        Nsample=1,
                         t0=t0,t1=t1,t2=t2,t3=t3,
                         ctime=ctime,
+                        assoc=assoc,
                         modelY=modelY,
                         seed=seed+idsample,
                         BLUP=BLUP)
@@ -227,7 +225,7 @@ browser()
     if(length(outcome02)>=1){
       y02k<-dataY[dataY$Outcome%in%outcome02,]
       # order  by individual and timeline 
-      y02k<-y02k[order(y02k[,colnames(y02k)%in%id],y02k$order),]
+      y02k<-y02k[order(y02k[,colnames(y02k)%in%id],y02k$order),4]
       
     }else{
       y02k<-rep(0,N*NtimePoints)
@@ -929,7 +927,7 @@ browser()
                                            combine=combine))
                              }
     }else{
-      outputNsample<-foreach::foreach(id.lambda=1:nlambda,
+    outputNsample<-foreach::foreach(id.lambda=1:nlambda,
                                .combine = combine_lambda_mla,
                                .errorhandling = "remove")%dopar%{
                                  
@@ -2962,7 +2960,6 @@ browser()
                               dataSurv=dataSurv,
                               dataLongi=dataLongi,
                               id=id,
-                              Nsample=1,
                               t0=t0,t1=t1,t2=t2,t3=t3,
                               assoc=assoc,
                               ctime=ctime,
@@ -2979,7 +2976,6 @@ browser()
                             dataSurv=dataSurv,
                             dataLongi=dataLongi,
                             id=id,
-                            Nsample=1,
                             t0=t0,t1=t1,t2=t2,t3=t3,
                             ctime=ctime,
                             modelY=modelY,
@@ -3027,7 +3023,7 @@ browser()
         if(length(outcome02)>=1){
           y02k<-dataY[dataY$Outcome%in%outcome02,]
           # order  by individual and timeline 
-          y02k<-y02k[order(y02k[,colnames(y02k)%in%id],y02k$order),]
+          y02k<-y02k[order(y02k[,colnames(y02k)%in%id],y02k$order),4]
           
         }else{
           y02k<-rep(0,N*NtimePoints)
@@ -4419,7 +4415,6 @@ browser()
                                                        dataSurv=dataSurv,
                                                        dataLongi=dataLongi,
                                                        id=id,
-                                                       Nsample=1,
                                                        t0=t0,t1=t1,t2=t2,t3=t3,
                                                        assoc=assoc,
                                                        ctime=ctime,
@@ -4436,7 +4431,6 @@ browser()
                                                      dataSurv=dataSurv,
                                                      dataLongi=dataLongi,
                                                      id=id,
-                                                     Nsample=1,
                                                      t0=t0,t1=t1,t2=t2,t3=t3,
                                                      ctime=ctime,
                                                      modelY=modelY,

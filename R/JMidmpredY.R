@@ -13,7 +13,8 @@ JMidmpredY<-function(timeVar,
                 dataSurv,
                 dataLongi,
                 id,
-                Nsample,t0,t1,t2,t3,ctime,
+                t0,t1,t2,t3,ctime,
+                assoc,
                 modelY,seed,BLUP){
   
   # define timePoints of prediction : 
@@ -47,6 +48,7 @@ JMidmpredY<-function(timeVar,
   length(Yall)<-length(formLong)
   
 
+  browser()
   for(indice in 1:length(formLong)){
 
 
@@ -82,18 +84,20 @@ JMidmpredY<-function(timeVar,
       nn<-rep(NtimePoints,N)
       ends   <- cumsum(nn)
       starts <- ends - nn + 1
-      
+      choiceY<-na.omit(unlist(assoc[[indice]]))
+      browser()
       if(BLUP==F){
-        
-      idNsample<-sample(x=c(1:M),size=Nsample)
+        browser()
+      idNsample<-sample(x=c(1:M),size=1)
 
+      if("value"%in% choiceY & "slope"%in%choiceY & "RE"%in%choiceY){
       Fixed <- X %*% t(betas[idNsample, , drop = FALSE])   # (n x m)
       slopeFixed<-dX %*% t(betas[idNsample, , drop = FALSE])
       
       # Terme aléatoire, on remplit directement un tableau vide
-      Random<-Random_all <- matrix(0, nrow = nrow(Z), ncol = Nsample)
-      
-      slopeRandom_all <- matrix(0, nrow = nrow(Z), ncol = Nsample)
+      Random_all <- matrix(0, nrow = nrow(Z), ncol = 1)
+      Random<-matrix(0,nrow=nrow(Z),ncol=1*dim(b_mat[1, , 1, drop = FALSE])[2])
+      slopeRandom_all <- matrix(0, nrow = nrow(Z), ncol = 1)
       
       for (j in seq_len(N)) {
         
@@ -102,50 +106,255 @@ JMidmpredY<-function(timeVar,
         Bj   <- b_mat[j, , idNsample, drop = FALSE] # (q x m)
         
         Random_all[rows, ] <- Zj %*% Bj[1,,]
-        Random[rows,]<-Bj[1,,]
+        Random[rows,]<-matrix(rep(t(Bj[1,,]),NtimePoints),ncol=dim(Bj)[2]*dim(Bj)[3],
+                                                nrow=NtimePoints, byrow = TRUE)
         
         dZj   <- dZ[rows, , drop = FALSE]                
         slopeRandom_all[rows, ] <- dZj %*% Bj[1,,]
       }
-      colnames(Random)<-paste0("RE_",c(1:dim(Random)[2]),"_",names(functional_forms)[[indice]])
+      browser()
+      nameRandom<-colnames(dZ)
+      if("(Intercept)"%in%nameRandom){nameRandom[which(nameRandom=="Intercept")]<-"Intercept"}
+      colnames(Random)<-paste0("RE_",nameRandom,"_",names(functional_forms)[[indice]])
       
       PredYx <- Fixed + Random_all
       slopePredYx<-slopeFixed + slopeRandom_all
       REPredYx<-Random
       
-       browser()
       Outcome<-names(functional_forms)[[indice]]
       slopeOutcome<-paste0("slope_",names(functional_forms)[[indice]])
-      REOutcome<-paste0("RE_",names(functional_forms)[[indice]])
+      REOutcome<-rep(colnames(Random), each = nrow(Random))
       
       PredYx<-cbind(newdataLongi,Outcome=Outcome,PredYx)
       slopePredYx<-cbind(newdataLongi,Outcome=slopeOutcome,slopePredYx)
-      REPredYx<-cbind(newdataLongi,Outcome=REOutcome,REPredYx)
+      REPredYx<-cbind(do.call(rbind, replicate(dim(Random)[2], newdataLongi, simplify = FALSE)),
+                      Outcome=REOutcome,
+                      as.vector(REPredYxmean))
       
-      colnames(PredYx)[4:(Nsample+3)]<-paste0("Sample_",c(1:Nsample))
-      colnames(slopePredYx)[4:(Nsample+3)]<-paste0("Sample_",c(1:Nsample))
-      colnames(REPredYx)[4:(Nsample+3)]<-paste0("Sample_",c(1:Nsample))
+      colnames(PredYx)[4]<-paste0("Sample_1")
+      colnames(slopePredYx)[4]<-paste0("Sample_1")
+      colnames(REPredYx)[4]<-paste0("Sample_1")
       
       Yall[[indice]]<- rbind(PredYx,slopePredYx,REPredYx)
-
-      }else{
-        REPredYx<-PredYx<-slopePredYx<-NULL
+      
+      }
+      
+      if("value"%in% choiceY & "slope"%in%choiceY & !"RE"%in%choiceY){
+        Fixed <- X %*% t(betas[idNsample, , drop = FALSE])   # (n x m)
+        slopeFixed<-dX %*% t(betas[idNsample, , drop = FALSE])
         
         # Terme aléatoire, on remplit directement un tableau vide
-        Random<-Random_mean <- matrix(0,nrow=nrow(Z),ncol=1)
-        slopeRandom_mean <- matrix(0,nrow=nrow(Z),ncol=1)
+        Random_all <- matrix(0, nrow = nrow(Z), ncol = 1)
         
+        slopeRandom_all <- matrix(0, nrow = nrow(Z), ncol = 1)
+        
+        for (j in seq_len(N)) {
+          
+          rows <- starts[j]:ends[j]
+          Zj   <- Z[rows, , drop = FALSE]                        # (nn[j] x q)
+          Bj   <- b_mat[j, , idNsample, drop = FALSE] # (q x m)
+          
+          Random_all[rows, ] <- Zj %*% Bj[1,,]
+          
+          dZj   <- dZ[rows, , drop = FALSE]                
+          slopeRandom_all[rows, ] <- dZj %*% Bj[1,,]
+        }
+        
+        PredYx <- Fixed + Random_all
+        slopePredYx<-slopeFixed + slopeRandom_all
+        
+        Outcome<-names(functional_forms)[[indice]]
+        slopeOutcome<-paste0("slope_",names(functional_forms)[[indice]])
+        
+        PredYx<-cbind(newdataLongi,Outcome=Outcome,PredYx)
+        slopePredYx<-cbind(newdataLongi,Outcome=slopeOutcome,slopePredYx)
+        
+        colnames(PredYx)[4]<-"Sample_1"
+        colnames(slopePredYx)[4]<-"Sample_1"
+        
+        Yall[[indice]]<- rbind(PredYx,slopePredYx)
+        
+      }
+      
+      if("value"%in% choiceY & !"slope"%in%choiceY & "RE"%in%choiceY){
+        Fixed <- X %*% t(betas[idNsample, , drop = FALSE])   # (n x m)
+        
+        # Terme aléatoire, on remplit directement un tableau vide
+        Random_all <- matrix(0, nrow = nrow(Z), ncol = 1)
+        Random<-matrix(0,nrow=nrow(Z),ncol=1*dim(b_mat[1, , 1, drop = FALSE])[2])
+        
+        for (j in seq_len(N)) {
+          
+          rows <- starts[j]:ends[j]
+          Zj   <- Z[rows, , drop = FALSE]                        # (nn[j] x q)
+          Bj   <- b_mat[j, , idNsample, drop = FALSE] # (q x m)
+          
+          Random_all[rows, ] <- Zj %*% Bj[1,,]
+          Random[rows,]<-matrix(rep(t(Bj[1,,]),NtimePoints),ncol=dim(Bj)[2]*dim(Bj)[3],
+                                nrow=NtimePoints, byrow = TRUE)
+          
+        }
+        nameRandom<-colnames(dZ)
+        if("(Intercept)"%in%nameRandom){nameRandom[which(nameRandom=="Intercept")]<-"Intercept"}
+        colnames(Random)<-paste0("RE_",nameRandom,"_",names(functional_forms)[[indice]])
+        
+        PredYx <- Fixed + Random_all
+        REPredYx<-Random
+        
+        Outcome<-names(functional_forms)[[indice]]
+        REOutcome<-rep(colnames(Random), each = nrow(Random))
+        
+        PredYx<-cbind(newdataLongi,Outcome=Outcome,PredYx)
+        REPredYx<-cbind(do.call(rbind, replicate(dim(Random)[2], newdataLongi, simplify = FALSE)),
+                        Outcome=REOutcome,
+                        as.vector(REPredYxmean))
+        
+        colnames(PredYx)[4]<-"Sample_1"
+        colnames(REPredYx)[4]<-"Sample_1"
+        
+        Yall[[indice]]<- rbind(PredYx,REPredYx)
+        
+      }
+      
+      if("value"%in% choiceY & !"slope"%in%choiceY & !"RE"%in%choiceY){
+        Fixed <- X %*% t(betas[idNsample, , drop = FALSE])   # (n x m)
+        
+        # Terme aléatoire, on remplit directement un tableau vide
+        Random_all <- matrix(0, nrow = nrow(Z), ncol = 1)
+        
+        for (j in seq_len(N)) {
+          
+          rows <- starts[j]:ends[j]
+          Zj   <- Z[rows, , drop = FALSE]                        # (nn[j] x q)
+          Bj   <- b_mat[j, , idNsample, drop = FALSE] # (q x m)
+          
+          Random_all[rows, ] <- Zj %*% Bj[1,,]
+         
+        }
+        
+        PredYx <- Fixed + Random_all
+        
+        Outcome<-names(functional_forms)[[indice]]
+        
+        PredYx<-cbind(newdataLongi,Outcome=Outcome,PredYx)
+        
+        colnames(PredYx)[4]<-"Sample_1"
+        
+        Yall[[indice]]<- PredYx
+        
+      }
+
+      if(!"value"%in% choiceY & "slope"%in%choiceY & "RE"%in%choiceY){
+        
+        slopeFixed<-dX %*% t(betas[idNsample, , drop = FALSE])
+        
+        # Terme aléatoire, on remplit directement un tableau vide
+        Random<-matrix(0,nrow=nrow(Z),ncol=1*dim(b_mat[1, , 1, drop = FALSE])[2])
+        
+        slopeRandom_all <- matrix(0, nrow = nrow(Z), ncol = 1)
+        
+        for (j in seq_len(N)) {
+          
+          rows <- starts[j]:ends[j]
+          Bj   <- b_mat[j, , idNsample, drop = FALSE] # (q x m)
+          
+          Random[rows,]<-matrix(rep(t(Bj[1,,]),NtimePoints),ncol=dim(Bj)[2]*dim(Bj)[3],
+                                nrow=NtimePoints, byrow = TRUE)
+          
+          dZj   <- dZ[rows, , drop = FALSE]                
+          slopeRandom_all[rows, ] <- dZj %*% Bj[1,,]
+        }
+        nameRandom<-colnames(dZ)
+        if("(Intercept)"%in%nameRandom){nameRandom[which(nameRandom=="Intercept")]<-"Intercept"}
+        colnames(Random)<-paste0("RE_",nameRandom,"_",names(functional_forms)[[indice]])
+        
+        slopePredYx<-slopeFixed + slopeRandom_all
+        REPredYx<-Random
+        
+        slopeOutcome<-paste0("slope_",names(functional_forms)[[indice]])
+        REOutcome<-rep(colnames(Random), each = nrow(Random))
+        
+        slopePredYx<-cbind(newdataLongi,Outcome=slopeOutcome,slopePredYx)
+        REPredYx<-cbind(do.call(rbind, replicate(dim(Random)[2], newdataLongi, simplify = FALSE)),
+                        Outcome=REOutcome,
+                        as.vector(REPredYxmean))
+        
+        colnames(slopePredYx)[4]<-"Sample_1"
+        colnames(REPredYx)[4]<-"Sample_1"
+        
+        Yall[[indice]]<- rbind(slopePredYx,REPredYx)
+        
+      }
+      
+      if(!"value"%in% choiceY & "slope"%in%choiceY & !"RE"%in%choiceY){
+        slopeFixed<-dX %*% t(betas[idNsample, , drop = FALSE])
+        
+        for (j in seq_len(N)) {
+          
+          rows <- starts[j]:ends[j]
+          Bj   <- b_mat[j, , idNsample, drop = FALSE] # (q x m)
+          
+          dZj   <- dZ[rows, , drop = FALSE]                
+          slopeRandom_all[rows, ] <- dZj %*% Bj[1,,]
+        }
+        slopePredYx<-slopeFixed + slopeRandom_all
+        slopeOutcome<-paste0("slope_",names(functional_forms)[[indice]])
+        slopePredYx<-cbind(newdataLongi,Outcome=slopeOutcome,slopePredYx)
+        colnames(slopePredYx)[4]<-"Sample_1"
+        
+        Yall[[indice]]<- slopePredYx
+        
+      }
+      
+      if(!"value"%in% choiceY & !"slope"%in%choiceY & "RE"%in%choiceY){
+       
+        # Terme aléatoire, on remplit directement un tableau vide
+        Random<-matrix(0,nrow=nrow(Z),ncol=1*dim(b_mat[1, , 1, drop = FALSE])[2])
+        
+        for (j in seq_len(N)) {
+          
+          rows <- starts[j]:ends[j]
+          Bj   <- b_mat[j, , idNsample, drop = FALSE] # (q x m)
+          
+          Random[rows,]<-matrix(rep(t(Bj[1,,]),NtimePoints),ncol=dim(Bj)[2]*dim(Bj)[3],
+                                nrow=NtimePoints, byrow = TRUE)
+          
+        }
+        nameRandom<-colnames(dZ)
+        if("(Intercept)"%in%nameRandom){nameRandom[which(nameRandom=="Intercept")]<-"Intercept"}
+        colnames(Random)<-paste0("RE_",nameRandom,"_",names(functional_forms)[[indice]])
+        
+        REPredYx<-Random
+        REOutcome<-rep(colnames(Random), each = nrow(Random))
+        REPredYx<-cbind(do.call(rbind, replicate(dim(Random)[2], newdataLongi, simplify = FALSE)),
+                        Outcome=REOutcome,
+                        as.vector(REPredYxmean))
+        colnames(REPredYx)[4]<-"Sample_1"
+        
+        Yall[[indice]]<- REPredYx
+        
+      }
+      }else{
+        REPredYx<-PredYx<-slopePredYx<-NULL
+        browser()
+        if("value"%in% choiceY & "slope"%in%choiceY & "RE"%in%choiceY){
+        # Terme aléatoire, on remplit directement un tableau vide
+        Random_mean <- matrix(0,nrow=nrow(Z),ncol=1)
+        slopeRandom_mean <- matrix(0,nrow=nrow(Z),ncol=1)
+        Random<-matrix(0,nrow=nrow(Z),ncol=length(JMmodel$statistics$Mean$b[1,]))
         for (j in seq_len(N)) {
           rows <- starts[j]:ends[j]
           Zj   <- Z[rows, , drop = FALSE]
           Random_mean[rows, ] <- Zj %*% JMmodel$statistics$Mean$b[j,]
-          Random[rows,]<-diag(1,nrow=dim(Zj)[1])%*% JMmodel$statistics$Mean$b[j,]
+          Random[rows,]<- JMmodel$statistics$Mean$b[j,]
           
           dZj   <- dZ[rows, , drop = FALSE]
           slopeRandom_mean[rows, ] <- dZj %*% JMmodel$statistics$Mean$b[j,]
         }
-        
-        colnames(Random)<-paste0("RE_",c(1:dim(Random)[2]),"_",names(functional_forms)[[indice]])
+        browser()
+        nameRandom<-names(JMmodel$statistics$Mean$b[j,])
+        if("(Intercept)"%in%nameRandom){nameRandom[which(nameRandom=="Intercept")]<-"Intercept"}
+        colnames(Random)<-paste0("RE_",nameRandom,"_",names(functional_forms)[[indice]])
         
         PredYmean<-X%*%as.matrix(JMmodel$statistics$Mean$betas1) + Random_mean
         slopePredYmean<-dX%*%as.matrix(JMmodel$statistics$Mean$betas1) + slopeRandom_mean
@@ -153,17 +362,186 @@ JMidmpredY<-function(timeVar,
         
         Outcome<-names(functional_forms)[[indice]]
         slopeOutcome<-paste0("slope_",names(functional_forms)[[indice]])
-        REOutcome<-paste0("RE_",names(functional_forms)[[indice]])
+        REOutcome<-rep(colnames(Random), each = nrow(Random))
         
         PredYx<-cbind(newdataLongi,Outcome=Outcome,PredYmean)
         slopePredYx<-cbind(newdataLongi,Outcome=slopeOutcome,slopePredYmean)
-        REPredYx<-cbind(newdataLongi,Outcome=REOutcome,REPredYxmean)
+        REPredYx<-cbind(do.call(rbind, replicate(dim(Random)[2], newdataLongi, simplify = FALSE)),
+                        Outcome=REOutcome,
+                        as.vector(REPredYxmean))
         
         colnames(PredYx)[4]<-"Sample_1"
         colnames(slopePredYx)[4]<-"Sample_1"
         colnames(REPredYx)[4]<-"Sample_1"
         
         Yall[[indice]]<- rbind(PredYx,slopePredYx,REPredYx)
+        }
+        
+        if("value"%in% choiceY & "slope"%in%choiceY & !"RE"%in%choiceY){
+          # Terme aléatoire, on remplit directement un tableau vide
+          Random_mean <- matrix(0,nrow=nrow(Z),ncol=1)
+          slopeRandom_mean <- matrix(0,nrow=nrow(Z),ncol=1)
+          
+          for (j in seq_len(N)) {
+            rows <- starts[j]:ends[j]
+            Zj   <- Z[rows, , drop = FALSE]
+            Random_mean[rows, ] <- Zj %*% JMmodel$statistics$Mean$b[j,]
+            
+            dZj   <- dZ[rows, , drop = FALSE]
+            slopeRandom_mean[rows, ] <- dZj %*% JMmodel$statistics$Mean$b[j,]
+          }
+          
+          
+          PredYmean<-X%*%as.matrix(JMmodel$statistics$Mean$betas1) + Random_mean
+          slopePredYmean<-dX%*%as.matrix(JMmodel$statistics$Mean$betas1) + slopeRandom_mean
+          
+          
+          Outcome<-names(functional_forms)[[indice]]
+          slopeOutcome<-paste0("slope_",names(functional_forms)[[indice]])
+          
+          PredYx<-cbind(newdataLongi,Outcome=Outcome,PredYmean)
+          slopePredYx<-cbind(newdataLongi,Outcome=slopeOutcome,slopePredYmean)
+          
+          colnames(PredYx)[4]<-"Sample_1"
+          colnames(slopePredYx)[4]<-"Sample_1"
+          
+          Yall[[indice]]<- rbind(PredYx,slopePredYx)
+        }
+        
+        if("value"%in% choiceY & !"slope"%in%choiceY & "RE"%in%choiceY){
+          # Terme aléatoire, on remplit directement un tableau vide
+          Random_mean <- matrix(0,nrow=nrow(Z),ncol=1)
+          Random<-matrix(0,nrow=nrow(Z),ncol=length(JMmodel$statistics$Mean$b[1,]))
+          for (j in seq_len(N)) {
+            rows <- starts[j]:ends[j]
+            Zj   <- Z[rows, , drop = FALSE]
+            Random_mean[rows, ] <- Zj %*% JMmodel$statistics$Mean$b[j,]
+            Random[rows,]<-JMmodel$statistics$Mean$b[j,]
+            
+            
+          }
+          
+          nameRandom<-names(JMmodel$statistics$Mean$b[j,])
+          if("(Intercept)"%in%nameRandom){nameRandom[which(nameRandom=="Intercept")]<-"Intercept"}
+          colnames(Random)<-paste0("RE_",nameRandom,"_",names(functional_forms)[[indice]])
+          
+          PredYmean<-X%*%as.matrix(JMmodel$statistics$Mean$betas1) + Random_mean
+          REPredYmean<- Random
+          
+          Outcome<-names(functional_forms)[[indice]]
+          REOutcome<-rep(colnames(Random), each = nrow(Random))
+          
+          PredYx<-cbind(newdataLongi,Outcome=Outcome,PredYmean)
+          REPredYx<-cbind(do.call(rbind, replicate(dim(Random)[2], newdataLongi, simplify = FALSE)),
+                          Outcome=REOutcome,
+                          as.vector(REPredYxmean))
+          
+          colnames(PredYx)[4]<-"Sample_1"
+          colnames(REPredYx)[4]<-"Sample_1"
+          
+          Yall[[indice]]<- rbind(PredYx,REPredYx)
+        }
+        
+        if("value"%in% choiceY & !"slope"%in%choiceY & !"RE"%in%choiceY){
+          # Terme aléatoire, on remplit directement un tableau vide
+          Random_mean <- matrix(0,nrow=nrow(Z),ncol=1)
+         
+          for (j in seq_len(N)) {
+            rows <- starts[j]:ends[j]
+            Zj   <- Z[rows, , drop = FALSE]
+            Random_mean[rows, ] <- Zj %*% JMmodel$statistics$Mean$b[j,]
+            
+          }
+          
+         
+          PredYmean<-X%*%as.matrix(JMmodel$statistics$Mean$betas1) + Random_mean
+          
+          Outcome<-names(functional_forms)[[indice]]
+          
+          PredYx<-cbind(newdataLongi,Outcome=Outcome,PredYmean)
+          
+          colnames(PredYx)[4]<-"Sample_1"
+          
+          Yall[[indice]]<- PredYx
+        }
+        
+        if(!"value"%in% choiceY & "slope"%in%choiceY & "RE"%in%choiceY){
+          # Terme aléatoire, on remplit directement un tableau vide
+          Random<-matrix(0,nrow=nrow(Z),ncol=length(JMmodel$statistics$Mean$b[1,]))
+          slopeRandom_mean <- matrix(0,nrow=nrow(Z),ncol=1)
+          
+          for (j in seq_len(N)) {
+            rows <- starts[j]:ends[j]
+            Zj   <- Z[rows, , drop = FALSE]
+            Random[rows,]<- JMmodel$statistics$Mean$b[j,]
+            
+            dZj   <- dZ[rows, , drop = FALSE]
+            slopeRandom_mean[rows, ] <- dZj %*% JMmodel$statistics$Mean$b[j,]
+          }
+          
+          nameRandom<-names(JMmodel$statistics$Mean$b[j,])
+          if("(Intercept)"%in%nameRandom){nameRandom[which(nameRandom=="Intercept")]<-"Intercept"}
+          colnames(Random)<-paste0("RE_",nameRandom,"_",names(functional_forms)[[indice]])
+          
+          slopePredYmean<-dX%*%as.matrix(JMmodel$statistics$Mean$betas1) + slopeRandom_mean
+          REPredYmean<- Random
+          
+          slopeOutcome<-paste0("slope_",names(functional_forms)[[indice]])
+          REOutcome<-rep(colnames(Random), each = nrow(Random))
+          
+          slopePredYx<-cbind(newdataLongi,Outcome=slopeOutcome,slopePredYmean)
+          REPredYx<-cbind(do.call(rbind, replicate(dim(Random)[2], newdataLongi, simplify = FALSE)),
+                          Outcome=REOutcome,
+                          as.vector(REPredYxmean))
+          
+          colnames(slopePredYx)[4]<-"Sample_1"
+          colnames(REPredYx)[4]<-"Sample_1"
+          
+          Yall[[indice]]<- rbind(slopePredYx,REPredYx)
+        }
+        
+        if(!"value"%in% choiceY & "slope"%in%choiceY & !"RE"%in%choiceY){
+          # Terme aléatoire, on remplit directement un tableau vide
+         
+          slopeRandom_mean <- matrix(0,nrow=nrow(Z),ncol=1)
+          
+          for (j in seq_len(N)) {
+            rows <- starts[j]:ends[j]
+            dZj   <- dZ[rows, , drop = FALSE]
+            slopeRandom_mean[rows, ] <- dZj %*% JMmodel$statistics$Mean$b[j,]
+          }
+          
+          slopePredYmean<-dX%*%as.matrix(JMmodel$statistics$Mean$betas1) + slopeRandom_mean
+          slopeOutcome<-paste0("slope_",names(functional_forms)[[indice]])
+          slopePredYx<-cbind(newdataLongi,Outcome=slopeOutcome,slopePredYmean)
+          colnames(slopePredYx)[4]<-"Sample_1"
+          
+          
+          Yall[[indice]]<- slopePredYx
+        }
+        
+        if(!"value"%in% choiceY & !"slope"%in%choiceY & "RE"%in%choiceY){
+          # Terme aléatoire, on remplit directement un tableau vide
+          Random<-matrix(0,nrow=nrow(Z),ncol=length(JMmodel$statistics$Mean$b[1,]))
+          for (j in seq_len(N)) {
+            rows <- starts[j]:ends[j]
+            Zj   <- Z[rows, , drop = FALSE]
+            Random[rows,]<- JMmodel$statistics$Mean$b[j,]
+            }
+          
+          nameRandom<-names(JMmodel$statistics$Mean$b[j,])
+          if("(Intercept)"%in%nameRandom){nameRandom[which(nameRandom=="Intercept")]<-"Intercept"}
+          colnames(Random)<-paste0("RE_",nameRandom,"_",names(functional_forms)[[indice]])
+          
+          REPredYmean<- Random
+          REOutcome<-rep(colnames(Random), each = nrow(Random))
+          REPredYx<-cbind(do.call(rbind, replicate(dim(Random)[2], newdataLongi, simplify = FALSE)),
+                          Outcome=REOutcome,
+                          as.vector(REPredYxmean))
+          colnames(REPredYx)[4]<-"Sample_1"
+          
+          Yall[[indice]]<- REPredYx
+        }
         
       }
       
@@ -172,7 +550,7 @@ JMidmpredY<-function(timeVar,
   }
   
   Yall<-do.call(rbind,Yall)
-  return(Yall[,colnames(Yall)%in%c(id,timeVar,"Outcome",paste0("Sample_",c(1:Nsample)))])
+  return(Yall[,colnames(Yall)%in%c(id,timeVar,"Outcome","Sample_1")])
   
 }
 
