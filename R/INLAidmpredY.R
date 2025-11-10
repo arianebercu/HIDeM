@@ -50,15 +50,12 @@ INLAidmpredY<-function(timeVar,truncated,formLong,dataSurv,dataLongi,id,
   dataSurv<-dataSurv[order(dataSurv[,colnames(dataSurv)%in%id]),]
   
   NtimePoints<-ifelse(truncated==F,256,271)
-  
-  browser()
+
   if(nproc==1){
     
     
     for(indice in 1:length(formLong)){
 
-
-      browser()
       INLAmodel<-modelY$modelY[[indice]]
       
       # data structure

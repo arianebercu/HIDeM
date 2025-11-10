@@ -557,6 +557,26 @@ DYNidm <- function(formula01,
       # keep names of Y 
       ynames<-unlist(lapply(formLong,FUN=function(x){as.character(x[[2]])}))
       
+      # keep names of REY 
+      
+      REynames<-lapply(formLong,FUN=function(formula) {
+        # convert formula to string
+        f_str <- deparse(formula)
+        
+        terms_labels <- attr(terms(formula), "term.labels")
+        terms_RE <- terms_labels[grepl(id, terms_labels)][1]
+        terms_RE <- gsub("\\|.*", "", terms_RE)
+        terms <- strsplit(terms_RE ,"\\+")[[1]]
+        terms <- trimws(terms)
+        terms_RE <- attr(terms(as.formula(paste("~", terms_RE))), "term.labels")
+        if("1"%in%terms){
+          terms_RE<-c("Intercept",terms_RE)
+        }
+       
+      })
+      
+      
+      
     }else{
       
       if(!inherits(formLong,"list")){stop("formLong should be a list of lme models")}
@@ -584,6 +604,22 @@ DYNidm <- function(formula01,
         }
       })
       ynames<-unlist(ynames)
+      
+      
+      REynames<-lapply(formLong,FUN=function(model) {
+        # model is an lmer/lmList object
+        re_list <- lme4::ranef(model)  # returns a list of data.frames for each grouping factor
+        re_names <- lapply(re_list, function(df) colnames(df))
+        
+        # optionally, convert "(Intercept)" to "Intercept"
+        re_names <- lapply(re_names, function(x) {
+          x[x == "(Intercept)"] <- "Intercept"
+          x
+        })
+        
+        # flatten if you want a single vector for all random effects
+        unlist(re_names)
+      })
       
     }
     
@@ -613,7 +649,7 @@ DYNidm <- function(formula01,
           res<-c(res,paste0("slope_",ynames[x]))
         }
         if("RE"%in%assoc[[x]][[1]]){
-          res<-c(res,paste0("RE_",ynames[x]))
+          res<-c(res,paste0("RE_",REynames[[x]],"_",ynames[x]))
         }
         return(res)
       }))
@@ -636,7 +672,7 @@ DYNidm <- function(formula01,
           res<-c(res,paste0("slope_",ynames[x]))
         }
         if("RE"%in%assoc[[x]][[2]]){
-          res<-c(res,paste0("RE_",ynames[x]))
+          res<-c(res,paste0("RE_",REynames[[x]],"_",ynames[x]))
         }
         return(res)
       }))
@@ -659,7 +695,7 @@ DYNidm <- function(formula01,
         }
         
         if("RE"%in%assoc[[x]][[3]]){
-          res<-c(res,paste0("RE_",ynames[x]))
+          res<-c(res,paste0("RE_",REynames[[x]],"_",ynames[x]))
         }
         return(res)
       }))
