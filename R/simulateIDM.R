@@ -177,7 +177,7 @@ simdep.idmModel <- function(x,
   #id<-which(T01<T02 & T01<18 & T12<18 & T01>dat$censtime)
   # interval censored illtime
   ipos <- grep("inspection[0-9]+",names(dat))
-  
+
   if (length(ipos)>0) {
     # compute inspection times
     # make sure all inspection times are in the future
@@ -745,6 +745,8 @@ simulateDYNIDM <- function(n=100,
   data_long <- c()
   mu_sigma<- 0 #random error are normally distributed around 0 
   B0<-B1<-c()
+  
+
   for( i in 1:n){
     
     #On tire les effets aléatoires
@@ -781,7 +783,7 @@ simulateDYNIDM <- function(n=100,
     for(m in paste0("Y",c(1:(dim(B)[2]/2)))){
       mm<-data_long[data_long$num.visit==1,colnames(data_long)%in% m]
       meanY[k]<-beta0[k]
-      sdY[k]<-sqrt(B[(k*2-1),(k*2-1)]+B[(k*2),(k*2)]+2*B[(k*2-1),(k*2)])
+      sdY[k]<-sqrt(B[(k*2-1),(k*2-1)])
     data_long[,colnames(data_long)%in% m]<-(data_long[,colnames(data_long)%in% m]-meanY[k])/sdY[k]
       k<-k+1
     }
@@ -878,6 +880,7 @@ simulateDYNIDM <- function(n=100,
 
   exogenous_data$ID<-c(1:n)
   data_long<-merge(x=data_long,exogenous_data,by="ID",all.x=T)
+
   simdep.idmModel(x=data_long,n=n,plot=list(p2,surv01,p01,surv02,p02,surv12,p12))
   
 }

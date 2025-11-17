@@ -1030,7 +1030,7 @@ DYNidm <- function(formula01,
     }else{
       NtimePoints<-256
     }
-    browser()
+ 
     if(penalty=="none"){
  
 ######################### with M-spline baseline risk  #########################
@@ -1361,7 +1361,7 @@ DYNidm <- function(formula01,
 ########################## perform penalty algorithm ###########################
 ##########################   with M-splines baseline risk ######################
 ################################################################################
-         browser()
+     
             if(verifRE==length(assoc)){
               out<-DYNidmRE.penalty.splines(b=b,
                                           fix0=fix0,
@@ -1614,7 +1614,7 @@ DYNidm <- function(formula01,
                                dimp12=dimp12,
                                scale.X=scale.X)
             }else{
-              out <- DYNidmRE.penalty.weib(b=b,
+              out <- DYNidm.penalty.weib(b=b,
                                            fix0=fix0,
                                            size_V=size_V,
                                            clustertype=clustertype,

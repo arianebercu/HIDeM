@@ -62,7 +62,7 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,size_spline,
 
 
   # need to keep original fix to calculate for beta 
-browser()
+
   V0<-NA
   fix00<-fix0
   
@@ -149,7 +149,7 @@ browser()
   
   outputall<-list()
   length(outputall)<-Nsample
-browser()
+
   if(nlambda>1){
   for(idsample in 1:Nsample){
     
@@ -168,7 +168,8 @@ browser()
                           seed=seed+idsample,
                           BLUP=BLUP,
                           nproc=1,
-                          clustertype=clustertype)
+                          clustertype=clustertype,
+                          scale.X=scale.X)
     }else{
       
       dataY<-JMidmpredY(timeVar=timeVar,
@@ -182,7 +183,8 @@ browser()
                         assoc=assoc,
                         modelY=modelY,
                         seed=seed+idsample,
-                        BLUP=BLUP)
+                        BLUP=BLUP,
+                        scale.X=scale.X)
     }
   
     for( m in unique(c(outcome01,outcome02,outcome12))){
@@ -198,18 +200,6 @@ browser()
     dataY[,colnames(dataY)%in%id]<-as.numeric(dataY[,colnames(dataY)%in%id])
     # to keep tracks of time order for each individual 
     dataY$order<-as.numeric(ave(dataY[,colnames(dataY)%in%id], cumsum(c(TRUE, diff(dataY[,colnames(dataY)%in%id]) != 0)), FUN = seq_along))
-    
-    if(scale.X==T){
-      
-      # Compute group means and sds
-      ym <- tapply(dataY[[4]], dataY$Outcome, mean)
-      ys <- tapply(dataY[[4]], dataY$Outcome, sd)
-      
-      # Normalize (min-max) within each group
-      dataY[[4]] <- ave(dataY[[4]], dataY$Outcome,
-                        FUN = function(x) (x - min(x)) / (max(x) - min(x)))
-      
-    }
     
     
     if(length(outcome01)>=1){
@@ -2967,7 +2957,8 @@ browser()
                               seed=seed+idsample,
                               BLUP=BLUP,
                               nproc=1,
-                              clustertype=clustertype)
+                              clustertype=clustertype,
+                              scale.X=scale.X)
         }else{
           
           dataY<-JMidmpredY(timeVar=timeVar,
@@ -2980,7 +2971,8 @@ browser()
                             ctime=ctime,
                             modelY=modelY,
                             seed=seed+idsample,
-                            BLUP=BLUP)
+                            BLUP=BLUP,
+                            scale.X=scale.X)
         }
         
         for( m in unique(c(outcome01,outcome02,outcome12))){
@@ -2996,18 +2988,7 @@ browser()
         dataY[,colnames(dataY)%in%id]<-as.numeric(dataY[,colnames(dataY)%in%id])
         # to keep tracks of time order for each individual 
         dataY$order<-as.numeric(ave(dataY[,colnames(dataY)%in%id], cumsum(c(TRUE, diff(dataY[,colnames(dataY)%in%id]) != 0)), FUN = seq_along))
-        
-        if(scale.X==T){
-          
-          # Compute group means and sds
-          ym <- tapply(dataY[[4]], dataY$Outcome, mean)
-          ys <- tapply(dataY[[4]], dataY$Outcome, sd)
-          
-          # Normalize (min-max) within each group
-          dataY[[4]] <- ave(dataY[[4]], dataY$Outcome,
-                            FUN = function(x) (x - min(x)) / (max(x) - min(x)))
-          
-        }
+      
         
         
         if(length(outcome01)>=1){
@@ -4422,7 +4403,8 @@ browser()
                                                        seed=seed+idsample,
                                                        BLUP=BLUP,
                                                        nproc=1,
-                                                       clustertype=clustertype)
+                                                       clustertype=clustertype,
+                                                       scale.X=scale.X)
                                  }else{
                                    
                                    dataY<-JMidmpredY(timeVar=timeVar,
@@ -4435,7 +4417,8 @@ browser()
                                                      ctime=ctime,
                                                      modelY=modelY,
                                                      seed=seed+idsample,
-                                                     BLUP=BLUP)
+                                                     BLUP=BLUP,
+                                                     scale.X=scale.X)
                                  }
         
                                  for( m in unique(c(outcome01,outcome02,outcome12))){
@@ -4451,20 +4434,7 @@ browser()
                                  dataY[,colnames(dataY)%in%id]<-as.numeric(dataY[,colnames(dataY)%in%id])
                                  # to keep tracks of time order for each individual 
                                  dataY$order<-as.numeric(ave(dataY[,colnames(dataY)%in%id], cumsum(c(TRUE, diff(dataY[,colnames(dataY)%in%id]) != 0)), FUN = seq_along))
-                                 
-                                 if(scale.X==T){
-                                   
-                                   # Compute group means and sds
-                                   ym <- tapply(dataY[[4]], dataY$Outcome, mean)
-                                   ys <- tapply(dataY[[4]], dataY$Outcome, sd)
-                                   
-                                   # Normalize (min-max) within each group
-                                   dataY[[4]] <- ave(dataY[[4]], dataY$Outcome,
-                                                     FUN = function(x) (x - min(x)) / (max(x) - min(x)))
-                                   
-                                 }
-                                 
-                                 
+                                
                                  if(length(outcome01)>=1){
                                    y01k<-dataY[dataY$Outcome%in%outcome01,]
                                    # order  by individual and timeline 

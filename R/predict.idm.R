@@ -109,6 +109,7 @@ predict.idm <- function(object,s,
     object$levels$class[sapply(object$levels$class, is.null)] <- NA
     if(length(object$levels$values)>0){
       object$levels$values[sapply(object$levels$values, is.null)] <- NA}
+    
     xlevels<-unlist(object$levels$class)
     if(any(xlevels%in%c("factor","character"))){
       xnames<-c(all.vars(object$terms$Formula01)[all.vars(object$terms$Formula01)%in%labels(terms(object$terms$Formula01))],
@@ -119,41 +120,46 @@ predict.idm <- function(object,s,
         id<-which(xlevels%in%c("factor","character"))
         m<-1
         for(k in xnamesfactor){
-          newdata[,k] <- factor(newdata[,k], levels=object$levels$values[[id[m]]])
-          m<-m+1 }
+          lev<-object$levels$values[[id[m]]]
+          for(l in lev[2:length(lev)]){
+          newdata$var <- factor(newdata[,k],
+                                levels = object$levels$values[[id[m]]])
+          colnames(newdata)[colnames(newdata)=="var"]<-paste0(k,l)
+          }
+          m<-m+1 
+          }
       }
-      
-      
     }
-    
+
     #################### prediction if model not from penalty ##################
     if(object$penalty=="none"){
     #update dataset from the formula 
     if (!missing(newdata)){
         if (NROW(newdata)>1) stop("Argument newdata has more than one row\n.Currently this function works only for one covariate constallation at a time.")
         if (length(object$Xnames01)>0){
-          if(length(grep(":",names(object$coef[1:object$NC[1]])))>0){
+         # if(length(grep(":",names(object$coef[1:object$NC[1]])))>0){
           #Z01 <- model.matrix(object$terms$Formula01,data=newdata)[, -1, drop = FALSE]
           Z01 <- model.matrix(update.formula(formula(object$terms$Formula01),NULL~.),data=newdata)[, -1, drop = FALSE]
-          }else{
-            Z01 <-as.matrix(model.frame(formula=update.formula(formula(object$terms$Formula01),NULL~.),data=newdata))}
+         # }else{
+         #   Z01 <- model.matrix(update.formula(formula(object$terms$Formula01),NULL~.),data=newdata)[, -1, drop = FALSE]
+            
           }else{
             Z01 <- 0}
         if (length(object$Xnames02)>0){
           
-          if(length(grep(":",names(object$coef[(1+object$NC[1]):(object$NC[2]+object$NC[1])])))>0){
+         # if(length(grep(":",names(object$coef[(1+object$NC[1]):(object$NC[2]+object$NC[1])])))>0){
             #Z02 <- model.matrix(object$terms$Formula02,data=newdata)[, -1, drop = FALSE]
             Z02 <- model.matrix(update.formula(formula(object$terms$Formula02),NULL~.),data=newdata)[, -1, drop = FALSE]
-          }else{
-            Z02 <-as.matrix(model.frame(formula=update.formula(formula(object$terms$Formula02),NULL~.),data=newdata))}
+         # }else{
+         #   Z02 <- model.matrix(update.formula(formula(object$terms$Formula02),NULL~.),data=newdata)[, -1, drop = FALSE]}
         }else{
             Z02 <- 0}
         if (length(object$Xnames12)>0){
-          if(length(grep(":",names(object$coef[(1+object$NC[1]+object$NC[2]):(object$NC[3]+object$NC[2]+object$NC[1])])))>0){
+       #   if(length(grep(":",names(object$coef[(1+object$NC[1]+object$NC[2]):(object$NC[3]+object$NC[2]+object$NC[1])])))>0){
             #Z12 <- model.matrix(object$terms$Formula12,data=newdata)[, -1, drop = FALSE]
             Z12 <- model.matrix(update.formula(formula(object$terms$Formula12),NULL~.),data=newdata)[, -1, drop = FALSE]
-          }else{
-            Z12 <-as.matrix(model.frame(formula=update.formula(formula(object$terms$Formula12),NULL~.),data=newdata))}
+        #  }else{
+        #    Z12 <- model.matrix(update.formula(formula(object$terms$Formula12),NULL~.),data=newdata)[, -1, drop = FALSE]}
           }else{
             Z12 <- 0}
     }else{
@@ -646,28 +652,28 @@ predict.idm <- function(object,s,
       if (!missing(newdata)){
         if (NROW(newdata)>1) stop("Argument newdata has more than one row\n.Currently this function works only for one covariate constallation at a time.")
         if (length(object$Xnames01)>0){
-          if(length(grep(":",names(object$coef[1:object$NC[1]])))>0){
+          #if(length(grep(":",names(object$coef[1:object$NC[1]])))>0){
             #Z01 <- model.matrix(object$terms$Formula01,data=newdata)[, -1, drop = FALSE]
             Z01 <- model.matrix(update.formula(formula(object$terms$Formula01),NULL~.),data=newdata)[, -1, drop = FALSE]
-          }else{
-            Z01 <-as.matrix(model.frame(formula=update.formula(formula(object$terms$Formula01),NULL~.),data=newdata))}
+         # }else{
+          #  Z01 <-as.matrix(model.frame(formula=update.formula(formula(object$terms$Formula01),NULL~.),data=newdata))}
         }else{
           Z01 <- 0}
         if (length(object$Xnames02)>0){
           
-          if(length(grep(":",names(object$coef[(1+object$NC[1]):(object$NC[2]+object$NC[1])])))>0){
+          #if(length(grep(":",names(object$coef[(1+object$NC[1]):(object$NC[2]+object$NC[1])])))>0){
             #Z02 <- model.matrix(object$terms$Formula02,data=newdata)[, -1, drop = FALSE]
             Z02 <- model.matrix(update.formula(formula(object$terms$Formula02),NULL~.),data=newdata)[, -1, drop = FALSE]
-          }else{
-            Z02 <-as.matrix(model.frame(formula=update.formula(formula(object$terms$Formula02),NULL~.),data=newdata))}
+         # }else{
+         #   Z02 <-as.matrix(model.frame(formula=update.formula(formula(object$terms$Formula02),NULL~.),data=newdata))}
         }else{
           Z02 <- 0}
         if (length(object$Xnames12)>0){
-          if(length(grep(":",names(object$coef[(1+object$NC[1]+object$NC[2]):(object$NC[3]+object$NC[2]+object$NC[1])])))>0){
+         # if(length(grep(":",names(object$coef[(1+object$NC[1]+object$NC[2]):(object$NC[3]+object$NC[2]+object$NC[1])])))>0){
             #Z12 <- model.matrix(object$terms$Formula12,data=newdata)[, -1, drop = FALSE]
             Z12 <- model.matrix(update.formula(formula(object$terms$Formula12),NULL~.),data=newdata)[, -1, drop = FALSE]
-          }else{
-            Z12 <-as.matrix(model.frame(formula=update.formula(formula(object$terms$Formula12),NULL~.),data=newdata))}
+         # }else{
+         #   Z12 <-as.matrix(model.frame(formula=update.formula(formula(object$terms$Formula12),NULL~.),data=newdata))}
         }else{
           Z12 <- 0}
       }else{

@@ -10,7 +10,7 @@
 
 INLAidmpredY<-function(timeVar,truncated,formLong,dataSurv,dataLongi,id,
                   t0,t1,t2,t3,assoc,
-                  ctime,modelY,seed,BLUP,nproc,clustertype){
+                  ctime,modelY,seed,BLUP,nproc,clustertype,scale.X){
 
   
   # define timePoints of prediction : 
@@ -51,6 +51,14 @@ INLAidmpredY<-function(timeVar,truncated,formLong,dataSurv,dataLongi,id,
   
   NtimePoints<-ifelse(truncated==F,256,271)
 
+  #
+  if(scale.X==T){
+    tcenter<-ifelse(truncated==T,0,min(t0))
+    dataCenter<-data.frame(ID=idsubjects,time=tcenter)
+    colnames(dataCenter)<-c(id,timeVar)
+  }
+  #browser()
+  # should center by median or mean ? 
   if(nproc==1){
     
     
@@ -83,32 +91,49 @@ INLAidmpredY<-function(timeVar,truncated,formLong,dataSurv,dataLongi,id,
         
         if("value"%in% choiceY){
         
-        Y<-make_XINLA(formula=formLong[[indice]], timeVar=timeVar, data=dataLongi_augmented,ct=ct,id=id,SMP=SMP[[x]])
+        Y<-as.matrix(make_XINLA(formula=formLong[[indice]], timeVar=timeVar, data=dataLongi_augmented,ct=ct,id=id,SMP=SMP[[1]]))
         Y<-Y[indices,]
         Outcome<-all.vars(terms(formLong[[indice]]))[1]
         PredYx<-cbind(timePointsdata,Outcome=Outcome,Y)
+        if(scale.X==T){
+          Ycenter<-make_XINLA(formula=formLong[[indice]], timeVar=timeVar, data=dataCenter,ct=ct,id=id,SMP=SMP[[1]])
+          PredYx$Y<-(PredYx$Y-mean(Ycenter))/sd(Ycenter)
+        }
         colnames(PredYx)[4]<-"Sample_1"
         res<-rbind(res,PredYx)
         }
         
         if("slope"%in% choiceY){
-        dY<-make_dXINLA(formula=formLong[[indice]], timeVar=timeVar, data=dataLongi_augmented,ct=ct,id=id,SMP=SMP[[x]])
+        dY<-as.matrix(make_dXINLA(formula=formLong[[indice]], timeVar=timeVar, data=dataLongi_augmented,ct=ct,id=id,SMP=SMP[[1]]))
         dY<-dY[indices,]
         slopeOutcome<-paste0("slope_",Outcome)
         slopePredYx<-cbind(timePointsdata,Outcome=slopeOutcome,dY)
+        if(scale.X==T){
+          dYcenter<-make_dXINLA(formula=formLong[[indice]], timeVar=timeVar, data=dataCenter,ct=ct,id=id,SMP=SMP[[1]])
+          slopePredYx$dY<-(slopePredYx$dY-mean(dYcenter))/sd(dYcenter)
+        }
         colnames(slopePredYx)[4]<-"Sample_1"
         res<-rbind(res,slopePredYx)
         }
         
         if("RE"%in% choiceY){
           
-        REY<-make_REXINLA(formula=formLong[[indice]], timeVar=timeVar, data=dataLongi_augmented,ct=ct,id=id,SMP=SMP[[x]])
+        REY<-as.matrix(make_REXINLA(formula=formLong[[indice]], timeVar=timeVar, data=dataLongi_augmented,ct=ct,id=id,SMP=SMP[[1]]))
        REY<-REY[indices,]
+       
+       if(scale.X==T){
+         REYcenter<-as.matrix(make_REXINLA(formula=formLong[[indice]], timeVar=timeVar, data=dataCenter,ct=ct,id=id,SMP=SMP[[1]]))
+         REY<-do.call(cbind,lapply(c(1:dim(REY)[2]),FUN=function(x){
+           (REY[,x]-mean(REYcenter[,x]))/sd(REYcenter[,x])
+         }))
+       }
        namesREY<-unlist(lapply(1:dim(REY)[2],FUN=function(x){
          rep(paste0("RE_",colnames(REY)[x],"_",Outcome),dim(REY)[1])
        }))
        dataREY<- do.call(rbind, replicate(dim(REY)[2], timePointsdata, simplify = FALSE))
        REPredYx<-cbind(dataREY,Outcome=namesREY,as.vector(REY))
+       
+       
        colnames(REPredYx)[4]<-"Sample_1"
        res<-rbind(res,REPredYx)
         }
@@ -135,6 +160,11 @@ INLAidmpredY<-function(timeVar,truncated,formLong,dataSurv,dataLongi,id,
           Y<-Y[indices,]
           Outcome<-all.vars(terms(formLong[[indice]]))[1]
           PredYx<-cbind(timePointsdata,Outcome=Outcome,Y)
+          
+          if(scale.X==T){
+            Ycenter<-make_XINLA_BLUP(formula=formLong[[indice]], timeVar=timeVar, data=dataCenter,ct=ct,id=id,SMP=INLAmodel)
+            PredYx$Y<-(PredYx$Y-mean(Ycenter))/sd(Ycenter)
+          }
           colnames(PredYx)[4]<-"Sample_1"
           res<-rbind(res,PredYx)
         }
@@ -144,6 +174,11 @@ INLAidmpredY<-function(timeVar,truncated,formLong,dataSurv,dataLongi,id,
         dY<-dY[indices,]
         slopeOutcome<-paste0("slope_",Outcome)
         slopePredYx<-cbind(timePointsdata,Outcome=slopeOutcome,dY)
+        
+        if(scale.X==T){
+          dYcenter<-make_dXINLA_BLUP(formula=formLong[[indice]], timeVar=timeVar, data=dataCenter,ct=ct,id=id,SMP=INLAmodel)
+          slopePredYx$dY<-(slopePredYx$dY-mean(dYcenter))/sd(dYcenter)
+        }
         colnames(slopePredYx)[4]<-"Sample_1"
         res<-rbind(res,slopePredYx)
         }
@@ -151,6 +186,13 @@ INLAidmpredY<-function(timeVar,truncated,formLong,dataSurv,dataLongi,id,
         if("RE"%in% choiceY){
         REY<-as.matrix(make_REXINLA_BLUP(formula=formLong[[indice]], timeVar=timeVar, data=dataLongi_augmented,ct=ct,id=id,SMP=INLAmodel))
         REY<-REY[indices,]
+        
+        if(scale.X==T){
+          REYcenter<-as.matrix(make_REXINLA_BLUP(formula=formLong[[indice]], timeVar=timeVar, data=dataCenter,ct=ct,id=id,SMP=INLAmodel))
+          REY<-do.call(cbind,lapply(c(1:dim(REY)[2]),FUN=function(x){
+            (REY[,x]-mean(REYcenter[,x]))/sd(REYcenter[,x])
+          }))
+        }
         namesREY<-unlist(lapply(1:dim(REY)[2],FUN=function(x){
           rep(paste0("RE_",colnames(REY)[x],"_",Outcome),dim(REY)[1])
         }))
@@ -217,27 +259,44 @@ INLAidmpredY<-function(timeVar,truncated,formLong,dataSurv,dataLongi,id,
                            
                            if("value"%in% choiceY){
                              
-                             Y<-make_XINLA(formula=formLong[[indice]], timeVar=timeVar, data=dataLongi_augmented,ct=ct,id=id,SMP=SMP[[x]])
+                             Y<-make_XINLA(formula=formLong[[indice]], timeVar=timeVar, data=dataLongi_augmented,ct=ct,id=id,SMP=SMP[[1]])
                              Y<-Y[indices,]
                              Outcome<-all.vars(terms(formLong[[indice]]))[1]
                              PredYx<-cbind(timePointsdata,Outcome=Outcome,Y)
+                             
+                             if(scale.X==T){
+                               Ycenter<-make_XINLA(formula=formLong[[indice]], timeVar=timeVar, data=dataCenter,ct=ct,id=id,SMP=SMP[[1]])
+                               PredYx$Y<-(PredYx$Y-mean(Ycenter))/sd(Ycenter)
+                             }
                              colnames(PredYx)[4]<-"Sample_1"
                              res<-rbind(res,PredYx)
                            }
                            
                            if("slope"%in% choiceY){
-                             dY<-make_dXINLA(formula=formLong[[indice]], timeVar=timeVar, data=dataLongi_augmented,ct=ct,id=id,SMP=SMP[[x]])
+                             dY<-make_dXINLA(formula=formLong[[indice]], timeVar=timeVar, data=dataLongi_augmented,ct=ct,id=id,SMP=SMP[[1]])
                              dY<-dY[indices,]
                              slopeOutcome<-paste0("slope_",Outcome)
                              slopePredYx<-cbind(timePointsdata,Outcome=slopeOutcome,dY)
+                             
+                             if(scale.X==T){
+                               dYcenter<-make_dXINLA(formula=formLong[[indice]], timeVar=timeVar, data=dataCenter,ct=ct,id=id,SMP=SMP[[1]])
+                               slopePredYx$dY<-(slopePredYx$dY-mean(dYcenter))/sd(dYcenter)
+                             }
                              colnames(slopePredYx)[4]<-"Sample_1"
                              res<-rbind(res,slopePredYx)
                            }
                            
                            if("RE"%in% choiceY){
                              
-                             REY<-make_REXINLA(formula=formLong[[indice]], timeVar=timeVar, data=dataLongi_augmented,ct=ct,id=id,SMP=SMP[[x]])
+                             REY<-make_REXINLA(formula=formLong[[indice]], timeVar=timeVar, data=dataLongi_augmented,ct=ct,id=id,SMP=SMP[[1]])
                              REY<-REY[indices,]
+                             
+                             if(scale.X==T){
+                               REYcenter<-as.matrix(make_REXINLA(formula=formLong[[indice]], timeVar=timeVar, data=dataCenter,ct=ct,id=id,SMP=SMP[[1]]))
+                               REY<-do.call(cbind,lapply(c(1:dim(REY)[2]),FUN=function(x){
+                                 (REY[,x]-mean(REYcenter[,x]))/sd(REYcenter[,x])
+                               }))
+                             }
                              namesREY<-unlist(lapply(1:dim(REY)[2],FUN=function(x){
                                rep(paste0("RE_",colnames(REY)[x],"_",Outcome),dim(REY)[1])
                              }))
@@ -268,6 +327,11 @@ INLAidmpredY<-function(timeVar,truncated,formLong,dataSurv,dataLongi,id,
                              Y<-Y[indices,]
                              Outcome<-all.vars(terms(formLong[[indice]]))[1]
                              PredYx<-cbind(timePointsdata,Outcome=Outcome,Y)
+                             
+                             if(scale.X==T){
+                               Ycenter<-make_XINLA_BLUP(formula=formLong[[indice]], timeVar=timeVar, data=dataCenter,ct=ct,id=id,SMP=INLAmodel)
+                               PredYx$Y<-(PredYx$Y-mean(Ycenter))/sd(Ycenter)
+                             }
                              colnames(PredYx)[4]<-"Sample_1"
                              res<-rbind(res,PredYx)
                            }
@@ -277,6 +341,11 @@ INLAidmpredY<-function(timeVar,truncated,formLong,dataSurv,dataLongi,id,
                              dY<-dY[indices,]
                              slopeOutcome<-paste0("slope_",Outcome)
                              slopePredYx<-cbind(timePointsdata,Outcome=slopeOutcome,dY)
+                             
+                             if(scale.X==T){
+                               dYcenter<-make_dXINLA_BLUP(formula=formLong[[indice]], timeVar=timeVar, data=dataCenter,ct=ct,id=id,SMP=INLAmodel)
+                               slopePredYx$dY<-(slopePredYx$dY-mean(dYcenter))/sd(dYcenter)
+                             }
                              colnames(slopePredYx)[4]<-"Sample_1"
                              res<-rbind(res,slopePredYx)
                            }
@@ -284,6 +353,13 @@ INLAidmpredY<-function(timeVar,truncated,formLong,dataSurv,dataLongi,id,
                            if("RE"%in% choiceY){
                              REY<-as.matrix(make_REXINLA_BLUP(formula=formLong[[indice]], timeVar=timeVar, data=dataLongi_augmented,ct=ct,id=id,SMP=INLAmodel))
                              REY<-REY[indices,]
+                             
+                             if(scale.X==T){
+                               REYcenter<-as.matrix(make_REXINLA_BLUP(formula=formLong[[indice]], timeVar=timeVar, data=dataCenter,ct=ct,id=id,SMP=INLAmodel))
+                               REY<-do.call(cbind,lapply(c(1:dim(REY)[2]),FUN=function(x){
+                                 (REY[,x]-mean(REYcenter[,x]))/sd(REYcenter[,x])
+                               }))
+                             }
                              namesREY<-unlist(lapply(1:dim(REY)[2],FUN=function(x){
                                rep(paste0("RE_",colnames(REY)[x],"_",Outcome),dim(REY)[1])
                              }))
@@ -531,7 +607,7 @@ make_dXINLA<- function(formula, timeVar, data, use_splines = FALSE, ct, id, SMP,
 
 make_XINLA_BLUP <- function(formula, timeVar, data, use_splines = FALSE, ct, id, SMP, ...) {
   n <- nrow(data)
-  
+  N<-length(unique(data[,colnames(data)%in%id]))
   # --- parse terms ---
   terms_labels <- attr(terms(formula), "term.labels")
   terms_fixed <- terms_labels[!grepl(id, terms_labels)]
@@ -567,6 +643,7 @@ make_XINLA_BLUP <- function(formula, timeVar, data, use_splines = FALSE, ct, id,
   B <- matrix(0, nrow = n, ncol = n_fixed)
   colnames(X) <- paste0(terms_fixed, "_L1")
   
+  #browser()
   for (k in seq_along(terms_fixed)) {
     lab <- terms_fixed[k]
     tag <- paste0(gsub("[()]", "", lab), "_L1")
@@ -629,9 +706,9 @@ make_XINLA_BLUP <- function(formula, timeVar, data, use_splines = FALSE, ct, id,
     } else {
       X_RE[, k] <- data[[lab]]
     }
-    
+  
     # extract modes for each id (rows in the summary.random element)
-    modes_vec <- sr_list[[pos]][, "mode"]
+    modes_vec <- sr_list[[pos]][((k-1)*N+1):(k*N), "mode"]
     # names correspond to id_levels order only if sr was built that way; original code used idd order (unique(data[[id]]))
     # so we set names using id_levels to replicate original replication logic
     names(modes_vec) <- id_levels
@@ -645,6 +722,8 @@ make_XINLA_BLUP <- function(formula, timeVar, data, use_splines = FALSE, ct, id,
 
 make_REXINLA_BLUP <- function(formula, timeVar, data, use_splines = FALSE, ct, id, SMP, ...) {
   # --- parse random-effect terms ---
+  n <- nrow(data)
+  N<-length(unique(data[,colnames(data)%in%id]))
   terms_labels <- attr(terms(formula), "term.labels")
   terms_RE <- terms_labels[grepl(id, terms_labels)][1]
   terms_RE <- gsub("\\|.*", "", terms_RE)
@@ -687,7 +766,7 @@ make_REXINLA_BLUP <- function(formula, timeVar, data, use_splines = FALSE, ct, i
     if (length(pos) == 0) next  # skip missing RE terms
     
     # Extract BLUP modes for each ID
-    modes_vec <- sr_list[[pos]][, "mode"]
+    modes_vec <- sr_list[[pos]][((k-1)*N+1):(k*N), "mode"]
     names(modes_vec) <- id_levels  # align with unique(data[[id]]) order
     
     # Vectorized mapping
@@ -701,7 +780,7 @@ make_REXINLA_BLUP <- function(formula, timeVar, data, use_splines = FALSE, ct, i
 }
 make_dXINLA_BLUP <- function(formula, timeVar, data, use_splines = FALSE, ct, id, SMP, ...) {
   n <- nrow(data)
-  
+  N<-length(unique(data[,colnames(data)%in%id]))
   # parse terms
   terms_labels <- attr(terms(formula), "term.labels")
   terms_fixed <- terms_labels[!grepl(id, terms_labels)]
@@ -796,7 +875,7 @@ make_dXINLA_BLUP <- function(formula, timeVar, data, use_splines = FALSE, ct, id
     }
     
     # extract BLUP modes for each id (the sr_list[[pos]] rows correspond to ids in original order)
-    modes_vec <- sr_list[[pos]][, "mode"]
+    modes_vec <- sr_list[[pos]][((k-1)*N+1):(k*N), "mode"]
     # align names to id_levels so mapping equals original replication logic
     names(modes_vec) <- id_levels
     B_RE[, k] <- unname(modes_vec[id_values])

@@ -76,7 +76,8 @@ DYNidm.splines<-function(b,clustertype,epsa,epsb,epsd,nproc,maxiter,size_V,size_
                             ctime=ctime,
                             modelY=modelY,
                             seed=seed+k,
-                            BLUP=BLUP)
+                            BLUP=BLUP,
+                            scale.X=scale.X)
       }else{
         
         dataY<-JMidmpredY(timeVar=timeVar,
@@ -89,7 +90,8 @@ DYNidm.splines<-function(b,clustertype,epsa,epsb,epsd,nproc,maxiter,size_V,size_
                           ctime=ctime,
                           modelY=modelY,
                           seed=seed+k,
-                          BLUP=BLUP)
+                          BLUP=BLUP,
+                          scale.X=scale.X)
       }
       
       for( m in unique(c(outcome01,outcome02,outcome12))){
@@ -105,18 +107,6 @@ DYNidm.splines<-function(b,clustertype,epsa,epsb,epsd,nproc,maxiter,size_V,size_
       dataY[,colnames(dataY)%in%id]<-as.numeric(dataY[,colnames(dataY)%in%id])
       # to keep tracks of time order for each individual 
       dataY$order<-as.numeric(ave(dataY[,colnames(dataY)%in%id], cumsum(c(TRUE, diff(dataY[,colnames(dataY)%in%id]) != 0)), FUN = seq_along))
-      
-      if(scale.X==T){
-        
-        # Compute group means and sds
-        ym <- tapply(dataY[[4]], dataY$Outcome, mean)
-        ys <- tapply(dataY[[4]], dataY$Outcome, sd)
-        
-        # Normalize (min-max) within each group
-        dataY[[4]] <- ave(dataY[[4]], dataY$Outcome,
-                          FUN = function(x) (x - min(x)) / (max(x) - min(x)))
-        
-      }
       
       
       if(length(outcome01)>=1){

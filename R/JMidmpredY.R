@@ -47,8 +47,6 @@ JMidmpredY<-function(timeVar,
   Yall<-list()
   length(Yall)<-length(formLong)
   
-
-  browser()
   for(indice in 1:length(formLong)){
 
 
@@ -85,9 +83,9 @@ JMidmpredY<-function(timeVar,
       ends   <- cumsum(nn)
       starts <- ends - nn + 1
       choiceY<-na.omit(unlist(assoc[[indice]]))
-      browser()
+
       if(BLUP==F){
-        browser()
+   
       idNsample<-sample(x=c(1:M),size=1)
 
       if("value"%in% choiceY & "slope"%in%choiceY & "RE"%in%choiceY){
@@ -112,9 +110,9 @@ JMidmpredY<-function(timeVar,
         dZj   <- dZ[rows, , drop = FALSE]                
         slopeRandom_all[rows, ] <- dZj %*% Bj[1,,]
       }
-      browser()
+     
       nameRandom<-colnames(dZ)
-      if("(Intercept)"%in%nameRandom){nameRandom[which(nameRandom=="Intercept")]<-"Intercept"}
+      if("(Intercept)"%in%nameRandom){nameRandom[which(nameRandom=="(Intercept)")]<-"Intercept"}
       colnames(Random)<-paste0("RE_",nameRandom,"_",names(functional_forms)[[indice]])
       
       PredYx <- Fixed + Random_all
@@ -129,7 +127,7 @@ JMidmpredY<-function(timeVar,
       slopePredYx<-cbind(newdataLongi,Outcome=slopeOutcome,slopePredYx)
       REPredYx<-cbind(do.call(rbind, replicate(dim(Random)[2], newdataLongi, simplify = FALSE)),
                       Outcome=REOutcome,
-                      as.vector(REPredYxmean))
+                      as.vector(REPredYx))
       
       colnames(PredYx)[4]<-paste0("Sample_1")
       colnames(slopePredYx)[4]<-paste0("Sample_1")
@@ -195,7 +193,7 @@ JMidmpredY<-function(timeVar,
           
         }
         nameRandom<-colnames(dZ)
-        if("(Intercept)"%in%nameRandom){nameRandom[which(nameRandom=="Intercept")]<-"Intercept"}
+        if("(Intercept)"%in%nameRandom){nameRandom[which(nameRandom=="(Intercept)")]<-"Intercept"}
         colnames(Random)<-paste0("RE_",nameRandom,"_",names(functional_forms)[[indice]])
         
         PredYx <- Fixed + Random_all
@@ -207,7 +205,7 @@ JMidmpredY<-function(timeVar,
         PredYx<-cbind(newdataLongi,Outcome=Outcome,PredYx)
         REPredYx<-cbind(do.call(rbind, replicate(dim(Random)[2], newdataLongi, simplify = FALSE)),
                         Outcome=REOutcome,
-                        as.vector(REPredYxmean))
+                        as.vector(REPredYx))
         
         colnames(PredYx)[4]<-"Sample_1"
         colnames(REPredYx)[4]<-"Sample_1"
@@ -265,7 +263,7 @@ JMidmpredY<-function(timeVar,
           slopeRandom_all[rows, ] <- dZj %*% Bj[1,,]
         }
         nameRandom<-colnames(dZ)
-        if("(Intercept)"%in%nameRandom){nameRandom[which(nameRandom=="Intercept")]<-"Intercept"}
+        if("(Intercept)"%in%nameRandom){nameRandom[which(nameRandom=="(Intercept)")]<-"Intercept"}
         colnames(Random)<-paste0("RE_",nameRandom,"_",names(functional_forms)[[indice]])
         
         slopePredYx<-slopeFixed + slopeRandom_all
@@ -277,7 +275,7 @@ JMidmpredY<-function(timeVar,
         slopePredYx<-cbind(newdataLongi,Outcome=slopeOutcome,slopePredYx)
         REPredYx<-cbind(do.call(rbind, replicate(dim(Random)[2], newdataLongi, simplify = FALSE)),
                         Outcome=REOutcome,
-                        as.vector(REPredYxmean))
+                        as.vector(REPredYx))
         
         colnames(slopePredYx)[4]<-"Sample_1"
         colnames(REPredYx)[4]<-"Sample_1"
@@ -321,14 +319,14 @@ JMidmpredY<-function(timeVar,
           
         }
         nameRandom<-colnames(dZ)
-        if("(Intercept)"%in%nameRandom){nameRandom[which(nameRandom=="Intercept")]<-"Intercept"}
+        if("(Intercept)"%in%nameRandom){nameRandom[which(nameRandom=="(Intercept)")]<-"Intercept"}
         colnames(Random)<-paste0("RE_",nameRandom,"_",names(functional_forms)[[indice]])
         
         REPredYx<-Random
         REOutcome<-rep(colnames(Random), each = nrow(Random))
         REPredYx<-cbind(do.call(rbind, replicate(dim(Random)[2], newdataLongi, simplify = FALSE)),
                         Outcome=REOutcome,
-                        as.vector(REPredYxmean))
+                        as.vector(REPredYx))
         colnames(REPredYx)[4]<-"Sample_1"
         
         Yall[[indice]]<- REPredYx
@@ -336,7 +334,7 @@ JMidmpredY<-function(timeVar,
       }
       }else{
         REPredYx<-PredYx<-slopePredYx<-NULL
-        browser()
+      
         if("value"%in% choiceY & "slope"%in%choiceY & "RE"%in%choiceY){
         # Terme aléatoire, on remplit directement un tableau vide
         Random_mean <- matrix(0,nrow=nrow(Z),ncol=1)
@@ -351,14 +349,14 @@ JMidmpredY<-function(timeVar,
           dZj   <- dZ[rows, , drop = FALSE]
           slopeRandom_mean[rows, ] <- dZj %*% JMmodel$statistics$Mean$b[j,]
         }
-        browser()
+    
         nameRandom<-names(JMmodel$statistics$Mean$b[j,])
-        if("(Intercept)"%in%nameRandom){nameRandom[which(nameRandom=="Intercept")]<-"Intercept"}
+        if("(Intercept)"%in%nameRandom){nameRandom[which(nameRandom=="(Intercept)")]<-"Intercept"}
         colnames(Random)<-paste0("RE_",nameRandom,"_",names(functional_forms)[[indice]])
         
         PredYmean<-X%*%as.matrix(JMmodel$statistics$Mean$betas1) + Random_mean
         slopePredYmean<-dX%*%as.matrix(JMmodel$statistics$Mean$betas1) + slopeRandom_mean
-        REPredYmean<- Random
+        REPredYx<- Random
         
         Outcome<-names(functional_forms)[[indice]]
         slopeOutcome<-paste0("slope_",names(functional_forms)[[indice]])
@@ -368,7 +366,7 @@ JMidmpredY<-function(timeVar,
         slopePredYx<-cbind(newdataLongi,Outcome=slopeOutcome,slopePredYmean)
         REPredYx<-cbind(do.call(rbind, replicate(dim(Random)[2], newdataLongi, simplify = FALSE)),
                         Outcome=REOutcome,
-                        as.vector(REPredYxmean))
+                        as.vector(REPredYx))
         
         colnames(PredYx)[4]<-"Sample_1"
         colnames(slopePredYx)[4]<-"Sample_1"
@@ -422,11 +420,11 @@ JMidmpredY<-function(timeVar,
           }
           
           nameRandom<-names(JMmodel$statistics$Mean$b[j,])
-          if("(Intercept)"%in%nameRandom){nameRandom[which(nameRandom=="Intercept")]<-"Intercept"}
+          if("(Intercept)"%in%nameRandom){nameRandom[which(nameRandom=="(Intercept)")]<-"Intercept"}
           colnames(Random)<-paste0("RE_",nameRandom,"_",names(functional_forms)[[indice]])
           
           PredYmean<-X%*%as.matrix(JMmodel$statistics$Mean$betas1) + Random_mean
-          REPredYmean<- Random
+          REPredYx<- Random
           
           Outcome<-names(functional_forms)[[indice]]
           REOutcome<-rep(colnames(Random), each = nrow(Random))
@@ -434,7 +432,7 @@ JMidmpredY<-function(timeVar,
           PredYx<-cbind(newdataLongi,Outcome=Outcome,PredYmean)
           REPredYx<-cbind(do.call(rbind, replicate(dim(Random)[2], newdataLongi, simplify = FALSE)),
                           Outcome=REOutcome,
-                          as.vector(REPredYxmean))
+                          as.vector(REPredYx))
           
           colnames(PredYx)[4]<-"Sample_1"
           colnames(REPredYx)[4]<-"Sample_1"
@@ -480,11 +478,11 @@ JMidmpredY<-function(timeVar,
           }
           
           nameRandom<-names(JMmodel$statistics$Mean$b[j,])
-          if("(Intercept)"%in%nameRandom){nameRandom[which(nameRandom=="Intercept")]<-"Intercept"}
+          if("(Intercept)"%in%nameRandom){nameRandom[which(nameRandom=="(Intercept)")]<-"Intercept"}
           colnames(Random)<-paste0("RE_",nameRandom,"_",names(functional_forms)[[indice]])
           
           slopePredYmean<-dX%*%as.matrix(JMmodel$statistics$Mean$betas1) + slopeRandom_mean
-          REPredYmean<- Random
+          REPredYx<- Random
           
           slopeOutcome<-paste0("slope_",names(functional_forms)[[indice]])
           REOutcome<-rep(colnames(Random), each = nrow(Random))
@@ -492,7 +490,7 @@ JMidmpredY<-function(timeVar,
           slopePredYx<-cbind(newdataLongi,Outcome=slopeOutcome,slopePredYmean)
           REPredYx<-cbind(do.call(rbind, replicate(dim(Random)[2], newdataLongi, simplify = FALSE)),
                           Outcome=REOutcome,
-                          as.vector(REPredYxmean))
+                          as.vector(REPredYx))
           
           colnames(slopePredYx)[4]<-"Sample_1"
           colnames(REPredYx)[4]<-"Sample_1"
@@ -530,14 +528,14 @@ JMidmpredY<-function(timeVar,
             }
           
           nameRandom<-names(JMmodel$statistics$Mean$b[j,])
-          if("(Intercept)"%in%nameRandom){nameRandom[which(nameRandom=="Intercept")]<-"Intercept"}
+          if("(Intercept)"%in%nameRandom){nameRandom[which(nameRandom=="(Intercept)")]<-"Intercept"}
           colnames(Random)<-paste0("RE_",nameRandom,"_",names(functional_forms)[[indice]])
           
-          REPredYmean<- Random
+          REPredYx<- Random
           REOutcome<-rep(colnames(Random), each = nrow(Random))
           REPredYx<-cbind(do.call(rbind, replicate(dim(Random)[2], newdataLongi, simplify = FALSE)),
                           Outcome=REOutcome,
-                          as.vector(REPredYxmean))
+                          as.vector(REPredYx))
           colnames(REPredYx)[4]<-"Sample_1"
           
           Yall[[indice]]<- REPredYx

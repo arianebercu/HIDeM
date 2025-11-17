@@ -150,14 +150,13 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
   outputall<-list()
   length(outputall)<-Nsample
  
-  browser()
+ 
   if(nlambda>1){
   
   for(idsample in 1:Nsample){
     
     # do prediction for the sample 
     
-    browser()
     if(modelY$method=="INLA"){
       
       dataY<-INLAidmpredY(timeVar=timeVar,
@@ -173,7 +172,8 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                           seed=seed+idsample,
                           BLUP=BLUP,
                           nproc=1,
-                          clustertype=clustertype)
+                          clustertype=clustertype,
+                          scale.X=scale.X)
     }else{
       
       dataY<-JMidmpredY(timeVar=timeVar,
@@ -186,7 +186,8 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                           ctime=ctime,
                           modelY=modelY,
                           seed=seed+idsample,
-                          BLUP=BLUP)
+                          BLUP=BLUP,
+                        scale.X=scale.X)
     }
     
     for( m in unique(c(outcome01,outcome02,outcome12))){
@@ -202,19 +203,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
     dataY[,colnames(dataY)%in%id]<-as.numeric(dataY[,colnames(dataY)%in%id])
     # to keep tracks of time order for each individual 
     dataY$order<-as.numeric(ave(dataY[,colnames(dataY)%in%id], cumsum(c(TRUE, diff(dataY[,colnames(dataY)%in%id]) != 0)), FUN = seq_along))
-    
-    if(scale.X==T){
-      
-      # Compute group means and sds
-      ym <- tapply(dataY[[4]], dataY$Outcome, mean)
-      ys <- tapply(dataY[[4]], dataY$Outcome, sd)
-      
-      # Normalize (min-max) within each group
-      dataY[[4]] <- ave(dataY[[4]], dataY$Outcome,
-                        FUN = function(x) (x - min(x)) / (max(x) - min(x)))
-      
-    }
-    
+
     
     if(length(outcome01)>=1){
       y01k<-dataY[dataY$Outcome%in%outcome01,]
@@ -244,7 +233,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
       y12k<-rep(0,N*NtimePoints)
     }
     
-    browser()
+ 
 
 
   if(nproc >1){
@@ -1552,7 +1541,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                  bfix<-b[fix0==1]
                                  b<-b[fix0==0]
                                
-                                browser()
+                               
                                  output<-DYNderivaweib( h=1e-8,b=b,
                                                 npm=npm,
                                                 npar=size_V,
@@ -1966,7 +1955,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                  b<-b[fix0.beta==0]
                                  # update modelPar
                                  
-                                browser()
+                                
                                  output.mla<- marqLevAlg::mla(b=b,
                                                               fn=gaussDYNidmlLikelihoodweib,
                                                               epsa=epsa,
@@ -2093,7 +2082,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                    fn.valuenew<-output.mla$fn.value-sum(p01)-sum(p02)-sum(p12)
                                    
                                  }
-                                 browser()
+                               
                                  ite<-ite+1
                                  
                                  # check cv criterias 
@@ -2829,7 +2818,8 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                               seed=seed+idsample,
                               BLUP=BLUP,
                               nproc=1,
-                              clustertype=clustertype)
+                              clustertype=clustertype,
+                              scale.X=scale.X)
         }else{
           
           dataY<-JMidmpredY(timeVar=timeVar,
@@ -2842,7 +2832,8 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                             ctime=ctime,
                             modelY=modelY,
                             seed=seed+idsample,
-                            BLUP=BLUP)
+                            BLUP=BLUP,
+                            scale.X=scale.X)
         }
         
         for( m in unique(c(outcome01,outcome02,outcome12))){
@@ -2859,18 +2850,18 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
         # to keep tracks of time order for each individual 
         dataY$order<-as.numeric(ave(dataY[,colnames(dataY)%in%id], cumsum(c(TRUE, diff(dataY[,colnames(dataY)%in%id]) != 0)), FUN = seq_along))
         
-        if(scale.X==T){
-          
-          # Compute group means and sds
-          ym <- tapply(dataY[[4]], dataY$Outcome, mean)
-          ys <- tapply(dataY[[4]], dataY$Outcome, sd)
-          
-          # Normalize (min-max) within each group
-          dataY[[4]] <- ave(dataY[[4]], dataY$Outcome,
-                            FUN = function(x) (x - min(x)) / (max(x) - min(x)))
-          
-        }
-        
+        # if(scale.X==T){
+        #   
+        #   # Compute group means and sds
+        #   ym <- tapply(dataY[[4]], dataY$Outcome, mean)
+        #   ys <- tapply(dataY[[4]], dataY$Outcome, sd)
+        #   
+        #   # Normalize (min-max) within each group
+        #   dataY[[4]] <- ave(dataY[[4]], dataY$Outcome,
+        #                     FUN = function(x) (x - min(x)) / (max(x) - min(x)))
+        #   
+        # }
+        # 
         
         if(length(outcome01)>=1){
           y01k<-dataY[dataY$Outcome%in%outcome01,]
@@ -4202,7 +4193,8 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                          seed=seed+idsample,
                                                          BLUP=BLUP,
                                                          nproc=1,
-                                                         clustertype=clustertype)
+                                                         clustertype=clustertype,
+                                                         scale.X=scale.X)
                                    }else{
                                      
                                      dataY<-JMidmpredY(timeVar=timeVar,
@@ -4215,7 +4207,8 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                        ctime=ctime,
                                                        modelY=modelY,
                                                        seed=seed+idsample,
-                                                       BLUP=BLUP)
+                                                       BLUP=BLUP,
+                                                       scale.X=scale.X)
                                    }
                                    
                                    for( m in unique(c(outcome01,outcome02,outcome12))){
@@ -4232,18 +4225,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                    # to keep tracks of time order for each individual 
                                    dataY$order<-as.numeric(ave(dataY[,colnames(dataY)%in%id], cumsum(c(TRUE, diff(dataY[,colnames(dataY)%in%id]) != 0)), FUN = seq_along))
                                    
-                                   if(scale.X==T){
-                                     
-                                     # Compute group means and sds
-                                     ym <- tapply(dataY[[4]], dataY$Outcome, mean)
-                                     ys <- tapply(dataY[[4]], dataY$Outcome, sd)
-                                     
-                                     # Normalize (min-max) within each group
-                                     dataY[[4]] <- ave(dataY[[4]], dataY$Outcome,
-                                                       FUN = function(x) (x - min(x)) / (max(x) - min(x)))
-                                     
-                                   }
-                                   
+                                
                                    
                                    if(length(outcome01)>=1){
                                      y01k<-dataY[dataY$Outcome%in%outcome01,]
