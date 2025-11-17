@@ -15,7 +15,7 @@ JMidmpredY<-function(timeVar,
                 id,
                 t0,t1,t2,t3,ctime,
                 assoc,
-                modelY,seed,BLUP){
+                modelY,seed,BLUP,scale.X){
   
   # define timePoints of prediction : 
   
@@ -47,6 +47,12 @@ JMidmpredY<-function(timeVar,
   Yall<-list()
   length(Yall)<-length(formLong)
   
+  if(scale.X==T){
+    tcenter<-ifelse(truncated==T,0,min(t0))
+    dataCenter<-data.frame(ID=idsubjects,time=tcenter)
+    colnames(dataCenter)<-c(id,timeVar)
+  }
+
   for(indice in 1:length(formLong)){
 
 
@@ -55,6 +61,7 @@ JMidmpredY<-function(timeVar,
     terms_FE<-JMmodel$model_info$terms$terms_FE[[1]]
     terms_RE<-JMmodel$model_info$terms$terms_RE[[1]]
       
+    if(scale.X==F){
       X<-model.matrix(reformulate(attr(terms(terms_FE), "term.labels")),data=newdataLongi)
       Z <- model.matrix(reformulate(attr(terms(terms_RE), "term.labels")),data=newdataLongi)
       
@@ -63,7 +70,27 @@ JMidmpredY<-function(timeVar,
       dX <- make_dX(formula(formLong[[indice]]$call$fixed), X=X, timevar = timeVar,data=newdataLongi)
       bars<-findbars(formLong[[indice]]$call$random)
       dZ <- make_dX(reformulate(deparse(bars[[1]][[2]])), X=Z, timevar = timeVar,data=newdataLongi)
+    }else{
+      X<-model.matrix(reformulate(attr(terms(terms_FE), "term.labels")),data=newdataLongi)
+      Z <- model.matrix(reformulate(attr(terms(terms_RE), "term.labels")),data=newdataLongi)
       
+      # derivatives of Y(t) design matrix -- does not handle splines so far
+      dX <- make_dX(formula(formLong[[indice]]$call$fixed), X=X, timevar = timeVar,data=newdataLongi)
+      bars<-findbars(formLong[[indice]]$call$random)
+      dZ <- make_dX(reformulate(deparse(bars[[1]][[2]])), X=Z, timevar = timeVar,data=newdataLongi)
+      
+      X0<-model.matrix(reformulate(attr(terms(terms_FE), "term.labels")),data=dataCenter)
+      X0<-do.call(rbind,rep(list(X0,X0),NtimePoints/2))
+      Z0 <- model.matrix(reformulate(attr(terms(terms_RE), "term.labels")),data=dataCenter)
+      Z0<-do.call(rbind,rep(list(Z0,Z0),NtimePoints/2))
+      dX0 <- make_dX(formula(formLong[[indice]]$call$fixed), X=X0, timevar = timeVar,data=dataCenter)
+      dZ0 <- make_dX(reformulate(deparse(bars[[1]][[2]])), X=Z0, timevar = timeVar,data=dataCenter)
+      
+      X[,colnames(X)%in%colnames(X0)]<-X[,colnames(X)%in%colnames(X0)]-X0
+      Z[,colnames(Z)%in%colnames(Z0)]<-Z[,colnames(Z)%in%colnames(Z0)]-Z0
+      dX[,colnames(dX)%in%colnames(dX0)]<-dX[,colnames(dX)%in%colnames(dX0)]-dX0
+      dZ[,colnames(dZ)%in%colnames(dZ0)]<-dZ[,colnames(dZ)%in%colnames(dZ0)]-dZ0
+    }
       
       betas<-do.call(rbind,JMmodel$mcmc$betas1)
       

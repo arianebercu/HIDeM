@@ -131,6 +131,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
   fix0.beta<-fix00
   fix0.beta[(6+1):size_V]<-rep(1,size_V-6)
 
+  
   npm<-sum(fix0==0)
   npmweib<-sum(fix00[1:6]==0)
   
@@ -646,7 +647,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                  bfix<-b[fix0.beta==1]
                                  b<-b[fix0.beta==0]
                                  # update for modelPar
-                                 
+                                 if(npmweib!=0){
                                  output.mla<- marqLevAlg::mla(b=b,
                                                   fn=gaussDYNidmlLikelihoodweib,
                                                   epsa=epsa,
@@ -776,6 +777,10 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                    
                                    fn.valuenew<-output.mla$fn.value-sum(p01)-sum(p02)-sum(p12)
                                    
+                                 }
+                                 }else{
+                                   snew<-s
+                                   fn.valuenew<-res
                                  }
                                  
                                  ite<-ite+1
@@ -1267,7 +1272,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                    bfix<-b[fix0.beta==1]
                                    b<-b[fix0.beta==0]
                                    # update for modelPar
-                                  
+                                  if(npmweib!=0){
                                    output.mla<- marqLevAlg::mla(b=b,
                                                                 fn=gaussDYNidmlLikelihoodweib,
                                                                 epsa=epsa,
@@ -1395,6 +1400,10 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                      fn.valuenew<-output.mla$fn.value-sum(p01)-sum(p02)-sum(p12)
                                      
                                    }
+                                  }else{
+                                    snew<-s
+                                    fn.valuenew<-res
+                                  }
                                    
                                    ite<-ite+1
                                    
@@ -1955,7 +1964,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                  b<-b[fix0.beta==0]
                                  # update modelPar
                                  
-                                
+                                if(npmweib!=0){
                                  output.mla<- marqLevAlg::mla(b=b,
                                                               fn=gaussDYNidmlLikelihoodweib,
                                                               epsa=epsa,
@@ -2082,6 +2091,10 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                    fn.valuenew<-output.mla$fn.value-sum(p01)-sum(p02)-sum(p12)
                                    
                                  }
+                                }else{
+                                  snew<-s
+                                  fn.valuenew<-res
+                                }
                                
                                  ite<-ite+1
                                  
@@ -2569,7 +2582,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                        b<-b[fix0.beta==0]
                                        # update modelPar
                                        
-                                       
+                                       if(npmweib!=0){
                                        output.mla<- marqLevAlg::mla(b=b,
                                                                     fn=gaussDYNidmlLikelihoodweib,
                                                                     epsa=epsa,
@@ -2695,6 +2708,10 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                          
                                          fn.valuenew<-output.mla$fn.value-sum(p01)-sum(p02)-sum(p12)
                                          
+                                       }
+                                       }else{
+                                         snew<-s
+                                         fn.valuenew<-res
                                        }
                                        
                                        ite<-ite+1
@@ -3316,7 +3333,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                          b<-b[fix0.beta==0]
                                          # update modelPar
                                          
-                                         
+                                         if(npmweib!=0){
                                          output.mla<- marqLevAlg::mla(b=b,
                                                                       fn=gaussDYNidmlLikelihoodweib,
                                                                       epsa=epsa,
@@ -3442,6 +3459,10 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                            
                                            fn.valuenew<-output.mla$fn.value-sum(p01)-sum(p02)-sum(p12)
                                            
+                                         }
+                                         }else{
+                                           snew<-s
+                                           fn.valuenew<-res
                                          }
                                          
                                          ite<-ite+1
@@ -3933,7 +3954,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                              b<-b[fix0.beta==0]
                                              # update modelPar
                                              
-                                             
+                                             if(npmweib!=0){
                                              output.mla<- marqLevAlg::mla(b=b,
                                                                           fn=gaussDYNidmlLikelihoodweib,
                                                                           epsa=epsa,
@@ -4059,6 +4080,10 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                
                                                fn.valuenew<-output.mla$fn.value-sum(p01)-sum(p02)-sum(p12)
                                                
+                                             }
+                                             }else{
+                                               snew<-s
+                                               fn.valuenew<-res
                                              }
                                              
                                              ite<-ite+1
@@ -4673,7 +4698,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                                     b<-b[fix0.beta==0]
                                                                     # update modelPar
                                                                     
-                                                                    
+                                                                    if(npmweib!=0){
                                                                     output.mla<- marqLevAlg::mla(b=b,
                                                                                                  fn=gaussDYNidmlLikelihoodweib,
                                                                                                  epsa=epsa,
@@ -4799,6 +4824,10 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                                       
                                                                       fn.valuenew<-output.mla$fn.value-sum(p01)-sum(p02)-sum(p12)
                                                                       
+                                                                    }
+                                                                    }else{
+                                                                      snew<-s
+                                                                      fn.valuenew<-res
                                                                     }
                                                                     
                                                                     ite<-ite+1
@@ -5284,6 +5313,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                                         b<-b[fix0.beta==0]
                                                                         # update modelPar
                                                                         
+                                                                        if(npmweib!=0){
                                                                         
                                                                         output.mla<- marqLevAlg::mla(b=b,
                                                                                                      fn=gaussDYNidmlLikelihoodweib,
@@ -5410,6 +5440,10 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                                           
                                                                           fn.valuenew<-output.mla$fn.value-sum(p01)-sum(p02)-sum(p12)
                                                                           
+                                                                        }
+                                                                        }else{
+                                                                          snew<-s
+                                                                          fn.valuenew<-res
                                                                         }
                                                                         
                                                                         ite<-ite+1

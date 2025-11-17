@@ -898,8 +898,9 @@ DYNidm <- function(formula01,
       
       # adapt to penalised setting :
       #if(any(posfix>size_spline) & penalty==T){stop(paste0("Fixed parameters can only be on spline when penalised model is request "))}
-      if(length(posfix)==6 & penalty%in%c("lasso","ridge","elasticnet","mcp","scad") & !any(posfix>6)){
-        stop(paste0("All weibull parameters cannot be fixed when penalised model is request "))}
+      
+      #if(length(posfix)==6 & penalty%in%c("lasso","ridge","elasticnet","mcp","scad") & !any(posfix>6)){
+       # stop(paste0("All weibull parameters cannot be fixed when penalised model is request "))}
       
       fix0[posfix]<-1
       

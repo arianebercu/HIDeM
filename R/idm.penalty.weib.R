@@ -162,8 +162,9 @@ idm.penalty.weib<-function(b,fix0,size_V,
   fix0[1:6]<-rep(1,6)
   fix0.beta<-fix00
   fix0.beta[(6+1):size_V]<-rep(1,size_V-6)
+  nweib<-sum(fix00[1:6])
   
-  
+  browser()
   if(nproc >1){
     
     
@@ -622,6 +623,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                  bfix<-b[fix0.beta==1]
                                  b<-b[fix0.beta==0]
                                  # update for modelPar
+                                 if(nweib!=6){
                                  if(analytics==F){
                                    output.mla<- marqLevAlg::mla(b=b,
                                                                 gr=reggrmlaweibana,
@@ -688,6 +690,8 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                  # new values for splines:
                                  snew<-s
                                  snew[fix00[1:6]==0]<-output.mla$b
+                                 
+                                
                                  if(nvat01>0){
                                  b01<-betanew[1:nvat01][penalty.factor[1:nvat01]==1]
                                  }else{b01<-0}
@@ -746,6 +750,10 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                    
                                    fn.valuenew<-output.mla$fn.value-sum(p01)-sum(p02)-sum(p12)
                                    
+                                 }
+                                 }else{
+                                   snew<-s
+                                   fn.valuenew<-res
                                  }
                                  
                                  ite<-ite+1
@@ -1226,6 +1234,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                    bfix<-b[fix0.beta==1]
                                    b<-b[fix0.beta==0]
                                    # update for modelPar
+                                   if(nweib!=6){
                                    if(analytics==T){
                                    output.mla<- marqLevAlg::mla(b=b,
                                                                 fn=idmlLikelihoodweib,
@@ -1352,6 +1361,11 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                      fn.valuenew<-output.mla$fn.value-sum(p01)-sum(p02)-sum(p12)
                                      
                                    }
+                                   }else{
+                                     snew<-s
+                                     fn.valuenew<-res
+                                   }
+                                   
                                    
                                    ite<-ite+1
                                    
@@ -1941,8 +1955,8 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                  bfix<-b[fix0.beta==1]
                                  b<-b[fix0.beta==0]
                                  # update modelPar
-                                 
-                           
+                                
+                                 if(nweib!=6){
                                  if(analytics==T){
                                  output.mla<- marqLevAlg::mla(b=b,
                                                   fn=idmlLikelihoodweib,
@@ -2067,6 +2081,10 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                    
                                    fn.valuenew<-output.mla$fn.value-sum(p01)-sum(p02)-sum(p12)
                                    
+                                 }
+                                 }else{
+                                 snew<-s
+                                 fn.valuenew<-res
                                  }
                                  
                                  ite<-ite+1
@@ -2548,6 +2566,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                        # update modelPar
                                        
                                        #browser()
+                                       if(nweib!=6){
                                        if(analytics==T){
                                        output.mla<- marqLevAlg::mla(b=b,
                                                                     fn=idmlLikelihoodweib,
@@ -2672,6 +2691,10 @@ idm.penalty.weib<-function(b,fix0,size_V,
                                          
                                          fn.valuenew<-output.mla$fn.value-sum(p01)-sum(p02)-sum(p12)
                                          
+                                       }
+                                       }else{
+                                         snew<-s
+                                         fn.valuenew<-res
                                        }
                                        
                                        ite<-ite+1

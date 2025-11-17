@@ -127,7 +127,7 @@ idm.penalty.splines<-function(b,fix0,size_V,size_spline,
   fix0.beta<-fix000
   fix0.beta[(size_spline+1):size_V]<-rep(1,length(beta.start))
   
-  
+  nspline<-sum(fix000[1:size_spline])
   if(nproc >1){
     
     if(is.null(clustertype)){
@@ -595,7 +595,7 @@ idm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                  bfix<-b[fix0.beta==1]
                                  b<-b[fix0.beta==0]
                                  ################## update splines parameters ##
-                                 
+                                 if(nspline!=size_spline){
                                  if(analytics==F){
                                    output.mla<- marqLevAlg::mla(b=b,
                                                                 fn=idmlLikelihood,
@@ -737,6 +737,10 @@ idm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                    
                                    fn.valuenew<-output.mla$fn.value-sum(p01)-sum(p02)-sum(p12)
                                    
+                                 }
+                                 }else{
+                                   snew<-s
+                                   fn.valuenew<-res
                                  }
                                  
                                  
@@ -1239,6 +1243,7 @@ idm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                    bfix<-b[fix0.beta==1]
                                    b<-b[fix0.beta==0]
                                    ################## update splines parameters ##
+                                   if(nspline!=size_spline){
                                    if(analytics==F){
                                      output.mla<- marqLevAlg::mla(b=b,
                                                                   fn=idmlLikelihood,
@@ -1380,6 +1385,10 @@ idm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                      
                                      fn.valuenew<-output.mla$fn.value-sum(p01)-sum(p02)-sum(p12)
                                      
+                                   }
+                                   }else{
+                                     snew<-s
+                                     fn.valuenew<-res
                                    }
                                    
                                    
@@ -1982,6 +1991,7 @@ idm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                  
                                  bfix<-b[fix0.beta==1]
                                  b<-b[fix0.beta==0]
+                                 if(nspline!=size_spline){
                                  if(analytics==F){
                                    output.mla<- marqLevAlg::mla(b=b,
                                                                 fn=idmlLikelihood,
@@ -2121,7 +2131,10 @@ idm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                    fn.valuenew<-output.mla$fn.value-sum(p01)-sum(p02)-sum(p12)
                                    
                                  }
-                                 
+                                 }else{
+                                   snew<-s
+                                   fn.valuenew<-res
+                                 }
                                  ite<-ite+1
                                  
                                  eval.cv.spline[ite]<-sum((snew-s)^2)
@@ -2617,7 +2630,7 @@ idm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                    
                                    bfix<-b[fix0.beta==1]
                                    b<-b[fix0.beta==0]
-                                   
+                                   if(nspline!=size_spline){
                                    if(analytics==F){
                                      output.mla<- marqLevAlg::mla(b=b,
                                                                   fn=idmlLikelihood,
@@ -2756,6 +2769,10 @@ idm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                      
                                      fn.valuenew<-output.mla$fn.value-sum(p01)-sum(p02)-sum(p12)
                                      
+                                   }
+                                   }else{
+                                     snew<-s
+                                     fn.valuenew<-res
                                    }
                                    
                                    ite<-ite+1

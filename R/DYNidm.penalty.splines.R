@@ -670,7 +670,7 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                  bfix<-b[fix0.beta==1]
                                  b<-b[fix0.beta==0]
                                  # update for modelPar
-                                 
+                                 if(npmspline!=0){
                                  output.mla<- marqLevAlg::mla(b=b,
                                                   fn=gaussDYNidmlLikelihood,
                                                   epsa=epsa,
@@ -806,6 +806,10 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                    
                                    fn.valuenew<-output.mla$fn.value-sum(p01)-sum(p02)-sum(p12)
                                    
+                                 }
+                                 }else{
+                                   snew<-s
+                                   fn.valuenew<-res
                                  }
                                  
                                  ite<-ite+1
@@ -1335,7 +1339,7 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                    bfix<-b[fix0.beta==1]
                                    b<-b[fix0.beta==0]
                                    # update for modelPar
-                                  
+                                  if(npmspline!=0){
                                    output.mla<- marqLevAlg::mla(b=b,
                                                                 fn=gaussDYNidmlLikelihood,
                                                                 epsa=epsa,
@@ -1469,6 +1473,10 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                      fn.valuenew<-output.mla$fn.value-sum(p01)-sum(p02)-sum(p12)
                                      
                                    }
+                                  }else{
+                                    snew<-s
+                                    fn.valuenew<-res
+                                  }
                                    
                                    ite<-ite+1
                                    
@@ -2034,7 +2042,7 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                  b<-b[fix0.beta==0]
                                  # update modelPar
                               
-                                
+                                if(npmspline!=0){
                                  output.mla<- marqLevAlg::mla(b=b,
                                                               fn=gaussDYNidmlLikelihood,
                                                               epsa=epsa,
@@ -2167,6 +2175,10 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                    fn.valuenew<-output.mla$fn.value-sum(p01)-sum(p02)-sum(p12)
                                    
                                  }
+                                }else{
+                                  snew<-s
+                                  fn.valuenew<-res
+                                }
                                  
                                  ite<-ite+1
                                  
@@ -2692,7 +2704,7 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                        b<-b[fix0.beta==0]
                                        # update modelPar
                                        
-                                       
+                                       if(npmspline!=0){
                                        output.mla<- marqLevAlg::mla(b=b,
                                                                     fn=gaussDYNidmlLikelihood,
                                                                     epsa=epsa,
@@ -2824,6 +2836,10 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                          
                                          fn.valuenew<-output.mla$fn.value-sum(p01)-sum(p02)-sum(p12)
                                          
+                                       }
+                                       }else{
+                                         snew<-s
+                                         fn.valuenew<-res
                                        }
                                        
                                        ite<-ite+1
@@ -3472,7 +3488,7 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                          b<-b[fix0.beta==0]
                                          # update modelPar
                                          
-                                         
+                                         if(npmspline!=0){
                                          output.mla<- marqLevAlg::mla(b=b,
                                                                       fn=gaussDYNidmlLikelihood,
                                                                       epsa=epsa,
@@ -3604,6 +3620,10 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                            
                                            fn.valuenew<-output.mla$fn.value-sum(p01)-sum(p02)-sum(p12)
                                            
+                                         }
+                                         }else{
+                                           snew<-s
+                                           fn.valuenew<-res
                                          }
                                          
                                          ite<-ite+1
@@ -4130,7 +4150,7 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                              b<-b[fix0.beta==0]
                                              # update modelPar
                                              
-                                             
+                                             if(npmspline!=0){
                                              output.mla<- marqLevAlg::mla(b=b,
                                                                           fn=gaussDYNidmlLikelihood,
                                                                           epsa=epsa,
@@ -4262,6 +4282,10 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                                
                                                fn.valuenew<-output.mla$fn.value-sum(p01)-sum(p02)-sum(p12)
                                                
+                                             }
+                                             }else{
+                                               snew<-s
+                                               fn.valuenew<-res
                                              }
                                              
                                              ite<-ite+1
@@ -4916,7 +4940,7 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                          b<-b[fix0.beta==0]
                                          # update modelPar
                                          
-                                         
+                                         if(npmspline!=0){
                                          output.mla<- marqLevAlg::mla(b=b,
                                                                       fn=gaussDYNidmlLikelihood,
                                                                       epsa=epsa,
@@ -5048,6 +5072,10 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                            
                                            fn.valuenew<-output.mla$fn.value-sum(p01)-sum(p02)-sum(p12)
                                            
+                                         }
+                                         }else{
+                                           snew<-s
+                                           fn.valuenew<-res
                                          }
                                          
                                          ite<-ite+1
@@ -5571,7 +5599,7 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                              b<-b[fix0.beta==0]
                                              # update modelPar
                                              
-                                             
+                                             if(npmspline!=0){
                                              output.mla<- marqLevAlg::mla(b=b,
                                                                           fn=gaussDYNidmlLikelihood,
                                                                           epsa=epsa,
@@ -5705,6 +5733,10 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                                
                                              }
                                              
+                                             }else{
+                                               snew<-s
+                                               fn.valuenew<-res
+                                             }
                                              ite<-ite+1
                                              
                                              # check cv criterias 
