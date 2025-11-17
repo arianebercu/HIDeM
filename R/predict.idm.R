@@ -66,8 +66,10 @@
 #' @author R: Ariane Bercu <ariane.bercu@@u-bordeaux.fr> 
 predict.idm <- function(object,s,
                         t,newdata,nsim=200,seed=21,conf.int=.95,lifeExpect=FALSE,maxtime,
+                        return.data=F,
                         lambda="BIC",...) {
     # check if model has weibull or splines baseline risk 
+  simdata<-NULL
   if(!is.null(object$modelPar)){
     object$method<-"weib"
     }else{object$method<-"splines"
@@ -110,26 +112,26 @@ predict.idm <- function(object,s,
     if(length(object$levels$values)>0){
       object$levels$values[sapply(object$levels$values, is.null)] <- NA}
     
-    xlevels<-unlist(object$levels$class)
-    if(any(xlevels%in%c("factor","character"))){
-      xnames<-c(all.vars(object$terms$Formula01)[all.vars(object$terms$Formula01)%in%labels(terms(object$terms$Formula01))],
-                      all.vars(object$terms$Formula02)[all.vars(object$terms$Formula02)%in%labels(terms(object$terms$Formula02))],
-                      all.vars(object$terms$Formula12)[all.vars(object$terms$Formula12)%in%labels(terms(object$terms$Formula12))])
-      xnamesfactor<-xnames[which(xlevels%in%c("factor","character"))]
-      if(length(xnamesfactor)>0){
-        id<-which(xlevels%in%c("factor","character"))
-        m<-1
-        for(k in xnamesfactor){
-          lev<-object$levels$values[[id[m]]]
-          for(l in lev[2:length(lev)]){
-          newdata$var <- factor(newdata[,k],
-                                levels = object$levels$values[[id[m]]])
-          colnames(newdata)[colnames(newdata)=="var"]<-paste0(k,l)
-          }
-          m<-m+1 
-          }
-      }
-    }
+    # xlevels<-unlist(object$levels$class)
+    # if(any(xlevels%in%c("factor","character"))){
+    #   xnames<-c(all.vars(object$terms$Formula01)[all.vars(object$terms$Formula01)%in%labels(terms(object$terms$Formula01))],
+    #                   all.vars(object$terms$Formula02)[all.vars(object$terms$Formula02)%in%labels(terms(object$terms$Formula02))],
+    #                   all.vars(object$terms$Formula12)[all.vars(object$terms$Formula12)%in%labels(terms(object$terms$Formula12))])
+    #   xnamesfactor<-xnames[which(xlevels%in%c("factor","character"))]
+    #   if(length(xnamesfactor)>0){
+    #     id<-which(xlevels%in%c("factor","character"))
+    #     m<-1
+    #     for(k in xnamesfactor){
+    #       lev<-object$levels$values[[id[m]]]
+    #       for(l in lev[2:length(lev)]){
+    #       newdata$var <- factor(newdata[,k],
+    #                             levels = object$levels$values[[id[m]]])
+    #       colnames(newdata)[colnames(newdata)=="var"]<-paste0(k,l)
+    #       }
+    #       m<-m+1 
+    #       }
+    #   }
+    # }
 
     #################### prediction if model not from penalty ##################
     if(object$penalty=="none"){
@@ -258,6 +260,8 @@ predict.idm <- function(object,s,
                                                            linPred12[i,],
                                                            linPred02[i,])
                                       }))
+                
+              
             }else{
                 simResults <- do.call("rbind",
                                       lapply(1:nsim,function(i){
@@ -277,6 +281,8 @@ predict.idm <- function(object,s,
                                                          linPred02[i,])
                                       }))
             }
+            
+            if(return.data==T){simdata<-simResults}
             q.lower <- (1-conf.int)/2
             q.upper <- 1-q.lower
             ci <- apply(simResults,2,function(x)quantile(unlist(x),c(q.lower,q.upper)))
@@ -477,6 +483,7 @@ predict.idm <- function(object,s,
                                                            bZ12=linPred12[[i]])
                                       }))
             }
+            if(return.data==T){simdata<-simResults}
             q.lower <- (1-conf.int)/2
             q.upper <- 1-q.lower
             ci <- apply(simResults,2,function(x)quantile(unlist(x),c(q.lower,q.upper)))
@@ -907,6 +914,7 @@ predict.idm <- function(object,s,
                      lowerintensity=lowerintensity,
                      intensity=intensity))
     class(out) <- "predict.idm"
+    out$simdata<-simdata
     out
 }
 
