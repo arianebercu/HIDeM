@@ -184,6 +184,7 @@ simdep.idmModel <- function(x,
     # of the previous inspection time
     iframe <- dat[,ipos]
     dat <- dat[,-ipos]
+  
     interval <- do.call("rbind",lapply(1:n,function(i){
       
       ## remove duplicates
@@ -812,7 +813,7 @@ simulateDYNIDM <- function(n=100,
       
     }
     T_01 <- try(expr = uniroot(S_01_inv,
-                               interval = c(0, max(data_long$visit[data_long$ID==i])))$root,
+                               interval = c(0, administrative.censoring))$root,
                 silent = TRUE)
     
     S_02_inv <- function(tstar){
@@ -824,7 +825,7 @@ simulateDYNIDM <- function(n=100,
       )) + log(U02[i])
     }
     T_02 <- try(expr = uniroot(S_02_inv,
-                               interval = c(0, max(data_long$visit[data_long$ID==i])))$root,
+                               interval = c(0, administrative.censoring))$root,
                 silent = TRUE)
     
     if(inherits(T_01, "try-error")){
@@ -861,7 +862,7 @@ simulateDYNIDM <- function(n=100,
         )) + log(u12_corrige)
       }
       T_12 <- try(expr = uniroot(S_12_inv,
-                                 interval = c(0, max(data_long$visit[data_long$ID==i])))$root,
+                                 interval = c(0, administrative.censoring))$root,
                   silent = TRUE)
       
       if(inherits(T_12, "try-error")){

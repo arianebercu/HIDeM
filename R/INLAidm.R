@@ -81,7 +81,7 @@ INLAidm<-function(timeVar,family,basRisk,assoc,
                                        basRisk = basRisk[indice], NbasRisk = 15, assoc = assoc[[indice]],
                                        control=list(int.strategy="eb"))
       
-      
+      #browser()
       if(lightmode==T){
         erase<-c(".args","marginals.random","dic","waic","mode","residuals",
                  "logfile","selection","internal.marginals.hyperpar",

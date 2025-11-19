@@ -151,7 +151,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
   outputall<-list()
   length(outputall)<-Nsample
  
- 
+
   if(nlambda>1){
   
   for(idsample in 1:Nsample){
