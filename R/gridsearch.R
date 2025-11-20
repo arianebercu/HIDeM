@@ -148,9 +148,18 @@ gridsearch <- function(
                 nlambda12=50,
                 penalty="lasso",
                 penalty.factor=NULL,
-                alpha=ifelse(penalty=="scad",3.7,
-                             ifelse(penalty=="mcp",3,
-                                    ifelse(penalty%in%c("elasticnet","corrected.elasticnet"),0.5,1))),
+                alpha=ifelse(penalty=="scad",list(rep(3.7,50),
+                                                  rep(3.7,50),
+                                                  rep(3.7,50)),
+                             ifelse(penalty=="mcp",list(rep(3,50),
+                                                        rep(3,50),
+                                                        rep(3,50)),
+                                    ifelse(penalty%in%c("elasticnet"),list(rep(0.5,50),
+                                                                           rep(0.5,50),
+                                                                           rep(0.5,50)),
+                                           list(rep(1,50),
+                                                rep(1,50),
+                                                rep(1,50))))),
                 nproc=1,
                 clustertype="FORK"){
   
@@ -326,6 +335,18 @@ gridsearch <- function(
   # nbr of quadrature points for estimating integral in idm without penalisation
   if(!gausspoint%in%c(10,15,21,31,41,51,61))stop("Argument type.quantile has to a numeric : 10, 15, 21, 31, 51 or 61.")
   
+  alpha01<-list(alpha[[1]],
+                rep(0,1),
+                rep(0,1))
+  
+  alpha02<-list(rep(0,1),
+                alpha[[2]],
+                rep(0,1))
+  
+  alpha12<-list(rep(0,1),
+                rep(0,1),
+                alpha[[3]])
+  
     if(method=="Weib"){
     posfix01<-c(posfix,3:6)
     posfix02<-c(posfix,1,2,5,6)
@@ -410,10 +431,9 @@ gridsearch <- function(
                                   scale.X=scale.X,
                                   lambda01 = lambda01,
                                   nlambda01 = nlambda01,
+                                  alpha=alpha01,
                                   lambda02=0.0001,
                                   lambda12=0.0001,
-                                  #posfix=posfix01,
-                                  alpha=alpha,
                                   maxiter=maxiter,
                                   maxiter.pena = maxiter.pena,
                                   n.knots=n.knots,
@@ -451,8 +471,7 @@ gridsearch <- function(
                                   nlambda02 = nlambda02,
                                   lambda01=0.0001,
                                   lambda12=0.0001,
-                                  #posfix=posfix02,
-                                  alpha=alpha,
+                                  alpha=alpha02,
                                   maxiter=maxiter,
                                   maxiter.pena = maxiter.pena,
                                   n.knots=n.knots,
@@ -488,10 +507,9 @@ gridsearch <- function(
                                   scale.X=scale.X,
                                   lambda12=lambda12,
                                   nlambda12 = nlambda12,
+                                  alpha=alpha12,
                                   lambda01=0.0001,
                                   lambda02=0.0001,
-                                  #posfix=posfix12,
-                                  alpha=alpha,
                                   maxiter=maxiter,
                                   maxiter.pena = maxiter.pena,
                                   n.knots=n.knots,

@@ -69,7 +69,7 @@ idm.penalty.splines<-function(b,fix0,size_V,size_spline,
   lambda<-expand.grid(lambda01,lambda02,lambda12)
   nlambda<-dim(lambda)[1]
   
-  browser()
+
   #nmax<-max(length(lambda01),length(lambda02),length(lam))
   alphagrid01<-data.frame(alpha01=alpha[[1]],
                         lambda01=lambda01)
@@ -707,7 +707,7 @@ idm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                      
                                    fn.valuenew<-output.mla$fn.value-lambda[id.lambda,1]*alpha[id.lambda,1]*sum(abs(b01))-lambda[id.lambda,1]*(1-alpha[id.lambda,1])*sum(b01*b01)
                                    fn.valuenew<-fn.valuenew-lambda[id.lambda,2]*alpha[id.lambda,2]*sum(abs(b02))-lambda[id.lambda,2]*(1-alpha[id.lambda,2])*sum(b02*b02)
-                                   fn.valuenew<-fn.valuenew-lambda[id.lambda,3]*alpha[id.lambda,3][id.lambda,3]*sum(abs(b12))-lambda[id.lambda,3]*(1-alpha[id.lambda,3])*sum(b12*b12)
+                                   fn.valuenew<-fn.valuenew-lambda[id.lambda,3]*alpha[id.lambda,3]*sum(abs(b12))-lambda[id.lambda,3]*(1-alpha[id.lambda,3])*sum(b12*b12)
                                  }
                                    
                                    
@@ -1355,7 +1355,7 @@ idm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                      
                                      fn.valuenew<-output.mla$fn.value-lambda[id.lambda,1]*alpha[id.lambda,1]*sum(abs(b01))-lambda[id.lambda,1]*(1-alpha[id.lambda,1])*sum(b01*b01)
                                      fn.valuenew<-fn.valuenew-lambda[id.lambda,2]*alpha[id.lambda,2]*sum(abs(b02))-lambda[id.lambda,2]*(1-alpha[id.lambda,2])*sum(b02*b02)
-                                     fn.valuenew<-fn.valuenew-lambda[id.lambda,3]*alpha[id.lambda,3][id.lambda,3]*sum(abs(b12))-lambda[id.lambda,3]*(1-alpha[id.lambda,3])*sum(b12*b12)
+                                     fn.valuenew<-fn.valuenew-lambda[id.lambda,3]*alpha[id.lambda,3]*sum(abs(b12))-lambda[id.lambda,3]*(1-alpha[id.lambda,3])*sum(b12*b12)
                                    }
                                    
                                    
@@ -1835,7 +1835,6 @@ idm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                  }
                                  
                                  
-                                 
                                  output.cv<-cv.model(beta=beta,
                                                      nva01=npm01,
                                                      nva02=npm02,
@@ -2002,6 +2001,7 @@ idm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                    break
                                  }else{validity<-T}
                                  
+                               
                                  # betanew already include s
                                  b<-c(s,betanew)
                                  
@@ -2102,7 +2102,7 @@ idm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                      
                                    fn.valuenew<-output.mla$fn.value-lambda[id.lambda,1]*alpha[id.lambda,1]*sum(abs(b01))-lambda[id.lambda,1]*(1-alpha[id.lambda,1])*sum(b01*b01)
                                    fn.valuenew<-fn.valuenew-lambda[id.lambda,2]*alpha[id.lambda,2]*sum(abs(b02))-lambda[id.lambda,2]*(1-alpha[id.lambda,2])*sum(b02*b02)
-                                   fn.valuenew<-fn.valuenew-lambda[id.lambda,3]*alpha[id.lambda,3][id.lambda,3]*sum(abs(b12))-lambda[id.lambda,3]*(1-alpha[id.lambda,3])*sum(b12*b12)
+                                   fn.valuenew<-fn.valuenew-lambda[id.lambda,3]*alpha[id.lambda,3]*sum(abs(b12))-lambda[id.lambda,3]*(1-alpha[id.lambda,3])*sum(b12*b12)
                                  }
                                    
                                  
@@ -2741,7 +2741,7 @@ idm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                      
                                      fn.valuenew<-output.mla$fn.value-lambda[id.lambda,1]*alpha[id.lambda,1]*sum(abs(b01))-lambda[id.lambda,1]*(1-alpha[id.lambda,1])*sum(b01*b01)
                                      fn.valuenew<-fn.valuenew-lambda[id.lambda,2]*alpha[id.lambda,2]*sum(abs(b02))-lambda[id.lambda,2]*(1-alpha[id.lambda,2])*sum(b02*b02)
-                                     fn.valuenew<-fn.valuenew-lambda[id.lambda,3]*alpha[id.lambda,3][id.lambda,3]*sum(abs(b12))-lambda[id.lambda,3]*(1-alpha[id.lambda,3])*sum(b12*b12)
+                                     fn.valuenew<-fn.valuenew-lambda[id.lambda,3]*alpha[id.lambda,3]*sum(abs(b12))-lambda[id.lambda,3]*(1-alpha[id.lambda,3])*sum(b12*b12)
                                    }
                                    
                                    
