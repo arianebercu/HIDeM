@@ -68,6 +68,8 @@ idm.penalty.splines<-function(b,fix0,size_V,size_spline,
   # create grid 3 == all possible combinaision 
   lambda<-expand.grid(lambda01,lambda02,lambda12)
   nlambda<-dim(lambda)[1]
+  
+  alpha<-matrix(rep(alpha,nlambda),ncol = 3,nrow=nlambda,byrow = T)
   # combine model estimations 
   combine_lambda<-function(x,newx){
 

@@ -64,6 +64,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
   lambda<-unique(lambda)
   nlambda<-dim(lambda)[1]
   
+  alpha<-matrix(rep(alpha,nlambda),ncol = 3,nrow=nlambda,byrow = T)
   # computation pbr 
   pbr_compu<-0
   
