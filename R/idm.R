@@ -208,9 +208,18 @@ idm <- function(formula01,
                 nlambda12=50,
                 penalty=NULL,
                 penalty.factor=NULL,
-                alpha=ifelse(penalty=="scad",rep(3.7,3),
-                             ifelse(penalty=="mcp",rep(3,3),
-                                    ifelse(penalty%in%c("elasticnet"),rep(0.5,3),rep(1,3)))),
+                alpha=ifelse(penalty=="scad",list(rep(3.7,50),
+                                                  rep(3.7,50),
+                                                  rep(3.7,50)),
+                             ifelse(penalty=="mcp",list(rep(3,50),
+                                                        rep(3,50),
+                                                        rep(3,50)),
+                                    ifelse(penalty%in%c("elasticnet"),list(rep(0.5,50),
+                                                                           rep(0.5,50),
+                                                                           rep(0.5,50)),
+                                           list(rep(1,50),
+                                                rep(1,50),
+                                                rep(1,50))))),
                 nproc=1,
                 analytics=T,
                 partialH=F,
@@ -1472,26 +1481,7 @@ idm <- function(formula01,
           }
            
 ############################ set value of penalty parameters ###################
-          if(penalty=="lasso"){alpha<-rep(1,3)}
-          if(penalty=="ridge"){alpha<-rep(0,3)}
-          if(length(alpha)==1){
-            alpha<-rep(alpha,3)
-          }else{
-            if(length(alpha)!=3){
-            stop("Can only specify one value for alpha per transition")}
-          }
-          if(penalty=="mcp"){
-            if(!inherits(alpha,c("numeric","integer"))  | any(alpha<=1))stop("Alpha need to be a numeric and superior to 1")
-            
-          }
-      
-          if(penalty=="scad"){
-            if(!inherits(alpha,c("numeric","integer")) | any(alpha<=2))stop("Alpha need to be a numeric and superior to 2")
-            
-          }
-          if(penalty%in%c("elasticnet")){
-           if(!inherits(alpha,c("numeric","integer"))  | any(alpha>1) | any(alpha <0))stop("Alpha need to be a numeric between 0 and 1")
-          }
+          
           if(!inherits(nlambda01,c("numeric","integer")) | round(nlambda01)!=nlambda01 | nlambda01<1)stop("Nlambda01 need to be an integer superior or equal to 1")
           if(!inherits(nlambda02,c("numeric","integer")) | round(nlambda02)!=nlambda02 | nlambda02<1)stop("Nlambda02 need to be an integer superior or equal to 1")
           if(!inherits(nlambda12,c("numeric","integer")) | round(nlambda12)!=nlambda12 | nlambda12<1)stop("Nlambda12 need to be an integer superior or equal to 1")
@@ -1558,7 +1548,7 @@ idm <- function(formula01,
                 #lambda.max<-ifelse(max(output$v)==0,0.001,max(output$v))
                 lambda.max<-ifelse(max(abs(output$v))==0,0.001,max(abs(output$v)))
               }else{
-                lambda.max<-ifelse(max(abs(output$v))==0,0.001,max(abs(output$v))/min(alpha))
+                lambda.max<-ifelse(max(abs(output$v))==0,0.001,max(abs(output$v))/min(unlist(alpha)))
               }
             }
             
@@ -1593,6 +1583,34 @@ idm <- function(formula01,
             }
             }else{lambda12<-0.0001}
             
+            
+            if(penalty=="lasso"){alpha<-list(rep(1,nlambda01),
+                                             rep(1,nlambda02),rep(1,nlambda12))}
+            if(penalty=="ridge"){alpha<-list(rep(0,nlambda01),
+                                             rep(0,nlambda02),rep(0,nlambda12))}
+            if(!inherits(alpha,c("list"))){
+              stop(paste0("Alpha needs to be list with 3 elements each of length :",nlambda01,",",nlambda02,",",nlambda12,"."))
+            }
+            if(length(alpha)!=3){
+              stop(paste0("Alpha needs to be list with 3 elements each of length :",nlambda01,",",nlambda02,",",nlambda12,"."))
+            }
+            
+            if(length(alpha[[1]])!=nlambda01|length(alpha[[2]])!=nlambda02|length(alpha[[3]])!=nlambda12){
+              stop(paste0("Alpha needs to be list with 3 elements each of length :",nlambda01,",",nlambda02,",",nlambda12,"."))
+            }
+            
+            if(penalty=="mcp"){
+              if(any(unlist(alpha)<=1))stop("Each element of alpha need to be a numeric and superior to 1")
+              
+            }
+            
+            if(penalty=="scad"){
+              if(any(unlist(alpha)<=2))stop("Each element of alpha need to be a numeric and superior to 2")
+              
+            }
+            if(penalty%in%c("elasticnet")){
+              if(any(unlist(alpha)>1) | any(unlist(alpha) <0))stop("Each element of alpha need to be a numeric between 0 and 1")
+            }
 ################################################################################
 ########################## perform penalty algorithm ###########################
 ##########################   with M-splines baseline risk ######################
@@ -1803,7 +1821,7 @@ idm <- function(formula01,
           
           if(method=="Weib"  & semiMarkov==F){
           
-           
+          
               #	cat("------ Program Weibull ------ \n")
 ############### some initial steps to have values for weibull parameters #########
             output.mla<- marqLevAlg::mla(b=b[which(fix0[1:6]==0)],
@@ -1890,7 +1908,7 @@ idm <- function(formula01,
                 #lambda.max<-ifelse(max(output$v)==0,0.001,max(output$v))
                 lambda.max<-ifelse(max(abs(output$v))==0,0.001,max(abs(output$v)))
               }else{
-                lambda.max<-ifelse(max(abs(output$v))==0,0.001,max(abs(output$v))/min(alpha))
+                lambda.max<-ifelse(max(abs(output$v))==0,0.001,max(abs(output$v))/min(unlist(alpha)))
               }
               
             }
@@ -1929,7 +1947,33 @@ idm <- function(formula01,
             }
             }else{lambda12<-0.0001}
             
+            if(penalty=="lasso"){alpha<-list(rep(1,nlambda01),
+                                             rep(1,nlambda02),rep(1,nlambda12))}
+            if(penalty=="ridge"){alpha<-list(rep(0,nlambda01),
+                                             rep(0,nlambda02),rep(0,nlambda12))}
+            if(!inherits(alpha,c("list"))){
+              stop(paste0("Alpha needs to be list with 3 elements each of length :",nlambda01,",",nlambda02,",",nlambda12,"."))
+            }
+            if(length(alpha)!=3){
+              stop(paste0("Alpha needs to be list with 3 elements each of length :",nlambda01,",",nlambda02,",",nlambda12,"."))
+            }
             
+            if(length(alpha[[1]])!=nlambda01|length(alpha[[2]])!=nlambda02|length(alpha[[3]])!=nlambda12){
+              stop(paste0("Alpha needs to be list with 3 elements each of length :",nlambda01,",",nlambda02,",",nlambda12,"."))
+            }
+            
+            if(penalty=="mcp"){
+              if(any(unlist(alpha)<=1))stop("Each element of alpha need to be a numeric and superior to 1")
+              
+            }
+            
+            if(penalty=="scad"){
+              if(any(unlist(alpha)<=2))stop("Each element of alpha need to be a numeric and superior to 2")
+              
+            }
+            if(penalty%in%c("elasticnet")){
+              if(any(unlist(alpha)>1) | any(unlist(alpha) <0))stop("Each element of alpha need to be a numeric between 0 and 1")
+            }
             
            
               out <- idm.penalty.weib(b=b,
@@ -2196,7 +2240,7 @@ idm <- function(formula01,
                 #lambda.max<-ifelse(max(output$v)==0,0.001,max(output$v))
                 lambda.max<-ifelse(max(abs(output$v))==0,0.001,max(abs(output$v)))
               }else{
-                lambda.max<-ifelse(max(abs(output$v))==0,0.001,max(abs(output$v))/min(alpha))
+                lambda.max<-ifelse(max(abs(output$v))==0,0.001,max(abs(output$v))/min(unlist(alpha)))
               }
             }
             
@@ -2231,6 +2275,34 @@ idm <- function(formula01,
               }
             }else{lambda12<-0.0001}
             
+            
+            if(penalty=="lasso"){alpha<-list(rep(1,nlambda01),
+                                             rep(1,nlambda02),rep(1,nlambda12))}
+            if(penalty=="ridge"){alpha<-list(rep(0,nlambda01),
+                                             rep(0,nlambda02),rep(0,nlambda12))}
+            if(!inherits(alpha,c("list"))){
+              stop(paste0("Alpha needs to be list with 3 elements each of length :",nlambda01,",",nlambda02,",",nlambda12,"."))
+            }
+            if(length(alpha)!=3){
+              stop(paste0("Alpha needs to be list with 3 elements each of length :",nlambda01,",",nlambda02,",",nlambda12,"."))
+            }
+            
+            if(length(alpha[[1]])!=nlambda01|length(alpha[[2]])!=nlambda02|length(alpha[[3]])!=nlambda12){
+              stop(paste0("Alpha needs to be list with 3 elements each of length :",nlambda01,",",nlambda02,",",nlambda12,"."))
+            }
+            
+            if(penalty=="mcp"){
+              if(any(unlist(alpha)<=1))stop("Each element of alpha need to be a numeric and superior to 1")
+              
+            }
+            
+            if(penalty=="scad"){
+              if(any(unlist(alpha)<=2))stop("Each element of alpha need to be a numeric and superior to 2")
+              
+            }
+            if(penalty%in%c("elasticnet")){
+              if(any(unlist(alpha)>1) | any(unlist(alpha) <0))stop("Each element of alpha need to be a numeric between 0 and 1")
+            }
             ################################################################################
             ########################## perform penalty algorithm ###########################
             ##########################   with M-splines baseline risk ######################
@@ -2525,7 +2597,7 @@ idm <- function(formula01,
                 #lambda.max<-ifelse(max(output$v)==0,0.001,max(output$v))
                 lambda.max<-ifelse(max(abs(output$v))==0,0.001,max(abs(output$v)))
               }else{
-                lambda.max<-ifelse(max(abs(output$v))==0,0.001,max(abs(output$v))/min(alpha))
+                lambda.max<-ifelse(max(abs(output$v))==0,0.001,max(abs(output$v))/min(unlist(alpha)))
               }
               
             }
@@ -2565,8 +2637,33 @@ idm <- function(formula01,
             }else{lambda12<-0.0001}
             
             
+            if(penalty=="lasso"){alpha<-list(rep(1,nlambda01),
+                                             rep(1,nlambda02),rep(1,nlambda12))}
+            if(penalty=="ridge"){alpha<-list(rep(0,nlambda01),
+                                             rep(0,nlambda02),rep(0,nlambda12))}
+            if(!inherits(alpha,c("list"))){
+              stop(paste0("Alpha needs to be list with 3 elements each of length :",nlambda01,",",nlambda02,",",nlambda12,"."))
+            }
+            if(length(alpha)!=3){
+              stop(paste0("Alpha needs to be list with 3 elements each of length :",nlambda01,",",nlambda02,",",nlambda12,"."))
+            }
             
+            if(length(alpha[[1]])!=nlambda01|length(alpha[[2]])!=nlambda02|length(alpha[[3]])!=nlambda12){
+              stop(paste0("Alpha needs to be list with 3 elements each of length :",nlambda01,",",nlambda02,",",nlambda12,"."))
+            }
             
+            if(penalty=="mcp"){
+              if(any(unlist(alpha)<=1))stop("Each element of alpha need to be a numeric and superior to 1")
+              
+            }
+            
+            if(penalty=="scad"){
+              if(any(unlist(alpha)<=2))stop("Each element of alpha need to be a numeric and superior to 2")
+              
+            }
+            if(penalty%in%c("elasticnet")){
+              if(any(unlist(alpha)>1) | any(unlist(alpha) <0))stop("Each element of alpha need to be a numeric between 0 and 1")
+            }
             out <- idm.penalty.weibsemiMarkov(b=b,
                                     fix0=fix0,
                                     size_V=size_V,

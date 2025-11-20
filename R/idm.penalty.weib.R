@@ -64,7 +64,16 @@ idm.penalty.weib<-function(b,fix0,size_V,
   lambda<-unique(lambda)
   nlambda<-dim(lambda)[1]
   
-  alpha<-matrix(rep(alpha,nlambda),ncol = 3,nrow=nlambda,byrow = T)
+  alphagrid<-data.frame(alpha01=alpha[[1]],
+                        alpha02=alpha[[2]],
+                        alpha12=alpha[[3]],
+                        lambda01=lambda01,
+                        lambda02=lambda02,
+                        lambda12=lambda12)
+  lambdamerge<-data.frame(lambda)
+  colnames(lambdamerge)<-c("lambda01","lambda02","lambda12")
+  alphagrid<-merge(alphdagrid,lambdamerge,by=c("lambda01","lambda02","lambda12"))
+  alpha<-alphagrid[,colnames(alphagrid)%in%c("alpha01","alpha02","alpha12")]
   # computation pbr 
   pbr_compu<-0
   
