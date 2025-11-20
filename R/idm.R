@@ -1561,7 +1561,8 @@ idm <- function(formula01,
               
               lambda01<-lambda.max*((pace.lambda)^(c(1:nlambda01)/nlambda01))
             }
-            }else{lambda01<-0.0001}
+            }else{lambda01<-0.0001
+            nlambda01<-1}
             
             if(nvat02>0){
             if(!is.null(lambda02)){
@@ -1571,7 +1572,8 @@ idm <- function(formula01,
             }else{
               lambda02<-lambda.max*((pace.lambda)^(c(1:nlambda02)/nlambda02))
             }
-            }else{lambda02<-0.0001}
+            }else{lambda02<-0.0001
+            nlambda02<-1}
             
             if(nvat12>0){
             if(!is.null(lambda12)){
@@ -1581,7 +1583,8 @@ idm <- function(formula01,
             }else{
               lambda12<-lambda.max*((pace.lambda)^(c(1:nlambda12)/nlambda12))
             }
-            }else{lambda12<-0.0001}
+            }else{lambda12<-0.0001
+            nlambda12<-1}
             
             
             if(penalty=="lasso"){alpha<-list(rep(1,nlambda01),
@@ -1923,7 +1926,8 @@ idm <- function(formula01,
               
               lambda01<-lambda.max*((pace.lambda)^(c(1:nlambda01)/nlambda01))
             }
-            }else{lambda01<-0.0001}
+            }else{lambda01<-0.0001
+            nlambda01<-1}
             
             if(nvat02>0){
             if(!is.null(lambda02)){
@@ -1934,7 +1938,8 @@ idm <- function(formula01,
               
               lambda02<-lambda.max*((pace.lambda)^(c(1:nlambda02)/nlambda02))
             }
-            }else{lambda02<-0.0001}
+            }else{lambda02<-0.0001
+            nlambda02<-1}
             
             if(nvat12>0){
             if(!is.null(lambda12)){
@@ -1945,7 +1950,8 @@ idm <- function(formula01,
               
               lambda12<-lambda.max*((pace.lambda)^(c(1:nlambda12)/nlambda12))
             }
-            }else{lambda12<-0.0001}
+            }else{lambda12<-0.0001
+            nlambda12<-1}
             
             if(penalty=="lasso"){alpha<-list(rep(1,nlambda01),
                                              rep(1,nlambda02),rep(1,nlambda12))}
@@ -2253,7 +2259,8 @@ idm <- function(formula01,
                 
                 lambda01<-lambda.max*((pace.lambda)^(c(1:nlambda01)/nlambda01))
               }
-            }else{lambda01<-0.0001}
+            }else{lambda01<-0.0001
+            nlambda01<-1}
             
             if(nvat02>0){
               if(!is.null(lambda02)){
@@ -2263,7 +2270,8 @@ idm <- function(formula01,
               }else{
                 lambda02<-lambda.max*((pace.lambda)^(c(1:nlambda02)/nlambda02))
               }
-            }else{lambda02<-0.0001}
+            }else{lambda02<-0.0001
+            nlambda02<-1}
             
             if(nvat12>0){
               if(!is.null(lambda12)){
@@ -2273,7 +2281,8 @@ idm <- function(formula01,
               }else{
                 lambda12<-lambda.max*((pace.lambda)^(c(1:nlambda12)/nlambda12))
               }
-            }else{lambda12<-0.0001}
+            }else{lambda12<-0.0001
+            nlambda12<-1}
             
             
             if(penalty=="lasso"){alpha<-list(rep(1,nlambda01),
@@ -2612,7 +2621,8 @@ idm <- function(formula01,
                 
                 lambda01<-lambda.max*((pace.lambda)^(c(1:nlambda01)/nlambda01))
               }
-            }else{lambda01<-0.0001}
+            }else{lambda01<-0.0001
+            nlambda01<-1}
             
             if(nvat02>0){
               if(!is.null(lambda02)){
@@ -2623,7 +2633,8 @@ idm <- function(formula01,
                 
                 lambda02<-lambda.max*((pace.lambda)^(c(1:nlambda02)/nlambda02))
               }
-            }else{lambda02<-0.0001}
+            }else{lambda02<-0.0001
+            nlambda02<-1}
             
             if(nvat12>0){
               if(!is.null(lambda12)){
@@ -2634,7 +2645,8 @@ idm <- function(formula01,
                 
                 lambda12<-lambda.max*((pace.lambda)^(c(1:nlambda12)/nlambda12))
               }
-            }else{lambda12<-0.0001}
+            }else{lambda12<-0.0001
+            nlambda12<-1}
             
             
             if(penalty=="lasso"){alpha<-list(rep(1,nlambda01),

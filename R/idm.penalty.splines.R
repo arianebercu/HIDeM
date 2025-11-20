@@ -70,16 +70,20 @@ idm.penalty.splines<-function(b,fix0,size_V,size_spline,
   nlambda<-dim(lambda)[1]
   
   browser()
-  alphagrid<-data.frame(alpha01=alpha[[1]],
-                        alpha02=alpha[[2]],
-                        alpha12=alpha[[3]],
-                        lambda01=lambda01,
-                        lambda02=lambda02,
-                        lambda12=lambda12)
+  #nmax<-max(length(lambda01),length(lambda02),length(lam))
+  alphagrid01<-data.frame(alpha01=alpha[[1]],
+                        lambda01=lambda01)
+  alphagrid02<-data.frame(alpha02=alpha[[2]],
+                          lambda02=lambda02)
+  alphagrid12<-data.frame(alpha12=alpha[[3]],
+                          lambda12=lambda12)
+  
   lambdamerge<-data.frame(lambda)
   colnames(lambdamerge)<-c("lambda01","lambda02","lambda12")
-  alphagrid<-merge(alphdagrid,lambdamerge,by=c("lambda01","lambda02","lambda12"))
-  alpha<-alphagrid[,colnames(alphagrid)%in%c("alpha01","alpha02","alpha12")]
+  alphagrid<-merge(alphagrid01,lambdamerge,by=c("lambda01"))
+  alphagrid<-merge(alphagrid02,alphagrid,by=c("lambda02"))
+  alphagrid<-merge(alphagrid12,alphagrid,by=c("lambda12"))
+  alpha<-alphagrid[,c("alpha01","alpha02","alpha12")]
   # combine model estimations 
   combine_lambda<-function(x,newx){
 
