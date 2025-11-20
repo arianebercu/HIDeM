@@ -1963,7 +1963,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                  bfix<-b[fix0.beta==1]
                                  b<-b[fix0.beta==0]
                                  # update modelPar
-                                 
+                                 browser()
                                 if(npmweib!=0){
                                  output.mla<- marqLevAlg::mla(b=b,
                                                               fn=gaussDYNidmlLikelihoodweib,
@@ -2993,7 +2993,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                          # h=1e-8 --> no issue
                                          output<-output$v
                                          
-                                         
+                                         browser()
                                          if(ite==0){
                                            fn.value<-gaussDYNidmlLikelihoodweibpena(b=b,
                                                                                     npm=npm,
@@ -3332,7 +3332,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                          bfix<-b[fix0.beta==1]
                                          b<-b[fix0.beta==0]
                                          # update modelPar
-                                         
+                                         browser()
                                          if(npmweib!=0){
                                          output.mla<- marqLevAlg::mla(b=b,
                                                                       fn=gaussDYNidmlLikelihoodweib,
@@ -3371,6 +3371,9 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                                       dimp02=dimp02,
                                                                       dimp12=dimp12,
                                                                       Ntime=NtimePoints)
+                                         
+                                         
+                                         
                                          
                                          # look at convergence for each lambda :
                                          

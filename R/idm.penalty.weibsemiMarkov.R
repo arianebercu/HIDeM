@@ -78,7 +78,7 @@ idm.penalty.weibsemiMarkov<-function(b,fix0,size_V,
            gapath=cbind(x$gapath,newx$gapath),
            fix=cbind(x$fix,newx$fix),
            lambda=cbind(x$lambda,newx$lambda),
-           alpha=c(x$alpha,newx$alpha),
+           alpha=cbind(x$alpha,newx$alpha),
            fn.value=c(x$fn.value,newx$fn.value),
            fn.value.pena=c(x$fn.value.pena,newx$fn.value.pena),
            ni=c(x$ni,newx$ni),
@@ -96,7 +96,7 @@ idm.penalty.weibsemiMarkov<-function(b,fix0,size_V,
            gapath=cbind(x$gapath,newx$gapath),
            fix=cbind(x$fix,newx$fix),
            lambda=cbind(x$lambda,newx$lambda),
-           alpha=c(x$alpha,newx$alpha),
+           alpha=cbind(x$alpha,newx$alpha),
            fn.value=c(x$fn.value,newx$fn.value),
            fn.value.pena=c(x$fn.value.pena,newx$fn.value.pena),
            ni=c(x$ni,newx$ni),
@@ -229,7 +229,7 @@ idm.penalty.weibsemiMarkov<-function(b,fix0,size_V,
                                                                     t3=t3,
                                                                     troncature=troncature,
                                                                     lambda=lambda[id.lambda,],
-                                                                    alpha=alpha,
+                                                                    alpha=alpha[id.lambda,],
                                                                     penalty.factor=penalty.factor,
                                                                     penalty=penalty)
                                  }
@@ -433,7 +433,7 @@ idm.penalty.weibsemiMarkov<-function(b,fix0,size_V,
                                                      v=V,
                                                      fu=fu,
                                                      lambda=lambda[id.lambda,],
-                                                     alpha=alpha
+                                                     alpha=alpha[id.lambda,]
                                  )
                                  
                                  # verify validity of parameters update 
@@ -466,7 +466,7 @@ idm.penalty.weibsemiMarkov<-function(b,fix0,size_V,
                                                              t3=t3,
                                                              troncature=troncature,
                                                              lambda=lambda[id.lambda,],
-                                                             alpha=alpha,
+                                                             alpha=alpha[id.lambda,],
                                                              penalty.factor=penalty.factor,
                                                              penalty=penalty)
                                  
@@ -527,7 +527,7 @@ idm.penalty.weibsemiMarkov<-function(b,fix0,size_V,
                                                   t3=t3,
                                                   troncature=troncature,
                                                   lambda=lambda[id.lambda,],
-                                                  alpha=alpha,
+                                                  alpha=alpha[id.lambda,],
                                                   penalty.factor=penalty.factor,
                                                   penalty=penalty)
                                    
@@ -558,7 +558,7 @@ idm.penalty.weibsemiMarkov<-function(b,fix0,size_V,
                                                                t3=t3,
                                                                troncature=troncature,
                                                                lambda=lambda[id.lambda,],
-                                                               alpha=alpha,
+                                                               alpha=alpha[id.lambda,],
                                                                penalty.factor=penalty.factor,
                                                                penalty=penalty)
                                  }
@@ -629,25 +629,25 @@ idm.penalty.weibsemiMarkov<-function(b,fix0,size_V,
                                  
                                  # calculate loglik pen 
                                  if(penalty%in%c("lasso","ridge","elasticnet","corrected.elasticnet")){
-                                   fn.valuenew<-output.mla$fn.value-lambda[id.lambda,1]*alpha*sum(abs(b01))-lambda[id.lambda,1]*(1-alpha)*sum(b01*b01)
-                                   fn.valuenew<-fn.valuenew-lambda[id.lambda,2]*alpha*sum(abs(b02))-lambda[id.lambda,2]*(1-alpha)*sum(b02*b02)
-                                   fn.valuenew<-fn.valuenew-lambda[id.lambda,3]*alpha*sum(abs(b12))-lambda[id.lambda,3]*(1-alpha)*sum(b12*b12)
+                                   fn.valuenew<-output.mla$fn.value-lambda[id.lambda,1]*alpha[id.lambda,1]*sum(abs(b01))-lambda[id.lambda,1]*(1-alpha[id.lambda,1])*sum(b01*b01)
+                                   fn.valuenew<-fn.valuenew-lambda[id.lambda,2]*alpha[id.lambda,2]*sum(abs(b02))-lambda[id.lambda,2]*(1-alpha[id.lambda,2])*sum(b02*b02)
+                                   fn.valuenew<-fn.valuenew-lambda[id.lambda,3]*alpha[id.lambda,3]*sum(abs(b12))-lambda[id.lambda,3]*(1-alpha[id.lambda,3])*sum(b12*b12)
                                  }
                                  
                                  
                                  if(penalty=="mcp"){
                                    
-                                   p01<-rep(alpha*lambda[id.lambda,1]*lambda[id.lambda,1]/2,length(b01))
-                                   idbeta<-which(b01<=alpha*lambda[id.lambda,1])
-                                   p01[idbeta]<-lambda[id.lambda,1]*abs(b01[idbeta])-((b01[idbeta]*b01[idbeta])/2*alpha)
+                                   p01<-rep(alpha[id.lambda,1]*lambda[id.lambda,1]*lambda[id.lambda,1]/2,length(b01))
+                                   idbeta<-which(b01<=alpha[id.lambda,1]*lambda[id.lambda,1])
+                                   p01[idbeta]<-lambda[id.lambda,1]*abs(b01[idbeta])-((b01[idbeta]*b01[idbeta])/2*alpha[id.lambda,1])
                                    
-                                   p02<-rep(alpha*lambda[id.lambda,2]*lambda[id.lambda,2]/2,length(b02))
-                                   idbeta<-which(b02<=alpha*lambda[id.lambda,2])
-                                   p02[idbeta]<-lambda[id.lambda,2]*abs(b02[idbeta])-((b02[idbeta]*b02[idbeta])/2*alpha)
+                                   p02<-rep(alpha[id.lambda,2]*lambda[id.lambda,2]*lambda[id.lambda,2]/2,length(b02))
+                                   idbeta<-which(b02<=alpha[id.lambda,2]*lambda[id.lambda,2])
+                                   p02[idbeta]<-lambda[id.lambda,2]*abs(b02[idbeta])-((b02[idbeta]*b02[idbeta])/2*alpha[id.lambda,2])
                                    
-                                   p12<-rep(alpha*lambda[id.lambda,3]*lambda[id.lambda,3]/2,length(b12))
-                                   idbeta<-which(b12<=alpha*lambda[id.lambda,3])
-                                   p12[idbeta]<-lambda[id.lambda,3]*abs(b12[idbeta])-((b12[idbeta]*b12[idbeta])/2*alpha)
+                                   p12<-rep(alpha[id.lambda,3]*lambda[id.lambda,3]*lambda[id.lambda,3]/2,length(b12))
+                                   idbeta<-which(b12<=alpha[id.lambda,3]*lambda[id.lambda,3])
+                                   p12[idbeta]<-lambda[id.lambda,3]*abs(b12[idbeta])-((b12[idbeta]*b12[idbeta])/2*alpha[id.lambda,3])
                                    
                                    fn.valuenew<-output.mla$fn.value-sum(p01)-sum(p02)-sum(p12)
                                    
@@ -655,23 +655,23 @@ idm.penalty.weibsemiMarkov<-function(b,fix0,size_V,
                                  
                                  if(penalty=="scad"){
                                    
-                                   p01<-rep((lambda[id.lambda,1]^2)*(alpha+1)/2,length(b01))
+                                   p01<-rep((lambda[id.lambda,1]^2)*(alpha[id.lambda,1]+1)/2,length(b01))
                                    idbeta<-which(b01<=lambda[id.lambda,1])
                                    p01[idbeta]<-lambda[id.lambda,1]*abs(b01[idbeta])
-                                   idbeta<-which(abs(b01)<lambda[id.lambda,1]*alpha)
-                                   p01[idbeta]<-(2*alpha*lambda[id.lambda,1]*abs(b01[idbeta])-b01[idbeta]^2-lambda[id.lambda,1]^2)/(2*(alpha-1))
+                                   idbeta<-which(abs(b01)<lambda[id.lambda,1]*alpha[id.lambda,1])
+                                   p01[idbeta]<-(2*alpha[id.lambda,1]*lambda[id.lambda,1]*abs(b01[idbeta])-b01[idbeta]^2-lambda[id.lambda,1]^2)/(2*(alpha[id.lambda,1]-1))
                                    
-                                   p02<-rep((lambda[id.lambda,2]^2)*(alpha+1)/2,length(b02))
+                                   p02<-rep((lambda[id.lambda,2]^2)*(alpha[id.lambda,2]+1)/2,length(b02))
                                    idbeta<-which(b02<=lambda[id.lambda,2])
                                    p02[idbeta]<-lambda[id.lambda,2]*abs(b02[idbeta])
-                                   idbeta<-which(abs(b02)<lambda[id.lambda,2]*alpha)
-                                   p02[idbeta]<-(2*alpha*lambda[id.lambda,2]*abs(b02[idbeta])-b02[idbeta]^2-lambda[id.lambda,2]^2)/(2*(alpha-1))
+                                   idbeta<-which(abs(b02)<lambda[id.lambda,2]*alpha[id.lambda,2])
+                                   p02[idbeta]<-(2*alpha[id.lambda,2]*lambda[id.lambda,2]*abs(b02[idbeta])-b02[idbeta]^2-lambda[id.lambda,2]^2)/(2*(alpha[id.lambda,2]-1))
                                    
-                                   p12<-rep((lambda[id.lambda,3]^2)*(alpha+1)/2,length(b12))
+                                   p12<-rep((lambda[id.lambda,3]^2)*(alpha[id.lambda,3]+1)/2,length(b12))
                                    idbeta<-which(b12<=lambda[id.lambda,3])
                                    p12[idbeta]<-lambda[id.lambda,3]*abs(b12[idbeta])
-                                   idbeta<-which(abs(b12)<lambda[id.lambda,3]*alpha)
-                                   p12[idbeta]<-(2*alpha*lambda[id.lambda,3]*abs(b12[idbeta])-b12[idbeta]^2-lambda[id.lambda,3]^2)/(2*(alpha-1))
+                                   idbeta<-which(abs(b12)<lambda[id.lambda,3]*alpha[id.lambda,3])
+                                   p12[idbeta]<-(2*alpha[id.lambda,3]*lambda[id.lambda,3]*abs(b12[idbeta])-b12[idbeta]^2-lambda[id.lambda,3]^2)/(2*(alpha[id.lambda,3]-1))
                                    
                                    fn.valuenew<-output.mla$fn.value-sum(p01)-sum(p02)-sum(p12)
                                    
@@ -800,7 +800,7 @@ idm.penalty.weibsemiMarkov<-function(b,fix0,size_V,
                                return(list(b=c(s,beta),
                                            H=V0,
                                            lambda=as.double(lambda[id.lambda,]),
-                                           alpha=alpha,
+                                           alpha=as.double(alpha[id.lambda,]),
                                            fn.value=ifelse(!exists("output.mla"),NA,output.mla$fn.value), # loglik
                                            fn.value.pena=fn.value, # penalised loglik
                                            ni=ite,
@@ -899,7 +899,7 @@ idm.penalty.weibsemiMarkov<-function(b,fix0,size_V,
                                                                         t3=t3,
                                                                         troncature=troncature,
                                                                         lambda=lambda[id.lambda,],
-                                                                        alpha=alpha,
+                                                                        alpha=alpha[id.lambda,],
                                                                         penalty.factor=penalty.factor,
                                                                         penalty=penalty)
                                      }
@@ -1001,7 +1001,7 @@ idm.penalty.weibsemiMarkov<-function(b,fix0,size_V,
                                                        v=V,
                                                        fu=fu,
                                                        lambda=lambda[id.lambda,],
-                                                       alpha=alpha
+                                                       alpha=alpha[id.lambda,]
                                    )
                                    
                                    # verify validity of parameters update 
@@ -1034,7 +1034,7 @@ idm.penalty.weibsemiMarkov<-function(b,fix0,size_V,
                                                                t3=t3,
                                                                troncature=troncature,
                                                                lambda=lambda[id.lambda,],
-                                                               alpha=alpha,
+                                                               alpha=alpha[id.lambda,],
                                                                penalty.factor=penalty.factor,
                                                                penalty=penalty)
                                    
@@ -1095,7 +1095,7 @@ idm.penalty.weibsemiMarkov<-function(b,fix0,size_V,
                                                     t3=t3,
                                                     troncature=troncature,
                                                     lambda=lambda[id.lambda,],
-                                                    alpha=alpha,
+                                                    alpha=alpha[id.lambda,],
                                                     penalty.factor=penalty.factor,
                                                     penalty=penalty)
                                      
@@ -1126,7 +1126,7 @@ idm.penalty.weibsemiMarkov<-function(b,fix0,size_V,
                                                                  t3=t3,
                                                                  troncature=troncature,
                                                                  lambda=lambda[id.lambda,],
-                                                                 alpha=alpha,
+                                                                 alpha=alpha[id.lambda,],
                                                                  penalty.factor=penalty.factor,
                                                                  penalty=penalty)
                                    }
@@ -1198,25 +1198,25 @@ idm.penalty.weibsemiMarkov<-function(b,fix0,size_V,
                                    
                                    # calculate loglik pen 
                                    if(penalty%in%c("lasso","ridge","elasticnet","corrected.elasticnet")){
-                                     fn.valuenew<-output.mla$fn.value-lambda[id.lambda,1]*alpha*sum(abs(b01))-lambda[id.lambda,1]*(1-alpha)*sum(b01*b01)
-                                     fn.valuenew<-fn.valuenew-lambda[id.lambda,2]*alpha*sum(abs(b02))-lambda[id.lambda,2]*(1-alpha)*sum(b02*b02)
-                                     fn.valuenew<-fn.valuenew-lambda[id.lambda,3]*alpha*sum(abs(b12))-lambda[id.lambda,3]*(1-alpha)*sum(b12*b12)
+                                     fn.valuenew<-output.mla$fn.value-lambda[id.lambda,1]*alpha[id.lambda,1]*sum(abs(b01))-lambda[id.lambda,1]*(1-alpha[id.lambda,1])*sum(b01*b01)
+                                     fn.valuenew<-fn.valuenew-lambda[id.lambda,2]*alpha[id.lambda,2]*sum(abs(b02))-lambda[id.lambda,2]*(1-alpha[id.lambda,2])*sum(b02*b02)
+                                     fn.valuenew<-fn.valuenew-lambda[id.lambda,3]*alpha[id.lambda,3]*sum(abs(b12))-lambda[id.lambda,3]*(1-alpha[id.lambda,3])*sum(b12*b12)
                                    }
                                    
                                    
                                    if(penalty=="mcp"){
                                      
-                                     p01<-rep(alpha*lambda[id.lambda,1]*lambda[id.lambda,1]/2,length(b01))
-                                     idbeta<-which(b01<=alpha*lambda[id.lambda,1])
-                                     p01[idbeta]<-lambda[id.lambda,1]*abs(b01[idbeta])-((b01[idbeta]*b01[idbeta])/2*alpha)
+                                     p01<-rep(alpha[id.lambda,1]*lambda[id.lambda,1]*lambda[id.lambda,1]/2,length(b01))
+                                     idbeta<-which(b01<=alpha[id.lambda,1]*lambda[id.lambda,1])
+                                     p01[idbeta]<-lambda[id.lambda,1]*abs(b01[idbeta])-((b01[idbeta]*b01[idbeta])/2*alpha[id.lambda,1])
                                      
-                                     p02<-rep(alpha*lambda[id.lambda,2]*lambda[id.lambda,2]/2,length(b02))
-                                     idbeta<-which(b02<=alpha*lambda[id.lambda,2])
-                                     p02[idbeta]<-lambda[id.lambda,2]*abs(b02[idbeta])-((b02[idbeta]*b02[idbeta])/2*alpha)
+                                     p02<-rep(alpha[id.lambda,2]*lambda[id.lambda,2]*lambda[id.lambda,2]/2,length(b02))
+                                     idbeta<-which(b02<=alpha[id.lambda,2]*lambda[id.lambda,2])
+                                     p02[idbeta]<-lambda[id.lambda,2]*abs(b02[idbeta])-((b02[idbeta]*b02[idbeta])/2*alpha[id.lambda,2])
                                      
-                                     p12<-rep(alpha*lambda[id.lambda,3]*lambda[id.lambda,3]/2,length(b12))
-                                     idbeta<-which(b12<=alpha*lambda[id.lambda,3])
-                                     p12[idbeta]<-lambda[id.lambda,3]*abs(b12[idbeta])-((b12[idbeta]*b12[idbeta])/2*alpha)
+                                     p12<-rep(alpha[id.lambda,3]*lambda[id.lambda,3]*lambda[id.lambda,3]/2,length(b12))
+                                     idbeta<-which(b12<=alpha[id.lambda,3]*lambda[id.lambda,3])
+                                     p12[idbeta]<-lambda[id.lambda,3]*abs(b12[idbeta])-((b12[idbeta]*b12[idbeta])/2*alpha[id.lambda,3])
                                      
                                      fn.valuenew<-output.mla$fn.value-sum(p01)-sum(p02)-sum(p12)
                                      
@@ -1224,23 +1224,23 @@ idm.penalty.weibsemiMarkov<-function(b,fix0,size_V,
                                    
                                    if(penalty=="scad"){
                                      
-                                     p01<-rep((lambda[id.lambda,1]^2)*(alpha+1)/2,length(b01))
+                                     p01<-rep((lambda[id.lambda,1]^2)*(alpha[id.lambda,1]+1)/2,length(b01))
                                      idbeta<-which(b01<=lambda[id.lambda,1])
                                      p01[idbeta]<-lambda[id.lambda,1]*abs(b01[idbeta])
-                                     idbeta<-which(abs(b01)<lambda[id.lambda,1]*alpha)
-                                     p01[idbeta]<-(2*alpha*lambda[id.lambda,1]*abs(b01[idbeta])-b01[idbeta]^2-lambda[id.lambda,1]^2)/(2*(alpha-1))
+                                     idbeta<-which(abs(b01)<lambda[id.lambda,1]*alpha[id.lambda,1])
+                                     p01[idbeta]<-(2*alpha[id.lambda,1]*lambda[id.lambda,1]*abs(b01[idbeta])-b01[idbeta]^2-lambda[id.lambda,1]^2)/(2*(alpha[id.lambda,1]-1))
                                      
-                                     p02<-rep((lambda[id.lambda,2]^2)*(alpha+1)/2,length(b02))
+                                     p02<-rep((lambda[id.lambda,2]^2)*(alpha[id.lambda,2]+1)/2,length(b02))
                                      idbeta<-which(b02<=lambda[id.lambda,2])
                                      p02[idbeta]<-lambda[id.lambda,2]*abs(b02[idbeta])
-                                     idbeta<-which(abs(b02)<lambda[id.lambda,2]*alpha)
-                                     p02[idbeta]<-(2*alpha*lambda[id.lambda,2]*abs(b02[idbeta])-b02[idbeta]^2-lambda[id.lambda,2]^2)/(2*(alpha-1))
+                                     idbeta<-which(abs(b02)<lambda[id.lambda,2]*alpha[id.lambda,2])
+                                     p02[idbeta]<-(2*alpha[id.lambda,2]*lambda[id.lambda,2]*abs(b02[idbeta])-b02[idbeta]^2-lambda[id.lambda,2]^2)/(2*(alpha[id.lambda,2]-1))
                                      
-                                     p12<-rep((lambda[id.lambda,3]^2)*(alpha+1)/2,length(b12))
+                                     p12<-rep((lambda[id.lambda,3]^2)*(alpha[id.lambda,3]+1)/2,length(b12))
                                      idbeta<-which(b12<=lambda[id.lambda,3])
                                      p12[idbeta]<-lambda[id.lambda,3]*abs(b12[idbeta])
-                                     idbeta<-which(abs(b12)<lambda[id.lambda,3]*alpha)
-                                     p12[idbeta]<-(2*alpha*lambda[id.lambda,3]*abs(b12[idbeta])-b12[idbeta]^2-lambda[id.lambda,3]^2)/(2*(alpha-1))
+                                     idbeta<-which(abs(b12)<lambda[id.lambda,3]*alpha[id.lambda,3])
+                                     p12[idbeta]<-(2*alpha[id.lambda,3]*lambda[id.lambda,3]*abs(b12[idbeta])-b12[idbeta]^2-lambda[id.lambda,3]^2)/(2*(alpha[id.lambda,3]-1))
                                      
                                      fn.valuenew<-output.mla$fn.value-sum(p01)-sum(p02)-sum(p12)
                                      
@@ -1369,7 +1369,7 @@ idm.penalty.weibsemiMarkov<-function(b,fix0,size_V,
                                  return(list(b=c(s,beta),
                                              H=V0,
                                              lambda=as.double(lambda[id.lambda,]),
-                                             alpha=alpha,
+                                             alpha=as.double(alpha[id.lambda,]),
                                              fn.value=ifelse(!exists("output.mla"),NA,output.mla$fn.value), # loglik
                                              fn.value.pena=fn.value, # penalised loglik
                                              ni=ite,
@@ -1479,7 +1479,7 @@ idm.penalty.weibsemiMarkov<-function(b,fix0,size_V,
                                                                     t3=t3,
                                                                     troncature=troncature,
                                                                     lambda=lambda[id.lambda,],
-                                                                    alpha=alpha,
+                                                                    alpha=alpha[id.lambda,],
                                                                     penalty.factor=penalty.factor,
                                                                     penalty=penalty)
                                    
@@ -1683,7 +1683,7 @@ idm.penalty.weibsemiMarkov<-function(b,fix0,size_V,
                                                      v=V,
                                                      fu=fu,
                                                      lambda=lambda[id.lambda,],
-                                                     alpha=alpha
+                                                     alpha=alpha[id.lambda,]
                                  )
                                  
                                  # verify validity of parameters update 
@@ -1715,7 +1715,7 @@ idm.penalty.weibsemiMarkov<-function(b,fix0,size_V,
                                                          t3=t3,
                                                          troncature=troncature,
                                                          lambda=lambda[id.lambda,],
-                                                         alpha=alpha,
+                                                         alpha=alpha[id.lambda,],
                                                          penalty.factor=penalty.factor,
                                                          penalty=penalty)
                                  
@@ -1780,7 +1780,7 @@ idm.penalty.weibsemiMarkov<-function(b,fix0,size_V,
                                                    t3=t3,
                                                    troncature=troncature,
                                                    lambda=lambda[id.lambda,],
-                                                   alpha=alpha,
+                                                   alpha=alpha[id.lambda,],
                                                   penalty.factor=penalty.factor,
                                                   penalty=penalty)
                                    
@@ -1811,7 +1811,7 @@ idm.penalty.weibsemiMarkov<-function(b,fix0,size_V,
                                                                t3=t3,
                                                                troncature=troncature,
                                                                lambda=lambda[id.lambda,],
-                                                               alpha=alpha,
+                                                               alpha=alpha[id.lambda,],
                                                                penalty.factor=penalty.factor,
                                                                penalty=penalty)
                                    
@@ -1883,25 +1883,25 @@ idm.penalty.weibsemiMarkov<-function(b,fix0,size_V,
                                  }else{b12<-0}
                                  # maximisation issue : lpen =l - pen
                                  if(penalty%in%c("lasso","ridge","elasticnet","corrected.elasticnet")){
-                                   fn.valuenew<-output.mla$fn.value-lambda[id.lambda,1]*alpha*sum(abs(b01))-lambda[id.lambda,1]*(1-alpha)*sum(b01*b01)
-                                   fn.valuenew<-fn.valuenew-lambda[id.lambda,2]*alpha*sum(abs(b02))-lambda[id.lambda,2]*(1-alpha)*sum(b02*b02)
-                                   fn.valuenew<-fn.valuenew-lambda[id.lambda,3]*alpha*sum(abs(b12))-lambda[id.lambda,3]*(1-alpha)*sum(b12*b12)
+                                   fn.valuenew<-output.mla$fn.value-lambda[id.lambda,1]*alpha[id.lambda,1]*sum(abs(b01))-lambda[id.lambda,1]*(1-alpha[id.lambda,1])*sum(b01*b01)
+                                   fn.valuenew<-fn.valuenew-lambda[id.lambda,2]*alpha[id.lambda,2]*sum(abs(b02))-lambda[id.lambda,2]*(1-alpha[id.lambda,2])*sum(b02*b02)
+                                   fn.valuenew<-fn.valuenew-lambda[id.lambda,3]*alpha[id.lambda,3]*sum(abs(b12))-lambda[id.lambda,3]*(1-alpha[id.lambda,3])*sum(b12*b12)
 
                                    }
                                  
                                  if(penalty=="mcp"){
                                    
-                                   p01<-rep(alpha*lambda[id.lambda,1]*lambda[id.lambda,1]/2,length(b01))
-                                   idbeta<-which(b01<=alpha*lambda[id.lambda,1])
-                                   p01[idbeta]<-lambda[id.lambda,1]*abs(b01[idbeta])-((b01[idbeta]*b01[idbeta])/2*alpha)
+                                   p01<-rep(alpha[id.lambda,1]*lambda[id.lambda,1]*lambda[id.lambda,1]/2,length(b01))
+                                   idbeta<-which(b01<=alpha[id.lambda,1]*lambda[id.lambda,1])
+                                   p01[idbeta]<-lambda[id.lambda,1]*abs(b01[idbeta])-((b01[idbeta]*b01[idbeta])/2*alpha[id.lambda,1])
                                    
-                                   p02<-rep(alpha*lambda[id.lambda,2]*lambda[id.lambda,2]/2,length(b02))
-                                   idbeta<-which(b02<=alpha*lambda[id.lambda,2])
-                                   p02[idbeta]<-lambda[id.lambda,2]*abs(b02[idbeta])-((b02[idbeta]*b02[idbeta])/2*alpha)
+                                   p02<-rep(alpha[id.lambda,2]*lambda[id.lambda,2]*lambda[id.lambda,2]/2,length(b02))
+                                   idbeta<-which(b02<=alpha[id.lambda,2]*lambda[id.lambda,2])
+                                   p02[idbeta]<-lambda[id.lambda,2]*abs(b02[idbeta])-((b02[idbeta]*b02[idbeta])/2*alpha[id.lambda,2])
                                    
-                                   p12<-rep(alpha*lambda[id.lambda,3]*lambda[id.lambda,3]/2,length(b12))
-                                   idbeta<-which(b12<=alpha*lambda[id.lambda,3])
-                                   p12[idbeta]<-lambda[id.lambda,3]*abs(b12[idbeta])-((b12[idbeta]*b12[idbeta])/2*alpha)
+                                   p12<-rep(alpha[id.lambda,3]*lambda[id.lambda,3]*lambda[id.lambda,3]/2,length(b12))
+                                   idbeta<-which(b12<=alpha[id.lambda,3]*lambda[id.lambda,3])
+                                   p12[idbeta]<-lambda[id.lambda,3]*abs(b12[idbeta])-((b12[idbeta]*b12[idbeta])/2*alpha[id.lambda,3])
                                    
                                    fn.valuenew<-output.mla$fn.value-sum(p01)-sum(p02)-sum(p12)
                                    
@@ -1909,23 +1909,23 @@ idm.penalty.weibsemiMarkov<-function(b,fix0,size_V,
                                  
                                  if(penalty=="scad"){
                                    
-                                   p01<-rep((lambda[id.lambda,1]^2)*(alpha+1)/2,length(b01))
+                                   p01<-rep((lambda[id.lambda,1]^2)*(alpha[id.lambda,1]+1)/2,length(b01))
                                    idbeta<-which(b01<=lambda[id.lambda,1])
                                    p01[idbeta]<-lambda[id.lambda,1]*abs(b01[idbeta])
-                                   idbeta<-which(abs(b01)<lambda[id.lambda,1]*alpha)
-                                   p01[idbeta]<-(2*alpha*lambda[id.lambda,1]*abs(b01[idbeta])-b01[idbeta]^2-lambda[id.lambda,1]^2)/(2*(alpha-1))
+                                   idbeta<-which(abs(b01)<lambda[id.lambda,1]*alpha[id.lambda,1])
+                                   p01[idbeta]<-(2*alpha[id.lambda,1]*lambda[id.lambda,1]*abs(b01[idbeta])-b01[idbeta]^2-lambda[id.lambda,1]^2)/(2*(alpha[id.lambda,1]-1))
                                    
-                                   p02<-rep((lambda[id.lambda,2]^2)*(alpha+1)/2,length(b02))
+                                   p02<-rep((lambda[id.lambda,2]^2)*(alpha[id.lambda,2]+1)/2,length(b02))
                                    idbeta<-which(b02<=lambda[id.lambda,2])
                                    p02[idbeta]<-lambda[id.lambda,2]*abs(b02[idbeta])
-                                   idbeta<-which(abs(b02)<lambda[id.lambda,2]*alpha)
-                                   p02[idbeta]<-(2*alpha*lambda[id.lambda,2]*abs(b02[idbeta])-b02[idbeta]^2-lambda[id.lambda,2]^2)/(2*(alpha-1))
+                                   idbeta<-which(abs(b02)<lambda[id.lambda,2]*alpha[id.lambda,2])
+                                   p02[idbeta]<-(2*alpha[id.lambda,2]*lambda[id.lambda,2]*abs(b02[idbeta])-b02[idbeta]^2-lambda[id.lambda,2]^2)/(2*(alpha[id.lambda,2]-1))
                                    
-                                   p12<-rep((lambda[id.lambda,3]^2)*(alpha+1)/2,length(b12))
+                                   p12<-rep((lambda[id.lambda,3]^2)*(alpha[id.lambda,3]+1)/2,length(b12))
                                    idbeta<-which(b12<=lambda[id.lambda,3])
                                    p12[idbeta]<-lambda[id.lambda,3]*abs(b12[idbeta])
-                                   idbeta<-which(abs(b12)<lambda[id.lambda,3]*alpha)
-                                   p12[idbeta]<-(2*alpha*lambda[id.lambda,3]*abs(b12[idbeta])-b12[idbeta]^2-lambda[id.lambda,3]^2)/(2*(alpha-1))
+                                   idbeta<-which(abs(b12)<lambda[id.lambda,3]*alpha[id.lambda,3])
+                                   p12[idbeta]<-(2*alpha[id.lambda,3]*lambda[id.lambda,3]*abs(b12[idbeta])-b12[idbeta]^2-lambda[id.lambda,3]^2)/(2*(alpha[id.lambda,3]-1))
                                    
                                    fn.valuenew<-output.mla$fn.value-sum(p01)-sum(p02)-sum(p12)
                                    
@@ -2051,7 +2051,7 @@ idm.penalty.weibsemiMarkov<-function(b,fix0,size_V,
                                return(list(b=c(s,beta),
                                            H=V0,
                                            lambda=as.double(lambda[id.lambda,]),
-                                           alpha=alpha,
+                                           alpha=as.double(alpha[id.lambda,]),
                                            fn.value=ifelse(!exists("output.mla"),NA,output.mla$fn.value),
                                            fn.value.pena=fn.value,
                                            ni=ite,
@@ -2153,7 +2153,7 @@ idm.penalty.weibsemiMarkov<-function(b,fix0,size_V,
                                                                             t3=t3,
                                                                             troncature=troncature,
                                                                             lambda=lambda[id.lambda,],
-                                                                            alpha=alpha,
+                                                                            alpha=alpha[id.lambda,],
                                                                             penalty.factor=penalty.factor,
                                                                             penalty=penalty)
                                          }
@@ -2252,7 +2252,7 @@ idm.penalty.weibsemiMarkov<-function(b,fix0,size_V,
                                                            v=V,
                                                            fu=fu,
                                                            lambda=lambda[id.lambda,],
-                                                           alpha=alpha
+                                                           alpha=alpha[id.lambda,]
                                        )
                                        
                                        # verify validity of parameters update 
@@ -2284,7 +2284,7 @@ idm.penalty.weibsemiMarkov<-function(b,fix0,size_V,
                                                                    t3=t3,
                                                                    troncature=troncature,
                                                                    lambda=lambda[id.lambda,],
-                                                                   alpha=alpha,
+                                                                   alpha=alpha[id.lambda,],
                                                                    penalty.factor=penalty.factor,
                                                                    penalty=penalty)
                                        
@@ -2348,7 +2348,7 @@ idm.penalty.weibsemiMarkov<-function(b,fix0,size_V,
                                                         t3=t3,
                                                         troncature=troncature,
                                                         lambda=lambda[id.lambda,],
-                                                        alpha=alpha,
+                                                        alpha=alpha[id.lambda,],
                                                         penalty.factor=penalty.factor,
                                                         penalty=penalty)
                                          
@@ -2379,7 +2379,7 @@ idm.penalty.weibsemiMarkov<-function(b,fix0,size_V,
                                                                      t3=t3,
                                                                      troncature=troncature,
                                                                      lambda=lambda[id.lambda,],
-                                                                     alpha=alpha,
+                                                                     alpha=alpha[id.lambda,],
                                                                      penalty.factor=penalty.factor,
                                                                      penalty=penalty)
                                          
@@ -2451,25 +2451,25 @@ idm.penalty.weibsemiMarkov<-function(b,fix0,size_V,
                                        }else{b12<-0}
                                        # maximisation issue : lpen =l - pen
                                        if(penalty%in%c("lasso","ridge","elasticnet","corrected.elasticnet")){
-                                         fn.valuenew<-output.mla$fn.value-lambda[id.lambda,1]*alpha*sum(abs(b01))-lambda[id.lambda,1]*(1-alpha)*sum(b01*b01)
-                                         fn.valuenew<-fn.valuenew-lambda[id.lambda,2]*alpha*sum(abs(b02))-lambda[id.lambda,2]*(1-alpha)*sum(b02*b02)
-                                         fn.valuenew<-fn.valuenew-lambda[id.lambda,3]*alpha*sum(abs(b12))-lambda[id.lambda,3]*(1-alpha)*sum(b12*b12)
+                                         fn.valuenew<-output.mla$fn.value-lambda[id.lambda,1]*alpha[id.lambda,1]*sum(abs(b01))-lambda[id.lambda,1]*(1-alpha[id.lambda,1])*sum(b01*b01)
+                                         fn.valuenew<-fn.valuenew-lambda[id.lambda,2]*alpha[id.lambda,2]*sum(abs(b02))-lambda[id.lambda,2]*(1-alpha[id.lambda,2])*sum(b02*b02)
+                                         fn.valuenew<-fn.valuenew-lambda[id.lambda,3]*alpha[id.lambda,3]*sum(abs(b12))-lambda[id.lambda,3]*(1-alpha[id.lambda,3])*sum(b12*b12)
                                          
                                        }
                                        
                                        if(penalty=="mcp"){
                                          
-                                         p01<-rep(alpha*lambda[id.lambda,1]*lambda[id.lambda,1]/2,length(b01))
-                                         idbeta<-which(b01<=alpha*lambda[id.lambda,1])
-                                         p01[idbeta]<-lambda[id.lambda,1]*abs(b01[idbeta])-((b01[idbeta]*b01[idbeta])/2*alpha)
+                                         p01<-rep(alpha[id.lambda,1]*lambda[id.lambda,1]*lambda[id.lambda,1]/2,length(b01))
+                                         idbeta<-which(b01<=alpha[id.lambda,1]*lambda[id.lambda,1])
+                                         p01[idbeta]<-lambda[id.lambda,1]*abs(b01[idbeta])-((b01[idbeta]*b01[idbeta])/2*alpha[id.lambda,1])
                                          
-                                         p02<-rep(alpha*lambda[id.lambda,2]*lambda[id.lambda,2]/2,length(b02))
-                                         idbeta<-which(b02<=alpha*lambda[id.lambda,2])
-                                         p02[idbeta]<-lambda[id.lambda,2]*abs(b02[idbeta])-((b02[idbeta]*b02[idbeta])/2*alpha)
+                                         p02<-rep(alpha[id.lambda,2]*lambda[id.lambda,2]*lambda[id.lambda,2]/2,length(b02))
+                                         idbeta<-which(b02<=alpha[id.lambda,2]*lambda[id.lambda,2])
+                                         p02[idbeta]<-lambda[id.lambda,2]*abs(b02[idbeta])-((b02[idbeta]*b02[idbeta])/2*alpha[id.lambda,2])
                                          
-                                         p12<-rep(alpha*lambda[id.lambda,3]*lambda[id.lambda,3]/2,length(b12))
-                                         idbeta<-which(b12<=alpha*lambda[id.lambda,3])
-                                         p12[idbeta]<-lambda[id.lambda,3]*abs(b12[idbeta])-((b12[idbeta]*b12[idbeta])/2*alpha)
+                                         p12<-rep(alpha[id.lambda,3]*lambda[id.lambda,3]*lambda[id.lambda,3]/2,length(b12))
+                                         idbeta<-which(b12<=alpha[id.lambda,3]*lambda[id.lambda,3])
+                                         p12[idbeta]<-lambda[id.lambda,3]*abs(b12[idbeta])-((b12[idbeta]*b12[idbeta])/2*alpha[id.lambda,3])
                                          
                                          fn.valuenew<-output.mla$fn.value-sum(p01)-sum(p02)-sum(p12)
                                          
@@ -2477,23 +2477,23 @@ idm.penalty.weibsemiMarkov<-function(b,fix0,size_V,
                                        
                                        if(penalty=="scad"){
                                          
-                                         p01<-rep((lambda[id.lambda,1]^2)*(alpha+1)/2,length(b01))
+                                         p01<-rep((lambda[id.lambda,1]^2)*(alpha[id.lambda,1]+1)/2,length(b01))
                                          idbeta<-which(b01<=lambda[id.lambda,1])
                                          p01[idbeta]<-lambda[id.lambda,1]*abs(b01[idbeta])
-                                         idbeta<-which(abs(b01)<lambda[id.lambda,1]*alpha)
-                                         p01[idbeta]<-(2*alpha*lambda[id.lambda,1]*abs(b01[idbeta])-b01[idbeta]^2-lambda[id.lambda,1]^2)/(2*(alpha-1))
+                                         idbeta<-which(abs(b01)<lambda[id.lambda,1]*alpha[id.lambda,1])
+                                         p01[idbeta]<-(2*alpha[id.lambda,1]*lambda[id.lambda,1]*abs(b01[idbeta])-b01[idbeta]^2-lambda[id.lambda,1]^2)/(2*(alpha[id.lambda,1]-1))
                                          
-                                         p02<-rep((lambda[id.lambda,2]^2)*(alpha+1)/2,length(b02))
+                                         p02<-rep((lambda[id.lambda,2]^2)*(alpha[id.lambda,2]+1)/2,length(b02))
                                          idbeta<-which(b02<=lambda[id.lambda,2])
                                          p02[idbeta]<-lambda[id.lambda,2]*abs(b02[idbeta])
-                                         idbeta<-which(abs(b02)<lambda[id.lambda,2]*alpha)
-                                         p02[idbeta]<-(2*alpha*lambda[id.lambda,2]*abs(b02[idbeta])-b02[idbeta]^2-lambda[id.lambda,2]^2)/(2*(alpha-1))
+                                         idbeta<-which(abs(b02)<lambda[id.lambda,2]*alpha[id.lambda,2])
+                                         p02[idbeta]<-(2*alpha[id.lambda,2]*lambda[id.lambda,2]*abs(b02[idbeta])-b02[idbeta]^2-lambda[id.lambda,2]^2)/(2*(alpha[id.lambda,2]-1))
                                          
-                                         p12<-rep((lambda[id.lambda,3]^2)*(alpha+1)/2,length(b12))
+                                         p12<-rep((lambda[id.lambda,3]^2)*(alpha[id.lambda,3]+1)/2,length(b12))
                                          idbeta<-which(b12<=lambda[id.lambda,3])
                                          p12[idbeta]<-lambda[id.lambda,3]*abs(b12[idbeta])
-                                         idbeta<-which(abs(b12)<lambda[id.lambda,3]*alpha)
-                                         p12[idbeta]<-(2*alpha*lambda[id.lambda,3]*abs(b12[idbeta])-b12[idbeta]^2-lambda[id.lambda,3]^2)/(2*(alpha-1))
+                                         idbeta<-which(abs(b12)<lambda[id.lambda,3]*alpha[id.lambda,3])
+                                         p12[idbeta]<-(2*alpha[id.lambda,3]*lambda[id.lambda,3]*abs(b12[idbeta])-b12[idbeta]^2-lambda[id.lambda,3]^2)/(2*(alpha[id.lambda,3]-1))
                                          
                                          fn.valuenew<-output.mla$fn.value-sum(p01)-sum(p02)-sum(p12)
                                          
@@ -2621,7 +2621,7 @@ idm.penalty.weibsemiMarkov<-function(b,fix0,size_V,
                                      return(list(b=c(s,beta),
                                                  H=V0,
                                                  lambda=as.double(lambda[id.lambda,]),
-                                                 alpha=alpha,
+                                                 alpha=as.double(alpha[id.lambda,]),
                                                  fn.value=ifelse(!exists("output.mla"),NA,output.mla$fn.value),
                                                  fn.value.pena=fn.value,
                                                  ni=ite,
