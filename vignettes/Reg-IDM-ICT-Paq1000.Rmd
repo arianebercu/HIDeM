@@ -131,6 +131,10 @@ start<-c(mvoidPaq1000$theta01,mvoidPaq1000$theta02,mvoidPaq1000$theta12,rep(0,52
   lambdatest<-seq(0.01,100,length.out=nlambda)
   penalty<-ifelse(a==1,"lasso","elasticnet")
 
+  alpha01<-list(rep(a,nlambda),1,1)
+  alpha02<-list(1,rep(a,nlambda),1)
+  alpha12<-list(1,1,rep(a,nlambda))
+  alpha_all<-list(rep(a,3),rep(a,3),rep(a,3))
   
 ############################ 01 ################################################
     f02<-as.formula("Hist(time = t, event =death,entry=e) ~1")
@@ -145,7 +149,7 @@ start<-c(mvoidPaq1000$theta01,mvoidPaq1000$theta02,mvoidPaq1000$theta12,rep(0,52
                                     lambda02=0.0001,
                                     lambda12=0.0001,B=start,
                                 method="splines",
-                                alpha=k,maxiter=100,maxiter.pena = 2)
+                                alpha=alpha01,maxiter=100,maxiter.pena = 2)
   
 
 ################################ 02 ############################################
@@ -163,7 +167,7 @@ start<-c(mvoidPaq1000$theta01,mvoidPaq1000$theta02,mvoidPaq1000$theta12,rep(0,52
                                     lambda02 = lambdatest,
                                     lambda01=0.0001,
                                     lambda12=0.0001,B=start,
-                                alpha=k,maxiter=100,maxiter.pena = 2)
+                                alpha=alpha02,maxiter=100,maxiter.pena = 2)
   
 
 
@@ -181,7 +185,7 @@ start<-c(mvoidPaq1000$theta01,mvoidPaq1000$theta02,mvoidPaq1000$theta12,rep(0,52
                                 lambda01 = 0.0001,
                                 lambda12= lambdatest,
                                 lambda02=0.0001,B=start,
-                                alpha=k,maxiter=100,maxiter.pena = 2)
+                                alpha=alpha12,maxiter=100,maxiter.pena = 2)
   
   
 ```
@@ -274,7 +278,7 @@ Note that for each transition, we reached the minimum as we have this U-shape of
                                 lambda01 = lambda01,
                                 lambda12= lambda12,
                                 lambda02=lambda02,B=c(start,rep(0,52*2)),
-                                alpha=k,maxiter=100,maxiter.pena = 2)
+                                alpha=alpha_all,maxiter=100,maxiter.pena = 2)
   
   
   
@@ -315,7 +319,7 @@ Based on the variable selection made in Reg IDM-ICT, we can re-estimate the mode
                                 formula12 = f12,data=Paq1000,
                                 eps=c(7,4,2),
                                 method="splines",
-                                lambda02=lambda02,B=c(mvoidPaq1000$theta01,
+                                B=c(mvoidPaq1000$theta01,
                                                       mvoidPaq1000$theta02,
                                                       mvoidPaq1000$theta12,0),
                                 maxiter=100,maxiter.pena = 2)

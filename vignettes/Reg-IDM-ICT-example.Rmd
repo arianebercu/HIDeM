@@ -268,6 +268,10 @@ We choose to estimate the baseline intensity transition with M-spline basis with
   lambdatest<-seq(0.01,100,length.out=nlambda)
   penalty<-ifelse(a==1,"lasso","elasticnet")
 
+  alpha01<-list(rep(a,nlambda),1,1)
+  alpha02<-list(1,rep(a,nlambda),1)
+  alpha12<-list(1,1,rep(a,nlambda))
+  alpha_all<-list(rep(a,3),rep(a,3),rep(a,3))
   
 ############################ 01 ################################################
     f02<-as.formula("Hist(time = observed.lifetime, event = seen.exit) ~1")
@@ -282,7 +286,7 @@ We choose to estimate the baseline intensity transition with M-spline basis with
                                     lambda02=0.0001,
                                     lambda12=0.0001,B=start,
                                 method="splines",nproc=2,clustertype = "PSOCK",
-                                alpha=k,maxiter=100,maxiter.pena = 2)
+                                alpha=alpha01,maxiter=100,maxiter.pena = 2)
   
 
 ################################ 02 ############################################
@@ -300,7 +304,7 @@ We choose to estimate the baseline intensity transition with M-spline basis with
                                     lambda02 = lambdatest,
                                     lambda01=0.0001,
                                     lambda12=0.0001,B=start,nproc=2,clustertype = "PSOCK",
-                                alpha=k,maxiter=100,maxiter.pena = 2)
+                                alpha=alpha02,maxiter=100,maxiter.pena = 2)
   
 
 
@@ -318,7 +322,7 @@ We choose to estimate the baseline intensity transition with M-spline basis with
                                 lambda01 = 0.0001,
                                 lambda12= lambdatest,
                                 lambda02=0.0001,B=start,nproc=2,clustertype = "PSOCK",
-                                alpha=k,maxiter=100,maxiter.pena = 2)
+                                alpha=alpha12,maxiter=100,maxiter.pena = 2)
   
   
 ```
@@ -408,7 +412,7 @@ Note that for each transition, we reached the minimum as we have this U-shape of
                                 lambda12= lambda12,
                                 lambda02=lambda02,B=c(start,rep(0,n_var*2)),
                                 nproc=2,clustertype = "PSOCK",
-                                alpha=k,maxiter=100,maxiter.pena = 2)
+                                alpha=alpha_all,maxiter=100,maxiter.pena = 2)
   
   
 ```
@@ -452,8 +456,7 @@ Based on the variable selection made in Reg IDM-ICT, we can re-estimate the mode
                                 formula01 = f01,
                                 formula12 = f12,data=simu$data,
                                 eps=c(7,4,2),
-                                method="splines",
-                                lambda02=lambda02,B=start,
+                                method="splines",B=start,
                                 maxiter=100)
   
 

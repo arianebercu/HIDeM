@@ -1663,7 +1663,7 @@ idm <- function(formula01,
                              alpha=alpha,
                              penalty.factor=penalty.factor,
                              penalty=penalty,
-                                    analytics=analytics,
+                             analytics=analytics,
                              partialH=partialH)
             
 ############################## Output   ########################################
@@ -1678,6 +1678,7 @@ idm <- function(formula01,
             beta<-as.matrix(out$b)
             fix<-as.matrix(out$fix)
             lambda<-as.matrix(lambda)
+            alpha<-as.matrix(alpha)
             
             theta_names <- cbind(c(rep("theta01",(nknots01+2)),rep("theta02",(nknots02+2)),rep("theta12",(nknots12+2))),c((1:(nknots01+2)),(1:(nknots02+2)),(1:(nknots12+2))))
             theta_names <- as.vector(apply(theta_names,1,paste,collapse=" "))
@@ -1692,6 +1693,11 @@ idm <- function(formula01,
             betaCoef<-as.matrix(betaCoef)
             fit$coef <- betaCoef
             fit$HR <- exp(betaCoef)
+            
+            # add ga and da information 
+            
+            fit$ga<-out$ga
+            fit$da<-out$da
             
 ########################## on  BIC and GCV #####################################
             if(dim(beta)[2]>1){
@@ -2036,6 +2042,7 @@ idm <- function(formula01,
               
               beta<-as.matrix(beta)
               lambda<-as.matrix(lambda)
+              alpha<-as.matrix(alpha)
               
               theta_names<-c("modelPar1 01",
               "modelPar2 01",
@@ -2374,6 +2381,7 @@ idm <- function(formula01,
             beta<-as.matrix(out$b)
             fix<-as.matrix(out$fix)
             lambda<-as.matrix(lambda)
+            alpha<-as.matrix(alpha)
             
             theta_names <- cbind(c(rep("theta01",(nknots01+2)),rep("theta02",(nknots02+2)),rep("theta12",(nknots12+2))),c((1:(nknots01+2)),(1:(nknots02+2)),(1:(nknots12+2))))
             theta_names <- as.vector(apply(theta_names,1,paste,collapse=" "))
@@ -2728,6 +2736,7 @@ idm <- function(formula01,
             
             beta<-as.matrix(beta)
             lambda<-as.matrix(lambda)
+            alpha<-as.matrix(alpha)
             
             theta_names<-c("modelPar1 01",
                            "modelPar2 01",

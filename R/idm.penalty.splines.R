@@ -101,7 +101,9 @@ idm.penalty.splines<-function(b,fix0,size_V,size_spline,
            ca.beta=cbind(x$ca.beta,newx$ca.beta),
            ca.spline=cbind(x$ca.spline,newx$ca.spline),
            ca.validity=cbind(x$ca.validity,newx$ca.validity),
-           cb=cbind(x$cb,newx$cb))
+           cb=cbind(x$cb,newx$cb),
+           ga=cbind(x$ga,newx$ga),
+           da=cbind(x$da,newx$da))
       
     }else{
       list(b=cbind(x$b,newx$b),
@@ -117,7 +119,9 @@ idm.penalty.splines<-function(b,fix0,size_V,size_spline,
            ca.beta=cbind(x$ca.beta,newx$ca.beta),
            ca.spline=cbind(x$ca.spline,newx$ca.spline),
            ca.validity=cbind(x$ca.validity,newx$ca.validity),
-           cb=cbind(x$cb,newx$cb))}
+           cb=cbind(x$cb,newx$cb),
+           ga=cbind(x$ga,newx$ga),
+           da=cbind(x$da,newx$da))}
    
   }
   
@@ -177,6 +181,8 @@ idm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                eval.loglik<-rep(NA,maxiter+1)
                                eval.validity<-rep(NA,maxiter+1)
                                
+                               eval.da<-rep(NA,maxiter+1)
+                               eval.ga<-rep(NA,maxiter+1)
                                
                                npm<-sum(fix0==0)
                                npm01<-ifelse(nvat01>0,sum(fix0[(size_spline+1):(size_spline+nvat01)]==0),0)
@@ -389,6 +395,8 @@ idm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                  idpos0<-idpos
                                  
                                  ncount<-0
+                                 ga <- 0.01
+                                 da <- 1E-2
                                  
                                  while(idpos != 0){
                                    
@@ -429,6 +437,9 @@ idm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                    
                                  }
                                  
+                                 eval.ga[ite]<-ga
+                                 eval.da[ite]<-da
+                                 
                                  if(idpos!=0){
                                    warning("Hessian not defined positive")
                                    ite<-ite+1
@@ -436,7 +447,7 @@ idm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                    break
                                  }
                                  
-                                 
+                                
                                  
                                  # update beta 
                                  output.cv<-cv.model(beta=beta,
@@ -896,6 +907,8 @@ idm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                            ca.spline=eval.cv.spline,
                                            ca.validity=eval.validity,
                                            cb=eval.loglik,
+                                           ga=eval.ga,
+                                           da=eval.da,
                                            istop=istop,
                                            combine=combine))
                                
@@ -919,6 +932,9 @@ idm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                  eval.cv.loglik<-rep(NA,maxiter+1)
                                  eval.loglik<-rep(NA,maxiter+1)
                                  eval.validity<-rep(NA,maxiter+1)
+                                 
+                                 eval.da<-rep(NA,maxiter+1)
+                                 eval.ga<-rep(NA,maxiter+1)
                                  
                                  
                                  npm<-sum(fix0==0)
@@ -1038,6 +1054,9 @@ idm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                      
                                      ncount<-0
                                      
+                                     ga <- 0.01
+                                     da <- 1E-2
+                                     
                                      while(idpos != 0){
                                        
                                        if(ncount==0){ 
@@ -1076,6 +1095,9 @@ idm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                        # }else{idpos<-ifelse(any(abs(eigen.values)==0),1,0)}
                                        
                                      }
+                                     
+                                     eval.ga[ite]<-ga
+                                     eval.da[ite]<-da
                                      
                                      if(idpos!=0){
                                        warning("Hessian not defined positive")
@@ -1544,6 +1566,8 @@ idm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                              ca.spline=eval.cv.spline,
                                              ca.validity=eval.validity,
                                              cb=eval.loglik,
+                                             ga=eval.ga,
+                                             da=eval.da,
                                              istop=istop,
                                              combine=combine))
                                  
@@ -1574,6 +1598,9 @@ idm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                eval.cv.loglik<-rep(NA,maxiter+1)
                                eval.loglik<-rep(NA,maxiter+1)
                                eval.validity<-rep(NA,maxiter+1)
+                               
+                               eval.da<-rep(NA,maxiter+1)
+                               eval.ga<-rep(NA,maxiter+1)
                                
                                
                                npm<-sum(fix0==0)
@@ -1788,6 +1815,8 @@ idm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                  
                                  ncount<-0
                                  
+                                 ga <- 0.01
+                                 da <- 1E-2
                                  while(idpos != 0){
                                    
                                    if(ncount==0){ 
@@ -1826,6 +1855,9 @@ idm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                    # }else{idpos<-ifelse(any(abs(eigen.values)==0),1,0)}
                                    
                                  }
+                                 
+                                 eval.ga[ite]<-ga
+                                 eval.da[ite]<-da
                                  
                                  if(idpos!=0){
                                    warning("Hessian not defined positive")
@@ -2286,6 +2318,8 @@ idm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                            ca.spline=eval.cv.spline,
                                            ca.validity=eval.validity,
                                            cb=eval.loglik,
+                                           ga=eval.ga,
+                                           da=eval.da,
                                            istop=istop,
                                            combine=combine))
                                
@@ -2309,6 +2343,9 @@ idm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                  eval.cv.loglik<-rep(NA,maxiter+1)
                                  eval.loglik<-rep(NA,maxiter+1)
                                  eval.validity<-rep(NA,maxiter+1)
+                                 
+                                 eval.da<-rep(NA,maxiter+1)
+                                 eval.ga<-rep(NA,maxiter+1)
                                  
                                  
                                  npm<-sum(fix0==0)
@@ -2427,6 +2464,9 @@ idm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                    
                                    ncount<-0
                                    
+                                   ga <- 0.01
+                                   da <- 1E-2
+                                   
                                    while(idpos != 0){
                                      
                                      if(ncount==0){ 
@@ -2465,6 +2505,9 @@ idm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                      # }else{idpos<-ifelse(any(abs(eigen.values)==0),1,0)}
                                      
                                    }
+                                   
+                                   eval.ga[ite]<-ga
+                                   eval.da[ite]<-da
                                    
                                    if(idpos!=0){
                                      warning("Hessian not defined positive")
@@ -2926,6 +2969,8 @@ idm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                              ca.spline=eval.cv.spline,
                                              ca.validity=eval.validity,
                                              cb=eval.loglik,
+                                             ga=eval.ga,
+                                             da=eval.da,
                                              istop=istop,
                                              combine=combine))
                                  
