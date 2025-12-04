@@ -23,6 +23,7 @@ gridsearch(
   B = NULL,
   posfix = NULL,
   gausspoint = 10,
+  semiMarkov = FALSE,
   lambda01 = NULL,
   lambda02 = NULL,
   lambda12 = NULL,
@@ -31,10 +32,15 @@ gridsearch(
   nlambda12 = 50,
   penalty = "lasso",
   penalty.factor = NULL,
-  alpha = ifelse(penalty == "scad", 3.7, ifelse(penalty == "mcp", 3, ifelse(penalty
-    \%in\% c("elasticnet", "corrected.elasticnet"), 0.5, 1))),
+  alpha = ifelse(penalty == "scad", list(rep(3.7, 50), rep(3.7, 50), rep(3.7, 50)),
+    ifelse(penalty == "mcp", list(rep(3, 50), rep(3, 50), rep(3, 50)), ifelse(penalty
+    \%in\% c("elasticnet"), list(rep(0.5, 50), rep(0.5, 50), rep(0.5, 50)), list(rep(1,
+    50), rep(1, 50), rep(1, 50))))),
+  analytics = T,
+  partialH = F,
   nproc = 1,
-  clustertype = "FORK"
+  clustertype = "FORK",
+  envir = parent.frame()
 )
 }
 \arguments{
@@ -63,12 +69,11 @@ state.  operator is not required. If missing it is set to
 \item{data}{A data frame in which to interpret the variables of
 \code{formula01}, \code{formula02} and \code{formula12}.}
 
-\item{method}{type of estimation method: "splines" for a likelihood approach with approximation of the transition
-intensities by M-splines, "Weib" for a parametric approach with a
-Weibull distribution on the transition intensities. Default is
+\item{method}{The type of estimation method: "splines" for a likelihood with baseline transition intensities using M-splines basis, "Weib" for a parametric approach with a
+Weibull distribution on the baseline transition intensities. Default is
 "Weib".}
 
-\item{scale.X}{do you want to center and reduce your explanatory variables}
+\item{scale.X}{TRUE (default), if you want to center and reduce your explanatory variables.}
 
 \item{maxiter}{Maximum number of iterations. The default is 200.}
 
@@ -83,51 +88,50 @@ parameters and likelihood) and \eqn{10^{-3}} for the second
 derivatives between two iterations.}
 
 \item{n.knots}{For \code{method="splines"} only, a vector of length
-3 specifing the number of knots, one for each transition, for the
+3 specifying the number of knots, one for each transition, for the
 M-splines estimate of the baseline intensities in the order \code{0
---> 1}, \code{0 --> 2}, \code{1 --> 2}. The default is c(7,7,7). When \code{knots}
+--> 1}, \code{0 --> 2}, \code{1 --> 2}. The default is c(3,3,3). When \code{knots}
 are specified as a list this argument is ignored.
-The algorithm needs least 5 knots and at most 20 knots.}
+The algorithm needs least 3 knots and at most 20 knots.}
 
-\item{knots}{Argument only active for the penalized likelihood approach \code{method="Splines"}.
-There are three ways to control the placement of the knots between the smallest and the largest
+\item{knots}{Argument only active for the likelihood approach with M-spline basis \code{method="Splines"}. There are three ways to control the placement of the knots between the smallest and the largest
 of all time points:
 \describe{
- \item{\code{knots="equidistant"}}{Knots are placed with same distance on the time scale.}
+ \item{\code{knots="equidistant"}}{Knots are placed with same distance on the time scale, time of death, last vital status or censoring.}
  \item{\code{knots="quantile"}}{Knots are placed such that the number of observations is roughly the same between knots.}
 \item{knots=list()}{List of 1 or 2 or three vectors. The list elements are the actual placements
 (timepoints) of the knots for the M-spline. The list may contain
 one vector of placements for each transition in the order \code{0 --> 1}, \code{0 --> 2}, \code{1 --> 2}.
-If only vector is specifified the knots are used for all transitions. If only 2 vectors are specifified, the
+If only vector is specified the knots are used for all transitions. If only 2 vectors are specifified, the
 knots for the \code{0 --> 1} transition are also used for the \code{1 --> 2} transition.}
 }
 The algorithm needs at least 3 knots in spline and allows no more than 20 knots.}
 
-\item{type.quantile}{Argument only active for the likelihood approach \code{method="splines"}.
-There are three ways to control the placement of the knots  according to the time considered between states :=
+\item{type.quantile}{Argument only active for the likelihood approach with M-spline basis \code{method="splines"}. There are three ways to control the placement of the knots  according to the time considered between states :
 \describe{
- \item{\code{type.quantile=1}}{Time for \code{0 --> 1} is the imputed to the middle of the interval left and right for demence . Time for \code{0 --> 2}
- and \code{1 --> 2} is the same t, time of news. }
- \item{\code{type.quantile=2}}{Time for \code{0 --> 1} is the imputed to the middle of the interval left and right. Time for \code{0 --> 2}
- and \code{1 --> 2} is the same t, time of news. }
-\item{\code{type.quantile=3}}{Time for \code{0 --> 1} is the imputed to the middle of the interval left and right. Time for \code{0 --> 2}
- is time of death for non demented sujects only. Time for \code{1 --> 2} is time of death for suject diagnose with dementia. }
- \item{\code{type.quantile=4}}{Time for \code{0 --> 1} is left and right. Time for \code{0 --> 2}
- is time of death for non demented sujects only. Time for \code{1 --> 2} is time of death for suject diagnose with dementia. }
-}}
+ \item{\code{type.quantile=1}}{Time for \code{0 --> 1} is the imputed to the midpoint between the last illness-free visit and the diagnosis visit. Time for \code{0 --> 2}
+ and \code{1 --> 2} is the same t, time of death. }
+ \item{\code{type.quantile=2}}{Time for \code{0 --> 1} is the imputed to the midpoint between the last illness-free visit and the diagnosis visit. Time for \code{0 --> 2}
+ and \code{1 --> 2} is the same t, time of death or time of vital status. }
+\item{\code{type.quantile=3}}{Time for \code{0 --> 1} is the imputed to the midpoint between the last illness-free visit and the diagnosis visit. Time for \code{0 --> 2}
+ is time of death for individual illness-free. Time for \code{1 --> 2} is time of death for ill individuals. }
+\item{\code{type.quantile=4}}{Time for \code{0 --> 1} is the last illness-free visit or the diagnosis visit. Time for \code{0 --> 2}
+ is time of death for individual illness-free. Time for \code{1 --> 2} is time of death for ill individuals. }
+}
+Note that if semiMarkov is TRUE then transition the time transition for \code{1 --> 2} needs to be adjusted for the time transition from \code{0 --> 1} such that time of \code{1 --> 2} becomes time of \code{1 --> 2} minus time of \code{0 --> 1}.}
 
-\item{na.action}{how NAs are treated. The default is first, any
+\item{na.action}{How NAs are treated. The default is first, any
 na.action attribute of data, second a na.action setting of options,
 and third 'na.fail' if that is unset. The 'factory-fresh' default
 is na.omit. Another possible value is NULL.}
 
-\item{B}{vector of size the number of parameters, in the following order, first the parameters of splines \code{0 --> 1}, \code{0 --> 2}, \code{1 --> 2},
-second the parameters of explanatory variables in order  \code{0 --> 1}, \code{0 --> 2}, \code{1 --> 2}.
-This argument is only used for models with M-splines.}
+\item{B}{A vector of size the number of parameters, firstly the parameters associated to the baseline transition intensities in order \code{0 --> 1}, \code{0 --> 2}, \code{1 --> 2}, secondly the parameters of explanatory variables in order  \code{0 --> 1}, \code{0 --> 2}, \code{1 --> 2}.}
 
-\item{posfix}{index of fixed parameters}
+\item{posfix}{The index of parameters that we want to fix, by default no parameters are fixed.}
 
-\item{gausspoint}{gauss quadrature points in the approximation of integrals}
+\item{gausspoint}{Gauss quadrature points in the approximation of integrals in the likelihood (only active if no penalty)}
+
+\item{semiMarkov}{TRUE if semi Markov on 1 --> 2 otherwise FALSE (default)}
 
 \item{lambda01}{Lambda on transition 0 --> 1}
 
@@ -141,15 +145,19 @@ This argument is only used for models with M-splines.}
 
 \item{nlambda12}{number of Lambda on transition 1 --> 2}
 
-\item{penalty}{which penalty to consider}
+\item{penalty}{Which penalty to consider, either "lasso","elasticnet","mcp" or "scad".}
 
-\item{penalty.factor}{which variable should be penalised}
+\item{penalty.factor}{A vector of size the number of explanatory variables, each element value 1 (default) if we should apply the penalization on the regression parameters associated, otherwise 0.}
 
-\item{alpha}{alpha on all transitions}
+\item{alpha}{The elastic-net threshold parameter between ridge and lasso on all transitions.}
+
+\item{partialH}{TRUE, if only the diagonal terms of the second derivatives of the regression parameters should be used, otherwise FALSE (default).}
 
 \item{nproc}{number of cluster}
 
 \item{clustertype}{in which cluster to work}
+
+\item{envir}{The working environment}
 }
 \value{
 \item{m01}{Model estimated on 0 --> 1} \item{m02}{Model estimated on 0 --> 2} 

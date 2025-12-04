@@ -11,15 +11,16 @@ JMidmpredY(
   dataSurv,
   dataLongi,
   id,
-  Nsample,
   t0,
   t1,
   t2,
   t3,
   ctime,
+  assoc,
   modelY,
   seed,
-  BLUP
+  BLUP,
+  scale.X
 )
 }
 \description{

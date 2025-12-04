@@ -35950,7 +35950,7 @@ logy01,logy02,logy12)
     double precision :: f101num,f102num,f112num
     double precision :: f201num,f202num,f212num
     double precision :: su01,ri01,gl01,su02,ri02,gl02,su12,ri12,gl12
-    double precision :: fcdenum,fc01num,fc02num,fc12num
+    double precision :: fcdenum,fc01num,fc02num,fc12num,denum
 
     ! Y-dependent temporaries
     double precision :: resk01numY(nY01), resk02numY(nY02), resk12numY(nY12)
@@ -36034,14 +36034,30 @@ logy01,logy02,logy12)
         call fonctdepfirstderiv(xm,the02,ri02,gl02,su02,inty02,yy02t,logy02t,nY02)
    		call fonctdepfirstderiv(xm,the12,ri12,gl12,su12,inty12,yy12t,logy12t,nY12)
 
-    	fcdenum =(su01**v01)*(su02**v02)*ri01*v01/(su12**v12)  ! valeur fct f au milieu de intervalle (a,b), cas pnt 0
-    	fc01num=(su01**v01)*(su02**v02)*ri01*v01*(1-(gl01*v01))/(su12**v12)
-		fc02num=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02/(su12**v12) 
-		fc12num=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12/(su12**v12) 
+		denum=su12**v12
+		if(denum.NE.0) then 
+    	
 		
-		fc01numY=(su01**v01)*(su02**v02)*ri01*v01*(logy01(m,:)-inty01*v01)/(su12**v12)
-		fc02numY=(su01**v01)*(su02**v02)*ri01*v01*inty02*v02/(su12**v12) 
-		fc12numY=(su01**v01)*(su02**v02)*ri01*v01*inty12*v12/(su12**v12) 
+    	fcdenum =(su01**v01)*(su02**v02)*ri01*v01/denum  ! valeur fct f au milieu de intervalle (a,b), cas pnt 0
+    	fc01num=(su01**v01)*(su02**v02)*ri01*v01*(1-(gl01*v01))/denum
+		fc02num=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02/denum 
+		fc12num=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12/denum 
+		
+		fc01numY=(su01**v01)*(su02**v02)*ri01*v01*(logy01(m,:)-inty01*v01)/denum
+		fc02numY=(su01**v01)*(su02**v02)*ri01*v01*inty02*v02/denum 
+		fc12numY=(su01**v01)*(su02**v02)*ri01*v01*inty12*v12/denum 
+		
+		else 
+		
+		fcdenum=0
+		fc01num=0
+		fc02num=0
+		fc12num=0
+		fc01numY=0
+		fc02numY=0
+		fc12numY=0
+		
+		end if 
 		
         	reskdenum = fcdenum*wgk(8)       ! init res Kronrod   ! fc * 8e poids Kronrod
         	resk01num = fc01num*wgk(8)       ! init res Kronrod   ! fc * 8e poids Kronrod
@@ -36066,16 +36082,29 @@ logy01,logy02,logy12)
                		call fonctdepfirstderiv(xx,the01,ri01,gl01,su01,inty01,yy01t,logy01t,nY01)
                		call fonctdepfirstderiv(xx,the02,ri02,gl02,su02,inty02,yy02t,logy02t,nY02)
 	       		call fonctdepfirstderiv(xx,the12,ri12,gl12,su12,inty12,yy12t,logy12t,nY12)
-                        
-			f1denum =(su01**v01)*(su02**v02)*ri01*v01/(su12**v12)
-			f101num=(su01**v01)*(su02**v02)*ri01*v01*(1-(gl01*v01))/(su12**v12)
-			f102num=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02/(su12**v12) 
-			f112num=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12/(su12**v12) 
+               
+			denum=su12**v12
+		if(denum.NE.0) then 
+    				   
+			f1denum =(su01**v01)*(su02**v02)*ri01*v01/denum
+			f101num=(su01**v01)*(su02**v02)*ri01*v01*(1-(gl01*v01))/denum
+			f102num=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02/denum 
+			f112num=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12/denum 
 			
-			f101numY=(su01**v01)*(su02**v02)*ri01*v01*(logy01((m+15),:)-inty01*v01)/(su12**v12)
-			f102numY=(su01**v01)*(su02**v02)*ri01*v01*inty02*v02/(su12**v12) 
-			f112numY=(su01**v01)*(su02**v02)*ri01*v01*inty12*v12/(su12**v12) 
+			f101numY=(su01**v01)*(su02**v02)*ri01*v01*(logy01((m+15),:)-inty01*v01)/denum
+			f102numY=(su01**v01)*(su02**v02)*ri01*v01*inty02*v02/denum 
+			f112numY=(su01**v01)*(su02**v02)*ri01*v01*inty12*v12/denum 
 			
+			else 
+			
+			f1denum =0
+			f101num=0
+			f102num=0
+			f112num=0
+			f101numY=0
+			f102numY=0
+			f112numY=0
+			end if 
                		xx = xm-dx
 					
 					yy01t=yy01((m-16):(m-1))
@@ -36088,16 +36117,28 @@ logy01,logy02,logy12)
                		call fonctdepfirstderiv(xx,the02,ri02,gl02,su02,inty02,yy02t,logy02t,nY02)
 	       		call fonctdepfirstderiv(xx,the12,ri12,gl12,su12,inty12,yy12t,logy12t,nY12)
 				
-                        f2denum =(su01**v01)*(su02**v02)*ri01*v01/(su12**v12)
-			f201num=(su01**v01)*(su02**v02)*ri01*v01*(1-(gl01*v01))/(su12**v12)
-			f202num=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02/(su12**v12) 
-			f212num=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12/(su12**v12) 
+				denum=su12**v12
+		if(denum.NE.0) then 
+    	
+                        f2denum =(su01**v01)*(su02**v02)*ri01*v01/denum
+			f201num=(su01**v01)*(su02**v02)*ri01*v01*(1-(gl01*v01))/denum
+			f202num=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02/denum 
+			f212num=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12/denum 
 			
-			f201numY=(su01**v01)*(su02**v02)*ri01*v01*(logy01((m-1),:)-inty01*v01)/(su12**v12)
-			f202numY=(su01**v01)*(su02**v02)*ri01*v01*inty02*v02/(su12**v12) 
-			f212numY=(su01**v01)*(su02**v02)*ri01*v01*inty12*v12/(su12**v12) 
+			f201numY=(su01**v01)*(su02**v02)*ri01*v01*(logy01((m-1),:)-inty01*v01)/denum
+			f202numY=(su01**v01)*(su02**v02)*ri01*v01*inty02*v02/denum 
+			f212numY=(su01**v01)*(su02**v02)*ri01*v01*inty12*v12/denum 
 
-
+			else 
+			f2denum =0
+			f201num=0
+			f202num=0
+			f212num=0
+			f201numY=0
+			f202numY=0
+			f212numY=0
+			
+			end if 
                		reskdenum = reskdenum + wgk(jtw)*(f1denum+f2denum)
 
                		resk01num = resk01num + wgk(jtw)*(f101num+f201num)
@@ -36127,15 +36168,29 @@ logy01,logy02,logy12)
                		call fonctdepfirstderiv(xx,the01,ri01,gl01,su01,inty01,yy01t,logy01t,nY01)
                		call fonctdepfirstderiv(xx,the02,ri02,gl02,su02,inty02,yy02t,logy02t,nY02)
 	       		call fonctdepfirstderiv(xx,the12,ri12,gl12,su12,inty12,yy12t,logy12t,nY12)
-      			
-			f1denum =(su01**v01)*(su02**v02)*ri01*v01/(su12**v12)
-			f101num=(su01**v01)*(su02**v02)*ri01*v01*(1-(gl01*v01))/(su12**v12)
-			f102num=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02/(su12**v12) 
-			f112num=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12/(su12**v12) 
+      		
+				denum=su12**v12
+			if(denum.NE.0) then 
+    				
+			f1denum =(su01**v01)*(su02**v02)*ri01*v01/denum
+			f101num=(su01**v01)*(su02**v02)*ri01*v01*(1-(gl01*v01))/denum
+			f102num=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02/denum 
+			f112num=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12/denum 
 			
-			f101numY=(su01**v01)*(su02**v02)*ri01*v01*(logy01((m+15),:)-inty01*v01)/(su12**v12)
-			f102numY=(su01**v01)*(su02**v02)*ri01*v01*inty02*v02/(su12**v12) 
-			f112numY=(su01**v01)*(su02**v02)*ri01*v01*inty12*v12/(su12**v12) 
+			f101numY=(su01**v01)*(su02**v02)*ri01*v01*(logy01((m+15),:)-inty01*v01)/denum
+			f102numY=(su01**v01)*(su02**v02)*ri01*v01*inty02*v02/denum 
+			f112numY=(su01**v01)*(su02**v02)*ri01*v01*inty12*v12/denum 
+			
+			else 
+			
+			f1denum =0
+			f101num=0
+			f102num=0
+			f112num=0
+			f101numY=0
+			f102numY=0
+			f112numY=0
+			end if 
 			
                		xx = xm-dx
 					
@@ -36150,15 +36205,29 @@ logy01,logy02,logy12)
                		call fonctdepfirstderiv(xx,the02,ri02,gl02,su02,inty02,yy02t,logy02t,nY02)
 	       		call fonctdepfirstderiv(xx,the12,ri12,gl12,su12,inty12,yy12t,logy12t,nY12)
 
-      			f2denum =(su01**v01)*(su02**v02)*ri01*v01/(su12**v12)
-			f201num=(su01**v01)*(su02**v02)*ri01*v01*(1-(gl01*v01))/(su12**v12)
-			f202num=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02/(su12**v12) 
-			f212num=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12/(su12**v12) 
+			denum=su12**v12
+		if(denum.NE.0) then 
+    	
+      			f2denum =(su01**v01)*(su02**v02)*ri01*v01/denum
+			f201num=(su01**v01)*(su02**v02)*ri01*v01*(1-(gl01*v01))/denum
+			f202num=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02/denum 
+			f212num=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12/denum 
 			
-			f201numY=(su01**v01)*(su02**v02)*ri01*v01*(logy01((m-1),:)-inty01*v01)/(su12**v12)
-			f202numY=(su01**v01)*(su02**v02)*ri01*v01*inty02*v02/(su12**v12) 
-			f212numY=(su01**v01)*(su02**v02)*ri01*v01*inty12*v12/(su12**v12) 
+			f201numY=(su01**v01)*(su02**v02)*ri01*v01*(logy01((m-1),:)-inty01*v01)/denum
+			f202numY=(su01**v01)*(su02**v02)*ri01*v01*inty02*v02/denum 
+			f212numY=(su01**v01)*(su02**v02)*ri01*v01*inty12*v12/denum 
 			
+			else 
+			
+			f2denum =0
+			f201num=0
+			f202num=0
+			f212num=0
+			f201numY=0
+			f202numY=0
+			f212numY=0
+			
+			end if 
 	       		reskdenum = reskdenum + wgk(jtwm1)*(f1denum+f2denum)
                		
 	       		resk01num = resk01num + wgk(jtwm1)*(f101num+f201num)
@@ -36454,7 +36523,7 @@ end module
 	end do
 	end if
 	
-	l=0
+	   l=0
        lfix=0
        w=0
 	   
@@ -36495,7 +36564,7 @@ end module
          
                do i=1,no0
 			   
-		!	write(6,*) 'subject',i
+			write(6,*) 'subject',i
 		!	call flush(6)
          
                 vet01 = 0.d0
@@ -36680,7 +36749,7 @@ end module
 					   
                 else
                 if(c(i).eq.2)then ! cpi 0-->1
-			!	write(6,*)'c=2'
+				write(6,*)'c=2'
 			!	call flush(6)
 			call fonctdep(t3(i),the12,ri12,gl12,su12, dble(y12t(241:256)))
 			v=(su12**vet12)
@@ -36696,20 +36765,20 @@ end module
                         
 			v=v*res2denum
 			
-		!	write(6,*)'v',v
-		!						write(6,*)'res2denum',res2denum
-		!						write(6,*)'res201num',res201num
-		!						write(6,*)'res202num',res202num
-		!						write(6,*)'res212num',res212num
-		!						write(6,*)'res201numY',res201numY
-		!						write(6,*)'res202numY',res202numY
-		!						write(6,*)'res212numY',res212numY
+			write(6,*)'v',v
+								write(6,*)'res2denum',res2denum
+								write(6,*)'res201num',res201num
+								write(6,*)'res202num',res202num
+								write(6,*)'res212num',res212num
+								write(6,*)'res201numY',res201numY
+								write(6,*)'res202numY',res202numY
+								write(6,*)'res212numY',res212numY
 		!						call flush(6)
 
+			if(v.NE.0) then 
 			if(nva01nofix.gt.0) then
 
 			u1=res201num*(su12**vet12)
-			
       		res1(1:nva01nofix)=&
 			ve01nofix(i,:)*u1/v
 			res1(1:nva01nofix)=res1(1:nva01nofix)+tronc01
@@ -36734,11 +36803,34 @@ end module
 
 			res1((nva0102+1):nvamax)=&
 			ve12nofix(i,:)*u3/v
+			 
+			end if 
+			
+			else 
+			
+			if(nva01nofix.gt.0) then
+			res1(1:nva01nofix)=tronc01
+			end if 
+
+			
+			if(nva02nofix.gt.0) then
+			res1((nva01nofix+1):nva0102)=tronc02
+			end if 
+
+			
+			if(nva12nofix.gt.0) then 
+
+			res1((nva0102+1):nvamax)=0
+			end if 
+			
 			end if 
 			
 			v=res2denum
 
+
+			if(v.NE.0) then 
 			if(nva01nofixY.gt.0) then 
+			
 			
 			res1((nvamax+1):nvamax01Y)= res201numY/v
 			res1((nvamax+1):nvamax01Y)=res1((nvamax+1):nvamax01Y)+ &
@@ -36764,7 +36856,28 @@ end module
 			
 			end if 
 			
-		!	write(6,*)'res1',res1
+			else 
+			
+			if(nva01nofixY.gt.0) then 
+			
+			res1((nvamax+1):nvamax01Y)=tronc01Y
+			
+			end if 
+			
+			if(nva02nofixY.gt.0) then 
+			res1((nvamax01Y+1):nvamax02Y)=tronc02Y
+			
+			end if 
+			
+			if(nva12nofixY.gt.0) then 
+			call fonctdepfirstderiv(t3(i),the12,ri12,gl12,su12,res212numY,y12t(241:256),logy12(241:256,:),nY12)
+			res1((nvamax02Y+1):np0)=-res212numY*vet12
+			
+			end if 
+			
+			end if 
+			
+			write(6,*)'res1',res1
 		!	call flush(6)
 						
                 else  
@@ -36772,7 +36885,7 @@ end module
 			             
                     else   
                        if(c(i).eq.4)then ! cpi 0-->1 et obs 1-->2
-					!   write(6,*)'c=4'
+					   write(6,*)'c=4'
 					 !  call flush(6)
 					  call fonctdep(t3(i),the12,ri12,gl12,su12, dble(y12t(241:256)))
 					   v=(su12**vet12)*ri12*vet12
@@ -36798,7 +36911,10 @@ end module
 		!						write(6,*)'res212numY',res212numY
 		!						call flush(6)
 
+
+			if(v.NE.0) then 
 			if(nva01nofix.gt.0) then 
+			
 			u1=res201num*(su12**vet12)*ri12*vet12
 			
 			res1(1:nva01nofix)=&
@@ -36825,15 +36941,38 @@ end module
 			u3=res212num+&
 			(1-gl12*vet12)*res2denum
 			u3=u3*(su12**vet12)*ri12*vet12
-			
 			res1((nva0102+1):nvamax)=&
 			ve12nofix(i,:)*u3/v
+			
+			end if 
+			
+			else 
+			
+			if(nva01nofix.gt.0) then 
+			
+			res1(1:nva01nofix)=tronc01
+			end if 
 
+			
+			if(nva02nofix.gt.0) then 
+
+			res1((nva01nofix+1):nva0102)=tronc02
+			end if 
+
+
+			
+			if(nva12nofix.gt.0) then 
+
+			res1((nva0102+1):nvamax)=0
+			
+			end if 
 			end if 
 			
 			v=res2denum
-			if(nva01nofixY.gt.0) then 
 			
+			if(v.NE.0) then 
+			if(nva01nofixY.gt.0) then 
+			 
 			res1((nvamax+1):nvamax01Y)= res201numY/v
 			res1((nvamax+1):nvamax01Y)=res1((nvamax+1):nvamax01Y)+ &
 			tronc01Y
@@ -36841,6 +36980,7 @@ end module
 			end if 
 			
 			if(nva02nofixY.gt.0) then 
+			
 			
 			res1((nvamax01Y+1):nvamax02Y)= -res202numY/v
 			res1((nvamax01Y+1):nvamax02Y)=res1((nvamax01Y+1):nvamax02Y)+ &
@@ -36851,14 +36991,38 @@ end module
 			if(nva12nofixY.gt.0) then 
 			
 			res1((nvamax02Y+1):np0)= res212numY/v
-			
 			call fonctdepfirstderiv(t3(i),the12,ri12,gl12,su12,res212numY,y12t(241:256),logy12(241:256,:),nY12)
 			res1((nvamax02Y+1):np0)=res1((nvamax02Y+1):np0)-&
 			res212numY*vet12+logy12(256,:)
 			
 			end if 
 			
-			!write(6,*)'res1',res1
+			else 
+			
+			if(nva01nofixY.gt.0) then 
+			
+			
+			res1((nvamax+1):nvamax01Y)=tronc01Y
+			
+			end if 
+			
+			if(nva02nofixY.gt.0) then 
+			
+			
+			res1((nvamax01Y+1):nvamax02Y)=tronc02Y
+			
+			end if 
+			
+			if(nva12nofixY.gt.0) then 
+			
+			
+			call fonctdepfirstderiv(t3(i),the12,ri12,gl12,su12,res212numY,y12t(241:256),logy12(241:256,:),nY12)
+			res1((nvamax02Y+1):np0)=-res212numY*vet12+logy12(256,:)
+			
+			end if 
+			end if 
+			
+			write(6,*)'res1',res1
 			!call flush(6)
 						
                        else
@@ -36866,7 +37030,7 @@ end module
 								
                          else
                             if(c(i).eq.6)then ! vivant ???
-						!write(6,*)'c=6'
+						write(6,*)'c=6'
 						!call flush(6)
 								call fonctdep(t3(i),the01,ri01,gl01,&
 								su01, dble(y01t(241:256)))
@@ -36898,7 +37062,8 @@ end module
 							!	write(6,*)'res202numY',res202numY
 							!	write(6,*)'res212numY',res212numY
 							!	call flush(6)
-
+						
+								if(v.NE.0) then 
 								if(nva01nofix.gt.0) then 
 
 								u1=(-gl01*vet01)*(su01**vet01)*(su02**vet02)+&
@@ -36957,19 +37122,63 @@ end module
 								
 								if(nva12nofixY.gt.0) then 
 								
+								
 								res1((nvamax02Y+1):np0)= res212numY*(su12**vet12)
 								call fonctdepfirstderiv(t3(i),the12,ri12,gl12,su12,res212numY,y12t(241:256),logy12(241:256,:),nY12)
 								res1((nvamax02Y+1):np0)=res1((nvamax02Y+1):np0)-&
 								res212numY*res2denum*(su12**vet12)*vet12
 								res1((nvamax02Y+1):np0)=res1((nvamax02Y+1):np0)/v
-
+								
 								end if 
 								
-							!	write(6,*)'res1',res1
+								else 
+								
+								if(nva01nofix.gt.0) then 
+
+								res1(1:nva01nofix)=tronc01
+								end if 
+								
+								if(nva02nofix.gt.0) then 
+
+								
+								res1((nva01nofix+1):nva0102)=tronc02
+								end if 
+
+								if(nva12nofix.gt.0) then 
+								
+								res1((nva0102+1):nvamax)=0
+								end if 
+								
+								
+								u1=(su01**vet01)*(su02**vet02)
+								
+								if(nva01nofixY.gt.0) then 
+								
+								
+								res1((nvamax+1):nvamax01Y)=tronc01Y
+								
+								end if 
+								
+								if(nva02nofixY.gt.0) then 
+								
+								
+								res1((nvamax01Y+1):nvamax02Y)=tronc02Y
+								
+								end if 
+								
+								if(nva12nofixY.gt.0) then 
+								
+								res1((nvamax02Y+1):np0)=0
+								
+								end if 
+								
+								end if 
+								
+								write(6,*)'res1',res1
 							!	call flush(6)
                             else ! passage 0-->2  
 					
-			!		write(6,*)'c=7'
+					write(6,*)'c=7'
 			!		call flush(6)
 				                call fonctdep(t3(i),the01,ri01,gl01,&
 								su01, dble(y01t(241:256)))
@@ -37001,6 +37210,7 @@ end module
 							!	write(6,*)'res212numY',res212numY
 							!	call flush(6)
 
+							if(v.NE.0) then 
 								if(nva01nofix.gt.0) then 
 
 								u1=-gl01*vet01*(su01**vet01)
@@ -37033,7 +37243,7 @@ end module
 
 								res1((nva0102+1):nvamax)=&
 								ve12nofix(i,:)*u3/v
-
+								
 								end if 
 												
 								
@@ -37070,10 +37280,52 @@ end module
 								res1((nvamax02Y+1):np0)=res1((nvamax02Y+1):np0)+&
 								(su12**vet12)*ri12*vet12*res2denum*(logy12(256,:)-res212numY*vet12)
 								res1((nvamax02Y+1):np0)=res1((nvamax02Y+1):np0)/v
-
+								
 								end if 
 								
-							!	write(6,*)'res1',res1
+								else 
+								
+								
+								if(nva01nofix.gt.0) then 
+
+								res1(1:nva01nofix)=tronc01
+								end if 
+
+								if(nva02nofix.gt.0) then 
+
+								res1((nva01nofix+1):nva0102)=tronc02
+
+								end if 
+
+								if(nva12nofix.gt.0) then 
+
+								res1((nva0102+1):nvamax)=0
+								
+								end if 
+												
+								
+								u1=(su01**vet01)*(su02**vet02)
+								
+								if(nva01nofixY.gt.0) then 
+								
+								res1((nvamax+1):nvamax01Y)=tronc01Y
+								
+								end if 
+								
+								if(nva02nofixY.gt.0) then 
+								
+								res1((nvamax01Y+1):nvamax02Y)=tronc02Y
+								
+								end if 
+								
+								if(nva12nofixY.gt.0) then 
+								
+								res1((nvamax02Y+1):np0)=0
+								
+								end if 
+								end if 
+								
+								write(6,*)'res1',res1
 							!	call flush(6)
 								
 						
@@ -37541,7 +37793,7 @@ logy01,logy02,logy12)
     double precision :: f101num,f102num,f112num
     double precision :: f201num,f202num,f212num
     double precision :: su01,ri01,gl01,su02,ri02,gl02,su12,ri12,gl12
-    double precision :: fcdenum,fc01num,fc02num,fc12num
+    double precision :: fcdenum,fc01num,fc02num,fc12num,denum
 
     ! Y-dependent temporaries
     double precision :: resk01numY(nY01), resk02numY(nY02), resk12numY(nY12)
@@ -37626,14 +37878,28 @@ logy01,logy02,logy12)
         call suspdepfirstderiv(xm,the02,zi02,nz02,ri02,gl02,su02,inty02,yy02t,logy02t,nY02)
    		call suspdepfirstderiv(xm,the12,zi12,nz12,ri12,gl12,su12,inty12,yy12t,logy12t,nY12)
 
-    	fcdenum =(su01**v01)*(su02**v02)*ri01*v01/(su12**v12)  ! valeur fct f au milieu de intervalle (a,b), cas pnt 0
-    	fc01num=(su01**v01)*(su02**v02)*ri01*v01*(1-(gl01*v01))/(su12**v12)
-		fc02num=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02/(su12**v12) 
-		fc12num=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12/(su12**v12) 
+		denum=su12**v12
+		if(denum.NE.0) then 
+    	fcdenum =(su01**v01)*(su02**v02)*ri01*v01/denum  ! valeur fct f au milieu de intervalle (a,b), cas pnt 0
+    	fc01num=(su01**v01)*(su02**v02)*ri01*v01*(1-(gl01*v01))/denum
+		fc02num=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02/denum
+		fc12num=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12/denum
 		
-		fc01numY=(su01**v01)*(su02**v02)*ri01*v01*(logy01(m,:)-inty01*v01)/(su12**v12)
-		fc02numY=(su01**v01)*(su02**v02)*ri01*v01*inty02*v02/(su12**v12) 
-		fc12numY=(su01**v01)*(su02**v02)*ri01*v01*inty12*v12/(su12**v12) 
+		fc01numY=(su01**v01)*(su02**v02)*ri01*v01*(logy01(m,:)-inty01*v01)/denum
+		fc02numY=(su01**v01)*(su02**v02)*ri01*v01*inty02*v02/denum
+		fc12numY=(su01**v01)*(su02**v02)*ri01*v01*inty12*v12/denum
+		
+		else 
+		
+		fcdenum=0
+		fc01num=0
+		fc02num=0
+		fc12num=0
+		fc01numY=0
+		fc02numY=0
+		fc12numY=0
+		
+		end if 
 		
         	reskdenum = fcdenum*wgk(8)       ! init res Kronrod   ! fc * 8e poids Kronrod
         	resk01num = fc01num*wgk(8)       ! init res Kronrod   ! fc * 8e poids Kronrod
@@ -37659,14 +37925,27 @@ logy01,logy02,logy12)
                		call suspdepfirstderiv(xx,the02,zi02,nz02,ri02,gl02,su02,inty02,yy02t,logy02t,nY02)
 	       		call suspdepfirstderiv(xx,the12,zi12,nz12,ri12,gl12,su12,inty12,yy12t,logy12t,nY12)
                         
-			f1denum =(su01**v01)*(su02**v02)*ri01*v01/(su12**v12)
-			f101num=(su01**v01)*(su02**v02)*ri01*v01*(1-(gl01*v01))/(su12**v12)
-			f102num=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02/(su12**v12) 
-			f112num=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12/(su12**v12) 
+			denum=su12**v12
+			if(denum.NE.0) then
+			f1denum =(su01**v01)*(su02**v02)*ri01*v01/denum
+			f101num=(su01**v01)*(su02**v02)*ri01*v01*(1-(gl01*v01))/denum
+			f102num=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02/denum 
+			f112num=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12/denum
 			
-			f101numY=(su01**v01)*(su02**v02)*ri01*v01*(logy01((m+15),:)-inty01*v01)/(su12**v12)
-			f102numY=(su01**v01)*(su02**v02)*ri01*v01*inty02*v02/(su12**v12) 
-			f112numY=(su01**v01)*(su02**v02)*ri01*v01*inty12*v12/(su12**v12) 
+			f101numY=(su01**v01)*(su02**v02)*ri01*v01*(logy01((m+15),:)-inty01*v01)/denum
+			f102numY=(su01**v01)*(su02**v02)*ri01*v01*inty02*v02/denum
+			f112numY=(su01**v01)*(su02**v02)*ri01*v01*inty12*v12/denum
+			
+			else 
+			
+			f1denum =0
+			f101num=0
+			f102num=0
+			f112num=0
+			f101numY=0
+			f102numY=0
+			f112numY=0
+			end if 
 			
                		xx = xm-dx
 					
@@ -37680,15 +37959,29 @@ logy01,logy02,logy12)
                		call suspdepfirstderiv(xx,the02,zi02,nz02,ri02,gl02,su02,inty02,yy02t,logy02t,nY02)
 	       		call suspdepfirstderiv(xx,the12,zi12,nz12,ri12,gl12,su12,inty12,yy12t,logy12t,nY12)
 				
-                        f2denum =(su01**v01)*(su02**v02)*ri01*v01/(su12**v12)
-			f201num=(su01**v01)*(su02**v02)*ri01*v01*(1-(gl01*v01))/(su12**v12)
-			f202num=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02/(su12**v12) 
-			f212num=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12/(su12**v12) 
+				denum=su12**v12
+			if(denum.NE.0) then
 			
-			f201numY=(su01**v01)*(su02**v02)*ri01*v01*(logy01((m-1),:)-inty01*v01)/(su12**v12)
-			f202numY=(su01**v01)*(su02**v02)*ri01*v01*inty02*v02/(su12**v12) 
-			f212numY=(su01**v01)*(su02**v02)*ri01*v01*inty12*v12/(su12**v12) 
+                        f2denum =(su01**v01)*(su02**v02)*ri01*v01/denum
+			f201num=(su01**v01)*(su02**v02)*ri01*v01*(1-(gl01*v01))/denum
+			f202num=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02/denum
+			f212num=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12/denum
+			
+			f201numY=(su01**v01)*(su02**v02)*ri01*v01*(logy01((m-1),:)-inty01*v01)/denum
+			f202numY=(su01**v01)*(su02**v02)*ri01*v01*inty02*v02/denum
+			f212numY=(su01**v01)*(su02**v02)*ri01*v01*inty12*v12/denum 
 
+			else 
+			
+			f2denum =0
+			f201num=0
+			f202num=0
+			f212num=0
+			f201numY=0
+			f202numY=0
+			f212numY=0
+			
+			end if 
 
                		reskdenum = reskdenum + wgk(jtw)*(f1denum+f2denum)
 
@@ -37720,14 +38013,29 @@ logy01,logy02,logy12)
                		call suspdepfirstderiv(xx,the02,zi02,nz02,ri02,gl02,su02,inty02,yy02t,logy02t,nY02)
 	       		call suspdepfirstderiv(xx,the12,zi12,nz12,ri12,gl12,su12,inty12,yy12t,logy12t,nY12)
       			
-			f1denum =(su01**v01)*(su02**v02)*ri01*v01/(su12**v12)
-			f101num=(su01**v01)*(su02**v02)*ri01*v01*(1-(gl01*v01))/(su12**v12)
-			f102num=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02/(su12**v12) 
-			f112num=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12/(su12**v12) 
+			denum=su12**v12
+			if(denum.NE.0) then
 			
-			f101numY=(su01**v01)*(su02**v02)*ri01*v01*(logy01((m+15),:)-inty01*v01)/(su12**v12)
-			f102numY=(su01**v01)*(su02**v02)*ri01*v01*inty02*v02/(su12**v12) 
-			f112numY=(su01**v01)*(su02**v02)*ri01*v01*inty12*v12/(su12**v12) 
+			f1denum =(su01**v01)*(su02**v02)*ri01*v01/denum
+			f101num=(su01**v01)*(su02**v02)*ri01*v01*(1-(gl01*v01))/denum
+			f102num=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02/denum
+			f112num=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12/denum
+			
+			f101numY=(su01**v01)*(su02**v02)*ri01*v01*(logy01((m+15),:)-inty01*v01)/denum
+			f102numY=(su01**v01)*(su02**v02)*ri01*v01*inty02*v02/denum
+			f112numY=(su01**v01)*(su02**v02)*ri01*v01*inty12*v12/denum
+			
+			else 
+			
+			f1denum =0
+			f101num=0
+			f102num=0
+			f112num=0
+			f101numY=0
+			f102numY=0
+			f112numY=0
+			
+			end if 
 			
                		xx = xm-dx
 					
@@ -37742,14 +38050,30 @@ logy01,logy02,logy12)
                		call suspdepfirstderiv(xx,the02,zi02,nz02,ri02,gl02,su02,inty02,yy02t,logy02t,nY02)
 	       		call suspdepfirstderiv(xx,the12,zi12,nz12,ri12,gl12,su12,inty12,yy12t,logy12t,nY12)
 
-      			f2denum =(su01**v01)*(su02**v02)*ri01*v01/(su12**v12)
-			f201num=(su01**v01)*(su02**v02)*ri01*v01*(1-(gl01*v01))/(su12**v12)
-			f202num=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02/(su12**v12) 
-			f212num=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12/(su12**v12) 
+			denum=su12**v12
+			if(denum.NE.0) then
 			
-			f201numY=(su01**v01)*(su02**v02)*ri01*v01*(logy01((m-1),:)-inty01*v01)/(su12**v12)
-			f202numY=(su01**v01)*(su02**v02)*ri01*v01*inty02*v02/(su12**v12) 
-			f212numY=(su01**v01)*(su02**v02)*ri01*v01*inty12*v12/(su12**v12) 
+			
+      			f2denum =(su01**v01)*(su02**v02)*ri01*v01/denum
+			f201num=(su01**v01)*(su02**v02)*ri01*v01*(1-(gl01*v01))/denum
+			f202num=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02/denum
+			f212num=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12/denum 
+			
+			f201numY=(su01**v01)*(su02**v02)*ri01*v01*(logy01((m-1),:)-inty01*v01)/denum
+			f202numY=(su01**v01)*(su02**v02)*ri01*v01*inty02*v02/denum 
+			f212numY=(su01**v01)*(su02**v02)*ri01*v01*inty12*v12/denum
+			
+			else 
+			
+			f2denum =0
+			f201num=0
+			f202num=0
+			f212num=0
+			f201numY=0
+			f202numY=0
+			f212numY=0
+			
+			end if 
 			
 	       		reskdenum = reskdenum + wgk(jtwm1)*(f1denum+f2denum)
                		
@@ -38195,7 +38519,7 @@ end module
                 ! ---- p02 ----
 				m=nva01+nva02+sizespline+nva12+p01
 			!	write(6,*) 'start y02t allocattion'
-				call flush(6)
+			!	call flush(6)
 				if (p02.gt.0) then
 					j  = (i-1)*Ntime*p02
 					k = sizespline + nva01 + nva02 + nva12 + p01
@@ -38322,6 +38646,7 @@ end module
 		!						write(6,*)'res212numY',res212numY
 		!						call flush(6)
 
+			if(v.NE.0) then 
 			if(nva01nofix.gt.0) then
 
 			u1=res201num*(su12**vet12)
@@ -38352,8 +38677,35 @@ end module
 			ve12nofix(i,:)*u3/v
 			end if 
 			
+			
+			else 
+			
+			
+			if(nva01nofix.gt.0) then
+
+			res1(1:nva01nofix)=tronc01
+			end if 
+
+			
+			if(nva02nofix.gt.0) then
+
+			res1((nva01nofix+1):nva0102)=tronc02
+			end if 
+
+			
+			if(nva12nofix.gt.0) then 
+
+			res1((nva0102+1):nvamax)=0
+			end if 
+			
+			end if 
+			
+			
+			
 			v=res2denum
 
+			if(v.NE.0) then 
+			
 			if(nva01nofixY.gt.0) then 
 			
 			res1((nvamax+1):nvamax01Y)= res201numY/v
@@ -38381,6 +38733,28 @@ end module
 			
 			end if 
 			
+			else 
+			if(nva01nofixY.gt.0) then 
+			
+			res1((nvamax+1):nvamax01Y)=tronc01Y
+			
+			end if 
+			
+			if(nva02nofixY.gt.0) then 
+			
+			res1((nvamax01Y+1):nvamax02Y)=tronc02Y
+			
+			end if 
+			
+			if(nva12nofixY.gt.0) then 
+			
+			
+			call suspdepfirstderiv(t3(i),the12,zi12,nz12,ri12,gl12,su12,&
+			res212numY,y12t(241:256),logy12(241:256,:),nY12)
+			res1((nvamax02Y+1):np0)=-res212numY*vet12
+			
+			end if 
+			end if 
 		!	write(6,*)'res1',res1
 		!	call flush(6)
 						
@@ -38417,7 +38791,9 @@ end module
 		!						write(6,*)'res212numY',res212numY
 		!						call flush(6)
 
+			if(v.NE.0) then
 			if(nva01nofix.gt.0) then 
+			
 			u1=res201num*(su12**vet12)*ri12*vet12
 			
 			res1(1:nva01nofix)=&
@@ -38450,7 +38826,32 @@ end module
 
 			end if 
 			
+			else 
+			
+			if(nva01nofix.gt.0) then 
+			
+			res1(1:nva01nofix)=tronc01
+			end if 
+
+			
+			if(nva02nofix.gt.0) then 
+
+			res1((nva01nofix+1):nva0102)=tronc02
+			end if 
+
+
+			
+			if(nva12nofix.gt.0) then 
+
+			res1((nva0102+1):nvamax)=0
+
+			end if 
+			
+			end if 
+			
 			v=res2denum
+			
+			if(v.NE.0) then
 			if(nva01nofixY.gt.0) then 
 			
 			res1((nvamax+1):nvamax01Y)= res201numY/v
@@ -38475,6 +38876,30 @@ end module
 			gl12,su12,res212numY,y12t(241:256),logy12(241:256,:),nY12)
 			res1((nvamax02Y+1):np0)=res1((nvamax02Y+1):np0)-&
 			res212numY*vet12+logy12(256,:)
+			
+			end if 
+			
+			else 
+			
+			if(nva01nofixY.gt.0) then 
+			
+			res1((nvamax+1):nvamax01Y)=tronc01Y
+			
+			end if 
+			
+			if(nva02nofixY.gt.0) then 
+			
+			res1((nvamax01Y+1):nvamax02Y)=tronc02Y
+			
+			end if 
+			
+			if(nva12nofixY.gt.0) then 
+			
+			call suspdepfirstderiv(t3(i),the12,zi12,nz12,ri12,&
+			gl12,su12,res212numY,y12t(241:256),logy12(241:256,:),nY12)
+			res1((nvamax02Y+1):np0)=-res212numY*vet12+logy12(256,:)
+			
+			end if 
 			
 			end if 
 			
@@ -38518,6 +38943,7 @@ end module
 							!	write(6,*)'res212numY',res212numY
 							!	call flush(6)
 
+							if(v.NE.0) then
 								if(nva01nofix.gt.0) then 
 
 								u1=(-gl01*vet01)*(su01**vet01)*(su02**vet02)+&
@@ -38587,6 +39013,48 @@ end module
 
 								end if 
 								
+							else 
+							
+							
+							if(nva01nofix.gt.0) then 
+
+								res1(1:nva01nofix)=tronc01
+								end if 
+								
+								if(nva02nofix.gt.0) then 
+
+								res1((nva01nofix+1):nva0102)=tronc02
+								end if 
+
+								if(nva12nofix.gt.0) then 
+								
+								res1((nva0102+1):nvamax)=0
+								end if 
+								
+								
+								u1=(su01**vet01)*(su02**vet02)
+								
+								if(nva01nofixY.gt.0) then 
+								
+								res1((nvamax+1):nvamax01Y)=tronc01Y
+								
+								end if 
+								
+								if(nva02nofixY.gt.0) then 
+								
+								res1((nvamax01Y+1):nvamax02Y)=tronc02Y
+								
+								end if 
+								
+								if(nva12nofixY.gt.0) then 
+								
+								
+								res1((nvamax02Y+1):np0)=0
+
+								end if 
+								
+							end if 
+								
 							!	write(6,*)'res1',res1
 							!	call flush(6)
                             else ! passage 0-->2  
@@ -38625,6 +39093,7 @@ end module
 							!	write(6,*)'res212numY',res212numY
 							!	call flush(6)
 
+							if(v.NE.0) then
 								if(nva01nofix.gt.0) then 
 
 								u1=-gl01*vet01*(su01**vet01)
@@ -38699,6 +39168,49 @@ end module
 								res1((nvamax02Y+1):np0)=res1((nvamax02Y+1):np0)/v
 
 								end if 
+								
+							else 
+							
+							
+							if(nva01nofix.gt.0) then 
+
+								res1(1:nva01nofix)=tronc01
+								end if 
+
+								if(nva02nofix.gt.0) then 
+
+								res1((nva01nofix+1):nva0102)=tronc02
+
+								end if 
+
+								if(nva12nofix.gt.0) then 
+
+								res1((nva0102+1):nvamax)=0
+
+								end if 
+												
+								
+								u1=(su01**vet01)*(su02**vet02)
+								
+								if(nva01nofixY.gt.0) then 
+								
+								res1((nvamax+1):nvamax01Y)=tronc01Y
+								
+								end if 
+								
+								if(nva02nofixY.gt.0) then 
+								
+								res1((nvamax01Y+1):nvamax02Y)=tronc02Y
+								
+								end if 
+								
+								if(nva12nofixY.gt.0) then 
+								
+								res1((nvamax02Y+1):np0)=0
+
+								end if 
+							
+							end if 
 								
 							!	write(6,*)'res1',res1
 							!	call flush(6)

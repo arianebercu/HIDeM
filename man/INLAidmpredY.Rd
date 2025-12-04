@@ -11,17 +11,18 @@ INLAidmpredY(
   dataSurv,
   dataLongi,
   id,
-  Nsample,
   t0,
   t1,
   t2,
   t3,
+  assoc,
   ctime,
   modelY,
   seed,
   BLUP,
   nproc,
-  clustertype
+  clustertype,
+  scale.X
 )
 }
 \description{

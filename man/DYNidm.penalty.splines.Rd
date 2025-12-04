@@ -65,6 +65,7 @@ DYNidm.penalty.splines(
   p01,
   p02,
   p12,
+  assoc,
   dimp01,
   dimp02,
   dimp12,

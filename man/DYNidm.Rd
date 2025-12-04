@@ -11,6 +11,7 @@ DYNidm(
   data,
   formLong,
   Longitransition,
+  assoc,
   threshold,
   dataLongi,
   timeVar,

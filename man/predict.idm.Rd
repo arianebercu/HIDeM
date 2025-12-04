@@ -15,6 +15,7 @@ of class \code{idmSplines} with confidence intervals are calculated.}
   conf.int = 0.95,
   lifeExpect = FALSE,
   maxtime,
+  return.data = F,
   lambda = "BIC",
   ...
 )

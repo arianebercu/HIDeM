@@ -33,8 +33,10 @@ idm(
   nlambda12 = 50,
   penalty = NULL,
   penalty.factor = NULL,
-  alpha = ifelse(penalty == "scad", 3.7, ifelse(penalty == "mcp", 3, ifelse(penalty
-    \%in\% c("elasticnet"), 0.5, 1))),
+  alpha = ifelse(penalty == "scad", list(rep(3.7, 50), rep(3.7, 50), rep(3.7, 50)),
+    ifelse(penalty == "mcp", list(rep(3, 50), rep(3, 50), rep(3, 50)), ifelse(penalty
+    \%in\% c("elasticnet"), list(rep(0.5, 50), rep(0.5, 50), rep(0.5, 50)), list(rep(1,
+    50), rep(1, 50), rep(1, 50))))),
   nproc = 1,
   analytics = T,
   partialH = F,

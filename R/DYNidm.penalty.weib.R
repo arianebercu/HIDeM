@@ -650,6 +650,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                  if(npmweib!=0){
                                  output.mla<- marqLevAlg::mla(b=b,
                                                   fn=gaussDYNidmlLikelihoodweib,
+                                                  gr=deriva.gradient.DYNweib,
                                                   epsa=epsa,
                                                   epsb=epsb,
                                                   epsd=epsd,
@@ -1275,6 +1276,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                   if(npmweib!=0){
                                    output.mla<- marqLevAlg::mla(b=b,
                                                                 fn=gaussDYNidmlLikelihoodweib,
+                                                                gr=deriva.gradient.DYNweib,
                                                                 epsa=epsa,
                                                                 epsb=epsb,
                                                                 epsd=epsd,
@@ -1967,6 +1969,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                 if(npmweib!=0){
                                  output.mla<- marqLevAlg::mla(b=b,
                                                               fn=gaussDYNidmlLikelihoodweib,
+                                                              gr=deriva.gradient.DYNweib,
                                                               epsa=epsa,
                                                               epsb=epsb,
                                                               epsd=epsd,
@@ -2585,6 +2588,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                        if(npmweib!=0){
                                        output.mla<- marqLevAlg::mla(b=b,
                                                                     fn=gaussDYNidmlLikelihoodweib,
+                                                                    gr=deriva.gradient.DYNweib,
                                                                     epsa=epsa,
                                                                     epsb=epsb,
                                                                     epsd=epsd,
@@ -2620,6 +2624,8 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                                     dimp02=dimp02,
                                                                     dimp12=dimp12,
                                                                     Ntime=NtimePoints)
+                                       
+                                       
                                        
                                        # look at convergence for each lambda :
                                        
@@ -2988,6 +2994,40 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                                 Ntime=NtimePoints)
                                          
                                          
+                                         test<-deriva.gradient(b=b,
+                                                          funcpa=gaussDYNidmlLikelihoodweib,
+                                                        npm=npm,
+                                                        npar=size_V,
+                                                        bfix=bfix,
+                                                        fix=fix0,
+                                                        ctime=ctime,
+                                                        no=N,
+                                                        ve01=ve01,
+                                                        ve02=ve02,
+                                                        ve12=ve12,
+                                                        dimnva01=dimnva01,
+                                                        dimnva02=dimnva02,
+                                                        dimnva12=dimnva12,
+                                                        nva01=nvat01,
+                                                        nva02=nvat02,
+                                                        nva12=nvat12,
+                                                        t0=t0,
+                                                        t1=t1,
+                                                        t2=t2,
+                                                        t3=t3,
+                                                        troncature=troncature,
+                                                        y01=y01k,
+                                                        y02=y02k,
+                                                        y12=y12k,
+                                                        p01=p01,
+                                                        p02=p02,
+                                                        p12=p12,
+                                                        dimp01=dimp01,
+                                                        dimp02=dimp02,
+                                                        dimp12=dimp12,
+                                                        Ntime=NtimePoints)
+                                         
+                                         
                                          #sparseHessianFD
                                          # h=1e-16 --> problem in hessian evaluation
                                          # h=1e-8 --> no issue
@@ -3336,6 +3376,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                          if(npmweib!=0){
                                          output.mla<- marqLevAlg::mla(b=b,
                                                                       fn=gaussDYNidmlLikelihoodweib,
+                                                                      gr=deriva.gradient.DYNweib,
                                                                       epsa=epsa,
                                                                       epsb=epsb,
                                                                       epsd=epsd,
@@ -3960,6 +4001,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                              if(npmweib!=0){
                                              output.mla<- marqLevAlg::mla(b=b,
                                                                           fn=gaussDYNidmlLikelihoodweib,
+                                                                          gr=deriva.gradient.DYNweib,
                                                                           epsa=epsa,
                                                                           epsb=epsb,
                                                                           epsd=epsd,
@@ -4704,6 +4746,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                                     if(npmweib!=0){
                                                                     output.mla<- marqLevAlg::mla(b=b,
                                                                                                  fn=gaussDYNidmlLikelihoodweib,
+                                                                                                 gr=deriva.gradient.DYNweib,
                                                                                                  epsa=epsa,
                                                                                                  epsb=epsb,
                                                                                                  epsd=epsd,
@@ -5320,6 +5363,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                                         
                                                                         output.mla<- marqLevAlg::mla(b=b,
                                                                                                      fn=gaussDYNidmlLikelihoodweib,
+                                                                                                     gr=deriva.gradient.DYNweib,
                                                                                                      epsa=epsa,
                                                                                                      epsb=epsb,
                                                                                                      epsd=epsd,
