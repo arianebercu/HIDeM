@@ -36564,7 +36564,7 @@ end module
          
                do i=1,no0
 			   
-			write(6,*) 'subject',i
+		!	write(6,*) 'subject',i
 		!	call flush(6)
          
                 vet01 = 0.d0
@@ -36749,7 +36749,7 @@ end module
 					   
                 else
                 if(c(i).eq.2)then ! cpi 0-->1
-				write(6,*)'c=2'
+			!	write(6,*)'c=2'
 			!	call flush(6)
 			call fonctdep(t3(i),the12,ri12,gl12,su12, dble(y12t(241:256)))
 			v=(su12**vet12)
@@ -36765,14 +36765,14 @@ end module
                         
 			v=v*res2denum
 			
-			write(6,*)'v',v
-								write(6,*)'res2denum',res2denum
-								write(6,*)'res201num',res201num
-								write(6,*)'res202num',res202num
-								write(6,*)'res212num',res212num
-								write(6,*)'res201numY',res201numY
-								write(6,*)'res202numY',res202numY
-								write(6,*)'res212numY',res212numY
+			!write(6,*)'v',v
+			!					write(6,*)'res2denum',res2denum
+			!					write(6,*)'res201num',res201num
+			!					write(6,*)'res202num',res202num
+			!					write(6,*)'res212num',res212num
+			!					write(6,*)'res201numY',res201numY
+			!					write(6,*)'res202numY',res202numY
+			!					write(6,*)'res212numY',res212numY
 		!						call flush(6)
 
 			if(v.NE.0) then 
@@ -36877,7 +36877,7 @@ end module
 			
 			end if 
 			
-			write(6,*)'res1',res1
+		!	write(6,*)'res1',res1
 		!	call flush(6)
 						
                 else  
@@ -36885,7 +36885,7 @@ end module
 			             
                     else   
                        if(c(i).eq.4)then ! cpi 0-->1 et obs 1-->2
-					   write(6,*)'c=4'
+					!   write(6,*)'c=4'
 					 !  call flush(6)
 					  call fonctdep(t3(i),the12,ri12,gl12,su12, dble(y12t(241:256)))
 					   v=(su12**vet12)*ri12*vet12
@@ -37022,7 +37022,7 @@ end module
 			end if 
 			end if 
 			
-			write(6,*)'res1',res1
+			! write(6,*)'res1',res1
 			!call flush(6)
 						
                        else
@@ -37030,7 +37030,7 @@ end module
 								
                          else
                             if(c(i).eq.6)then ! vivant ???
-						write(6,*)'c=6'
+						! write(6,*)'c=6'
 						!call flush(6)
 								call fonctdep(t3(i),the01,ri01,gl01,&
 								su01, dble(y01t(241:256)))
@@ -37174,11 +37174,11 @@ end module
 								
 								end if 
 								
-								write(6,*)'res1',res1
+							!	write(6,*)'res1',res1
 							!	call flush(6)
                             else ! passage 0-->2  
 					
-					write(6,*)'c=7'
+					! write(6,*)'c=7'
 			!		call flush(6)
 				                call fonctdep(t3(i),the01,ri01,gl01,&
 								su01, dble(y01t(241:256)))
@@ -37325,7 +37325,7 @@ end module
 								end if 
 								end if 
 								
-								write(6,*)'res1',res1
+							!	write(6,*)'res1',res1
 							!	call flush(6)
 								
 						
