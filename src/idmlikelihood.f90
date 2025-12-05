@@ -36258,6 +36258,348 @@ logy01,logy02,logy12)
               
           end subroutine qgaussweibfirstderivtimedep
 
+
+!=============================================================================================        
+!================================  qgaussweibderiv  ==========================================
+!=== for derivatives approximation out a 15 point Gauss-Kronrod quadrature rule for weib =====
+!========================= looking only weib paramters  ===================
+!========================= and first derivatives of weib parameters ==========================
+!=============================================================================================  
+
+
+subroutine qgaussweibbetafirstderiv(a,b,the01,the02,the12,resdenum,&
+resthe01,resthe02,resthe12,resthenum,res01num,res02num,res12num, &
+v01,v02,v12,yy01,yy02,yy12)
+
+		implicit none
+        ! arguments
+    double precision:: a, b
+    double precision:: the01(2), the02(2), the12(2)
+	double precision::yy01t(16),yy02t(16),yy12t(16)
+    double precision :: resdenum, res01num, res02num, res12num, &
+	resthe01,resthe02,resthe12,resthenum
+    double precision :: v01, v02, v12
+
+    ! 1D arrays of fixed length 240
+    double precision:: yy01(:), yy02(:), yy12(:)
+
+    ! locals
+    double precision :: dx,xm,xr,xx
+    double precision :: reskdenum,resk01num,resk02num,resk12num, &
+	reskthe01,reskthe02,reskthe12,reskthenum
+    double precision :: f1denum,f2denum,f1thenum,f2thenum
+    double precision :: f101num,f102num,f112num
+    double precision :: f201num,f202num,f212num
+	double precision :: f1the01, f2the01,f1the02, f2the02,f1the12, f2the12
+    double precision :: su01,ri01,gl01,su02,ri02,gl02,su12,ri12,gl12
+    double precision :: fcdenum,fc01num,fc02num,fc12num,denum, &
+	fcthe01, fcthe02, fcthe12,fcthenum
+
+    ! Y-dependent temporaries
+   
+
+    integer :: j,jtw,jtwm1,m
+
+    double precision, dimension(8) :: xgk,wgk
+    double precision, dimension(4) :: wg
+
+    ! machine constants
+    double precision :: epmach,uflow
+    double precision :: d1mach(5)
+
+    ! save quadrature nodes/weights
+    save xgk,wgk
+
+   	D1MACH(1)=2.23D-308
+    	D1MACH(2)=1.79D+308
+    	D1MACH(3)=1.11D-16
+    	D1MACH(4)=2.22D-16
+    	D1MACH(5)=0.301029995663981195D0
+
+    	epmach = d1mach(4)
+    	uflow = d1mach(1)
+
+	wg(1)=0.129484966168869693270611432679082d0
+   	wg(2)=0.279705391489276667901467771423780d0
+    	wg(3)=0.381830050505118944950369775488975d0
+    	wg(4)=0.417959183673469387755102040816327d0
+
+    	xgk(1)=0.991455371120812639206854697526329d0
+    	xgk(2)=0.949107912342758524526189684047851d0
+    	xgk(3)=0.864864423359769072789712788640926d0
+    	xgk(4)=0.741531185599394439863864773280788d0
+    	xgk(5)=0.586087235467691130294144838258730d0
+    	xgk(6)=0.405845151377397166906606412076961d0
+    	xgk(7)=0.207784955007898467600689403773245d0
+    	xgk(8)=0.000000000000000000000000000000000d0
+
+    	wgk(1)=0.022935322010529224963732008058970d0
+    	wgk(2)=0.063092092629978553290700663189204d0
+    	wgk(3)=0.104790010322250183839876322541518d0
+    	wgk(4)=0.140653259715525918745189590510238d0
+    	wgk(5)=0.169004726639267902826583426598550d0
+    	wgk(6)=0.190350578064785409913256402421014d0
+    	wgk(7)=0.204432940075298892414161999234649d0
+    	wgk(8)=0.209482141084727828012999174891714d0
+
+
+
+            resdenum = 0.d0
+	    res01num = 0.d0
+	    res02num = 0.d0
+	    res12num = 0.d0
+		resthe01 = 0.d0
+	    resthe02 = 0.d0
+	    resthe12 = 0.d0
+	
+
+		if(a.ne.b) then
+		xm = 0.5d+00*(b+a)
+        xr = 0.5d+00*(b-a)
+        
+		m=16
+		yy01t=yy01(1:m)
+		yy02t=yy02(1:m)
+		yy12t=yy12(1:m)
+		
+		
+    	call fonctdep(xm,the01,ri01,gl01,su01,yy01t)
+        call fonctdep(xm,the02,ri02,gl02,su02,yy02t)
+   		call fonctdep(xm,the12,ri12,gl12,su12,yy12t)
+
+		denum=su12**v12
+		if(denum.NE.0) then 
+    	
+		
+    	fcdenum =(su01**v01)*(su02**v02)*ri01*v01/denum  ! valeur fct f au milieu de intervalle (a,b), cas pnt 0
+    	fc01num=(su01**v01)*(su02**v02)*ri01*v01*(1-(gl01*v01))/denum
+		fc02num=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02/denum 
+		fc12num=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12/denum 
+		
+		fcthe01=(su01**v01)*(su02**v02)*ri01*v01*gl01*v01*LOG(xm)/denum
+		fcthe02=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02*LOG(xm)/denum
+		fcthe12=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12*LOG(xm)/denum
+
+		
+		fcthenum=(su01**v01)*(su02**v02)*ri01*v01*LOG(xm)/denum
+		
+		else 
+		
+		fcdenum=0
+		fc01num=0
+		fc02num=0
+		fc12num=0
+		fcthe01=0
+		fcthe02=0
+		fcthe12=0
+		fcthenum=0
+		
+		end if 
+		
+        	reskdenum = fcdenum*wgk(8)       ! init res Kronrod   ! fc * 8e poids Kronrod
+        	resk01num = fc01num*wgk(8)       ! init res Kronrod   ! fc * 8e poids Kronrod
+        	resk02num = fc02num*wgk(8)       ! init res Kronrod   ! fc * 8e poids Kronrod
+        	resk12num = fc12num*wgk(8)       ! init res Kronrod   ! fc * 8e poids Kronrod
+			reskthe01 = fcthe01*wgk(8)       ! init res Kronrod   ! fc * 8e poids Kronrod
+        	reskthe02 = fcthe02*wgk(8)       ! init res Kronrod   ! fc * 8e poids Kronrod
+        	reskthe12 = fcthe12*wgk(8)       ! init res Kronrod   ! fc * 8e poids Kronrod
+        	
+		m=193
+		do j=1,3
+	       		jtw = j*2
+               		dx=xr*xgk(jtw)
+               		xx = xm+dx
+					yy01t=yy01(m:(m+15))
+					yy02t=yy02(m:(m+15))
+					yy12t=yy12(m:(m+15))
+					
+					
+		call fonctdep(xx,the01,ri01,gl01,su01,yy01t)
+        call fonctdep(xx,the02,ri02,gl02,su02,yy02t)
+   		call fonctdep(xx,the12,ri12,gl12,su12,yy12t)
+               
+			denum=su12**v12
+		if(denum.NE.0) then 
+    				   
+			f1denum =(su01**v01)*(su02**v02)*ri01*v01/denum
+			f101num=(su01**v01)*(su02**v02)*ri01*v01*(1-(gl01*v01))/denum
+			f102num=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02/denum 
+			f112num=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12/denum 
+			
+			f1the01=(su01**v01)*(su02**v02)*ri01*v01*gl01*v01*LOG(xx)/denum
+			f1the02=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02*LOG(xx)/denum
+			f1the12=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12*LOG(xx)/denum
+			f1thenum=(su01**v01)*(su02**v02)*ri01*v01*LOG(xx)/denum
+		
+
+			else 
+			
+			f1denum =0
+			f1thenum=0
+			f101num=0
+			f102num=0
+			f112num=0
+			f1the01=0
+			f1the02=0
+			f1the12=0
+			end if 
+               		xx = xm-dx
+					
+					yy01t=yy01((m-16):(m-1))
+					yy02t=yy02((m-16):(m-1))
+					yy12t=yy12((m-16):(m-1))
+					
+        call fonctdep(xx,the01,ri01,gl01,su01,yy01t)
+        call fonctdep(xx,the02,ri02,gl02,su02,yy02t)
+   		call fonctdep(xx,the12,ri12,gl12,su12,yy12t)
+				denum=su12**v12
+		if(denum.NE.0) then 
+    	
+                        f2denum =(su01**v01)*(su02**v02)*ri01*v01/denum
+			f201num=(su01**v01)*(su02**v02)*ri01*v01*(1-(gl01*v01))/denum
+			f202num=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02/denum 
+			f212num=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12/denum 
+			
+			
+			f2the01=(su01**v01)*(su02**v02)*ri01*v01*gl01*v01*LOG(xx)/denum
+			f2the02=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02*LOG(xx)/denum
+			f2the12=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12*LOG(xx)/denum
+			f2thenum=(su01**v01)*(su02**v02)*ri01*v01*LOG(xx)/denum
+
+			else 
+			f2denum =0
+			f2thenum=0
+			f201num=0
+			f202num=0
+			f212num=0
+			f2the01=0
+			f2the02=0
+			f2the12=0
+			
+			end if 
+               		reskdenum = reskdenum + wgk(jtw)*(f1denum+f2denum)
+					
+
+               		resk01num = resk01num + wgk(jtw)*(f101num+f201num)
+					resk02num = resk02num + wgk(jtw)*(f102num+f202num)
+               		resk12num = resk12num + wgk(jtw)*(f112num+f212num)
+					
+					reskthe01 = reskthe01 + wgk(jtw)*(f1the01+f2the01)
+					reskthe02 = reskthe02 + wgk(jtw)*(f1the02+f2the02)
+               		reskthe12 = reskthe12 + wgk(jtw)*(f1the12+f2the12)
+					reskthenum = reskthenum + wgk(jtw)*(f1thenum+f2thenum)
+               		
+			m=m-64
+			
+         	end do
+		m=225
+	 	do j=1,4
+			jtwm1 = j*2-1
+               		dx=xr*xgk(jtwm1)
+               		xx = xm+dx
+					
+					yy01t=yy01(m:(m+15))
+					yy02t=yy02(m:(m+15))
+					yy12t=yy12(m:(m+15))
+					
+					call fonctdep(xx,the01,ri01,gl01,su01,yy01t)
+        call fonctdep(xx,the02,ri02,gl02,su02,yy02t)
+   		call fonctdep(xx,the12,ri12,gl12,su12,yy12t)
+		
+				denum=su12**v12
+			if(denum.NE.0) then 
+    				
+			f1denum =(su01**v01)*(su02**v02)*ri01*v01/denum
+			f101num=(su01**v01)*(su02**v02)*ri01*v01*(1-(gl01*v01))/denum
+			f102num=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02/denum 
+			f112num=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12/denum 
+			
+			f1the01=(su01**v01)*(su02**v02)*ri01*v01*gl01*v01*LOG(xx)/denum
+			f1the02=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02*LOG(xx)/denum
+			f1the12=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12*LOG(xx)/denum
+			f1thenum=(su01**v01)*(su02**v02)*ri01*v01*LOG(xx)/denum
+			
+			else 
+			
+			f1denum =0
+			f1thenum=0
+			f101num=0
+			f102num=0
+			f112num=0
+			f1the01=0
+			f1the02=0
+			f1the12=0
+			
+			end if 
+			
+               		xx = xm-dx
+					
+					yy01t=yy01((m-16):(m-1))
+					yy02t=yy02((m-16):(m-1))
+					yy12t=yy12((m-16):(m-1))
+					
+					call fonctdep(xx,the01,ri01,gl01,su01,yy01t)
+        call fonctdep(xx,the02,ri02,gl02,su02,yy02t)
+   		call fonctdep(xx,the12,ri12,gl12,su12,yy12t)
+		
+			denum=su12**v12
+		if(denum.NE.0) then 
+    	
+      			f2denum =(su01**v01)*(su02**v02)*ri01*v01/denum
+			f201num=(su01**v01)*(su02**v02)*ri01*v01*(1-(gl01*v01))/denum
+			f202num=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02/denum 
+			f212num=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12/denum 
+			
+			f2the01=(su01**v01)*(su02**v02)*ri01*v01*gl01*v01*LOG(xx)/denum
+			f2the02=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02*LOG(xx)/denum
+			f2the12=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12*LOG(xx)/denum
+			f2thenum=(su01**v01)*(su02**v02)*ri01*v01*LOG(xx)/denum
+			
+			else 
+			
+			f2denum =0
+			f2thenum=0
+			f201num=0
+			f202num=0
+			f212num=0
+			f2the01=0
+			f2the02=0
+			f2the12=0
+			
+			
+			end if 
+	       		reskdenum = reskdenum + wgk(jtwm1)*(f1denum+f2denum)
+               		
+	       		resk01num = resk01num + wgk(jtwm1)*(f101num+f201num)
+               	resk02num = resk02num + wgk(jtwm1)*(f102num+f202num)
+	       		resk12num = resk12num + wgk(jtwm1)*(f112num+f212num)
+				
+				reskthe01 = reskthe01 + wgk(jtwm1)*(f1the01+f2the01)
+				reskthe02 = reskthe02 + wgk(jtwm1)*(f1the02+f2the02)
+               	reskthe12 = reskthe12 + wgk(jtwm1)*(f1the12+f2the12)
+				reskthenum = reskthenum + wgk(jtwm1)*(f1thenum+f2thenum)
+				
+				m=m-64
+               		
+
+         	end do
+
+    		resdenum = xr*reskdenum
+    		res01num = xr*resk01num 
+    		res02num = xr*resk02num
+    		res12num = xr*resk12num 
+			
+			
+			resthenum = reskthenum*xr
+		
+				resthe01 = reskthe01*xr
+				resthe02 = reskthe02*xr
+				resthe12 = reskthe12*xr
+	
+         endif
+              
+          end subroutine qgaussweibbetafirstderivtimedep
+
 end module 
 !============================================================================================= 
 !========================    caculate first deriva only of====================================
@@ -37355,6 +37697,1003 @@ end module
 	res202numY,res212numY,tronc01Y,tronc01,tronc02Y,tronc02)
 
 end subroutine firstderivaidmlikelihoodweibtimedep
+
+
+!============================================================================================= 
+!========================    caculate first deriva only of====================================
+!======================== regression parameters ==============================================
+!========================    with baseline weibull and time dependent covariates  ============
+!======================== using gaussian quadrature 15 points ================================
+!============================================================================================= 
+
+
+
+      subroutine derivaweibfirstderivtimedep(b0,np0,npar0,bfix0,fix0,c0,&
+      no0,ve010,ve120,ve020,y010,y020,y120, &
+	  p01,p02,p12,dimp01,dimp02,dimp12, Ntime, &
+	  dimnva01,dimnva12,dimnva02,nva01,&
+      nva12,nva02,t00,t10,t20,t30,troncature0,likelihood_deriv)
+
+	    use commun
+		use my_functions
+        implicit none
+         
+    double precision::res2denum,res201num,res202num,res212num, &
+	res2thenum,res2the01,res2the02,res2the12,vet01,vet12, &
+	vet02,resint,v,u1,u2,u3
+
+        integer::np0,i,j,l,w,k,m,npar0,nva01,nva12,nva02,no0, &
+	troncature0,dimnva01,dimnva02,dimnva12, &
+	p01,p02,p12,dimp01,dimp02,dimp12,Ntime, &
+	nva0102,nvamax,nva01nofix,nva01nofixY,nva02nofix, &
+	nva02nofixY,nva12nofix,nva12nofixY, nvamax01Y,nvamax02Y, &
+	nY01,nY02,nY12,sizespline,lfix
+	
+	integer::nvaweib01,nvaweib02,nvaweib12,nvaweib,nweib
+
+	double precision,dimension(np0),intent(inout)::likelihood_deriv
+	double precision,dimension(np0)::b0,res,resk,res1
+        double precision,dimension(npar0)::bh
+	double precision,dimension(npar0-np0)::bfix0
+	integer,dimension(npar0)::fix0
+	double precision,dimension(2)::the01
+	double precision,dimension(2)::the12
+	double precision,dimension(2)::the02
+    
+	double precision,dimension(no0,dimnva01)::ve010
+	double precision,dimension(no0,dimnva02)::ve020
+	double precision,dimension(no0,dimnva12)::ve120
+	
+	
+	double precision,dimension(no0*dimp01*Ntime)::y010
+	double precision,dimension(no0*dimp02*Ntime)::y020
+	double precision,dimension(no0*dimp12*Ntime)::y120
+	
+	
+	
+	double precision,dimension(Ntime)::y01t,y02t,y12t
+
+!	integer, dimension(16) :: indices
+	
+    double precision::su01,ri01,su12,ri12,su02,ri02,gl01,gl02,gl12, & 
+	troncweib01012,troncweib01011,troncweib02021,troncweib02022
+	double precision,dimension(no0)::t00,t10,t20,t30
+	integer,dimension(no0)::c0
+
+	allocate(b(np0),bfix(npar0-np0))
+	allocate(fix(npar0))
+	
+	fix=fix0
+	b=b0
+	bfix=bfix0
+	
+
+	sizespline=6
+
+
+	nvaweib01=2-sum(fix(1:2))
+	nvaweib02=2-sum(fix(3:4))
+	nvaweib12=2-sum(fix(5:6))
+
+	nva01nofix=0
+	nva02nofix=0
+	nva12nofix=0
+	
+	nva01nofixY=0
+	nva02nofixY=0
+	nva12nofixY=0
+
+
+	nvaweib=nvaweib01+nvaweib02+nvaweib12
+	nva0102=nvaweib
+	nvamax=nva0102
+	
+
+
+	if(nva01.gt.0) then 
+		allocate(ve01(no0,nva01))
+		
+	else 
+		allocate(ve01(no0,1))
+	end if 
+	
+	if(nva02.gt.0) then 
+		allocate(ve02(no0,nva02))
+		
+	else 
+		allocate(ve02(no0,1))
+		
+	end if 
+
+	if(nva12.gt.0) then 
+		allocate(ve12(no0,nva12))
+		
+		
+	else 
+		allocate(ve12(no0,1))
+		
+	end if 
+	
+	
+
+	
+	
+	if(p01.gt.0) then 
+		allocate(dy01(no0*p01*Ntime))
+		allocate(logy01(Ntime,nva01nofixY))
+		dy01=y010
+		nY01=nva01nofixY
+		
+	else 
+		allocate(dy01(no0*Ntime))
+		allocate(logy01(Ntime,1))
+		dy01=0
+		nY01=1
+		
+	end if 
+	
+
+	if(p02.gt.0) then 
+		allocate(dy02(no0*p02*Ntime))
+		dy02=y020
+		allocate(logy02(Ntime,nva02nofixY))
+		nY02=nva02nofixY
+		
+	else 
+		allocate(dy02(no0*Ntime))
+		allocate(logy02(Ntime,1))
+		dy02=0
+		nY02=1
+	end if 
+	
+
+	if(p12.gt.0) then 
+		allocate(dy12(no0*p12*Ntime))
+		allocate(logy12(Ntime,nva12nofixY))
+		dy12=y120
+		nY12=nva12nofixY
+		
+	else 
+		allocate(dy12(no0*Ntime))
+		allocate(logy12(Ntime,1))
+		dy12=0
+		nY12=1
+	end if 
+
+
+
+	ve01=ve010
+	ve02=ve020
+	ve12=ve120
+
+
+	allocate(t0(no0),t1(no0),t2(no0),t3(no0),c(no0))
+	c=c0
+	t0=t00
+	t1=t10
+	t2=t20
+	t3=t30
+
+         
+        ! we need to put bh at its original values if in posfix 
+	
+	   l=0
+       lfix=0
+       w=0
+	   
+
+
+     do k=1,npar0 
+         if(fix(k).eq.0) then
+            l=l+1
+            bh(k)=b(l)
+	 end if 
+         if(fix(k).eq.1) then
+            w=w+1
+            bh(k)=bfix(w)
+         end if
+      end do
+
+   
+	
+
+         do i=1,2
+            the01(i)=(bh(i))*(bh(i))
+         end do
+         do i=1,2
+            j = 2+i
+            the02(i)=(bh(j))*(bh(j))
+         end do
+         do i=1,2
+            j = 4+i
+            the12(i)=(bh(j))*(bh(j))
+         end do
+	
+
+		res = 0.d0
+		
+!---------- calcul de la vraisemblance ------------------
+
+
+         
+               do i=1,no0
+			   
+		!	write(6,*) 'subject',i
+		!	call flush(6)
+         
+                vet01 = 0.d0
+                vet12 = 0.d0
+                vet02 = 0.d0
+
+				y01t = 0
+                y12t = 0
+                y02t = 0
+
+             !  write(6,*) 'start vet01 allocattion'
+			  ! call flush(6)
+				! ---- nva01 ----
+				if (nva01.gt.0) then
+					vet01 = vet01 + dot_product( bh(6+1 : 6+nva01), dble(ve01(i,1:nva01)) )
+				endif
+! write(6,*) 'start vet02 allocattion'
+! call flush(6)
+				! ---- nva02 ----
+				if (nva02.gt.0) then
+					vet02 = vet02 + dot_product( bh(6+nva01+1 : 6+nva01+nva02), dble(ve02(i,1:nva02)) )
+				endif
+! write(6,*) 'start vet12 allocattion'
+! call flush(6)
+				! ---- nva12 ----
+				if (nva12.gt.0) then
+					vet12 = vet12 + dot_product( bh(6+nva01+nva02+1 : 6+nva01+nva02+nva12), dble(ve12(i,1:nva12)) )
+				endif
+
+				
+				! ---- p01 ----
+				m=nva01+nva02+sizespline +nva12
+			!	write(6,*) 'start y01t allocattion'
+			!	write(6,*) 'size dy01',size(dy01)
+			!	write(6,*) 'size dy02',size(dy02)
+			!	write(6,*) 'size dy02',size(dy12)
+			!	write(6,*) 'bh',bh
+			!	write(6,*)'start of dy01',dy01(1:40)
+			!	call flush(6)
+				if (p01 .gt. 0) then
+						j = (i-1)*Ntime*p01
+						k = 6 + nva01 + nva02 + nva12
+					!	write(6,*) 'j=',j
+					!	write(6,*) 'k=',k
+				     !   call flush(6)
+						do l = 1, Ntime
+							w = j + (l-1)*p01
+						!	write(6,*) 'w=',w
+						!	write(6,*) 'dy01(w+1:w+p01)',dy01(w+1:w+p01)
+				         !   call flush(6)
+							! produit scalaire entre bh et y01(k)
+							y01t(l) = y01t(l) + dot_product( bh(k+1:k+p01), dy01(w+1:w+p01) )
+						!	write(6,*) 'logy01=',logy01(l,1:p01)
+				        !   call flush(6)
+						end do
+				endif
+
+
+	!			if (p01 > 0) then
+    !do l = 1, Ntime
+    !    y01t(l) = y01t(l) + dot_product( &
+    !        bh(nspline+nva01+nva02+nva12+1 : nspline+nva01+nva02+nva12+p01), &
+     !       y01((i-1)*Ntime*p01 + (l-1)*p01 + 1 : (i-1)*Ntime*p01 + (l-1)*p01 + p01) &
+     !   )
+    !end do
+!endif
+				!if(p01.gt.0)then
+				!	do l=1,Ntime
+                 !       do j=1,p01
+					!			k = (i-1)*Ntime*p01+(l-1)*p01+j
+                     !           y01t(l) =y01t(l) +&
+                      !          bh(nspline+nva01+nva02+nva12+j)*y01(k)
+!
+  !                      end do
+	!				end do 
+     !           endif  
+                ! ---- p02 ----
+				m=nva01+nva02+sizespline+nva12+p01
+			!	write(6,*) 'start y02t allocattion'
+				call flush(6)
+				if (p02.gt.0) then
+					j  = (i-1)*Ntime*p02
+					k = 6 + nva01 + nva02 + nva12 + p01
+
+					do l = 1, Ntime
+						w = j + (l-1)*p02
+
+						! produit scalaire
+						y02t(l) = y02t(l) + dot_product( bh(k+1:k+p02),  dble(dy02(w+1:w+p02) ))
+
+					end do
+				endif
+
+
+				! ---- p12 ----
+				m=nva01+nva02+sizespline+nva12+p01+p02
+			!	write(6,*) 'start y12t allocattion'
+			!	call flush(6)
+				if (p12.gt.0) then
+					j  = (i-1)*Ntime*p12
+					k = 6 + nva01 + nva02 + nva12 + p01 + p02
+
+					do l = 1, Ntime
+						w = j + (l-1)*p12
+
+						! produit scalaire
+						y12t(l) = y12t(l) + dot_product( bh(k+1:k+p12),  dble(dy12(w+1:w+p12) ))
+
+					end do
+				endif
+				
+			!	write(6,*) 'y01t',y01t
+			!!	write(6,*) 'y02t',y02t
+			!	write(6,*) 'y12t',y12t
+			!	write(6,*) 'vet01',vet01
+			!	write(6,*) 'vet02',vet02
+			!	write(6,*) 'vet12',vet12
+			!	write(6,*) 'go to exp'
+			!	call flush(6)
+				
+				y01t=exp(y01t)
+				y02t=exp(y02t)
+				y12t=exp(y12t)
+
+                vet01 = dexp(vet01)
+                vet12 = dexp(vet12)
+                vet02 = dexp(vet02)
+
+			!	write(6,*) 'y01t',y01t
+			!	write(6,*) 'y02t',y02t
+			!	write(6,*) 'y12t',y12t
+			!	write(6,*) 'vet01',vet01
+			!	write(6,*) 'vet02',vet02
+			!	write(6,*) 'vet12',vet12
+			!	call flush(6)
+
+                res1 = 0.d0
+                
+			!	write(6,*)'start tronc'
+			!	call flush(6)
+				 if(troncature.eq.1)then
+                        if(t0(i).eq.0.d0)then
+                                troncweib01012 = 0
+							troncweib01011 = 0
+							troncweib02021 = 0
+							troncweib02022 = 0
+                        else 
+						
+				call fonctdep0(t0(i),the01,gl01,y01t(257:271))
+				call fonctdep0(t0(i),the02,gl02,y02t(257:271))
+                           
+							troncweib01011=gl01*vet01*LOG(the01(2)*t0(i))
+							troncweib01012=the01(1)*gl01*vet01/the01(2)
+							troncweib02021=LOG(the02(2)*t0(i))*gl02*vet02
+							troncweib02022=the02(1)*gl02*vet02/the02(2)
+                        end if
+                else
+                    troncweib01012 = 0
+							troncweib01011 = 0
+							troncweib02021 = 0
+							troncweib02022 = 0
+                end if
+				
+
+				
+		
+                if(c(i).eq.1)then ! cad 0-->1 et 0-->2
+
+			       
+					   
+                else
+                if(c(i).eq.2)then ! cpi 0-->1
+			!	write(6,*)'c=2'
+			!	call flush(6)
+			call fonctdep(t3(i),the12,ri12,gl12,su12, dble(y12t(241:256)))
+			u=(su12**vet12)
+			call  qgaussweibbetafirstderivtimedep(t1(i),t2(i),the01,the02,&
+                         the12,res2denum,res2the01,res2the02,res2the12, &
+						 res2thenum,res201num,res202num,res212num, &
+						 vet01,vet02,vet12,&
+						 y01t(1:240),y02t(1:240),y12t(1:240)))
+						 
+				
+                        
+			u=u*res2denum
+			
+			nweib = 0
+			if(u.NE.0) then 
+			if(fix(1).eq.0)then
+				nweib = nweib + 1
+				v=(LOG(the01(2))+(1/the01(1)))*u +&
+				res2thenum-LOG(the01(2))*(u-res201num)-&
+				res2the01
+				res1(nweib)=v/u
+				
+				res1(nweib)=res1(nweib)+troncweib01011
+				
+			endif
+			
+			if(fix(2).eq.0)then
+				nweib = nweib + 1
+				v=the01(1)*u/the01(2) -&
+				the01(1)*(u-res201num)/the01(2)
+				res1(nweib)=v/u
+				res1(nweib)=res1(nweib)+troncweib01012
+				
+			endif
+			
+			if(fix(3).eq.0)then
+				nweib = nweib + 1
+				
+				v=-LOG(the02(2))*res202num-&
+				res2the02
+				res1(nweib)=v/u
+				res1(nweib)=res1(nweib)+ &
+				troncweib02021
+				
+			endif
+			
+			if(fix(4).eq.0)then
+				nweib = nweib + 1
+				v=-the02(1)*res202num/the02(2)
+				res1(nweib)=v/u
+				res1(nweib)=res1(nweib)+troncweib02022
+				
+			endif
+			
+			if(fix(5).eq.0)then
+				nweib = nweib + 1
+				
+				v=LOG(the12(2))*res212num+&
+				res2the12
+				res1(nweib)=v/u
+				res1(nweib)=res1(nweib)-&
+				LOG(the12(2)*t3(i))*gl12*vet12
+				
+			endif
+			
+			if(fix(6).eq.0)then
+				nweib = nweib + 1
+				v=the12(1)*res212num/the12(2)
+				res1(nweib)=v/u
+				res1(nweib)=res1(nweib)-&
+				the12(1)*gl12*vet12/the12(2)
+				
+			endif	
+			
+			else 
+			
+			if(fix(1).eq.0)then
+				nweib = nweib + 1
+				res1(nweib)=troncweib01011
+				
+			endif
+			
+			if(fix(2).eq.0)then
+				nweib = nweib + 1
+				res1(nweib)=troncweib01012
+				
+			endif
+			
+			if(fix(3).eq.0)then
+				nweib = nweib + 1
+				res1(nweib)=troncweib02021
+				
+			endif
+			
+			if(fix(4).eq.0)then
+				nweib = nweib + 1
+				res1(nweib)=troncweib02022
+				
+			endif
+			
+			if(fix(5).eq.0)then
+				nweib = nweib + 1
+				
+				res1(nweib)=-LOG(the12(2)*t3(i))*gl12*vet12
+				
+			endif
+			
+			
+			if(fix(6).eq.0)then
+				nweib = nweib + 1
+				res1(nweib)=-the12(1)*gl12*vet12/the12(2)
+				
+			endif	
+			
+			end if 
+			
+			
+		!	write(6,*)'res1',res1
+		!	call flush(6)
+						
+                else  
+                    if(c(i).eq.3)then ! obs 0-->1
+			             
+                    else   
+                       if(c(i).eq.4)then ! cpi 0-->1 et obs 1-->2
+					!   write(6,*)'c=4'
+					 !  call flush(6)
+					  call fonctdep(t3(i),the12,ri12,gl12,su12, dble(y12t(241:256)))
+					   u=(su12**vet12)*ri12*vet12
+						 call  qgaussweibbetafirstderivtimedep(t1(i),t2(i),the01,the02,&
+                         the12,res2denum,res2the01,res2the02,res2the12, &
+						 res2thenum,res201num,res202num,res212num, &
+						 vet01,vet02,vet12,&
+						 y01t(1:240),y02t(1:240),y12t(1:240))
+						 
+				
+                        
+			u=u*res2denum
+			nweib =0
+			
+		!	write(6,*)'v',v
+		!						write(6,*)'res2denum',res2denum
+		!						write(6,*)'res201num',res201num
+		!						write(6,*)'res202num',res202num
+		!						write(6,*)'res212num',res212num
+		!						write(6,*)'res201numY',res201numY
+		!						write(6,*)'res202numY',res202numY
+		!						write(6,*)'res212numY',res212numY
+		!						call flush(6)
+
+
+			if(fix(1).eq.0)then
+				nweib = nweib + 1
+				
+				v=(LOG(the01(2))+(1/the01(1)))*u +&
+				res2thenum-LOG(the01(2))*(u-res201num)-&
+				res2the01
+				res1(nweib)=v/u
+				res1(nweib)=res1(nweib)+troncweib01011
+				
+			endif
+	
+			if(fix(2).eq.0)then
+				nweib = nweib + 1
+				v=the01(1)*u/the01(2) -&
+				the01(1)*(u-res201num)/the01(2)
+				res1(nweib)=v/u
+				res1(nweib)=res1(nweib)+troncweib01012
+			endif
+
+				
+			if(fix(3).eq.0)then
+				nweib = nweib + 1
+				
+				v=-LOG(the02(2))*res202num-&
+				res2the02
+				res1(nweib)=v/u
+				res1(nweib)=res1(nweib)+troncweib02021
+			endif
+			
+			if(fix(4).eq.0)then
+				nweib = nweib + 1
+				v=-the02(1)*res202num/the02(2)
+				res1(nweib)=v/u
+				res1(nweib)=res1(nweib)+troncweib02022
+			endif	
+
+			if(fix(5).eq.0)then
+				nweib = nweib + 1
+				
+				v=LOG(the12(2))*res212num+&
+				res2the12
+				res1(nweib)=v/u
+				res1(nweib)=res1(nweib)+&
+				LOG(the12(2)*t3(i))*(1-gl12*vet12)+1/ &
+				the12(1)
+				
+			endif
+			
+			if(fix(6).eq.0)then
+				nweib = nweib + 1
+				v=the12(1)*res212num/the12(2)
+				res1(nweib)=v/u
+				res1(nweib)=res1(nweib)-&
+				the12(1)*gl12*vet12/the12(2)+&
+				the12(1)/the12(2)
+			endif	
+			
+			else
+			
+			if(fix(1).eq.0)then
+				nweib = nweib + 1
+				res1(nweib)=troncweib01011
+				
+			endif
+	
+			if(fix(2).eq.0)then
+				nweib = nweib + 1
+				res1(nweib)=troncweib01012
+			endif
+
+				
+			if(fix(3).eq.0)then
+				nweib = nweib + 1
+				res1(nweib)=troncweib02021
+			endif
+			
+			if(fix(4).eq.0)then
+				nweib = nweib + 1
+				res1(nweib)=troncweib02022
+			endif	
+
+			if(fix(5).eq.0)then
+				nweib = nweib + 1
+				res1(nweib)=LOG(the12(2)*t3(i))*(1-gl12*vet12)+1/ &
+				the12(1)
+				
+			endif
+			
+			if(fix(6).eq.0)then
+				nweib = nweib + 1
+				res1(nweib)=-the12(1)*gl12*vet12/the12(2)+&
+				the12(1)/the12(2)
+			endif	
+			
+			end if 
+						
+                       else
+                         if(c(i).eq.5)then ! obs 0-->1 et obs 1-->2
+								
+                         else
+                            if(c(i).eq.6)then ! vivant ???
+						! write(6,*)'c=6'
+						!call flush(6)
+								call fonctdep(t3(i),the01,ri01,gl01,&
+								su01, dble(y01t(241:256)))
+                                call fonctdep(t3(i),the02,ri02,gl02,&
+								su02, dble(y02t(241:256)))
+                                call fonctdep(t3(i),the12,ri12,gl12,&
+								su12, dble(y12t(241:256)))
+          
+								
+								call  qgaussweibbetafirstderivtimedep(t1(i),t3(i),the01,the02,&
+                         the12,res2denum,res2the01,res2the02,res2the12, &
+						 res2thenum,res201num,res202num,res212num, &
+						 vet01,vet02,vet12,&
+						 y01t(1:240),y02t(1:240),y12t(1:240)))
+						 
+				
+                        
+								u1=(su12**vet12)*res2denum+&
+								(su01**vet01)*(su02**vet02)
+								
+								nweib =0
+							!	write(6,*)'v',v
+							!	write(6,*)'res2denum',res2denum
+							!	write(6,*)'res201num',res201num
+							!	write(6,*)'res202num',res202num
+							!!	write(6,*)'res212num',res212num
+							!	write(6,*)'res201numY',res201numY
+							!	write(6,*)'res202numY',res202numY
+							!	write(6,*)'res212numY',res212numY
+							!	call flush(6)
+						if(u1.NE.0)then 
+						
+						if(fix(1).eq.0)then
+				nweib = nweib + 1
+				v=(LOG(the01(2))+(1/the01(1)))*res2denum +&
+				res2thenum-LOG(the01(2))*(res2denum-res201num)-&
+				res2the01
+				
+				v=v*(su12**vet12)-&
+				LOG(the01(2)*t3(i))*gl01*vet01*(su01**vet01)*(su02**vet02)
+				
+				res1(nweib)=v/u1
+				
+				res1(nweib)=res1(nweib)+troncweib01011
+				
+				endif
+			
+			
+			if(fix(2).eq.0)then
+				nweib = nweib + 1
+				
+				v=the01(1)*res2denum/the01(2) -&
+				the01(1)*(res2denum-res201num)/the01(2)
+				
+				v= v*(su12**vet12)-&
+				the01(1)*gl01*vet01*(su01**vet01)* &
+				(su02**vet02)/the01(2)
+				
+				res1(nweib)=v/u1
+				res1(nweib)=res1(nweib)+troncweib01012
+			endif
+			
+				
+				
+			if(fix(3).eq.0)then
+				nweib = nweib + 1
+				
+				v=-LOG(the02(2))*res202num-&
+				res2the02
+				
+				v=v*(su12**vet12)-&
+				LOG(the02(2)*t3(i))*gl02*vet02* &
+				(su01**vet01)*(su02**vet02)
+				
+				res1(nweib)=v/u1
+				res1(nweib)=res1(nweib)+troncweib02021
+				
+			endif
+			
+            
+			if(fix(4).eq.0)then
+				nweib = nweib + 1
+				v=-the02(1)*res202num/the02(2)
+				
+				v=v*(su12**vet12)-&
+				gl02*vet02*the02(1)*(su01**vet01)* &
+				(su02**vet02)/the02(2)
+				
+				res1(nweib)=v/u1
+				res1(nweib)=res1(nweib)+troncweib02022
+				
+			endif	
+
+			
+			if(fix(5).eq.0)then
+				nweib = nweib + 1
+				
+				v=LOG(the12(2))*res212num+&
+				res2the12
+				v=v*(su12**vet12)-&
+				LOG(the12(2)*t3(i))*gl12*vet12* &
+				(su12**vet12)*res2denum
+				
+				res1(nweib)=v/u1
+				
+			endif
+			
+			 
+			if(fix(6).eq.0)then
+				nweib = nweib + 1
+				
+				v=the12(1)*res212num/the12(2)
+				v=v*(su12**vet12)-&
+				the12(1)*gl12*vet12*(su12**vet12)* &
+				res2denum/the12(2)
+				
+				res1(nweib)=v/u1
+				
+			endif	
+			
+			else 
+			
+			if(fix(1).eq.0)then
+				nweib = nweib + 1
+				res1(nweib)=troncweib01011
+				
+				endif
+			
+			
+			if(fix(2).eq.0)then
+				nweib = nweib + 1
+				res1(nweib)=troncweib01012
+			endif
+			
+				
+				
+			if(fix(3).eq.0)then
+				nweib = nweib + 1
+				res1(nweib)=troncweib02021
+				
+			endif
+			
+            
+			if(fix(4).eq.0)then
+				nweib = nweib + 1
+				res1(nweib)=troncweib02022
+				
+			endif	
+
+			
+			if(fix(5).eq.0)then
+				nweib = nweib + 1
+				res1(nweib)=0
+				
+			endif
+			
+			 
+			if(fix(6).eq.0)then
+				nweib = nweib + 1
+				res1(nweib)=0
+				
+			endif	
+			
+			end if 
+								
+							!	write(6,*)'res1',res1
+							!	call flush(6)
+                            else ! passage 0-->2  
+					
+					! write(6,*)'c=7'
+			!		call flush(6)
+				                call fonctdep(t3(i),the01,ri01,gl01,&
+								su01, dble(y01t(241:256)))
+                                call fonctdep(t3(i),the02,ri02,gl02,&
+								su02, dble(y02t(241:256)))
+                                call fonctdep(t3(i),the12,ri12,gl12,&
+								su12, dble(y12t(241:256)))
+          
+								
+								call  qgaussweibbetafirstderivtimedep(t1(i),t3(i),the01,the02,&
+                         the12,res2denum,res2the01,res2the02,res2the12, &
+						 res2thenum,res201num,res202num,res212num, &
+						 vet01,vet02,vet12,&
+						 y01t(1:240),y02t(1:240),y12t(1:240))
+						 
+						
+							   u1=(su12**vet12)*ri12*vet12*res2denum+&
+								(su01**vet01)*(su02**vet02)*ri02*vet02
+								
+								nweib = 0
+								
+							if(u1.NE.0) then 
+							
+							if(fix(1).eq.0)then
+				nweib = nweib + 1
+				v=(LOG(the01(2))+(1/the01(1)))*res2denum +&
+				res2thenum-LOG(the01(2))*(res2denum-res201num)-&
+				res2the01
+				
+				
+				v=v*(su12**vet12)*ri12*vet12-&
+				LOG(the01(2)*t3(i))*gl01*vet01*(su01**vet01)* &
+				ri02*vet02*(su02**vet02)
+				
+				res1(nweib)=v/u1
+				
+				res1(nweib)=res1(nweib)+troncweib01011
+			endif
+			
+		
+			if(fix(2).eq.0)then
+				nweib = nweib + 1
+				
+				v=the01(1)*res2denum/the01(2) -&
+				the01(1)*(res2denum-res201num)/the01(2)
+				
+				v= v*(su12**vet12)*ri12*vet12-&
+				ri02*vet02*the01(1)*gl01*vet01*(su01**vet01)* &
+				(su02**vet02)/the01(2)
+				
+				res1(nweib)=v/u1
+				res1(nweib)=res1(nweib)+troncweib01012
+			endif
+			
+			if(fix(3).eq.0)then
+				nweib = nweib + 1
+				
+				v=-LOG(the02(2))*res202num-&
+				res2the02
+				
+				v=v*(su12**vet12)*ri12*vet12+&
+				ri02*vet02*(su01**vet01)*(su02**vet02)* &
+				(LOG(the02(2)*t3(i))+&
+				(1/the02(1))-&
+				gl02*vet02*LOG(the02(2)*t3(i)))
+				
+				res1(nweib)=v/u1
+				res1(nweib)=res1(nweib)+troncweib02021
+			endif
+			
+			if(fix(4).eq.0)then
+				nweib = nweib + 1
+				v=-the02(1)*res202num/the02(2)
+				
+				v=v*(su12**vet12)*ri12*vet12+&
+				ri02*vet02*(1-gl02*vet02)* &
+				the02(1)*(su01**vet01)* &
+				(su02**vet02)/the02(2)
+				
+				res1(nweib)=v/u1
+				res1(nweib)=res1(nweib)+troncweib02022
+			endif	
+		
+			if(fix(5).eq.0)then
+				nweib = nweib + 1
+				
+				v=LOG(the12(2))*res212num+&
+				res2the12
+				v=v*(su12**vet12)*ri12*vet12+&
+				ri12*vet12*(su12**vet12)*res2denum* &
+				(LOG(the12(2)*t3(i))+&
+				(1/the12(1))-&
+				LOG(the12(2)*t3(i))*gl12*vet12)
+				
+				res1(nweib)=v/u1
+				
+			endif
+			
+			
+			if(fix(6).eq.0)then
+				nweib = nweib + 1
+				
+				v=the12(1)*res212num/the12(2)
+				v=v*(su12**vet12)*ri12*vet12+&
+				ri12*vet12*the12(1)*(1- &
+				gl12*vet12)*(su12**vet12)* &
+				res2denum/the12(2)
+				
+				res1(nweib)=v/u1
+				
+			endif
+			
+			else 
+			
+			if(fix(1).eq.0)then
+				nweib = nweib + 1
+				res1(nweib)=troncweib01011
+			endif
+			
+		
+			if(fix(2).eq.0)then
+				nweib = nweib + 1
+				res1(nweib)=troncweib01012
+			endif
+			
+			if(fix(3).eq.0)then
+				nweib = nweib + 1
+				res1(nweib)=troncweib02021
+			endif
+			
+			if(fix(4).eq.0)then
+				nweib = nweib + 1
+				res1(nweib)=troncweib02022
+			endif	
+		
+			if(fix(5).eq.0)then
+				nweib = nweib + 1
+				res1(nweib)=0
+				
+			endif
+			
+			
+			if(fix(6).eq.0)then
+				nweib = nweib + 1
+				res1(nweib)=0
+				
+			endif
+			
+			end if 
+							!	write(6,*)'res1',res1
+							!	call flush(6)
+								
+						
+                            endif
+                         endif                        
+                      endif
+                   endif   
+                endif   
+                endif  				
+
+			
+                res = res + res1 
+
+
+        end do   
+ 
+
+
+        likelihood_deriv = res
+
+
+123     continue 
+
+	deallocate(b,bfix,fix,ve01,ve02,ve12,&
+	t0,t1,t2,t3,c,ve01nofix,ve02nofix,ve12nofix,&
+	logy01,logy02,logy12,res201numY,dy01,dy02,dy12,&
+	res202numY,res212numY,tronc01Y,tronc01,tronc02Y,tronc02)
+
+end subroutine derivaweibfirstderivtimedep
 
 
 module my_functions_splines
