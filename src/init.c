@@ -41,6 +41,11 @@ extern void F77_NAME(firstderivaidmlikelihoodweibtimedep)(double *,int *, int *,
               int *,int *,int *,int *,int *,int *,int *,
               int *,int *,int *,int *,int *,int *, double *,double*, double *, double *,int *,double *);
 
+extern void F77_NAME(derivaweibfirstderivtimedep)(double *,int *, int *, double *,int*,
+              int *,int *, double *,double*, double *, double *,double*, double *,
+              int *,int *,int *,int *,int *,int *,int *,
+              int *,int *,int *,int *,int *,int *, double *,double*, double *, double *,int *,double *);
+
 extern void F77_NAME(idmlikelihoodtimedep)(double *,int *, int *, double *,int*,
 			  double *, double *, double*, int*,
               int *, int *,int *,int *,double *,double *, double *, 
@@ -50,6 +55,14 @@ extern void F77_NAME(idmlikelihoodtimedep)(double *,int *, int *, double *,int*,
 			  double *,int *,double *);
 
 extern void F77_NAME(firstderivaidmlikelihoodsplinetimedep)(double *,int *, int *, double *,int*,
+			  double *, double *, double*, int*,
+              int *, int *,int *,int *,double *,double *, double *, 
+			  double *,double*, double *,
+              int *,int *,int *,int *,int *,int *,int *,
+              int *,int *,int *,int *,int *,int *, double *,double*, double *,
+			  double *,int *,double *);
+
+extern void F77_NAME(derivafirstderivtimedep)(double *,int *, int *, double *,int*,
 			  double *, double *, double*, int*,
               int *, int *,int *,int *,double *,double *, double *, 
 			  double *,double*, double *,
@@ -138,8 +151,10 @@ static const R_FortranMethodDef FortranEntries[] = {
     {"idmlikelihoodweibsemimark",(DL_FUNC) &F77_NAME(idmlikelihoodweibsemimark),    22},
     {"idmlikelihoodweibtimedep",(DL_FUNC) &F77_NAME(idmlikelihoodweibtimedep),    32},
      {"firstderivaidmlikelihoodweibtimedep",(DL_FUNC) &F77_NAME(firstderivaidmlikelihoodweibtimedep),    32},
+      {"derivaweibfirstderivtimedep",(DL_FUNC) &F77_NAME(derivaweibfirstderivtimedep),    32},
 	 {"idmlikelihoodtimedep",(DL_FUNC) &F77_NAME(idmlikelihoodtimedep),    38},
      {"firstderivaidmlikelihoodsplinetimedep",(DL_FUNC) &F77_NAME(firstderivaidmlikelihoodsplinetimedep),    38},
+     {"derivafirstderivtimedep",(DL_FUNC) &F77_NAME(derivafirstderivtimedep),    38},
     {"causalidmlikelihoodweib",(DL_FUNC) &F77_NAME(causalidmlikelihoodweib),    24},
     {"derivaweib",(DL_FUNC) &F77_NAME(derivaweib),    22},
      {"derivaweibsemimark",(DL_FUNC) &F77_NAME(derivaweibsemimark),    22},

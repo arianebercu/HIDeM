@@ -56,7 +56,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                    outcome01,outcome02,
                    outcome12,NtimePoints,
                    p01,p02,p12,assoc,
-                   dimp01,dimp02,dimp12,scale.X){
+                   dimp01,dimp02,dimp12,scale.X,defpositive){
   
 
 
@@ -398,7 +398,11 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                  
                                  eigen.values<-eigen(V,symmetric=T,only.values=T)$values
                                  
+                                 if(defpositive==T){
                                  idpos<-ifelse(any(eigen.values<=eps.eigen),1,0)
+                                 }else{
+                                   idpos<-ifelse(any(diag(V)==0),1,0)
+                                 }
                                  
                                  
                                  idpos0<-idpos
@@ -435,7 +439,12 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                    eigen.values<-eigen(V,symmetric=T,only.values=T)$values
                                    # check if hessienne defined positive
                                    
-                                   idpos<-ifelse(any(eigen.values<=eps.eigen),1,0)
+                                  
+                                   if(defpositive==T){
+                                     idpos<-ifelse(any(eigen.values<=eps.eigen),1,0)
+                                   }else{
+                                     idpos<-ifelse(any(diag(V)==0),1,0)
+                                   }
                                    
                                    # if(def.positive==T){
                                    #   idpos<-ifelse(any(eigen.values<=0),1,0)
@@ -587,6 +596,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                    
                                    
                                    betanew<-beta+delta*sears$vw
+                                   betanew<-ifelse(abs(betanew)<=0.0001,0,betanew)
                                    b<-c(s,betanew)
                                    
                                    
@@ -650,7 +660,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                  if(npmweib!=0){
                                  output.mla<- marqLevAlg::mla(b=b,
                                                   fn=gaussDYNidmlLikelihoodweib,
-                                                  gr=deriva.gradient.DYNweib,
+                                                  gr=DYNreggrmlaweibana,
                                                   epsa=epsa,
                                                   epsb=epsb,
                                                   epsd=epsd,
@@ -1022,7 +1032,11 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                      
                                      eigen.values<-diag(V)
                                      
-                                     idpos<-ifelse(any(eigen.values<=eps.eigen),1,0)
+                                     if(defpositive==T){
+                                       idpos<-ifelse(any(eigen.values<=eps.eigen),1,0)
+                                     }else{
+                                       idpos<-ifelse(any(diag(V)==0),1,0)
+                                     }
                                      
                                      
                                      idpos0<-idpos
@@ -1059,7 +1073,11 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                        eigen.values<-diag(V)
                                        # check if hessienne defined positive
                                        
-                                       idpos<-ifelse(any(eigen.values<=eps.eigen),1,0)
+                                       if(defpositive==T){
+                                         idpos<-ifelse(any(eigen.values<=eps.eigen),1,0)
+                                       }else{
+                                         idpos<-ifelse(any(diag(V)==0),1,0)
+                                       }
                                        
                                        # if(def.positive==T){
                                        #   idpos<-ifelse(any(eigen.values<=0),1,0)
@@ -1212,6 +1230,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                     penalty=penalty)
                                      
                                      betanew<-beta+delta*sears$vw
+                                     betanew<-ifelse(abs(betanew)<=0.0001,0,betanew)
                                      b<-c(s,betanew)
                                      
                                      
@@ -1276,7 +1295,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                   if(npmweib!=0){
                                    output.mla<- marqLevAlg::mla(b=b,
                                                                 fn=gaussDYNidmlLikelihoodweib,
-                                                                gr=deriva.gradient.DYNweib,
+                                                                gr=DYNreggrmlaweibana,
                                                                 epsa=epsa,
                                                                 epsb=epsb,
                                                                 epsd=epsd,
@@ -1543,7 +1562,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                eval.loglik<-rep(NA,maxiter+1)
                                eval.validity<-rep(NA,maxiter+1)
                                
-                               
+                               #browser()
                                while(converged==F & ite<=maxiter){
                                
                              
@@ -1553,7 +1572,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                  b<-b[fix0==0]
                                
                                
-                                 output<-DYNderivaweib( h=1e-8,b=b,
+                                 output<-DYNderivaweib( h=1e-4,b=b,
                                                 npm=npm,
                                                 npar=size_V,
                                                 bfix=bfix,
@@ -1585,40 +1604,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                 dimp12=dimp12,
                                                 Ntime=NtimePoints)
                                  
-                                 
-                                 outputb<-deriva( funcpa=gaussDYNidmlLikelihoodweib,
-                                                 h=1e-8,b=b,
-                                                        npm=npm,
-                                                        npar=size_V,
-                                                        bfix=bfix,
-                                                        fix=fix0,
-                                                        ctime=ctime,
-                                                        no=N,
-                                                        ve01=ve01,
-                                                        ve02=ve02,
-                                                        ve12=ve12,
-                                                        dimnva01=dimnva01,
-                                                        dimnva02=dimnva02,
-                                                        dimnva12=dimnva12,
-                                                        nva01=nvat01,
-                                                        nva02=nvat02,
-                                                        nva12=nvat12,
-                                                        t0=t0,
-                                                        t1=t1,
-                                                        t2=t2,
-                                                        t3=t3,
-                                                        troncature=troncature,
-                                                        y01=y01k,
-                                                        y02=y02k,
-                                                        y12=y12k,
-                                                        p01=p01,
-                                                        p02=p02,
-                                                        p12=p12,
-                                                        dimp01=dimp01,
-                                                        dimp02=dimp02,
-                                                        dimp12=dimp12,
-                                                        Ntime=NtimePoints)
-                                 
+                                #browser()
                                  
                                
                                  #sparseHessianFD
@@ -1708,11 +1694,15 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                    # deriva gives information matrix
                                    tr <- sum(diag(V))/npm
                                    V0<-V
-                                
+                                   #browser()
                                  
                                  eigen.values<-eigen(V,symmetric=T,only.values=T)$values
                                 
-                                 idpos<-ifelse(any(eigen.values<=eps.eigen),1,0)
+                                 if(defpositive==T){
+                                   idpos<-ifelse(any(eigen.values<=eps.eigen),1,0)
+                                 }else{
+                                   idpos<-ifelse(any(diag(V)==0),1,0)
+                                 }
                                  
                                  
                                  idpos0<-idpos
@@ -1748,7 +1738,11 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                    if(sum(V==Inf)>0|sum(V==-Inf)>0){break}
                                    eigen.values<-eigen(V,symmetric=T,only.values=T)$values
                                    # check if hessienne defined positive
-                                   idpos<-ifelse(any(eigen.values<=eps.eigen),1,0)
+                                   if(defpositive==T){
+                                     idpos<-ifelse(any(eigen.values<=eps.eigen),1,0)
+                                   }else{
+                                     idpos<-ifelse(any(diag(V)==0),1,0)
+                                   }
                                    
                                    
                                    
@@ -1832,7 +1826,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                  # if not better or do not exist need to readjust
                                  # value of beta 
                               
-                              
+                                # browser()
                                 if(res %in%c(-1e9,1e9) | res < fn.value){
                                   
                                   print(paste0("needed update at ite :",ite))
@@ -1905,6 +1899,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                    
                                    
                                    betanew<-beta+delta*sears$vw
+                                   betanew<-ifelse(abs(betanew)<=0.0001,0,betanew)
                                    b<-c(s,betanew)
                                    
                                    
@@ -1965,11 +1960,12 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                  bfix<-b[fix0.beta==1]
                                  b<-b[fix0.beta==0]
                                  # update modelPar
-                                 browser()
+                                 #browser()
                                 if(npmweib!=0){
+                               
                                  output.mla<- marqLevAlg::mla(b=b,
                                                               fn=gaussDYNidmlLikelihoodweib,
-                                                              gr=deriva.gradient.DYNweib,
+                                                              gr=DYNreggrmlaweibana,
                                                               epsa=epsa,
                                                               epsb=epsb,
                                                               epsd=epsd,
@@ -2006,6 +2002,141 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                               dimp12=dimp12,
                                                               Ntime=NtimePoints)
                                  
+                                 # output.mla2<- marqLevAlg::mla(b=b,
+                                 #                              fn=gaussDYNidmlLikelihoodweib,epsa=epsa,
+                                 #                              epsb=epsb,
+                                 #                              epsd=epsd,
+                                 #                              maxiter=maxiter.pena,
+                                 #                              minimize=F,
+                                 #                              npm=npmweib,
+                                 #                              npar=size_V,
+                                 #                              bfix=bfix,
+                                 #                              fix=fix0.beta,
+                                 #                              ctime=ctime,
+                                 #                              no=N,
+                                 #                              ve01=ve01,
+                                 #                              ve02=ve02,
+                                 #                              ve12=ve12,
+                                 #                              dimnva01=dimnva01,
+                                 #                              dimnva02=dimnva02,
+                                 #                              dimnva12=dimnva12,
+                                 #                              nva01=nvat01,
+                                 #                              nva02=nvat02,
+                                 #                              nva12=nvat12,
+                                 #                              t0=t0,
+                                 #                              t1=t1,
+                                 #                              t2=t2,
+                                 #                              t3=t3,
+                                 #                              troncature=troncature,
+                                 #                              y01=y01k,
+                                 #                              y02=y02k,
+                                 #                              y12=y12k,
+                                 #                              p01=p01,
+                                 #                              p02=p02,
+                                 #                              p12=p12,
+                                 #                              dimp01=dimp01,
+                                 #                              dimp02=dimp02,
+                                 #                              dimp12=dimp12,
+                                 #                              Ntime=NtimePoints)
+                                 # 
+                                 # output.deriv<- DYNreggrmlaweibana(b=b,
+                                 #                              npm=npmweib,
+                                 #                              npar=size_V,
+                                 #                              bfix=bfix,
+                                 #                              fix=fix0.beta,
+                                 #                              ctime=ctime,
+                                 #                              no=N,
+                                 #                              ve01=ve01,
+                                 #                              ve02=ve02,
+                                 #                              ve12=ve12,
+                                 #                              dimnva01=dimnva01,
+                                 #                              dimnva02=dimnva02,
+                                 #                              dimnva12=dimnva12,
+                                 #                              nva01=nvat01,
+                                 #                              nva02=nvat02,
+                                 #                              nva12=nvat12,
+                                 #                              t0=t0,
+                                 #                              t1=t1,
+                                 #                              t2=t2,
+                                 #                              t3=t3,
+                                 #                              troncature=troncature,
+                                 #                              y01=y01k,
+                                 #                              y02=y02k,
+                                 #                              y12=y12k,
+                                 #                              p01=p01,
+                                 #                              p02=p02,
+                                 #                              p12=p12,
+                                 #                              dimp01=dimp01,
+                                 #                              dimp02=dimp02,
+                                 #                              dimp12=dimp12,
+                                 #                              Ntime=NtimePoints)
+                                 # 
+                                 # 
+                                 # output.deriv2<- deriva.gradient.DYNweib(b=b,
+                                 #                                   npm=npmweib,
+                                 #                                   npar=size_V,
+                                 #                                   bfix=bfix,
+                                 #                                   fix=fix0.beta,
+                                 #                                   ctime=ctime,
+                                 #                                   no=N,
+                                 #                                   ve01=ve01,
+                                 #                                   ve02=ve02,
+                                 #                                   ve12=ve12,
+                                 #                                   dimnva01=dimnva01,
+                                 #                                   dimnva02=dimnva02,
+                                 #                                   dimnva12=dimnva12,
+                                 #                                   nva01=nvat01,
+                                 #                                   nva02=nvat02,
+                                 #                                   nva12=nvat12,
+                                 #                                   t0=t0,
+                                 #                                   t1=t1,
+                                 #                                   t2=t2,
+                                 #                                   t3=t3,
+                                 #                                   troncature=troncature,
+                                 #                                   y01=y01k,
+                                 #                                   y02=y02k,
+                                 #                                   y12=y12k,
+                                 #                                   p01=p01,
+                                 #                                   p02=p02,
+                                 #                                   p12=p12,
+                                 #                                   dimp01=dimp01,
+                                 #                                   dimp02=dimp02,
+                                 #                                   dimp12=dimp12,
+                                 #                                   Ntime=NtimePoints)
+                                 # 
+                                 # output.deriv3<- deriva.gradient(b=b,
+                                 #                        funcpa=gaussDYNidmlLikelihoodweib,
+                                 #                                         npm=npmweib,
+                                 #                                         npar=size_V,
+                                 #                                         bfix=bfix,
+                                 #                                         fix=fix0.beta,
+                                 #                                         ctime=ctime,
+                                 #                                         no=N,
+                                 #                                         ve01=ve01,
+                                 #                                         ve02=ve02,
+                                 #                                         ve12=ve12,
+                                 #                                         dimnva01=dimnva01,
+                                 #                                         dimnva02=dimnva02,
+                                 #                                         dimnva12=dimnva12,
+                                 #                                         nva01=nvat01,
+                                 #                                         nva02=nvat02,
+                                 #                                         nva12=nvat12,
+                                 #                                         t0=t0,
+                                 #                                         t1=t1,
+                                 #                                         t2=t2,
+                                 #                                         t3=t3,
+                                 #                                         troncature=troncature,
+                                 #                                         y01=y01k,
+                                 #                                         y02=y02k,
+                                 #                                         y12=y12k,
+                                 #                                         p01=p01,
+                                 #                                         p02=p02,
+                                 #                                         p12=p12,
+                                 #                                         dimp01=dimp01,
+                                 #                                         dimp02=dimp02,
+                                 #                                         dimp12=dimp12,
+                                 #                                         Ntime=NtimePoints)
+
                                  # look at convergence for each lambda :
                                  
                                  # new values for splines:
@@ -2333,7 +2464,11 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                          
                                          eigen.values<-diag(V)
                                          
-                                         idpos<-ifelse(any(eigen.values<=eps.eigen),1,0)
+                                         if(defpositive==T){
+                                           idpos<-ifelse(any(eigen.values<=eps.eigen),1,0)
+                                         }else{
+                                           idpos<-ifelse(any(diag(V)==0),1,0)
+                                         }
                                          
                                          
                                          idpos0<-idpos
@@ -2370,7 +2505,11 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                            if(sum(V==Inf)>0|sum(V==-Inf)>0){break}
                                            eigen.values<-diag(V)
                                            # check if hessienne defined positive
-                                           idpos<-ifelse(any(eigen.values<=eps.eigen),1,0)
+                                           if(defpositive==T){
+                                             idpos<-ifelse(any(eigen.values<=eps.eigen),1,0)
+                                           }else{
+                                             idpos<-ifelse(any(diag(V)==0),1,0)
+                                           }
                                            
                                            
                                            
@@ -2523,6 +2662,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                          
                                          
                                          betanew<-beta+delta*sears$vw
+                                         betanew<-ifelse(abs(betanew)<=0.0001,0,betanew)
                                          b<-c(s,betanew)
                                          
                                          
@@ -2588,7 +2728,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                        if(npmweib!=0){
                                        output.mla<- marqLevAlg::mla(b=b,
                                                                     fn=gaussDYNidmlLikelihoodweib,
-                                                                    gr=deriva.gradient.DYNweib,
+                                                                    gr=DYNreggrmlaweibana,
                                                                     epsa=epsa,
                                                                     epsb=epsb,
                                                                     epsd=epsd,
@@ -2994,46 +3134,12 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                                 Ntime=NtimePoints)
                                          
                                          
-                                         test<-deriva.gradient(b=b,
-                                                          funcpa=gaussDYNidmlLikelihoodweib,
-                                                        npm=npm,
-                                                        npar=size_V,
-                                                        bfix=bfix,
-                                                        fix=fix0,
-                                                        ctime=ctime,
-                                                        no=N,
-                                                        ve01=ve01,
-                                                        ve02=ve02,
-                                                        ve12=ve12,
-                                                        dimnva01=dimnva01,
-                                                        dimnva02=dimnva02,
-                                                        dimnva12=dimnva12,
-                                                        nva01=nvat01,
-                                                        nva02=nvat02,
-                                                        nva12=nvat12,
-                                                        t0=t0,
-                                                        t1=t1,
-                                                        t2=t2,
-                                                        t3=t3,
-                                                        troncature=troncature,
-                                                        y01=y01k,
-                                                        y02=y02k,
-                                                        y12=y12k,
-                                                        p01=p01,
-                                                        p02=p02,
-                                                        p12=p12,
-                                                        dimp01=dimp01,
-                                                        dimp02=dimp02,
-                                                        dimp12=dimp12,
-                                                        Ntime=NtimePoints)
-                                         
-                                         
                                          #sparseHessianFD
                                          # h=1e-16 --> problem in hessian evaluation
                                          # h=1e-8 --> no issue
                                          output<-output$v
                                          
-                                         browser()
+                                         #browser()
                                          if(ite==0){
                                            fn.value<-gaussDYNidmlLikelihoodweibpena(b=b,
                                                                                     npm=npm,
@@ -3119,7 +3225,11 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                          
                                          eigen.values<-eigen(V,symmetric=T,only.values=T)$values
                                          
-                                         idpos<-ifelse(any(eigen.values<=eps.eigen),1,0)
+                                         if(defpositive==T){
+                                           idpos<-ifelse(any(eigen.values<=eps.eigen),1,0)
+                                         }else{
+                                           idpos<-ifelse(any(diag(V)==0),1,0)
+                                         }
                                          
                                          
                                          idpos0<-idpos
@@ -3155,7 +3265,11 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                            if(sum(V==Inf)>0|sum(V==-Inf)>0){break}
                                            eigen.values<-eigen(V,symmetric=T,only.values=T)$values
                                            # check if hessienne defined positive
-                                           idpos<-ifelse(any(eigen.values<=eps.eigen),1,0)
+                                           if(defpositive==T){
+                                             idpos<-ifelse(any(eigen.values<=eps.eigen),1,0)
+                                           }else{
+                                             idpos<-ifelse(any(diag(V)==0),1,0)
+                                           }
                                            
                                            
                                            
@@ -3238,7 +3352,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                          # we have issue if res is NA or if not higher than previous one 
                                          # if not better or do not exist need to readjust
                                          # value of beta 
-                                         
+                                   
                                          
                                          if(res %in%c(-1e9,1e9) | res < fn.value){
                                            
@@ -3312,6 +3426,9 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                            
                                            
                                            betanew<-beta+delta*sears$vw
+                                           # add close to 0 check 
+                                           #browser()
+                                           betanew<-ifelse(abs(betanew)<=0.0001,0,betanew)
                                            b<-c(s,betanew)
                                            
                                            
@@ -3372,11 +3489,12 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                          bfix<-b[fix0.beta==1]
                                          b<-b[fix0.beta==0]
                                          # update modelPar
-                                         browser()
+                                        # browser()
                                          if(npmweib!=0){
                                          output.mla<- marqLevAlg::mla(b=b,
                                                                       fn=gaussDYNidmlLikelihoodweib,
-                                                                      gr=deriva.gradient.DYNweib,
+                                                                      gr=DYNreggrmlaweibana,
+                                                                  
                                                                       epsa=epsa,
                                                                       epsb=epsb,
                                                                       epsd=epsd,
@@ -3412,10 +3530,83 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                                       dimp02=dimp02,
                                                                       dimp12=dimp12,
                                                                       Ntime=NtimePoints)
-                                         
-                                         
-                                         
-                                         
+                                       
+                                         # output.mla2<- marqLevAlg::mla(b=b,
+                                         #                              fn=gaussDYNidmlLikelihoodweib,
+                                         # 
+                                         #                              epsa=epsa,
+                                         #                              epsb=epsb,
+                                         #                              epsd=epsd,
+                                         #                              maxiter=maxiter.pena,
+                                         #                              minimize=F,
+                                         #                              npm=npmweib,
+                                         #                              npar=size_V,
+                                         #                              bfix=bfix,
+                                         #                              fix=fix0.beta,
+                                         #                              ctime=ctime,
+                                         #                              no=N,
+                                         #                              ve01=ve01,
+                                         #                              ve02=ve02,
+                                         #                              ve12=ve12,
+                                         #                              dimnva01=dimnva01,
+                                         #                              dimnva02=dimnva02,
+                                         #                              dimnva12=dimnva12,
+                                         #                              nva01=nvat01,
+                                         #                              nva02=nvat02,
+                                         #                              nva12=nvat12,
+                                         #                              t0=t0,
+                                         #                              t1=t1,
+                                         #                              t2=t2,
+                                         #                              t3=t3,
+                                         #                              troncature=troncature,
+                                         #                              y01=y01k,
+                                         #                              y02=y02k,
+                                         #                              y12=y12k,
+                                         #                              p01=p01,
+                                         #                              p02=p02,
+                                         #                              p12=p12,
+                                         #                              dimp01=dimp01,
+                                         #                              dimp02=dimp02,
+                                         #                              dimp12=dimp12,
+                                         #                              Ntime=NtimePoints)
+                                         # output.mla3<- marqLevAlg::mla(b=b,
+                                         #                              fn=gaussDYNidmlLikelihoodweib,
+                                         #                              gr=deriva.gradient.DYNweib,
+                                         #                              epsa=epsa,
+                                         #                              epsb=epsb,
+                                         #                              epsd=epsd,
+                                         #                              maxiter=maxiter.pena,
+                                         #                              minimize=F,
+                                         #                              npm=npmweib,
+                                         #                              npar=size_V,
+                                         #                              bfix=bfix,
+                                         #                              fix=fix0.beta,
+                                         #                              ctime=ctime,
+                                         #                              no=N,
+                                         #                              ve01=ve01,
+                                         #                              ve02=ve02,
+                                         #                              ve12=ve12,
+                                         #                              dimnva01=dimnva01,
+                                         #                              dimnva02=dimnva02,
+                                         #                              dimnva12=dimnva12,
+                                         #                              nva01=nvat01,
+                                         #                              nva02=nvat02,
+                                         #                              nva12=nvat12,
+                                         #                              t0=t0,
+                                         #                              t1=t1,
+                                         #                              t2=t2,
+                                         #                              t3=t3,
+                                         #                              troncature=troncature,
+                                         #                              y01=y01k,
+                                         #                              y02=y02k,
+                                         #                              y12=y12k,
+                                         #                              p01=p01,
+                                         #                              p02=p02,
+                                         #                              p12=p12,
+                                         #                              dimp01=dimp01,
+                                         #                              dimp02=dimp02,
+                                         #                              dimp12=dimp12,
+                                         #                              Ntime=NtimePoints)
                                          # look at convergence for each lambda :
                                          
                                          # new values for splines:
@@ -3640,7 +3831,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                            
                                            
                                            while(converged==F & ite<=maxiter){
-                                             
+                                             # browser()
                                              b<-c(s,beta)
                                              bfix<-b[fix0==1]
                                              b<-b[fix0==0]
@@ -3721,7 +3912,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                                                         penalty=penalty)
                                              }
                                              
-                                             if(any(is.na(output$V))|any(output$V==Inf) |any(output$V==-Inf)|any(is.na(output$fu))|any(output$fu==Inf) |any(output$fu==-Inf)){
+                                             if(any(is.na(output))|any(output==Inf) |any(output==-Inf)){
                                                warning("Computational error for calculation of the hessian : division by 0 or Infinite value")
                                                if(ite==0){
                                                  
@@ -3746,7 +3937,11 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                              
                                              eigen.values<-diag(V)
                                              
-                                             idpos<-ifelse(any(eigen.values<=eps.eigen),1,0)
+                                             if(defpositive==T){
+                                               idpos<-ifelse(any(eigen.values<=eps.eigen),1,0)
+                                             }else{
+                                               idpos<-ifelse(any(diag(V)==0),1,0)
+                                             }
                                              
                                              
                                              idpos0<-idpos
@@ -3783,7 +3978,11 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                if(sum(V==Inf)>0|sum(V==-Inf)>0){break}
                                                eigen.values<-diag(V)
                                                # check if hessienne defined positive
-                                               idpos<-ifelse(any(eigen.values<=eps.eigen),1,0)
+                                               if(defpositive==T){
+                                                 idpos<-ifelse(any(eigen.values<=eps.eigen),1,0)
+                                               }else{
+                                                 idpos<-ifelse(any(diag(V)==0),1,0)
+                                               }
                                                
                                                
                                                
@@ -3936,6 +4135,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                
                                                
                                                betanew<-beta+delta*sears$vw
+                                               betanew<-ifelse(abs(betanew)<=0.0001,0,betanew)
                                                b<-c(s,betanew)
                                                
                                                
@@ -3976,6 +4176,8 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                                                    penalty.factor=penalty.factor,
                                                                                    penalty=penalty)
                                                
+                                               
+                                               
                                              }
                                              # if not better or do not exist need to readjust
                                              # value of beta 
@@ -4001,7 +4203,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                              if(npmweib!=0){
                                              output.mla<- marqLevAlg::mla(b=b,
                                                                           fn=gaussDYNidmlLikelihoodweib,
-                                                                          gr=deriva.gradient.DYNweib,
+                                                                          gr=DYNreggrmlaweibana,
                                                                           epsa=epsa,
                                                                           epsb=epsb,
                                                                           epsd=epsd,
@@ -4489,7 +4691,12 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                                     
                                                                     eigen.values<-eigen(V,symmetric=T,only.values=T)$values
                                                                     
-                                                                    idpos<-ifelse(any(eigen.values<=eps.eigen),1,0)
+                                                                    if(defpositive==T){
+                                                                      idpos<-ifelse(any(eigen.values<=eps.eigen),1,0)
+                                                                    }else{
+                                                                      idpos<-ifelse(any(diag(V)==0),1,0)
+                                                                    }
+                                                                    
                                                                     
                                                                     
                                                                     idpos0<-idpos
@@ -4525,7 +4732,12 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                                       if(sum(V==Inf)>0|sum(V==-Inf)>0){break}
                                                                       eigen.values<-eigen(V,symmetric=T,only.values=T)$values
                                                                       # check if hessienne defined positive
-                                                                      idpos<-ifelse(any(eigen.values<=eps.eigen),1,0)
+                                                                      if(defpositive==T){
+                                                                        idpos<-ifelse(any(eigen.values<=eps.eigen),1,0)
+                                                                      }else{
+                                                                        idpos<-ifelse(any(diag(V)==0),1,0)
+                                                                      }
+                                                                      
                                                                       
                                                                       
                                                                       
@@ -4682,6 +4894,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                                       
                                                                       
                                                                       betanew<-beta+delta*sears$vw
+                                                                      betanew<-ifelse(abs(betanew)<=0.0001,0,betanew)
                                                                       b<-c(s,betanew)
                                                                       
                                                                       
@@ -4746,7 +4959,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                                     if(npmweib!=0){
                                                                     output.mla<- marqLevAlg::mla(b=b,
                                                                                                  fn=gaussDYNidmlLikelihoodweib,
-                                                                                                 gr=deriva.gradient.DYNweib,
+                                                                                                 gr=DYNreggrmlaweibana,
                                                                                                  epsa=epsa,
                                                                                                  epsb=epsb,
                                                                                                  epsd=epsd,
@@ -5107,7 +5320,12 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                                         
                                                                         eigen.values<-diag(V)
                                                                         
-                                                                        idpos<-ifelse(any(eigen.values<=eps.eigen),1,0)
+                                                                        if(defpositive==T){
+                                                                          idpos<-ifelse(any(eigen.values<=eps.eigen),1,0)
+                                                                        }else{
+                                                                          idpos<-ifelse(any(diag(V)==0),1,0)
+                                                                        }
+                                                                        
                                                                         
                                                                         
                                                                         idpos0<-idpos
@@ -5144,7 +5362,12 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                                           if(sum(V==Inf)>0|sum(V==-Inf)>0){break}
                                                                           eigen.values<-diag(V)
                                                                           # check if hessienne defined positive
-                                                                          idpos<-ifelse(any(eigen.values<=eps.eigen),1,0)
+                                                                          if(defpositive==T){
+                                                                            idpos<-ifelse(any(eigen.values<=eps.eigen),1,0)
+                                                                          }else{
+                                                                            idpos<-ifelse(any(diag(V)==0),1,0)
+                                                                          }
+                                                                          
                                                                           
                                                                           
                                                                           
@@ -5297,6 +5520,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                                           
                                                                           
                                                                           betanew<-beta+delta*sears$vw
+                                                                          betanew<-ifelse(abs(betanew)<=0.0001,0,betanew)
                                                                           b<-c(s,betanew)
                                                                           
                                                                           
@@ -5363,7 +5587,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                                         
                                                                         output.mla<- marqLevAlg::mla(b=b,
                                                                                                      fn=gaussDYNidmlLikelihoodweib,
-                                                                                                     gr=deriva.gradient.DYNweib,
+                                                                                                     gr=DYNreggrmlaweibana,
                                                                                                      epsa=epsa,
                                                                                                      epsb=epsb,
                                                                                                      epsd=epsd,

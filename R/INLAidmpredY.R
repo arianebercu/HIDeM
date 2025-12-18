@@ -391,6 +391,7 @@ INLAidmpredY<-function(timeVar,truncated,formLong,dataSurv,dataLongi,id,
 
 
 make_XINLA <- function(formula, timeVar, data, use_splines = FALSE, ct, id, SMP, ...) {
+  
   n <- nrow(data)
   
   # Extract terms

@@ -150,16 +150,15 @@ deriva.hessianweib <- function(nproc=1,b,fix,funcpa,.packages=NULL,...){
 
 deriva.gradient.DYNweib <- function(b,nproc=1,.packages=NULL,...){
   fn<-gaussDYNidmlLikelihoodweib
-  h<-1E-4
+  h<-1e-4
   m <- length(b)
   bh2 <- bh <- rep(0,m)
   v <- rep(0,(m*(m+3)/2))
   fcith <- fcith2 <- rep(0,m)
   ## function 
   rl <- fn(b,...)
-  eps<-h^(1/2)
-  th<-pmax(eps,(eps*abs(b)))
-  
+  #th<-pmax(h^(1/2),(h^(1/2)*abs(b)))
+  th <- (.Machine$double.eps)^(1/3) * pmax(1, abs(b))
   if(nproc>1)
   {
     ### remplacer les 2 boucles par une seule
@@ -186,7 +185,7 @@ deriva.gradient.DYNweib <- function(b,nproc=1,.packages=NULL,...){
         bm[i] <- b[i]-th[i]
         ar <- fn(bm,...)
         
-        d <- (av-ar)/(2*h[i])
+        d <- (av-ar)/(2*th[i])
         
         c(av,d)
       }
@@ -212,7 +211,7 @@ deriva.gradient.DYNweib <- function(b,nproc=1,.packages=NULL,...){
       fcith2[i] <- fn(bh2,...)
       #thn<-max(1E-7,(1E-4*abs(b[i])))
       #thn<-.Machine$double.eps^(1/4)
-      v[i]<--(fcith[i]-fcith2[i])/(2*th[i])
+      v[i]<-(fcith[i]-fcith2[i])/(2*th[i])
     }
   }
   return(v)
@@ -220,15 +219,14 @@ deriva.gradient.DYNweib <- function(b,nproc=1,.packages=NULL,...){
 
 deriva.gradient.DYNspline <- function(b,nproc=1,.packages=NULL,...){
   fn<-gaussDYNidmlLikelihood
-  h<-1E-4
+ 
   m <- length(b)
   bh2 <- bh <- rep(0,m)
   v <- rep(0,(m*(m+3)/2))
   fcith <- fcith2 <- rep(0,m)
   ## function 
   rl <- fn(b,...)
-  eps<-h^(1/2)
-  th<-pmax(eps,(eps*abs(b)))
+  th<-pmax(1E-7,(1E-4*abs(b)))
   
   if(nproc>1)
   {
@@ -256,7 +254,7 @@ deriva.gradient.DYNspline <- function(b,nproc=1,.packages=NULL,...){
         bm[i] <- b[i]-th[i]
         ar <- fn(bm,...)
         
-        d <- (av-ar)/(2*h[i])
+        d <- (av-ar)/(2*th[i])
         
         c(av,d)
       }
@@ -282,7 +280,7 @@ deriva.gradient.DYNspline <- function(b,nproc=1,.packages=NULL,...){
       fcith2[i] <- fn(bh2,...)
       #thn<-max(1E-7,(1E-4*abs(b[i])))
       #thn<-.Machine$double.eps^(1/4)
-      v[i]<--(fcith[i]-fcith2[i])/(2*th[i])
+      v[i]<-(fcith[i]-fcith2[i])/(2*th[i])
     }
   }
   return(v)
@@ -1439,32 +1437,42 @@ reggrmlaweibana<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
                           t0,t1,t2,t3,troncature,lambda,alpha,penalty.factor,penalty,gausspoint){
   
 
+
   res<-rep(0,npm)
   output<-.Fortran("derivaweibfirstderiv",
-                   ## input
-                   as.double(b),
-                   as.integer(npm),
-                   as.integer(npar),
-                   as.double(bfix),
-                   as.integer(fix),
-                   as.integer(ctime),
-                   as.integer(no),
-                   as.double(ve01),
-                   as.double(ve12),
-                   as.double(ve02),
-                   as.integer(dimnva01),
-                   as.integer(dimnva12),
-                   as.integer(dimnva02),
-                   as.integer(nva01),
-                   as.integer(nva12),
-                   as.integer(nva02),
-                   as.double(t0),
-                   as.double(t1),
-                   as.double(t2),
-                   as.double(t3),
-                   as.integer(troncature),
-                   likelihood_deriv=as.double(res),
-                   PACKAGE="HIDeM")$likelihood_deriv
+                  as.double(b),
+           as.integer(npm),
+           as.integer(npar),
+           as.double(bfix),
+           as.integer(fix),
+           as.integer(ctime),
+           as.integer(no),
+           as.double(ve01),
+           as.double(ve12),
+           as.double(ve02),
+           as.double(y01),
+           as.double(y02),
+           as.double(y12),
+           as.integer(p01),
+           as.integer(p02),
+           as.integer(p12),
+           as.integer(dimp01),
+           as.integer(dimp02),
+           as.integer(dimp12),
+           as.integer(Ntime),
+           as.integer(dimnva01),
+           as.integer(dimnva12),
+           as.integer(dimnva02),
+           as.integer(nva01),
+           as.integer(nva12),
+           as.integer(nva02),
+           as.double(t0),
+           as.double(t1),
+           as.double(t2),
+           as.double(t3),
+           as.integer(troncature),
+           likelihood_res=as.double(res),
+           PACKAGE="HIDeM")$likelihood_res
   
   
   if(any(output==Inf)| any(output==-Inf) | any(is.na(output)) | any(is.nan(output))){
@@ -1486,4 +1494,5 @@ reggrmlaweibana<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
   return(sol)
 }
  
+
 

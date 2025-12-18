@@ -221,6 +221,7 @@ DYNcv.model<-function(beta,
   NEW.BETA.all<-beta
   penalty.factor<-penalty.factor[fix==0]
   
+  #browser()
   num<-sapply(c(1:dim(v)[1]),FUN=function(x){
     fu[x]-sum(v[x,-x]*BETA[-x])+sum(BETA*v[x,])
   }) 

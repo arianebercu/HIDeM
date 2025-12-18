@@ -5289,7 +5289,7 @@ subroutine fonctrisq(x,p,risq)
         double precision,dimension(2)::p
         double precision::x,risq
 
-        	risq = p(1)*(p(2)**p(1))*(x**(p(1)-1.d0)) ! base risk 
+       	risq = p(1)*(p(2)**p(1))*(x**(p(1)-1.d0)) ! base risk 
 
         if (x.le.0.d0) then
                 risq = 0.d0
@@ -5298,6 +5298,25 @@ subroutine fonctrisq(x,p,risq)
         return
 
 end subroutine fonctrisq
+
+! try numeric change 17/12/2025
+! subroutine fonctrisq(x,p,risq)
+
+ !       implicit none
+
+  !      double precision,dimension(2)::p
+   !     double precision::x,risq
+
+        !	risq = p(1)*(p(2)**p(1))*(x**(p(1)-1.d0)) ! base risk 
+	!		risq = dexp(p(2)+x*(p(1)-1.d0)) ! base risk 
+
+     !   if (x.le.0.d0) then
+      !          risq = 0.d0
+       ! endif
+
+        !return
+
+!end subroutine fonctrisq
 
 
 subroutine fonctdep(x,p,risq,glam,surv,y)
@@ -5676,7 +5695,7 @@ subroutine qgauss1(cas,a,b,c, the01,the02,the12,res,v01,v02,v12_ref, gamma, semi
               ctemp=c-xx
              endif
              
-              v12dem = exp(gamma*xx)
+              v12dem = dexp(gamma*xx)
    	          v12 = v12_ref*v12dem
    	                
    	         !   Print *, "Gamma", gamma, xx 
@@ -5723,7 +5742,7 @@ subroutine qgauss1(cas,a,b,c, the01,the02,the12,res,v01,v02,v12_ref, gamma, semi
              endif
    	         
                    
-   	         v12dem = exp(gamma*xx)
+   	         v12dem = dexp(gamma*xx)
    	         v12 = v12_ref*v12dem
    	         
                   call fonct(xx,the01,ri01,gl01,su01)
@@ -6080,6 +6099,8 @@ subroutine qgaussPL15weibsemimark(cas,a,b,c,the01,the02,the12,res,v01,v02,v12)
 !=============================================================================================  
 !==== QGAUS15 out a 15 point Gauss-Kronrod quadrature rule for weib  =========================
 !=============================================================================================  
+
+						 
 subroutine qgaussPL15weibtimedep(a,b,the01,the02,the12,res,&
        v01,v02,v12,y01,y02,y12)
          
@@ -8744,46 +8765,46 @@ res0202num,res0212num,res1212num,v01,v02,v12)
 		fc12num=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12/(su12**v12) 
 
 
-		fcthe01=(su01**v01)*(su02**v02)*ri01*v01*gl01*v01*LOG(xm)/(su12**v12)
-		fcthe02=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02*LOG(xm)/(su12**v12)
-		fcthe12=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12*LOG(xm)/(su12**v12)
+		fcthe01=(su01**v01)*(su02**v02)*ri01*v01*gl01*v01*dlog(xm)/(su12**v12)
+		fcthe02=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02*dlog(xm)/(su12**v12)
+		fcthe12=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12*dlog(xm)/(su12**v12)
 
-		fcthe0101=(su01**v01)*(su02**v02)*ri01*v01*((gl01*v01)**2)*LOG(xm)/(su12**v12)
-		fcthe0202=(su01**v01)*(su02**v02)*ri01*v01*((gl02*v02)**2)*LOG(xm)/(su12**v12)
-		fcthe1212=(su01**v01)*(su02**v02)*ri01*v01*((gl12*v12)**2)*LOG(xm)/(su12**v12)
+		fcthe0101=(su01**v01)*(su02**v02)*ri01*v01*((gl01*v01)**2)*dlog(xm)/(su12**v12)
+		fcthe0202=(su01**v01)*(su02**v02)*ri01*v01*((gl02*v02)**2)*dlog(xm)/(su12**v12)
+		fcthe1212=(su01**v01)*(su02**v02)*ri01*v01*((gl12*v12)**2)*dlog(xm)/(su12**v12)
 
 		fcthe0101dsquare=&
-		(su01**v01)*(su02**v02)*ri01*v01*((gl01*v01)**2)*(LOG(xm)**2)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*((gl01*v01)**2)*(dlog(xm)**2)/(su12**v12)
 		fcthe0202dsquare=&
-		(su01**v01)*(su02**v02)*ri01*v01*((gl02*v02)**2)*(LOG(xm)**2)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*((gl02*v02)**2)*(dlog(xm)**2)/(su12**v12)
 		fcthe1212dsquare=&
-		(su01**v01)*(su02**v02)*ri01*v01*((gl12*v12)**2)*(LOG(xm)**2)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*((gl12*v12)**2)*(dlog(xm)**2)/(su12**v12)
 
 		fcthe0101square=&
-		(su01**v01)*(su02**v02)*ri01*v01*(gl01*v01)*(LOG(xm)**2)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*(gl01*v01)*(dlog(xm)**2)/(su12**v12)
 		fcthe0202square=&
-		(su01**v01)*(su02**v02)*ri01*v01*(gl02*v02)*(LOG(xm)**2)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*(gl02*v02)*(dlog(xm)**2)/(su12**v12)
 		fcthe1212square=&
-		(su01**v01)*(su02**v02)*ri01*v01*gl12*v12*(LOG(xm)**2)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*gl12*v12*(dlog(xm)**2)/(su12**v12)
 
 		fcthenum=&
-		(su01**v01)*(su02**v02)*ri01*v01*LOG(xm)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*dlog(xm)/(su12**v12)
 		fcthenumsquare=&
-		(su01**v01)*(su02**v02)*ri01*v01*(LOG(xm)**2)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*(dlog(xm)**2)/(su12**v12)
 
 		fcthe0102=&
-		(su01**v01)*(su02**v02)*ri01*v01*(gl01*v01)*(gl02*v02)*LOG(xm)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*(gl01*v01)*(gl02*v02)*dlog(xm)/(su12**v12)
 		fcthe0112=&
-		(su01**v01)*(su02**v02)*ri01*v01*(gl01*v01)*(gl12*v12)*LOG(xm)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*(gl01*v01)*(gl12*v12)*dlog(xm)/(su12**v12)
 		fcthe0212=&
-		(su01**v01)*(su02**v02)*ri01*v01*(gl02*v02)*gl12*v12*LOG(xm)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*(gl02*v02)*gl12*v12*dlog(xm)/(su12**v12)
 
 		fcthe0102square=&
-		(su01**v01)*(su02**v02)*ri01*v01*(gl01*v01)*(gl02*v02)*(LOG(xm)**2)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*(gl01*v01)*(gl02*v02)*(dlog(xm)**2)/(su12**v12)
 		fcthe0112square=&
-		(su01**v01)*(su02**v02)*ri01*v01*(gl01*v01)*(gl12*v12)*(LOG(xm)**2)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*(gl01*v01)*(gl12*v12)*(dlog(xm)**2)/(su12**v12)
 		fcthe0212square=&
-		(su01**v01)*(su02**v02)*ri01*v01*(gl02*v02)*gl12*v12*(LOG(xm)**2)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*(gl02*v02)*gl12*v12*(dlog(xm)**2)/(su12**v12)
 
 		fc0101num=(su01**v01)*(su02**v02)*ri01*v01*(((1-gl01*v01)**2)-&
 			gl01*v01)/(su12**v12)
@@ -8849,46 +8870,46 @@ res0202num,res0212num,res1212num,v01,v02,v12)
 			f10212num=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02*gl12*v12/(su12**v12)
 			f11212num=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12*gl12*v12/(su12**v12)
 
-			f1the01=(su01**v01)*(su02**v02)*ri01*v01*gl01*v01*LOG(xx)/(su12**v12)
-			f1the02=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02*LOG(xx)/(su12**v12)
-			f1the12=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12*LOG(xx)/(su12**v12)
+			f1the01=(su01**v01)*(su02**v02)*ri01*v01*gl01*v01*dlog(xx)/(su12**v12)
+			f1the02=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02*dlog(xx)/(su12**v12)
+			f1the12=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12*dlog(xx)/(su12**v12)
 
-			f1the0101=(su01**v01)*(su02**v02)*ri01*v01*((gl01*v01)**2)*LOG(xx)/(su12**v12)
-			f1the0202=(su01**v01)*(su02**v02)*ri01*v01*((gl02*v02)**2)*LOG(xx)/(su12**v12)
-			f1the1212=(su01**v01)*(su02**v02)*ri01*v01*((gl12*v12)**2)*LOG(xx)/(su12**v12)
+			f1the0101=(su01**v01)*(su02**v02)*ri01*v01*((gl01*v01)**2)*dlog(xx)/(su12**v12)
+			f1the0202=(su01**v01)*(su02**v02)*ri01*v01*((gl02*v02)**2)*dlog(xx)/(su12**v12)
+			f1the1212=(su01**v01)*(su02**v02)*ri01*v01*((gl12*v12)**2)*dlog(xx)/(su12**v12)
 
 			f1the0101dsquare=&
-		(su01**v01)*(su02**v02)*ri01*v01*((gl01*v01)**2)*(LOG(xx)**2)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*((gl01*v01)**2)*(dlog(xx)**2)/(su12**v12)
 			f1the0202dsquare=&
-		(su01**v01)*(su02**v02)*ri01*v01*((gl02*v02)**2)*(LOG(xx)**2)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*((gl02*v02)**2)*(dlog(xx)**2)/(su12**v12)
 			f1the1212dsquare=&
-		(su01**v01)*(su02**v02)*ri01*v01*((gl12*v12)**2)*(LOG(xx)**2)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*((gl12*v12)**2)*(dlog(xx)**2)/(su12**v12)
 
 			f1the0101square=&
-		(su01**v01)*(su02**v02)*ri01*v01*(gl01*v01)*(LOG(xx)**2)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*(gl01*v01)*(dlog(xx)**2)/(su12**v12)
 			f1the0202square=&
-		(su01**v01)*(su02**v02)*ri01*v01*(gl02*v02)*(LOG(xx)**2)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*(gl02*v02)*(dlog(xx)**2)/(su12**v12)
 			f1the1212square=&
-		(su01**v01)*(su02**v02)*ri01*v01*gl12*v12*(LOG(xx)**2)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*gl12*v12*(dlog(xx)**2)/(su12**v12)
 
 			f1thenum=&
-		(su01**v01)*(su02**v02)*ri01*v01*LOG(xx)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*dlog(xx)/(su12**v12)
 		f1thenumsquare=&
-		(su01**v01)*(su02**v02)*ri01*v01*(LOG(xx)**2)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*(dlog(xx)**2)/(su12**v12)
 
 			f1the0102=&
-		(su01**v01)*(su02**v02)*ri01*v01*(gl01*v01)*(gl02*v02)*LOG(xx)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*(gl01*v01)*(gl02*v02)*dlog(xx)/(su12**v12)
 			f1the0112=&
-		(su01**v01)*(su02**v02)*ri01*v01*(gl01*v01)*(gl12*v12)*LOG(xx)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*(gl01*v01)*(gl12*v12)*dlog(xx)/(su12**v12)
 			f1the0212=&
-		(su01**v01)*(su02**v02)*ri01*v01*(gl02*v02)*gl12*v12*LOG(xx)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*(gl02*v02)*gl12*v12*dlog(xx)/(su12**v12)
 
 			f1the0102square=&
-		(su01**v01)*(su02**v02)*ri01*v01*(gl01*v01)*(gl02*v02)*(LOG(xx)**2)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*(gl01*v01)*(gl02*v02)*(dlog(xx)**2)/(su12**v12)
 			f1the0112square=&
-		(su01**v01)*(su02**v02)*ri01*v01*(gl01*v01)*(gl12*v12)*(LOG(xx)**2)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*(gl01*v01)*(gl12*v12)*(dlog(xx)**2)/(su12**v12)
 			f1the0212square=&
-		(su01**v01)*(su02**v02)*ri01*v01*(gl02*v02)*gl12*v12*(LOG(xx)**2)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*(gl02*v02)*gl12*v12*(dlog(xx)**2)/(su12**v12)
 
 
 			
@@ -8909,46 +8930,46 @@ res0202num,res0212num,res1212num,v01,v02,v12)
 			f20212num=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02*gl12*v12/(su12**v12)
 			f21212num=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12*gl12*v12/(su12**v12)
 
-			f2the01=(su01**v01)*(su02**v02)*ri01*v01*gl01*v01*LOG(xx)/(su12**v12)
-			f2the02=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02*LOG(xx)/(su12**v12)
-			f2the12=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12*LOG(xx)/(su12**v12)
+			f2the01=(su01**v01)*(su02**v02)*ri01*v01*gl01*v01*dlog(xx)/(su12**v12)
+			f2the02=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02*dlog(xx)/(su12**v12)
+			f2the12=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12*dlog(xx)/(su12**v12)
 
-			f2the0101=(su01**v01)*(su02**v02)*ri01*v01*((gl01*v01)**2)*LOG(xx)/(su12**v12)
-			f2the0202=(su01**v01)*(su02**v02)*ri01*v01*((gl02*v02)**2)*LOG(xx)/(su12**v12)
-			f2the1212=(su01**v01)*(su02**v02)*ri01*v01*((gl12*v12)**2)*LOG(xx)/(su12**v12)
+			f2the0101=(su01**v01)*(su02**v02)*ri01*v01*((gl01*v01)**2)*dlog(xx)/(su12**v12)
+			f2the0202=(su01**v01)*(su02**v02)*ri01*v01*((gl02*v02)**2)*dlog(xx)/(su12**v12)
+			f2the1212=(su01**v01)*(su02**v02)*ri01*v01*((gl12*v12)**2)*dlog(xx)/(su12**v12)
 
 			f2the0101dsquare=&
-		(su01**v01)*(su02**v02)*ri01*v01*((gl01*v01)**2)*(LOG(xx)**2)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*((gl01*v01)**2)*(dlog(xx)**2)/(su12**v12)
 			f2the0202dsquare=&
-		(su01**v01)*(su02**v02)*ri01*v01*((gl02*v02)**2)*(LOG(xx)**2)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*((gl02*v02)**2)*(dlog(xx)**2)/(su12**v12)
 			f2the1212dsquare=&
-		(su01**v01)*(su02**v02)*ri01*v01*((gl12*v12)**2)*(LOG(xx)**2)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*((gl12*v12)**2)*(dlog(xx)**2)/(su12**v12)
 
 			f2the0101square=&
-		(su01**v01)*(su02**v02)*ri01*v01*(gl01*v01)*(LOG(xx)**2)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*(gl01*v01)*(dlog(xx)**2)/(su12**v12)
 			f2the0202square=&
-		(su01**v01)*(su02**v02)*ri01*v01*(gl02*v02)*(LOG(xx)**2)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*(gl02*v02)*(dlog(xx)**2)/(su12**v12)
 			f2the1212square=&
-		(su01**v01)*(su02**v02)*ri01*v01*gl12*v12*(LOG(xx)**2)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*gl12*v12*(dlog(xx)**2)/(su12**v12)
 
 			f2thenum=&
-		(su01**v01)*(su02**v02)*ri01*v01*LOG(xx)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*dlog(xx)/(su12**v12)
 		f2thenumsquare=&
-		(su01**v01)*(su02**v02)*ri01*v01*(LOG(xx)**2)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*(dlog(xx)**2)/(su12**v12)
 
 			f2the0102=&
-		(su01**v01)*(su02**v02)*ri01*v01*(gl01*v01)*(gl02*v02)*LOG(xx)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*(gl01*v01)*(gl02*v02)*dlog(xx)/(su12**v12)
 			f2the0112=&
-		(su01**v01)*(su02**v02)*ri01*v01*(gl01*v01)*(gl12*v12)*LOG(xx)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*(gl01*v01)*(gl12*v12)*dlog(xx)/(su12**v12)
 			f2the0212=&
-		(su01**v01)*(su02**v02)*ri01*v01*(gl02*v02)*gl12*v12*LOG(xx)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*(gl02*v02)*gl12*v12*dlog(xx)/(su12**v12)
 
 			f2the0102square=&
-		(su01**v01)*(su02**v02)*ri01*v01*(gl01*v01)*(gl02*v02)*(LOG(xx)**2)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*(gl01*v01)*(gl02*v02)*(dlog(xx)**2)/(su12**v12)
 			f2the0112square=&
-		(su01**v01)*(su02**v02)*ri01*v01*(gl01*v01)*(gl12*v12)*(LOG(xx)**2)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*(gl01*v01)*(gl12*v12)*(dlog(xx)**2)/(su12**v12)
 			f2the0212square=&
-		(su01**v01)*(su02**v02)*ri01*v01*(gl02*v02)*gl12*v12*(LOG(xx)**2)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*(gl02*v02)*gl12*v12*(dlog(xx)**2)/(su12**v12)
 
 			
             reskdenum = reskdenum + wgk(jtw)*(f1denum+f2denum)
@@ -9005,46 +9026,46 @@ res0202num,res0212num,res1212num,v01,v02,v12)
 			f10212num=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02*gl12*v12/(su12**v12)
 			f11212num=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12*gl12*v12/(su12**v12)
 
-			f1the01=(su01**v01)*(su02**v02)*ri01*v01*gl01*v01*LOG(xx)/(su12**v12)
-			f1the02=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02*LOG(xx)/(su12**v12)
-			f1the12=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12*LOG(xx)/(su12**v12)
+			f1the01=(su01**v01)*(su02**v02)*ri01*v01*gl01*v01*dlog(xx)/(su12**v12)
+			f1the02=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02*dlog(xx)/(su12**v12)
+			f1the12=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12*dlog(xx)/(su12**v12)
 
-			f1the0101=(su01**v01)*(su02**v02)*ri01*v01*((gl01*v01)**2)*LOG(xx)/(su12**v12)
-			f1the0202=(su01**v01)*(su02**v02)*ri01*v01*((gl02*v02)**2)*LOG(xx)/(su12**v12)
-			f1the1212=(su01**v01)*(su02**v02)*ri01*v01*((gl12*v12)**2)*LOG(xx)/(su12**v12)
+			f1the0101=(su01**v01)*(su02**v02)*ri01*v01*((gl01*v01)**2)*dlog(xx)/(su12**v12)
+			f1the0202=(su01**v01)*(su02**v02)*ri01*v01*((gl02*v02)**2)*dlog(xx)/(su12**v12)
+			f1the1212=(su01**v01)*(su02**v02)*ri01*v01*((gl12*v12)**2)*dlog(xx)/(su12**v12)
 
 			f1the0101dsquare=&
-		(su01**v01)*(su02**v02)*ri01*v01*((gl01*v01)**2)*(LOG(xx)**2)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*((gl01*v01)**2)*(dlog(xx)**2)/(su12**v12)
 			f1the0202dsquare=&
-		(su01**v01)*(su02**v02)*ri01*v01*((gl02*v02)**2)*(LOG(xx)**2)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*((gl02*v02)**2)*(dlog(xx)**2)/(su12**v12)
 			f1the1212dsquare=&
-		(su01**v01)*(su02**v02)*ri01*v01*((gl12*v12)**2)*(LOG(xx)**2)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*((gl12*v12)**2)*(dlog(xx)**2)/(su12**v12)
 
 			f1the0101square=&
-		(su01**v01)*(su02**v02)*ri01*v01*(gl01*v01)*(LOG(xx)**2)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*(gl01*v01)*(dlog(xx)**2)/(su12**v12)
 			f1the0202square=&
-		(su01**v01)*(su02**v02)*ri01*v01*(gl02*v02)*(LOG(xx)**2)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*(gl02*v02)*(dlog(xx)**2)/(su12**v12)
 			f1the1212square=&
-		(su01**v01)*(su02**v02)*ri01*v01*gl12*v12*(LOG(xx)**2)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*gl12*v12*(dlog(xx)**2)/(su12**v12)
 
 			f1thenum=&
-		(su01**v01)*(su02**v02)*ri01*v01*LOG(xx)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*dlog(xx)/(su12**v12)
 		f1thenumsquare=&
-		(su01**v01)*(su02**v02)*ri01*v01*(LOG(xx)**2)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*(dlog(xx)**2)/(su12**v12)
 
 			f1the0102=&
-		(su01**v01)*(su02**v02)*ri01*v01*(gl01*v01)*(gl02*v02)*LOG(xx)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*(gl01*v01)*(gl02*v02)*dlog(xx)/(su12**v12)
 			f1the0112=&
-		(su01**v01)*(su02**v02)*ri01*v01*(gl01*v01)*(gl12*v12)*LOG(xx)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*(gl01*v01)*(gl12*v12)*dlog(xx)/(su12**v12)
 			f1the0212=&
-		(su01**v01)*(su02**v02)*ri01*v01*(gl02*v02)*gl12*v12*LOG(xx)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*(gl02*v02)*gl12*v12*dlog(xx)/(su12**v12)
 
 			f1the0102square=&
-		(su01**v01)*(su02**v02)*ri01*v01*(gl01*v01)*(gl02*v02)*(LOG(xx)**2)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*(gl01*v01)*(gl02*v02)*(dlog(xx)**2)/(su12**v12)
 			f1the0112square=&
-		(su01**v01)*(su02**v02)*ri01*v01*(gl01*v01)*(gl12*v12)*(LOG(xx)**2)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*(gl01*v01)*(gl12*v12)*(dlog(xx)**2)/(su12**v12)
 			f1the0212square=&
-		(su01**v01)*(su02**v02)*ri01*v01*(gl02*v02)*gl12*v12*(LOG(xx)**2)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*(gl02*v02)*gl12*v12*(dlog(xx)**2)/(su12**v12)
 
                		xx = xm-dx
                		call fonct(xx,the01,ri01,gl01,su01)
@@ -9063,46 +9084,46 @@ res0202num,res0212num,res1212num,v01,v02,v12)
 			f20212num=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02*gl12*v12/(su12**v12)
 			f21212num=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12*gl12*v12/(su12**v12)
 
-			f2the01=(su01**v01)*(su02**v02)*ri01*v01*gl01*v01*LOG(xx)/(su12**v12)
-			f2the02=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02*LOG(xx)/(su12**v12)
-			f2the12=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12*LOG(xx)/(su12**v12)
+			f2the01=(su01**v01)*(su02**v02)*ri01*v01*gl01*v01*dlog(xx)/(su12**v12)
+			f2the02=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02*dlog(xx)/(su12**v12)
+			f2the12=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12*dlog(xx)/(su12**v12)
 
-			f2the0101=(su01**v01)*(su02**v02)*ri01*v01*((gl01*v01)**2)*LOG(xx)/(su12**v12)
-			f2the0202=(su01**v01)*(su02**v02)*ri01*v01*((gl02*v02)**2)*LOG(xx)/(su12**v12)
-			f2the1212=(su01**v01)*(su02**v02)*ri01*v01*((gl12*v12)**2)*LOG(xx)/(su12**v12)
+			f2the0101=(su01**v01)*(su02**v02)*ri01*v01*((gl01*v01)**2)*dlog(xx)/(su12**v12)
+			f2the0202=(su01**v01)*(su02**v02)*ri01*v01*((gl02*v02)**2)*dlog(xx)/(su12**v12)
+			f2the1212=(su01**v01)*(su02**v02)*ri01*v01*((gl12*v12)**2)*dlog(xx)/(su12**v12)
 
 			f2the0101dsquare=&
-		(su01**v01)*(su02**v02)*ri01*v01*((gl01*v01)**2)*(LOG(xx)**2)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*((gl01*v01)**2)*(dlog(xx)**2)/(su12**v12)
 			f2the0202dsquare=&
-		(su01**v01)*(su02**v02)*ri01*v01*((gl02*v02)**2)*(LOG(xx)**2)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*((gl02*v02)**2)*(dlog(xx)**2)/(su12**v12)
 			f2the1212dsquare=&
-		(su01**v01)*(su02**v02)*ri01*v01*((gl12*v12)**2)*(LOG(xx)**2)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*((gl12*v12)**2)*(dlog(xx)**2)/(su12**v12)
 
 			f2the0101square=&
-		(su01**v01)*(su02**v02)*ri01*v01*(gl01*v01)*(LOG(xx)**2)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*(gl01*v01)*(dlog(xx)**2)/(su12**v12)
 			f2the0202square=&
-		(su01**v01)*(su02**v02)*ri01*v01*(gl02*v02)*(LOG(xx)**2)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*(gl02*v02)*(dlog(xx)**2)/(su12**v12)
 			f2the1212square=&
-		(su01**v01)*(su02**v02)*ri01*v01*gl12*v12*(LOG(xx)**2)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*gl12*v12*(dlog(xx)**2)/(su12**v12)
 
 			f2thenum=&
-		(su01**v01)*(su02**v02)*ri01*v01*LOG(xx)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*dlog(xx)/(su12**v12)
 		f2thenumsquare=&
-		(su01**v01)*(su02**v02)*ri01*v01*(LOG(xx)**2)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*(dlog(xx)**2)/(su12**v12)
 
 			f2the0102=&
-		(su01**v01)*(su02**v02)*ri01*v01*(gl01*v01)*(gl02*v02)*LOG(xx)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*(gl01*v01)*(gl02*v02)*dlog(xx)/(su12**v12)
 			f2the0112=&
-		(su01**v01)*(su02**v02)*ri01*v01*(gl01*v01)*(gl12*v12)*LOG(xx)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*(gl01*v01)*(gl12*v12)*dlog(xx)/(su12**v12)
 			f2the0212=&
-		(su01**v01)*(su02**v02)*ri01*v01*(gl02*v02)*gl12*v12*LOG(xx)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*(gl02*v02)*gl12*v12*dlog(xx)/(su12**v12)
 
 			f2the0102square=&
-		(su01**v01)*(su02**v02)*ri01*v01*(gl01*v01)*(gl02*v02)*(LOG(xx)**2)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*(gl01*v01)*(gl02*v02)*(dlog(xx)**2)/(su12**v12)
 			f2the0112square=&
-		(su01**v01)*(su02**v02)*ri01*v01*(gl01*v01)*(gl12*v12)*(LOG(xx)**2)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*(gl01*v01)*(gl12*v12)*(dlog(xx)**2)/(su12**v12)
 			f2the0212square=&
-		(su01**v01)*(su02**v02)*ri01*v01*(gl02*v02)*gl12*v12*(LOG(xx)**2)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*(gl02*v02)*gl12*v12*(dlog(xx)**2)/(su12**v12)
 
             reskdenum = reskdenum + wgk(jtwm1)*(f1denum+f2denum)
             resk01num = resk01num + wgk(jtwm1)*(f101num+f201num)
@@ -9326,32 +9347,32 @@ res0202num,res1212num,v01,v02,v12)
 		fc02num=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02/(su12**v12) 
 		fc12num=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12/(su12**v12) 
 
-		fcthe01=(su01**v01)*(su02**v02)*ri01*v01*gl01*v01*LOG(xm)/(su12**v12)
-		fcthe02=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02*LOG(xm)/(su12**v12)
-		fcthe12=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12*LOG(xm)/(su12**v12)
+		fcthe01=(su01**v01)*(su02**v02)*ri01*v01*gl01*v01*dlog(xm)/(su12**v12)
+		fcthe02=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02*dlog(xm)/(su12**v12)
+		fcthe12=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12*dlog(xm)/(su12**v12)
 
-		fcthe0101=(su01**v01)*(su02**v02)*ri01*v01*((gl01*v01)**2)*LOG(xm)/(su12**v12)
-		fcthe0202=(su01**v01)*(su02**v02)*ri01*v01*((gl02*v02)**2)*LOG(xm)/(su12**v12)
-		fcthe1212=(su01**v01)*(su02**v02)*ri01*v01*((gl12*v12)**2)*LOG(xm)/(su12**v12)
+		fcthe0101=(su01**v01)*(su02**v02)*ri01*v01*((gl01*v01)**2)*dlog(xm)/(su12**v12)
+		fcthe0202=(su01**v01)*(su02**v02)*ri01*v01*((gl02*v02)**2)*dlog(xm)/(su12**v12)
+		fcthe1212=(su01**v01)*(su02**v02)*ri01*v01*((gl12*v12)**2)*dlog(xm)/(su12**v12)
 
 		fcthe0101dsquare=&
-		(su01**v01)*(su02**v02)*ri01*v01*((gl01*v01)**2)*(LOG(xm)**2)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*((gl01*v01)**2)*(dlog(xm)**2)/(su12**v12)
 		fcthe0202dsquare=&
-		(su01**v01)*(su02**v02)*ri01*v01*((gl02*v02)**2)*(LOG(xm)**2)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*((gl02*v02)**2)*(dlog(xm)**2)/(su12**v12)
 		fcthe1212dsquare=&
-		(su01**v01)*(su02**v02)*ri01*v01*((gl12*v12)**2)*(LOG(xm)**2)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*((gl12*v12)**2)*(dlog(xm)**2)/(su12**v12)
 
 		fcthe0101square=&
-		(su01**v01)*(su02**v02)*ri01*v01*(gl01*v01)*(LOG(xm)**2)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*(gl01*v01)*(dlog(xm)**2)/(su12**v12)
 		fcthe0202square=&
-		(su01**v01)*(su02**v02)*ri01*v01*(gl02*v02)*(LOG(xm)**2)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*(gl02*v02)*(dlog(xm)**2)/(su12**v12)
 		fcthe1212square=&
-		(su01**v01)*(su02**v02)*ri01*v01*gl12*v12*(LOG(xm)**2)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*gl12*v12*(dlog(xm)**2)/(su12**v12)
 
 		fcthenum=&
-		(su01**v01)*(su02**v02)*ri01*v01*LOG(xm)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*dlog(xm)/(su12**v12)
 		fcthenumsquare=&
-		(su01**v01)*(su02**v02)*ri01*v01*(LOG(xm)**2)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*(dlog(xm)**2)/(su12**v12)
 
 		fc0101num=(su01**v01)*(su02**v02)*ri01*v01*(((1-gl01*v01)**2)-&
 			gl01*v01)/(su12**v12)
@@ -9403,32 +9424,32 @@ res0202num,res1212num,v01,v02,v12)
 			f10202num=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02*gl02*v02/(su12**v12)
 			f11212num=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12*gl12*v12/(su12**v12)
 
-			f1the01=(su01**v01)*(su02**v02)*ri01*v01*gl01*v01*LOG(xx)/(su12**v12)
-			f1the02=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02*LOG(xx)/(su12**v12)
-			f1the12=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12*LOG(xx)/(su12**v12)
+			f1the01=(su01**v01)*(su02**v02)*ri01*v01*gl01*v01*dlog(xx)/(su12**v12)
+			f1the02=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02*dlog(xx)/(su12**v12)
+			f1the12=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12*dlog(xx)/(su12**v12)
 
-			f1the0101=(su01**v01)*(su02**v02)*ri01*v01*((gl01*v01)**2)*LOG(xx)/(su12**v12)
-			f1the0202=(su01**v01)*(su02**v02)*ri01*v01*((gl02*v02)**2)*LOG(xx)/(su12**v12)
-			f1the1212=(su01**v01)*(su02**v02)*ri01*v01*((gl12*v12)**2)*LOG(xx)/(su12**v12)
+			f1the0101=(su01**v01)*(su02**v02)*ri01*v01*((gl01*v01)**2)*dlog(xx)/(su12**v12)
+			f1the0202=(su01**v01)*(su02**v02)*ri01*v01*((gl02*v02)**2)*dlog(xx)/(su12**v12)
+			f1the1212=(su01**v01)*(su02**v02)*ri01*v01*((gl12*v12)**2)*dlog(xx)/(su12**v12)
 
 			f1the0101dsquare=&
-		(su01**v01)*(su02**v02)*ri01*v01*((gl01*v01)**2)*(LOG(xx)**2)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*((gl01*v01)**2)*(dlog(xx)**2)/(su12**v12)
 			f1the0202dsquare=&
-		(su01**v01)*(su02**v02)*ri01*v01*((gl02*v02)**2)*(LOG(xx)**2)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*((gl02*v02)**2)*(dlog(xx)**2)/(su12**v12)
 			f1the1212dsquare=&
-		(su01**v01)*(su02**v02)*ri01*v01*((gl12*v12)**2)*(LOG(xx)**2)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*((gl12*v12)**2)*(dlog(xx)**2)/(su12**v12)
 
 			f1the0101square=&
-		(su01**v01)*(su02**v02)*ri01*v01*(gl01*v01)*(LOG(xx)**2)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*(gl01*v01)*(dlog(xx)**2)/(su12**v12)
 			f1the0202square=&
-		(su01**v01)*(su02**v02)*ri01*v01*(gl02*v02)*(LOG(xx)**2)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*(gl02*v02)*(dlog(xx)**2)/(su12**v12)
 			f1the1212square=&
-		(su01**v01)*(su02**v02)*ri01*v01*gl12*v12*(LOG(xx)**2)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*gl12*v12*(dlog(xx)**2)/(su12**v12)
 
 			f1thenum=&
-		(su01**v01)*(su02**v02)*ri01*v01*LOG(xx)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*dlog(xx)/(su12**v12)
 		f1thenumsquare=&
-		(su01**v01)*(su02**v02)*ri01*v01*(LOG(xx)**2)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*(dlog(xx)**2)/(su12**v12)
 
                		xx = xm-dx
                		call fonct(xx,the01,ri01,gl01,su01)
@@ -9444,32 +9465,32 @@ res0202num,res1212num,v01,v02,v12)
 			f20202num=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02*gl02*v02/(su12**v12)
 			f21212num=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12*gl12*v12/(su12**v12)
 
-			f2the01=(su01**v01)*(su02**v02)*ri01*v01*gl01*v01*LOG(xx)/(su12**v12)
-			f2the02=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02*LOG(xx)/(su12**v12)
-			f2the12=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12*LOG(xx)/(su12**v12)
+			f2the01=(su01**v01)*(su02**v02)*ri01*v01*gl01*v01*dlog(xx)/(su12**v12)
+			f2the02=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02*dlog(xx)/(su12**v12)
+			f2the12=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12*dlog(xx)/(su12**v12)
 
-			f2the0101=(su01**v01)*(su02**v02)*ri01*v01*((gl01*v01)**2)*LOG(xx)/(su12**v12)
-			f2the0202=(su01**v01)*(su02**v02)*ri01*v01*((gl02*v02)**2)*LOG(xx)/(su12**v12)
-			f2the1212=(su01**v01)*(su02**v02)*ri01*v01*((gl12*v12)**2)*LOG(xx)/(su12**v12)
+			f2the0101=(su01**v01)*(su02**v02)*ri01*v01*((gl01*v01)**2)*dlog(xx)/(su12**v12)
+			f2the0202=(su01**v01)*(su02**v02)*ri01*v01*((gl02*v02)**2)*dlog(xx)/(su12**v12)
+			f2the1212=(su01**v01)*(su02**v02)*ri01*v01*((gl12*v12)**2)*dlog(xx)/(su12**v12)
 
 			f2the0101dsquare=&
-		(su01**v01)*(su02**v02)*ri01*v01*((gl01*v01)**2)*(LOG(xx)**2)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*((gl01*v01)**2)*(dlog(xx)**2)/(su12**v12)
 			f2the0202dsquare=&
-		(su01**v01)*(su02**v02)*ri01*v01*((gl02*v02)**2)*(LOG(xx)**2)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*((gl02*v02)**2)*(dlog(xx)**2)/(su12**v12)
 			f2the1212dsquare=&
-		(su01**v01)*(su02**v02)*ri01*v01*((gl12*v12)**2)*(LOG(xx)**2)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*((gl12*v12)**2)*(dlog(xx)**2)/(su12**v12)
 
 			f2the0101square=&
-		(su01**v01)*(su02**v02)*ri01*v01*(gl01*v01)*(LOG(xx)**2)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*(gl01*v01)*(dlog(xx)**2)/(su12**v12)
 			f2the0202square=&
-		(su01**v01)*(su02**v02)*ri01*v01*(gl02*v02)*(LOG(xx)**2)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*(gl02*v02)*(dlog(xx)**2)/(su12**v12)
 			f2the1212square=&
-		(su01**v01)*(su02**v02)*ri01*v01*gl12*v12*(LOG(xx)**2)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*gl12*v12*(dlog(xx)**2)/(su12**v12)
 
 			f2thenum=&
-		(su01**v01)*(su02**v02)*ri01*v01*LOG(xx)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*dlog(xx)/(su12**v12)
 		f2thenumsquare=&
-		(su01**v01)*(su02**v02)*ri01*v01*(LOG(xx)**2)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*(dlog(xx)**2)/(su12**v12)
 
 			
             reskdenum = reskdenum + wgk(jtw)*(f1denum+f2denum)
@@ -9513,32 +9534,32 @@ res0202num,res1212num,v01,v02,v12)
 			f10202num=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02*gl02*v02/(su12**v12)
 			f11212num=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12*gl12*v12/(su12**v12)
 
-			f1the01=(su01**v01)*(su02**v02)*ri01*v01*gl01*v01*LOG(xx)/(su12**v12)
-			f1the02=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02*LOG(xx)/(su12**v12)
-			f1the12=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12*LOG(xx)/(su12**v12)
+			f1the01=(su01**v01)*(su02**v02)*ri01*v01*gl01*v01*dlog(xx)/(su12**v12)
+			f1the02=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02*dlog(xx)/(su12**v12)
+			f1the12=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12*dlog(xx)/(su12**v12)
 
-			f1the0101=(su01**v01)*(su02**v02)*ri01*v01*((gl01*v01)**2)*LOG(xx)/(su12**v12)
-			f1the0202=(su01**v01)*(su02**v02)*ri01*v01*((gl02*v02)**2)*LOG(xx)/(su12**v12)
-			f1the1212=(su01**v01)*(su02**v02)*ri01*v01*((gl12*v12)**2)*LOG(xx)/(su12**v12)
+			f1the0101=(su01**v01)*(su02**v02)*ri01*v01*((gl01*v01)**2)*dlog(xx)/(su12**v12)
+			f1the0202=(su01**v01)*(su02**v02)*ri01*v01*((gl02*v02)**2)*dlog(xx)/(su12**v12)
+			f1the1212=(su01**v01)*(su02**v02)*ri01*v01*((gl12*v12)**2)*dlog(xx)/(su12**v12)
 
 			f1the0101dsquare=&
-		(su01**v01)*(su02**v02)*ri01*v01*((gl01*v01)**2)*(LOG(xx)**2)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*((gl01*v01)**2)*(dlog(xx)**2)/(su12**v12)
 			f1the0202dsquare=&
-		(su01**v01)*(su02**v02)*ri01*v01*((gl02*v02)**2)*(LOG(xx)**2)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*((gl02*v02)**2)*(dlog(xx)**2)/(su12**v12)
 			f1the1212dsquare=&
-		(su01**v01)*(su02**v02)*ri01*v01*((gl12*v12)**2)*(LOG(xx)**2)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*((gl12*v12)**2)*(dlog(xx)**2)/(su12**v12)
 
 			f1the0101square=&
-		(su01**v01)*(su02**v02)*ri01*v01*(gl01*v01)*(LOG(xx)**2)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*(gl01*v01)*(dlog(xx)**2)/(su12**v12)
 			f1the0202square=&
-		(su01**v01)*(su02**v02)*ri01*v01*(gl02*v02)*(LOG(xx)**2)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*(gl02*v02)*(dlog(xx)**2)/(su12**v12)
 			f1the1212square=&
-		(su01**v01)*(su02**v02)*ri01*v01*gl12*v12*(LOG(xx)**2)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*gl12*v12*(dlog(xx)**2)/(su12**v12)
 
 			f1thenum=&
-		(su01**v01)*(su02**v02)*ri01*v01*LOG(xx)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*dlog(xx)/(su12**v12)
 		f1thenumsquare=&
-		(su01**v01)*(su02**v02)*ri01*v01*(LOG(xx)**2)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*(dlog(xx)**2)/(su12**v12)
 
                		xx = xm-dx
                		call fonct(xx,the01,ri01,gl01,su01)
@@ -9554,32 +9575,32 @@ res0202num,res1212num,v01,v02,v12)
 			f20202num=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02*gl02*v02/(su12**v12)
 			f21212num=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12*gl12*v12/(su12**v12)
 
-			f2the01=(su01**v01)*(su02**v02)*ri01*v01*gl01*v01*LOG(xx)/(su12**v12)
-			f2the02=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02*LOG(xx)/(su12**v12)
-			f2the12=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12*LOG(xx)/(su12**v12)
+			f2the01=(su01**v01)*(su02**v02)*ri01*v01*gl01*v01*dlog(xx)/(su12**v12)
+			f2the02=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02*dlog(xx)/(su12**v12)
+			f2the12=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12*dlog(xx)/(su12**v12)
 
-			f2the0101=(su01**v01)*(su02**v02)*ri01*v01*((gl01*v01)**2)*LOG(xx)/(su12**v12)
-			f2the0202=(su01**v01)*(su02**v02)*ri01*v01*((gl02*v02)**2)*LOG(xx)/(su12**v12)
-			f2the1212=(su01**v01)*(su02**v02)*ri01*v01*((gl12*v12)**2)*LOG(xx)/(su12**v12)
+			f2the0101=(su01**v01)*(su02**v02)*ri01*v01*((gl01*v01)**2)*dlog(xx)/(su12**v12)
+			f2the0202=(su01**v01)*(su02**v02)*ri01*v01*((gl02*v02)**2)*dlog(xx)/(su12**v12)
+			f2the1212=(su01**v01)*(su02**v02)*ri01*v01*((gl12*v12)**2)*dlog(xx)/(su12**v12)
 
 			f2the0101dsquare=&
-		(su01**v01)*(su02**v02)*ri01*v01*((gl01*v01)**2)*(LOG(xx)**2)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*((gl01*v01)**2)*(dlog(xx)**2)/(su12**v12)
 			f2the0202dsquare=&
-		(su01**v01)*(su02**v02)*ri01*v01*((gl02*v02)**2)*(LOG(xx)**2)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*((gl02*v02)**2)*(dlog(xx)**2)/(su12**v12)
 			f2the1212dsquare=&
-		(su01**v01)*(su02**v02)*ri01*v01*((gl12*v12)**2)*(LOG(xx)**2)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*((gl12*v12)**2)*(dlog(xx)**2)/(su12**v12)
 
 			f2the0101square=&
-		(su01**v01)*(su02**v02)*ri01*v01*(gl01*v01)*(LOG(xx)**2)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*(gl01*v01)*(dlog(xx)**2)/(su12**v12)
 			f2the0202square=&
-		(su01**v01)*(su02**v02)*ri01*v01*(gl02*v02)*(LOG(xx)**2)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*(gl02*v02)*(dlog(xx)**2)/(su12**v12)
 			f2the1212square=&
-		(su01**v01)*(su02**v02)*ri01*v01*gl12*v12*(LOG(xx)**2)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*gl12*v12*(dlog(xx)**2)/(su12**v12)
 
 			f2thenum=&
-		(su01**v01)*(su02**v02)*ri01*v01*LOG(xx)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*dlog(xx)/(su12**v12)
 		f2thenumsquare=&
-		(su01**v01)*(su02**v02)*ri01*v01*(LOG(xx)**2)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*(dlog(xx)**2)/(su12**v12)
 
             reskdenum = reskdenum + wgk(jtwm1)*(f1denum+f2denum)
             resk01num = resk01num + wgk(jtwm1)*(f101num+f201num)
@@ -9731,13 +9752,13 @@ v01,v02,v12)
 		fc02num=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02/(su12**v12) 
 		fc12num=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12/(su12**v12) 
 
-		fcthe01=(su01**v01)*(su02**v02)*ri01*v01*gl01*v01*LOG(xm)/(su12**v12)
-		fcthe02=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02*LOG(xm)/(su12**v12)
-		fcthe12=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12*LOG(xm)/(su12**v12)
+		fcthe01=(su01**v01)*(su02**v02)*ri01*v01*gl01*v01*dlog(xm)/(su12**v12)
+		fcthe02=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02*dlog(xm)/(su12**v12)
+		fcthe12=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12*dlog(xm)/(su12**v12)
 
 		
 		fcthenum=&
-		(su01**v01)*(su02**v02)*ri01*v01*LOG(xm)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*dlog(xm)/(su12**v12)
 		
 
     		reskdenum = fcdenum*wgk(8)       ! init res Kronrod   ! fc * 8e poids Kronrod
@@ -9767,13 +9788,13 @@ v01,v02,v12)
 			f112num=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12/(su12**v12) 
 
 			
-			f1the01=(su01**v01)*(su02**v02)*ri01*v01*gl01*v01*LOG(xx)/(su12**v12)
-			f1the02=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02*LOG(xx)/(su12**v12)
-			f1the12=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12*LOG(xx)/(su12**v12)
+			f1the01=(su01**v01)*(su02**v02)*ri01*v01*gl01*v01*dlog(xx)/(su12**v12)
+			f1the02=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02*dlog(xx)/(su12**v12)
+			f1the12=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12*dlog(xx)/(su12**v12)
 
 			
 			f1thenum=&
-		(su01**v01)*(su02**v02)*ri01*v01*LOG(xx)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*dlog(xx)/(su12**v12)
 		
                		xx = xm-dx
                		call fonct(xx,the01,ri01,gl01,su01)
@@ -9785,13 +9806,13 @@ v01,v02,v12)
 			f212num=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12/(su12**v12) 
 
 			
-			f2the01=(su01**v01)*(su02**v02)*ri01*v01*gl01*v01*LOG(xx)/(su12**v12)
-			f2the02=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02*LOG(xx)/(su12**v12)
-			f2the12=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12*LOG(xx)/(su12**v12)
+			f2the01=(su01**v01)*(su02**v02)*ri01*v01*gl01*v01*dlog(xx)/(su12**v12)
+			f2the02=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02*dlog(xx)/(su12**v12)
+			f2the12=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12*dlog(xx)/(su12**v12)
 
 			
 			f2thenum=&
-		(su01**v01)*(su02**v02)*ri01*v01*LOG(xx)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*dlog(xx)/(su12**v12)
 		
 			
             reskdenum = reskdenum + wgk(jtw)*(f1denum+f2denum)
@@ -9820,13 +9841,13 @@ v01,v02,v12)
 
 
 			
-			f1the01=(su01**v01)*(su02**v02)*ri01*v01*gl01*v01*LOG(xx)/(su12**v12)
-			f1the02=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02*LOG(xx)/(su12**v12)
-			f1the12=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12*LOG(xx)/(su12**v12)
+			f1the01=(su01**v01)*(su02**v02)*ri01*v01*gl01*v01*dlog(xx)/(su12**v12)
+			f1the02=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02*dlog(xx)/(su12**v12)
+			f1the12=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12*dlog(xx)/(su12**v12)
 
 			
 			f1thenum=&
-		(su01**v01)*(su02**v02)*ri01*v01*LOG(xx)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*dlog(xx)/(su12**v12)
 		
                		xx = xm-dx
                		call fonct(xx,the01,ri01,gl01,su01)
@@ -9838,13 +9859,13 @@ v01,v02,v12)
 			f212num=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12/(su12**v12) 
 
 			
-			f2the01=(su01**v01)*(su02**v02)*ri01*v01*gl01*v01*LOG(xx)/(su12**v12)
-			f2the02=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02*LOG(xx)/(su12**v12)
-			f2the12=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12*LOG(xx)/(su12**v12)
+			f2the01=(su01**v01)*(su02**v02)*ri01*v01*gl01*v01*dlog(xx)/(su12**v12)
+			f2the02=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02*dlog(xx)/(su12**v12)
+			f2the12=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12*dlog(xx)/(su12**v12)
 
 			
 			f2thenum=&
-		(su01**v01)*(su02**v02)*ri01*v01*LOG(xx)/(su12**v12)
+		(su01**v01)*(su02**v02)*ri01*v01*dlog(xx)/(su12**v12)
 		
             reskdenum = reskdenum + wgk(jtwm1)*(f1denum+f2denum)
             resk01num = resk01num + wgk(jtwm1)*(f101num+f201num)
@@ -11810,7 +11831,7 @@ subroutine qgausssplinederivdiagsemimark(cas,a,b,c,the01,the02,the12,resdenum,&
           end subroutine qgausssplinederivdiagsemimark
 
 !=============================================================================================  
-!======================= Calculate derivatives of loglik with weibull baseline risk ==========
+!======================= Calculate derivatives of dloglik with weibull baseline risk ==========
 !======================= only beta parameters ========================================================
 !=============================================================================================  
 
@@ -12951,7 +12972,7 @@ subroutine derivaweib(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
     end subroutine derivaweib
 	
 !=============================================================================================  
-!======================= Calculate derivatives of loglik with weibull baseline risk ==========
+!======================= Calculate derivatives of dloglik with weibull baseline risk ==========
 !======================= only beta parameters ========================================================
 !======================= and semi markov ==============================================================
 !=============================================================================================  
@@ -14212,25 +14233,25 @@ subroutine derivaweibsecondderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 				call fonct(t0(i),the02,ri02,gl02,su02)
 				
                             
-							troncweib01011=gl01*vet01*LOG(the01(2)*t0(i))
+							troncweib01011=gl01*vet01*dlog(the01(2)*t0(i))
 							troncweib01011square=&
-							((LOG(the01(2)*t0(i)))**2)*gl01*vet01
+							((dlog(the01(2)*t0(i)))**2)*gl01*vet01
 							
 							
 							troncweib010112=&
-							(1+LOG(the01(2)*t0(i))*the01(1))*gl01*vet01/the01(2)
+							(1+dlog(the01(2)*t0(i))*the01(1))*gl01*vet01/the01(2)
 							
 							troncweib01012=the01(1)*gl01*vet01/the01(2)
 							
 							troncweib01012square=&
 							the01(1)*(the01(1)-1)*gl01*vet01/(the01(2)**2)
 							
-							troncweib02021=LOG(the02(2)*t0(i))*gl02*vet02
+							troncweib02021=dlog(the02(2)*t0(i))*gl02*vet02
 							troncweib02021square=&
-							((LOG(the02(2)*t0(i)))**2)*gl02*vet02
+							((dlog(the02(2)*t0(i)))**2)*gl02*vet02
 							
 							troncweib020212=&
-							(1+LOG(the02(2)*t0(i))*the02(1))*gl02*vet02/the02(2)
+							(1+dlog(the02(2)*t0(i))*the02(1))*gl02*vet02/the02(2)
 							
 							
 							troncweib02022=&
@@ -14270,15 +14291,15 @@ subroutine derivaweibsecondderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 			if(fix(1).eq.0)then
 				iter = iter + 1
 				nweib = nweib + 1
-				res1(nweib)=-LOG(the01(2)*t1(i))*gl01*vet01 +&
+				res1(nweib)=-dlog(the01(2)*t1(i))*gl01*vet01 +&
 				troncweib01011
 				res1((nvamax+iter))=&
-				-((LOG(the01(2)*t1(i)))**2)*gl01*vet01 +&
+				-((dlog(the01(2)*t1(i)))**2)*gl01*vet01 +&
 				troncweib01011square
 				if(fix(2).eq.0)then
 					iter = iter +1
 					res1((nvamax+iter))=&
-					-(1+the01(1)*LOG(the01(2)*t1(i)))* &
+					-(1+the01(1)*dlog(the01(2)*t1(i)))* &
 					gl01*vet01/the01(2) +&
 					troncweib010112
 				endif
@@ -14333,16 +14354,16 @@ subroutine derivaweibsecondderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 			if(fix(3).eq.0)then
 				iter = iter + 1
 				nweib = nweib +1
-				res1(nweib)=-LOG(the02(2)*t1(i))*gl02*vet02 +&
+				res1(nweib)=-dlog(the02(2)*t1(i))*gl02*vet02 +&
 				troncweib02021
 				res1((nvamax+iter))=&
-				-((LOG(the02(2)*t1(i)))**2)*gl02*vet02+&
+				-((dlog(the02(2)*t1(i)))**2)*gl02*vet02+&
 				troncweib02021square
 				
 				if(fix(4).eq.0)then
 					iter = iter +1
 					res1((nvamax+iter))=&
-					-(1+the02(1)*LOG(the02(2)*t1(i)))* &
+					-(1+the02(1)*dlog(the02(2)*t1(i)))* &
 					gl02*vet02/the02(2)+&
 					troncweib020212
 				endif
@@ -14403,7 +14424,7 @@ subroutine derivaweibsecondderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 			
 
 			call fonct(t3(i),the12,ri12,gl12,su12)
-			!call logapproxi(t1(i),t2(i),res2denum) approxi log(x) OK
+			!call dlogapproxi(t1(i),t2(i),res2denum) approxi dlog(x) OK
 			call qgaussweibbetaderiv(t1(i),t2(i),the01,&
 			the02,the12,res2denum,res2the01,res2the02,&
 			res2the12,res2thenum,res2thenumsquare,&
@@ -14425,26 +14446,26 @@ subroutine derivaweibsecondderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 			if(fix(1).eq.0)then
 				iter = iter + 1
 				nweib = nweib + 1
-				v=(LOG(the01(2))+(1/the01(1)))*res2denum +&
-				res2thenum-LOG(the01(2))*(res2denum-res201num)-&
+				v=(dlog(the01(2))+(1/the01(1)))*res2denum +&
+				res2thenum-dlog(the01(2))*(res2denum-res201num)-&
 				res2the01
 				res1(nweib)=v/res2denum
 				
 				res1(nweib)=res1(nweib)+troncweib01011
 				
 				res1((nvamax+iter))=&
-				(LOG(the01(2))**2)*res2denum+ &
-				LOG(the01(2))*2*res2thenum+ &
+				(dlog(the01(2))**2)*res2denum+ &
+				dlog(the01(2))*2*res2thenum+ &
 				res2thenumsquare+ &
-				LOG(the01(2))*2/the01(1)*res2denum+ &
+				dlog(the01(2))*2/the01(1)*res2denum+ &
 				res2thenum*2/the01(1)- &
-				(LOG(the01(2))**2)*3*(res2denum-res201num)- &
-				LOG(the01(2))*6*res2the01- &
+				(dlog(the01(2))**2)*3*(res2denum-res201num)- &
+				dlog(the01(2))*6*res2the01- &
 				res2the0101square*3- &
-				LOG(the01(2))*2*(res2denum-res201num)/the01(1)-&
+				dlog(the01(2))*2*(res2denum-res201num)/the01(1)-&
 				res2the01*2/the01(1)+ &
-				(LOG(the01(2))**2)*res20101numbis+ &
-				LOG(the01(2))*2*res2the0101+ &
+				(dlog(the01(2))**2)*res20101numbis+ &
+				dlog(the01(2))*2*res2the0101+ &
 				res2the0101dsquare
 				
 				
@@ -14461,11 +14482,11 @@ subroutine derivaweibsecondderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 					u2=res2denum*the01(1)/the01(2)-&
 					(res2denum-res201num)*the01(1)/the01(2)
 					
-					u1=the01(1)*LOG(the01(2))*res20101numbis/the01(2)+&
+					u1=the01(1)*dlog(the01(2))*res20101numbis/the01(2)+&
 					the01(1)*res2the0101/the01(2)+&
-					(the01(1)*LOG(the01(2))+2)*res2denum/the01(2)+&
+					(the01(1)*dlog(the01(2))+2)*res2denum/the01(2)+&
 					the01(1)*res2thenum/the01(2)-&
-					(3*the01(1)*LOG(the01(2))+2)* &
+					(3*the01(1)*dlog(the01(2))+2)* &
 					(res2denum-res201num)/the01(2)-3* &
 					the01(1)*res2the01/the01(2)
 					
@@ -14480,16 +14501,16 @@ subroutine derivaweibsecondderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 				endif
 				if(fix(3).eq.0)then
 				
-					u1=-LOG(the01(2))*LOG(the02(2))*res202num-&
-					LOG(the01(2))*res2the02-LOG(the02(2))*res2the02-&
-					res2the0202square-LOG(the02(2))*res202num/the01(1)-&
+					u1=-dlog(the01(2))*dlog(the02(2))*res202num-&
+					dlog(the01(2))*res2the02-dlog(the02(2))*res2the02-&
+					res2the0202square-dlog(the02(2))*res202num/the01(1)-&
 					res2the02/the01(1)+&
-					LOG(the01(2))*LOG(the02(2))*res20102num+&
-					LOG(the01(2))*res2the0102+&
-					LOG(the02(2))*res2the0102+&
+					dlog(the01(2))*dlog(the02(2))*res20102num+&
+					dlog(the01(2))*res2the0102+&
+					dlog(the02(2))*res2the0102+&
 					res2the0102square
 					
-					u2=-LOG(the02(2))*(res202num)-&
+					u2=-dlog(the02(2))*(res202num)-&
 						res2the02
 					iter = iter +1
 					res1((nvamax+iter))=u1*res2denum-&
@@ -14500,10 +14521,10 @@ subroutine derivaweibsecondderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 				
 				if(fix(4).eq.0)then
 				
-					u1=-LOG(the01(2))*the02(1)*res202num/the02(2)-&
+					u1=-dlog(the01(2))*the02(1)*res202num/the02(2)-&
 					the02(1)*res2the02/the02(2)-&
 					the02(1)*res202num/(the01(1)*the02(2))+&
-					LOG(the01(2))*the02(1)*res20102num/the02(2)+&
+					dlog(the01(2))*the02(1)*res20102num/the02(2)+&
 					the02(1)*res2the0102/the02(2)
 					
 					u2=-the02(1)*res202num/the02(2)
@@ -14517,16 +14538,16 @@ subroutine derivaweibsecondderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 				
 				if(fix(5).eq.0)then
 				
-					u1=LOG(the01(2))*LOG(the12(2))*res212num+&
-					LOG(the01(2))*res2the12+LOG(the12(2))*res2the12+&
-					res2the1212square+LOG(the12(2))*res212num/the01(1)+&
+					u1=dlog(the01(2))*dlog(the12(2))*res212num+&
+					dlog(the01(2))*res2the12+dlog(the12(2))*res2the12+&
+					res2the1212square+dlog(the12(2))*res212num/the01(1)+&
 					res2the12/the01(1)-&
-					LOG(the01(2))*LOG(the12(2))*res20112num-&
-					LOG(the01(2))*res2the0112-&
-					LOG(the12(2))*res2the0112-&
+					dlog(the01(2))*dlog(the12(2))*res20112num-&
+					dlog(the01(2))*res2the0112-&
+					dlog(the12(2))*res2the0112-&
 					res2the0112square
 					
-					u2=LOG(the12(2))*(res212num)+&
+					u2=dlog(the12(2))*(res212num)+&
 						res2the12
 						
 					iter = iter +1
@@ -14540,10 +14561,10 @@ subroutine derivaweibsecondderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 				if(fix(6).eq.0)then
 					
 					u1=&
-					LOG(the01(2))*the12(1)*res212num/the12(2)+&
+					dlog(the01(2))*the12(1)*res212num/the12(2)+&
 					the12(1)/the12(2)*res2the12+res212num* &
 					the12(1)/(the12(2)*the01(1))-&
-					LOG(the01(2))*the12(1)*res20112num/the12(2)-&
+					dlog(the01(2))*the12(1)*res20112num/the12(2)-&
 					the12(1)/the12(2)*res2the0112
 					
 					
@@ -14581,13 +14602,13 @@ subroutine derivaweibsecondderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 				res1((nvamax+iter))+ troncweib01012square
 				if(fix(3).eq.0)then
 				
-					u1=-LOG(the02(2))*the01(1)* &
+					u1=-dlog(the02(2))*the01(1)* &
 					res202num/the01(2)-&
 					the01(1)*res2the02/the01(2)+&
-					the01(1)*LOG(the02(2))*res20102num/the01(2)+&
+					the01(1)*dlog(the02(2))*res20102num/the01(2)+&
 					the01(1)*res2the0102/the01(2)
 					
-					u2=-LOG(the02(2))*(res202num)-&
+					u2=-dlog(the02(2))*(res202num)-&
 						res2the02
 					iter = iter +1
 					res1((nvamax+iter))=u1*res2denum-&
@@ -14613,12 +14634,12 @@ subroutine derivaweibsecondderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 				
 				if(fix(5).eq.0)then
 				
-					u1=LOG(the12(2))*the01(1)*res212num/the01(2)+&
+					u1=dlog(the12(2))*the01(1)*res212num/the01(2)+&
 					the01(1)*res2the12/the01(2)-&
-					the01(1)*LOG(the12(2))*res20112num/the01(2)-&
+					the01(1)*dlog(the12(2))*res20112num/the01(2)-&
 					the01(1)*res2the0112/the01(2)
 					
-					u2=LOG(the12(2))*(res212num)+&
+					u2=dlog(the12(2))*(res212num)+&
 						res2the12
 						
 					iter = iter +1
@@ -14650,18 +14671,18 @@ subroutine derivaweibsecondderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 				iter = iter + 1
 				nweib = nweib + 1
 				
-				v=-LOG(the02(2))*res202num-&
+				v=-dlog(the02(2))*res202num-&
 				res2the02
 				res1(nweib)=v/res2denum
 				res1(nweib)=res1(nweib)+ &
 				troncweib02021
 				
 				res1((nvamax+iter))=&
-				((LOG(the02(2)))**2)* &
-				res20202num+2*LOG(the02(2))*res2the0202+&
+				((dlog(the02(2)))**2)* &
+				res20202num+2*dlog(the02(2))*res2the0202+&
 				res2the0202dsquare-&
-				((LOG(the02(2)))**2)* &
-				res202num-2*LOG(the02(2))*res2the02-&
+				((dlog(the02(2)))**2)* &
+				res202num-2*dlog(the02(2))*res2the02-&
 				res2the0202square
 				
 				res1((nvamax+iter))=&
@@ -14674,10 +14695,10 @@ subroutine derivaweibsecondderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 				
 				if(fix(4).eq.0)then
 				
-					u1=-(the02(1)*LOG(the02(2))+1)* &
+					u1=-(the02(1)*dlog(the02(2))+1)* &
 					res202num/the02(2)-&
 					the02(1)*res2the02/the02(2)+ &
-					LOG(the02(2))*the02(1)* &
+					dlog(the02(2))*the02(1)* &
 					res20202num/the02(2)+ &
 					the02(1)/the02(2)*res2the0202
 					
@@ -14696,11 +14717,11 @@ subroutine derivaweibsecondderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 				
 				if(fix(5).eq.0)then
 				
-					u1=-LOG(the02(2))*LOG(the12(2))*res20212num-&
-					LOG(the02(2))*res2the0212-LOG(the12(2))*res2the0212-&
+					u1=-dlog(the02(2))*dlog(the12(2))*res20212num-&
+					dlog(the02(2))*res2the0212-dlog(the12(2))*res2the0212-&
 					res2the0212square
 					
-					u2=LOG(the12(2))*(res212num)+&
+					u2=dlog(the12(2))*(res212num)+&
 						res2the12
 						
 					iter = iter +1
@@ -14713,7 +14734,7 @@ subroutine derivaweibsecondderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 				
 				if(fix(6).eq.0)then
 				
-					u1=-LOG(the02(2))*the12(1)*res20212num/the12(2)-&
+					u1=-dlog(the02(2))*the12(1)*res20212num/the12(2)-&
 					the12(1)*res2the0212/the12(2)
 					
 					u2=the12(1)*res212num/the12(2)
@@ -14749,10 +14770,10 @@ subroutine derivaweibsecondderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 				
 				if(fix(5).eq.0)then
 				
-					u1=-the02(1)*LOG(the12(2))*res20212num/the02(2)-&
+					u1=-the02(1)*dlog(the12(2))*res20212num/the02(2)-&
 					the02(1)*res2the0212/the02(2)
 					
-					u2=LOG(the12(2))*(res212num)+&
+					u2=dlog(the12(2))*(res212num)+&
 						res2the12
 						
 					iter = iter +1
@@ -14783,18 +14804,18 @@ subroutine derivaweibsecondderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 				iter = iter + 1
 				nweib = nweib + 1
 				
-				v=LOG(the12(2))*res212num+&
+				v=dlog(the12(2))*res212num+&
 				res2the12
 				res1(nweib)=v/res2denum
 				res1(nweib)=res1(nweib)-&
-				LOG(the12(2)*t3(i))*gl12*vet12
+				dlog(the12(2)*t3(i))*gl12*vet12
 				
 				res1((nvamax+iter))=&
-				((LOG(the12(2)))**2)* &
-				res21212num+2*LOG(the12(2))*res2the1212+&
+				((dlog(the12(2)))**2)* &
+				res21212num+2*dlog(the12(2))*res2the1212+&
 				res2the1212dsquare+&
-				((LOG(the12(2)))**2)* &
-				res212num+2*LOG(the12(2))*res2the12+&
+				((dlog(the12(2)))**2)* &
+				res212num+2*dlog(the12(2))*res2the12+&
 				res2the1212square
 				
 				res1((nvamax+iter))=&
@@ -14803,14 +14824,14 @@ subroutine derivaweibsecondderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 				res1((nvamax+iter))/(res2denum*res2denum)
 				res1((nvamax+iter))=&
 				res1((nvamax+iter))-&
-				((LOG(the12(2)*t3(i)))**2)*gl12*vet12
+				((dlog(the12(2)*t3(i)))**2)*gl12*vet12
 				
 
 				if(fix(6).eq.0)then
 			
-					u1=LOG(the12(2))*the12(1)*res21212num/the12(2)+&
+					u1=dlog(the12(2))*the12(1)*res21212num/the12(2)+&
 					the12(1)*res2the1212/the12(2)+&
-					(the12(1)*LOG(the12(2))+1)*res212num/the12(2)+&
+					(the12(1)*dlog(the12(2))+1)*res212num/the12(2)+&
 					the12(1)*res2the12/the12(2)
 					
 					u2=the12(1)*res212num/the12(2)
@@ -14821,7 +14842,7 @@ subroutine derivaweibsecondderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 					res1((nvamax+iter))/(res2denum*res2denum)
 					res1((nvamax+iter))=&
 					res1((nvamax+iter))-&
-					(1+LOG(the12(2)*t3(i))*the12(1))*gl12*vet12/the12(2)
+					(1+dlog(the12(2)*t3(i))*the12(1))*gl12*vet12/the12(2)
 				endif
 				
 			endif
@@ -14865,18 +14886,18 @@ subroutine derivaweibsecondderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 				iter = iter + 1
 				nweib = nweib + 1
 				
-				res1(nweib)=-LOG(the01(2)*t1(i))*gl01*vet01 +&
+				res1(nweib)=-dlog(the01(2)*t1(i))*gl01*vet01 +&
 				troncweib01011+&
-				(LOG(the01(2)*t1(i))+(1/the01(1)))
+				(dlog(the01(2)*t1(i))+(1/the01(1)))
 				
-				res1((nvamax+iter))=-((LOG(the01(2)*t1(i)))**2)* &
+				res1((nvamax+iter))=-((dlog(the01(2)*t1(i)))**2)* &
 				gl01*vet01 +&
 				troncweib01011square-1/(the01(1)**2)
 				
 				if(fix(2).eq.0)then
 					iter = iter +1
 					res1((nvamax+iter))= &
-					-(LOG(the01(2)*t1(i))* &
+					-(dlog(the01(2)*t1(i))* &
 					the01(1)+1)*gl01*vet01/the01(2)+&
 					troncweib010112+(1/the01(2))
 				endif
@@ -14906,17 +14927,17 @@ subroutine derivaweibsecondderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 			if(fix(3).eq.0)then
 				iter = iter + 1
 				nweib = nweib +1
-				res1(nweib)=-LOG(the02(2)*t1(i))*gl02*vet02 +&
+				res1(nweib)=-dlog(the02(2)*t1(i))*gl02*vet02 +&
 				troncweib02021
 				
 				res1((nvamax+iter))=&
-				-((LOG(the02(2)*t1(i)))**2)*gl02*vet02+&
+				-((dlog(the02(2)*t1(i)))**2)*gl02*vet02+&
 				troncweib02021square
 				
 				if(fix(4).eq.0)then
 					iter = iter +1
 					
-					res1((nvamax+iter))=-(LOG(the02(2)*t1(i))* &
+					res1((nvamax+iter))=-(dlog(the02(2)*t1(i))* &
 					the02(1)+1)*gl02*vet02/the02(2)+&
 					troncweib020212
 				endif
@@ -14943,29 +14964,29 @@ subroutine derivaweibsecondderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 			if(fix(5).eq.0)then
 				iter = iter + 1
 				nweib= nweib +1
-				res1(nweib)=LOG(the12(2)*t1(i))*gl12*vet12
-				res1(nvamax+iter)=((LOG(the12(2)*t1(i)))**2)*gl12*vet12
+				res1(nweib)=dlog(the12(2)*t1(i))*gl12*vet12
+				res1(nvamax+iter)=((dlog(the12(2)*t1(i)))**2)*gl12*vet12
 				if(fix(6).eq.0)then
 					iter = iter +1
-					res1((nvamax+iter))=(LOG(the12(2)*t1(i))* &
+					res1((nvamax+iter))=(dlog(the12(2)*t1(i))* &
 					the12(1)+1)*gl12*vet12/the12(2)
 				endif
 				
 				call fonct(t3(i),the12,ri12,gl12,su12)
 				
 				res1(nweib)=res1(nweib)-&
-				LOG(the12(2)*t3(i))*gl12*vet12
+				dlog(the12(2)*t3(i))*gl12*vet12
 				iter=iter-nva12nofix-nva02nofix-nva01nofix
 				if(fix(6).eq.0)then
 					res1((nvamax+iter))=&
 					res1((nvamax+iter))-&
-					(LOG(the12(2)*t3(i))* &
+					(dlog(the12(2)*t3(i))* &
 					the12(1)+1)*gl12*vet12/the12(2)
 					iter=iter-1
 				endif
 				
 				res1(nvamax+iter)=res1(nvamax+iter)-&
-				((LOG(the12(2)*t3(i)))**2)*gl12*vet12
+				((dlog(the12(2)*t3(i)))**2)*gl12*vet12
 				
 				iter=iter+nva12nofix+nva02nofix+nva01nofix
 				
@@ -15024,24 +15045,24 @@ subroutine derivaweibsecondderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 				iter = iter + 1
 				nweib = nweib + 1
 				
-				v=(LOG(the01(2))+(1/the01(1)))*res2denum +&
-				res2thenum-LOG(the01(2))*(res2denum-res201num)-&
+				v=(dlog(the01(2))+(1/the01(1)))*res2denum +&
+				res2thenum-dlog(the01(2))*(res2denum-res201num)-&
 				res2the01
 				res1(nweib)=v/res2denum
 				res1(nweib)=res1(nweib)+troncweib01011
 				
 				res1((nvamax+iter))=&
-				LOG(the01(2))*2/the01(1)*res2denum+&
+				dlog(the01(2))*2/the01(1)*res2denum+&
 				res2thenum*2/the01(1)+&
-				(LOG(the01(2))**2)*res2denum+&
-				LOG(the01(2))*2*res2thenum+&
-				res2thenumsquare-3*(LOG(the01(2))**2)* &
+				(dlog(the01(2))**2)*res2denum+&
+				dlog(the01(2))*2*res2thenum+&
+				res2thenumsquare-3*(dlog(the01(2))**2)* &
 				(res2denum-res201num)-&
-				LOG(the01(2))*6*res2the01-3*res2the0101square-&
-				LOG(the01(2))*2/the01(1)*(res2denum-res201num)- &
+				dlog(the01(2))*6*res2the01-3*res2the0101square-&
+				dlog(the01(2))*2/the01(1)*(res2denum-res201num)- &
 				res2the01*2/the01(1)+ &
-				(LOG(the01(2))**2)*res20101numbis+&
-				LOG(the01(2))*2*res2the0101+&
+				(dlog(the01(2))**2)*res20101numbis+&
+				dlog(the01(2))*2*res2the0101+&
 				res2the0101dsquare
 				
 				res1((nvamax+iter))=&
@@ -15058,11 +15079,11 @@ subroutine derivaweibsecondderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 					u2=res2denum*the01(1)/the01(2)-&
 					(res2denum-res201num)*the01(1)/the01(2)
 					
-					u1=the01(1)*LOG(the01(2))*res20101numbis/the01(2)+&
+					u1=the01(1)*dlog(the01(2))*res20101numbis/the01(2)+&
 					the01(1)*res2the0101/the01(2)+&
-					(the01(1)*LOG(the01(2))+2)*res2denum/the01(2)+&
+					(the01(1)*dlog(the01(2))+2)*res2denum/the01(2)+&
 					the01(1)*res2thenum/the01(2)-&
-					(3*the01(1)*LOG(the01(2))+2)* &
+					(3*the01(1)*dlog(the01(2))+2)* &
 					(res2denum-res201num)/the01(2)-3* &
 					the01(1)*res2the01/the01(2)
 					
@@ -15078,16 +15099,16 @@ subroutine derivaweibsecondderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 				endif
 				if(fix(3).eq.0)then
 				
-					u1=-LOG(the01(2))*LOG(the02(2))*res202num-&
-					LOG(the01(2))*res2the02-LOG(the02(2))*res2the02-&
-					res2the0202square-LOG(the02(2))*res202num/the01(1)-&
+					u1=-dlog(the01(2))*dlog(the02(2))*res202num-&
+					dlog(the01(2))*res2the02-dlog(the02(2))*res2the02-&
+					res2the0202square-dlog(the02(2))*res202num/the01(1)-&
 					res2the02/the01(1)+&
-					LOG(the01(2))*LOG(the02(2))*res20102num+&
-					LOG(the01(2))*res2the0102+&
-					LOG(the02(2))*res2the0102+&
+					dlog(the01(2))*dlog(the02(2))*res20102num+&
+					dlog(the01(2))*res2the0102+&
+					dlog(the02(2))*res2the0102+&
 					res2the0102square
 					
-					u2=-LOG(the02(2))*(res202num)-&
+					u2=-dlog(the02(2))*(res202num)-&
 						res2the02
 					iter = iter +1
 					res1((nvamax+iter))=u1*res2denum-&
@@ -15098,10 +15119,10 @@ subroutine derivaweibsecondderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 				
 				if(fix(4).eq.0)then
 				
-					u1=-LOG(the01(2))*the02(1)*res202num/the02(2)-&
+					u1=-dlog(the01(2))*the02(1)*res202num/the02(2)-&
 					the02(1)*res2the02/the02(2)-&
 					the02(1)*res202num/(the01(1)*the02(2))+&
-					LOG(the01(2))*the02(1)*res20102num/the02(2)+&
+					dlog(the01(2))*the02(1)*res20102num/the02(2)+&
 					the02(1)*res2the0102/the02(2)
 					
 					u2=-the02(1)*res202num/the02(2)
@@ -15115,16 +15136,16 @@ subroutine derivaweibsecondderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 				
 				if(fix(5).eq.0)then
 				
-					u1=LOG(the01(2))*LOG(the12(2))*res212num+&
-					LOG(the01(2))*res2the12+LOG(the12(2))*res2the12+&
-					res2the1212square+LOG(the12(2))*res212num/the01(1)+&
+					u1=dlog(the01(2))*dlog(the12(2))*res212num+&
+					dlog(the01(2))*res2the12+dlog(the12(2))*res2the12+&
+					res2the1212square+dlog(the12(2))*res212num/the01(1)+&
 					res2the12/the01(1)-&
-					LOG(the01(2))*LOG(the12(2))*res20112num-&
-					LOG(the01(2))*res2the0112-&
-					LOG(the12(2))*res2the0112-&
+					dlog(the01(2))*dlog(the12(2))*res20112num-&
+					dlog(the01(2))*res2the0112-&
+					dlog(the12(2))*res2the0112-&
 					res2the0112square
 					
-					u2=LOG(the12(2))*(res212num)+&
+					u2=dlog(the12(2))*(res212num)+&
 						res2the12
 						
 					iter = iter +1
@@ -15137,10 +15158,10 @@ subroutine derivaweibsecondderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 				
 				if(fix(6).eq.0)then
 					u1=&
-					LOG(the01(2))*the12(1)*res212num/the12(2)+&
+					dlog(the01(2))*the12(1)*res212num/the12(2)+&
 					the12(1)/the12(2)*res2the12+res212num* &
 					the12(1)/(the12(2)*the01(1))-&
-					LOG(the01(2))*the12(1)*res20112num/the12(2)-&
+					dlog(the01(2))*the12(1)*res20112num/the12(2)-&
 					the12(1)/the12(2)*res2the0112
 					
 					
@@ -15179,12 +15200,12 @@ subroutine derivaweibsecondderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 				res1((nvamax+iter))+troncweib01012square
 				if(fix(3).eq.0)then
 				
-					u1=-LOG(the02(2))*the01(1)*res202num/the01(2)-&
+					u1=-dlog(the02(2))*the01(1)*res202num/the01(2)-&
 					the01(1)*res2the02/the01(2)+&
-					the01(1)*LOG(the02(2))*res20102num/the01(2)+&
+					the01(1)*dlog(the02(2))*res20102num/the01(2)+&
 					the01(1)*res2the0102/the01(2)
 					
-					u2=-LOG(the02(2))*(res202num)-&
+					u2=-dlog(the02(2))*(res202num)-&
 						res2the02
 					iter = iter +1
 					res1((nvamax+iter))=u1*res2denum-&
@@ -15210,12 +15231,12 @@ subroutine derivaweibsecondderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 				
 				if(fix(5).eq.0)then
 				
-					u1=LOG(the12(2))*the01(1)*res212num/the01(2)+&
+					u1=dlog(the12(2))*the01(1)*res212num/the01(2)+&
 					the01(1)*res2the12/the01(2)-&
-					the01(1)*LOG(the12(2))*res20112num/the01(2)-&
+					the01(1)*dlog(the12(2))*res20112num/the01(2)-&
 					the01(1)*res2the0112/the01(2)
 					
-					u2=LOG(the12(2))*(res212num)+&
+					u2=dlog(the12(2))*(res212num)+&
 						res2the12
 						
 					iter = iter +1
@@ -15247,17 +15268,17 @@ subroutine derivaweibsecondderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 				iter = iter + 1
 				nweib = nweib + 1
 				
-				v=-LOG(the02(2))*res202num-&
+				v=-dlog(the02(2))*res202num-&
 				res2the02
 				res1(nweib)=v/res2denum
 				res1(nweib)=res1(nweib)+troncweib02021
 				
 				res1((nvamax+iter))=&
-				((LOG(the02(2)))**2)*res20202num+2* &
-				LOG(the02(2))*res2the0202+&
+				((dlog(the02(2)))**2)*res20202num+2* &
+				dlog(the02(2))*res2the0202+&
 				res2the0202dsquare-&
-				((LOG(the02(2)))**2)*res202num-2* &
-				LOG(the02(2))*res2the02-&
+				((dlog(the02(2)))**2)*res202num-2* &
+				dlog(the02(2))*res2the02-&
 				res2the0202square
 				
 				res1((nvamax+iter))=&
@@ -15270,10 +15291,10 @@ subroutine derivaweibsecondderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 				
 				if(fix(4).eq.0)then
 				
-					u1=-(the02(1)*LOG(the02(2))+1)* &
+					u1=-(the02(1)*dlog(the02(2))+1)* &
 					res202num/the02(2)-&
 					the02(1)*res2the02/the02(2)+ &
-					LOG(the02(2))*the02(1)* &
+					dlog(the02(2))*the02(1)* &
 					res20202num/the02(2)+ &
 					the02(1)/the02(2)*res2the0202
 					
@@ -15292,11 +15313,11 @@ subroutine derivaweibsecondderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 				
 				if(fix(5).eq.0)then
 				
-					u1=-LOG(the02(2))*LOG(the12(2))*res20212num-&
-					LOG(the02(2))*res2the0212-LOG(the12(2))*res2the0212-&
+					u1=-dlog(the02(2))*dlog(the12(2))*res20212num-&
+					dlog(the02(2))*res2the0212-dlog(the12(2))*res2the0212-&
 					res2the0212square
 					
-					u2=LOG(the12(2))*(res212num)+&
+					u2=dlog(the12(2))*(res212num)+&
 						res2the12
 						
 					iter = iter +1
@@ -15309,7 +15330,7 @@ subroutine derivaweibsecondderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 				
 				if(fix(6).eq.0)then
 				
-					u1=-LOG(the02(2))*the12(1)*res20212num/the12(2)-&
+					u1=-dlog(the02(2))*the12(1)*res20212num/the12(2)-&
 					the12(1)*res2the0212/the12(2)
 					
 					u2=the12(1)*res212num/the12(2)
@@ -15346,10 +15367,10 @@ subroutine derivaweibsecondderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 				
 				if(fix(5).eq.0)then
 				
-					u1=-the02(1)*LOG(the12(2))*res20212num/the02(2)-&
+					u1=-the02(1)*dlog(the12(2))*res20212num/the02(2)-&
 					the02(1)*res2the0212/the02(2)
 					
-					u2=LOG(the12(2))*(res212num)+&
+					u2=dlog(the12(2))*(res212num)+&
 						res2the12
 						
 					iter = iter +1
@@ -15380,19 +15401,19 @@ subroutine derivaweibsecondderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 				iter = iter + 1
 				nweib = nweib + 1
 				
-				v=LOG(the12(2))*res212num+&
+				v=dlog(the12(2))*res212num+&
 				res2the12
 				res1(nweib)=v/res2denum
 				res1(nweib)=res1(nweib)+&
-				LOG(the12(2)*t3(i))*(1-gl12*vet12)+1/ &
+				dlog(the12(2)*t3(i))*(1-gl12*vet12)+1/ &
 				the12(1)
 				
 				res1((nvamax+iter))=&
-				((LOG(the12(2)))**2)*res21212num+2* &
-				LOG(the12(2))*res2the1212+&
+				((dlog(the12(2)))**2)*res21212num+2* &
+				dlog(the12(2))*res2the1212+&
 				res2the1212dsquare+&
-				((LOG(the12(2)))**2)*res212num+2* &
-				LOG(the12(2))*res2the12+&
+				((dlog(the12(2)))**2)*res212num+2* &
+				dlog(the12(2))*res2the12+&
 				res2the1212square
 				
 				res1((nvamax+iter))=&
@@ -15401,15 +15422,15 @@ subroutine derivaweibsecondderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 				res1((nvamax+iter))/(res2denum*res2denum)
 				res1((nvamax+iter))=&
 				res1((nvamax+iter))-&
-				((LOG(the12(2)*t3(i)))**2)*gl12*vet12-&
+				((dlog(the12(2)*t3(i)))**2)*gl12*vet12-&
 				(1/(the12(1)**2))
 				
 
 				if(fix(6).eq.0)then
 			
-					u1=LOG(the12(2))*the12(1)*res21212num/the12(2)+&
+					u1=dlog(the12(2))*the12(1)*res21212num/the12(2)+&
 					the12(1)*res2the1212/the12(2)+&
-					(the12(1)*LOG(the12(2))+1)*res212num/the12(2)+&
+					(the12(1)*dlog(the12(2))+1)*res212num/the12(2)+&
 					the12(1)*res2the12/the12(2)
 					
 					u2=the12(1)*res212num/the12(2)
@@ -15420,7 +15441,7 @@ subroutine derivaweibsecondderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 					res1((nvamax+iter))/(res2denum*res2denum)
 					res1((nvamax+iter))=&
 					res1((nvamax+iter))-&
-					(1+LOG(the12(2)*t3(i))*the12(1))*gl12*vet12/the12(2)+&
+					(1+dlog(the12(2)*t3(i))*the12(1))*gl12*vet12/the12(2)+&
 					(1/the12(2))
 				endif
 				
@@ -15467,18 +15488,18 @@ subroutine derivaweibsecondderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 				iter = iter + 1
 				nweib = nweib + 1
 				
-				res1(nweib)=-LOG(the01(2)*t1(i))*gl01*vet01 +&
+				res1(nweib)=-dlog(the01(2)*t1(i))*gl01*vet01 +&
 				troncweib01011+&
-				(LOG(the01(2)*t1(i))+(1/the01(1)))
+				(dlog(the01(2)*t1(i))+(1/the01(1)))
 				
 				res1((nvamax+iter))=&
-				-((LOG(the01(2)*t1(i)))**2)*gl01*vet01 +&
+				-((dlog(the01(2)*t1(i)))**2)*gl01*vet01 +&
 				troncweib01011square-1/(the01(1)**2)
 				
 				if(fix(2).eq.0)then
 					iter = iter +1
 					res1((nvamax+iter))=&
-					-(LOG(the01(2)*t1(i))*the01(1)+1)* &
+					-(dlog(the01(2)*t1(i))*the01(1)+1)* &
 					gl01*vet01/the01(2)+&
 					troncweib010112+(1/the01(2))
 					
@@ -15509,11 +15530,11 @@ subroutine derivaweibsecondderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 			if(fix(3).eq.0)then
 				iter = iter + 1
 				nweib = nweib +1
-				res1(nweib)=-LOG(the02(2)*t1(i))*gl02*vet02 +&
+				res1(nweib)=-dlog(the02(2)*t1(i))*gl02*vet02 +&
 				troncweib02021
 				
 				res1((nvamax+iter))=&
-				-((LOG(the02(2)*t1(i)))**2)*gl02*vet02+&
+				-((dlog(the02(2)*t1(i)))**2)*gl02*vet02+&
 				troncweib02021square
 				
 				if(fix(4).eq.0)then
@@ -15521,7 +15542,7 @@ subroutine derivaweibsecondderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 					
 					
 					res1((nvamax+iter))=&
-					-(LOG(the02(2)*t1(i))*the02(1)+1)* &
+					-(dlog(the02(2)*t1(i))*the02(1)+1)* &
 					gl02*vet02/the02(2)+&
 					troncweib02021
 				endif
@@ -15548,30 +15569,30 @@ subroutine derivaweibsecondderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 			if(fix(5).eq.0)then
 				iter = iter + 1
 				nweib= nweib +1
-				res1(nweib)=LOG(the12(2)*t1(i))*gl12*vet12
+				res1(nweib)=dlog(the12(2)*t1(i))*gl12*vet12
 				
-				res1(nvamax+iter)=((LOG(the12(2)*t1(i)))**2)*gl12*vet12
+				res1(nvamax+iter)=((dlog(the12(2)*t1(i)))**2)*gl12*vet12
 				if(fix(6).eq.0)then
 					iter = iter +1
 					res1((nvamax+iter))=&
-					(LOG(the12(2)*t1(i))*the12(1)+1)* &
+					(dlog(the12(2)*t1(i))*the12(1)+1)* &
 					gl12*vet12/the12(2)
 				endif
 				call fonct(t3(i),the12,ri12,gl12,su12)
 				
 				res1(nweib)=res1(nweib)-&
-				LOG(the12(2)*t3(i))*gl12*vet12+&
-				(LOG(the12(2)*t3(i))+(1/the12(1)))
+				dlog(the12(2)*t3(i))*gl12*vet12+&
+				(dlog(the12(2)*t3(i))+(1/the12(1)))
 				iter=iter-nva12nofix-nva02nofix-nva01nofix
 				if(fix(6).eq.0)then
 					res1((nvamax+iter))=res1((nvamax+iter))-&
-					(LOG(the12(2)*t3(i))*the12(1)+1)* &
+					(dlog(the12(2)*t3(i))*the12(1)+1)* &
 					gl12*vet12/the12(2)+1/the12(2)
 					iter=iter-1
 				endif
 				
 				res1(nvamax+iter)=res1(nvamax+iter)-&
-				((LOG(the12(2)*t3(i)))**2)*gl12*vet12-1/(the12(1)**2)
+				((dlog(the12(2)*t3(i)))**2)*gl12*vet12-1/(the12(1)**2)
 				
 				
 				iter=iter+nva12nofix+nva02nofix+nva01nofix
@@ -15637,34 +15658,34 @@ subroutine derivaweibsecondderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 			if(fix(1).eq.0)then
 				iter = iter + 1
 				nweib = nweib + 1
-				v=(LOG(the01(2))+(1/the01(1)))*res2denum +&
-				res2thenum-LOG(the01(2))*(res2denum-res201num)-&
+				v=(dlog(the01(2))+(1/the01(1)))*res2denum +&
+				res2thenum-dlog(the01(2))*(res2denum-res201num)-&
 				res2the01
 				
 				v=v*(su12**vet12)-&
-				LOG(the01(2)*t3(i))*gl01*vet01*(su01**vet01)*(su02**vet02)
+				dlog(the01(2)*t3(i))*gl01*vet01*(su01**vet01)*(su02**vet02)
 				
 				res1(nweib)=v/u1
 				
 				res1(nweib)=res1(nweib)+troncweib01011
 				
 				res1((nvamax+iter))=&
-				LOG(the01(2))*2/the01(1)*res2denum+&
+				dlog(the01(2))*2/the01(1)*res2denum+&
 				res2thenum*2/the01(1)+&
-				(LOG(the01(2))**2)*res2denum+&
-				LOG(the01(2))*2*res2thenum+&
-				res2thenumsquare-3*(LOG(the01(2))**2)* &
+				(dlog(the01(2))**2)*res2denum+&
+				dlog(the01(2))*2*res2thenum+&
+				res2thenumsquare-3*(dlog(the01(2))**2)* &
 				(res2denum-res201num)-&
-				LOG(the01(2))*6*res2the01-3*res2the0101square-&
-				LOG(the01(2))*2/the01(1)*(res2denum-res201num)- &
+				dlog(the01(2))*6*res2the01-3*res2the0101square-&
+				dlog(the01(2))*2/the01(1)*(res2denum-res201num)- &
 				res2the01*2/the01(1)+ &
-				(LOG(the01(2))**2)*res20101numbis+&
-				LOG(the01(2))*2*res2the0101+&
+				(dlog(the01(2))**2)*res20101numbis+&
+				dlog(the01(2))*2*res2the0101+&
 				res2the0101dsquare
 				
 				res1((nvamax+iter))=&
 				res1((nvamax+iter))*(su12**vet12)+&
-				gl01*vet01*(LOG(the01(2)*t3(i))**2)*(-1+&
+				gl01*vet01*(dlog(the01(2)*t3(i))**2)*(-1+&
 				gl01*vet01)*(su01**vet01)*(su02**vet02)
 				res1((nvamax+iter))=&
 				(res1((nvamax+iter))*u1-v*v)/(u1*u1)
@@ -15680,18 +15701,18 @@ subroutine derivaweibsecondderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 					u2=u2*(su12**vet12)-&
 					the01(1)*gl01*vet01*(su01**vet01)*(su02**vet02)/the01(2)
 					
-					u3=the01(1)*LOG(the01(2))*res20101numbis/the01(2)+&
+					u3=the01(1)*dlog(the01(2))*res20101numbis/the01(2)+&
 					the01(1)*res2the0101/the01(2)+&
-					(the01(1)*LOG(the01(2))+2)*res2denum/the01(2)+&
+					(the01(1)*dlog(the01(2))+2)*res2denum/the01(2)+&
 					the01(1)*res2thenum/the01(2)-&
-					(3*the01(1)*LOG(the01(2))+2)* &
+					(3*the01(1)*dlog(the01(2))+2)* &
 					(res2denum-res201num)/the01(2)-3* &
 					the01(1)*res2the01/the01(2)
 					
 					u3=u3*(su12**vet12)+&
 					gl01*vet01*(su01**vet01)*(su02**vet02)*(-1-&
-					LOG(the01(2)*t3(i))*the01(1)+&
-					gl01*vet01*LOG(the01(2)*t3(i))*the01(1))/the01(2)
+					dlog(the01(2)*t3(i))*the01(1)+&
+					gl01*vet01*dlog(the01(2)*t3(i))*the01(1))/the01(2)
 					
 					iter = iter +1
 					res1((nvamax+iter))=&
@@ -15704,22 +15725,22 @@ subroutine derivaweibsecondderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 				
 				if(fix(3).eq.0)then
 				
-					u3=-LOG(the01(2))*LOG(the02(2))*res202num-&
-					LOG(the01(2))*res2the02-LOG(the02(2))*res2the02-&
-					res2the0202square-LOG(the02(2))*res202num/the01(1)-&
+					u3=-dlog(the01(2))*dlog(the02(2))*res202num-&
+					dlog(the01(2))*res2the02-dlog(the02(2))*res2the02-&
+					res2the0202square-dlog(the02(2))*res202num/the01(1)-&
 					res2the02/the01(1)+&
-					LOG(the01(2))*LOG(the02(2))*res20102num+&
-					LOG(the01(2))*res2the0102+&
-					LOG(the02(2))*res2the0102+&
+					dlog(the01(2))*dlog(the02(2))*res20102num+&
+					dlog(the01(2))*res2the0102+&
+					dlog(the02(2))*res2the0102+&
 					res2the0102square
 					u3=u3*(su12**vet12)+&
 					gl01*vet01*gl02*vet02*(su01**vet01)*(su02**vet02)* &
-					LOG(the01(2)*t3(i))*LOG(the02(2)*t3(i))
+					dlog(the01(2)*t3(i))*dlog(the02(2)*t3(i))
 					
-					u2=-LOG(the02(2))*(res202num)-&
+					u2=-dlog(the02(2))*(res202num)-&
 						res2the02
 					u2=u2*(su12**vet12)-&
-					LOG(the02(2)*t3(i))*gl02*vet02* &
+					dlog(the02(2)*t3(i))*gl02*vet02* &
 					(su01**vet01)*(su02**vet02)
 					
 					iter = iter +1
@@ -15729,16 +15750,16 @@ subroutine derivaweibsecondderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 				
 				if(fix(4).eq.0)then
 				
-					u3=-LOG(the01(2))*the02(1)*res202num/the02(2)-&
+					u3=-dlog(the01(2))*the02(1)*res202num/the02(2)-&
 					the02(1)*res2the02/the02(2)-&
 					the02(1)*res202num/(the01(1)*the02(2))+&
-					LOG(the01(2))*the02(1)*res20102num/the02(2)+&
+					dlog(the01(2))*the02(1)*res20102num/the02(2)+&
 					the02(1)*res2the0102/the02(2)
 					
 					u3=u3*(su12**vet12)+&
 					gl01*vet01*gl02*vet02*(su01**vet01)* &
 					(su02**vet02)*the02(1)* &
-					LOG(the01(2)*t3(i))/the02(2)
+					dlog(the01(2)*t3(i))/the02(2)
 					
 					u2=-the02(1)*res202num/the02(2)
 					u2=u2*(su12**vet12)-&
@@ -15753,26 +15774,26 @@ subroutine derivaweibsecondderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 				if(fix(5).eq.0)then
 				
 				
-					u3=LOG(the01(2))*LOG(the12(2))*res212num+&
-					LOG(the01(2))*res2the12+LOG(the12(2))*res2the12+&
-					res2the1212square+LOG(the12(2))*res212num/the01(1)+&
+					u3=dlog(the01(2))*dlog(the12(2))*res212num+&
+					dlog(the01(2))*res2the12+dlog(the12(2))*res2the12+&
+					res2the1212square+dlog(the12(2))*res212num/the01(1)+&
 					res2the12/the01(1)-&
-					LOG(the01(2))*LOG(the12(2))*res20112num-&
-					LOG(the01(2))*res2the0112-&
-					LOG(the12(2))*res2the0112-&
+					dlog(the01(2))*dlog(the12(2))*res20112num-&
+					dlog(the01(2))*res2the0112-&
+					dlog(the12(2))*res2the0112-&
 					res2the0112square
 
 					u3=u3*(su12**vet12)-&
 					gl12*vet12*(su12**vet12)* &
-					LOG(the12(2)*t3(i))* &
-					((LOG(the01(2))+(1/the01(1)))*res2denum +&
-					res2thenum-LOG(the01(2))*(res2denum-res201num)-&
+					dlog(the12(2)*t3(i))* &
+					((dlog(the01(2))+(1/the01(1)))*res2denum +&
+					res2thenum-dlog(the01(2))*(res2denum-res201num)-&
 					res2the01)
 					
-					u2=LOG(the12(2))*(res212num)+&
+					u2=dlog(the12(2))*(res212num)+&
 						res2the12
 					u2=u2*(su12**vet12)-&
-					LOG(the12(2)*t3(i))*gl12*vet12* &
+					dlog(the12(2)*t3(i))*gl12*vet12* &
 					res2denum*(su12**vet12)
 						
 					iter = iter +1
@@ -15785,16 +15806,16 @@ subroutine derivaweibsecondderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 				
 					
 					u3=&
-					LOG(the01(2))*the12(1)*res212num/the12(2)+&
+					dlog(the01(2))*the12(1)*res212num/the12(2)+&
 					the12(1)/the12(2)*res2the12+res212num* &
 					the12(1)/(the12(2)*the01(1))-&
-					LOG(the01(2))*the12(1)*res20112num/the12(2)-&
+					dlog(the01(2))*the12(1)*res20112num/the12(2)-&
 					the12(1)/the12(2)*res2the0112
 					
 					u3=u3*(su12**vet12)-&
 					gl12*vet12*(su12**vet12)*the12(1)* &
-					((LOG(the01(2))+(1/the01(1)))*res2denum +&
-					res2thenum-LOG(the01(2))*(res2denum-res201num)-&
+					((dlog(the01(2))+(1/the01(1)))*res2denum +&
+					res2thenum-dlog(the01(2))*(res2denum-res201num)-&
 					res2the01)/the12(2)
 					
 					
@@ -15842,22 +15863,22 @@ subroutine derivaweibsecondderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 				
 				if(fix(3).eq.0)then
 				
-					u3=-LOG(the02(2))*the01(1)*res202num/the01(2)-&
+					u3=-dlog(the02(2))*the01(1)*res202num/the01(2)-&
 					the01(1)*res2the02/the01(2)+&
-					the01(1)*LOG(the02(2))*res20102num/the01(2)+&
+					the01(1)*dlog(the02(2))*res20102num/the01(2)+&
 					the01(1)*res2the0102/the01(2)
 					
 					u3=u3*(su12**vet12)+&
 					gl01*vet01*gl02*vet02*the01(1)* &
-					LOG(the02(2)*t3(i))*(su01**vet01)* &
+					dlog(the02(2)*t3(i))*(su01**vet01)* &
 					(su02**vet02)/the01(2)
 					
 					
 					
-					u2=-LOG(the02(2))*(res202num)-&
+					u2=-dlog(the02(2))*(res202num)-&
 						res2the02
 					u2=u2*(su12**vet12)-&
-					LOG(the02(2)*t3(i))*gl02*vet02* &
+					dlog(the02(2)*t3(i))*gl02*vet02* &
 					(su01**vet01)*(su02**vet02)
 					
 					iter = iter +1
@@ -15887,21 +15908,21 @@ subroutine derivaweibsecondderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 				
 				if(fix(5).eq.0)then
 				
-					u3=LOG(the12(2))*the01(1)*res212num/the01(2)+&
+					u3=dlog(the12(2))*the01(1)*res212num/the01(2)+&
 					the01(1)*res2the12/the01(2)-&
-					the01(1)*LOG(the12(2))*res20112num/the01(2)-&
+					the01(1)*dlog(the12(2))*res20112num/the01(2)-&
 					the01(1)*res2the0112/the01(2)
 					
 					u3=u3*(su12**vet12)-&
-					gl12*vet12*(su12**vet12)*LOG(the12(2)* &
+					gl12*vet12*(su12**vet12)*dlog(the12(2)* &
 					t3(i))*(the01(1)*res2denum/the01(2) -&
 					the01(1)*(res2denum-res201num)/the01(2))
 				
 					
-					u2=LOG(the12(2))*(res212num)+&
+					u2=dlog(the12(2))*(res212num)+&
 						res2the12
 					u2=u2*(su12**vet12)-&
-					LOG(the12(2)*t3(i))*gl12*vet12* &
+					dlog(the12(2)*t3(i))*gl12*vet12* &
 					(su12**vet12)*res2denum
 						
 					iter = iter +1
@@ -15940,28 +15961,28 @@ subroutine derivaweibsecondderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 				iter = iter + 1
 				nweib = nweib + 1
 				
-				v=-LOG(the02(2))*res202num-&
+				v=-dlog(the02(2))*res202num-&
 				res2the02
 				
 				v=v*(su12**vet12)-&
-				LOG(the02(2)*t3(i))*gl02*vet02* &
+				dlog(the02(2)*t3(i))*gl02*vet02* &
 				(su01**vet01)*(su02**vet02)
 				
 				res1(nweib)=v/u1
 				res1(nweib)=res1(nweib)+troncweib02021
 				
 				res1((nvamax+iter))=&
-				((LOG(the02(2)))**2)*res20202num+&
-				(2*LOG(the02(2))*res2the0202)+&
+				((dlog(the02(2)))**2)*res20202num+&
+				(2*dlog(the02(2))*res2the0202)+&
 				res2the0202dsquare-&
-				((LOG(the02(2)))**2)*res202num-&
-				(2*LOG(the02(2))*res2the02)-&
+				((dlog(the02(2)))**2)*res202num-&
+				(2*dlog(the02(2))*res2the02)-&
 				res2the0202square
 				
 				res1((nvamax+iter))=&
 				res1((nvamax+iter))*(su12**vet12)+&
 				gl02*vet02*(su01**vet01)*(su02**vet02)* &
-				(LOG(the02(2)*t3(i))**2)*(gl02*vet02-1)
+				(dlog(the02(2)*t3(i))**2)*(gl02*vet02-1)
 				
 				res1((nvamax+iter))=&
 				res1((nvamax+iter))*u1 -v*v
@@ -15974,17 +15995,17 @@ subroutine derivaweibsecondderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 				
 				if(fix(4).eq.0)then
 				
-					u3=-(the02(1)*LOG(the02(2))+1)* &
+					u3=-(the02(1)*dlog(the02(2))+1)* &
 					res202num/the02(2)-&
 					the02(1)*res2the02/the02(2)+ &
-					LOG(the02(2))*the02(1)* &
+					dlog(the02(2))*the02(1)* &
 					res20202num/the02(2)+ &
 					the02(1)/the02(2)*res2the0202
 					
 					u3=u3*(su12**vet12)+&
 					gl02*vet02*(su01**vet01)*(su02**vet02)* &
-					(-1-LOG(the02(2)*t3(i))*the02(1)+&
-					gl02*vet02*LOG(the02(2)*t3(i))* &
+					(-1-dlog(the02(2)*t3(i))*the02(1)+&
+					gl02*vet02*dlog(the02(2)*t3(i))* &
 					the02(1))/the02(2)
 					
 					u2=-the02(1)*res202num/the02(2)
@@ -16005,19 +16026,19 @@ subroutine derivaweibsecondderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 				
 				if(fix(5).eq.0)then
 				
-					u3=-LOG(the02(2))*LOG(the12(2))*res20212num-&
-					LOG(the02(2))*res2the0212-LOG(the12(2))*res2the0212-&
+					u3=-dlog(the02(2))*dlog(the12(2))*res20212num-&
+					dlog(the02(2))*res2the0212-dlog(the12(2))*res2the0212-&
 					res2the0212square
 					
 					u3=u3*(su12**vet12)-&
-					gl12*vet12*(su12**vet12)*LOG(the12(2)* &
-					t3(i))*(-LOG(the02(2))*res202num-&
+					gl12*vet12*(su12**vet12)*dlog(the12(2)* &
+					t3(i))*(-dlog(the02(2))*res202num-&
 					res2the02)
 					
-					u2=LOG(the12(2))*(res212num)+&
+					u2=dlog(the12(2))*(res212num)+&
 						res2the12
 					u2=u2*(su12**vet12)-&
-					LOG(the12(2)*t3(i))*gl12*vet12* &
+					dlog(the12(2)*t3(i))*gl12*vet12* &
 					(su12**vet12)*res2denum
 						
 					iter = iter +1
@@ -16030,11 +16051,11 @@ subroutine derivaweibsecondderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 			
 				if(fix(6).eq.0)then
 				
-					u3=-LOG(the02(2))*the12(1)*res20212num/the12(2)-&
+					u3=-dlog(the02(2))*the12(1)*res20212num/the12(2)-&
 					the12(1)*res2the0212/the12(2)
 					u3=u3*(su12**vet12)-&
 					gl12*vet12*(su12**vet12)*the12(1)* &
-					(-1*LOG(the02(2))*res202num-&
+					(-1*dlog(the02(2))*res202num-&
 					res2the02)/the12(2)
 				
 					
@@ -16085,16 +16106,16 @@ subroutine derivaweibsecondderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 			
 				if(fix(5).eq.0)then
 				
-					u3=-the02(1)*LOG(the12(2))*res20212num/the02(2)-&
+					u3=-the02(1)*dlog(the12(2))*res20212num/the02(2)-&
 					the02(1)*res2the0212/the02(2)
 					u3=u3*(su12**vet12)+&
-					gl12*vet12*(su12**vet12)*LOG(the12(2)*t3(i))* &
+					gl12*vet12*(su12**vet12)*dlog(the12(2)*t3(i))* &
 					(the02(1)*res202num/the02(2))
 					
-					u2=LOG(the12(2))*(res212num)+&
+					u2=dlog(the12(2))*(res212num)+&
 						res2the12
 					u2=u2*(su12**vet12)-&
-					LOG(the12(2)*t3(i))*gl12*vet12* &
+					dlog(the12(2)*t3(i))*gl12*vet12* &
 					(su12**vet12)*res2denum
 						
 					iter = iter +1
@@ -16133,27 +16154,27 @@ subroutine derivaweibsecondderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 				iter = iter + 1
 				nweib = nweib + 1
 				
-				v=LOG(the12(2))*res212num+&
+				v=dlog(the12(2))*res212num+&
 				res2the12
 				v=v*(su12**vet12)-&
-				LOG(the12(2)*t3(i))*gl12*vet12* &
+				dlog(the12(2)*t3(i))*gl12*vet12* &
 				(su12**vet12)*res2denum
 				
 				res1(nweib)=v/u1
 				
 				res1((nvamax+iter))=&
-				((LOG(the12(2)))**2)* &
-				res21212num+2*LOG(the12(2))*res2the1212+&
+				((dlog(the12(2)))**2)* &
+				res21212num+2*dlog(the12(2))*res2the1212+&
 				res2the1212dsquare+&
-				((LOG(the12(2)))**2)* &
-				res212num+2*LOG(the12(2))*res2the12+&
+				((dlog(the12(2)))**2)* &
+				res212num+2*dlog(the12(2))*res2the12+&
 				res2the1212square
 				
 				res1((nvamax+iter))=&
 				res1((nvamax+iter))*(su12**vet12)+&
-				gl12*vet12*(su12**vet12)*LOG(the12(2)* &
-				t3(i))*(-2*(LOG(the12(2))*res212num+&
-				res2the12)-LOG(the12(2)*t3(i))*res2denum* &
+				gl12*vet12*(su12**vet12)*dlog(the12(2)* &
+				t3(i))*(-2*(dlog(the12(2))*res212num+&
+				res2the12)-dlog(the12(2)*t3(i))*res2denum* &
 				(1-gl12*vet12))
 				
 				res1((nvamax+iter))=&
@@ -16166,17 +16187,17 @@ subroutine derivaweibsecondderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 			
 					u2=the12(1)*res212num/the12(2)
 					
-					u3=LOG(the12(2))*the12(1)*res21212num/the12(2)+&
+					u3=dlog(the12(2))*the12(1)*res21212num/the12(2)+&
 					the12(1)*res2the1212/the12(2)+&
-					(the12(1)*LOG(the12(2))+1)*res212num/the12(2)+&
+					(the12(1)*dlog(the12(2))+1)*res212num/the12(2)+&
 					the12(1)*res2the12/the12(2)
 					u3=u3*(su12**vet12)+&
 					gl12*vet12*(su12**vet12)* &
-					(-1*LOG(the12(2)*t3(i))*u2 - &
-					(LOG(the12(2))*res212num+&
+					(-1*dlog(the12(2)*t3(i))*u2 - &
+					(dlog(the12(2))*res212num+&
 					res2the12)*the12(1)/the12(2)+&
-					res2denum*(-1-LOG(the12(2)*t3(i))*the12(1)+&
-					gl12*vet12*the12(1)*LOG(the12(2)*t3(i)))/ &
+					res2denum*(-1-dlog(the12(2)*t3(i))*the12(1)+&
+					gl12*vet12*the12(1)*dlog(the12(2)*t3(i)))/ &
 					the12(2))
 					
 					u2=u2*(su12**vet12)-&
@@ -16244,17 +16265,17 @@ subroutine derivaweibsecondderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 				iter = iter + 1
 				nweib = nweib + 1
 				
-				res1(nweib)=-LOG(the01(2)*t1(i))*gl01*vet01 +&
+				res1(nweib)=-dlog(the01(2)*t1(i))*gl01*vet01 +&
 				troncweib01011
 				
 				res1((nvamax+iter))=&
-				-((LOG(the01(2)*t1(i)))**2)*gl01*vet01 +&
+				-((dlog(the01(2)*t1(i)))**2)*gl01*vet01 +&
 				troncweib01011square
 				
 				if(fix(2).eq.0)then
 					iter = iter +1
 					res1((nvamax+iter))=&
-					-(LOG(the01(2)*t1(i))* &
+					-(dlog(the01(2)*t1(i))* &
 					the01(1)+1)*gl01*vet01/the01(2)+&
 					troncweib010112
 				endif
@@ -16312,17 +16333,17 @@ subroutine derivaweibsecondderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 			if(fix(3).eq.0)then
 				iter = iter + 1
 				nweib = nweib +1
-				res1(nweib)=-LOG(the02(2)*t1(i))*gl02*vet02 +&
-				troncweib02021+log(the02(2)*t1(i))+1/the02(1)
+				res1(nweib)=-dlog(the02(2)*t1(i))*gl02*vet02 +&
+				troncweib02021+dlog(the02(2)*t1(i))+1/the02(1)
 				
 				res1((nvamax+iter))=&
-				-((LOG(the02(2)*t1(i)))**2)*gl02*vet02+&
+				-((dlog(the02(2)*t1(i)))**2)*gl02*vet02+&
 				troncweib02021square-1/(the02(1)**2)
 				
 				if(fix(4).eq.0)then
 					iter = iter +1
 					res1((nvamax+iter))=&
-					-(LOG(the02(2)*t1(i))* &
+					-(dlog(the02(2)*t1(i))* &
 					the02(1)+1)*gl02*vet02/the02(2)+&
 					troncweib020212
 				endif
@@ -16413,12 +16434,12 @@ subroutine derivaweibsecondderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 			if(fix(1).eq.0)then
 				iter = iter + 1
 				nweib = nweib + 1
-				v=(LOG(the01(2))+(1/the01(1)))*res2denum +&
-				res2thenum-LOG(the01(2))*(res2denum-res201num)-&
+				v=(dlog(the01(2))+(1/the01(1)))*res2denum +&
+				res2thenum-dlog(the01(2))*(res2denum-res201num)-&
 				res2the01
 				
 				v=v*(su12**vet12)*ri12*vet12-&
-				LOG(the01(2)*t3(i))*gl01*vet01*(su01**vet01)* &
+				dlog(the01(2)*t3(i))*gl01*vet01*(su01**vet01)* &
 				ri02*vet02*(su02**vet02)
 				
 				res1(nweib)=v/u1
@@ -16426,22 +16447,22 @@ subroutine derivaweibsecondderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 				res1(nweib)=res1(nweib)+troncweib01011
 				
 				res1((nvamax+iter))=&
-				LOG(the01(2))*2/the01(1)*res2denum+&
+				dlog(the01(2))*2/the01(1)*res2denum+&
 				res2thenum*2/the01(1)+&
-				(LOG(the01(2))**2)*res2denum+&
-				LOG(the01(2))*2*res2thenum+&
-				res2thenumsquare-3*(LOG(the01(2))**2)* &
+				(dlog(the01(2))**2)*res2denum+&
+				dlog(the01(2))*2*res2thenum+&
+				res2thenumsquare-3*(dlog(the01(2))**2)* &
 				(res2denum-res201num)-&
-				LOG(the01(2))*6*res2the01-3*res2the0101square-&
-				LOG(the01(2))*2/the01(1)*(res2denum-res201num)- &
+				dlog(the01(2))*6*res2the01-3*res2the0101square-&
+				dlog(the01(2))*2/the01(1)*(res2denum-res201num)- &
 				res2the01*2/the01(1)+ &
-				(LOG(the01(2))**2)*res20101numbis+&
-				LOG(the01(2))*2*res2the0101+&
+				(dlog(the01(2))**2)*res20101numbis+&
+				dlog(the01(2))*2*res2the0101+&
 				res2the0101dsquare
 				
 				res1((nvamax+iter))=&
 				res1((nvamax+iter))*(su12**vet12)*ri12*vet12+&
-				gl01*vet01*(LOG(the01(2)*t3(i))**2)*(-1+&
+				gl01*vet01*(dlog(the01(2)*t3(i))**2)*(-1+&
 				gl01*vet01)*(su01**vet01)*(su02**vet02)*ri02*vet02
 				
 				res1((nvamax+iter))=&
@@ -16459,19 +16480,19 @@ subroutine derivaweibsecondderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 					ri02*vet02*the01(1)*gl01*vet01* &
 					(su01**vet01)*(su02**vet02)/the01(2)
 					
-					u3=the01(1)*LOG(the01(2))*res20101numbis/the01(2)+&
+					u3=the01(1)*dlog(the01(2))*res20101numbis/the01(2)+&
 					the01(1)*res2the0101/the01(2)+&
-					(the01(1)*LOG(the01(2))+2)*res2denum/the01(2)+&
+					(the01(1)*dlog(the01(2))+2)*res2denum/the01(2)+&
 					the01(1)*res2thenum/the01(2)-&
-					(3*the01(1)*LOG(the01(2))+2)* &
+					(3*the01(1)*dlog(the01(2))+2)* &
 					(res2denum-res201num)/the01(2)-3* &
 					the01(1)*res2the01/the01(2)
 					
 					u3=u3*(su12**vet12)*ri12*vet12+&
 					ri02*vet02*gl01*vet01*(su01**vet01)* &
 					(su02**vet02)*(-1-&
-					LOG(the01(2)*t3(i))*the01(1)+&
-					gl01*vet01*LOG(the01(2)*t3(i))*the01(1))/the01(2)
+					dlog(the01(2)*t3(i))*the01(1)+&
+					gl01*vet01*dlog(the01(2)*t3(i))*the01(1))/the01(2)
 					
 					iter = iter +1
 					res1((nvamax+iter))=&
@@ -16484,33 +16505,33 @@ subroutine derivaweibsecondderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 				if(fix(3).eq.0)then
 				
 					u3=&
-					-LOG(the01(2))*LOG(the02(2))*res202num-&
-					LOG(the01(2))*res2the02-&
-					LOG(the02(2))*res2the02-&
+					-dlog(the01(2))*dlog(the02(2))*res202num-&
+					dlog(the01(2))*res2the02-&
+					dlog(the02(2))*res2the02-&
 					res2the0202square-&
-					LOG(the02(2))*res202num/the01(1)-&
+					dlog(the02(2))*res202num/the01(1)-&
 					res2the02/the01(1)+&
-					LOG(the01(2))*LOG(the02(2))*res20102num+&
-					LOG(the01(2))*res2the0102+&
-					LOG(the02(2))*res2the0102+&
+					dlog(the01(2))*dlog(the02(2))*res20102num+&
+					dlog(the01(2))*res2the0102+&
+					dlog(the02(2))*res2the0102+&
 					res2the0102square
 					
 					
 					u3=u3*(su12**vet12)*ri12*vet12+&
 					ri02*vet02*gl01*vet01* &
 					(su01**vet01)*(su02**vet02)* &
-					LOG(the01(2)*t3(i))* &
-					(LOG(the02(2)*t3(i))*gl02*vet02-&
-					LOG(the02(2)*t3(i))-&
+					dlog(the01(2)*t3(i))* &
+					(dlog(the02(2)*t3(i))*gl02*vet02-&
+					dlog(the02(2)*t3(i))-&
 					(1/the02(1)))
 					
 					
-					u2=-LOG(the02(2))*(res202num)-&
+					u2=-dlog(the02(2))*(res202num)-&
 						res2the02
 					u2=u2*(su12**vet12)*ri12*vet12+&
 					ri02*vet02*(su01**vet01)*(su02**vet02)* &
-					(LOG(the02(2)*t3(i))+(1/the02(1))-&
-					LOG(the02(2)*t3(i))*gl02*vet02)
+					(dlog(the02(2)*t3(i))+(1/the02(1))-&
+					dlog(the02(2)*t3(i))*gl02*vet02)
 					
 					iter = iter +1
 					res1((nvamax+iter))=(u3*u1-&
@@ -16519,10 +16540,10 @@ subroutine derivaweibsecondderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 				
 				if(fix(4).eq.0)then
 				
-					u3=-LOG(the01(2))*the02(1)*res202num/the02(2)-&
+					u3=-dlog(the01(2))*the02(1)*res202num/the02(2)-&
 					the02(1)*res2the02/the02(2)-&
 					the02(1)*res202num/(the01(1)*the02(2))+&
-					LOG(the01(2))*the02(1)*res20102num/the02(2)+&
+					dlog(the01(2))*the02(1)*res20102num/the02(2)+&
 					the02(1)*res2the0102/the02(2)
 					
 					
@@ -16530,7 +16551,7 @@ subroutine derivaweibsecondderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 					ri02*vet02*gl01*vet01* &
 					(1-gl02*vet02)*(su01**vet01)* &
 					(su02**vet02)*the02(1)* &
-					LOG(the01(2)*t3(i))/the02(2)
+					dlog(the01(2)*t3(i))/the02(2)
 					
 					u2=-the02(1)*res202num/the02(2)
 					u2=u2*(su12**vet12)*ri12*vet12+&
@@ -16546,32 +16567,32 @@ subroutine derivaweibsecondderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 				if(fix(5).eq.0)then
 				
 					
-					u3=LOG(the01(2))*LOG(the12(2))*res212num+&
-					LOG(the01(2))*res2the12+LOG(the12(2))*res2the12+&
-					res2the1212square+LOG(the12(2))*res212num/the01(1)+&
+					u3=dlog(the01(2))*dlog(the12(2))*res212num+&
+					dlog(the01(2))*res2the12+dlog(the12(2))*res2the12+&
+					res2the1212square+dlog(the12(2))*res212num/the01(1)+&
 					res2the12/the01(1)-&
-					LOG(the01(2))*LOG(the12(2))*res20112num-&
-					LOG(the01(2))*res2the0112-&
-					LOG(the12(2))*res2the0112-&
+					dlog(the01(2))*dlog(the12(2))*res20112num-&
+					dlog(the01(2))*res2the0112-&
+					dlog(the12(2))*res2the0112-&
 					res2the0112square
 					
 					u3=u3*(su12**vet12)*ri12*vet12+&
 					ri12*vet12*(su12**vet12)* &
-					(LOG(the12(2)*t3(i))+ &
+					(dlog(the12(2)*t3(i))+ &
 					(1/the12(1))-&
-					LOG(the12(2)*t3(i))*gl12*vet12)* &
-					((LOG(the01(2))+(1/the01(1)))*res2denum +&
-				res2thenum-LOG(the01(2))*(res2denum-res201num)-&
+					dlog(the12(2)*t3(i))*gl12*vet12)* &
+					((dlog(the01(2))+(1/the01(1)))*res2denum +&
+				res2thenum-dlog(the01(2))*(res2denum-res201num)-&
 				res2the01)
 					
 					
-					u2=LOG(the12(2))*(res212num)+&
+					u2=dlog(the12(2))*(res212num)+&
 						res2the12
 					u2=u2*(su12**vet12)*ri12*vet12+&
 					ri12*vet12*(su12**vet12)*res2denum* &
-					(LOG(the12(2)*t3(i))+&
+					(dlog(the12(2)*t3(i))+&
 					(1/the12(1))-&
-					LOG(the12(2)*t3(i))*gl12*vet12)
+					dlog(the12(2)*t3(i))*gl12*vet12)
 						
 						
 					
@@ -16584,17 +16605,17 @@ subroutine derivaweibsecondderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 				if(fix(6).eq.0)then
 				
 					u3=&
-					LOG(the01(2))*the12(1)*res212num/the12(2)+&
+					dlog(the01(2))*the12(1)*res212num/the12(2)+&
 					the12(1)/the12(2)*res2the12+res212num* &
 					the12(1)/(the12(2)*the01(1))-&
-					LOG(the01(2))*the12(1)*res20112num/the12(2)-&
+					dlog(the01(2))*the12(1)*res20112num/the12(2)-&
 					the12(1)/the12(2)*res2the0112
 					
 					u3=u3*(su12**vet12)*ri12*vet12+&
 					ri12*vet12*(su12**vet12)*the12(1)* &
 					(1-gl12*vet12)* &
-					((LOG(the01(2))+(1/the01(1)))*res2denum +&
-					res2thenum-LOG(the01(2))*(res2denum-res201num)-&
+					((dlog(the01(2))+(1/the01(1)))*res2denum +&
+					res2thenum-dlog(the01(2))*(res2denum-res201num)-&
 					res2the01)/the12(2)
 					
 					
@@ -16647,25 +16668,25 @@ subroutine derivaweibsecondderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 				if(fix(3).eq.0)then
 				
 					
-					u3=-LOG(the02(2))*the01(1)* &
+					u3=-dlog(the02(2))*the01(1)* &
 					res202num/the01(2)-&
 					the01(1)*res2the02/the01(2)+&
-					the01(1)*LOG(the02(2))*res20102num/the01(2)+&
+					the01(1)*dlog(the02(2))*res20102num/the01(2)+&
 					the01(1)*res2the0102/the01(2)
 					
 					u3=u3*(su12**vet12)*ri12*vet12-&
 					ri02*vet02*gl01*vet01*the01(1)* &
 					(su01**vet01)*(su02**vet02)* &
-					(LOG(the02(2)*t3(i))*(1-&
+					(dlog(the02(2)*t3(i))*(1-&
 					gl02*vet02)+(1/the02(1)))/the01(2)
 					
-					u2=-LOG(the02(2))*(res202num)-&
+					u2=-dlog(the02(2))*(res202num)-&
 						res2the02
 					u2=u2*(su12**vet12)*ri12*vet12+&
 					ri02*vet02*(su01**vet01)*(su02**vet02)* &
-					(LOG(the02(2)*t3(i))+&
+					(dlog(the02(2)*t3(i))+&
 					(1/the02(1))-&
-					gl02*vet02*LOG(the02(2)*t3(i)))
+					gl02*vet02*dlog(the02(2)*t3(i)))
 					
 					iter = iter +1
 					res1((nvamax+iter))=(u3*u1-&
@@ -16695,25 +16716,25 @@ subroutine derivaweibsecondderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 				
 				if(fix(5).eq.0)then
 				
-					u3=LOG(the12(2))*the01(1)*res212num/the01(2)+&
+					u3=dlog(the12(2))*the01(1)*res212num/the01(2)+&
 					the01(1)*res2the12/the01(2)-&
-					the01(1)*LOG(the12(2))*res20112num/the01(2)-&
+					the01(1)*dlog(the12(2))*res20112num/the01(2)-&
 					the01(1)*res2the0112/the01(2)
 					
 					u3=u3*(su12**vet12)*ri12*vet12+&
-					ri12*vet12*(su12**vet12)*(LOG(the12(2)* &
+					ri12*vet12*(su12**vet12)*(dlog(the12(2)* &
 					t3(i)) + &
-					(1/the12(1))-LOG(the12(2)*t3(i))*gl12*vet12)* &
+					(1/the12(1))-dlog(the12(2)*t3(i))*gl12*vet12)* &
 					(the01(1)*res2denum/the01(2) -&
 					the01(1)*(res2denum-res201num)/the01(2))
 					
-					u2=LOG(the12(2))*(res212num)+&
+					u2=dlog(the12(2))*(res212num)+&
 						res2the12
 					u2=u2*(su12**vet12)*ri12*vet12+&
 					ri12*vet12*(su12**vet12)*res2denum* &
-					(LOG(the12(2)*t3(i))+&
+					(dlog(the12(2)*t3(i))+&
 					(1/the12(1))-&
-					LOG(the12(2)*t3(i))*gl12*vet12)
+					dlog(the12(2)*t3(i))*gl12*vet12)
 						
 					iter = iter +1
 					res1((nvamax+iter))=(u3*u1-&
@@ -16753,34 +16774,34 @@ subroutine derivaweibsecondderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 				iter = iter + 1
 				nweib = nweib + 1
 				
-				v=-LOG(the02(2))*res202num-&
+				v=-dlog(the02(2))*res202num-&
 				res2the02
 				
 				v=v*(su12**vet12)*ri12*vet12+&
 				ri02*vet02*(su01**vet01)*(su02**vet02)* &
-				(LOG(the02(2)*t3(i))+&
+				(dlog(the02(2)*t3(i))+&
 				(1/the02(1))-&
-				gl02*vet02*LOG(the02(2)*t3(i)))
+				gl02*vet02*dlog(the02(2)*t3(i)))
 				
 				res1(nweib)=v/u1
 				res1(nweib)=res1(nweib)+troncweib02021
 				res1((nvamax+iter))=&
-				((LOG(the02(2)))**2)* &
-				res20202num+2*LOG(the02(2))*res2the0202+&
+				((dlog(the02(2)))**2)* &
+				res20202num+2*dlog(the02(2))*res2the0202+&
 				res2the0202dsquare-&
-				((LOG(the02(2)))**2)* &
-				res202num-2*LOG(the02(2))*res2the02-&
+				((dlog(the02(2)))**2)* &
+				res202num-2*dlog(the02(2))*res2the02-&
 				res2the0202square
 				
 				res1((nvamax+iter))=&
 				res1((nvamax+iter))* &
 				(su12**vet12)*ri12*vet12+&
 				ri02*vet02*(su01**vet01)*(su02**vet02)* &
-				(((LOG(the02(2)*t3(i))+&
+				(((dlog(the02(2)*t3(i))+&
 				(1/the02(1))-&
-				gl02*vet02*LOG(the02(2)*t3(i)))**2)-&
+				gl02*vet02*dlog(the02(2)*t3(i)))**2)-&
 				((1/(the02(1)**2))+&
-				(LOG(the02(2)*t3(i))**2)*gl02*vet02))
+				(dlog(the02(2)*t3(i))**2)*gl02*vet02))
 				
 				res1((nvamax+iter))=&
 				res1((nvamax+iter))*u1 -v*v
@@ -16793,21 +16814,21 @@ subroutine derivaweibsecondderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 				
 				if(fix(4).eq.0)then
 				
-					u3=-(the02(1)*LOG(the02(2))+1)* &
+					u3=-(the02(1)*dlog(the02(2))+1)* &
 					res202num/the02(2)-&
 					the02(1)*res2the02/the02(2)+ &
-					LOG(the02(2))*the02(1)* &
+					dlog(the02(2))*the02(1)* &
 					res20202num/the02(2)+ &
 					the02(1)/the02(2)*res2the0202
 					
 					u3=u3*(su12**vet12)*ri12*vet12+&
 					ri02*vet02*(1-gl02*vet02)*the02(1)* &
 					(su01**vet01)*(su02**vet02)* &
-					(LOG(the02(2)*t3(i))+&
+					(dlog(the02(2)*t3(i))+&
 					(1/the02(1))-&
-					LOG(the02(2)*t3(i))*gl02*vet02)/the02(2)+ &
+					dlog(the02(2)*t3(i))*gl02*vet02)/the02(2)+ &
 					ri02*vet02*(su01**vet01)*(su02**vet02)* &
-					(1-gl02*vet02-LOG(the02(2)*t3(i))*the02(1)* &
+					(1-gl02*vet02-dlog(the02(2)*t3(i))*the02(1)* &
 					gl02*vet02)/the02(2)
 					
 					u2=-the02(1)*res202num/the02(2)
@@ -16828,25 +16849,25 @@ subroutine derivaweibsecondderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 				
 				if(fix(5).eq.0)then
 				
-					u3=-LOG(the02(2))*LOG(the12(2))*res20212num-&
-					LOG(the02(2))*res2the0212-LOG(the12(2))*res2the0212-&
+					u3=-dlog(the02(2))*dlog(the12(2))*res20212num-&
+					dlog(the02(2))*res2the0212-dlog(the12(2))*res2the0212-&
 					res2the0212square
 					
 					u3=u3*(su12**vet12)*ri12*vet12+&
 					ri12*vet12*(su12**vet12)* &
-					(LOG(the12(2)*t3(i))+&
+					(dlog(the12(2)*t3(i))+&
 					(1/the12(1))-&
-					LOG(the12(2)*t3(i))*gl12*vet12)* &
-					(-1*LOG(the02(2))*res202num-&
+					dlog(the12(2)*t3(i))*gl12*vet12)* &
+					(-1*dlog(the02(2))*res202num-&
 					res2the02)
 					
-					u2=LOG(the12(2))*(res212num)+&
+					u2=dlog(the12(2))*(res212num)+&
 						res2the12
 					u2=u2*(su12**vet12)*ri12*vet12+&
 					ri12*vet12*(su12**vet12)*res2denum* &
-					(LOG(the12(2)*t3(i))+&
+					(dlog(the12(2)*t3(i))+&
 					(1/the12(1))-&
-					LOG(the12(2)*t3(i))*gl12*vet12)
+					dlog(the12(2)*t3(i))*gl12*vet12)
 						
 					iter = iter +1
 					res1((nvamax+iter))=u1*u3-&
@@ -16858,12 +16879,12 @@ subroutine derivaweibsecondderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 				
 				if(fix(6).eq.0)then
 				
-					u3=-LOG(the02(2))*the12(1)*res20212num/the12(2)-&
+					u3=-dlog(the02(2))*the12(1)*res20212num/the12(2)-&
 					the12(1)*res2the0212/the12(2)
 					
 					u3=u3*(su12**vet12)*ri12*vet12+&
 					ri12*vet12*(1-gl12*vet12)*(su12**vet12)*the12(1)* &
-					(-1*LOG(the02(2))*res202num-&
+					(-1*dlog(the02(2))*res202num-&
 					res2the02)/the12(2)
 				
 					
@@ -16920,22 +16941,22 @@ subroutine derivaweibsecondderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 				
 				if(fix(5).eq.0)then
 				
-					u3=-the02(1)*LOG(the12(2))*res20212num/the02(2)-&
+					u3=-the02(1)*dlog(the12(2))*res20212num/the02(2)-&
 					the02(1)*res2the0212/the02(2)
 					u3=u3*(su12**vet12)*ri12*vet12-&
 					ri12*vet12*(su12**vet12)* &
-					(LOG(the12(2)*t3(i))+&
+					(dlog(the12(2)*t3(i))+&
 					(1/the12(1))- &
-					LOG(the12(2)*t3(i))*gl12*vet12)* &
+					dlog(the12(2)*t3(i))*gl12*vet12)* &
 					(the02(1)*res202num/the02(2))
 					
-					u2=LOG(the12(2))*(res212num)+&
+					u2=dlog(the12(2))*(res212num)+&
 						res2the12
 					u2=u2*(su12**vet12)*ri12*vet12+&
 					ri12*vet12*(su12**vet12)*res2denum* &
-					(LOG(the12(2)*t3(i))+&
+					(dlog(the12(2)*t3(i))+&
 					(1/the12(1))-&
-					LOG(the12(2)*t3(i))*gl12*vet12)
+					dlog(the12(2)*t3(i))*gl12*vet12)
 						
 					iter = iter +1
 					res1((nvamax+iter))=u1*u3-&
@@ -16978,37 +16999,37 @@ subroutine derivaweibsecondderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 				iter = iter + 1
 				nweib = nweib + 1
 				
-				v=LOG(the12(2))*res212num+&
+				v=dlog(the12(2))*res212num+&
 				res2the12
 				v=v*(su12**vet12)*ri12*vet12+&
 				ri12*vet12*(su12**vet12)*res2denum* &
-				(LOG(the12(2)*t3(i))+&
+				(dlog(the12(2)*t3(i))+&
 				(1/the12(1))-&
-				LOG(the12(2)*t3(i))*gl12*vet12)
+				dlog(the12(2)*t3(i))*gl12*vet12)
 				
 				res1(nweib)=v/u1
 				
 				res1((nvamax+iter))=&
-				((LOG(the12(2)))**2)* &
-				res21212num+2*LOG(the12(2))*res2the1212+&
+				((dlog(the12(2)))**2)* &
+				res21212num+2*dlog(the12(2))*res2the1212+&
 				res2the1212dsquare+&
-				((LOG(the12(2)))**2)* &
-				res212num+2*LOG(the12(2))*res2the12+&
+				((dlog(the12(2)))**2)* &
+				res212num+2*dlog(the12(2))*res2the12+&
 				res2the1212square
 				
 				res1((nvamax+iter))=&
 				res1((nvamax+iter))*(su12**vet12)*ri12*vet12+&
 				ri12*vet12*(su12**vet12)* &
-				(LOG(the12(2)*t3(i)) +&
+				(dlog(the12(2)*t3(i)) +&
 				(1/the12(1))-&
-				LOG(the12(2)*t3(i))*gl12*vet12)* &
-				(2*(LOG(the12(2))*res212num+&
-				res2the12)+res2denum*(LOG(the12(2)*t3(i))+&
+				dlog(the12(2)*t3(i))*gl12*vet12)* &
+				(2*(dlog(the12(2))*res212num+&
+				res2the12)+res2denum*(dlog(the12(2)*t3(i))+&
 				(1/the12(1))-&
-				LOG(the12(2)*t3(i))*gl12*vet12))-&
+				dlog(the12(2)*t3(i))*gl12*vet12))-&
 				ri12*vet12*(su12**vet12)*res2denum* &
 				((1/(the12(1)**2))+&
-				(LOG(the12(2)*t3(i))**2)*gl12*vet12)
+				(dlog(the12(2)*t3(i))**2)*gl12*vet12)
 				
 				res1((nvamax+iter))=&
 				res1((nvamax+iter))*u1 -v*v
@@ -17020,27 +17041,27 @@ subroutine derivaweibsecondderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 	
 					u2=the12(1)*res212num/the12(2)
 					
-					u3=LOG(the12(2))*the12(1)*res21212num/the12(2)+&
+					u3=dlog(the12(2))*the12(1)*res21212num/the12(2)+&
 					the12(1)*res2the1212/the12(2)+&
-					(the12(1)*LOG(the12(2))+1)*res212num/the12(2)+&
+					(the12(1)*dlog(the12(2))+1)*res212num/the12(2)+&
 					the12(1)*res2the12/the12(2)
 					
 					u3=u3*(su12**vet12)*ri12*vet12+&
 					ri12*vet12*(1-gl12*vet12)* &
 					(su12**vet12)*the12(1)* &
-					((LOG(the12(2))*res212num+&
+					((dlog(the12(2))*res212num+&
 					res2the12)+&
-					res2denum*(LOG(the12(2)*t3(i))+&
+					res2denum*(dlog(the12(2)*t3(i))+&
 					(1/the12(1))-&
-					LOG(the12(2)*t3(i))*gl12*vet12))/the12(2)
+					dlog(the12(2)*t3(i))*gl12*vet12))/the12(2)
 					
 					u3=u3+ &
 					ri12*vet12*(su12**vet12)*res2denum* &
-					(1-LOG(the12(2)*t3(i))*the12(1)* &
+					(1-dlog(the12(2)*t3(i))*the12(1)* &
 					gl12*vet12-gl12*vet12)/the12(2)+&
 					ri12*vet12*(su12**vet12)*u2* &
-					(LOG(the12(2)*t3(i))+(1/the12(1))-&
-					LOG(the12(2)*t3(i))*gl12*vet12)
+					(dlog(the12(2)*t3(i))+(1/the12(1))-&
+					dlog(the12(2)*t3(i))*gl12*vet12)
 					
 					
 					u2=u2*(su12**vet12)*ri12*vet12+&
@@ -17117,7 +17138,7 @@ subroutine derivaweibsecondderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 	
 	
 	!=============================================================================================  
-!======================= Calculate derivatives of loglik with weibull baseline risk ==========
+!======================= Calculate derivatives of dloglik with weibull baseline risk ==========
 !=============================================================================================  
 
 
@@ -17442,31 +17463,31 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
                         	tronc01square=ve01square(i,:)*gl01*vet01
                         	tronc02square=ve02square(i,:)*gl02*vet02
 							
-							troncweib01011=gl01*vet01*LOG(the01(2)*t0(i))
+							troncweib01011=gl01*vet01*dlog(the01(2)*t0(i))
 							troncweib01011square=&
-							((LOG(the01(2)*t0(i)))**2)*gl01*vet01
+							((dlog(the01(2)*t0(i)))**2)*gl01*vet01
 							
-							troncweib01011beta01=LOG(the01(2)*t0(i))*tronc01
+							troncweib01011beta01=dlog(the01(2)*t0(i))*tronc01
 							
 							troncweib01012beta01=tronc01*the01(1)/the01(2)
 							
 							troncweib010112=&
-							(1+LOG(the01(2)*t0(i))*the01(1))*gl01*vet01/the01(2)
+							(1+dlog(the01(2)*t0(i))*the01(1))*gl01*vet01/the01(2)
 							
 							troncweib01012=the01(1)*gl01*vet01/the01(2)
 							
 							troncweib01012square=&
 							the01(1)*(the01(1)-1)*gl01*vet01/(the01(2)**2)
 							
-							troncweib02021=LOG(the02(2)*t0(i))*gl02*vet02
+							troncweib02021=dlog(the02(2)*t0(i))*gl02*vet02
 							troncweib02021square=&
-							((LOG(the02(2)*t0(i)))**2)*gl02*vet02
+							((dlog(the02(2)*t0(i)))**2)*gl02*vet02
 							
 							troncweib020212=&
-							(1+LOG(the02(2)*t0(i))*the02(1))*gl02*vet02/the02(2)
+							(1+dlog(the02(2)*t0(i))*the02(1))*gl02*vet02/the02(2)
 							
 							troncweib02021beta02=&
-							tronc02*LOG(the02(2)*t0(i))
+							tronc02*dlog(the02(2)*t0(i))
 							
 							troncweib02022=&
 							the02(1)*gl02*vet02/the02(2)
@@ -17510,15 +17531,15 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 			if(fix(1).eq.0)then
 				iter = iter + 1
 				nweib = nweib + 1
-				res1(nweib)=-LOG(the01(2)*t1(i))*gl01*vet01 +&
+				res1(nweib)=-dlog(the01(2)*t1(i))*gl01*vet01 +&
 				troncweib01011
 				res1((nvamax+iter))=&
-				-((LOG(the01(2)*t1(i)))**2)*gl01*vet01 +&
+				-((dlog(the01(2)*t1(i)))**2)*gl01*vet01 +&
 				troncweib01011square
 				if(fix(2).eq.0)then
 					iter = iter +1
 					res1((nvamax+iter))=&
-					-(1+the01(1)*LOG(the01(2)*t1(i)))* &
+					-(1+the01(1)*dlog(the01(2)*t1(i)))* &
 					gl01*vet01/the01(2) +&
 					troncweib010112
 				endif
@@ -17541,7 +17562,7 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 				if(nva01nofix.gt.0) then 
 					
 					res1((nvamax+iter+1):(nvamax+iter+nva01nofix))=&
-					-ve01nofix(i,:)*gl01*vet01*LOG(the01(2)*t1(i))+&
+					-ve01nofix(i,:)*gl01*vet01*dlog(the01(2)*t1(i))+&
 					troncweib01011beta01
 					iter = iter +nva01nofix
 				endif
@@ -17605,16 +17626,16 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 			if(fix(3).eq.0)then
 				iter = iter + 1
 				nweib = nweib +1
-				res1(nweib)=-LOG(the02(2)*t1(i))*gl02*vet02 +&
+				res1(nweib)=-dlog(the02(2)*t1(i))*gl02*vet02 +&
 				troncweib02021
 				res1((nvamax+iter))=&
-				-((LOG(the02(2)*t1(i)))**2)*gl02*vet02+&
+				-((dlog(the02(2)*t1(i)))**2)*gl02*vet02+&
 				troncweib02021square
 				
 				if(fix(4).eq.0)then
 					iter = iter +1
 					res1((nvamax+iter))=&
-					-(1+the02(1)*LOG(the02(2)*t1(i)))* &
+					-(1+the02(1)*dlog(the02(2)*t1(i)))* &
 					gl02*vet02/the02(2)+&
 					troncweib020212
 				endif
@@ -17635,7 +17656,7 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 					
 					res1((nvamax+iter+1):(nvamax+iter+nva02nofix))=&
 					troncweib02021beta02-&
-					ve02nofix(i,:)*gl02*vet02*LOG(the02(2)*t1(i))
+					ve02nofix(i,:)*gl02*vet02*dlog(the02(2)*t1(i))
 					iter = iter +nva02nofix
 				endif
 				if(nva12nofix.gt.0) then 
@@ -17793,8 +17814,8 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 				iter = iter + 1
 				nweib = nweib + 1
 				
-				v=(LOG(the01(2))+(1/the01(1)))*res2denum +&
-				res2thenum-LOG(the01(2))*(res2denum-res201num)-&
+				v=(dlog(the01(2))+(1/the01(1)))*res2denum +&
+				res2thenum-dlog(the01(2))*(res2denum-res201num)-&
 				res2the01
 				res1(nweib)=v/res2denum
 				
@@ -17802,18 +17823,18 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 				
 				
 				res1((nvamax+iter))=&
-				(LOG(the01(2))**2)*res2denum+ &
-				LOG(the01(2))*2*res2thenum+ &
+				(dlog(the01(2))**2)*res2denum+ &
+				dlog(the01(2))*2*res2thenum+ &
 				res2thenumsquare+ &
-				LOG(the01(2))*2/the01(1)*res2denum+ &
+				dlog(the01(2))*2/the01(1)*res2denum+ &
 				res2thenum*2/the01(1)- &
-				(LOG(the01(2))**2)*3*(res2denum-res201num)- &
-				LOG(the01(2))*6*res2the01- &
+				(dlog(the01(2))**2)*3*(res2denum-res201num)- &
+				dlog(the01(2))*6*res2the01- &
 				res2the0101square*3- &
-				LOG(the01(2))*2*(res2denum-res201num)/the01(1)-&
+				dlog(the01(2))*2*(res2denum-res201num)/the01(1)-&
 				res2the01*2/the01(1)+ &
-				(LOG(the01(2))**2)*res20101numbis+ &
-				LOG(the01(2))*2*res2the0101+ &
+				(dlog(the01(2))**2)*res20101numbis+ &
+				dlog(the01(2))*2*res2the0101+ &
 				res2the0101dsquare
 				
 				
@@ -17830,11 +17851,11 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 					u2=res2denum*the01(1)/the01(2)-&
 					(res2denum-res201num)*the01(1)/the01(2)
 					
-					u1=the01(1)*LOG(the01(2))*res20101numbis/the01(2)+&
+					u1=the01(1)*dlog(the01(2))*res20101numbis/the01(2)+&
 					the01(1)*res2the0101/the01(2)+&
-					(the01(1)*LOG(the01(2))+2)*res2denum/the01(2)+&
+					(the01(1)*dlog(the01(2))+2)*res2denum/the01(2)+&
 					the01(1)*res2thenum/the01(2)-&
-					(3*the01(1)*LOG(the01(2))+2)* &
+					(3*the01(1)*dlog(the01(2))+2)* &
 					(res2denum-res201num)/the01(2)-3* &
 					the01(1)*res2the01/the01(2)
 					
@@ -17849,16 +17870,16 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 				endif
 				if(fix(3).eq.0)then
 				
-					u1=-LOG(the01(2))*LOG(the02(2))*res202num-&
-					LOG(the01(2))*res2the02-LOG(the02(2))*res2the02-&
-					res2the0202square-LOG(the02(2))*res202num/the01(1)-&
+					u1=-dlog(the01(2))*dlog(the02(2))*res202num-&
+					dlog(the01(2))*res2the02-dlog(the02(2))*res2the02-&
+					res2the0202square-dlog(the02(2))*res202num/the01(1)-&
 					res2the02/the01(1)+&
-					LOG(the01(2))*LOG(the02(2))*res20102num+&
-					LOG(the01(2))*res2the0102+&
-					LOG(the02(2))*res2the0102+&
+					dlog(the01(2))*dlog(the02(2))*res20102num+&
+					dlog(the01(2))*res2the0102+&
+					dlog(the02(2))*res2the0102+&
 					res2the0102square
 					
-					u2=-LOG(the02(2))*(res202num)-&
+					u2=-dlog(the02(2))*(res202num)-&
 						res2the02
 					iter = iter +1
 					res1((nvamax+iter))=u1*res2denum-&
@@ -17869,10 +17890,10 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 				
 				if(fix(4).eq.0)then
 				
-					u1=-LOG(the01(2))*the02(1)*res202num/the02(2)-&
+					u1=-dlog(the01(2))*the02(1)*res202num/the02(2)-&
 					the02(1)*res2the02/the02(2)-&
 					the02(1)*res202num/(the01(1)*the02(2))+&
-					LOG(the01(2))*the02(1)*res20102num/the02(2)+&
+					dlog(the01(2))*the02(1)*res20102num/the02(2)+&
 					the02(1)*res2the0102/the02(2)
 					
 					u2=-the02(1)*res202num/the02(2)
@@ -17886,16 +17907,16 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 				
 				if(fix(5).eq.0)then
 				
-					u1=LOG(the01(2))*LOG(the12(2))*res212num+&
-					LOG(the01(2))*res2the12+LOG(the12(2))*res2the12+&
-					res2the1212square+LOG(the12(2))*res212num/the01(1)+&
+					u1=dlog(the01(2))*dlog(the12(2))*res212num+&
+					dlog(the01(2))*res2the12+dlog(the12(2))*res2the12+&
+					res2the1212square+dlog(the12(2))*res212num/the01(1)+&
 					res2the12/the01(1)-&
-					LOG(the01(2))*LOG(the12(2))*res20112num-&
-					LOG(the01(2))*res2the0112-&
-					LOG(the12(2))*res2the0112-&
+					dlog(the01(2))*dlog(the12(2))*res20112num-&
+					dlog(the01(2))*res2the0112-&
+					dlog(the12(2))*res2the0112-&
 					res2the0112square
 					
-					u2=LOG(the12(2))*(res212num)+&
+					u2=dlog(the12(2))*(res212num)+&
 						res2the12
 						
 					iter = iter +1
@@ -17909,10 +17930,10 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 				if(fix(6).eq.0)then
 					
 					u1=&
-					LOG(the01(2))*the12(1)*res212num/the12(2)+&
+					dlog(the01(2))*the12(1)*res212num/the12(2)+&
 					the12(1)/the12(2)*res2the12+res212num* &
 					the12(1)/(the12(2)*the01(1))-&
-					LOG(the01(2))*the12(1)*res20112num/the12(2)-&
+					dlog(the01(2))*the12(1)*res20112num/the12(2)-&
 					the12(1)/the12(2)*res2the0112
 					
 					
@@ -17927,10 +17948,10 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 				if(nva01nofix.gt.0) then 
 					
 					u1=res2the0101+ &
-					LOG(the01(2))*res20101numbis-&
-					LOG(the01(2))*3*(res2denum-res201num)-&
+					dlog(the01(2))*res20101numbis-&
+					dlog(the01(2))*3*(res2denum-res201num)-&
 					res2the01*3-(res2denum-res201num)/the01(1)+&
-					(LOG(the01(2))+(1/the01(1)))*res2denum+&
+					(dlog(the01(2))+(1/the01(1)))*res2denum+&
 					res2thenum
 					
 					u2=res201num
@@ -17947,10 +17968,10 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 				endif
 				if(nva02nofix.gt.0) then 
 					
-					u1=-(LOG(the01(2))+&
+					u1=-(dlog(the01(2))+&
 					(1/the01(1)))*res202num-&
 					res2the02+&
-					LOG(the01(2))*res20102num+&
+					dlog(the01(2))*res20102num+&
 					res2the0102
 					
 					u2=-res202num
@@ -17961,10 +17982,10 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 					iter = iter +nva02nofix
 				endif
 				if(nva12nofix.gt.0) then 
-					u1=(LOG(the01(2))+&
+					u1=(dlog(the01(2))+&
 					(1/the01(1)))*res212num+&
 					res2the12-&
-					LOG(the01(2))*res20112num-&
+					dlog(the01(2))*res20112num-&
 					res2the0112
 					
 					u2=res212num
@@ -18002,13 +18023,13 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 				res1((nvamax+iter))+ troncweib01012square
 				if(fix(3).eq.0)then
 				
-					u1=-LOG(the02(2))*the01(1)* &
+					u1=-dlog(the02(2))*the01(1)* &
 					res202num/the01(2)-&
 					the01(1)*res2the02/the01(2)+&
-					the01(1)*LOG(the02(2))*res20102num/the01(2)+&
+					the01(1)*dlog(the02(2))*res20102num/the01(2)+&
 					the01(1)*res2the0102/the01(2)
 					
-					u2=-LOG(the02(2))*(res202num)-&
+					u2=-dlog(the02(2))*(res202num)-&
 						res2the02
 					iter = iter +1
 					res1((nvamax+iter))=u1*res2denum-&
@@ -18034,12 +18055,12 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 				
 				if(fix(5).eq.0)then
 				
-					u1=LOG(the12(2))*the01(1)*res212num/the01(2)+&
+					u1=dlog(the12(2))*the01(1)*res212num/the01(2)+&
 					the01(1)*res2the12/the01(2)-&
-					the01(1)*LOG(the12(2))*res20112num/the01(2)-&
+					the01(1)*dlog(the12(2))*res20112num/the01(2)-&
 					the01(1)*res2the0112/the01(2)
 					
-					u2=LOG(the12(2))*(res212num)+&
+					u2=dlog(the12(2))*(res212num)+&
 						res2the12
 						
 					iter = iter +1
@@ -18115,18 +18136,18 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 				iter = iter + 1
 				nweib = nweib + 1
 				
-				v=-LOG(the02(2))*res202num-&
+				v=-dlog(the02(2))*res202num-&
 				res2the02
 				res1(nweib)=v/res2denum
 				res1(nweib)=res1(nweib)+ &
 				troncweib02021
 				
 				res1((nvamax+iter))=&
-				((LOG(the02(2)))**2)* &
-				res20202num+2*LOG(the02(2))*res2the0202+&
+				((dlog(the02(2)))**2)* &
+				res20202num+2*dlog(the02(2))*res2the0202+&
 				res2the0202dsquare-&
-				((LOG(the02(2)))**2)* &
-				res202num-2*LOG(the02(2))*res2the02-&
+				((dlog(the02(2)))**2)* &
+				res202num-2*dlog(the02(2))*res2the02-&
 				res2the0202square
 				
 				res1((nvamax+iter))=&
@@ -18139,10 +18160,10 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 				
 				if(fix(4).eq.0)then
 				
-					u1=-(the02(1)*LOG(the02(2))+1)* &
+					u1=-(the02(1)*dlog(the02(2))+1)* &
 					res202num/the02(2)-&
 					the02(1)*res2the02/the02(2)+ &
-					LOG(the02(2))*the02(1)* &
+					dlog(the02(2))*the02(1)* &
 					res20202num/the02(2)+ &
 					the02(1)/the02(2)*res2the0202
 					
@@ -18161,11 +18182,11 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 				
 				if(fix(5).eq.0)then
 				
-					u1=-LOG(the02(2))*LOG(the12(2))*res20212num-&
-					LOG(the02(2))*res2the0212-LOG(the12(2))*res2the0212-&
+					u1=-dlog(the02(2))*dlog(the12(2))*res20212num-&
+					dlog(the02(2))*res2the0212-dlog(the12(2))*res2the0212-&
 					res2the0212square
 					
-					u2=LOG(the12(2))*(res212num)+&
+					u2=dlog(the12(2))*(res212num)+&
 						res2the12
 						
 					iter = iter +1
@@ -18178,7 +18199,7 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 				
 				if(fix(6).eq.0)then
 				
-					u1=-LOG(the02(2))*the12(1)*res20212num/the12(2)-&
+					u1=-dlog(the02(2))*the12(1)*res20212num/the12(2)-&
 					the12(1)*res2the0212/the12(2)
 					
 					u2=the12(1)*res212num/the12(2)
@@ -18191,8 +18212,8 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 				
 				if(nva01nofix.gt.0) then 
 					
-					u1=LOG(the02(2))*res20102num+&
-					res2the0102-res202num*LOG(the02(2))-&
+					u1=dlog(the02(2))*res20102num+&
+					res2the0102-res202num*dlog(the02(2))-&
 					res2the02
 					
 					u2=res201num
@@ -18206,8 +18227,8 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 				endif
 				if(nva02nofix.gt.0) then 
 					
-					u1=-LOG(the02(2))*res202num-&
-					res2the02+LOG(the02(2))*res20202num+&
+					u1=-dlog(the02(2))*res202num-&
+					res2the02+dlog(the02(2))*res20202num+&
 					res2the0202
 					
 					u2=-res202num
@@ -18224,7 +18245,7 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 				endif
 				if(nva12nofix.gt.0) then 
 				
-					u1=-LOG(the02(2))*res20212num-&
+					u1=-dlog(the02(2))*res20212num-&
 					res2the0212
 					
 					u2=res212num
@@ -18260,10 +18281,10 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 				
 				if(fix(5).eq.0)then
 				
-					u1=-the02(1)*LOG(the12(2))*res20212num/the02(2)-&
+					u1=-the02(1)*dlog(the12(2))*res20212num/the02(2)-&
 					the02(1)*res2the0212/the02(2)
 					
-					u2=LOG(the12(2))*(res212num)+&
+					u2=dlog(the12(2))*(res212num)+&
 						res2the12
 						
 					iter = iter +1
@@ -18335,18 +18356,18 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 				iter = iter + 1
 				nweib = nweib + 1
 				
-				v=LOG(the12(2))*res212num+&
+				v=dlog(the12(2))*res212num+&
 				res2the12
 				res1(nweib)=v/res2denum
 				res1(nweib)=res1(nweib)-&
-				LOG(the12(2)*t3(i))*gl12*vet12
+				dlog(the12(2)*t3(i))*gl12*vet12
 				
 				res1((nvamax+iter))=&
-				((LOG(the12(2)))**2)* &
-				res21212num+2*LOG(the12(2))*res2the1212+&
+				((dlog(the12(2)))**2)* &
+				res21212num+2*dlog(the12(2))*res2the1212+&
 				res2the1212dsquare+&
-				((LOG(the12(2)))**2)* &
-				res212num+2*LOG(the12(2))*res2the12+&
+				((dlog(the12(2)))**2)* &
+				res212num+2*dlog(the12(2))*res2the12+&
 				res2the1212square
 				
 				res1((nvamax+iter))=&
@@ -18355,14 +18376,14 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 				res1((nvamax+iter))/(res2denum*res2denum)
 				res1((nvamax+iter))=&
 				res1((nvamax+iter))-&
-				((LOG(the12(2)*t3(i)))**2)*gl12*vet12
+				((dlog(the12(2)*t3(i)))**2)*gl12*vet12
 				
 
 				if(fix(6).eq.0)then
 			
-					u1=LOG(the12(2))*the12(1)*res21212num/the12(2)+&
+					u1=dlog(the12(2))*the12(1)*res21212num/the12(2)+&
 					the12(1)*res2the1212/the12(2)+&
-					(the12(1)*LOG(the12(2))+1)*res212num/the12(2)+&
+					(the12(1)*dlog(the12(2))+1)*res212num/the12(2)+&
 					the12(1)*res2the12/the12(2)
 					
 					u2=the12(1)*res212num/the12(2)
@@ -18373,13 +18394,13 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 					res1((nvamax+iter))/(res2denum*res2denum)
 					res1((nvamax+iter))=&
 					res1((nvamax+iter))-&
-					(1+LOG(the12(2)*t3(i))*the12(1))*gl12*vet12/the12(2)
+					(1+dlog(the12(2)*t3(i))*the12(1))*gl12*vet12/the12(2)
 				endif
 				
 				if(nva01nofix.gt.0) then 
 					
-					u1=-LOG(the12(2))*res20112num-&
-					res2the0112+res212num*LOG(the12(2))+&
+					u1=-dlog(the12(2))*res20112num-&
+					res2the0112+res212num*dlog(the12(2))+&
 					res2the12
 					
 					u2=res201num
@@ -18393,7 +18414,7 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 				endif
 				if(nva02nofix.gt.0) then 
 					
-					u1=-LOG(the12(2))*res20212num-&
+					u1=-dlog(the12(2))*res20212num-&
 					res2the0212
 					
 					u2=-res202num
@@ -18407,8 +18428,8 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 				endif
 				if(nva12nofix.gt.0) then 
 				
-					u1=LOG(the12(2))*res21212num+&
-					res2the1212+LOG(the12(2))*res212num+&
+					u1=dlog(the12(2))*res21212num+&
+					res2the1212+dlog(the12(2))*res212num+&
 					res2the12
 					
 					u2=res212num
@@ -18419,7 +18440,7 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 					v*u2)/(res2denum*res2denum)
 					res1((nvamax+iter+1):(nvamax+iter+nva12nofix))=&
 					res1((nvamax+iter+1):(nvamax+iter+nva12nofix))-&
-					ve12nofix(i,:)*LOG(the12(2)*t3(i))*gl12*vet12
+					ve12nofix(i,:)*dlog(the12(2)*t3(i))*gl12*vet12
 					
 					iter = iter +nva12nofix
 				endif
@@ -18649,18 +18670,18 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 				iter = iter + 1
 				nweib = nweib + 1
 				
-				res1(nweib)=-LOG(the01(2)*t1(i))*gl01*vet01 +&
+				res1(nweib)=-dlog(the01(2)*t1(i))*gl01*vet01 +&
 				troncweib01011+&
-				(LOG(the01(2)*t1(i))+(1/the01(1)))
+				(dlog(the01(2)*t1(i))+(1/the01(1)))
 				
-				res1((nvamax+iter))=-((LOG(the01(2)*t1(i)))**2)* &
+				res1((nvamax+iter))=-((dlog(the01(2)*t1(i)))**2)* &
 				gl01*vet01 +&
 				troncweib01011square-1/(the01(1)**2)
 				
 				if(fix(2).eq.0)then
 					iter = iter +1
 					res1((nvamax+iter))= &
-					-(LOG(the01(2)*t1(i))* &
+					-(dlog(the01(2)*t1(i))* &
 					the01(1)+1)*gl01*vet01/the01(2)+&
 					troncweib010112+(1/the01(2))
 				endif
@@ -18684,7 +18705,7 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 				if(nva01nofix.gt.0) then 
 					
 					res1((nvamax+iter+1):(nvamax+iter+nva01nofix))=&
-					-ve01nofix(i,:)*gl01*vet01*LOG(the01(2)*t1(i))+&
+					-ve01nofix(i,:)*gl01*vet01*dlog(the01(2)*t1(i))+&
 					troncweib01011beta01
 					iter = iter +nva01nofix
 				endif
@@ -18752,17 +18773,17 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 			if(fix(3).eq.0)then
 				iter = iter + 1
 				nweib = nweib +1
-				res1(nweib)=-LOG(the02(2)*t1(i))*gl02*vet02 +&
+				res1(nweib)=-dlog(the02(2)*t1(i))*gl02*vet02 +&
 				troncweib02021
 				
 				res1((nvamax+iter))=&
-				-((LOG(the02(2)*t1(i)))**2)*gl02*vet02+&
+				-((dlog(the02(2)*t1(i)))**2)*gl02*vet02+&
 				troncweib02021square
 				
 				if(fix(4).eq.0)then
 					iter = iter +1
 					
-					res1((nvamax+iter))=-(LOG(the02(2)*t1(i))* &
+					res1((nvamax+iter))=-(dlog(the02(2)*t1(i))* &
 					the02(1)+1)*gl02*vet02/the02(2)+&
 					troncweib020212
 				endif
@@ -18782,7 +18803,7 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 				if(nva02nofix.gt.0) then 
 					
 					res1((nvamax+iter+1):(nvamax+iter+nva02nofix))=&
-					-ve02nofix(i,:)*LOG(the02(2)*t1(i))*gl12*vet12+&
+					-ve02nofix(i,:)*dlog(the02(2)*t1(i))*gl12*vet12+&
 					troncweib02021beta02
 					iter = iter +nva02nofix
 				endif
@@ -18834,11 +18855,11 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 			if(fix(5).eq.0)then
 				iter = iter + 1
 				nweib= nweib +1
-				res1(nweib)=LOG(the12(2)*t1(i))*gl12*vet12
-				res1(nvamax+iter)=((LOG(the12(2)*t1(i)))**2)*gl12*vet12
+				res1(nweib)=dlog(the12(2)*t1(i))*gl12*vet12
+				res1(nvamax+iter)=((dlog(the12(2)*t1(i)))**2)*gl12*vet12
 				if(fix(6).eq.0)then
 					iter = iter +1
-					res1((nvamax+iter))=(LOG(the12(2)*t1(i))* &
+					res1((nvamax+iter))=(dlog(the12(2)*t1(i))* &
 					the12(1)+1)*gl12*vet12/the12(2)
 				endif
 				if(nva01nofix.gt.0) then 
@@ -18853,11 +18874,11 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 				if(nva12nofix.gt.0) then 
 					
 					res1((nvamax+iter+1):(nvamax+iter+nva12nofix))=&
-					ve12nofix(i,:)*LOG(the12(2)*t1(i))*gl12*vet12
+					ve12nofix(i,:)*dlog(the12(2)*t1(i))*gl12*vet12
 					call fonct(t3(i),the12,ri12,gl12,su12)
 					res1((nvamax+iter+1):(nvamax+iter+nva12nofix))=&
 					res1((nvamax+iter+1):(nvamax+iter+nva12nofix))-&
-					ve12nofix(i,:)*LOG(the12(2)*t3(i))*gl12*vet12
+					ve12nofix(i,:)*dlog(the12(2)*t3(i))*gl12*vet12
 					
 					iter = iter +nva12nofix
 				endif
@@ -18865,18 +18886,18 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 				call fonct(t3(i),the12,ri12,gl12,su12)
 				
 				res1(nweib)=res1(nweib)-&
-				LOG(the12(2)*t3(i))*gl12*vet12
+				dlog(the12(2)*t3(i))*gl12*vet12
 				iter=iter-nva12nofix-nva02nofix-nva01nofix
 				if(fix(6).eq.0)then
 					res1((nvamax+iter))=&
 					res1((nvamax+iter))-&
-					(LOG(the12(2)*t3(i))* &
+					(dlog(the12(2)*t3(i))* &
 					the12(1)+1)*gl12*vet12/the12(2)
 					iter=iter-1
 				endif
 				
 				res1(nvamax+iter)=res1(nvamax+iter)-&
-				((LOG(the12(2)*t3(i)))**2)*gl12*vet12
+				((dlog(the12(2)*t3(i)))**2)*gl12*vet12
 				
 				iter=iter+nva12nofix+nva02nofix+nva01nofix
 				
@@ -19013,24 +19034,24 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 				iter = iter + 1
 				nweib = nweib + 1
 				
-				v=(LOG(the01(2))+(1/the01(1)))*res2denum +&
-				res2thenum-LOG(the01(2))*(res2denum-res201num)-&
+				v=(dlog(the01(2))+(1/the01(1)))*res2denum +&
+				res2thenum-dlog(the01(2))*(res2denum-res201num)-&
 				res2the01
 				res1(nweib)=v/res2denum
 				res1(nweib)=res1(nweib)+troncweib01011
 				
 				res1((nvamax+iter))=&
-				LOG(the01(2))*2/the01(1)*res2denum+&
+				dlog(the01(2))*2/the01(1)*res2denum+&
 				res2thenum*2/the01(1)+&
-				(LOG(the01(2))**2)*res2denum+&
-				LOG(the01(2))*2*res2thenum+&
-				res2thenumsquare-3*(LOG(the01(2))**2)* &
+				(dlog(the01(2))**2)*res2denum+&
+				dlog(the01(2))*2*res2thenum+&
+				res2thenumsquare-3*(dlog(the01(2))**2)* &
 				(res2denum-res201num)-&
-				LOG(the01(2))*6*res2the01-3*res2the0101square-&
-				LOG(the01(2))*2/the01(1)*(res2denum-res201num)- &
+				dlog(the01(2))*6*res2the01-3*res2the0101square-&
+				dlog(the01(2))*2/the01(1)*(res2denum-res201num)- &
 				res2the01*2/the01(1)+ &
-				(LOG(the01(2))**2)*res20101numbis+&
-				LOG(the01(2))*2*res2the0101+&
+				(dlog(the01(2))**2)*res20101numbis+&
+				dlog(the01(2))*2*res2the0101+&
 				res2the0101dsquare
 				
 				res1((nvamax+iter))=&
@@ -19047,11 +19068,11 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 					u2=res2denum*the01(1)/the01(2)-&
 					(res2denum-res201num)*the01(1)/the01(2)
 					
-					u1=the01(1)*LOG(the01(2))*res20101numbis/the01(2)+&
+					u1=the01(1)*dlog(the01(2))*res20101numbis/the01(2)+&
 					the01(1)*res2the0101/the01(2)+&
-					(the01(1)*LOG(the01(2))+2)*res2denum/the01(2)+&
+					(the01(1)*dlog(the01(2))+2)*res2denum/the01(2)+&
 					the01(1)*res2thenum/the01(2)-&
-					(3*the01(1)*LOG(the01(2))+2)* &
+					(3*the01(1)*dlog(the01(2))+2)* &
 					(res2denum-res201num)/the01(2)-3* &
 					the01(1)*res2the01/the01(2)
 					
@@ -19067,16 +19088,16 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 				endif
 				if(fix(3).eq.0)then
 				
-					u1=-LOG(the01(2))*LOG(the02(2))*res202num-&
-					LOG(the01(2))*res2the02-LOG(the02(2))*res2the02-&
-					res2the0202square-LOG(the02(2))*res202num/the01(1)-&
+					u1=-dlog(the01(2))*dlog(the02(2))*res202num-&
+					dlog(the01(2))*res2the02-dlog(the02(2))*res2the02-&
+					res2the0202square-dlog(the02(2))*res202num/the01(1)-&
 					res2the02/the01(1)+&
-					LOG(the01(2))*LOG(the02(2))*res20102num+&
-					LOG(the01(2))*res2the0102+&
-					LOG(the02(2))*res2the0102+&
+					dlog(the01(2))*dlog(the02(2))*res20102num+&
+					dlog(the01(2))*res2the0102+&
+					dlog(the02(2))*res2the0102+&
 					res2the0102square
 					
-					u2=-LOG(the02(2))*(res202num)-&
+					u2=-dlog(the02(2))*(res202num)-&
 						res2the02
 					iter = iter +1
 					res1((nvamax+iter))=u1*res2denum-&
@@ -19087,10 +19108,10 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 				
 				if(fix(4).eq.0)then
 				
-					u1=-LOG(the01(2))*the02(1)*res202num/the02(2)-&
+					u1=-dlog(the01(2))*the02(1)*res202num/the02(2)-&
 					the02(1)*res2the02/the02(2)-&
 					the02(1)*res202num/(the01(1)*the02(2))+&
-					LOG(the01(2))*the02(1)*res20102num/the02(2)+&
+					dlog(the01(2))*the02(1)*res20102num/the02(2)+&
 					the02(1)*res2the0102/the02(2)
 					
 					u2=-the02(1)*res202num/the02(2)
@@ -19104,16 +19125,16 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 				
 				if(fix(5).eq.0)then
 				
-					u1=LOG(the01(2))*LOG(the12(2))*res212num+&
-					LOG(the01(2))*res2the12+LOG(the12(2))*res2the12+&
-					res2the1212square+LOG(the12(2))*res212num/the01(1)+&
+					u1=dlog(the01(2))*dlog(the12(2))*res212num+&
+					dlog(the01(2))*res2the12+dlog(the12(2))*res2the12+&
+					res2the1212square+dlog(the12(2))*res212num/the01(1)+&
 					res2the12/the01(1)-&
-					LOG(the01(2))*LOG(the12(2))*res20112num-&
-					LOG(the01(2))*res2the0112-&
-					LOG(the12(2))*res2the0112-&
+					dlog(the01(2))*dlog(the12(2))*res20112num-&
+					dlog(the01(2))*res2the0112-&
+					dlog(the12(2))*res2the0112-&
 					res2the0112square
 					
-					u2=LOG(the12(2))*(res212num)+&
+					u2=dlog(the12(2))*(res212num)+&
 						res2the12
 						
 					iter = iter +1
@@ -19126,10 +19147,10 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 				
 				if(fix(6).eq.0)then
 					u1=&
-					LOG(the01(2))*the12(1)*res212num/the12(2)+&
+					dlog(the01(2))*the12(1)*res212num/the12(2)+&
 					the12(1)/the12(2)*res2the12+res212num* &
 					the12(1)/(the12(2)*the01(1))-&
-					LOG(the01(2))*the12(1)*res20112num/the12(2)-&
+					dlog(the01(2))*the12(1)*res20112num/the12(2)-&
 					the12(1)/the12(2)*res2the0112
 					
 					
@@ -19144,10 +19165,10 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 				if(nva01nofix.gt.0) then 
 					
 					u1=res2the0101+ &
-					LOG(the01(2))*res20101numbis-&
-					LOG(the01(2))*3*(res2denum-res201num)-&
+					dlog(the01(2))*res20101numbis-&
+					dlog(the01(2))*3*(res2denum-res201num)-&
 					res2the01*3-(res2denum-res201num)/the01(1)+&
-					(LOG(the01(2))+(1/the01(1)))*res2denum+&
+					(dlog(the01(2))+(1/the01(1)))*res2denum+&
 					res2thenum
 					
 					u2=res201num
@@ -19164,10 +19185,10 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 				endif
 				if(nva02nofix.gt.0) then 
 					
-					u1=-(LOG(the01(2))+&
+					u1=-(dlog(the01(2))+&
 					(1/the01(1)))*res202num-&
 					res2the02+&
-					LOG(the01(2))*res20102num+&
+					dlog(the01(2))*res20102num+&
 					res2the0102
 					
 					u2=-res202num
@@ -19178,10 +19199,10 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 					iter = iter +nva02nofix
 				endif
 				if(nva12nofix.gt.0) then 
-					u1=(LOG(the01(2))+&
+					u1=(dlog(the01(2))+&
 					(1/the01(1)))*res212num+&
 					res2the12-&
-					LOG(the01(2))*res20112num-&
+					dlog(the01(2))*res20112num-&
 					res2the0112
 					
 					u2=res212num
@@ -19219,12 +19240,12 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 				res1((nvamax+iter))+troncweib01012square
 				if(fix(3).eq.0)then
 				
-					u1=-LOG(the02(2))*the01(1)*res202num/the01(2)-&
+					u1=-dlog(the02(2))*the01(1)*res202num/the01(2)-&
 					the01(1)*res2the02/the01(2)+&
-					the01(1)*LOG(the02(2))*res20102num/the01(2)+&
+					the01(1)*dlog(the02(2))*res20102num/the01(2)+&
 					the01(1)*res2the0102/the01(2)
 					
-					u2=-LOG(the02(2))*(res202num)-&
+					u2=-dlog(the02(2))*(res202num)-&
 						res2the02
 					iter = iter +1
 					res1((nvamax+iter))=u1*res2denum-&
@@ -19250,12 +19271,12 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 				
 				if(fix(5).eq.0)then
 				
-					u1=LOG(the12(2))*the01(1)*res212num/the01(2)+&
+					u1=dlog(the12(2))*the01(1)*res212num/the01(2)+&
 					the01(1)*res2the12/the01(2)-&
-					the01(1)*LOG(the12(2))*res20112num/the01(2)-&
+					the01(1)*dlog(the12(2))*res20112num/the01(2)-&
 					the01(1)*res2the0112/the01(2)
 					
-					u2=LOG(the12(2))*(res212num)+&
+					u2=dlog(the12(2))*(res212num)+&
 						res2the12
 						
 					iter = iter +1
@@ -19329,17 +19350,17 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 				iter = iter + 1
 				nweib = nweib + 1
 				
-				v=-LOG(the02(2))*res202num-&
+				v=-dlog(the02(2))*res202num-&
 				res2the02
 				res1(nweib)=v/res2denum
 				res1(nweib)=res1(nweib)+troncweib02021
 				
 				res1((nvamax+iter))=&
-				((LOG(the02(2)))**2)*res20202num+2* &
-				LOG(the02(2))*res2the0202+&
+				((dlog(the02(2)))**2)*res20202num+2* &
+				dlog(the02(2))*res2the0202+&
 				res2the0202dsquare-&
-				((LOG(the02(2)))**2)*res202num-2* &
-				LOG(the02(2))*res2the02-&
+				((dlog(the02(2)))**2)*res202num-2* &
+				dlog(the02(2))*res2the02-&
 				res2the0202square
 				
 				res1((nvamax+iter))=&
@@ -19352,10 +19373,10 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 				
 				if(fix(4).eq.0)then
 				
-					u1=-(the02(1)*LOG(the02(2))+1)* &
+					u1=-(the02(1)*dlog(the02(2))+1)* &
 					res202num/the02(2)-&
 					the02(1)*res2the02/the02(2)+ &
-					LOG(the02(2))*the02(1)* &
+					dlog(the02(2))*the02(1)* &
 					res20202num/the02(2)+ &
 					the02(1)/the02(2)*res2the0202
 					
@@ -19374,11 +19395,11 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 				
 				if(fix(5).eq.0)then
 				
-					u1=-LOG(the02(2))*LOG(the12(2))*res20212num-&
-					LOG(the02(2))*res2the0212-LOG(the12(2))*res2the0212-&
+					u1=-dlog(the02(2))*dlog(the12(2))*res20212num-&
+					dlog(the02(2))*res2the0212-dlog(the12(2))*res2the0212-&
 					res2the0212square
 					
-					u2=LOG(the12(2))*(res212num)+&
+					u2=dlog(the12(2))*(res212num)+&
 						res2the12
 						
 					iter = iter +1
@@ -19391,7 +19412,7 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 				
 				if(fix(6).eq.0)then
 				
-					u1=-LOG(the02(2))*the12(1)*res20212num/the12(2)-&
+					u1=-dlog(the02(2))*the12(1)*res20212num/the12(2)-&
 					the12(1)*res2the0212/the12(2)
 					
 					u2=the12(1)*res212num/the12(2)
@@ -19404,8 +19425,8 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 				
 				if(nva01nofix.gt.0) then 
 					
-					u1=LOG(the02(2))*res20102num+&
-					res2the0102-res202num*LOG(the02(2))-&
+					u1=dlog(the02(2))*res20102num+&
+					res2the0102-res202num*dlog(the02(2))-&
 					res2the02
 					
 					u2=res201num
@@ -19420,8 +19441,8 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 				if(nva02nofix.gt.0) then 
 					
 					
-					u1=-LOG(the02(2))*res202num-&
-					res2the02+LOG(the02(2))*res20202num+&
+					u1=-dlog(the02(2))*res202num-&
+					res2the02+dlog(the02(2))*res20202num+&
 					res2the0202
 					
 					u2=-res202num
@@ -19438,7 +19459,7 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 				endif
 				if(nva12nofix.gt.0) then 
 				
-					u1=-LOG(the02(2))*res20212num-&
+					u1=-dlog(the02(2))*res20212num-&
 					res2the0212
 					
 					u2=res212num
@@ -19475,10 +19496,10 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 				
 				if(fix(5).eq.0)then
 				
-					u1=-the02(1)*LOG(the12(2))*res20212num/the02(2)-&
+					u1=-the02(1)*dlog(the12(2))*res20212num/the02(2)-&
 					the02(1)*res2the0212/the02(2)
 					
-					u2=LOG(the12(2))*(res212num)+&
+					u2=dlog(the12(2))*(res212num)+&
 						res2the12
 						
 					iter = iter +1
@@ -19550,19 +19571,19 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 				iter = iter + 1
 				nweib = nweib + 1
 				
-				v=LOG(the12(2))*res212num+&
+				v=dlog(the12(2))*res212num+&
 				res2the12
 				res1(nweib)=v/res2denum
 				res1(nweib)=res1(nweib)+&
-				LOG(the12(2)*t3(i))*(1-gl12*vet12)+1/ &
+				dlog(the12(2)*t3(i))*(1-gl12*vet12)+1/ &
 				the12(1)
 				
 				res1((nvamax+iter))=&
-				((LOG(the12(2)))**2)*res21212num+2* &
-				LOG(the12(2))*res2the1212+&
+				((dlog(the12(2)))**2)*res21212num+2* &
+				dlog(the12(2))*res2the1212+&
 				res2the1212dsquare+&
-				((LOG(the12(2)))**2)*res212num+2* &
-				LOG(the12(2))*res2the12+&
+				((dlog(the12(2)))**2)*res212num+2* &
+				dlog(the12(2))*res2the12+&
 				res2the1212square
 				
 				res1((nvamax+iter))=&
@@ -19571,15 +19592,15 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 				res1((nvamax+iter))/(res2denum*res2denum)
 				res1((nvamax+iter))=&
 				res1((nvamax+iter))-&
-				((LOG(the12(2)*t3(i)))**2)*gl12*vet12-&
+				((dlog(the12(2)*t3(i)))**2)*gl12*vet12-&
 				(1/(the12(1)**2))
 				
 
 				if(fix(6).eq.0)then
 			
-					u1=LOG(the12(2))*the12(1)*res21212num/the12(2)+&
+					u1=dlog(the12(2))*the12(1)*res21212num/the12(2)+&
 					the12(1)*res2the1212/the12(2)+&
-					(the12(1)*LOG(the12(2))+1)*res212num/the12(2)+&
+					(the12(1)*dlog(the12(2))+1)*res212num/the12(2)+&
 					the12(1)*res2the12/the12(2)
 					
 					u2=the12(1)*res212num/the12(2)
@@ -19590,14 +19611,14 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 					res1((nvamax+iter))/(res2denum*res2denum)
 					res1((nvamax+iter))=&
 					res1((nvamax+iter))-&
-					(1+LOG(the12(2)*t3(i))*the12(1))*gl12*vet12/the12(2)+&
+					(1+dlog(the12(2)*t3(i))*the12(1))*gl12*vet12/the12(2)+&
 					(1/the12(2))
 				endif
 				
 				if(nva01nofix.gt.0) then 
 					
-					u1=-LOG(the12(2))*res20112num-&
-					res2the0112+res212num*LOG(the12(2))+&
+					u1=-dlog(the12(2))*res20112num-&
+					res2the0112+res212num*dlog(the12(2))+&
 					res2the12
 					
 					u2=res201num
@@ -19611,7 +19632,7 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 				endif
 				if(nva02nofix.gt.0) then 
 					
-					u1=-LOG(the12(2))*res20212num-&
+					u1=-dlog(the12(2))*res20212num-&
 					res2the0212
 					
 					u2=-res202num
@@ -19626,8 +19647,8 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 				
 				if(nva12nofix.gt.0) then 
 				
-					u1=LOG(the12(2))*res21212num+&
-					res2the1212+LOG(the12(2))*res212num+&
+					u1=dlog(the12(2))*res21212num+&
+					res2the1212+dlog(the12(2))*res212num+&
 					res2the12
 					
 					u2=res212num
@@ -19638,7 +19659,7 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 					v*u2)/(res2denum*res2denum)
 					res1((nvamax+iter+1):(nvamax+iter+nva12nofix))=&
 					res1((nvamax+iter+1):(nvamax+iter+nva12nofix))-&
-					ve12nofix(i,:)*LOG(the12(2)*t3(i))*gl12*vet12
+					ve12nofix(i,:)*dlog(the12(2)*t3(i))*gl12*vet12
 					
 					iter = iter +nva12nofix
 				endif
@@ -19870,18 +19891,18 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 				iter = iter + 1
 				nweib = nweib + 1
 				
-				res1(nweib)=-LOG(the01(2)*t1(i))*gl01*vet01 +&
+				res1(nweib)=-dlog(the01(2)*t1(i))*gl01*vet01 +&
 				troncweib01011+&
-				(LOG(the01(2)*t1(i))+(1/the01(1)))
+				(dlog(the01(2)*t1(i))+(1/the01(1)))
 				
 				res1((nvamax+iter))=&
-				-((LOG(the01(2)*t1(i)))**2)*gl01*vet01 +&
+				-((dlog(the01(2)*t1(i)))**2)*gl01*vet01 +&
 				troncweib01011square-1/(the01(1)**2)
 			
 				if(fix(2).eq.0)then
 					iter = iter +1
 					res1((nvamax+iter))=&
-					-(LOG(the01(2)*t1(i))*the01(1)+1)* &
+					-(dlog(the01(2)*t1(i))*the01(1)+1)* &
 					gl01*vet01/the01(2)+&
 					troncweib010112+(1/the01(2))
 					
@@ -19906,7 +19927,7 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 				if(nva01nofix.gt.0) then 
 					
 					res1((nvamax+iter+1):(nvamax+iter+nva01nofix))=&
-					-ve01nofix(i,:)*gl01*vet01*LOG(the01(2)*t1(i))+&
+					-ve01nofix(i,:)*gl01*vet01*dlog(the01(2)*t1(i))+&
 					troncweib01011beta01
 					iter = iter +nva01nofix
 				endif
@@ -19974,11 +19995,11 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 			if(fix(3).eq.0)then
 				iter = iter + 1
 				nweib = nweib +1
-				res1(nweib)=-LOG(the02(2)*t1(i))*gl02*vet02 +&
+				res1(nweib)=-dlog(the02(2)*t1(i))*gl02*vet02 +&
 				troncweib02021
 				
 				res1((nvamax+iter))=&
-				-((LOG(the02(2)*t1(i)))**2)*gl02*vet02+&
+				-((dlog(the02(2)*t1(i)))**2)*gl02*vet02+&
 				troncweib02021square
 				
 				if(fix(4).eq.0)then
@@ -19986,7 +20007,7 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 					
 					
 					res1((nvamax+iter))=&
-					-(LOG(the02(2)*t1(i))*the02(1)+1)* &
+					-(dlog(the02(2)*t1(i))*the02(1)+1)* &
 					gl02*vet02/the02(2)+&
 					troncweib02021
 				endif
@@ -20006,7 +20027,7 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 				if(nva02nofix.gt.0) then 
 					
 					res1((nvamax+iter+1):(nvamax+iter+nva02nofix))=&
-					-ve02nofix(i,:)*LOG(the02(2)*t1(i))*gl12*vet12+&
+					-ve02nofix(i,:)*dlog(the02(2)*t1(i))*gl12*vet12+&
 					troncweib02021beta02
 					iter = iter +nva02nofix
 				endif
@@ -20058,13 +20079,13 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 			if(fix(5).eq.0)then
 				iter = iter + 1
 				nweib= nweib +1
-				res1(nweib)=LOG(the12(2)*t1(i))*gl12*vet12
+				res1(nweib)=dlog(the12(2)*t1(i))*gl12*vet12
 				
-				res1(nvamax+iter)=((LOG(the12(2)*t1(i)))**2)*gl12*vet12
+				res1(nvamax+iter)=((dlog(the12(2)*t1(i)))**2)*gl12*vet12
 				if(fix(6).eq.0)then
 					iter = iter +1
 					res1((nvamax+iter))=&
-					(LOG(the12(2)*t1(i))*the12(1)+1)* &
+					(dlog(the12(2)*t1(i))*the12(1)+1)* &
 					gl12*vet12/the12(2)
 				endif
 				if(nva01nofix.gt.0) then 
@@ -20079,11 +20100,11 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 				if(nva12nofix.gt.0) then 
 					
 					res1((nvamax+iter+1):(nvamax+iter+nva12nofix))=&
-					ve12nofix(i,:)*LOG(the12(2)*t1(i))*gl12*vet12
+					ve12nofix(i,:)*dlog(the12(2)*t1(i))*gl12*vet12
 					call fonct(t3(i),the12,ri12,gl12,su12)
 					res1((nvamax+iter+1):(nvamax+iter+nva12nofix))=&
 					res1((nvamax+iter+1):(nvamax+iter+nva12nofix))-&
-					ve12nofix(i,:)*LOG(the12(2)*t3(i))*gl12*vet12
+					ve12nofix(i,:)*dlog(the12(2)*t3(i))*gl12*vet12
 					
 					iter = iter +nva12nofix
 				endif
@@ -20091,18 +20112,18 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 				call fonct(t3(i),the12,ri12,gl12,su12)
 				
 				res1(nweib)=res1(nweib)-&
-				LOG(the12(2)*t3(i))*gl12*vet12+&
-				(LOG(the12(2)*t3(i))+(1/the12(1)))
+				dlog(the12(2)*t3(i))*gl12*vet12+&
+				(dlog(the12(2)*t3(i))+(1/the12(1)))
 				iter=iter-nva12nofix-nva02nofix-nva01nofix
 				if(fix(6).eq.0)then
 					res1((nvamax+iter))=res1((nvamax+iter))-&
-					(LOG(the12(2)*t3(i))*the12(1)+1)* &
+					(dlog(the12(2)*t3(i))*the12(1)+1)* &
 					gl12*vet12/the12(2)+1/the12(2)
 					iter=iter-1
 				endif
 				
 				res1(nvamax+iter)=res1(nvamax+iter)-&
-				((LOG(the12(2)*t3(i)))**2)*gl12*vet12-1/(the12(1)**2)
+				((dlog(the12(2)*t3(i)))**2)*gl12*vet12-1/(the12(1)**2)
 				
 				
 				iter=iter+nva12nofix+nva02nofix+nva01nofix
@@ -20248,34 +20269,34 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 			if(fix(1).eq.0)then
 				iter = iter + 1
 				nweib = nweib + 1
-				v=(LOG(the01(2))+(1/the01(1)))*res2denum +&
-				res2thenum-LOG(the01(2))*(res2denum-res201num)-&
+				v=(dlog(the01(2))+(1/the01(1)))*res2denum +&
+				res2thenum-dlog(the01(2))*(res2denum-res201num)-&
 				res2the01
 				
 				v=v*(su12**vet12)-&
-				LOG(the01(2)*t3(i))*gl01*vet01*(su01**vet01)*(su02**vet02)
+				dlog(the01(2)*t3(i))*gl01*vet01*(su01**vet01)*(su02**vet02)
 				
 				res1(nweib)=v/u1
 				
 				res1(nweib)=res1(nweib)+troncweib01011
 				
 				res1((nvamax+iter))=&
-				LOG(the01(2))*2/the01(1)*res2denum+&
+				dlog(the01(2))*2/the01(1)*res2denum+&
 				res2thenum*2/the01(1)+&
-				(LOG(the01(2))**2)*res2denum+&
-				LOG(the01(2))*2*res2thenum+&
-				res2thenumsquare-3*(LOG(the01(2))**2)* &
+				(dlog(the01(2))**2)*res2denum+&
+				dlog(the01(2))*2*res2thenum+&
+				res2thenumsquare-3*(dlog(the01(2))**2)* &
 				(res2denum-res201num)-&
-				LOG(the01(2))*6*res2the01-3*res2the0101square-&
-				LOG(the01(2))*2/the01(1)*(res2denum-res201num)- &
+				dlog(the01(2))*6*res2the01-3*res2the0101square-&
+				dlog(the01(2))*2/the01(1)*(res2denum-res201num)- &
 				res2the01*2/the01(1)+ &
-				(LOG(the01(2))**2)*res20101numbis+&
-				LOG(the01(2))*2*res2the0101+&
+				(dlog(the01(2))**2)*res20101numbis+&
+				dlog(the01(2))*2*res2the0101+&
 				res2the0101dsquare
 				
 				res1((nvamax+iter))=&
 				res1((nvamax+iter))*(su12**vet12)+&
-				gl01*vet01*(LOG(the01(2)*t3(i))**2)*(-1+&
+				gl01*vet01*(dlog(the01(2)*t3(i))**2)*(-1+&
 				gl01*vet01)*(su01**vet01)*(su02**vet02)
 				res1((nvamax+iter))=&
 				(res1((nvamax+iter))*u1-v*v)/(u1*u1)
@@ -20291,18 +20312,18 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 					u2=u2*(su12**vet12)-&
 					the01(1)*gl01*vet01*(su01**vet01)*(su02**vet02)/the01(2)
 					
-					u3=the01(1)*LOG(the01(2))*res20101numbis/the01(2)+&
+					u3=the01(1)*dlog(the01(2))*res20101numbis/the01(2)+&
 					the01(1)*res2the0101/the01(2)+&
-					(the01(1)*LOG(the01(2))+2)*res2denum/the01(2)+&
+					(the01(1)*dlog(the01(2))+2)*res2denum/the01(2)+&
 					the01(1)*res2thenum/the01(2)-&
-					(3*the01(1)*LOG(the01(2))+2)* &
+					(3*the01(1)*dlog(the01(2))+2)* &
 					(res2denum-res201num)/the01(2)-3* &
 					the01(1)*res2the01/the01(2)
 					
 					u3=u3*(su12**vet12)+&
 					gl01*vet01*(su01**vet01)*(su02**vet02)*(-1-&
-					LOG(the01(2)*t3(i))*the01(1)+&
-					gl01*vet01*LOG(the01(2)*t3(i))*the01(1))/the01(2)
+					dlog(the01(2)*t3(i))*the01(1)+&
+					gl01*vet01*dlog(the01(2)*t3(i))*the01(1))/the01(2)
 					
 					iter = iter +1
 					res1((nvamax+iter))=&
@@ -20315,22 +20336,22 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 				
 				if(fix(3).eq.0)then
 				
-					u3=-LOG(the01(2))*LOG(the02(2))*res202num-&
-					LOG(the01(2))*res2the02-LOG(the02(2))*res2the02-&
-					res2the0202square-LOG(the02(2))*res202num/the01(1)-&
+					u3=-dlog(the01(2))*dlog(the02(2))*res202num-&
+					dlog(the01(2))*res2the02-dlog(the02(2))*res2the02-&
+					res2the0202square-dlog(the02(2))*res202num/the01(1)-&
 					res2the02/the01(1)+&
-					LOG(the01(2))*LOG(the02(2))*res20102num+&
-					LOG(the01(2))*res2the0102+&
-					LOG(the02(2))*res2the0102+&
+					dlog(the01(2))*dlog(the02(2))*res20102num+&
+					dlog(the01(2))*res2the0102+&
+					dlog(the02(2))*res2the0102+&
 					res2the0102square
 					u3=u3*(su12**vet12)+&
 					gl01*vet01*gl02*vet02*(su01**vet01)*(su02**vet02)* &
-					LOG(the01(2)*t3(i))*LOG(the02(2)*t3(i))
+					dlog(the01(2)*t3(i))*dlog(the02(2)*t3(i))
 					
-					u2=-LOG(the02(2))*(res202num)-&
+					u2=-dlog(the02(2))*(res202num)-&
 						res2the02
 					u2=u2*(su12**vet12)-&
-					LOG(the02(2)*t3(i))*gl02*vet02* &
+					dlog(the02(2)*t3(i))*gl02*vet02* &
 					(su01**vet01)*(su02**vet02)
 					
 					iter = iter +1
@@ -20340,16 +20361,16 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 				
 				if(fix(4).eq.0)then
 				
-					u3=-LOG(the01(2))*the02(1)*res202num/the02(2)-&
+					u3=-dlog(the01(2))*the02(1)*res202num/the02(2)-&
 					the02(1)*res2the02/the02(2)-&
 					the02(1)*res202num/(the01(1)*the02(2))+&
-					LOG(the01(2))*the02(1)*res20102num/the02(2)+&
+					dlog(the01(2))*the02(1)*res20102num/the02(2)+&
 					the02(1)*res2the0102/the02(2)
 					
 					u3=u3*(su12**vet12)+&
 					gl01*vet01*gl02*vet02*(su01**vet01)* &
 					(su02**vet02)*the02(1)* &
-					LOG(the01(2)*t3(i))/the02(2)
+					dlog(the01(2)*t3(i))/the02(2)
 					
 					u2=-the02(1)*res202num/the02(2)
 					u2=u2*(su12**vet12)-&
@@ -20364,26 +20385,26 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 				if(fix(5).eq.0)then
 				
 				
-					u3=LOG(the01(2))*LOG(the12(2))*res212num+&
-					LOG(the01(2))*res2the12+LOG(the12(2))*res2the12+&
-					res2the1212square+LOG(the12(2))*res212num/the01(1)+&
+					u3=dlog(the01(2))*dlog(the12(2))*res212num+&
+					dlog(the01(2))*res2the12+dlog(the12(2))*res2the12+&
+					res2the1212square+dlog(the12(2))*res212num/the01(1)+&
 					res2the12/the01(1)-&
-					LOG(the01(2))*LOG(the12(2))*res20112num-&
-					LOG(the01(2))*res2the0112-&
-					LOG(the12(2))*res2the0112-&
+					dlog(the01(2))*dlog(the12(2))*res20112num-&
+					dlog(the01(2))*res2the0112-&
+					dlog(the12(2))*res2the0112-&
 					res2the0112square
 
 					u3=u3*(su12**vet12)-&
 					gl12*vet12*(su12**vet12)* &
-					LOG(the12(2)*t3(i))* &
-					((LOG(the01(2))+(1/the01(1)))*res2denum +&
-					res2thenum-LOG(the01(2))*(res2denum-res201num)-&
+					dlog(the12(2)*t3(i))* &
+					((dlog(the01(2))+(1/the01(1)))*res2denum +&
+					res2thenum-dlog(the01(2))*(res2denum-res201num)-&
 					res2the01)
 					
-					u2=LOG(the12(2))*(res212num)+&
+					u2=dlog(the12(2))*(res212num)+&
 						res2the12
 					u2=u2*(su12**vet12)-&
-					LOG(the12(2)*t3(i))*gl12*vet12* &
+					dlog(the12(2)*t3(i))*gl12*vet12* &
 					res2denum*(su12**vet12)
 						
 					iter = iter +1
@@ -20396,16 +20417,16 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 				
 					
 					u3=&
-					LOG(the01(2))*the12(1)*res212num/the12(2)+&
+					dlog(the01(2))*the12(1)*res212num/the12(2)+&
 					the12(1)/the12(2)*res2the12+res212num* &
 					the12(1)/(the12(2)*the01(1))-&
-					LOG(the01(2))*the12(1)*res20112num/the12(2)-&
+					dlog(the01(2))*the12(1)*res20112num/the12(2)-&
 					the12(1)/the12(2)*res2the0112
 					
 					u3=u3*(su12**vet12)-&
 					gl12*vet12*(su12**vet12)*the12(1)* &
-					((LOG(the01(2))+(1/the01(1)))*res2denum +&
-					res2thenum-LOG(the01(2))*(res2denum-res201num)-&
+					((dlog(the01(2))+(1/the01(1)))*res2denum +&
+					res2thenum-dlog(the01(2))*(res2denum-res201num)-&
 					res2the01)/the12(2)
 					
 					
@@ -20424,14 +20445,14 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 				if(nva01nofix.gt.0) then 
 					
 					u3=res2the0101+ &
-					LOG(the01(2))*res20101numbis-&
-					LOG(the01(2))*3*(res2denum-res201num)-&
+					dlog(the01(2))*res20101numbis-&
+					dlog(the01(2))*3*(res2denum-res201num)-&
 					res2the01*3-(res2denum-res201num)/the01(1)+&
-					(LOG(the01(2))+(1/the01(1)))*res2denum+&
+					(dlog(the01(2))+(1/the01(1)))*res2denum+&
 					res2thenum
 					
 					u3= u3*(su12**vet12)-&
-					LOG(the01(2)*t3(i))*gl01*vet01*(1-&
+					dlog(the01(2)*t3(i))*gl01*vet01*(1-&
 					gl01*vet01)*(su01**vet01)*(su02**vet02)
 					
 					u2=res201num*(su12**vet12)-&
@@ -20449,14 +20470,14 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 				endif
 				if(nva02nofix.gt.0) then 
 					
-					u3=-(LOG(the01(2))+&
+					u3=-(dlog(the01(2))+&
 					(1/the01(1)))*res202num-&
 					res2the02+&
-					LOG(the01(2))*res20102num+&
+					dlog(the01(2))*res20102num+&
 					res2the0102
 					
 					u3=u3*(su12**vet12)+&
-					LOG(the01(2)*t3(i))*gl01*vet01* &
+					dlog(the01(2)*t3(i))*gl01*vet01* &
 					gl02*vet02*(su01**vet01)*(su02**vet02)
 					
 					u2=-res202num*(su12**vet12)-&
@@ -20469,16 +20490,16 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 				endif
 				
 				if(nva12nofix.gt.0) then 
-					u3=(LOG(the01(2))+&
+					u3=(dlog(the01(2))+&
 					(1/the01(1)))*res212num+&
 					res2the12-&
-					LOG(the01(2))*res20112num-&
+					dlog(the01(2))*res20112num-&
 					res2the0112
 					
 					u3=u3*(su12**vet12)-&
 					gl12*vet12*(su12**vet12)* &
-					((LOG(the01(2))+(1/the01(1)))*res2denum +&
-					res2thenum-LOG(the01(2))*(res2denum-res201num)-&
+					((dlog(the01(2))+(1/the01(1)))*res2denum +&
+					res2thenum-dlog(the01(2))*(res2denum-res201num)-&
 					res2the01)
 					
 					u2=res212num*(su12**vet12)-&
@@ -20523,22 +20544,22 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 				
 				if(fix(3).eq.0)then
 				
-					u3=-LOG(the02(2))*the01(1)*res202num/the01(2)-&
+					u3=-dlog(the02(2))*the01(1)*res202num/the01(2)-&
 					the01(1)*res2the02/the01(2)+&
-					the01(1)*LOG(the02(2))*res20102num/the01(2)+&
+					the01(1)*dlog(the02(2))*res20102num/the01(2)+&
 					the01(1)*res2the0102/the01(2)
 					
 					u3=u3*(su12**vet12)+&
 					gl01*vet01*gl02*vet02*the01(1)* &
-					LOG(the02(2)*t3(i))*(su01**vet01)* &
+					dlog(the02(2)*t3(i))*(su01**vet01)* &
 					(su02**vet02)/the01(2)
 					
 					
 					
-					u2=-LOG(the02(2))*(res202num)-&
+					u2=-dlog(the02(2))*(res202num)-&
 						res2the02
 					u2=u2*(su12**vet12)-&
-					LOG(the02(2)*t3(i))*gl02*vet02* &
+					dlog(the02(2)*t3(i))*gl02*vet02* &
 					(su01**vet01)*(su02**vet02)
 					
 					iter = iter +1
@@ -20568,21 +20589,21 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 				
 				if(fix(5).eq.0)then
 				
-					u3=LOG(the12(2))*the01(1)*res212num/the01(2)+&
+					u3=dlog(the12(2))*the01(1)*res212num/the01(2)+&
 					the01(1)*res2the12/the01(2)-&
-					the01(1)*LOG(the12(2))*res20112num/the01(2)-&
+					the01(1)*dlog(the12(2))*res20112num/the01(2)-&
 					the01(1)*res2the0112/the01(2)
 					
 					u3=u3*(su12**vet12)-&
-					gl12*vet12*(su12**vet12)*LOG(the12(2)* &
+					gl12*vet12*(su12**vet12)*dlog(the12(2)* &
 					t3(i))*(the01(1)*res2denum/the01(2) -&
 					the01(1)*(res2denum-res201num)/the01(2))
 				
 					
-					u2=LOG(the12(2))*(res212num)+&
+					u2=dlog(the12(2))*(res212num)+&
 						res2the12
 					u2=u2*(su12**vet12)-&
-					LOG(the12(2)*t3(i))*gl12*vet12* &
+					dlog(the12(2)*t3(i))*gl12*vet12* &
 					(su12**vet12)*res2denum
 						
 					iter = iter +1
@@ -20679,28 +20700,28 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 				iter = iter + 1
 				nweib = nweib + 1
 				
-				v=-LOG(the02(2))*res202num-&
+				v=-dlog(the02(2))*res202num-&
 				res2the02
 				
 				v=v*(su12**vet12)-&
-				LOG(the02(2)*t3(i))*gl02*vet02* &
+				dlog(the02(2)*t3(i))*gl02*vet02* &
 				(su01**vet01)*(su02**vet02)
 				
 				res1(nweib)=v/u1
 				res1(nweib)=res1(nweib)+troncweib02021
 				
 				res1((nvamax+iter))=&
-				((LOG(the02(2)))**2)*res20202num+&
-				(2*LOG(the02(2))*res2the0202)+&
+				((dlog(the02(2)))**2)*res20202num+&
+				(2*dlog(the02(2))*res2the0202)+&
 				res2the0202dsquare-&
-				((LOG(the02(2)))**2)*res202num-&
-				(2*LOG(the02(2))*res2the02)-&
+				((dlog(the02(2)))**2)*res202num-&
+				(2*dlog(the02(2))*res2the02)-&
 				res2the0202square
 				
 				res1((nvamax+iter))=&
 				res1((nvamax+iter))*(su12**vet12)+&
 				gl02*vet02*(su01**vet01)*(su02**vet02)* &
-				(LOG(the02(2)*t3(i))**2)*(gl02*vet02-1)
+				(dlog(the02(2)*t3(i))**2)*(gl02*vet02-1)
 				
 				res1((nvamax+iter))=&
 				res1((nvamax+iter))*u1 -v*v
@@ -20712,17 +20733,17 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 				
 				if(fix(4).eq.0)then
 				
-					u3=-(the02(1)*LOG(the02(2))+1)* &
+					u3=-(the02(1)*dlog(the02(2))+1)* &
 					res202num/the02(2)-&
 					the02(1)*res2the02/the02(2)+ &
-					LOG(the02(2))*the02(1)* &
+					dlog(the02(2))*the02(1)* &
 					res20202num/the02(2)+ &
 					the02(1)/the02(2)*res2the0202
 					
 					u3=u3*(su12**vet12)+&
 					gl02*vet02*(su01**vet01)*(su02**vet02)* &
-					(-1-LOG(the02(2)*t3(i))*the02(1)+&
-					gl02*vet02*LOG(the02(2)*t3(i))* &
+					(-1-dlog(the02(2)*t3(i))*the02(1)+&
+					gl02*vet02*dlog(the02(2)*t3(i))* &
 					the02(1))/the02(2)
 					
 					u2=-the02(1)*res202num/the02(2)
@@ -20743,19 +20764,19 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 			
 				if(fix(5).eq.0)then
 				
-					u3=-LOG(the02(2))*LOG(the12(2))*res20212num-&
-					LOG(the02(2))*res2the0212-LOG(the12(2))*res2the0212-&
+					u3=-dlog(the02(2))*dlog(the12(2))*res20212num-&
+					dlog(the02(2))*res2the0212-dlog(the12(2))*res2the0212-&
 					res2the0212square
 					
 					u3=u3*(su12**vet12)-&
-					gl12*vet12*(su12**vet12)*LOG(the12(2)* &
-					t3(i))*(-LOG(the02(2))*res202num-&
+					gl12*vet12*(su12**vet12)*dlog(the12(2)* &
+					t3(i))*(-dlog(the02(2))*res202num-&
 					res2the02)
 					
-					u2=LOG(the12(2))*(res212num)+&
+					u2=dlog(the12(2))*(res212num)+&
 						res2the12
 					u2=u2*(su12**vet12)-&
-					LOG(the12(2)*t3(i))*gl12*vet12* &
+					dlog(the12(2)*t3(i))*gl12*vet12* &
 					(su12**vet12)*res2denum
 						
 					iter = iter +1
@@ -20768,11 +20789,11 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 			
 				if(fix(6).eq.0)then
 				
-					u3=-LOG(the02(2))*the12(1)*res20212num/the12(2)-&
+					u3=-dlog(the02(2))*the12(1)*res20212num/the12(2)-&
 					the12(1)*res2the0212/the12(2)
 					u3=u3*(su12**vet12)-&
 					gl12*vet12*(su12**vet12)*the12(1)* &
-					(-1*LOG(the02(2))*res202num-&
+					(-1*dlog(the02(2))*res202num-&
 					res2the02)/the12(2)
 				
 					
@@ -20790,12 +20811,12 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 				
 				if(nva01nofix.gt.0) then 
 					
-					u3=LOG(the02(2))*res20102num+&
-					res2the0102-res202num*LOG(the02(2))-&
+					u3=dlog(the02(2))*res20102num+&
+					res2the0102-res202num*dlog(the02(2))-&
 					res2the02
 					
 					u3=u3*(su12**vet12)+&
-					LOG(the02(2)*t3(i))*gl01*vet01* &
+					dlog(the02(2)*t3(i))*gl01*vet01* &
 					gl02*vet02*(su01**vet01)*(su02**vet02)
 					
 					u2=res201num*(su12**vet12)-&
@@ -20812,11 +20833,11 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 				
 				if(nva02nofix.gt.0) then 
 					
-					u3=-LOG(the02(2))*res202num-&
-					res2the02+LOG(the02(2))*res20202num+&
+					u3=-dlog(the02(2))*res202num-&
+					res2the02+dlog(the02(2))*res20202num+&
 					res2the0202
 					u3=u3*(su12**vet12)+&
-					LOG(the02(2)*t3(i))*gl02*vet02* &
+					dlog(the02(2)*t3(i))*gl02*vet02* &
 					(su01**vet01)*(su02**vet02)* &
 					(-1+gl02*vet02)
 					
@@ -20836,11 +20857,11 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 				
 				if(nva12nofix.gt.0) then 
 				
-					u3=-LOG(the02(2))*res20212num-&
+					u3=-dlog(the02(2))*res20212num-&
 					res2the0212
 					u3=u3*(su12**vet12)-&
 					gl12*vet12*(su12**vet12)* &
-					(-1*LOG(the02(2))*res202num-&
+					(-1*dlog(the02(2))*res202num-&
 					res2the02)
 					
 					u2=res212num*(su12**vet12)-&
@@ -20886,16 +20907,16 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 				
 				if(fix(5).eq.0)then
 				
-					u3=-the02(1)*LOG(the12(2))*res20212num/the02(2)-&
+					u3=-the02(1)*dlog(the12(2))*res20212num/the02(2)-&
 					the02(1)*res2the0212/the02(2)
 					u3=u3*(su12**vet12)+&
-					gl12*vet12*(su12**vet12)*LOG(the12(2)*t3(i))* &
+					gl12*vet12*(su12**vet12)*dlog(the12(2)*t3(i))* &
 					(the02(1)*res202num/the02(2))
 					
-					u2=LOG(the12(2))*(res212num)+&
+					u2=dlog(the12(2))*(res212num)+&
 						res2the12
 					u2=u2*(su12**vet12)-&
-					LOG(the12(2)*t3(i))*gl12*vet12* &
+					dlog(the12(2)*t3(i))*gl12*vet12* &
 					(su12**vet12)*res2denum
 						
 					iter = iter +1
@@ -20987,27 +21008,27 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 				iter = iter + 1
 				nweib = nweib + 1
 				
-				v=LOG(the12(2))*res212num+&
+				v=dlog(the12(2))*res212num+&
 				res2the12
 				v=v*(su12**vet12)-&
-				LOG(the12(2)*t3(i))*gl12*vet12* &
+				dlog(the12(2)*t3(i))*gl12*vet12* &
 				(su12**vet12)*res2denum
 				
 				res1(nweib)=v/u1
 				
 				res1((nvamax+iter))=&
-				((LOG(the12(2)))**2)* &
-				res21212num+2*LOG(the12(2))*res2the1212+&
+				((dlog(the12(2)))**2)* &
+				res21212num+2*dlog(the12(2))*res2the1212+&
 				res2the1212dsquare+&
-				((LOG(the12(2)))**2)* &
-				res212num+2*LOG(the12(2))*res2the12+&
+				((dlog(the12(2)))**2)* &
+				res212num+2*dlog(the12(2))*res2the12+&
 				res2the1212square
 				
 				res1((nvamax+iter))=&
 				res1((nvamax+iter))*(su12**vet12)+&
-				gl12*vet12*(su12**vet12)*LOG(the12(2)* &
-				t3(i))*(-2*(LOG(the12(2))*res212num+&
-				res2the12)-LOG(the12(2)*t3(i))*res2denum* &
+				gl12*vet12*(su12**vet12)*dlog(the12(2)* &
+				t3(i))*(-2*(dlog(the12(2))*res212num+&
+				res2the12)-dlog(the12(2)*t3(i))*res2denum* &
 				(1-gl12*vet12))
 				
 				res1((nvamax+iter))=&
@@ -21020,17 +21041,17 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 			
 					u2=the12(1)*res212num/the12(2)
 					
-					u3=LOG(the12(2))*the12(1)*res21212num/the12(2)+&
+					u3=dlog(the12(2))*the12(1)*res21212num/the12(2)+&
 					the12(1)*res2the1212/the12(2)+&
-					(the12(1)*LOG(the12(2))+1)*res212num/the12(2)+&
+					(the12(1)*dlog(the12(2))+1)*res212num/the12(2)+&
 					the12(1)*res2the12/the12(2)
 					u3=u3*(su12**vet12)+&
 					gl12*vet12*(su12**vet12)* &
-					(-1*LOG(the12(2)*t3(i))*u2 - &
-					(LOG(the12(2))*res212num+&
+					(-1*dlog(the12(2)*t3(i))*u2 - &
+					(dlog(the12(2))*res212num+&
 					res2the12)*the12(1)/the12(2)+&
-					res2denum*(-1-LOG(the12(2)*t3(i))*the12(1)+&
-					gl12*vet12*the12(1)*LOG(the12(2)*t3(i)))/ &
+					res2denum*(-1-dlog(the12(2)*t3(i))*the12(1)+&
+					gl12*vet12*the12(1)*dlog(the12(2)*t3(i)))/ &
 					the12(2))
 					
 					u2=u2*(su12**vet12)-&
@@ -21048,11 +21069,11 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 				
 				if(nva01nofix.gt.0) then 
 					
-					u3=-LOG(the12(2))*res20112num-&
-					res2the0112+res212num*LOG(the12(2))+&
+					u3=-dlog(the12(2))*res20112num-&
+					res2the0112+res212num*dlog(the12(2))+&
 					res2the12
 					u3=u3*(su12**vet12)-&
-					LOG(the12(2)*t3(i))*gl12*vet12* &
+					dlog(the12(2)*t3(i))*gl12*vet12* &
 					(su12**vet12)*res201num
 					
 					
@@ -21068,10 +21089,10 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 				endif
 				if(nva02nofix.gt.0) then 
 					
-					u3=-LOG(the12(2))*res20212num-&
+					u3=-dlog(the12(2))*res20212num-&
 					res2the0212
 					u3=u3*(su12**vet12)-&
-					LOG(the12(2)*t3(i))*gl12*vet12* &
+					dlog(the12(2)*t3(i))*gl12*vet12* &
 					(su12**vet12)*(-res202num)
 					
 					u2=-res202num*(su12**vet12)-&
@@ -21086,14 +21107,14 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 				endif
 				if(nva12nofix.gt.0) then 
 					
-					u3=LOG(the12(2))*res21212num+&
-					res2the1212+LOG(the12(2))*res212num+&
+					u3=dlog(the12(2))*res21212num+&
+					res2the1212+dlog(the12(2))*res212num+&
 					res2the12
 					u3=u3*(su12**vet12)-&
 					gl12*vet12*(su12**vet12)* &
-					(LOG(the12(2))*res212num+&
+					(dlog(the12(2))*res212num+&
 					res2the12)-gl12*vet12*(su12**vet12)* &
-					LOG(the12(2)*t3(i))* &
+					dlog(the12(2)*t3(i))* &
 					(res212num + res2denum*(1-gl12*vet12))
 					
 					u2=res212num*(su12**vet12)-&
@@ -21363,17 +21384,17 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 				iter = iter + 1
 				nweib = nweib + 1
 				
-				res1(nweib)=-LOG(the01(2)*t1(i))*gl01*vet01 +&
+				res1(nweib)=-dlog(the01(2)*t1(i))*gl01*vet01 +&
 				troncweib01011
 				
 				res1((nvamax+iter))=&
-				-((LOG(the01(2)*t1(i)))**2)*gl01*vet01 +&
+				-((dlog(the01(2)*t1(i)))**2)*gl01*vet01 +&
 				troncweib01011square
 
 				if(fix(2).eq.0)then
 					iter = iter +1
 					res1((nvamax+iter))=&
-					-(LOG(the01(2)*t1(i))* &
+					-(dlog(the01(2)*t1(i))* &
 					the01(1)+1)*gl01*vet01/the01(2)+&
 					troncweib010112
 				endif
@@ -21397,7 +21418,7 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 				if(nva01nofix.gt.0) then 
 					
 					res1((nvamax+iter+1):(nvamax+iter+nva01nofix))=&
-					-ve01nofix(i,:)*gl01*vet01*LOG(the01(2)*t1(i))+&
+					-ve01nofix(i,:)*gl01*vet01*dlog(the01(2)*t1(i))+&
 					troncweib01011beta01
 					iter = iter +nva01nofix
 				endif
@@ -21466,17 +21487,17 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 			if(fix(3).eq.0)then
 				iter = iter + 1
 				nweib = nweib +1
-				res1(nweib)=-LOG(the02(2)*t1(i))*gl02*vet02 +&
-				troncweib02021+log(the02(2)*t1(i))+1/the02(1)
+				res1(nweib)=-dlog(the02(2)*t1(i))*gl02*vet02 +&
+				troncweib02021+dlog(the02(2)*t1(i))+1/the02(1)
 				
 				res1((nvamax+iter))=&
-				-((LOG(the02(2)*t1(i)))**2)*gl02*vet02+&
+				-((dlog(the02(2)*t1(i)))**2)*gl02*vet02+&
 				troncweib02021square-1/(the02(1)**2)
 				
 				if(fix(4).eq.0)then
 					iter = iter +1
 					res1((nvamax+iter))=&
-					-(LOG(the02(2)*t1(i))* &
+					-(dlog(the02(2)*t1(i))* &
 					the02(1)+1)*gl02*vet02/the02(2)+&
 					troncweib020212
 				endif
@@ -21496,7 +21517,7 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 				if(nva02nofix.gt.0) then 
 					
 					res1((nvamax+iter+1):(nvamax+iter+nva02nofix))=&
-					-ve02nofix(i,:)*LOG(the02(2)*t1(i))*gl12*vet12+&
+					-ve02nofix(i,:)*dlog(the02(2)*t1(i))*gl12*vet12+&
 					troncweib02021beta02
 					iter = iter +nva02nofix
 				endif
@@ -21683,13 +21704,13 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 			if(fix(1).eq.0)then
 				iter = iter + 1
 				nweib = nweib + 1
-				v=(LOG(the01(2))+(1/the01(1)))*res2denum +&
-				res2thenum-LOG(the01(2))*(res2denum-res201num)-&
+				v=(dlog(the01(2))+(1/the01(1)))*res2denum +&
+				res2thenum-dlog(the01(2))*(res2denum-res201num)-&
 				res2the01
 				
 			
 				v=v*(su12**vet12)*ri12*vet12-&
-				LOG(the01(2)*t3(i))*gl01*vet01*(su01**vet01)* &
+				dlog(the01(2)*t3(i))*gl01*vet01*(su01**vet01)* &
 				ri02*vet02*(su02**vet02)
 				
 				res1(nweib)=v/u1
@@ -21699,22 +21720,22 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 
 				
 				res1((nvamax+iter))=&
-				LOG(the01(2))*2/the01(1)*res2denum+&
+				dlog(the01(2))*2/the01(1)*res2denum+&
 				res2thenum*2/the01(1)+&
-				(LOG(the01(2))**2)*res2denum+&
-				LOG(the01(2))*2*res2thenum+&
-				res2thenumsquare-3*(LOG(the01(2))**2)* &
+				(dlog(the01(2))**2)*res2denum+&
+				dlog(the01(2))*2*res2thenum+&
+				res2thenumsquare-3*(dlog(the01(2))**2)* &
 				(res2denum-res201num)-&
-				LOG(the01(2))*6*res2the01-3*res2the0101square-&
-				LOG(the01(2))*2/the01(1)*(res2denum-res201num)- &
+				dlog(the01(2))*6*res2the01-3*res2the0101square-&
+				dlog(the01(2))*2/the01(1)*(res2denum-res201num)- &
 				res2the01*2/the01(1)+ &
-				(LOG(the01(2))**2)*res20101numbis+&
-				LOG(the01(2))*2*res2the0101+&
+				(dlog(the01(2))**2)*res20101numbis+&
+				dlog(the01(2))*2*res2the0101+&
 				res2the0101dsquare
 				
 				res1((nvamax+iter))=&
 				res1((nvamax+iter))*(su12**vet12)*ri12*vet12+&
-				gl01*vet01*(LOG(the01(2)*t3(i))**2)*(-1+&
+				gl01*vet01*(dlog(the01(2)*t3(i))**2)*(-1+&
 				gl01*vet01)*(su01**vet01)*(su02**vet02)*ri02*vet02
 				
 				res1((nvamax+iter))=&
@@ -21732,19 +21753,19 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 					ri02*vet02*the01(1)*gl01*vet01* &
 					(su01**vet01)*(su02**vet02)/the01(2)
 					
-					u3=the01(1)*LOG(the01(2))*res20101numbis/the01(2)+&
+					u3=the01(1)*dlog(the01(2))*res20101numbis/the01(2)+&
 					the01(1)*res2the0101/the01(2)+&
-					(the01(1)*LOG(the01(2))+2)*res2denum/the01(2)+&
+					(the01(1)*dlog(the01(2))+2)*res2denum/the01(2)+&
 					the01(1)*res2thenum/the01(2)-&
-					(3*the01(1)*LOG(the01(2))+2)* &
+					(3*the01(1)*dlog(the01(2))+2)* &
 					(res2denum-res201num)/the01(2)-3* &
 					the01(1)*res2the01/the01(2)
 					
 					u3=u3*(su12**vet12)*ri12*vet12+&
 					ri02*vet02*gl01*vet01*(su01**vet01)* &
 					(su02**vet02)*(-1-&
-					LOG(the01(2)*t3(i))*the01(1)+&
-					gl01*vet01*LOG(the01(2)*t3(i))*the01(1))/the01(2)
+					dlog(the01(2)*t3(i))*the01(1)+&
+					gl01*vet01*dlog(the01(2)*t3(i))*the01(1))/the01(2)
 					
 					iter = iter +1
 					res1((nvamax+iter))=&
@@ -21757,33 +21778,33 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 				if(fix(3).eq.0)then
 				
 					u3=&
-					-LOG(the01(2))*LOG(the02(2))*res202num-&
-					LOG(the01(2))*res2the02-&
-					LOG(the02(2))*res2the02-&
+					-dlog(the01(2))*dlog(the02(2))*res202num-&
+					dlog(the01(2))*res2the02-&
+					dlog(the02(2))*res2the02-&
 					res2the0202square-&
-					LOG(the02(2))*res202num/the01(1)-&
+					dlog(the02(2))*res202num/the01(1)-&
 					res2the02/the01(1)+&
-					LOG(the01(2))*LOG(the02(2))*res20102num+&
-					LOG(the01(2))*res2the0102+&
-					LOG(the02(2))*res2the0102+&
+					dlog(the01(2))*dlog(the02(2))*res20102num+&
+					dlog(the01(2))*res2the0102+&
+					dlog(the02(2))*res2the0102+&
 					res2the0102square
 					
 					
 					u3=u3*(su12**vet12)*ri12*vet12+&
 					ri02*vet02*gl01*vet01* &
 					(su01**vet01)*(su02**vet02)* &
-					LOG(the01(2)*t3(i))* &
-					(LOG(the02(2)*t3(i))*gl02*vet02-&
-					LOG(the02(2)*t3(i))-&
+					dlog(the01(2)*t3(i))* &
+					(dlog(the02(2)*t3(i))*gl02*vet02-&
+					dlog(the02(2)*t3(i))-&
 					(1/the02(1)))
 					
 					
-					u2=-LOG(the02(2))*(res202num)-&
+					u2=-dlog(the02(2))*(res202num)-&
 						res2the02
 					u2=u2*(su12**vet12)*ri12*vet12+&
 					ri02*vet02*(su01**vet01)*(su02**vet02)* &
-					(LOG(the02(2)*t3(i))+(1/the02(1))-&
-					LOG(the02(2)*t3(i))*gl02*vet02)
+					(dlog(the02(2)*t3(i))+(1/the02(1))-&
+					dlog(the02(2)*t3(i))*gl02*vet02)
 					
 					iter = iter +1
 					res1((nvamax+iter))=(u3*u1-&
@@ -21792,10 +21813,10 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 				
 				if(fix(4).eq.0)then
 				
-					u3=-LOG(the01(2))*the02(1)*res202num/the02(2)-&
+					u3=-dlog(the01(2))*the02(1)*res202num/the02(2)-&
 					the02(1)*res2the02/the02(2)-&
 					the02(1)*res202num/(the01(1)*the02(2))+&
-					LOG(the01(2))*the02(1)*res20102num/the02(2)+&
+					dlog(the01(2))*the02(1)*res20102num/the02(2)+&
 					the02(1)*res2the0102/the02(2)
 					
 					
@@ -21803,7 +21824,7 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 					ri02*vet02*gl01*vet01* &
 					(1-gl02*vet02)*(su01**vet01)* &
 					(su02**vet02)*the02(1)* &
-					LOG(the01(2)*t3(i))/the02(2)
+					dlog(the01(2)*t3(i))/the02(2)
 					
 					u2=-the02(1)*res202num/the02(2)
 					u2=u2*(su12**vet12)*ri12*vet12+&
@@ -21819,32 +21840,32 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 				if(fix(5).eq.0)then
 				
 					
-					u3=LOG(the01(2))*LOG(the12(2))*res212num+&
-					LOG(the01(2))*res2the12+LOG(the12(2))*res2the12+&
-					res2the1212square+LOG(the12(2))*res212num/the01(1)+&
+					u3=dlog(the01(2))*dlog(the12(2))*res212num+&
+					dlog(the01(2))*res2the12+dlog(the12(2))*res2the12+&
+					res2the1212square+dlog(the12(2))*res212num/the01(1)+&
 					res2the12/the01(1)-&
-					LOG(the01(2))*LOG(the12(2))*res20112num-&
-					LOG(the01(2))*res2the0112-&
-					LOG(the12(2))*res2the0112-&
+					dlog(the01(2))*dlog(the12(2))*res20112num-&
+					dlog(the01(2))*res2the0112-&
+					dlog(the12(2))*res2the0112-&
 					res2the0112square
 					
 					u3=u3*(su12**vet12)*ri12*vet12+&
 					ri12*vet12*(su12**vet12)* &
-					(LOG(the12(2)*t3(i))+ &
+					(dlog(the12(2)*t3(i))+ &
 					(1/the12(1))-&
-					LOG(the12(2)*t3(i))*gl12*vet12)* &
-					((LOG(the01(2))+(1/the01(1)))*res2denum +&
-				res2thenum-LOG(the01(2))*(res2denum-res201num)-&
+					dlog(the12(2)*t3(i))*gl12*vet12)* &
+					((dlog(the01(2))+(1/the01(1)))*res2denum +&
+				res2thenum-dlog(the01(2))*(res2denum-res201num)-&
 				res2the01)
 					
 					
-					u2=LOG(the12(2))*(res212num)+&
+					u2=dlog(the12(2))*(res212num)+&
 						res2the12
 					u2=u2*(su12**vet12)*ri12*vet12+&
 					ri12*vet12*(su12**vet12)*res2denum* &
-					(LOG(the12(2)*t3(i))+&
+					(dlog(the12(2)*t3(i))+&
 					(1/the12(1))-&
-					LOG(the12(2)*t3(i))*gl12*vet12)
+					dlog(the12(2)*t3(i))*gl12*vet12)
 						
 						
 					
@@ -21857,17 +21878,17 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 				if(fix(6).eq.0)then
 				
 					u3=&
-					LOG(the01(2))*the12(1)*res212num/the12(2)+&
+					dlog(the01(2))*the12(1)*res212num/the12(2)+&
 					the12(1)/the12(2)*res2the12+res212num* &
 					the12(1)/(the12(2)*the01(1))-&
-					LOG(the01(2))*the12(1)*res20112num/the12(2)-&
+					dlog(the01(2))*the12(1)*res20112num/the12(2)-&
 					the12(1)/the12(2)*res2the0112
 					
 					u3=u3*(su12**vet12)*ri12*vet12+&
 					ri12*vet12*(su12**vet12)*the12(1)* &
 					(1-gl12*vet12)* &
-					((LOG(the01(2))+(1/the01(1)))*res2denum +&
-					res2thenum-LOG(the01(2))*(res2denum-res201num)-&
+					((dlog(the01(2))+(1/the01(1)))*res2denum +&
+					res2thenum-dlog(the01(2))*(res2denum-res201num)-&
 					res2the01)/the12(2)
 					
 					
@@ -21886,14 +21907,14 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 				if(nva01nofix.gt.0) then 
 					
 					u3=res2the0101+ &
-					LOG(the01(2))*res20101numbis-&
-					LOG(the01(2))*3*(res2denum-res201num)-&
+					dlog(the01(2))*res20101numbis-&
+					dlog(the01(2))*3*(res2denum-res201num)-&
 					res2the01*3-(res2denum-res201num)/the01(1)+&
-					(LOG(the01(2))+(1/the01(1)))*res2denum+&
+					(dlog(the01(2))+(1/the01(1)))*res2denum+&
 					res2thenum
 					
 					u3= u3*(su12**vet12)*ri12*vet12-&
-					ri02*vet02*LOG(the01(2)*t3(i))*gl01*vet01*(1-&
+					ri02*vet02*dlog(the01(2)*t3(i))*gl01*vet01*(1-&
 					gl01*vet01)*(su01**vet01)*(su02**vet02)
 					
 					u2=res201num*(su12**vet12)*ri12*vet12-&
@@ -21913,14 +21934,14 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 				if(nva02nofix.gt.0) then 
 					
 					
-					u3=-(LOG(the01(2))+&
+					u3=-(dlog(the01(2))+&
 					(1/the01(1)))*res202num-&
 					res2the02+&
-					LOG(the01(2))*res20102num+&
+					dlog(the01(2))*res20102num+&
 					res2the0102
 					
 					u3=u3*(su12**vet12)*ri12*vet12-&
-					ri02*vet02*LOG(the01(2)*t3(i))*gl01*vet01* &
+					ri02*vet02*dlog(the01(2)*t3(i))*gl01*vet01* &
 					(su01**vet01)*(su02**vet02)* &
 					(1-gl02*vet02)
 					
@@ -21936,16 +21957,16 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 				
 				if(nva12nofix.gt.0) then 
 				
-					u3=(LOG(the01(2))+&
+					u3=(dlog(the01(2))+&
 					(1/the01(1)))*res212num+&
 					res2the12-&
-					LOG(the01(2))*res20112num-&
+					dlog(the01(2))*res20112num-&
 					res2the0112
 					
 					u3=u3*(su12**vet12)*ri12*vet12+&
 					ri12*vet12*(1-gl12*vet12)*(su12**vet12)* &
-					((LOG(the01(2))+(1/the01(1)))*res2denum +&
-					res2thenum-LOG(the01(2))*(res2denum-res201num)-&
+					((dlog(the01(2))+(1/the01(1)))*res2denum +&
+					res2thenum-dlog(the01(2))*(res2denum-res201num)-&
 					res2the01)
 					
 					u2=res212num*(su12**vet12)*ri12*vet12+&
@@ -21994,25 +22015,25 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 				if(fix(3).eq.0)then
 				
 					
-					u3=-LOG(the02(2))*the01(1)* &
+					u3=-dlog(the02(2))*the01(1)* &
 					res202num/the01(2)-&
 					the01(1)*res2the02/the01(2)+&
-					the01(1)*LOG(the02(2))*res20102num/the01(2)+&
+					the01(1)*dlog(the02(2))*res20102num/the01(2)+&
 					the01(1)*res2the0102/the01(2)
 					
 					u3=u3*(su12**vet12)*ri12*vet12-&
 					ri02*vet02*gl01*vet01*the01(1)* &
 					(su01**vet01)*(su02**vet02)* &
-					(LOG(the02(2)*t3(i))*(1-&
+					(dlog(the02(2)*t3(i))*(1-&
 					gl02*vet02)+(1/the02(1)))/the01(2)
 					
-					u2=-LOG(the02(2))*(res202num)-&
+					u2=-dlog(the02(2))*(res202num)-&
 						res2the02
 					u2=u2*(su12**vet12)*ri12*vet12+&
 					ri02*vet02*(su01**vet01)*(su02**vet02)* &
-					(LOG(the02(2)*t3(i))+&
+					(dlog(the02(2)*t3(i))+&
 					(1/the02(1))-&
-					gl02*vet02*LOG(the02(2)*t3(i)))
+					gl02*vet02*dlog(the02(2)*t3(i)))
 					
 					iter = iter +1
 					res1((nvamax+iter))=(u3*u1-&
@@ -22042,25 +22063,25 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 				
 				if(fix(5).eq.0)then
 				
-					u3=LOG(the12(2))*the01(1)*res212num/the01(2)+&
+					u3=dlog(the12(2))*the01(1)*res212num/the01(2)+&
 					the01(1)*res2the12/the01(2)-&
-					the01(1)*LOG(the12(2))*res20112num/the01(2)-&
+					the01(1)*dlog(the12(2))*res20112num/the01(2)-&
 					the01(1)*res2the0112/the01(2)
 					
 					u3=u3*(su12**vet12)*ri12*vet12+&
-					ri12*vet12*(su12**vet12)*(LOG(the12(2)* &
+					ri12*vet12*(su12**vet12)*(dlog(the12(2)* &
 					t3(i)) + &
-					(1/the12(1))-LOG(the12(2)*t3(i))*gl12*vet12)* &
+					(1/the12(1))-dlog(the12(2)*t3(i))*gl12*vet12)* &
 					(the01(1)*res2denum/the01(2) -&
 					the01(1)*(res2denum-res201num)/the01(2))
 					
-					u2=LOG(the12(2))*(res212num)+&
+					u2=dlog(the12(2))*(res212num)+&
 						res2the12
 					u2=u2*(su12**vet12)*ri12*vet12+&
 					ri12*vet12*(su12**vet12)*res2denum* &
-					(LOG(the12(2)*t3(i))+&
+					(dlog(the12(2)*t3(i))+&
 					(1/the12(1))-&
-					LOG(the12(2)*t3(i))*gl12*vet12)
+					dlog(the12(2)*t3(i))*gl12*vet12)
 						
 					iter = iter +1
 					res1((nvamax+iter))=(u3*u1-&
@@ -22161,34 +22182,34 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 				iter = iter + 1
 				nweib = nweib + 1
 				
-				v=-LOG(the02(2))*res202num-&
+				v=-dlog(the02(2))*res202num-&
 				res2the02
 				
 				v=v*(su12**vet12)*ri12*vet12+&
 				ri02*vet02*(su01**vet01)*(su02**vet02)* &
-				(LOG(the02(2)*t3(i))+&
+				(dlog(the02(2)*t3(i))+&
 				(1/the02(1))-&
-				gl02*vet02*LOG(the02(2)*t3(i)))
+				gl02*vet02*dlog(the02(2)*t3(i)))
 				
 				res1(nweib)=v/u1
 				res1(nweib)=res1(nweib)+troncweib02021
 				res1((nvamax+iter))=&
-				((LOG(the02(2)))**2)* &
-				res20202num+2*LOG(the02(2))*res2the0202+&
+				((dlog(the02(2)))**2)* &
+				res20202num+2*dlog(the02(2))*res2the0202+&
 				res2the0202dsquare-&
-				((LOG(the02(2)))**2)* &
-				res202num-2*LOG(the02(2))*res2the02-&
+				((dlog(the02(2)))**2)* &
+				res202num-2*dlog(the02(2))*res2the02-&
 				res2the0202square
 				
 				res1((nvamax+iter))=&
 				res1((nvamax+iter))* &
 				(su12**vet12)*ri12*vet12+&
 				ri02*vet02*(su01**vet01)*(su02**vet02)* &
-				(((LOG(the02(2)*t3(i))+&
+				(((dlog(the02(2)*t3(i))+&
 				(1/the02(1))-&
-				gl02*vet02*LOG(the02(2)*t3(i)))**2)-&
+				gl02*vet02*dlog(the02(2)*t3(i)))**2)-&
 				((1/(the02(1)**2))+&
-				(LOG(the02(2)*t3(i))**2)*gl02*vet02))
+				(dlog(the02(2)*t3(i))**2)*gl02*vet02))
 				
 				res1((nvamax+iter))=&
 				res1((nvamax+iter))*u1 -v*v
@@ -22200,21 +22221,21 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 				
 				if(fix(4).eq.0)then
 				
-					u3=-(the02(1)*LOG(the02(2))+1)* &
+					u3=-(the02(1)*dlog(the02(2))+1)* &
 					res202num/the02(2)-&
 					the02(1)*res2the02/the02(2)+ &
-					LOG(the02(2))*the02(1)* &
+					dlog(the02(2))*the02(1)* &
 					res20202num/the02(2)+ &
 					the02(1)/the02(2)*res2the0202
 					
 					u3=u3*(su12**vet12)*ri12*vet12+&
 					ri02*vet02*(1-gl02*vet02)*the02(1)* &
 					(su01**vet01)*(su02**vet02)* &
-					(LOG(the02(2)*t3(i))+&
+					(dlog(the02(2)*t3(i))+&
 					(1/the02(1))-&
-					LOG(the02(2)*t3(i))*gl02*vet02)/the02(2)+ &
+					dlog(the02(2)*t3(i))*gl02*vet02)/the02(2)+ &
 					ri02*vet02*(su01**vet01)*(su02**vet02)* &
-					(1-gl02*vet02-LOG(the02(2)*t3(i))*the02(1)* &
+					(1-gl02*vet02-dlog(the02(2)*t3(i))*the02(1)* &
 					gl02*vet02)/the02(2)
 					
 					u2=-the02(1)*res202num/the02(2)
@@ -22235,25 +22256,25 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 				
 				if(fix(5).eq.0)then
 				
-					u3=-LOG(the02(2))*LOG(the12(2))*res20212num-&
-					LOG(the02(2))*res2the0212-LOG(the12(2))*res2the0212-&
+					u3=-dlog(the02(2))*dlog(the12(2))*res20212num-&
+					dlog(the02(2))*res2the0212-dlog(the12(2))*res2the0212-&
 					res2the0212square
 					
 					u3=u3*(su12**vet12)*ri12*vet12+&
 					ri12*vet12*(su12**vet12)* &
-					(LOG(the12(2)*t3(i))+&
+					(dlog(the12(2)*t3(i))+&
 					(1/the12(1))-&
-					LOG(the12(2)*t3(i))*gl12*vet12)* &
-					(-1*LOG(the02(2))*res202num-&
+					dlog(the12(2)*t3(i))*gl12*vet12)* &
+					(-1*dlog(the02(2))*res202num-&
 					res2the02)
 					
-					u2=LOG(the12(2))*(res212num)+&
+					u2=dlog(the12(2))*(res212num)+&
 						res2the12
 					u2=u2*(su12**vet12)*ri12*vet12+&
 					ri12*vet12*(su12**vet12)*res2denum* &
-					(LOG(the12(2)*t3(i))+&
+					(dlog(the12(2)*t3(i))+&
 					(1/the12(1))-&
-					LOG(the12(2)*t3(i))*gl12*vet12)
+					dlog(the12(2)*t3(i))*gl12*vet12)
 						
 					iter = iter +1
 					res1((nvamax+iter))=u1*u3-&
@@ -22265,12 +22286,12 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 				
 				if(fix(6).eq.0)then
 				
-					u3=-LOG(the02(2))*the12(1)*res20212num/the12(2)-&
+					u3=-dlog(the02(2))*the12(1)*res20212num/the12(2)-&
 					the12(1)*res2the0212/the12(2)
 					
 					u3=u3*(su12**vet12)*ri12*vet12+&
 					ri12*vet12*(1-gl12*vet12)*(su12**vet12)*the12(1)* &
-					(-1*LOG(the02(2))*res202num-&
+					(-1*dlog(the02(2))*res202num-&
 					res2the02)/the12(2)
 				
 					
@@ -22291,16 +22312,16 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 				if(nva01nofix.gt.0) then 
 					
 					
-					u3=LOG(the02(2))*res20102num+&
-					res2the0102-res202num*LOG(the02(2))-&
+					u3=dlog(the02(2))*res20102num+&
+					res2the0102-res202num*dlog(the02(2))-&
 					res2the02
 					
 					u3=u3*(su12**vet12)*ri12*vet12-&
 					ri02*vet02*gl01*vet01* &
 					(su01**vet01)*(su02**vet02)* &
-					(LOG(the02(2)*t3(i))+&
+					(dlog(the02(2)*t3(i))+&
 					(1/the02(1))-&
-					LOG(the02(2)*t3(i))*gl02*vet02)
+					dlog(the02(2)*t3(i))*gl02*vet02)
 					
 					u2=res201num*(su12**vet12)*ri12*vet12-&
 					ri02*vet02*gl01*vet01*(su01**vet01)* &
@@ -22316,17 +22337,17 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 				
 				if(nva02nofix.gt.0) then 
 					
-					u3=-LOG(the02(2))*res202num-&
-					res2the02+LOG(the02(2))*res20202num+&
+					u3=-dlog(the02(2))*res202num-&
+					res2the02+dlog(the02(2))*res20202num+&
 					res2the0202
 					u3=u3*(su12**vet12)*ri12*vet12+&
 					ri02*vet02*(1-gl02*vet02)* &
 					(su01**vet01)*(su02**vet02)* &
-					(LOG(the02(2)*t3(i))+&
+					(dlog(the02(2)*t3(i))+&
 					(1/the02(1))-&
-					LOG(the02(2)*t3(i))*gl02*vet02)-&
+					dlog(the02(2)*t3(i))*gl02*vet02)-&
 					ri02*vet02*gl02*vet02*(su01**vet01)* &
-					(su02**vet02)*LOG(the02(2)*t3(i))
+					(su02**vet02)*dlog(the02(2)*t3(i))
 					
 					u2=-res202num*(su12**vet12)*ri12*vet12+&
 					(1-gl02*vet02)*(su01**vet01)* &
@@ -22345,11 +22366,11 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 				
 				if(nva12nofix.gt.0) then 
 				
-					u3=-LOG(the02(2))*res20212num-&
+					u3=-dlog(the02(2))*res20212num-&
 					res2the0212
 					u3=u3*(su12**vet12)*ri12*vet12+&
 					ri12*vet12*(1-gl12*vet12)*(su12**vet12)* &
-					(-1*LOG(the02(2))*res202num-&
+					(-1*dlog(the02(2))*res202num-&
 					res2the02)
 					
 					u2=res212num*(su12**vet12)*ri12*vet12+&
@@ -22398,22 +22419,22 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 				
 				if(fix(5).eq.0)then
 				
-					u3=-the02(1)*LOG(the12(2))*res20212num/the02(2)-&
+					u3=-the02(1)*dlog(the12(2))*res20212num/the02(2)-&
 					the02(1)*res2the0212/the02(2)
 					u3=u3*(su12**vet12)*ri12*vet12-&
 					ri12*vet12*(su12**vet12)* &
-					(LOG(the12(2)*t3(i))+&
+					(dlog(the12(2)*t3(i))+&
 					(1/the12(1))- &
-					LOG(the12(2)*t3(i))*gl12*vet12)* &
+					dlog(the12(2)*t3(i))*gl12*vet12)* &
 					(the02(1)*res202num/the02(2))
 					
-					u2=LOG(the12(2))*(res212num)+&
+					u2=dlog(the12(2))*(res212num)+&
 						res2the12
 					u2=u2*(su12**vet12)*ri12*vet12+&
 					ri12*vet12*(su12**vet12)*res2denum* &
-					(LOG(the12(2)*t3(i))+&
+					(dlog(the12(2)*t3(i))+&
 					(1/the12(1))-&
-					LOG(the12(2)*t3(i))*gl12*vet12)
+					dlog(the12(2)*t3(i))*gl12*vet12)
 						
 					iter = iter +1
 					res1((nvamax+iter))=u1*u3-&
@@ -22515,37 +22536,37 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 				iter = iter + 1
 				nweib = nweib + 1
 				
-				v=LOG(the12(2))*res212num+&
+				v=dlog(the12(2))*res212num+&
 				res2the12
 				v=v*(su12**vet12)*ri12*vet12+&
 				ri12*vet12*(su12**vet12)*res2denum* &
-				(LOG(the12(2)*t3(i))+&
+				(dlog(the12(2)*t3(i))+&
 				(1/the12(1))-&
-				LOG(the12(2)*t3(i))*gl12*vet12)
+				dlog(the12(2)*t3(i))*gl12*vet12)
 				
 				res1(nweib)=v/u1
 		
 				res1((nvamax+iter))=&
-				((LOG(the12(2)))**2)* &
-				res21212num+2*LOG(the12(2))*res2the1212+&
+				((dlog(the12(2)))**2)* &
+				res21212num+2*dlog(the12(2))*res2the1212+&
 				res2the1212dsquare+&
-				((LOG(the12(2)))**2)* &
-				res212num+2*LOG(the12(2))*res2the12+&
+				((dlog(the12(2)))**2)* &
+				res212num+2*dlog(the12(2))*res2the12+&
 				res2the1212square
 				
 				res1((nvamax+iter))=&
 				res1((nvamax+iter))*(su12**vet12)*ri12*vet12+&
 				ri12*vet12*(su12**vet12)* &
-				(LOG(the12(2)*t3(i)) +&
+				(dlog(the12(2)*t3(i)) +&
 				(1/the12(1))-&
-				LOG(the12(2)*t3(i))*gl12*vet12)* &
-				(2*(LOG(the12(2))*res212num+&
-				res2the12)+res2denum*(LOG(the12(2)*t3(i))+&
+				dlog(the12(2)*t3(i))*gl12*vet12)* &
+				(2*(dlog(the12(2))*res212num+&
+				res2the12)+res2denum*(dlog(the12(2)*t3(i))+&
 				(1/the12(1))-&
-				LOG(the12(2)*t3(i))*gl12*vet12))-&
+				dlog(the12(2)*t3(i))*gl12*vet12))-&
 				ri12*vet12*(su12**vet12)*res2denum* &
 				((1/(the12(1)**2))+&
-				(LOG(the12(2)*t3(i))**2)*gl12*vet12)
+				(dlog(the12(2)*t3(i))**2)*gl12*vet12)
 				
 				res1((nvamax+iter))=&
 				res1((nvamax+iter))*u1 -v*v
@@ -22556,27 +22577,27 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 	
 					u2=the12(1)*res212num/the12(2)
 					
-					u3=LOG(the12(2))*the12(1)*res21212num/the12(2)+&
+					u3=dlog(the12(2))*the12(1)*res21212num/the12(2)+&
 					the12(1)*res2the1212/the12(2)+&
-					(the12(1)*LOG(the12(2))+1)*res212num/the12(2)+&
+					(the12(1)*dlog(the12(2))+1)*res212num/the12(2)+&
 					the12(1)*res2the12/the12(2)
 					
 					u3=u3*(su12**vet12)*ri12*vet12+&
 					ri12*vet12*(1-gl12*vet12)* &
 					(su12**vet12)*the12(1)* &
-					((LOG(the12(2))*res212num+&
+					((dlog(the12(2))*res212num+&
 					res2the12)+&
-					res2denum*(LOG(the12(2)*t3(i))+&
+					res2denum*(dlog(the12(2)*t3(i))+&
 					(1/the12(1))-&
-					LOG(the12(2)*t3(i))*gl12*vet12))/the12(2)
+					dlog(the12(2)*t3(i))*gl12*vet12))/the12(2)
 					
 					u3=u3+ &
 					ri12*vet12*(su12**vet12)*res2denum* &
-					(1-LOG(the12(2)*t3(i))*the12(1)* &
+					(1-dlog(the12(2)*t3(i))*the12(1)* &
 					gl12*vet12-gl12*vet12)/the12(2)+&
 					ri12*vet12*(su12**vet12)*u2* &
-					(LOG(the12(2)*t3(i))+(1/the12(1))-&
-					LOG(the12(2)*t3(i))*gl12*vet12)
+					(dlog(the12(2)*t3(i))+(1/the12(1))-&
+					dlog(the12(2)*t3(i))*gl12*vet12)
 					
 					
 					u2=u2*(su12**vet12)*ri12*vet12+&
@@ -22595,14 +22616,14 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 				
 				if(nva01nofix.gt.0) then 
 					
-					u3=-LOG(the12(2))*res20112num-&
-					res2the0112+res212num*LOG(the12(2))+&
+					u3=-dlog(the12(2))*res20112num-&
+					res2the0112+res212num*dlog(the12(2))+&
 					res2the12
 					u3=u3*(su12**vet12)*ri12*vet12+&
 					ri12*vet12*(su12**vet12)* &
-					(LOG(the12(2)*t3(i))+&
+					(dlog(the12(2)*t3(i))+&
 					(1/the12(1))-&
-					LOG(the12(2)*t3(i))*gl12*vet12)* &
+					dlog(the12(2)*t3(i))*gl12*vet12)* &
 					res201num
 					
 					
@@ -22619,13 +22640,13 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 				endif
 				if(nva02nofix.gt.0) then 
 				
-					u3=-LOG(the12(2))*res20212num-&
+					u3=-dlog(the12(2))*res20212num-&
 					res2the0212
 					u3=u3*(su12**vet12)*ri12*vet12-&
 					ri12*vet12*(su12**vet12)* &
-					(LOG(the12(2)*t3(i))+&
+					(dlog(the12(2)*t3(i))+&
 					(1/the12(1))-&
-					LOG(the12(2)*t3(i))*gl12*vet12)* &
+					dlog(the12(2)*t3(i))*gl12*vet12)* &
 					(res202num)
 					
 					u2=-res202num*(su12**vet12)*ri12*vet12+&
@@ -22643,19 +22664,19 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
 				endif
 				if(nva12nofix.gt.0) then 
 				
-					u3=LOG(the12(2))*res21212num+&
-					res2the1212+LOG(the12(2))*res212num+&
+					u3=dlog(the12(2))*res21212num+&
+					res2the1212+dlog(the12(2))*res212num+&
 					res2the12
 					
 					u3=u3*(su12**vet12)*ri12*vet12+&
 					(1-gl12*vet12)*(su12**vet12)* &
-					(LOG(the12(2))*res212num+&
+					(dlog(the12(2))*res212num+&
 					res2the12)*ri12*vet12+&
 					ri12*vet12*(su12**vet12)* &
-					(LOG(the12(2)*t3(i))+(1/the12(1))-&
-					LOG(the12(2)*t3(i))*gl12*vet12)* &
+					(dlog(the12(2)*t3(i))+(1/the12(1))-&
+					dlog(the12(2)*t3(i))*gl12*vet12)* &
 					(res212num+res2denum*(1-gl12*vet12))-&
-					LOG(the12(2)*t3(i))*gl12*vet12* &
+					dlog(the12(2)*t3(i))*gl12*vet12* &
 					ri12*vet12*(su12**vet12)*res2denum
 					
 					u2=res212num*(su12**vet12)*ri12*vet12+&
@@ -22969,7 +22990,7 @@ subroutine derivaweiballpara(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
     end subroutine derivaweiballpara
 
 !=============================================================================================  
-!======================= Calculate derivatives of loglik with weibull baseline risk ==========
+!======================= Calculate derivatives of dloglik with weibull baseline risk ==========
 !======================== only diagonal for all parameters =================================================
 !=============================================================================================  
 
@@ -23250,9 +23271,9 @@ subroutine derivaweiballparadiag(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
                         	tronc01square=ve01square(i,:)*gl01*vet01
                         	tronc02square=ve02square(i,:)*gl02*vet02
 							
-							troncweib01011=gl01*vet01*LOG(the01(2)*t0(i))
+							troncweib01011=gl01*vet01*dlog(the01(2)*t0(i))
 							troncweib01011square=&
-							((LOG(the01(2)*t0(i)))**2)*gl01*vet01
+							((dlog(the01(2)*t0(i)))**2)*gl01*vet01
 							
 							
 							troncweib01012=the01(1)*gl01*vet01/the01(2)
@@ -23260,9 +23281,9 @@ subroutine derivaweiballparadiag(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 							troncweib01012square=&
 							the01(1)*(the01(1)-1)*gl01*vet01/(the01(2)**2)
 							
-							troncweib02021=LOG(the02(2)*t0(i))*gl02*vet02
+							troncweib02021=dlog(the02(2)*t0(i))*gl02*vet02
 							troncweib02021square=&
-							((LOG(the02(2)*t0(i)))**2)*gl02*vet02
+							((dlog(the02(2)*t0(i)))**2)*gl02*vet02
 							
 							
 							troncweib02022=&
@@ -23300,10 +23321,10 @@ subroutine derivaweiballparadiag(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 			if(fix(1).eq.0)then
 				iter = iter + 1
 				nweib = nweib + 1
-				res1(nweib)=-LOG(the01(2)*t1(i))*gl01*vet01 +&
+				res1(nweib)=-dlog(the01(2)*t1(i))*gl01*vet01 +&
 				troncweib01011
 				res1((nvamax+iter))=&
-				-((LOG(the01(2)*t1(i)))**2)*gl01*vet01 +&
+				-((dlog(the01(2)*t1(i)))**2)*gl01*vet01 +&
 				troncweib01011square
 				
 			endif 
@@ -23323,10 +23344,10 @@ subroutine derivaweiballparadiag(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 			if(fix(3).eq.0)then
 				iter = iter + 1
 				nweib = nweib +1
-				res1(nweib)=-LOG(the02(2)*t1(i))*gl02*vet02 +&
+				res1(nweib)=-dlog(the02(2)*t1(i))*gl02*vet02 +&
 				troncweib02021
 				res1((nvamax+iter))=&
-				-((LOG(the02(2)*t1(i)))**2)*gl02*vet02+&
+				-((dlog(the02(2)*t1(i)))**2)*gl02*vet02+&
 				troncweib02021square
 				
 			endif 
@@ -23410,25 +23431,25 @@ subroutine derivaweiballparadiag(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 			if(fix(1).eq.0)then
 				iter = iter + 1
 				nweib = nweib + 1
-				v=(LOG(the01(2))+(1/the01(1)))*res2denum +&
-				res2thenum-LOG(the01(2))*(res2denum-res201num)-&
+				v=(dlog(the01(2))+(1/the01(1)))*res2denum +&
+				res2thenum-dlog(the01(2))*(res2denum-res201num)-&
 				res2the01
 				res1(nweib)=v/res2denum
 				
 				res1(nweib)=res1(nweib)+troncweib01011
 				res1((nvamax+iter))=&
-				(LOG(the01(2))**2)*res2denum+ &
-				LOG(the01(2))*2*res2thenum+ &
+				(dlog(the01(2))**2)*res2denum+ &
+				dlog(the01(2))*2*res2thenum+ &
 				res2thenumsquare+ &
-				LOG(the01(2))*2/the01(1)*res2denum+ &
+				dlog(the01(2))*2/the01(1)*res2denum+ &
 				res2thenum*2/the01(1)- &
-				(LOG(the01(2))**2)*3*(res2denum-res201num)- &
-				LOG(the01(2))*6*res2the01- &
+				(dlog(the01(2))**2)*3*(res2denum-res201num)- &
+				dlog(the01(2))*6*res2the01- &
 				res2the0101square*3- &
-				LOG(the01(2))*2*(res2denum-res201num)/the01(1)-&
+				dlog(the01(2))*2*(res2denum-res201num)/the01(1)-&
 				res2the01*2/the01(1)+ &
-				(LOG(the01(2))**2)*res20101numbis+ &
-				LOG(the01(2))*2*res2the0101+ &
+				(dlog(the01(2))**2)*res20101numbis+ &
+				dlog(the01(2))*2*res2the0101+ &
 				res2the0101dsquare
 				
 				
@@ -23469,18 +23490,18 @@ subroutine derivaweiballparadiag(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 			if(fix(3).eq.0)then
 				iter = iter + 1
 				nweib = nweib + 1
-				v=-LOG(the02(2))*res202num-&
+				v=-dlog(the02(2))*res202num-&
 				res2the02
 				res1(nweib)=v/res2denum
 				res1(nweib)=res1(nweib)+ &
 				troncweib02021
 				
 				res1((nvamax+iter))=&
-				((LOG(the02(2)))**2)* &
-				res20202num+2*LOG(the02(2))*res2the0202+&
+				((dlog(the02(2)))**2)* &
+				res20202num+2*dlog(the02(2))*res2the0202+&
 				res2the0202dsquare-&
-				((LOG(the02(2)))**2)* &
-				res202num-2*LOG(the02(2))*res2the02-&
+				((dlog(the02(2)))**2)* &
+				res202num-2*dlog(the02(2))*res2the02-&
 				res2the0202square
 				
 				res1((nvamax+iter))=&
@@ -23519,18 +23540,18 @@ subroutine derivaweiballparadiag(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 				iter = iter + 1
 				nweib = nweib + 1
 				
-				v=LOG(the12(2))*res212num+&
+				v=dlog(the12(2))*res212num+&
 				res2the12
 				res1(nweib)=v/res2denum
 				res1(nweib)=res1(nweib)-&
-				LOG(the12(2)*t3(i))*gl12*vet12
+				dlog(the12(2)*t3(i))*gl12*vet12
 				
 				res1((nvamax+iter))=&
-				((LOG(the12(2)))**2)* &
-				res21212num+2*LOG(the12(2))*res2the1212+&
+				((dlog(the12(2)))**2)* &
+				res21212num+2*dlog(the12(2))*res2the1212+&
 				res2the1212dsquare+&
-				((LOG(the12(2)))**2)* &
-				res212num+2*LOG(the12(2))*res2the12+&
+				((dlog(the12(2)))**2)* &
+				res212num+2*dlog(the12(2))*res2the12+&
 				res2the1212square
 				
 				res1((nvamax+iter))=&
@@ -23539,7 +23560,7 @@ subroutine derivaweiballparadiag(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 				res1((nvamax+iter))/(res2denum*res2denum)
 				res1((nvamax+iter))=&
 				res1((nvamax+iter))-&
-				((LOG(the12(2)*t3(i)))**2)*gl12*vet12
+				((dlog(the12(2)*t3(i)))**2)*gl12*vet12
 				
 
 			endif
@@ -23648,12 +23669,12 @@ subroutine derivaweiballparadiag(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 				iter = iter + 1
 				nweib = nweib + 1
 				
-				res1(nweib)=-LOG(the01(2)*t1(i))*gl01*vet01 +&
+				res1(nweib)=-dlog(the01(2)*t1(i))*gl01*vet01 +&
 				troncweib01011+&
-				LOG(the01(2)*t1(i))+(1/the01(1))
+				dlog(the01(2)*t1(i))+(1/the01(1))
 				
 				res1((nvamax+iter))=&
-				-((LOG(the01(2)*t1(i)))**2)*gl01*vet01 +&
+				-((dlog(the01(2)*t1(i)))**2)*gl01*vet01 +&
 				troncweib01011square-1/(the01(1)**2)
 				
 			endif 
@@ -23677,11 +23698,11 @@ subroutine derivaweiballparadiag(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 			if(fix(3).eq.0)then
 				iter = iter + 1
 				nweib = nweib +1
-				res1(nweib)=-LOG(the02(2)*t1(i))*gl02*vet02 +&
+				res1(nweib)=-dlog(the02(2)*t1(i))*gl02*vet02 +&
 				troncweib02021
 				
 				res1((nvamax+iter))=&
-				-((LOG(the02(2)*t1(i)))**2)*gl02*vet02+&
+				-((dlog(the02(2)*t1(i)))**2)*gl02*vet02+&
 				troncweib02021square
 				
 			endif 
@@ -23703,17 +23724,17 @@ subroutine derivaweiballparadiag(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 			if(fix(5).eq.0)then
 				iter = iter + 1
 				nweib= nweib +1
-				res1(nweib)=LOG(the12(2)*t1(i))*gl12*vet12
-				res1(nvamax+iter)=((LOG(the12(2)*t1(i)))**2)*gl12*vet12
+				res1(nweib)=dlog(the12(2)*t1(i))*gl12*vet12
+				res1(nvamax+iter)=((dlog(the12(2)*t1(i)))**2)*gl12*vet12
 				
 				call fonct(t3(i),the12,ri12,gl12,su12)
 				
 				res1(nweib)=res1(nweib)-&
-				LOG(the12(2)*t3(i))*gl12*vet12
+				dlog(the12(2)*t3(i))*gl12*vet12
 				iter=iter-nva12nofix-nva02nofix-nva01nofix
 				
 				res1(nvamax+iter)=res1(nvamax+iter)-&
-				((LOG(the12(2)*t3(i)))**2)*gl12*vet12
+				((dlog(the12(2)*t3(i)))**2)*gl12*vet12
 				
 				iter=iter+nva12nofix+nva02nofix+nva01nofix
 				
@@ -23813,24 +23834,24 @@ subroutine derivaweiballparadiag(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 				iter = iter + 1
 				nweib = nweib + 1
 				
-				v=(LOG(the01(2))+(1/the01(1)))*res2denum +&
-				res2thenum-LOG(the01(2))*(res2denum-res201num)-&
+				v=(dlog(the01(2))+(1/the01(1)))*res2denum +&
+				res2thenum-dlog(the01(2))*(res2denum-res201num)-&
 				res2the01
 				res1(nweib)=v/res2denum
 				res1(nweib)=res1(nweib)+troncweib01011
 				
 				res1((nvamax+iter))=&
-				LOG(the01(2))*2/the01(1)*res2denum+&
+				dlog(the01(2))*2/the01(1)*res2denum+&
 				res2thenum*2/the01(1)+&
-				(LOG(the01(2))**2)*res2denum+&
-				LOG(the01(2))*2*res2thenum+&
-				res2thenumsquare-3*(LOG(the01(2))**2)* &
+				(dlog(the01(2))**2)*res2denum+&
+				dlog(the01(2))*2*res2thenum+&
+				res2thenumsquare-3*(dlog(the01(2))**2)* &
 				(res2denum-res201num)-&
-				LOG(the01(2))*6*res2the01-3*res2the0101square-&
-				LOG(the01(2))*2/the01(1)*(res2denum-res201num)- &
+				dlog(the01(2))*6*res2the01-3*res2the0101square-&
+				dlog(the01(2))*2/the01(1)*(res2denum-res201num)- &
 				res2the01*2/the01(1)+ &
-				(LOG(the01(2))**2)*res20101numbis+&
-				LOG(the01(2))*2*res2the0101+&
+				(dlog(the01(2))**2)*res20101numbis+&
+				dlog(the01(2))*2*res2the0101+&
 				res2the0101dsquare
 				
 				res1((nvamax+iter))=&
@@ -23873,17 +23894,17 @@ subroutine derivaweiballparadiag(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 				iter = iter + 1
 				nweib = nweib + 1
 				
-				v=-LOG(the02(2))*res202num-&
+				v=-dlog(the02(2))*res202num-&
 				res2the02
 				res1(nweib)=v/res2denum
 				res1(nweib)=res1(nweib)+troncweib02021
 				
 				res1((nvamax+iter))=&
-				((LOG(the02(2)))**2)*res20202num+2* &
-				LOG(the02(2))*res2the0202+&
+				((dlog(the02(2)))**2)*res20202num+2* &
+				dlog(the02(2))*res2the0202+&
 				res2the0202dsquare-&
-				((LOG(the02(2)))**2)*res202num-2* &
-				LOG(the02(2))*res2the02-&
+				((dlog(the02(2)))**2)*res202num-2* &
+				dlog(the02(2))*res2the02-&
 				res2the0202square
 				
 				res1((nvamax+iter))=&
@@ -23922,19 +23943,19 @@ subroutine derivaweiballparadiag(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 				iter = iter + 1
 				nweib = nweib + 1
 				
-				v=LOG(the12(2))*res212num+&
+				v=dlog(the12(2))*res212num+&
 				res2the12
 				res1(nweib)=v/res2denum
 				res1(nweib)=res1(nweib)+&
-				LOG(the12(2)*t3(i))*(1-gl12*vet12)+1/ &
+				dlog(the12(2)*t3(i))*(1-gl12*vet12)+1/ &
 				the12(1)
 				
 				res1((nvamax+iter))=&
-				((LOG(the12(2)))**2)*res21212num+2* &
-				LOG(the12(2))*res2the1212+&
+				((dlog(the12(2)))**2)*res21212num+2* &
+				dlog(the12(2))*res2the1212+&
 				res2the1212dsquare+&
-				((LOG(the12(2)))**2)*res212num+2* &
-				LOG(the12(2))*res2the12+&
+				((dlog(the12(2)))**2)*res212num+2* &
+				dlog(the12(2))*res2the12+&
 				res2the1212square
 				
 				res1((nvamax+iter))=&
@@ -23943,7 +23964,7 @@ subroutine derivaweiballparadiag(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 				res1((nvamax+iter))/(res2denum*res2denum)
 				res1((nvamax+iter))=&
 				res1((nvamax+iter))-&
-				((LOG(the12(2)*t3(i)))**2)*gl12*vet12-&
+				((dlog(the12(2)*t3(i)))**2)*gl12*vet12-&
 				(1/(the12(1)**2))
 				
 			endif
@@ -24058,12 +24079,12 @@ subroutine derivaweiballparadiag(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 				iter = iter + 1
 				nweib = nweib + 1
 				
-				res1(nweib)=-LOG(the01(2)*t1(i))*gl01*vet01 +&
+				res1(nweib)=-dlog(the01(2)*t1(i))*gl01*vet01 +&
 				troncweib01011+&
-				LOG(the01(2)*t1(i))+(1/the01(1))
+				dlog(the01(2)*t1(i))+(1/the01(1))
 				
 				res1((nvamax+iter))=&
-				-((LOG(the01(2)*t1(i)))**2)*gl01*vet01 +&
+				-((dlog(the01(2)*t1(i)))**2)*gl01*vet01 +&
 				troncweib01011square-1/(the01(1)**2)
 				
 			endif 
@@ -24087,11 +24108,11 @@ subroutine derivaweiballparadiag(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 			if(fix(3).eq.0)then
 				iter = iter + 1
 				nweib = nweib +1
-				res1(nweib)=-LOG(the02(2)*t1(i))*gl02*vet02 +&
+				res1(nweib)=-dlog(the02(2)*t1(i))*gl02*vet02 +&
 				troncweib02021
 				
 				res1((nvamax+iter))=&
-				-((LOG(the02(2)*t1(i)))**2)*gl02*vet02+&
+				-((dlog(the02(2)*t1(i)))**2)*gl02*vet02+&
 				troncweib02021square
 				
 			endif 
@@ -24113,21 +24134,21 @@ subroutine derivaweiballparadiag(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 			if(fix(5).eq.0)then
 				iter = iter + 1
 				nweib= nweib +1
-				res1(nweib)=LOG(the12(2)*t1(i))*gl12*vet12+&
+				res1(nweib)=dlog(the12(2)*t1(i))*gl12*vet12+&
 				(1/the12(1))
-				res1(nvamax+iter)=((LOG(the12(2)*t1(i)))**2)*gl12*vet12-&
+				res1(nvamax+iter)=((dlog(the12(2)*t1(i)))**2)*gl12*vet12-&
 				(1/(the12(1)**2))
 				
 				call fonct(t3(i),the12,ri12,gl12,su12)
 				
 				res1(nweib)=res1(nweib)-&
-				LOG(the12(2)*t3(i))*gl12*vet12+&
-				LOG(the12(2)*t3(i))
+				dlog(the12(2)*t3(i))*gl12*vet12+&
+				dlog(the12(2)*t3(i))
 				iter=iter-nva12nofix-nva02nofix-nva01nofix
 				
 				
 				res1(nvamax+iter)=res1(nvamax+iter)-&
-				((LOG(the12(2)*t3(i)))**2)*gl12*vet12
+				((dlog(the12(2)*t3(i)))**2)*gl12*vet12
 				
 				iter=iter+nva12nofix+nva02nofix+nva01nofix
 				
@@ -24238,34 +24259,34 @@ subroutine derivaweiballparadiag(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 			if(fix(1).eq.0)then
 				iter = iter + 1
 				nweib = nweib + 1
-				v=(LOG(the01(2))+(1/the01(1)))*res2denum +&
-				res2thenum-LOG(the01(2))*(res2denum-res201num)-&
+				v=(dlog(the01(2))+(1/the01(1)))*res2denum +&
+				res2thenum-dlog(the01(2))*(res2denum-res201num)-&
 				res2the01
 				
 				v=v*(su12**vet12)-&
-				LOG(the01(2)*t3(i))*gl01*vet01*(su01**vet01)*(su02**vet02)
+				dlog(the01(2)*t3(i))*gl01*vet01*(su01**vet01)*(su02**vet02)
 				
 				res1(nweib)=v/u1
 				
 				res1(nweib)=res1(nweib)+troncweib01011
 				
 				res1((nvamax+iter))=&
-				LOG(the01(2))*2/the01(1)*res2denum+&
+				dlog(the01(2))*2/the01(1)*res2denum+&
 				res2thenum*2/the01(1)+&
-				(LOG(the01(2))**2)*res2denum+&
-				LOG(the01(2))*2*res2thenum+&
-				res2thenumsquare-3*(LOG(the01(2))**2)* &
+				(dlog(the01(2))**2)*res2denum+&
+				dlog(the01(2))*2*res2thenum+&
+				res2thenumsquare-3*(dlog(the01(2))**2)* &
 				(res2denum-res201num)-&
-				LOG(the01(2))*6*res2the01-3*res2the0101square-&
-				LOG(the01(2))*2/the01(1)*(res2denum-res201num)- &
+				dlog(the01(2))*6*res2the01-3*res2the0101square-&
+				dlog(the01(2))*2/the01(1)*(res2denum-res201num)- &
 				res2the01*2/the01(1)+ &
-				(LOG(the01(2))**2)*res20101numbis+&
-				LOG(the01(2))*2*res2the0101+&
+				(dlog(the01(2))**2)*res20101numbis+&
+				dlog(the01(2))*2*res2the0101+&
 				res2the0101dsquare
 				
 				res1((nvamax+iter))=&
 				res1((nvamax+iter))*(su12**vet12)+&
-				gl01*vet01*(LOG(the01(2)*t3(i))**2)*(-1+&
+				gl01*vet01*(dlog(the01(2)*t3(i))**2)*(-1+&
 				gl01*vet01)*(su01**vet01)*(su02**vet02)
 				res1((nvamax+iter))=&
 				(res1((nvamax+iter))*u1-v*v)/(u1*u1)
@@ -24312,28 +24333,28 @@ subroutine derivaweiballparadiag(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 				iter = iter + 1
 				nweib = nweib + 1
 				
-				v=-LOG(the02(2))*res202num-&
+				v=-dlog(the02(2))*res202num-&
 				res2the02
 				
 				v=v*(su12**vet12)-&
-				LOG(the02(2)*t3(i))*gl02*vet02* &
+				dlog(the02(2)*t3(i))*gl02*vet02* &
 				(su01**vet01)*(su02**vet02)
 				
 				res1(nweib)=v/u1
 				res1(nweib)=res1(nweib)+troncweib02021
 				
 				res1((nvamax+iter))=&
-				((LOG(the02(2)))**2)*res20202num+&
-				(2*LOG(the02(2))*res2the0202)+&
+				((dlog(the02(2)))**2)*res20202num+&
+				(2*dlog(the02(2))*res2the0202)+&
 				res2the0202dsquare-&
-				((LOG(the02(2)))**2)*res202num-&
-				(2*LOG(the02(2))*res2the02)-&
+				((dlog(the02(2)))**2)*res202num-&
+				(2*dlog(the02(2))*res2the02)-&
 				res2the0202square
 				
 				res1((nvamax+iter))=&
 				res1((nvamax+iter))*(su12**vet12)+&
 				gl02*vet02*(su01**vet01)*(su02**vet02)* &
-				(LOG(the02(2)*t3(i))**2)*(gl02*vet02-1)
+				(dlog(the02(2)*t3(i))**2)*(gl02*vet02-1)
 				
 				res1((nvamax+iter))=&
 				res1((nvamax+iter))*u1 -v*v
@@ -24383,27 +24404,27 @@ subroutine derivaweiballparadiag(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 				iter = iter + 1
 				nweib = nweib + 1
 				
-				v=LOG(the12(2))*res212num+&
+				v=dlog(the12(2))*res212num+&
 				res2the12
 				v=v*(su12**vet12)-&
-				LOG(the12(2)*t3(i))*gl12*vet12* &
+				dlog(the12(2)*t3(i))*gl12*vet12* &
 				(su12**vet12)*res2denum
 				
 				res1(nweib)=v/u1
 				
 				res1((nvamax+iter))=&
-				((LOG(the12(2)))**2)* &
-				res21212num+2*LOG(the12(2))*res2the1212+&
+				((dlog(the12(2)))**2)* &
+				res21212num+2*dlog(the12(2))*res2the1212+&
 				res2the1212dsquare+&
-				((LOG(the12(2)))**2)* &
-				res212num+2*LOG(the12(2))*res2the12+&
+				((dlog(the12(2)))**2)* &
+				res212num+2*dlog(the12(2))*res2the12+&
 				res2the1212square
 				
 				res1((nvamax+iter))=&
 				res1((nvamax+iter))*(su12**vet12)+&
-				gl12*vet12*(su12**vet12)*LOG(the12(2)* &
-				t3(i))*(-2*(LOG(the12(2))*res212num+&
-				res2the12)-LOG(the12(2)*t3(i))*res2denum* &
+				gl12*vet12*(su12**vet12)*dlog(the12(2)* &
+				t3(i))*(-2*(dlog(the12(2))*res212num+&
+				res2the12)-dlog(the12(2)*t3(i))*res2denum* &
 				(1-gl12*vet12))
 				
 				res1((nvamax+iter))=&
@@ -24540,11 +24561,11 @@ subroutine derivaweiballparadiag(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 				iter = iter + 1
 				nweib = nweib + 1
 				
-				res1(nweib)=-LOG(the01(2)*t1(i))*gl01*vet01 +&
+				res1(nweib)=-dlog(the01(2)*t1(i))*gl01*vet01 +&
 				troncweib01011
 				
 				res1((nvamax+iter))=&
-				-((LOG(the01(2)*t1(i)))**2)*gl01*vet01 +&
+				-((dlog(the01(2)*t1(i)))**2)*gl01*vet01 +&
 				troncweib01011square
 				
 				
@@ -24568,11 +24589,11 @@ subroutine derivaweiballparadiag(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 			if(fix(3).eq.0)then
 				iter = iter + 1
 				nweib = nweib +1
-				res1(nweib)=-LOG(the02(2)*t1(i))*gl02*vet02 +&
-				troncweib02021+log(the02(2)*t1(i))+1/the02(1)
+				res1(nweib)=-dlog(the02(2)*t1(i))*gl02*vet02 +&
+				troncweib02021+dlog(the02(2)*t1(i))+1/the02(1)
 				
 				res1((nvamax+iter))=&
-				-((LOG(the02(2)*t1(i)))**2)*gl02*vet02+&
+				-((dlog(the02(2)*t1(i)))**2)*gl02*vet02+&
 				troncweib02021square-1/(the02(1)**2)
 				
 				
@@ -24689,13 +24710,13 @@ subroutine derivaweiballparadiag(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 			if(fix(1).eq.0)then
 				iter = iter + 1
 				nweib = nweib + 1
-				v=(LOG(the01(2))+(1/the01(1)))*res2denum +&
-				res2thenum-LOG(the01(2))*(res2denum-res201num)-&
+				v=(dlog(the01(2))+(1/the01(1)))*res2denum +&
+				res2thenum-dlog(the01(2))*(res2denum-res201num)-&
 				res2the01
 				
 				
 				v=v*(su12**vet12)*ri12*vet12-&
-				LOG(the01(2)*t3(i))*gl01*vet01*(su01**vet01)* &
+				dlog(the01(2)*t3(i))*gl01*vet01*(su01**vet01)* &
 				ri02*vet02*(su02**vet02)
 				
 				res1(nweib)=v/u1
@@ -24704,22 +24725,22 @@ subroutine derivaweiballparadiag(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 				
 				
 				res1((nvamax+iter))=&
-				LOG(the01(2))*2/the01(1)*res2denum+&
+				dlog(the01(2))*2/the01(1)*res2denum+&
 				res2thenum*2/the01(1)+&
-				(LOG(the01(2))**2)*res2denum+&
-				LOG(the01(2))*2*res2thenum+&
-				res2thenumsquare-3*(LOG(the01(2))**2)* &
+				(dlog(the01(2))**2)*res2denum+&
+				dlog(the01(2))*2*res2thenum+&
+				res2thenumsquare-3*(dlog(the01(2))**2)* &
 				(res2denum-res201num)-&
-				LOG(the01(2))*6*res2the01-3*res2the0101square-&
-				LOG(the01(2))*2/the01(1)*(res2denum-res201num)- &
+				dlog(the01(2))*6*res2the01-3*res2the0101square-&
+				dlog(the01(2))*2/the01(1)*(res2denum-res201num)- &
 				res2the01*2/the01(1)+ &
-				(LOG(the01(2))**2)*res20101numbis+&
-				LOG(the01(2))*2*res2the0101+&
+				(dlog(the01(2))**2)*res20101numbis+&
+				dlog(the01(2))*2*res2the0101+&
 				res2the0101dsquare
 				
 				res1((nvamax+iter))=&
 				res1((nvamax+iter))*(su12**vet12)*ri12*vet12+&
-				gl01*vet01*(LOG(the01(2)*t3(i))**2)*(-1+&
+				gl01*vet01*(dlog(the01(2)*t3(i))**2)*(-1+&
 				gl01*vet01)*(su01**vet01)*(su02**vet02)*ri02*vet02
 				
 				res1((nvamax+iter))=&
@@ -24769,34 +24790,34 @@ subroutine derivaweiballparadiag(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 				iter = iter + 1
 				nweib = nweib + 1
 				
-				v=-LOG(the02(2))*res202num-&
+				v=-dlog(the02(2))*res202num-&
 				res2the02
 				
 				v=v*(su12**vet12)*ri12*vet12+&
 				ri02*vet02*(su01**vet01)*(su02**vet02)* &
-				(LOG(the02(2)*t3(i))+&
+				(dlog(the02(2)*t3(i))+&
 				(1/the02(1))-&
-				gl02*vet02*LOG(the02(2)*t3(i)))
+				gl02*vet02*dlog(the02(2)*t3(i)))
 				
 				res1(nweib)=v/u1
 				res1(nweib)=res1(nweib)+troncweib02021
 				res1((nvamax+iter))=&
-				((LOG(the02(2)))**2)* &
-				res20202num+2*LOG(the02(2))*res2the0202+&
+				((dlog(the02(2)))**2)* &
+				res20202num+2*dlog(the02(2))*res2the0202+&
 				res2the0202dsquare-&
-				((LOG(the02(2)))**2)* &
-				res202num-2*LOG(the02(2))*res2the02-&
+				((dlog(the02(2)))**2)* &
+				res202num-2*dlog(the02(2))*res2the02-&
 				res2the0202square
 				
 				res1((nvamax+iter))=&
 				res1((nvamax+iter))* &
 				(su12**vet12)*ri12*vet12+&
 				ri02*vet02*(su01**vet01)*(su02**vet02)* &
-				(((LOG(the02(2)*t3(i))+&
+				(((dlog(the02(2)*t3(i))+&
 				(1/the02(1))-&
-				gl02*vet02*LOG(the02(2)*t3(i)))**2)-&
+				gl02*vet02*dlog(the02(2)*t3(i)))**2)-&
 				((1/(the02(1)**2))+&
-				(LOG(the02(2)*t3(i))**2)*gl02*vet02))
+				(dlog(the02(2)*t3(i))**2)*gl02*vet02))
 				
 				res1((nvamax+iter))=&
 				res1((nvamax+iter))*u1 -v*v
@@ -24849,37 +24870,37 @@ subroutine derivaweiballparadiag(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve02
 				iter = iter + 1
 				nweib = nweib + 1
 				
-				v=LOG(the12(2))*res212num+&
+				v=dlog(the12(2))*res212num+&
 				res2the12
 				v=v*(su12**vet12)*ri12*vet12+&
 				ri12*vet12*(su12**vet12)*res2denum* &
-				(LOG(the12(2)*t3(i))+&
+				(dlog(the12(2)*t3(i))+&
 				(1/the12(1))-&
-				LOG(the12(2)*t3(i))*gl12*vet12)
+				dlog(the12(2)*t3(i))*gl12*vet12)
 				
 				res1(nweib)=v/u1
 			
 				res1((nvamax+iter))=&
-				((LOG(the12(2)))**2)* &
-				res21212num+2*LOG(the12(2))*res2the1212+&
+				((dlog(the12(2)))**2)* &
+				res21212num+2*dlog(the12(2))*res2the1212+&
 				res2the1212dsquare+&
-				((LOG(the12(2)))**2)* &
-				res212num+2*LOG(the12(2))*res2the12+&
+				((dlog(the12(2)))**2)* &
+				res212num+2*dlog(the12(2))*res2the12+&
 				res2the1212square
 				
 				res1((nvamax+iter))=&
 				res1((nvamax+iter))*(su12**vet12)*ri12*vet12+&
 				ri12*vet12*(su12**vet12)* &
-				(LOG(the12(2)*t3(i)) +&
+				(dlog(the12(2)*t3(i)) +&
 				(1/the12(1))-&
-				LOG(the12(2)*t3(i))*gl12*vet12)* &
-				(2*(LOG(the12(2))*res212num+&
-				res2the12)+res2denum*(LOG(the12(2)*t3(i))+&
+				dlog(the12(2)*t3(i))*gl12*vet12)* &
+				(2*(dlog(the12(2))*res212num+&
+				res2the12)+res2denum*(dlog(the12(2)*t3(i))+&
 				(1/the12(1))-&
-				LOG(the12(2)*t3(i))*gl12*vet12))-&
+				dlog(the12(2)*t3(i))*gl12*vet12))-&
 				ri12*vet12*(su12**vet12)*res2denum* &
 				((1/(the12(1)**2))+&
-				(LOG(the12(2)*t3(i))**2)*gl12*vet12)
+				(dlog(the12(2)*t3(i))**2)*gl12*vet12)
 				
 				res1((nvamax+iter))=&
 				res1((nvamax+iter))*u1 -v*v
@@ -25204,9 +25225,9 @@ subroutine derivaweibfirstderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020
 				call fonct(t0(i),the02,ri02,gl02,su02)
 				
                             
-							troncweib01011=gl01*vet01*LOG(the01(2)*t0(i))
+							troncweib01011=gl01*vet01*dlog(the01(2)*t0(i))
 							troncweib01012=the01(1)*gl01*vet01/the01(2)
-							troncweib02021=LOG(the02(2)*t0(i))*gl02*vet02
+							troncweib02021=dlog(the02(2)*t0(i))*gl02*vet02
 							troncweib02022=&
 							the02(1)*gl02*vet02/the02(2)
 							
@@ -25233,7 +25254,7 @@ subroutine derivaweibfirstderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020
 			nweib= 0
 			if(fix(1).eq.0)then
 				nweib = nweib + 1
-				res1(nweib)=-LOG(the01(2)*t1(i))*gl01*vet01 +&
+				res1(nweib)=-dlog(the01(2)*t1(i))*gl01*vet01 +&
 				troncweib01011
 			endif 
 			
@@ -25245,7 +25266,7 @@ subroutine derivaweibfirstderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020
 			
 			if(fix(3).eq.0)then
 				nweib = nweib +1
-				res1(nweib)=-LOG(the02(2)*t1(i))*gl02*vet02 +&
+				res1(nweib)=-dlog(the02(2)*t1(i))*gl02*vet02 +&
 				troncweib02021
 			endif 
 			
@@ -25280,8 +25301,8 @@ subroutine derivaweibfirstderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020
 			nweib = 0
 			if(fix(1).eq.0)then
 				nweib = nweib + 1
-				v=(LOG(the01(2))+(1/the01(1)))*res2denum +&
-				res2thenum-LOG(the01(2))*(res2denum-res201num)-&
+				v=(dlog(the01(2))+(1/the01(1)))*res2denum +&
+				res2thenum-dlog(the01(2))*(res2denum-res201num)-&
 				res2the01
 				res1(nweib)=v/res2denum
 				
@@ -25302,7 +25323,7 @@ subroutine derivaweibfirstderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020
 			if(fix(3).eq.0)then
 				nweib = nweib + 1
 				
-				v=-LOG(the02(2))*res202num-&
+				v=-dlog(the02(2))*res202num-&
 				res2the02
 				res1(nweib)=v/res2denum
 				res1(nweib)=res1(nweib)+ &
@@ -25321,11 +25342,11 @@ subroutine derivaweibfirstderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020
 			if(fix(5).eq.0)then
 				nweib = nweib + 1
 				
-				v=LOG(the12(2))*res212num+&
+				v=dlog(the12(2))*res212num+&
 				res2the12
 				res1(nweib)=v/res2denum
 				res1(nweib)=res1(nweib)-&
-				LOG(the12(2)*t3(i))*gl12*vet12
+				dlog(the12(2)*t3(i))*gl12*vet12
 				
 			endif
 
@@ -25350,9 +25371,9 @@ subroutine derivaweibfirstderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020
 			if(fix(1).eq.0)then
 				nweib = nweib + 1
 				
-				res1(nweib)=-LOG(the01(2)*t1(i))*gl01*vet01 +&
+				res1(nweib)=-dlog(the01(2)*t1(i))*gl01*vet01 +&
 				troncweib01011+&
-				LOG(the01(2)*t1(i))+(1/the01(1))
+				dlog(the01(2)*t1(i))+(1/the01(1))
 				
 				endif 
 			
@@ -25367,7 +25388,7 @@ subroutine derivaweibfirstderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020
 			
 			if(fix(3).eq.0)then
 				nweib = nweib +1
-				res1(nweib)=-LOG(the02(2)*t1(i))*gl02*vet02 +&
+				res1(nweib)=-dlog(the02(2)*t1(i))*gl02*vet02 +&
 				troncweib02021
 				
 			endif 
@@ -25382,13 +25403,13 @@ subroutine derivaweibfirstderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020
 			
 			if(fix(5).eq.0)then
 				nweib= nweib +1
-				res1(nweib)=LOG(the12(2)*t1(i))*gl12*vet12
+				res1(nweib)=dlog(the12(2)*t1(i))*gl12*vet12
 				
 				
 				call fonct(t3(i),the12,ri12,gl12,su12)
 				
 				res1(nweib)=res1(nweib)-&
-				LOG(the12(2)*t3(i))*gl12*vet12
+				dlog(the12(2)*t3(i))*gl12*vet12
 				
 				call fonct(t1(i),the12,ri12,gl12,su12)
 			endif
@@ -25424,8 +25445,8 @@ subroutine derivaweibfirstderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020
 			if(fix(1).eq.0)then
 				nweib = nweib + 1
 				
-				v=(LOG(the01(2))+(1/the01(1)))*res2denum +&
-				res2thenum-LOG(the01(2))*(res2denum-res201num)-&
+				v=(dlog(the01(2))+(1/the01(1)))*res2denum +&
+				res2thenum-dlog(the01(2))*(res2denum-res201num)-&
 				res2the01
 				res1(nweib)=v/res2denum
 				res1(nweib)=res1(nweib)+troncweib01011
@@ -25444,7 +25465,7 @@ subroutine derivaweibfirstderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020
 			if(fix(3).eq.0)then
 				nweib = nweib + 1
 				
-				v=-LOG(the02(2))*res202num-&
+				v=-dlog(the02(2))*res202num-&
 				res2the02
 				res1(nweib)=v/res2denum
 				res1(nweib)=res1(nweib)+troncweib02021
@@ -25460,11 +25481,11 @@ subroutine derivaweibfirstderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020
 			if(fix(5).eq.0)then
 				nweib = nweib + 1
 				
-				v=LOG(the12(2))*res212num+&
+				v=dlog(the12(2))*res212num+&
 				res2the12
 				res1(nweib)=v/res2denum
 				res1(nweib)=res1(nweib)+&
-				LOG(the12(2)*t3(i))*(1-gl12*vet12)+1/ &
+				dlog(the12(2)*t3(i))*(1-gl12*vet12)+1/ &
 				the12(1)
 				
 			endif
@@ -25491,9 +25512,9 @@ subroutine derivaweibfirstderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020
 			if(fix(1).eq.0)then
 				nweib = nweib + 1
 				
-				res1(nweib)=-LOG(the01(2)*t1(i))*gl01*vet01 +&
+				res1(nweib)=-dlog(the01(2)*t1(i))*gl01*vet01 +&
 				troncweib01011+&
-				LOG(the01(2)*t1(i))+(1/the01(1))
+				dlog(the01(2)*t1(i))+(1/the01(1))
 			endif 
 			
 			if(fix(2).eq.0)then
@@ -25507,7 +25528,7 @@ subroutine derivaweibfirstderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020
 		
 			if(fix(3).eq.0)then
 				nweib = nweib +1
-				res1(nweib)=-LOG(the02(2)*t1(i))*gl02*vet02 +&
+				res1(nweib)=-dlog(the02(2)*t1(i))*gl02*vet02 +&
 				troncweib02021
 			endif 
 			
@@ -25521,14 +25542,14 @@ subroutine derivaweibfirstderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020
 			
 			if(fix(5).eq.0)then
 				nweib= nweib +1
-				res1(nweib)=LOG(the12(2)*t1(i))*gl12*vet12+&
+				res1(nweib)=dlog(the12(2)*t1(i))*gl12*vet12+&
 				(1/the12(1))
 				
 				call fonct(t3(i),the12,ri12,gl12,su12)
 				
 				res1(nweib)=res1(nweib)-&
-				LOG(the12(2)*t3(i))*gl12*vet12+&
-				LOG(the12(2)*t3(i))
+				dlog(the12(2)*t3(i))*gl12*vet12+&
+				dlog(the12(2)*t3(i))
 				
 				call fonct(t1(i),the12,ri12,gl12,su12)
 			endif
@@ -25571,12 +25592,12 @@ subroutine derivaweibfirstderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020
 				
 			if(fix(1).eq.0)then
 				nweib = nweib + 1
-				v=(LOG(the01(2))+(1/the01(1)))*res2denum +&
-				res2thenum-LOG(the01(2))*(res2denum-res201num)-&
+				v=(dlog(the01(2))+(1/the01(1)))*res2denum +&
+				res2thenum-dlog(the01(2))*(res2denum-res201num)-&
 				res2the01
 				
 				v=v*(su12**vet12)-&
-				LOG(the01(2)*t3(i))*gl01*vet01*(su01**vet01)*(su02**vet02)
+				dlog(the01(2)*t3(i))*gl01*vet01*(su01**vet01)*(su02**vet02)
 				
 				res1(nweib)=v/u1
 				
@@ -25604,11 +25625,11 @@ subroutine derivaweibfirstderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020
 			if(fix(3).eq.0)then
 				nweib = nweib + 1
 				
-				v=-LOG(the02(2))*res202num-&
+				v=-dlog(the02(2))*res202num-&
 				res2the02
 				
 				v=v*(su12**vet12)-&
-				LOG(the02(2)*t3(i))*gl02*vet02* &
+				dlog(the02(2)*t3(i))*gl02*vet02* &
 				(su01**vet01)*(su02**vet02)
 				
 				res1(nweib)=v/u1
@@ -25634,10 +25655,10 @@ subroutine derivaweibfirstderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020
 			if(fix(5).eq.0)then
 				nweib = nweib + 1
 				
-				v=LOG(the12(2))*res212num+&
+				v=dlog(the12(2))*res212num+&
 				res2the12
 				v=v*(su12**vet12)-&
-				LOG(the12(2)*t3(i))*gl12*vet12* &
+				dlog(the12(2)*t3(i))*gl12*vet12* &
 				(su12**vet12)*res2denum
 				
 				res1(nweib)=v/u1
@@ -25679,13 +25700,13 @@ subroutine derivaweibfirstderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020
 			
 			if(fix(1).eq.0)then
 				nweib = nweib + 1
-				v=(LOG(the01(2))+(1/the01(1)))*res2denum +&
-				res2thenum-LOG(the01(2))*(res2denum-res201num)-&
+				v=(dlog(the01(2))+(1/the01(1)))*res2denum +&
+				res2thenum-dlog(the01(2))*(res2denum-res201num)-&
 				res2the01
 				
 				
 				v=v*(su12**vet12)*ri12*vet12-&
-				LOG(the01(2)*t3(i))*gl01*vet01*(su01**vet01)* &
+				dlog(the01(2)*t3(i))*gl01*vet01*(su01**vet01)* &
 				ri02*vet02*(su02**vet02)
 				
 				res1(nweib)=v/u1
@@ -25711,14 +25732,14 @@ subroutine derivaweibfirstderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020
 			if(fix(3).eq.0)then
 				nweib = nweib + 1
 				
-				v=-LOG(the02(2))*res202num-&
+				v=-dlog(the02(2))*res202num-&
 				res2the02
 				
 				v=v*(su12**vet12)*ri12*vet12+&
 				ri02*vet02*(su01**vet01)*(su02**vet02)* &
-				(LOG(the02(2)*t3(i))+&
+				(dlog(the02(2)*t3(i))+&
 				(1/the02(1))-&
-				gl02*vet02*LOG(the02(2)*t3(i)))
+				gl02*vet02*dlog(the02(2)*t3(i)))
 				
 				res1(nweib)=v/u1
 				res1(nweib)=res1(nweib)+troncweib02021
@@ -25740,13 +25761,13 @@ subroutine derivaweibfirstderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020
 			if(fix(5).eq.0)then
 				nweib = nweib + 1
 				
-				v=LOG(the12(2))*res212num+&
+				v=dlog(the12(2))*res212num+&
 				res2the12
 				v=v*(su12**vet12)*ri12*vet12+&
 				ri12*vet12*(su12**vet12)*res2denum* &
-				(LOG(the12(2)*t3(i))+&
+				(dlog(the12(2)*t3(i))+&
 				(1/the12(1))-&
-				LOG(the12(2)*t3(i))*gl12*vet12)
+				dlog(the12(2)*t3(i))*gl12*vet12)
 				
 				res1(nweib)=v/u1
 				
@@ -25785,7 +25806,7 @@ subroutine derivaweibfirstderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020
     end subroutine derivaweibfirstderiv
 
 !=============================================================================================  
-!======================= Calculate first derivatives of loglik with weibull baseline risk ==========
+!======================= Calculate first derivatives of dloglik with weibull baseline risk ==========
 !=============================================================================================  
 
 subroutine derivaweiballparafirstderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
@@ -26024,9 +26045,9 @@ subroutine derivaweiballparafirstderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve12
 				
                             tronc01=ve01nofix(i,:)*gl01*vet01
                         	tronc02=ve02nofix(i,:)*gl02*vet02
-							troncweib01011=gl01*vet01*LOG(the01(2)*t0(i))
+							troncweib01011=gl01*vet01*dlog(the01(2)*t0(i))
 							troncweib01012=the01(1)*gl01*vet01/the01(2)
-							troncweib02021=LOG(the02(2)*t0(i))*gl02*vet02
+							troncweib02021=dlog(the02(2)*t0(i))*gl02*vet02
 							troncweib02022=&
 							the02(1)*gl02*vet02/the02(2)
 							
@@ -26053,7 +26074,7 @@ subroutine derivaweiballparafirstderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve12
 			nweib= 0
 			if(fix(1).eq.0)then
 				nweib = nweib + 1
-				res1(nweib)=-LOG(the01(2)*t1(i))*gl01*vet01 +&
+				res1(nweib)=-dlog(the01(2)*t1(i))*gl01*vet01 +&
 				troncweib01011
 			endif 
 			
@@ -26065,7 +26086,7 @@ subroutine derivaweiballparafirstderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve12
 			
 			if(fix(3).eq.0)then
 				nweib = nweib +1
-				res1(nweib)=-LOG(the02(2)*t1(i))*gl02*vet02 +&
+				res1(nweib)=-dlog(the02(2)*t1(i))*gl02*vet02 +&
 				troncweib02021
 			endif 
 			
@@ -26119,8 +26140,8 @@ subroutine derivaweiballparafirstderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve12
 			nweib = 0
 			if(fix(1).eq.0)then
 				nweib = nweib + 1
-				v=(LOG(the01(2))+(1/the01(1)))*res2denum +&
-				res2thenum-LOG(the01(2))*(res2denum-res201num)-&
+				v=(dlog(the01(2))+(1/the01(1)))*res2denum +&
+				res2thenum-dlog(the01(2))*(res2denum-res201num)-&
 				res2the01
 				res1(nweib)=v/res2denum
 				
@@ -26140,7 +26161,7 @@ subroutine derivaweiballparafirstderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve12
 				
 			if(fix(3).eq.0)then
 				nweib = nweib + 1
-				v=-LOG(the02(2))*res202num-&
+				v=-dlog(the02(2))*res202num-&
 				res2the02
 				res1(nweib)=v/res2denum
 				res1(nweib)=res1(nweib)+ &
@@ -26159,11 +26180,11 @@ subroutine derivaweiballparafirstderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve12
 			if(fix(5).eq.0)then
 				nweib = nweib + 1
 				
-				v=LOG(the12(2))*res212num+&
+				v=dlog(the12(2))*res212num+&
 				res2the12
 				res1(nweib)=v/res2denum
 				res1(nweib)=res1(nweib)-&
-				LOG(the12(2)*t3(i))*gl12*vet12
+				dlog(the12(2)*t3(i))*gl12*vet12
 				
 			endif
 			
@@ -26222,9 +26243,9 @@ subroutine derivaweiballparafirstderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve12
 			if(fix(1).eq.0)then
 				nweib = nweib + 1
 				
-				res1(nweib)=-LOG(the01(2)*t1(i))*gl01*vet01 +&
+				res1(nweib)=-dlog(the01(2)*t1(i))*gl01*vet01 +&
 				troncweib01011+&
-				LOG(the01(2)*t1(i))+(1/the01(1))
+				dlog(the01(2)*t1(i))+(1/the01(1))
 				
 				endif 
 			
@@ -26239,7 +26260,7 @@ subroutine derivaweiballparafirstderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve12
 			
 			if(fix(3).eq.0)then
 				nweib = nweib +1
-				res1(nweib)=-LOG(the02(2)*t1(i))*gl02*vet02 +&
+				res1(nweib)=-dlog(the02(2)*t1(i))*gl02*vet02 +&
 				troncweib02021
 				
 			endif 
@@ -26253,13 +26274,13 @@ subroutine derivaweiballparafirstderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve12
 			
 			if(fix(5).eq.0)then
 				nweib= nweib +1
-				res1(nweib)=LOG(the12(2)*t1(i))*gl12*vet12
+				res1(nweib)=dlog(the12(2)*t1(i))*gl12*vet12
 				
 				
 				call fonct(t3(i),the12,ri12,gl12,su12)
 				
 				res1(nweib)=res1(nweib)-&
-				LOG(the12(2)*t3(i))*gl12*vet12
+				dlog(the12(2)*t3(i))*gl12*vet12
 				
 				call fonct(t1(i),the12,ri12,gl12,su12)
 			endif
@@ -26323,8 +26344,8 @@ subroutine derivaweiballparafirstderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve12
 			if(fix(1).eq.0)then
 				nweib = nweib + 1
 				
-				v=(LOG(the01(2))+(1/the01(1)))*res2denum +&
-				res2thenum-LOG(the01(2))*(res2denum-res201num)-&
+				v=(dlog(the01(2))+(1/the01(1)))*res2denum +&
+				res2thenum-dlog(the01(2))*(res2denum-res201num)-&
 				res2the01
 				res1(nweib)=v/res2denum
 				res1(nweib)=res1(nweib)+troncweib01011
@@ -26343,7 +26364,7 @@ subroutine derivaweiballparafirstderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve12
 			if(fix(3).eq.0)then
 				nweib = nweib + 1
 				
-				v=-LOG(the02(2))*res202num-&
+				v=-dlog(the02(2))*res202num-&
 				res2the02
 				res1(nweib)=v/res2denum
 				res1(nweib)=res1(nweib)+troncweib02021
@@ -26360,11 +26381,11 @@ subroutine derivaweiballparafirstderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve12
 			if(fix(5).eq.0)then
 				nweib = nweib + 1
 				
-				v=LOG(the12(2))*res212num+&
+				v=dlog(the12(2))*res212num+&
 				res2the12
 				res1(nweib)=v/res2denum
 				res1(nweib)=res1(nweib)+&
-				LOG(the12(2)*t3(i))*(1-gl12*vet12)+1/ &
+				dlog(the12(2)*t3(i))*(1-gl12*vet12)+1/ &
 				the12(1)
 				
 			endif
@@ -26431,9 +26452,9 @@ subroutine derivaweiballparafirstderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve12
 			if(fix(1).eq.0)then
 				nweib = nweib + 1
 				
-				res1(nweib)=-LOG(the01(2)*t1(i))*gl01*vet01 +&
+				res1(nweib)=-dlog(the01(2)*t1(i))*gl01*vet01 +&
 				troncweib01011+&
-				LOG(the01(2)*t1(i))+(1/the01(1))
+				dlog(the01(2)*t1(i))+(1/the01(1))
 			endif 
 			
 			if(fix(2).eq.0)then
@@ -26447,7 +26468,7 @@ subroutine derivaweiballparafirstderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve12
 			
 			if(fix(3).eq.0)then
 				nweib = nweib +1
-				res1(nweib)=-LOG(the02(2)*t1(i))*gl02*vet02 +&
+				res1(nweib)=-dlog(the02(2)*t1(i))*gl02*vet02 +&
 				troncweib02021
 			endif 
 			
@@ -26461,14 +26482,14 @@ subroutine derivaweiballparafirstderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve12
 			
 			if(fix(5).eq.0)then
 				nweib= nweib +1
-				res1(nweib)=LOG(the12(2)*t1(i))*gl12*vet12+&
+				res1(nweib)=dlog(the12(2)*t1(i))*gl12*vet12+&
 				(1/the12(1))
 				
 				call fonct(t3(i),the12,ri12,gl12,su12)
 				
 				res1(nweib)=res1(nweib)-&
-				LOG(the12(2)*t3(i))*gl12*vet12+&
-				LOG(the12(2)*t3(i))
+				dlog(the12(2)*t3(i))*gl12*vet12+&
+				dlog(the12(2)*t3(i))
 				
 				call fonct(t1(i),the12,ri12,gl12,su12)
 			endif
@@ -26537,12 +26558,12 @@ subroutine derivaweiballparafirstderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve12
 				
 			if(fix(1).eq.0)then
 				nweib = nweib + 1
-				v=(LOG(the01(2))+(1/the01(1)))*res2denum +&
-				res2thenum-LOG(the01(2))*(res2denum-res201num)-&
+				v=(dlog(the01(2))+(1/the01(1)))*res2denum +&
+				res2thenum-dlog(the01(2))*(res2denum-res201num)-&
 				res2the01
 				
 				v=v*(su12**vet12)-&
-				LOG(the01(2)*t3(i))*gl01*vet01*(su01**vet01)*(su02**vet02)
+				dlog(the01(2)*t3(i))*gl01*vet01*(su01**vet01)*(su02**vet02)
 				
 				res1(nweib)=v/u1
 				
@@ -26569,11 +26590,11 @@ subroutine derivaweiballparafirstderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve12
 			if(fix(3).eq.0)then
 				nweib = nweib + 1
 				
-				v=-LOG(the02(2))*res202num-&
+				v=-dlog(the02(2))*res202num-&
 				res2the02
 				
 				v=v*(su12**vet12)-&
-				LOG(the02(2)*t3(i))*gl02*vet02* &
+				dlog(the02(2)*t3(i))*gl02*vet02* &
 				(su01**vet01)*(su02**vet02)
 				
 				res1(nweib)=v/u1
@@ -26599,10 +26620,10 @@ subroutine derivaweiballparafirstderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve12
 			if(fix(5).eq.0)then
 				nweib = nweib + 1
 				
-				v=LOG(the12(2))*res212num+&
+				v=dlog(the12(2))*res212num+&
 				res2the12
 				v=v*(su12**vet12)-&
-				LOG(the12(2)*t3(i))*gl12*vet12* &
+				dlog(the12(2)*t3(i))*gl12*vet12* &
 				(su12**vet12)*res2denum
 				
 				res1(nweib)=v/u1
@@ -26687,12 +26708,12 @@ subroutine derivaweiballparafirstderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve12
 			
 			if(fix(1).eq.0)then
 				nweib = nweib + 1
-				v=(LOG(the01(2))+(1/the01(1)))*res2denum +&
-				res2thenum-LOG(the01(2))*(res2denum-res201num)-&
+				v=(dlog(the01(2))+(1/the01(1)))*res2denum +&
+				res2thenum-dlog(the01(2))*(res2denum-res201num)-&
 				res2the01
 				
 				v=v*(su12**vet12)*ri12*vet12-&
-				LOG(the01(2)*t3(i))*gl01*vet01*(su01**vet01)* &
+				dlog(the01(2)*t3(i))*gl01*vet01*(su01**vet01)* &
 				ri02*vet02*(su02**vet02)
 				
 				res1(nweib)=v/u1
@@ -26717,14 +26738,14 @@ subroutine derivaweiballparafirstderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve12
 			if(fix(3).eq.0)then
 				nweib = nweib + 1
 				
-				v=-LOG(the02(2))*res202num-&
+				v=-dlog(the02(2))*res202num-&
 				res2the02
 				
 				v=v*(su12**vet12)*ri12*vet12+&
 				ri02*vet02*(su01**vet01)*(su02**vet02)* &
-				(LOG(the02(2)*t3(i))+&
+				(dlog(the02(2)*t3(i))+&
 				(1/the02(1))-&
-				gl02*vet02*LOG(the02(2)*t3(i)))
+				gl02*vet02*dlog(the02(2)*t3(i)))
 				
 				res1(nweib)=v/u1
 				res1(nweib)=res1(nweib)+troncweib02021
@@ -26747,13 +26768,13 @@ subroutine derivaweiballparafirstderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve12
 			if(fix(5).eq.0)then
 				nweib = nweib + 1
 				
-				v=LOG(the12(2))*res212num+&
+				v=dlog(the12(2))*res212num+&
 				res2the12
 				v=v*(su12**vet12)*ri12*vet12+&
 				ri12*vet12*(su12**vet12)*res2denum* &
-				(LOG(the12(2)*t3(i))+&
+				(dlog(the12(2)*t3(i))+&
 				(1/the12(1))-&
-				LOG(the12(2)*t3(i))*gl12*vet12)
+				dlog(the12(2)*t3(i))*gl12*vet12)
 				
 				res1(nweib)=v/u1
 				
@@ -26843,7 +26864,7 @@ subroutine derivaweiballparafirstderiv(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve12
     end subroutine derivaweiballparafirstderiv
 
 !=============================================================================================  
-!======================= Calculate first derivatives of loglik with weibull baseline risk ==========
+!======================= Calculate first derivatives of dloglik with weibull baseline risk ==========
 !======================= only beta parameters ========================================================
 !=============================================================================================  
 
@@ -27375,7 +27396,7 @@ subroutine firstderivaweib(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
     end subroutine firstderivaweib
 
 !=============================================================================================  
-!======================= Calculate derivatives of loglik with weibull baseline risk ==========
+!======================= Calculate derivatives of dloglik with weibull baseline risk ==========
 !======================= only diagonal terms for second derivatives of beta parameters             ==========
 !=============================================================================================  
 
@@ -28158,7 +28179,7 @@ subroutine derivaweibdiag(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve020,&
     end subroutine derivaweibdiag
 
 !=============================================================================================  
-!======================= Calculate derivatives of loglik with weibull baseline risk ==========
+!======================= Calculate derivatives of dloglik with weibull baseline risk ==========
 !======================= only diagonal terms for second derivatives of beta parameters             ==========
 !======================= in semi markov =======================================================
 !=============================================================================================  
@@ -28908,7 +28929,7 @@ subroutine derivaweibdiagsemimark(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve0
 
 
 !=============================================================================================  
-!======================= Calculate derivatives of loglik with M-splines baseline risk ========
+!======================= Calculate derivatives of dloglik with M-splines baseline risk ========
 !======================= first and seconds ===================================================
  !======================= only beta parameters ========================================================
 !============================================================================================= 
@@ -30065,7 +30086,7 @@ subroutine derivaweibdiagsemimark(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve0
 
 
 !=============================================================================================  
-!======================= Calculate derivatives of loglik with M-splines baseline risk ========
+!======================= Calculate derivatives of dloglik with M-splines baseline risk ========
 !======================= first and seconds ===================================================
  !======================= only beta parameters =====================================================
  !======================== and semi markov ===================================================
@@ -31164,7 +31185,7 @@ subroutine derivaweibdiagsemimark(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve0
 
 
 !=============================================================================================  
-!======================= Calculate first derivatives of loglik with M-splines baseline risk ==
+!======================= Calculate first derivatives of dloglik with M-splines baseline risk ==
 !======================= only beta parameters ========================================================
 !============================================================================================= 
 
@@ -31712,7 +31733,7 @@ subroutine derivaweibdiagsemimark(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve0
 
 
 !=============================================================================================  
-!======================= Calculate derivatives of loglik with M-splines baseline risk ========
+!======================= Calculate derivatives of dloglik with M-splines baseline risk ========
 !======================= only diagonal terms of hessian of beta parameters ======================================
 !============================================================================================= 
 
@@ -32491,7 +32512,7 @@ subroutine derivaweibdiagsemimark(b0,np0,npar0,bfix0,fix0,c0,no0,ve010,ve120,ve0
 
 
 !=============================================================================================  
-!======================= Calculate derivatives of loglik with M-splines baseline risk ========
+!======================= Calculate derivatives of dloglik with M-splines baseline risk ========
 !======================= only diagonal terms of hessian of beta parameters ===================
 !======================= for semi markov case ================================================
 !============================================================================================= 
@@ -34085,7 +34106,7 @@ resi1212num,v01,v02,v12,z01,z02,z12,n01,n02,n12)
           end subroutine qgausssplinebetasecondderiv
 	
 !=============================================================================================  
-!======================= Calculate first derivatives of loglik of splines baseline parameters ==========
+!======================= Calculate first derivatives of dloglik of splines baseline parameters ==========
 !=============================================================================================  
 
 
@@ -34554,7 +34575,7 @@ subroutine derivasplinesfirstderiv(b0,np0,npar0,bfix0,fix0,zi010,zi120,&
 
 
 !=============================================================================================  
-!======================= Calculate second derivatives of loglik of splines baseline parameters ==========
+!======================= Calculate second derivatives of dloglik of splines baseline parameters ==========
 !=============================================================================================  
 
 
@@ -35528,14 +35549,14 @@ module my_functions
 contains
 
 
-subroutine fonctdepfirstderiv(x,p,risq,glam,surv,inty,y,logy,nY)
+subroutine fonctdepfirstderiv(x,p,risq,glam,surv,inty,y,dlogy,nY)
 
         implicit none
         double precision,dimension(2)::p
 		double precision,dimension(16)::y
         double precision::x,surv,risq,glam,ri,gl,su,gl1,gl2
 		integer::j,jtw,jtwm1,nY
-		double precision::logy(:,:)
+		double precision::dlogy(:,:)
 		double precision,intent(out)::inty(:)
 		double precision::inty1(nY),inty2(nY)
         double precision::a,b,dx,xm,xr,&
@@ -35589,7 +35610,7 @@ subroutine fonctdepfirstderiv(x,p,risq,glam,surv,inty,y,logy,nY)
         call fonctrisq(xm,p,ri)
         
 		glam = ri*y(1)*wgk(8)   !integral over 0 to x of base risk
-        inty=glam*logy(1,1:nY)
+        inty=glam*dlogy(1,1:nY)
 
 		  if(a.eq.b)then
                surv = 1.d0
@@ -35606,11 +35627,11 @@ subroutine fonctdepfirstderiv(x,p,risq,glam,surv,inty,y,logy,nY)
                xx = xm+dx
                call fonctrisq(xx,p,ri)
                gl1=ri*y(3) 
-			   inty1=gl1*logy(3,1:nY) 
+			   inty1=gl1*dlogy(3,1:nY) 
                xx = xm-dx
                call fonctrisq(xx,p,ri)
                gl2=ri*y(2)   ! svgrd valeurs fct f a drte du centre
-			   inty2=gl2*logy(2,1:nY) 
+			   inty2=gl2*dlogy(2,1:nY) 
 	       
 		  glam=glam+wgk(jtwm1)*(gl1+gl2)
 		  inty=inty+wgk(jtwm1)*(inty1+inty2)
@@ -35622,11 +35643,11 @@ subroutine fonctdepfirstderiv(x,p,risq,glam,surv,inty,y,logy,nY)
                xx = xm+dx
                call fonctrisq(xx,p,ri)
                gl1=ri*y(5)
-			   inty1=gl1*logy(5,1:nY) 
+			   inty1=gl1*dlogy(5,1:nY) 
                xx = xm-dx
                call fonctrisq(xx,p,ri)
                gl2=ri*y(4)   ! svgrd valeurs fct f a drte du centre
-			   inty2=gl2*logy(4,1:nY) 
+			   inty2=gl2*dlogy(4,1:nY) 
 	       
 		  glam=glam+wgk(jtwm1)*(gl1+gl2)
 		  inty=inty+wgk(jtwm1)*(inty1+inty2)
@@ -35636,11 +35657,11 @@ subroutine fonctdepfirstderiv(x,p,risq,glam,surv,inty,y,logy,nY)
                xx = xm+dx
                call fonctrisq(xx,p,ri)
                gl1=ri*y(7) 
-			   inty1=gl1*logy(7,1:nY) 
+			   inty1=gl1*dlogy(7,1:nY) 
                xx = xm-dx
                call fonctrisq(xx,p,ri)
                gl2=ri*y(6)   ! svgrd valeurs fct f a drte du centre
-			   inty2=gl2*logy(6,1:nY) 
+			   inty2=gl2*dlogy(6,1:nY) 
 	       
 		  glam=glam+wgk(jtwm1)*(gl1+gl2)
 		  inty=inty+wgk(jtwm1)*(inty1+inty2)
@@ -35653,11 +35674,11 @@ subroutine fonctdepfirstderiv(x,p,risq,glam,surv,inty,y,logy,nY)
                xx = xm+dx
                call fonctrisq(xx,p,ri)
                gl1=ri*y(9)
-			   inty1=gl1*logy(9,1:nY) 
+			   inty1=gl1*dlogy(9,1:nY) 
                xx = xm-dx
                call fonctrisq(xx,p,ri)
                gl2=ri*y(8)   ! svgrd valeurs fct f a drte du centre
-			   inty2=gl2*logy(8,1:nY) 
+			   inty2=gl2*dlogy(8,1:nY) 
 	       
 		   glam=glam+wgk(jtwm1)*(gl1+gl2)
 		   inty=inty+wgk(jtwm1)*(inty1+inty2)
@@ -35667,11 +35688,11 @@ subroutine fonctdepfirstderiv(x,p,risq,glam,surv,inty,y,logy,nY)
                xx = xm+dx
                call fonctrisq(xx,p,ri)
 				gl1=ri*y(11) 
-				inty1=gl1*logy(11,1:nY) 
+				inty1=gl1*dlogy(11,1:nY) 
                xx = xm-dx
                call fonctrisq(xx,p,ri)
 				gl2=ri*y(10)   ! svgrd valeurs fct f a drte du centre
-				inty2=gl2*logy(10,1:nY) 
+				inty2=gl2*dlogy(10,1:nY) 
 	       
 			glam=glam+wgk(jtwm1)*(gl1+gl2)
 			inty=inty+wgk(jtwm1)*(inty1+inty2)
@@ -35683,11 +35704,11 @@ subroutine fonctdepfirstderiv(x,p,risq,glam,surv,inty,y,logy,nY)
                xx = xm+dx
                call fonctrisq(xx,p,ri)
                gl1=ri*y(13) 
-			   inty1=gl1*logy(13,1:nY) 
+			   inty1=gl1*dlogy(13,1:nY) 
                xx = xm-dx
                call fonctrisq(xx,p,ri)
                gl2=ri*y(12)   ! svgrd valeurs fct f a drte du centre
-			   inty2=gl2*logy(12,1:nY) 
+			   inty2=gl2*dlogy(12,1:nY) 
 	       
 		 glam=glam+wgk(jtwm1)*(gl1+gl2)
 		 inty=inty+wgk(jtwm1)*(inty1+inty2)
@@ -35697,11 +35718,11 @@ subroutine fonctdepfirstderiv(x,p,risq,glam,surv,inty,y,logy,nY)
                xx = xm+dx
                call fonctrisq(xx,p,ri)
 			   gl1=ri*y(15) 
-			   inty1=gl1*logy(15,1:nY) 
+			   inty1=gl1*dlogy(15,1:nY) 
                xx = xm-dx
                call fonctrisq(xx,p,ri)
 			   gl2=ri*y(14)   ! svgrd valeurs fct f a drte du centre
-			   inty2=gl2*logy(14,1:nY) 
+			   inty2=gl2*dlogy(14,1:nY) 
 	       
 		glam=glam+wgk(jtwm1)*(gl1+gl2)
 		inty=inty+wgk(jtwm1)*(inty1+inty2)
@@ -35722,7 +35743,7 @@ subroutine fonctdepfirstderiv(x,p,risq,glam,surv,inty,y,logy,nY)
 
 end subroutine fonctdepfirstderiv
 
-subroutine fonctdep0firstderiv(x,p,glam,inty,y,logy,nY)
+subroutine fonctdep0firstderiv(x,p,glam,inty,y,dlogy,nY)
 
         implicit none
 
@@ -35734,7 +35755,7 @@ subroutine fonctdep0firstderiv(x,p,glam,inty,y,logy,nY)
 		double precision,dimension(8)::xgk,wgk
 	    double precision,dimension(4)::wg
          double precision::xx
-		 double precision::logy(15,nY)
+		 double precision::dlogy(15,nY)
 		 double precision::inty(:),inty1(nY),inty2(nY)
          save wgk,xgk
 		 
@@ -35783,7 +35804,7 @@ subroutine fonctdep0firstderiv(x,p,glam,inty,y,logy,nY)
         call fonctrisq(xm,p,ri)
         
 		glam = ri*y(1)*wgk(8)   !integral over 0 to x of base risk
-		inty=glam*logy(1,:)
+		inty=glam*dlogy(1,:)
        
 
 		  if(a.eq.b)then
@@ -35798,11 +35819,11 @@ subroutine fonctdep0firstderiv(x,p,glam,inty,y,logy,nY)
                xx = xm+dx
                call fonctrisq(xx,p,ri)
                gl1=ri*y(3) 
-			   inty1=gl1*logy(3,:)
+			   inty1=gl1*dlogy(3,:)
                xx = xm-dx
                call fonctrisq(xx,p,ri)
                gl2=ri*y(2)   ! svgrd valeurs fct f a drte du centre
-			    inty2=gl2*logy(2,:)
+			    inty2=gl2*dlogy(2,:)
 				
 		  glam=glam+wgk(jtwm1)*(gl1+gl2)
 		  inty=inty+wgk(jtwm1)*(inty1+inty2)
@@ -35813,11 +35834,11 @@ subroutine fonctdep0firstderiv(x,p,glam,inty,y,logy,nY)
                xx = xm+dx
                call fonctrisq(xx,p,ri)
                gl1=ri*y(5)
-			   inty1=gl1*logy(5,:)
+			   inty1=gl1*dlogy(5,:)
                xx = xm-dx
                call fonctrisq(xx,p,ri)
                gl2=ri*y(4)   ! svgrd valeurs fct f a drte du centre
-	        inty2=gl2*logy(4,:)
+	        inty2=gl2*dlogy(4,:)
 		  glam=glam+wgk(jtwm1)*(gl1+gl2)
 		  inty=inty+wgk(jtwm1)*(inty1+inty2)
 		   
@@ -35826,11 +35847,11 @@ subroutine fonctdep0firstderiv(x,p,glam,inty,y,logy,nY)
                xx = xm+dx
                call fonctrisq(xx,p,ri)
                gl1=ri*y(7) 
-			   inty1=gl1*logy(7,:)
+			   inty1=gl1*dlogy(7,:)
                xx = xm-dx
                call fonctrisq(xx,p,ri)
                gl2=ri*y(6)   ! svgrd valeurs fct f a drte du centre
-			    inty2=gl2*logy(6,:)
+			    inty2=gl2*dlogy(6,:)
 	       
 		  glam=glam+wgk(jtwm1)*(gl1+gl2)
 		  inty=inty+wgk(jtwm1)*(inty1+inty2)
@@ -35843,11 +35864,11 @@ subroutine fonctdep0firstderiv(x,p,glam,inty,y,logy,nY)
                xx = xm+dx
                call fonctrisq(xx,p,ri)
                gl1=ri*y(9)
-			   inty1=gl1*logy(9,:)
+			   inty1=gl1*dlogy(9,:)
                xx = xm-dx
                call fonctrisq(xx,p,ri)
                gl2=ri*y(8)   ! svgrd valeurs fct f a drte du centre
-			    inty2=gl2*logy(8,:)
+			    inty2=gl2*dlogy(8,:)
 	       
 		   glam=glam+wgk(jtwm1)*(gl1+gl2)
 		   inty=inty+wgk(jtwm1)*(inty1+inty2)
@@ -35857,11 +35878,11 @@ subroutine fonctdep0firstderiv(x,p,glam,inty,y,logy,nY)
                xx = xm+dx
                call fonctrisq(xx,p,ri)
 				gl1=ri*y(11) 
-				inty1=gl1*logy(11,:)
+				inty1=gl1*dlogy(11,:)
                xx = xm-dx
                call fonctrisq(xx,p,ri)
 				gl2=ri*y(10)   ! svgrd valeurs fct f a drte du centre
-				 inty2=gl2*logy(10,:)
+				 inty2=gl2*dlogy(10,:)
 	       
 			glam=glam+wgk(jtwm1)*(gl1+gl2)
 			inty=inty+wgk(jtwm1)*(inty1+inty2)
@@ -35873,11 +35894,11 @@ subroutine fonctdep0firstderiv(x,p,glam,inty,y,logy,nY)
                xx = xm+dx
                call fonctrisq(xx,p,ri)
                gl1=ri*y(13) 
-			   inty1=gl1*logy(13,:)
+			   inty1=gl1*dlogy(13,:)
                xx = xm-dx
                call fonctrisq(xx,p,ri)
                gl2=ri*y(12)   ! svgrd valeurs fct f a drte du centre
-			    inty2=gl2*logy(12,:)
+			    inty2=gl2*dlogy(12,:)
 	       
 		 glam=glam+wgk(jtwm1)*(gl1+gl2)
 		 inty=inty+wgk(jtwm1)*(inty1+inty2)
@@ -35887,11 +35908,11 @@ subroutine fonctdep0firstderiv(x,p,glam,inty,y,logy,nY)
                xx = xm+dx
                call fonctrisq(xx,p,ri)
          gl1=ri*y(15) 
-		 inty1=gl1*logy(15,:)
+		 inty1=gl1*dlogy(15,:)
                xx = xm-dx
                call fonctrisq(xx,p,ri)
          gl2=ri*y(14)   ! svgrd valeurs fct f a drte du centre
-		  inty2=gl2*logy(14,:)
+		  inty2=gl2*dlogy(14,:)
 	       
 		glam=glam+wgk(jtwm1)*(gl1+gl2)
 		inty=inty+wgk(jtwm1)*(inty1+inty2)
@@ -36266,8 +36287,7 @@ logy01,logy02,logy12)
 !========================= and first derivatives of weib parameters ==========================
 !=============================================================================================  
 
-
-subroutine qgaussweibbetafirstderiv(a,b,the01,the02,the12,resdenum,&
+subroutine qgaussweibbetafirstderivtimedep(a,b,the01,the02,the12,resdenum,&
 resthe01,resthe02,resthe12,resthenum,res01num,res02num,res12num, &
 v01,v02,v12,yy01,yy02,yy12)
 
@@ -36344,13 +36364,16 @@ v01,v02,v12,yy01,yy02,yy12)
 
 
 
-            resdenum = 0.d0
+        resdenum = 0.d0
 	    res01num = 0.d0
 	    res02num = 0.d0
 	    res12num = 0.d0
+		
 		resthe01 = 0.d0
 	    resthe02 = 0.d0
 	    resthe12 = 0.d0
+		
+		resthenum =0.d0
 	
 
 		if(a.ne.b) then
@@ -36376,12 +36399,12 @@ v01,v02,v12,yy01,yy02,yy12)
 		fc02num=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02/denum 
 		fc12num=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12/denum 
 		
-		fcthe01=(su01**v01)*(su02**v02)*ri01*v01*gl01*v01*LOG(xm)/denum
-		fcthe02=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02*LOG(xm)/denum
-		fcthe12=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12*LOG(xm)/denum
+		fcthe01=(su01**v01)*(su02**v02)*ri01*v01*gl01*v01*dlog(xm)/denum
+		fcthe02=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02*dlog(xm)/denum
+		fcthe12=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12*dlog(xm)/denum
 
 		
-		fcthenum=(su01**v01)*(su02**v02)*ri01*v01*LOG(xm)/denum
+		fcthenum=(su01**v01)*(su02**v02)*ri01*v01*dlog(xm)/denum
 		
 		else 
 		
@@ -36389,6 +36412,7 @@ v01,v02,v12,yy01,yy02,yy12)
 		fc01num=0
 		fc02num=0
 		fc12num=0
+		
 		fcthe01=0
 		fcthe02=0
 		fcthe12=0
@@ -36403,6 +36427,7 @@ v01,v02,v12,yy01,yy02,yy12)
 			reskthe01 = fcthe01*wgk(8)       ! init res Kronrod   ! fc * 8e poids Kronrod
         	reskthe02 = fcthe02*wgk(8)       ! init res Kronrod   ! fc * 8e poids Kronrod
         	reskthe12 = fcthe12*wgk(8)       ! init res Kronrod   ! fc * 8e poids Kronrod
+			reskthenum = fcthenum*wgk(8)       ! init res Kronrod   ! fc * 8e poids Kronrod
         	
 		m=193
 		do j=1,3
@@ -36426,19 +36451,21 @@ v01,v02,v12,yy01,yy02,yy12)
 			f102num=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02/denum 
 			f112num=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12/denum 
 			
-			f1the01=(su01**v01)*(su02**v02)*ri01*v01*gl01*v01*LOG(xx)/denum
-			f1the02=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02*LOG(xx)/denum
-			f1the12=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12*LOG(xx)/denum
-			f1thenum=(su01**v01)*(su02**v02)*ri01*v01*LOG(xx)/denum
+			f1the01=(su01**v01)*(su02**v02)*ri01*v01*gl01*v01*dlog(xx)/denum
+			f1the02=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02*dlog(xx)/denum
+			f1the12=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12*dlog(xx)/denum
+			f1thenum=(su01**v01)*(su02**v02)*ri01*v01*dlog(xx)/denum
 		
 
 			else 
 			
 			f1denum =0
 			f1thenum=0
+			
 			f101num=0
 			f102num=0
 			f112num=0
+			
 			f1the01=0
 			f1the02=0
 			f1the12=0
@@ -36455,23 +36482,27 @@ v01,v02,v12,yy01,yy02,yy12)
 				denum=su12**v12
 		if(denum.NE.0) then 
     	
-                        f2denum =(su01**v01)*(su02**v02)*ri01*v01/denum
+            f2denum =(su01**v01)*(su02**v02)*ri01*v01/denum
 			f201num=(su01**v01)*(su02**v02)*ri01*v01*(1-(gl01*v01))/denum
 			f202num=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02/denum 
 			f212num=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12/denum 
 			
 			
-			f2the01=(su01**v01)*(su02**v02)*ri01*v01*gl01*v01*LOG(xx)/denum
-			f2the02=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02*LOG(xx)/denum
-			f2the12=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12*LOG(xx)/denum
-			f2thenum=(su01**v01)*(su02**v02)*ri01*v01*LOG(xx)/denum
+			f2the01=(su01**v01)*(su02**v02)*ri01*v01*gl01*v01*dlog(xx)/denum
+			f2the02=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02*dlog(xx)/denum
+			f2the12=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12*dlog(xx)/denum
+			
+			f2thenum=(su01**v01)*(su02**v02)*ri01*v01*dlog(xx)/denum
 
 			else 
+			
 			f2denum =0
 			f2thenum=0
+			
 			f201num=0
 			f202num=0
 			f212num=0
+			
 			f2the01=0
 			f2the02=0
 			f2the12=0
@@ -36487,6 +36518,7 @@ v01,v02,v12,yy01,yy02,yy12)
 					reskthe01 = reskthe01 + wgk(jtw)*(f1the01+f2the01)
 					reskthe02 = reskthe02 + wgk(jtw)*(f1the02+f2the02)
                		reskthe12 = reskthe12 + wgk(jtw)*(f1the12+f2the12)
+					
 					reskthenum = reskthenum + wgk(jtw)*(f1thenum+f2thenum)
                		
 			m=m-64
@@ -36514,18 +36546,21 @@ v01,v02,v12,yy01,yy02,yy12)
 			f102num=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02/denum 
 			f112num=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12/denum 
 			
-			f1the01=(su01**v01)*(su02**v02)*ri01*v01*gl01*v01*LOG(xx)/denum
-			f1the02=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02*LOG(xx)/denum
-			f1the12=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12*LOG(xx)/denum
-			f1thenum=(su01**v01)*(su02**v02)*ri01*v01*LOG(xx)/denum
+			f1the01=(su01**v01)*(su02**v02)*ri01*v01*gl01*v01*dlog(xx)/denum
+			f1the02=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02*dlog(xx)/denum
+			f1the12=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12*dlog(xx)/denum
+			
+			f1thenum=(su01**v01)*(su02**v02)*ri01*v01*dlog(xx)/denum
 			
 			else 
 			
 			f1denum =0
 			f1thenum=0
+			
 			f101num=0
 			f102num=0
 			f112num=0
+			
 			f1the01=0
 			f1the02=0
 			f1the12=0
@@ -36538,7 +36573,7 @@ v01,v02,v12,yy01,yy02,yy12)
 					yy02t=yy02((m-16):(m-1))
 					yy12t=yy12((m-16):(m-1))
 					
-					call fonctdep(xx,the01,ri01,gl01,su01,yy01t)
+		call fonctdep(xx,the01,ri01,gl01,su01,yy01t)
         call fonctdep(xx,the02,ri02,gl02,su02,yy02t)
    		call fonctdep(xx,the12,ri12,gl12,su12,yy12t)
 		
@@ -36550,18 +36585,21 @@ v01,v02,v12,yy01,yy02,yy12)
 			f202num=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02/denum 
 			f212num=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12/denum 
 			
-			f2the01=(su01**v01)*(su02**v02)*ri01*v01*gl01*v01*LOG(xx)/denum
-			f2the02=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02*LOG(xx)/denum
-			f2the12=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12*LOG(xx)/denum
-			f2thenum=(su01**v01)*(su02**v02)*ri01*v01*LOG(xx)/denum
+			f2the01=(su01**v01)*(su02**v02)*ri01*v01*gl01*v01*dlog(xx)/denum
+			f2the02=(su01**v01)*(su02**v02)*ri01*v01*gl02*v02*dlog(xx)/denum
+			f2the12=(su01**v01)*(su02**v02)*ri01*v01*gl12*v12*dlog(xx)/denum
+			
+			f2thenum=(su01**v01)*(su02**v02)*ri01*v01*dlog(xx)/denum
 			
 			else 
 			
 			f2denum =0
 			f2thenum=0
+			
 			f201num=0
 			f202num=0
 			f212num=0
+			
 			f2the01=0
 			f2the02=0
 			f2the12=0
@@ -36577,6 +36615,7 @@ v01,v02,v12,yy01,yy02,yy12)
 				reskthe01 = reskthe01 + wgk(jtwm1)*(f1the01+f2the01)
 				reskthe02 = reskthe02 + wgk(jtwm1)*(f1the02+f2the02)
                	reskthe12 = reskthe12 + wgk(jtwm1)*(f1the12+f2the12)
+				
 				reskthenum = reskthenum + wgk(jtwm1)*(f1thenum+f2thenum)
 				
 				m=m-64
@@ -36599,6 +36638,341 @@ v01,v02,v12,yy01,yy02,yy12)
          endif
               
           end subroutine qgaussweibbetafirstderivtimedep
+
+
+!=============================================================================================        
+!================================  qgaussweibderiv  ==========================================
+!=== for derivatives approximation out a 15 point Gauss-Kronrod quadrature rule for weib =====
+!========================= looking only weib paramters  ===================
+!========================= and first derivatives of weib parameters ==========================
+!=============================================================================================  
+
+
+subroutine qgaussbetafirstderivtimedep(a,b,the01,the02,the12,resdenum,&
+resi01num,resi02num,resi12num,resm01num, &
+v01,v02,v12,z01,z02,z12,n01,n02,n12,yy01,yy02,yy12)
+
+		implicit none
+        ! arguments
+    double precision:: a, b
+	double precision::yy01t(16),yy02t(16),yy12t(16)
+    double precision :: resdenum
+    double precision :: v01, v02, v12
+
+    ! 1D arrays of fixed length 240
+    double precision:: yy01(:), yy02(:), yy12(:)
+	integer :: n01,n02,n12
+
+    ! locals
+    double precision :: dx,xm,xr,xx
+    double precision :: reskdenum,f1denum,f2denum
+    
+    double precision :: su01,ri01,gl01,su02,ri02,gl02,su12,ri12,gl12
+    double precision :: fcdenum,denum
+	
+	double precision,dimension(-2:(n01+3))::z01
+	double precision,dimension(-2:(n02+3))::z02
+	double precision,dimension(-2:(n12+3))::z12
+	
+
+    double precision,dimension(-2:(n01-1))::the01,f1i01num, &
+	f2i01num,fci01num,f1m01num, &
+	f2m01num,fcm01num,reski01num,&
+	resi01num,reskm01num,resm01num,si01,sm01
+	
+	
+    double precision,dimension(-2:(n12-1))::the12,f1i12num, &
+	f2i12num,fci12num,resi12num,reski12num, &
+	si12,sm12
+	
+	
+    double precision,dimension(-2:(n02-1))::the02,f1i02num, &
+	f2i02num,fci02num,resi02num,reski02num, &
+	si02,sm02
+	
+	
+
+    ! Y-dependent temporaries
+   
+
+    integer :: j,jtw,jtwm1,m
+
+    double precision, dimension(8) :: xgk,wgk
+    double precision, dimension(4) :: wg
+
+    ! machine constants
+    double precision :: epmach,uflow
+    double precision :: d1mach(5)
+
+    ! save quadrature nodes/weights
+    save xgk,wgk
+
+   	D1MACH(1)=2.23D-308
+    	D1MACH(2)=1.79D+308
+    	D1MACH(3)=1.11D-16
+    	D1MACH(4)=2.22D-16
+    	D1MACH(5)=0.301029995663981195D0
+
+    	epmach = d1mach(4)
+    	uflow = d1mach(1)
+
+	wg(1)=0.129484966168869693270611432679082d0
+   	wg(2)=0.279705391489276667901467771423780d0
+    	wg(3)=0.381830050505118944950369775488975d0
+    	wg(4)=0.417959183673469387755102040816327d0
+
+    	xgk(1)=0.991455371120812639206854697526329d0
+    	xgk(2)=0.949107912342758524526189684047851d0
+    	xgk(3)=0.864864423359769072789712788640926d0
+    	xgk(4)=0.741531185599394439863864773280788d0
+    	xgk(5)=0.586087235467691130294144838258730d0
+    	xgk(6)=0.405845151377397166906606412076961d0
+    	xgk(7)=0.207784955007898467600689403773245d0
+    	xgk(8)=0.000000000000000000000000000000000d0
+
+    	wgk(1)=0.022935322010529224963732008058970d0
+    	wgk(2)=0.063092092629978553290700663189204d0
+    	wgk(3)=0.104790010322250183839876322541518d0
+    	wgk(4)=0.140653259715525918745189590510238d0
+    	wgk(5)=0.169004726639267902826583426598550d0
+    	wgk(6)=0.190350578064785409913256402421014d0
+    	wgk(7)=0.204432940075298892414161999234649d0
+    	wgk(8)=0.209482141084727828012999174891714d0
+
+
+
+        resdenum = 0.d0
+	    resi01num = 0.d0
+	    resi02num = 0.d0
+	    resi12num = 0.d0
+	    resm01num = 0.d0
+	
+
+		if(a.ne.b) then
+		xm = 0.5d+00*(b+a)
+        xr = 0.5d+00*(b-a)
+        
+		m=16
+		yy01t=yy01(1:m)
+		yy02t=yy02(1:m)
+		yy12t=yy12(1:m)
+		
+		
+    	call suspdep(xm,the01,n01,su01,ri01,z01,gl01,yy01t)
+        call suspdep(xm,the02,n02,su02,ri02,z02,gl02,yy02t)
+   		call suspdep(xm,the12,n12,su12,ri12,z12,gl12,yy12t)
+		
+		call suspMI(xm,n01,z01,si01,sm01)
+		call suspMI(xm,n02,z02,si02,sm02)
+		call suspMI(xm,n12,z12,si12,sm12)
+
+		denum=su12**v12
+		if(denum.NE.0) then 
+    	
+		
+		fcdenum =(su01**v01)*(su02**v02)*ri01*v01/denum  ! valeur fct f au milieu de intervalle (a,b), cas pnt 0
+    	
+		fci01num=fcdenum*si01*yy01t(16)
+		fci02num=fcdenum*si02*yy02t(16)
+		fci12num=fcdenum*si12*yy12t(16)
+		fcm01num=(su01**v01)*(su02**v02)*sm01*yy01t(16)/denum
+		
+		else 
+		
+		fcdenum =0
+    	fci01num=0
+		fci02num=0
+		fci12num=0
+		fcm01num=0
+		
+		end if 
+		
+        	reskdenum = fcdenum*wgk(8)       ! init res Kronrod   ! fc * 8e poids Kronrod
+        	reski01num = fci01num*wgk(8)       ! init res Kronrod   ! fc * 8e poids Kronrod
+        	reski02num = fci02num*wgk(8)       ! init res Kronrod   ! fc * 8e poids Kronrod
+        	reski12num = fci12num*wgk(8)       ! init res Kronrod   ! fc * 8e poids Kronrod
+			reskm01num = fcm01num*wgk(8)  
+        	
+		m=193
+		do j=1,3
+	       		jtw = j*2
+               		dx=xr*xgk(jtw)
+               		xx = xm+dx
+					yy01t=yy01(m:(m+15))
+					yy02t=yy02(m:(m+15))
+					yy12t=yy12(m:(m+15))
+					
+					
+		call suspdep(xx,the01,n01,su01,ri01,z01,gl01,yy01t)
+        call suspdep(xx,the02,n02,su02,ri02,z02,gl02,yy02t)
+   		call suspdep(xx,the12,n12,su12,ri12,z12,gl12,yy12t)
+		
+		call suspMI(xx,n01,z01,si01,sm01)
+			call suspMI(xx,n02,z02,si02,sm02)
+			call suspMI(xx,n12,z12,si12,sm12)
+               
+			denum=su12**v12
+		if(denum.NE.0) then 
+    				   
+			f1denum =(su01**v01)*(su02**v02)*ri01*v01/denum
+			f1i01num=f1denum*si01*yy01t(16)
+			f1i02num=f1denum*si02*yy02t(16)
+			f1i12num=f1denum*si12*yy12t(16)
+			f1m01num=(su01**v01)*(su02**v02)*sm01*yy01t(16)/denum
+			
+		
+
+			else 
+			
+			f1denum =0
+			f1i01num=0
+			f1i02num=0
+			f1i12num=0
+			f1m01num=0
+			end if 
+               		xx = xm-dx
+					
+					yy01t=yy01((m-16):(m-1))
+					yy02t=yy02((m-16):(m-1))
+					yy12t=yy12((m-16):(m-1))
+					
+        call suspdep(xx,the01,n01,su01,ri01,z01,gl01,yy01t)
+        call suspdep(xx,the02,n02,su02,ri02,z02,gl02,yy02t)
+   		call suspdep(xx,the12,n12,su12,ri12,z12,gl12,yy12t)
+		
+		call suspMI(xx,n01,z01,si01,sm01)
+			call suspMI(xx,n02,z02,si02,sm02)
+			call suspMI(xx,n12,z12,si12,sm12)
+			
+				denum=su12**v12
+		if(denum.NE.0) then 
+    	
+            f2denum =(su01**v01)*(su02**v02)*ri01*v01/denum
+			f2i01num=f1denum*si01*yy01t(16)
+			f2i02num=f1denum*si02*yy02t(16)
+			f2i12num=f1denum*si12*yy12t(16)
+			f2m01num=(su01**v01)*(su02**v02)*sm01*yy01t(16)/denum
+			
+			else 
+			
+			f2denum =0
+			f2i01num=0
+			f2i02num=0
+			f2i12num=0
+			f2m01num=0
+			
+			end if 
+               		reskdenum = reskdenum + wgk(jtw)*(f1denum+f2denum)
+			
+			reski01num = reski01num + wgk(jtw)*(f1i01num+f2i01num)
+
+			reski02num = reski02num + wgk(jtw)*(f1i02num+f2i02num)
+               		
+			reski12num = reski12num + wgk(jtw)*(f1i12num+f2i12num)
+
+			reskm01num = reskm01num + wgk(jtw)*(f1m01num+f2m01num)
+
+               		
+			m=m-64
+			
+         	end do
+		m=225
+	 	do j=1,4
+			jtwm1 = j*2-1
+               		dx=xr*xgk(jtwm1)
+               		xx = xm+dx
+					
+					yy01t=yy01(m:(m+15))
+					yy02t=yy02(m:(m+15))
+					yy12t=yy12(m:(m+15))
+					
+		call suspdep(xx,the01,n01,su01,ri01,z01,gl01,yy01t)
+        call suspdep(xx,the02,n02,su02,ri02,z02,gl02,yy02t)
+   		call suspdep(xx,the12,n12,su12,ri12,z12,gl12,yy12t)
+		
+		call suspMI(xx,n01,z01,si01,sm01)
+			call suspMI(xx,n02,z02,si02,sm02)
+			call suspMI(xx,n12,z12,si12,sm12)
+		
+		
+				denum=su12**v12
+			if(denum.NE.0) then 
+    				
+			f1denum =(su01**v01)*(su02**v02)*ri01*v01/denum
+			f1i01num=f1denum*si01*yy01t(16)
+			f1i02num=f1denum*si02*yy02t(16)
+			f1i12num=f1denum*si12*yy12t(16)
+			f1m01num=(su01**v01)*(su02**v02)*sm01*yy01t(16)/denum
+			
+			else 
+			
+			f1denum =0
+			f1i01num=0
+			f1i02num=0
+			f1i12num=0
+			f1m01num=0
+			
+			end if 
+			
+               		xx = xm-dx
+					
+					yy01t=yy01((m-16):(m-1))
+					yy02t=yy02((m-16):(m-1))
+					yy12t=yy12((m-16):(m-1))
+					
+		call suspdep(xx,the01,n01,su01,ri01,z01,gl01,yy01t)
+        call suspdep(xx,the02,n02,su02,ri02,z02,gl02,yy02t)
+   		call suspdep(xx,the12,n12,su12,ri12,z12,gl12,yy12t)
+		
+		call suspMI(xx,n01,z01,si01,sm01)
+			call suspMI(xx,n02,z02,si02,sm02)
+			call suspMI(xx,n12,z12,si12,sm12)
+			
+			denum=su12**v12
+		if(denum.NE.0) then 
+    	
+      		 f2denum =(su01**v01)*(su02**v02)*ri01*v01/denum
+			f2i01num=f1denum*si01*yy01t(16)
+			f2i02num=f1denum*si02*yy02t(16)
+			f2i12num=f1denum*si12*yy12t(16)
+			f2m01num=(su01**v01)*(su02**v02)*sm01*yy01t(16)/denum
+			
+			else 
+			
+			f2denum =0
+			f2i01num=0
+			f2i02num=0
+			f2i12num=0
+			f2m01num=0
+			
+			
+			end if 
+	       		reskdenum = reskdenum + wgk(jtwm1)*(f1denum+f2denum)
+			
+             
+			reski01num = reski01num + wgk(jtwm1)*(f1i01num+f2i01num)
+
+			reski02num = reski02num + wgk(jtwm1)*(f1i02num+f2i02num)
+               		
+			reski12num = reski12num + wgk(jtwm1)*(f1i12num+f2i12num)
+
+			
+			reskm01num = reskm01num + wgk(jtwm1)*(f1m01num+f2m01num)
+
+				m=m-64
+               		
+
+         	end do
+
+    		resdenum = reskdenum*xr
+    		resi01num = reski01num*xr
+    		resi02num = reski02num*xr
+    		resi12num = reski12num*xr
+			resm01num = reskm01num*xr
+	
+         endif
+              
+          end subroutine qgaussbetafirstderivtimedep
 
 end module 
 !============================================================================================= 
@@ -37041,9 +37415,9 @@ end module
 			!	write(6,*) 'go to exp'
 			!	call flush(6)
 				
-				y01t=exp(y01t)
-				y02t=exp(y02t)
-				y12t=exp(y12t)
+				y01t=dexp(y01t)
+				y02t=dexp(y02t)
+				y12t=dexp(y12t)
 
                 vet01 = dexp(vet01)
                 vet12 = dexp(vet12)
@@ -37699,12 +38073,15 @@ end module
 end subroutine firstderivaidmlikelihoodweibtimedep
 
 
+
+
 !============================================================================================= 
 !========================    caculate first deriva only of====================================
-!======================== regression parameters ==============================================
-!========================    with baseline weibull and time dependent covariates  ============
+!========================weibull parameters ==============================================
+!========================  and time dependent covariates  ============
 !======================== using gaussian quadrature 15 points ================================
 !============================================================================================= 
+
 
 
 
@@ -37727,7 +38104,7 @@ end subroutine firstderivaidmlikelihoodweibtimedep
 	p01,p02,p12,dimp01,dimp02,dimp12,Ntime, &
 	nva0102,nvamax,nva01nofix,nva01nofixY,nva02nofix, &
 	nva02nofixY,nva12nofix,nva12nofixY, nvamax01Y,nvamax02Y, &
-	nY01,nY02,nY12,sizespline,lfix
+	sizespline,lfix
 	
 	integer::nvaweib01,nvaweib02,nvaweib12,nvaweib,nweib
 
@@ -37766,6 +38143,8 @@ end subroutine firstderivaidmlikelihoodweibtimedep
 	fix=fix0
 	b=b0
 	bfix=bfix0
+	
+	troncature=troncature0
 	
 
 	sizespline=6
@@ -37815,49 +38194,24 @@ end subroutine firstderivaidmlikelihoodweibtimedep
 	end if 
 	
 	
-
-	
-	
 	if(p01.gt.0) then 
 		allocate(dy01(no0*p01*Ntime))
-		allocate(logy01(Ntime,nva01nofixY))
-		dy01=y010
-		nY01=nva01nofixY
-		
 	else 
 		allocate(dy01(no0*Ntime))
-		allocate(logy01(Ntime,1))
-		dy01=0
-		nY01=1
-		
 	end if 
 	
 
 	if(p02.gt.0) then 
-		allocate(dy02(no0*p02*Ntime))
-		dy02=y020
-		allocate(logy02(Ntime,nva02nofixY))
-		nY02=nva02nofixY
-		
+		allocate(dy02(no0*p02*Ntime))	
 	else 
-		allocate(dy02(no0*Ntime))
-		allocate(logy02(Ntime,1))
-		dy02=0
-		nY02=1
+		allocate(dy02(no0*Ntime))	
 	end if 
 	
 
 	if(p12.gt.0) then 
-		allocate(dy12(no0*p12*Ntime))
-		allocate(logy12(Ntime,nva12nofixY))
-		dy12=y120
-		nY12=nva12nofixY
-		
+		allocate(dy12(no0*p12*Ntime))	
 	else 
-		allocate(dy12(no0*Ntime))
-		allocate(logy12(Ntime,1))
-		dy12=0
-		nY12=1
+		allocate(dy12(no0*Ntime))		
 	end if 
 
 
@@ -37865,6 +38219,10 @@ end subroutine firstderivaidmlikelihoodweibtimedep
 	ve01=ve010
 	ve02=ve020
 	ve12=ve120
+	
+	dy01=y010
+	dy02=y020
+	dy12=y120
 
 
 	allocate(t0(no0),t1(no0),t2(no0),t3(no0),c(no0))
@@ -37897,17 +38255,13 @@ end subroutine firstderivaidmlikelihoodweibtimedep
    
 	
 
-         do i=1,2
-            the01(i)=(bh(i))*(bh(i))
-         end do
-         do i=1,2
-            j = 2+i
-            the02(i)=(bh(j))*(bh(j))
-         end do
-         do i=1,2
-            j = 4+i
-            the12(i)=(bh(j))*(bh(j))
-         end do
+    the01(2)=bh(2)*bh(2)
+	the02(2)=bh(4)*bh(4)
+	the12(2)=bh(6)*bh(6)
+	
+	the01(1)=bh(1)*bh(1)
+	the02(1)=bh(3)*bh(3)
+	the12(1)=bh(5)*bh(5)
 	
 
 		res = 0.d0
@@ -37935,14 +38289,11 @@ end subroutine firstderivaidmlikelihoodweibtimedep
 				if (nva01.gt.0) then
 					vet01 = vet01 + dot_product( bh(6+1 : 6+nva01), dble(ve01(i,1:nva01)) )
 				endif
-! write(6,*) 'start vet02 allocattion'
-! call flush(6)
+
 				! ---- nva02 ----
 				if (nva02.gt.0) then
 					vet02 = vet02 + dot_product( bh(6+nva01+1 : 6+nva01+nva02), dble(ve02(i,1:nva02)) )
 				endif
-! write(6,*) 'start vet12 allocattion'
-! call flush(6)
 				! ---- nva12 ----
 				if (nva12.gt.0) then
 					vet12 = vet12 + dot_product( bh(6+nva01+nva02+1 : 6+nva01+nva02+nva12), dble(ve12(i,1:nva12)) )
@@ -37950,55 +38301,18 @@ end subroutine firstderivaidmlikelihoodweibtimedep
 
 				
 				! ---- p01 ----
-				m=nva01+nva02+sizespline +nva12
-			!	write(6,*) 'start y01t allocattion'
-			!	write(6,*) 'size dy01',size(dy01)
-			!	write(6,*) 'size dy02',size(dy02)
-			!	write(6,*) 'size dy02',size(dy12)
-			!	write(6,*) 'bh',bh
-			!	write(6,*)'start of dy01',dy01(1:40)
-			!	call flush(6)
+			
 				if (p01 .gt. 0) then
 						j = (i-1)*Ntime*p01
 						k = 6 + nva01 + nva02 + nva12
-					!	write(6,*) 'j=',j
-					!	write(6,*) 'k=',k
-				     !   call flush(6)
-						do l = 1, Ntime
+					do l = 1, Ntime
 							w = j + (l-1)*p01
-						!	write(6,*) 'w=',w
-						!	write(6,*) 'dy01(w+1:w+p01)',dy01(w+1:w+p01)
-				         !   call flush(6)
-							! produit scalaire entre bh et y01(k)
-							y01t(l) = y01t(l) + dot_product( bh(k+1:k+p01), dy01(w+1:w+p01) )
-						!	write(6,*) 'logy01=',logy01(l,1:p01)
-				        !   call flush(6)
+							y01t(l) = y01t(l) + dot_product( bh(k+1:k+p01), dble(dy01(w+1:w+p01) ))
 						end do
 				endif
 
 
-	!			if (p01 > 0) then
-    !do l = 1, Ntime
-    !    y01t(l) = y01t(l) + dot_product( &
-    !        bh(nspline+nva01+nva02+nva12+1 : nspline+nva01+nva02+nva12+p01), &
-     !       y01((i-1)*Ntime*p01 + (l-1)*p01 + 1 : (i-1)*Ntime*p01 + (l-1)*p01 + p01) &
-     !   )
-    !end do
-!endif
-				!if(p01.gt.0)then
-				!	do l=1,Ntime
-                 !       do j=1,p01
-					!			k = (i-1)*Ntime*p01+(l-1)*p01+j
-                     !           y01t(l) =y01t(l) +&
-                      !          bh(nspline+nva01+nva02+nva12+j)*y01(k)
-!
-  !                      end do
-	!				end do 
-     !           endif  
-                ! ---- p02 ----
-				m=nva01+nva02+sizespline+nva12+p01
-			!	write(6,*) 'start y02t allocattion'
-				call flush(6)
+				! ---- p02 ----
 				if (p02.gt.0) then
 					j  = (i-1)*Ntime*p02
 					k = 6 + nva01 + nva02 + nva12 + p01
@@ -38006,7 +38320,6 @@ end subroutine firstderivaidmlikelihoodweibtimedep
 					do l = 1, Ntime
 						w = j + (l-1)*p02
 
-						! produit scalaire
 						y02t(l) = y02t(l) + dot_product( bh(k+1:k+p02),  dble(dy02(w+1:w+p02) ))
 
 					end do
@@ -38014,54 +38327,36 @@ end subroutine firstderivaidmlikelihoodweibtimedep
 
 
 				! ---- p12 ----
-				m=nva01+nva02+sizespline+nva12+p01+p02
-			!	write(6,*) 'start y12t allocattion'
-			!	call flush(6)
-				if (p12.gt.0) then
+			if (p12.gt.0) then
 					j  = (i-1)*Ntime*p12
 					k = 6 + nva01 + nva02 + nva12 + p01 + p02
 
 					do l = 1, Ntime
 						w = j + (l-1)*p12
 
-						! produit scalaire
+					
 						y12t(l) = y12t(l) + dot_product( bh(k+1:k+p12),  dble(dy12(w+1:w+p12) ))
 
 					end do
 				endif
 				
-			!	write(6,*) 'y01t',y01t
-			!!	write(6,*) 'y02t',y02t
-			!	write(6,*) 'y12t',y12t
-			!	write(6,*) 'vet01',vet01
-			!	write(6,*) 'vet02',vet02
-			!	write(6,*) 'vet12',vet12
-			!	write(6,*) 'go to exp'
-			!	call flush(6)
+			
 				
-				y01t=exp(y01t)
-				y02t=exp(y02t)
-				y12t=exp(y12t)
+				y01t=dexp(y01t)
+				y02t=dexp(y02t)
+				y12t=dexp(y12t)
 
                 vet01 = dexp(vet01)
                 vet12 = dexp(vet12)
                 vet02 = dexp(vet02)
 
-			!	write(6,*) 'y01t',y01t
-			!	write(6,*) 'y02t',y02t
-			!	write(6,*) 'y12t',y12t
-			!	write(6,*) 'vet01',vet01
-			!	write(6,*) 'vet02',vet02
-			!	write(6,*) 'vet12',vet12
-			!	call flush(6)
-
+			 
                 res1 = 0.d0
                 
-			!	write(6,*)'start tronc'
-			!	call flush(6)
+
 				 if(troncature.eq.1)then
                         if(t0(i).eq.0.d0)then
-                                troncweib01012 = 0
+                            troncweib01012 = 0
 							troncweib01011 = 0
 							troncweib02021 = 0
 							troncweib02022 = 0
@@ -38070,13 +38365,13 @@ end subroutine firstderivaidmlikelihoodweibtimedep
 				call fonctdep0(t0(i),the01,gl01,y01t(257:271))
 				call fonctdep0(t0(i),the02,gl02,y02t(257:271))
                            
-							troncweib01011=gl01*vet01*LOG(the01(2)*t0(i))
+							troncweib01011=gl01*vet01*dlog(the01(2)*t0(i))
 							troncweib01012=the01(1)*gl01*vet01/the01(2)
-							troncweib02021=LOG(the02(2)*t0(i))*gl02*vet02
+							troncweib02021=dlog(the02(2)*t0(i))*gl02*vet02
 							troncweib02022=the02(1)*gl02*vet02/the02(2)
                         end if
                 else
-                    troncweib01012 = 0
+							troncweib01012 = 0
 							troncweib01011 = 0
 							troncweib02021 = 0
 							troncweib02022 = 0
@@ -38093,26 +38388,26 @@ end subroutine firstderivaidmlikelihoodweibtimedep
                 if(c(i).eq.2)then ! cpi 0-->1
 			!	write(6,*)'c=2'
 			!	call flush(6)
-			call fonctdep(t3(i),the12,ri12,gl12,su12, dble(y12t(241:256)))
-			u=(su12**vet12)
+			
+			call fonctdep(t3(i),the12,ri12,gl12,su12,dble(y12t(241:256)))
+			
 			call  qgaussweibbetafirstderivtimedep(t1(i),t2(i),the01,the02,&
                          the12,res2denum,res2the01,res2the02,res2the12, &
 						 res2thenum,res201num,res202num,res212num, &
 						 vet01,vet02,vet12,&
-						 y01t(1:240),y02t(1:240),y12t(1:240)))
+						 y01t(1:240),y02t(1:240),y12t(1:240))
 						 
 				
                         
-			u=u*res2denum
 			
 			nweib = 0
-			if(u.NE.0) then 
+			if(res2denum.NE.0) then 
 			if(fix(1).eq.0)then
 				nweib = nweib + 1
-				v=(LOG(the01(2))+(1/the01(1)))*u +&
-				res2thenum-LOG(the01(2))*(u-res201num)-&
+				v=(dlog(the01(2))+(1/the01(1)))*res2denum +&
+				res2thenum-dlog(the01(2))*(res2denum-res201num)-&
 				res2the01
-				res1(nweib)=v/u
+				res1(nweib)=v/res2denum
 				
 				res1(nweib)=res1(nweib)+troncweib01011
 				
@@ -38120,9 +38415,9 @@ end subroutine firstderivaidmlikelihoodweibtimedep
 			
 			if(fix(2).eq.0)then
 				nweib = nweib + 1
-				v=the01(1)*u/the01(2) -&
-				the01(1)*(u-res201num)/the01(2)
-				res1(nweib)=v/u
+				v=the01(1)*res2denum/the01(2) -&
+				the01(1)*(res2denum-res201num)/the01(2)
+				res1(nweib)=v/res2denum
 				res1(nweib)=res1(nweib)+troncweib01012
 				
 			endif
@@ -38130,9 +38425,9 @@ end subroutine firstderivaidmlikelihoodweibtimedep
 			if(fix(3).eq.0)then
 				nweib = nweib + 1
 				
-				v=-LOG(the02(2))*res202num-&
+				v=-dlog(the02(2))*res202num-&
 				res2the02
-				res1(nweib)=v/u
+				res1(nweib)=v/res2denum
 				res1(nweib)=res1(nweib)+ &
 				troncweib02021
 				
@@ -38141,7 +38436,7 @@ end subroutine firstderivaidmlikelihoodweibtimedep
 			if(fix(4).eq.0)then
 				nweib = nweib + 1
 				v=-the02(1)*res202num/the02(2)
-				res1(nweib)=v/u
+				res1(nweib)=v/res2denum
 				res1(nweib)=res1(nweib)+troncweib02022
 				
 			endif
@@ -38149,18 +38444,18 @@ end subroutine firstderivaidmlikelihoodweibtimedep
 			if(fix(5).eq.0)then
 				nweib = nweib + 1
 				
-				v=LOG(the12(2))*res212num+&
+				v=dlog(the12(2))*res212num+&
 				res2the12
-				res1(nweib)=v/u
+				res1(nweib)=v/res2denum
 				res1(nweib)=res1(nweib)-&
-				LOG(the12(2)*t3(i))*gl12*vet12
+				dlog(the12(2)*t3(i))*gl12*vet12
 				
 			endif
 			
 			if(fix(6).eq.0)then
 				nweib = nweib + 1
 				v=the12(1)*res212num/the12(2)
-				res1(nweib)=v/u
+				res1(nweib)=v/res2denum
 				res1(nweib)=res1(nweib)-&
 				the12(1)*gl12*vet12/the12(2)
 				
@@ -38194,8 +38489,7 @@ end subroutine firstderivaidmlikelihoodweibtimedep
 			
 			if(fix(5).eq.0)then
 				nweib = nweib + 1
-				
-				res1(nweib)=-LOG(the12(2)*t3(i))*gl12*vet12
+				res1(nweib)=-dlog(the12(2)*t3(i))*gl12*vet12
 				
 			endif
 			
@@ -38206,7 +38500,7 @@ end subroutine firstderivaidmlikelihoodweibtimedep
 				
 			endif	
 			
-			end if 
+			endif 
 			
 			
 		!	write(6,*)'res1',res1
@@ -38218,9 +38512,9 @@ end subroutine firstderivaidmlikelihoodweibtimedep
                     else   
                        if(c(i).eq.4)then ! cpi 0-->1 et obs 1-->2
 					!   write(6,*)'c=4'
-					 !  call flush(6)
+					!   call flush(6)
 					  call fonctdep(t3(i),the12,ri12,gl12,su12, dble(y12t(241:256)))
-					   u=(su12**vet12)*ri12*vet12
+					  
 						 call  qgaussweibbetafirstderivtimedep(t1(i),t2(i),the01,the02,&
                          the12,res2denum,res2the01,res2the02,res2the12, &
 						 res2thenum,res201num,res202num,res212num, &
@@ -38228,37 +38522,27 @@ end subroutine firstderivaidmlikelihoodweibtimedep
 						 y01t(1:240),y02t(1:240),y12t(1:240))
 						 
 				
-                        
-			u=u*res2denum
 			nweib =0
 			
-		!	write(6,*)'v',v
-		!						write(6,*)'res2denum',res2denum
-		!						write(6,*)'res201num',res201num
-		!						write(6,*)'res202num',res202num
-		!						write(6,*)'res212num',res212num
-		!						write(6,*)'res201numY',res201numY
-		!						write(6,*)'res202numY',res202numY
-		!						write(6,*)'res212numY',res212numY
-		!						call flush(6)
+		
 
-
+			if(res2denum.NE.0) then 
 			if(fix(1).eq.0)then
 				nweib = nweib + 1
 				
-				v=(LOG(the01(2))+(1/the01(1)))*u +&
-				res2thenum-LOG(the01(2))*(u-res201num)-&
+				v=(dlog(the01(2))+(1/the01(1)))*res2denum +&
+				res2thenum-dlog(the01(2))*(res2denum-res201num)-&
 				res2the01
-				res1(nweib)=v/u
+				res1(nweib)=v/res2denum
 				res1(nweib)=res1(nweib)+troncweib01011
 				
 			endif
 	
 			if(fix(2).eq.0)then
 				nweib = nweib + 1
-				v=the01(1)*u/the01(2) -&
-				the01(1)*(u-res201num)/the01(2)
-				res1(nweib)=v/u
+				v=the01(1)*res2denum/the01(2) -&
+				the01(1)*(res2denum-res201num)/the01(2)
+				res1(nweib)=v/res2denum
 				res1(nweib)=res1(nweib)+troncweib01012
 			endif
 
@@ -38266,38 +38550,37 @@ end subroutine firstderivaidmlikelihoodweibtimedep
 			if(fix(3).eq.0)then
 				nweib = nweib + 1
 				
-				v=-LOG(the02(2))*res202num-&
+				v=-dlog(the02(2))*res202num-&
 				res2the02
-				res1(nweib)=v/u
+				res1(nweib)=v/res2denum
 				res1(nweib)=res1(nweib)+troncweib02021
 			endif
 			
 			if(fix(4).eq.0)then
 				nweib = nweib + 1
 				v=-the02(1)*res202num/the02(2)
-				res1(nweib)=v/u
+				res1(nweib)=v/res2denum
 				res1(nweib)=res1(nweib)+troncweib02022
 			endif	
 
 			if(fix(5).eq.0)then
 				nweib = nweib + 1
 				
-				v=LOG(the12(2))*res212num+&
+				v=dlog(the12(2))*res212num+&
 				res2the12
-				res1(nweib)=v/u
+				res1(nweib)=v/res2denum
 				res1(nweib)=res1(nweib)+&
-				LOG(the12(2)*t3(i))*(1-gl12*vet12)+1/ &
-				the12(1)
+				dlog(the12(2)*t3(i))*(1- & 
+				gl12*vet12)+1/the12(1)
 				
 			endif
 			
 			if(fix(6).eq.0)then
 				nweib = nweib + 1
 				v=the12(1)*res212num/the12(2)
-				res1(nweib)=v/u
-				res1(nweib)=res1(nweib)-&
-				the12(1)*gl12*vet12/the12(2)+&
-				the12(1)/the12(2)
+				res1(nweib)=v/res2denum
+				res1(nweib)=res1(nweib)+&
+				the12(1)*(1-gl12*vet12)/the12(2)
 			endif	
 			
 			else
@@ -38326,18 +38609,20 @@ end subroutine firstderivaidmlikelihoodweibtimedep
 
 			if(fix(5).eq.0)then
 				nweib = nweib + 1
-				res1(nweib)=LOG(the12(2)*t3(i))*(1-gl12*vet12)+1/ &
+				res1(nweib)=dlog(the12(2)*t3(i))*(1-gl12*vet12)+1/ &
 				the12(1)
 				
 			endif
 			
 			if(fix(6).eq.0)then
 				nweib = nweib + 1
-				res1(nweib)=-the12(1)*gl12*vet12/the12(2)+&
-				the12(1)/the12(2)
+				res1(nweib)=the12(1)*(1-gl12*vet12)/the12(2)
 			endif	
 			
-			end if 
+		!	write(6,*)'res1',res1
+		!	call flush(6)
+			
+			endif 
 						
                        else
                          if(c(i).eq.5)then ! obs 0-->1 et obs 1-->2
@@ -38345,7 +38630,7 @@ end subroutine firstderivaidmlikelihoodweibtimedep
                          else
                             if(c(i).eq.6)then ! vivant ???
 						! write(6,*)'c=6'
-						!call flush(6)
+						! call flush(6)
 								call fonctdep(t3(i),the01,ri01,gl01,&
 								su01, dble(y01t(241:256)))
                                 call fonctdep(t3(i),the02,ri02,gl02,&
@@ -38354,11 +38639,12 @@ end subroutine firstderivaidmlikelihoodweibtimedep
 								su12, dble(y12t(241:256)))
           
 								
-								call  qgaussweibbetafirstderivtimedep(t1(i),t3(i),the01,the02,&
+								
+		call  qgaussweibbetafirstderivtimedep(t1(i),t3(i),the01,the02,&
                          the12,res2denum,res2the01,res2the02,res2the12, &
 						 res2thenum,res201num,res202num,res212num, &
 						 vet01,vet02,vet12,&
-						 y01t(1:240),y02t(1:240),y12t(1:240)))
+						 y01t(1:240),y02t(1:240),y12t(1:240))
 						 
 				
                         
@@ -38379,12 +38665,12 @@ end subroutine firstderivaidmlikelihoodweibtimedep
 						
 						if(fix(1).eq.0)then
 				nweib = nweib + 1
-				v=(LOG(the01(2))+(1/the01(1)))*res2denum +&
-				res2thenum-LOG(the01(2))*(res2denum-res201num)-&
+				v=(dlog(the01(2))+(1/the01(1)))*res2denum +&
+				res2thenum-dlog(the01(2))*(res2denum-res201num)-&
 				res2the01
 				
 				v=v*(su12**vet12)-&
-				LOG(the01(2)*t3(i))*gl01*vet01*(su01**vet01)*(su02**vet02)
+				dlog(the01(2)*t3(i))*gl01*vet01*(su01**vet01)*(su02**vet02)
 				
 				res1(nweib)=v/u1
 				
@@ -38412,11 +38698,11 @@ end subroutine firstderivaidmlikelihoodweibtimedep
 			if(fix(3).eq.0)then
 				nweib = nweib + 1
 				
-				v=-LOG(the02(2))*res202num-&
+				v=-dlog(the02(2))*res202num-&
 				res2the02
 				
 				v=v*(su12**vet12)-&
-				LOG(the02(2)*t3(i))*gl02*vet02* &
+				dlog(the02(2)*t3(i))*gl02*vet02* &
 				(su01**vet01)*(su02**vet02)
 				
 				res1(nweib)=v/u1
@@ -38442,10 +38728,10 @@ end subroutine firstderivaidmlikelihoodweibtimedep
 			if(fix(5).eq.0)then
 				nweib = nweib + 1
 				
-				v=LOG(the12(2))*res212num+&
+				v=dlog(the12(2))*res212num+&
 				res2the12
 				v=v*(su12**vet12)-&
-				LOG(the12(2)*t3(i))*gl12*vet12* &
+				dlog(the12(2)*t3(i))*gl12*vet12* &
 				(su12**vet12)*res2denum
 				
 				res1(nweib)=v/u1
@@ -38508,14 +38794,14 @@ end subroutine firstderivaidmlikelihoodweibtimedep
 				
 			endif	
 			
-			end if 
+			endif 
 								
 							!	write(6,*)'res1',res1
 							!	call flush(6)
                             else ! passage 0-->2  
 					
 					! write(6,*)'c=7'
-			!		call flush(6)
+					! call flush(6)
 				                call fonctdep(t3(i),the01,ri01,gl01,&
 								su01, dble(y01t(241:256)))
                                 call fonctdep(t3(i),the02,ri02,gl02,&
@@ -38540,13 +38826,13 @@ end subroutine firstderivaidmlikelihoodweibtimedep
 							
 							if(fix(1).eq.0)then
 				nweib = nweib + 1
-				v=(LOG(the01(2))+(1/the01(1)))*res2denum +&
-				res2thenum-LOG(the01(2))*(res2denum-res201num)-&
+				v=(dlog(the01(2))+(1/the01(1)))*res2denum +&
+				res2thenum-dlog(the01(2))*(res2denum-res201num)-&
 				res2the01
 				
 				
 				v=v*(su12**vet12)*ri12*vet12-&
-				LOG(the01(2)*t3(i))*gl01*vet01*(su01**vet01)* &
+				dlog(the01(2)*t3(i))*gl01*vet01*(su01**vet01)* &
 				ri02*vet02*(su02**vet02)
 				
 				res1(nweib)=v/u1
@@ -38572,14 +38858,14 @@ end subroutine firstderivaidmlikelihoodweibtimedep
 			if(fix(3).eq.0)then
 				nweib = nweib + 1
 				
-				v=-LOG(the02(2))*res202num-&
+				v=-dlog(the02(2))*res202num-&
 				res2the02
 				
 				v=v*(su12**vet12)*ri12*vet12+&
 				ri02*vet02*(su01**vet01)*(su02**vet02)* &
-				(LOG(the02(2)*t3(i))+&
+				(dlog(the02(2)*t3(i))+&
 				(1/the02(1))-&
-				gl02*vet02*LOG(the02(2)*t3(i)))
+				gl02*vet02*dlog(the02(2)*t3(i)))
 				
 				res1(nweib)=v/u1
 				res1(nweib)=res1(nweib)+troncweib02021
@@ -38601,13 +38887,13 @@ end subroutine firstderivaidmlikelihoodweibtimedep
 			if(fix(5).eq.0)then
 				nweib = nweib + 1
 				
-				v=LOG(the12(2))*res212num+&
+				v=dlog(the12(2))*res212num+&
 				res2the12
 				v=v*(su12**vet12)*ri12*vet12+&
 				ri12*vet12*(su12**vet12)*res2denum* &
-				(LOG(the12(2)*t3(i))+&
+				(dlog(the12(2)*t3(i))+&
 				(1/the12(1))-&
-				LOG(the12(2)*t3(i))*gl12*vet12)
+				dlog(the12(2)*t3(i))*gl12*vet12)
 				
 				res1(nweib)=v/u1
 				
@@ -38663,7 +38949,7 @@ end subroutine firstderivaidmlikelihoodweibtimedep
 				
 			endif
 			
-			end if 
+			endif 
 							!	write(6,*)'res1',res1
 							!	call flush(6)
 								
@@ -38689,25 +38975,721 @@ end subroutine firstderivaidmlikelihoodweibtimedep
 123     continue 
 
 	deallocate(b,bfix,fix,ve01,ve02,ve12,&
-	t0,t1,t2,t3,c,ve01nofix,ve02nofix,ve12nofix,&
-	logy01,logy02,logy12,res201numY,dy01,dy02,dy12,&
-	res202numY,res212numY,tronc01Y,tronc01,tronc02Y,tronc02)
+	t0,t1,t2,t3,c,dy01,dy02,dy12)
 
 end subroutine derivaweibfirstderivtimedep
+
+!============================================================================================= 
+!========================    caculate first deriva only of====================================
+!========================weibull parameters ==============================================
+!========================  and time dependent covariates  ============
+!======================== using gaussian quadrature 15 points ================================
+!============================================================================================= 
+
+
+
+
+      subroutine derivafirstderivtimedep(b0,np0,npar0,bfix0,fix0,zi010,zi120,&
+      zi020, c0,no0,nz010,nz120,nz020,ve010,ve120,ve020,y010,y020,y120, &
+	  p01,p02,p12,dimp01,dimp02,dimp12, Ntime, &
+	  dimnva01,dimnva12,dimnva02,nva01,&
+      nva12,nva02,t00,t10,t20,t30,troncature0,likelihood_deriv)
+
+	    use commun
+		use my_functions
+        implicit none
+         
+    double precision::res2denum,res201num,res202num,res212num, &
+	res2thenum,res2the01,res2the02,res2the12,vet01,vet12, &
+	vet02,resint,v,u1,u2,u3,u
+
+        integer::np0,i,j,l,w,k,m,npar0,nva01,nva12,nva02,no0, &
+	troncature0,dimnva01,dimnva02,dimnva12, &
+	p01,p02,p12,dimp01,dimp02,dimp12,Ntime, &
+	nva0102,nvamax,nva01nofix,nva01nofixY,nva02nofix, &
+	nva02nofixY,nva12nofix,nva12nofixY, nvamax01Y,nvamax02Y, &
+	sizespline,lfix,nz010,nz020,nz120
+	
+	integer::nvaweib01,nvaweib02,nvaweib12,nvaweib,nweib
+
+	double precision,dimension(np0),intent(inout)::likelihood_deriv
+	double precision,dimension(np0)::b0,res,resk,res1
+        double precision,dimension(npar0)::bh
+	double precision,dimension(npar0-np0)::bfix0
+	integer,dimension(npar0)::fix0
+	double precision,dimension(-2:(nz010+3))::zi010
+	double precision,dimension(-2:(nz020+3))::zi020
+	double precision,dimension(-2:(nz120+3))::zi120
+	
+	double precision,dimension(-2:(nz010-1))::the01,res2m01num,&
+	res2i01num,i01,m01
+	double precision,dimension(-2:(nz020-1))::the02,res2i02num, &
+	i02,m02
+	double precision,dimension(-2:(nz120-1))::the12,res2i12num, &
+	i12,m12
+    
+	double precision,dimension(no0,dimnva01)::ve010
+	double precision,dimension(no0,dimnva02)::ve020
+	double precision,dimension(no0,dimnva12)::ve120
+	
+	
+	double precision,dimension(no0*dimp01*Ntime)::y010
+	double precision,dimension(no0*dimp02*Ntime)::y020
+	double precision,dimension(no0*dimp12*Ntime)::y120
+	
+	
+	
+	double precision,dimension(Ntime)::y01t,y02t,y12t
+
+!	integer, dimension(16) :: indices
+	
+    double precision::su01,ri01,su12,ri12,su02,ri02,gl01,gl02,gl12, & 
+	troncweib01012,troncweib01011,troncweib02021,troncweib02022
+	double precision,dimension(no0)::t00,t10,t20,t30
+	integer,dimension(no0)::c0
+
+	allocate(b(np0),bfix(npar0-np0))
+	allocate(fix(npar0))
+	
+	fix=fix0
+	b=b0
+	bfix=bfix0
+	
+	troncature=troncature0
+
+	allocate(zi01(-2:(nz010+3)),zi12(-2:(nz120+3)),zi02(-2:(nz020+3)))
+	allocate(tronc01(-2:(nz010-1)),tronc02(-2:(nz020-1)))
+	zi01=zi010
+	zi02=zi020
+	zi12=zi120
+	
+	nz01=nz010
+	nz02=nz020
+	nz12=nz120
+	sizespline=nz01+nz02+nz12+6
+
+	nva01nofix=0
+	nva02nofix=0
+	nva12nofix=0
+	
+	nva01nofixY=0
+	nva02nofixY=0
+	nva12nofixY=0
+
+
+	nvaweib=nvaweib01+nvaweib02+nvaweib12
+	nva0102=nvaweib
+	nvamax=nva0102
+	
+
+
+	if(nva01.gt.0) then 
+		allocate(ve01(no0,nva01))
+		
+	else 
+		allocate(ve01(no0,1))
+	end if 
+	
+	if(nva02.gt.0) then 
+		allocate(ve02(no0,nva02))
+		
+	else 
+		allocate(ve02(no0,1))
+		
+	end if 
+
+	if(nva12.gt.0) then 
+		allocate(ve12(no0,nva12))
+		
+		
+	else 
+		allocate(ve12(no0,1))
+		
+	end if 
+	
+	
+	if(p01.gt.0) then 
+		allocate(dy01(no0*p01*Ntime))
+	else 
+		allocate(dy01(no0*Ntime))
+	end if 
+	
+
+	if(p02.gt.0) then 
+		allocate(dy02(no0*p02*Ntime))	
+	else 
+		allocate(dy02(no0*Ntime))	
+	end if 
+	
+
+	if(p12.gt.0) then 
+		allocate(dy12(no0*p12*Ntime))	
+	else 
+		allocate(dy12(no0*Ntime))		
+	end if 
+
+
+
+	ve01=ve010
+	ve02=ve020
+	ve12=ve120
+	
+	dy01=y010
+	dy02=y020
+	dy12=y120
+
+
+	allocate(t0(no0),t1(no0),t2(no0),t3(no0),c(no0))
+	c=c0
+	t0=t00
+	t1=t10
+	t2=t20
+	t3=t30
+
+         
+        ! we need to put bh at its original values if in posfix 
+	
+	   l=0
+       lfix=0
+       w=0
+	   
+
+
+     do k=1,npar0 
+         if(fix(k).eq.0) then
+            l=l+1
+            bh(k)=b(l)
+	 end if 
+         if(fix(k).eq.1) then
+            w=w+1
+            bh(k)=bfix(w)
+         end if
+      end do
+
+   
+	
+
+      do i=1,nz01+2
+            the01(i-3)=(bh(i))**2
+!       the01(i-3)=dexp(bh(i))
+         end do
+         do i=1,nz02+2
+            j = nz01+2+i
+            the02(i-3)=(bh(j))**2
+!       the12(i-3)=dexp(bh(j))
+         end do
+         do i=1,nz12+2
+            j = nz02+2+nz01+2+i
+            the12(i-3)=(bh(j))**2
+!       the02(i-3)=dexp(bh(j))
+         end do
+	
+
+		res = 0.d0
+		
+!---------- calcul de la vraisemblance ------------------
+
+
+         
+               do i=1,no0
+			   
+			write(6,*) 'subject',i
+			call flush(6)
+		
+	i12 = 0
+	m12 = 0
+	
+	i01 = 0
+	m01= 0
+	
+	m02=0
+	i02=0
+	
+	res2i01num=0
+	res2i02num=0
+	res2i12num=0
+	res2m01num=0
+	res2denum=0
+         
+                vet01 = 0.d0
+                vet12 = 0.d0
+                vet02 = 0.d0
+
+				y01t = 0
+                y12t = 0
+                y02t = 0
+
+             !  write(6,*) 'start vet01 allocattion'
+			  ! call flush(6)
+				! ---- nva01 ----
+				if (nva01.gt.0) then
+					vet01 = vet01 + dot_product( bh(6+1 : 6+nva01), dble(ve01(i,1:nva01)) )
+				endif
+
+				! ---- nva02 ----
+				if (nva02.gt.0) then
+					vet02 = vet02 + dot_product( bh(6+nva01+1 : 6+nva01+nva02), dble(ve02(i,1:nva02)) )
+				endif
+				! ---- nva12 ----
+				if (nva12.gt.0) then
+					vet12 = vet12 + dot_product( bh(6+nva01+nva02+1 : 6+nva01+nva02+nva12), dble(ve12(i,1:nva12)) )
+				endif
+
+				
+				! ---- p01 ----
+			
+				if (p01 .gt. 0) then
+						j = (i-1)*Ntime*p01
+						k = 6 + nva01 + nva02 + nva12
+					do l = 1, Ntime
+							w = j + (l-1)*p01
+							y01t(l) = y01t(l) + dot_product( bh(k+1:k+p01), dble(dy01(w+1:w+p01) ))
+						end do
+				endif
+
+
+				! ---- p02 ----
+				if (p02.gt.0) then
+					j  = (i-1)*Ntime*p02
+					k = 6 + nva01 + nva02 + nva12 + p01
+
+					do l = 1, Ntime
+						w = j + (l-1)*p02
+
+						y02t(l) = y02t(l) + dot_product( bh(k+1:k+p02),  dble(dy02(w+1:w+p02) ))
+
+					end do
+				endif
+
+
+				! ---- p12 ----
+			if (p12.gt.0) then
+					j  = (i-1)*Ntime*p12
+					k = 6 + nva01 + nva02 + nva12 + p01 + p02
+
+					do l = 1, Ntime
+						w = j + (l-1)*p12
+
+					
+						y12t(l) = y12t(l) + dot_product( bh(k+1:k+p12),  dble(dy12(w+1:w+p12) ))
+
+					end do
+				endif
+				
+			
+				
+				y01t=dexp(y01t)
+				y02t=dexp(y02t)
+				y12t=dexp(y12t)
+
+                vet01 = dexp(vet01)
+                vet12 = dexp(vet12)
+                vet02 = dexp(vet02)
+
+			 
+                res1 = 0.d0
+                
+
+				 if(troncature.eq.1)then
+                        if(t0(i).eq.0.d0)then
+                            tronc01 = 0
+							tronc02 =  0
+                        else 
+						
+				
+				call suspMI(t0(i),nz01,zi01,i01,m01)
+				call suspMI(t0(i),nz02,zi02,i02,m02)
+				
+                            tronc01=vet01*i01*y01t(271)
+                        	tronc02=vet02*i02*y02t(271)
+                           
+							
+                        end if
+                else
+							tronc01 = 0
+							tronc02 =  0
+                end if
+				
+
+				
+		
+                if(c(i).eq.1)then ! cad 0-->1 et 0-->2
+
+			       
+					   
+                else
+                if(c(i).eq.2)then ! cpi 0-->1
+				write(6,*)'c=2'
+			!	call flush(6)
+			
+			call  qgaussbetafirstderivtimedep(t1(i),t2(i),the01,the02,&
+                         the12,res2denum,&
+						 res2i01num,res2i02num,res2i12num,res2m01num, &
+						 vet01,vet02,vet12,zi01,zi02,zi12,nz01,nz02,nz12, &
+						 y01t(1:240),y02t(1:240),y12t(1:240))
+						 
+				
+                        
+			
+		
+			u=res2denum
+			
+				write(6,*)'u',u
+								write(6,*)'res2denum',res2denum
+								write(6,*)'res2i01num',res2i01num
+								write(6,*)'res2i02num',res2i02num
+								write(6,*)'res2i12num',res2i12num
+							    write(6,*)'res2m01num',res2m01num
+			
+			if(res2denum.NE.0) then 
+			
+			if(nz01.GT.0) then
+			res1(1:(nz01+2))=(res2m01num-res2i01num)* &
+			vet01/u+ tronc01
+			end if 
+			
+			if(nz02.GT.0) then
+			res1((nz01+3):(nz02+nz01+4))=-res2i02num* &
+			vet02/u + tronc02
+			end if 
+			
+			
+			if(nz12.GT.0) then
+			
+			call suspdep(t3(i),the12,nz12,su12,ri12,zi12,gl12,dble(y12t(241:256)))
+			call suspMI(t3(i),nz12,zi12,i12,m12)
+			
+			res1((nz01+nz02+5):(nz02+nz01+nz12+6))= &
+			res2i12num*vet12/u-i12*vet12*y12t(256)
+			
+			end if
+			else 
+			
+			if(nz01.GT.0) then
+			res1(1:(nz01+2))=tronc01
+			end if 
+			
+			if(nz02.GT.0) then
+			res1((nz01+3):(nz02+nz01+4))=tronc02
+			end if 
+			
+			
+			if(nz12.GT.0) then
+			
+			call suspMI(t3(i),nz12,zi12,i12,m12)
+			
+			res1((nz01+nz02+5):(nz02+nz01+nz12+6))= &
+			-i12*vet12*y12t(256)
+			
+			end if
+			endif 
+			
+			write(6,*)'res1',res1
+			
+			
+		!	write(6,*)'res1',res1
+		!	call flush(6)
+						
+                else  
+                    if(c(i).eq.3)then ! obs 0-->1
+			             
+                    else   
+                       if(c(i).eq.4)then ! cpi 0-->1 et obs 1-->2
+					   write(6,*)'c=4'
+					!   call flush(6)
+					  call  qgaussbetafirstderivtimedep(t1(i),t2(i),the01,the02,&
+                         the12,res2denum,&
+						 res2i01num,res2i02num,res2i12num,res2m01num, &
+						 vet01,vet02,vet12,zi01,zi02,zi12,nz01,nz02,nz12, &
+						 y01t(1:240),y02t(1:240),y12t(1:240))
+						 
+				
+						 
+			u=res2denum
+			
+				write(6,*)'u',u
+								write(6,*)'res2denum',res2denum
+								write(6,*)'res2i01num',res2i01num
+								write(6,*)'res2i02num',res2i02num
+								write(6,*)'res2i12num',res2i12num
+							    write(6,*)'res2m01num',res2m01num
+
+			if(res2denum.NE.0) then 
+			
+			if(nz01.GT.0) then
+			res1(1:(nz01+2))=(res2m01num-res2i01num)* &
+			vet01/u+ &
+			tronc01
+			end if 
+			
+			
+			if(nz02.GT.0) then
+			res1((nz01+3):(nz02+nz01+4))=-res2i02num* &
+			vet02/u+ &
+			tronc02
+			end if 
+			
+		
+			
+			if(nz12.GT.0) then
+			
+			call suspMI(t3(i),nz12,zi12,i12,m12)
+			call suspdep(t3(i),the12,nz12,su12,ri12,zi12,gl12,dble(y12t(241:256)))
+			
+			res1((nz01+nz02+5):(nz02+nz01+nz12+6))= &
+			(res2i12num)*vet12/u-i12*vet12*y12t(256) + m12*y12t(256)/ri12
+			
+			end if
+			else
+			
+			if(nz01.GT.0) then
+			res1(1:(nz01+2))=tronc01
+			end if 
+			
+			
+			if(nz02.GT.0) then
+			res1((nz01+3):(nz02+nz01+4))=tronc02
+			end if 
+			
+		
+			
+			if(nz12.GT.0) then
+			
+			call suspMI(t3(i),nz12,zi12,i12,m12)
+			call suspdep(t3(i),the12,nz12,su12,ri12,zi12,gl12,dble(y12t(241:256)))
+			
+			res1((nz01+nz02+5):(nz02+nz01+nz12+6))= &
+			-i12*vet12*y12t(256) + m12*y12t(256)/ri12
+			
+			end if
+			
+			endif 
+			
+			write(6,*)'res1',res1
+						
+                       else
+                         if(c(i).eq.5)then ! obs 0-->1 et obs 1-->2
+								
+                         else
+                            if(c(i).eq.6)then ! vivant ???
+						 write(6,*)'c=6'
+						
+								
+		call  qgaussbetafirstderivtimedep(t1(i),t3(i),the01,the02,&
+                         the12,res2denum,&
+						 res2i01num,res2i02num,res2i12num,res2m01num, &
+						 vet01,vet02,vet12,zi01,zi02,zi12,nz01,nz02,nz12, &
+						 y01t(1:240),y02t(1:240),y12t(1:240))
+						 
+		    call suspdep(t3(i),the12,nz12,su12,ri12,zi12,gl12, dble(y12t(241:256)))
+			call suspdep(t3(i),the02,nz02,su02,ri02,zi02,gl02, dble(y02t(241:256)))
+			call suspdep(t3(i),the01,nz01,su01,ri01,zi01,gl01, dble(y01t(241:256)))
+			
+			call suspMI(t3(i),nz12,zi12,i12,m12)
+			call suspMI(t3(i),nz02,zi02,i02,m02)
+			call suspMI(t3(i),nz01,zi01,i01,m01)
+				
+			u1=(su12**vet12)*res2denum+&
+			(su01**vet01)*(su02**vet02)
+						 
+								write(6,*)'u1',u1
+								write(6,*)'res2denum',res2denum
+								write(6,*)'res2i01num',res2i01num
+								write(6,*)'res2i02num',res2i02num
+								write(6,*)'res2i12num',res2i12num
+							    write(6,*)'res2m01num',res2m01num
+							!	write(6,*)'res202numY',res202numY
+							!	write(6,*)'res212numY',res212numY
+							!	call flush(6)
+						if(u1.NE.0)then 
+						
+					if(nz01.GT.0) then
+			res1(1:(nz01+2))=(res2m01num-res2i01num)* &
+			vet01*(su12**vet12)-i01*vet01*(su01**vet01)* &
+			(su02**vet02)*y01t(256)
+			res1(1:(nz01+2))=res1(1:(nz01+2))/u1
+			res1(1:(nz01+2))= res1(1:(nz01+2))+&
+			tronc01
+			end if 
+			
+			if(nz02.GT.0) then
+			
+			
+			res1((nz01+2+1):(nz02+nz01+4))=-res2i02num* &
+			vet02*(su12**vet12)-i02*vet02*(su01**vet01)* &
+			(su02**vet02)*y02t(256)
+			res1((nz01+2+1):(nz02+nz01+4))= &
+			res1((nz01+2+1):(nz02+nz01+4))/u1
+			res1((nz01+2+1):(nz02+nz01+4))= &
+			res1((nz01+2+1):(nz02+nz01+4))+tronc02
+			end if 
+			
+			if(nz12.GT.0) then
+			
+			
+			res1((nz01+nz02+5):(nz02+nz01+nz12+6))= &
+			(res2i12num)*vet12*(su12**vet12)-&
+			i12*vet12*(su12**vet12)*res2denum*y12t(256)
+			
+			res1((nz01+nz02+5):(nz02+nz01+nz12+6))= &
+			res1((nz01+nz02+5):(nz02+nz01+nz12+6))/u1
+			
+			end if
+			else 
+			
+					if(nz01.GT.0) then
+			res1(1:(nz01+2))=tronc01
+			end if 
+			
+			if(nz02.GT.0) then
+			
+			
+			res1((nz01+2+1):(nz02+nz01+4))=tronc02
+			end if 
+			
+			if(nz12.GT.0) then
+			
+			
+			res1((nz01+nz02+5):(nz02+nz01+nz12+6))= 0
+			
+				
+			endif	
+			
+			endif 
+								
+							!	write(6,*)'res1',res1
+							!	call flush(6)
+                            else ! passage 0-->2  
+					
+write(6,*)'c=7'
+								
+							call  qgaussbetafirstderivtimedep(t1(i),t3(i),the01,the02,&
+                         the12,res2denum,&
+						 res2i01num,res2i02num,res2i12num,res2m01num, &
+						 vet01,vet02,vet12,zi01,zi02,zi12,nz01,nz02,nz12, &
+						 y01t(1:240),y02t(1:240),y12t(1:240))
+						 
+						 
+						
+			call suspdep(t3(i),the12,nz12,su12,ri12,zi12,gl12,dble(y12t(241:256)))
+			call suspdep(t3(i),the02,nz02,su02,ri02,zi02,gl02,dble(y02t(241:256)))
+			call suspdep(t3(i),the01,nz01,su01,ri01,zi01,gl01,dble(y01t(241:256)))
+			
+			call suspMI(t3(i),nz12,zi12,i12,m12)
+			call suspMI(t3(i),nz02,zi02,i02,m02)
+			call suspMI(t3(i),nz01,zi01,i01,m01)
+				
+			u1=(su12**vet12)*res2denum*ri12*vet12+&
+			(su01**vet01)*(su02**vet02)*ri02*vet02
+								
+									write(6,*)'u1',u1
+								write(6,*)'res2denum',res2denum
+								write(6,*)'res2i01num',res2i01num
+								write(6,*)'res2i02num',res2i02num
+								write(6,*)'res2i12num',res2i12num
+							    write(6,*)'res2m01num',res2m01num
+							if(u1.NE.0) then 
+							
+						if(nz01.GT.0) then
+			res1(1:(nz01+2))=(res2m01num-res2i01num)* &
+			vet01*ri12*vet12*(su12**vet12)- &
+			i01*vet01*(su01**vet01)*y01t(256)* &
+			(su02**vet02)*ri02*vet02
+			res1(1:(nz01+2))=res1(1:(nz01+2))/u1
+			res1(1:(nz01+2))= res1(1:(nz01+2))+&
+			tronc01
+			end if 
+			
+			if(nz02.GT.0) then
+			
+			
+			res1((nz01+2+1):(nz02+nz01+4))=-res2i02num* &
+			vet02*(su12**vet12)*ri12*vet12+ &
+			(m02-i02*ri02*vet02)*vet02*y02t(256)*(su01**vet01)* &
+			(su02**vet02)
+			res1((nz01+2+1):(nz02+nz01+4))= &
+			res1((nz01+2+1):(nz02+nz01+4))/u1
+			res1((nz01+2+1):(nz02+nz01+4))= &
+			res1((nz01+2+1):(nz02+nz01+4))+tronc02
+			end if 
+			
+			if(nz12.GT.0) then
+			
+			
+			res1((nz01+nz02+5):(nz02+nz01+nz12+6))= &
+			(res2i12num)*vet12*(su12**vet12)* &
+			ri12*vet12+&
+			(m12- & 
+			i12*ri12*vet12)*vet12*y12t(256)*(su12**vet12)*res2denum
+			
+			res1((nz01+nz02+5):(nz02+nz01+nz12+6))= &
+			res1((nz01+nz02+5):(nz02+nz01+nz12+6))/u1
+			
+			endif
+			
+			else 
+			
+						if(nz01.GT.0) then
+			res1(1:(nz01+2))=tronc01
+			end if 
+			
+			if(nz02.GT.0) then
+			
+			
+			res1((nz01+2+1):(nz02+nz01+4))=tronc02
+			end if 
+			
+			if(nz12.GT.0) then
+			
+			
+			res1((nz01+nz02+5):(nz02+nz01+nz12+6))= 0
+			
+			endif
+			
+			endif 
+							!	write(6,*)'res1',res1
+							!	call flush(6)
+							write(6,*)'res1',res1	
+						
+                            endif
+                         endif                        
+                      endif
+                   endif   
+                endif   
+                endif  				
+
+			write(6,*)'res',res
+                res = res + res1 
+
+
+        end do   
+ 
+
+
+        likelihood_deriv = res
+
+
+123     continue 
+
+	deallocate(b,bfix,fix,ve01,ve02,ve12,&
+	t0,t1,t2,t3,c,dy01,dy02,dy12,zi01,zi02,zi12,&
+	tronc01,tronc02)
+
+end subroutine derivafirstderivtimedep
 
 
 module my_functions_splines
 contains
 
 
-subroutine suspdepfirstderiv(x,p,z,n,risq,glam,surv,inty,y,logy,nY)
+subroutine suspdepfirstderiv(x,p,z,n,risq,glam,surv,inty,y,dlogy,nY)
 
         implicit none
 		integer::n
 		double precision,dimension(16)::y
         double precision::x,surv,risq,glam,ri,gl,su,gl1,gl2
 		integer::j,jtw,jtwm1,nY
-		double precision::logy(:,:)
+		double precision::dlogy(:,:)
 		double precision,intent(out)::inty(:)
 		double precision::inty1(nY),inty2(nY)
         double precision::a,b,dx,xm,xr,&
@@ -38763,7 +39745,7 @@ subroutine suspdepfirstderiv(x,p,z,n,risq,glam,surv,inty,y,logy,nY)
         xr = 0.5d+00*(b-a)
         call susp(xm,p,n,su,ri,z,gl)
 		glam = ri*y(1)*wgk(8)   !integral over 0 to x of base risk
-        inty=glam*logy(1,1:nY)
+        inty=glam*dlogy(1,1:nY)
 
 		  if(a.eq.b)then
                surv = 1.d0
@@ -38780,11 +39762,11 @@ subroutine suspdepfirstderiv(x,p,z,n,risq,glam,surv,inty,y,logy,nY)
                xx = xm+dx
                call susp(xx,p,n,su,ri,z,gl)
                gl1=ri*y(3) 
-			   inty1=gl1*logy(3,1:nY) 
+			   inty1=gl1*dlogy(3,1:nY) 
                xx = xm-dx
                call susp(xx,p,n,su,ri,z,gl)
                gl2=ri*y(2)   ! svgrd valeurs fct f a drte du centre
-			   inty2=gl2*logy(2,1:nY) 
+			   inty2=gl2*dlogy(2,1:nY) 
 	       
 		  glam=glam+wgk(jtwm1)*(gl1+gl2)
 		  inty=inty+wgk(jtwm1)*(inty1+inty2)
@@ -38796,11 +39778,11 @@ subroutine suspdepfirstderiv(x,p,z,n,risq,glam,surv,inty,y,logy,nY)
                xx = xm+dx
                call susp(xx,p,n,su,ri,z,gl)
                gl1=ri*y(5)
-			   inty1=gl1*logy(5,1:nY) 
+			   inty1=gl1*dlogy(5,1:nY) 
                xx = xm-dx
                call susp(xx,p,n,su,ri,z,gl)
                gl2=ri*y(4)   ! svgrd valeurs fct f a drte du centre
-			   inty2=gl2*logy(4,1:nY) 
+			   inty2=gl2*dlogy(4,1:nY) 
 	       
 		  glam=glam+wgk(jtwm1)*(gl1+gl2)
 		  inty=inty+wgk(jtwm1)*(inty1+inty2)
@@ -38810,11 +39792,11 @@ subroutine suspdepfirstderiv(x,p,z,n,risq,glam,surv,inty,y,logy,nY)
                xx = xm+dx
                call susp(xx,p,n,su,ri,z,gl)
                gl1=ri*y(7) 
-			   inty1=gl1*logy(7,1:nY) 
+			   inty1=gl1*dlogy(7,1:nY) 
                xx = xm-dx
                call susp(xx,p,n,su,ri,z,gl)
                gl2=ri*y(6)   ! svgrd valeurs fct f a drte du centre
-			   inty2=gl2*logy(6,1:nY) 
+			   inty2=gl2*dlogy(6,1:nY) 
 	       
 		  glam=glam+wgk(jtwm1)*(gl1+gl2)
 		  inty=inty+wgk(jtwm1)*(inty1+inty2)
@@ -38827,11 +39809,11 @@ subroutine suspdepfirstderiv(x,p,z,n,risq,glam,surv,inty,y,logy,nY)
                xx = xm+dx
                call susp(xx,p,n,su,ri,z,gl)
                gl1=ri*y(9)
-			   inty1=gl1*logy(9,1:nY) 
+			   inty1=gl1*dlogy(9,1:nY) 
                xx = xm-dx
                call susp(xx,p,n,su,ri,z,gl)
                gl2=ri*y(8)   ! svgrd valeurs fct f a drte du centre
-			   inty2=gl2*logy(8,1:nY) 
+			   inty2=gl2*dlogy(8,1:nY) 
 	       
 		   glam=glam+wgk(jtwm1)*(gl1+gl2)
 		   inty=inty+wgk(jtwm1)*(inty1+inty2)
@@ -38841,11 +39823,11 @@ subroutine suspdepfirstderiv(x,p,z,n,risq,glam,surv,inty,y,logy,nY)
                xx = xm+dx
               call susp(xx,p,n,su,ri,z,gl)
 				gl1=ri*y(11) 
-				inty1=gl1*logy(11,1:nY) 
+				inty1=gl1*dlogy(11,1:nY) 
                xx = xm-dx
               call susp(xx,p,n,su,ri,z,gl)
 				gl2=ri*y(10)   ! svgrd valeurs fct f a drte du centre
-				inty2=gl2*logy(10,1:nY) 
+				inty2=gl2*dlogy(10,1:nY) 
 	       
 			glam=glam+wgk(jtwm1)*(gl1+gl2)
 			inty=inty+wgk(jtwm1)*(inty1+inty2)
@@ -38857,11 +39839,11 @@ subroutine suspdepfirstderiv(x,p,z,n,risq,glam,surv,inty,y,logy,nY)
                xx = xm+dx
                call susp(xx,p,n,su,ri,z,gl)
                gl1=ri*y(13) 
-			   inty1=gl1*logy(13,1:nY) 
+			   inty1=gl1*dlogy(13,1:nY) 
                xx = xm-dx
                call susp(xx,p,n,su,ri,z,gl)
                gl2=ri*y(12)   ! svgrd valeurs fct f a drte du centre
-			   inty2=gl2*logy(12,1:nY) 
+			   inty2=gl2*dlogy(12,1:nY) 
 	       
 		 glam=glam+wgk(jtwm1)*(gl1+gl2)
 		 inty=inty+wgk(jtwm1)*(inty1+inty2)
@@ -38871,11 +39853,11 @@ subroutine suspdepfirstderiv(x,p,z,n,risq,glam,surv,inty,y,logy,nY)
                xx = xm+dx
                call susp(xx,p,n,su,ri,z,gl)
 			   gl1=ri*y(15) 
-			   inty1=gl1*logy(15,1:nY) 
+			   inty1=gl1*dlogy(15,1:nY) 
                xx = xm-dx
                call susp(xx,p,n,su,ri,z,gl)
 			   gl2=ri*y(14)   ! svgrd valeurs fct f a drte du centre
-			   inty2=gl2*logy(14,1:nY) 
+			   inty2=gl2*dlogy(14,1:nY) 
 	       
 		glam=glam+wgk(jtwm1)*(gl1+gl2)
 		inty=inty+wgk(jtwm1)*(inty1+inty2)
@@ -38896,7 +39878,7 @@ subroutine suspdepfirstderiv(x,p,z,n,risq,glam,surv,inty,y,logy,nY)
 
 end subroutine suspdepfirstderiv
 
-subroutine suspdep0firstderiv(x,p,z,n,glam,inty,y,logy,nY)
+subroutine suspdep0firstderiv(x,p,z,n,glam,inty,y,dlogy,nY)
 
         implicit none
 
@@ -38907,7 +39889,7 @@ subroutine suspdep0firstderiv(x,p,z,n,glam,inty,y,logy,nY)
 		double precision,dimension(8)::xgk,wgk
 	    double precision,dimension(4)::wg
          double precision::xx
-		 double precision::logy(15,nY)
+		 double precision::dlogy(15,nY)
 		 double precision::inty(:),inty1(nY),inty2(nY)
 		 
 		double precision,dimension(-2:(n+3))::z
@@ -38958,7 +39940,7 @@ subroutine suspdep0firstderiv(x,p,z,n,glam,inty,y,logy,nY)
         xr = 0.5d+00*(b-a)
         call susp(xm,p,n,su,ri,z,gl)
 		glam = ri*y(1)*wgk(8)   !integral over 0 to x of base risk
-		inty=glam*logy(1,:)
+		inty=glam*dlogy(1,:)
        
 
 		  if(a.eq.b)then
@@ -38973,11 +39955,11 @@ subroutine suspdep0firstderiv(x,p,z,n,glam,inty,y,logy,nY)
                xx = xm+dx
                call susp(xx,p,n,su,ri,z,gl)
                gl1=ri*y(3) 
-			   inty1=gl1*logy(3,:)
+			   inty1=gl1*dlogy(3,:)
                xx = xm-dx
                call susp(xx,p,n,su,ri,z,gl)
                gl2=ri*y(2)   ! svgrd valeurs fct f a drte du centre
-			    inty2=gl2*logy(2,:)
+			    inty2=gl2*dlogy(2,:)
 				
 		  glam=glam+wgk(jtwm1)*(gl1+gl2)
 		  inty=inty+wgk(jtwm1)*(inty1+inty2)
@@ -38988,11 +39970,11 @@ subroutine suspdep0firstderiv(x,p,z,n,glam,inty,y,logy,nY)
                xx = xm+dx
                call susp(xx,p,n,su,ri,z,gl)
                gl1=ri*y(5)
-			   inty1=gl1*logy(5,:)
+			   inty1=gl1*dlogy(5,:)
                xx = xm-dx
                call susp(xx,p,n,su,ri,z,gl)
                gl2=ri*y(4)   ! svgrd valeurs fct f a drte du centre
-	        inty2=gl2*logy(4,:)
+	        inty2=gl2*dlogy(4,:)
 		  glam=glam+wgk(jtwm1)*(gl1+gl2)
 		  inty=inty+wgk(jtwm1)*(inty1+inty2)
 		   
@@ -39001,11 +39983,11 @@ subroutine suspdep0firstderiv(x,p,z,n,glam,inty,y,logy,nY)
                xx = xm+dx
                call susp(xx,p,n,su,ri,z,gl)
                gl1=ri*y(7) 
-			   inty1=gl1*logy(7,:)
+			   inty1=gl1*dlogy(7,:)
                xx = xm-dx
                call susp(xx,p,n,su,ri,z,gl)
                gl2=ri*y(6)   ! svgrd valeurs fct f a drte du centre
-			    inty2=gl2*logy(6,:)
+			    inty2=gl2*dlogy(6,:)
 	       
 		  glam=glam+wgk(jtwm1)*(gl1+gl2)
 		  inty=inty+wgk(jtwm1)*(inty1+inty2)
@@ -39018,11 +40000,11 @@ subroutine suspdep0firstderiv(x,p,z,n,glam,inty,y,logy,nY)
                xx = xm+dx
                call susp(xx,p,n,su,ri,z,gl)
                gl1=ri*y(9)
-			   inty1=gl1*logy(9,:)
+			   inty1=gl1*dlogy(9,:)
                xx = xm-dx
                call susp(xx,p,n,su,ri,z,gl)
                gl2=ri*y(8)   ! svgrd valeurs fct f a drte du centre
-			    inty2=gl2*logy(8,:)
+			    inty2=gl2*dlogy(8,:)
 	       
 		   glam=glam+wgk(jtwm1)*(gl1+gl2)
 		   inty=inty+wgk(jtwm1)*(inty1+inty2)
@@ -39032,11 +40014,11 @@ subroutine suspdep0firstderiv(x,p,z,n,glam,inty,y,logy,nY)
                xx = xm+dx
                call susp(xx,p,n,su,ri,z,gl)
 				gl1=ri*y(11) 
-				inty1=gl1*logy(11,:)
+				inty1=gl1*dlogy(11,:)
                xx = xm-dx
                call susp(xx,p,n,su,ri,z,gl)
 				gl2=ri*y(10)   ! svgrd valeurs fct f a drte du centre
-				 inty2=gl2*logy(10,:)
+				 inty2=gl2*dlogy(10,:)
 	       
 			glam=glam+wgk(jtwm1)*(gl1+gl2)
 			inty=inty+wgk(jtwm1)*(inty1+inty2)
@@ -39048,11 +40030,11 @@ subroutine suspdep0firstderiv(x,p,z,n,glam,inty,y,logy,nY)
                xx = xm+dx
                call susp(xx,p,n,su,ri,z,gl)
                gl1=ri*y(13) 
-			   inty1=gl1*logy(13,:)
+			   inty1=gl1*dlogy(13,:)
                xx = xm-dx
                call susp(xx,p,n,su,ri,z,gl)
                gl2=ri*y(12)   ! svgrd valeurs fct f a drte du centre
-			    inty2=gl2*logy(12,:)
+			    inty2=gl2*dlogy(12,:)
 	       
 		 glam=glam+wgk(jtwm1)*(gl1+gl2)
 		 inty=inty+wgk(jtwm1)*(inty1+inty2)
@@ -39062,11 +40044,11 @@ subroutine suspdep0firstderiv(x,p,z,n,glam,inty,y,logy,nY)
                xx = xm+dx
                call susp(xx,p,n,su,ri,z,gl)
          gl1=ri*y(15) 
-		 inty1=gl1*logy(15,:)
+		 inty1=gl1*dlogy(15,:)
                xx = xm-dx
                call susp(xx,p,n,su,ri,z,gl)
          gl2=ri*y(14)   ! svgrd valeurs fct f a drte du centre
-		  inty2=gl2*logy(14,:)
+		  inty2=gl2*dlogy(14,:)
 	       
 		glam=glam+wgk(jtwm1)*(gl1+gl2)
 		inty=inty+wgk(jtwm1)*(inty1+inty2)
@@ -39903,9 +40885,9 @@ end module
 			!	write(6,*) 'go to exp'
 			!	call flush(6)
 				
-				y01t=exp(y01t)
-				y02t=exp(y02t)
-				y12t=exp(y12t)
+				y01t=dexp(y01t)
+				y02t=dexp(y02t)
+				y12t=dexp(y12t)
 
                 vet01 = dexp(vet01)
                 vet12 = dexp(vet12)

@@ -167,6 +167,69 @@ DYNderivaweib<-function(h,b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
 
 
 
+DYNreggrmlaweibana<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
+                             dimnva01,dimnva02,dimnva12,nva01,nva02,nva12,
+                             t0,t1,t2,t3,troncature,lambda,alpha,penalty.factor,penalty,
+                             y01,y02,y12,p01,p02,p12,dimp01,dimp02,dimp12,Ntime){
+  
+  res<-rep(0,npm)
+  output<-.Fortran("derivaweibfirstderivtimedep",
+                   ## input
+                   as.double(b),
+                   as.integer(npm),
+                   as.integer(npar),
+                   as.double(bfix),
+                   as.integer(fix),
+                   as.integer(ctime),
+                   as.integer(no),
+                   as.double(ve01),
+                   as.double(ve12),
+                   as.double(ve02),
+                   as.double(y01),
+                   as.double(y02),
+                   as.double(y12),
+                   as.integer(p01),
+                   as.integer(p02),
+                   as.integer(p12),
+                   as.integer(dimp01),
+                   as.integer(dimp02),
+                   as.integer(dimp12),
+                   as.integer(Ntime),
+                   as.integer(dimnva01),
+                   as.integer(dimnva12),
+                   as.integer(dimnva02),
+                   as.integer(nva01),
+                   as.integer(nva12),
+                   as.integer(nva02),
+                   as.double(t0),
+                   as.double(t1),
+                   as.double(t2),
+                   as.double(t3),
+                   as.integer(troncature),
+                   likelihood_res=as.double(res),
+                   PACKAGE="HIDeM")$likelihood_res
+  
+  if(any(output==Inf)| any(output==-Inf) | any(is.na(output)) | any(is.nan(output))){
+    
+    output[any(output==Inf)|any(is.na(output)) | any(is.nan(output))]<-.Machine$double.eps
+    output[any(output==-Inf)]<--.Machine$double.eps
+    
+  }
+
+  sol<-output
+  #browser()
+  if(sum(fix[1:6])!=6){
+    
+    bb<-rep(NA,npar)
+    bb[which(fix==0)]<-b
+    bb[which(fix==1)]<-bfix
+    
+    sol[1:(6-sum(fix[1:6]))]<-sol[1:(6-sum(fix[1:6]))]*2*bb[which(fix[1:6]==0)]
+  }
+  #browser()
+  return(sol)
+}
+
 
 DYNderivaweibdiag<-function(h,b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
                         dimnva01,dimnva02,dimnva12,nva01,nva02,nva12,

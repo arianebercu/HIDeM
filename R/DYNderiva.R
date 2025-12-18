@@ -344,5 +344,74 @@ DYNderivadiag<-function(h,b,npm,npar,bfix,fix,zi01,zi02,zi12,ctime,no,nz01,nz02,
 
 
 
+DYNreggrmlaana<-function(b,npm,npar,bfix,fix,zi01,zi02,zi12,ctime,no,nz01,nz02,nz12,ve01,ve02,ve12,
+                    dimnva01,dimnva02,dimnva12,nva01,nva02,nva12,
+                    t0,t1,t2,t3,troncature,y01,y02,y12,
+                    p01,p02,p12,dimp01,dimp02,dimp12,Ntime){
+
+  res<-rep(0,npm)
+  #browser()
+  output<-.Fortran("derivafirstderivtimedep",
+               ## input
+               as.double(b),
+               as.integer(npm),
+               as.integer(npar),
+               as.double(bfix),
+               as.integer(fix),
+               as.double(zi01),
+               as.double(zi12),
+               as.double(zi02),
+               as.integer(ctime),
+               as.integer(no),
+               as.integer(nz01),
+               as.integer(nz12),
+               as.integer(nz02),
+               as.double(ve01),
+               as.double(ve12),
+               as.double(ve02),
+               as.double(y01),
+               as.double(y02),
+               as.double(y12),
+               as.integer(p01),
+               as.integer(p02),
+               as.integer(p12),
+               as.integer(dimp01),
+               as.integer(dimp02),
+               as.integer(dimp12),
+               as.integer(Ntime),
+               as.integer(dimnva01),
+               as.integer(dimnva12),
+               as.integer(dimnva02),
+               as.integer(nva01),
+               as.integer(nva12),
+               as.integer(nva02),
+               as.double(t0),
+               as.double(t1),
+               as.double(t2),
+               as.double(t3),
+               as.integer(troncature),
+               likelihood_res=as.double(res),
+               PACKAGE="HIDeM")$likelihood_res
+  nn<-nz01+nz02+nz12+6
+  
+  if(length(-c(which(fix[1:nn]==1)))>0){
+    output<-output[-c(which(fix[1:nn]==1))]}
+  
+  if(any(output==Inf)| any(output==-Inf) | any(is.na(output)) | any(is.nan(output))){
+    
+    output[any(output==Inf)|any(is.na(output)) | any(is.nan(output))]<-.Machine$double.eps
+    output[any(output==-Inf)]<--.Machine$double.eps
+    
+  }
+  sol<-output
+  
+  bb<-rep(NA,npar)
+  bb[which(fix==0)]<-b
+  bb[which(fix==1)]<-bfix
+  np<-sum(fix[1:nn]==0)
+  sol[1:np]<-sol[1:np]*2*bb[which(fix[1:nn]==0)]
+
+  return(sol)
+}
 
 

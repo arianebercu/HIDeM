@@ -57,7 +57,7 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,size_spline,
                    outcome01,outcome02,
                    outcome12,NtimePoints,
                    p01,p02,p12, assoc,
-                   dimp01,dimp02,dimp12,scale.X){
+                   dimp01,dimp02,dimp12,scale.X,defpositive){
   
 
 
@@ -403,7 +403,11 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                  
                                  eigen.values<-eigen(V,symmetric=T,only.values=T)$values
                                  
-                                 idpos<-ifelse(any(eigen.values<=eps.eigen),1,0)
+                                 if(defpositive==T){
+                                   idpos<-ifelse(any(eigen.values<=eps.eigen),1,0)
+                                 }else{
+                                   idpos<-ifelse(any(diag(V)==0),1,0)
+                                 }
                                  
                                  
                                  idpos0<-idpos
@@ -440,7 +444,11 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                    eigen.values<-eigen(V,symmetric=T,only.values=T)$values
                                    # check if hessienne defined positive
                                    
-                                   idpos<-ifelse(any(eigen.values<=eps.eigen),1,0)
+                                   if(defpositive==T){
+                                     idpos<-ifelse(any(eigen.values<=eps.eigen),1,0)
+                                   }else{
+                                     idpos<-ifelse(any(diag(V)==0),1,0)
+                                   }
                                    
                                    # if(def.positive==T){
                                    #   idpos<-ifelse(any(eigen.values<=0),1,0)
@@ -604,6 +612,7 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                    
                                    
                                    betanew<-beta+delta*sears$vw
+                                   betanew<-ifelse(abs(betanew)<=0.0001,0,betanew)
                                    b<-c(s,betanew)
                                    
                                    
@@ -673,7 +682,7 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                  if(npmspline!=0){
                                  output.mla<- marqLevAlg::mla(b=b,
                                                   fn=gaussDYNidmlLikelihood,
-                                                  gr=deriva.gradient.DYNspline,
+                                                 
                                                   epsa=epsa,
                                                   epsb=epsb,
                                                   epsd=epsd,
@@ -1071,7 +1080,11 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                      
                                      eigen.values<-diag(V)
                                      
-                                     idpos<-ifelse(any(eigen.values<=eps.eigen),1,0)
+                                     if(defpositive==T){
+                                       idpos<-ifelse(any(eigen.values<=eps.eigen),1,0)
+                                     }else{
+                                       idpos<-ifelse(any(diag(V)==0),1,0)
+                                     }
                                      
                                      
                                      idpos0<-idpos
@@ -1108,7 +1121,11 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                        eigen.values<-diag(V)
                                        # check if hessienne defined positive
                                        
-                                       idpos<-ifelse(any(eigen.values<=eps.eigen),1,0)
+                                       if(defpositive==T){
+                                         idpos<-ifelse(any(eigen.values<=eps.eigen),1,0)
+                                       }else{
+                                         idpos<-ifelse(any(diag(V)==0),1,0)
+                                       }
                                        
                                        # if(def.positive==T){
                                        #   idpos<-ifelse(any(eigen.values<=0),1,0)
@@ -1273,6 +1290,7 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                                     penalty=penalty)
                                      
                                      betanew<-beta+delta*sears$vw
+                                     betanew<-ifelse(abs(betanew)<=0.0001,0,betanew)
                                      b<-c(s,betanew)
                                      
                                      
@@ -1343,7 +1361,7 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                   if(npmspline!=0){
                                    output.mla<- marqLevAlg::mla(b=b,
                                                                 fn=gaussDYNidmlLikelihood,
-                                                                gr=deriva.gradient.DYNspline,
+                                                                
                                                                 epsa=epsa,
                                                                 epsb=epsb,
                                                                 epsd=epsd,
@@ -1601,7 +1619,7 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                
                                
                                # computation pbr 
-                               
+                               browser()
                                pbr_compu<-0
                                
                                if(idsample==1){
@@ -1772,7 +1790,11 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                  
                                  eigen.values<-eigen(V,symmetric=T,only.values=T)$values
                                 
-                                 idpos<-ifelse(any(eigen.values<=eps.eigen),1,0)
+                                 if(defpositive==T){
+                                   idpos<-ifelse(any(eigen.values<=eps.eigen),1,0)
+                                 }else{
+                                   idpos<-ifelse(any(diag(V)==0),1,0)
+                                 }
                                  
                                  
                                  idpos0<-idpos
@@ -1808,7 +1830,11 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                    if(sum(V==Inf)>0|sum(V==-Inf)>0){break}
                                    eigen.values<-eigen(V,symmetric=T,only.values=T)$values
                                    # check if hessienne defined positive
-                                   idpos<-ifelse(any(eigen.values<=eps.eigen),1,0)
+                                   if(defpositive==T){
+                                     idpos<-ifelse(any(eigen.values<=eps.eigen),1,0)
+                                   }else{
+                                     idpos<-ifelse(any(diag(V)==0),1,0)
+                                   }
                                    
                                    
                                    
@@ -1977,6 +2003,7 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                    
                                    
                                    betanew<-beta+delta*sears$vw
+                                   betanew<-ifelse(abs(betanew)<=0.0001,0,betanew)
                                    b<-c(s,betanew)
                                    
                                    
@@ -2043,11 +2070,11 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                  bfix<-b[fix0.beta==1]
                                  b<-b[fix0.beta==0]
                                  # update modelPar
-                              
+                              browser()
                                 if(npmspline!=0){
                                  output.mla<- marqLevAlg::mla(b=b,
                                                               fn=gaussDYNidmlLikelihood,
-                                                              gr=deriva.gradient.DYNspline,
+                                                              #gr=DYNreggrmlaana,
                                                               epsa=epsa,
                                                               epsb=epsb,
                                                               epsd=epsd,
@@ -2090,6 +2117,9 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                                               dimp12=dimp12,
                                                               Ntime=NtimePoints)
                                  
+                                 
+                                 
+                               
                                  # look at convergence for each lambda :
                                  
                                  # new values for splines:
@@ -2437,7 +2467,11 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                          
                                          eigen.values<-diag(V)
                                          
-                                         idpos<-ifelse(any(eigen.values<=eps.eigen),1,0)
+                                         if(defpositive==T){
+                                           idpos<-ifelse(any(eigen.values<=eps.eigen),1,0)
+                                         }else{
+                                           idpos<-ifelse(any(diag(V)==0),1,0)
+                                         }
                                          
                                          
                                          idpos0<-idpos
@@ -2474,7 +2508,11 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                            if(sum(V==Inf)>0|sum(V==-Inf)>0){break}
                                            eigen.values<-diag(V)
                                            # check if hessienne defined positive
-                                           idpos<-ifelse(any(eigen.values<=eps.eigen),1,0)
+                                           if(defpositive==T){
+                                             idpos<-ifelse(any(eigen.values<=eps.eigen),1,0)
+                                           }else{
+                                             idpos<-ifelse(any(diag(V)==0),1,0)
+                                           }
                                            
                                            
                                            
@@ -2639,6 +2677,7 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                          
                                          
                                          betanew<-beta+delta*sears$vw
+                                         betanew<-ifelse(abs(betanew)<=0.0001,0,betanew)
                                          b<-c(s,betanew)
                                          
                                          
@@ -2710,7 +2749,7 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                        if(npmspline!=0){
                                        output.mla<- marqLevAlg::mla(b=b,
                                                                     fn=gaussDYNidmlLikelihood,
-                                                                    gr=deriva.gradient.DYNspline,
+                                                                    
                                                                     epsa=epsa,
                                                                     epsb=epsb,
                                                                     epsd=epsd,
@@ -3220,7 +3259,11 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                          
                                          eigen.values<-eigen(V,symmetric=T,only.values=T)$values
                                          
-                                         idpos<-ifelse(any(eigen.values<=eps.eigen),1,0)
+                                         if(defpositive==T){
+                                           idpos<-ifelse(any(eigen.values<=eps.eigen),1,0)
+                                         }else{
+                                           idpos<-ifelse(any(diag(V)==0),1,0)
+                                         }
                                          
                                          
                                          idpos0<-idpos
@@ -3256,7 +3299,11 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                            if(sum(V==Inf)>0|sum(V==-Inf)>0){break}
                                            eigen.values<-eigen(V,symmetric=T,only.values=T)$values
                                            # check if hessienne defined positive
-                                           idpos<-ifelse(any(eigen.values<=eps.eigen),1,0)
+                                           if(defpositive==T){
+                                             idpos<-ifelse(any(eigen.values<=eps.eigen),1,0)
+                                           }else{
+                                             idpos<-ifelse(any(diag(V)==0),1,0)
+                                           }
                                            
                                            
                                            
@@ -3425,6 +3472,7 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                            
                                            
                                            betanew<-beta+delta*sears$vw
+                                           betanew<-ifelse(abs(betanew)<=0.0001,0,betanew)
                                            b<-c(s,betanew)
                                            
                                            
@@ -3495,7 +3543,7 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                          if(npmspline!=0){
                                          output.mla<- marqLevAlg::mla(b=b,
                                                                       fn=gaussDYNidmlLikelihood,
-                                                                      gr=deriva.gradient.DYNspline,
+                                                 
                                                                       epsa=epsa,
                                                                       epsb=epsb,
                                                                       epsd=epsd,
@@ -3885,7 +3933,11 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                              
                                              eigen.values<-diag(V)
                                              
-                                             idpos<-ifelse(any(eigen.values<=eps.eigen),1,0)
+                                             if(defpositive==T){
+                                               idpos<-ifelse(any(eigen.values<=eps.eigen),1,0)
+                                             }else{
+                                               idpos<-ifelse(any(diag(V)==0),1,0)
+                                             }
                                              
                                              
                                              idpos0<-idpos
@@ -3922,7 +3974,11 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                                if(sum(V==Inf)>0|sum(V==-Inf)>0){break}
                                                eigen.values<-diag(V)
                                                # check if hessienne defined positive
-                                               idpos<-ifelse(any(eigen.values<=eps.eigen),1,0)
+                                               if(defpositive==T){
+                                                 idpos<-ifelse(any(eigen.values<=eps.eigen),1,0)
+                                               }else{
+                                                 idpos<-ifelse(any(diag(V)==0),1,0)
+                                               }
                                                
                                                
                                                
@@ -4087,6 +4143,7 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                                
                                                
                                                betanew<-beta+delta*sears$vw
+                                               betanew<-ifelse(abs(betanew)<=0.0001,0,betanew)
                                                b<-c(s,betanew)
                                                
                                                
@@ -4158,7 +4215,7 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                              if(npmspline!=0){
                                              output.mla<- marqLevAlg::mla(b=b,
                                                                           fn=gaussDYNidmlLikelihood,
-                                                                          gr=deriva.gradient.DYNspline,
+                                 
                                                                           epsa=epsa,
                                                                           epsb=epsb,
                                                                           epsd=epsd,
@@ -4674,7 +4731,11 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                          
                                          eigen.values<-eigen(V,symmetric=T,only.values=T)$values
                                          
-                                         idpos<-ifelse(any(eigen.values<=eps.eigen),1,0)
+                                         if(defpositive==T){
+                                           idpos<-ifelse(any(eigen.values<=eps.eigen),1,0)
+                                         }else{
+                                           idpos<-ifelse(any(diag(V)==0),1,0)
+                                         }
                                          
                                          
                                          idpos0<-idpos
@@ -4710,7 +4771,11 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                            if(sum(V==Inf)>0|sum(V==-Inf)>0){break}
                                            eigen.values<-eigen(V,symmetric=T,only.values=T)$values
                                            # check if hessienne defined positive
-                                           idpos<-ifelse(any(eigen.values<=eps.eigen),1,0)
+                                           if(defpositive==T){
+                                             idpos<-ifelse(any(eigen.values<=eps.eigen),1,0)
+                                           }else{
+                                             idpos<-ifelse(any(diag(V)==0),1,0)
+                                           }
                                            
                                            
                                            
@@ -4879,6 +4944,7 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                            
                                            
                                            betanew<-beta+delta*sears$vw
+                                           betanew<-ifelse(abs(betanew)<=0.0001,0,betanew)
                                            b<-c(s,betanew)
                                            
                                            
@@ -4949,7 +5015,7 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                          if(npmspline!=0){
                                          output.mla<- marqLevAlg::mla(b=b,
                                                                       fn=gaussDYNidmlLikelihood,
-                                                                      gr=deriva.gradient.DYNspline,
+                            
                                                                       epsa=epsa,
                                                                       epsb=epsb,
                                                                       epsd=epsd,
@@ -5336,7 +5402,11 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                              
                                              eigen.values<-diag(V)
                                              
-                                             idpos<-ifelse(any(eigen.values<=eps.eigen),1,0)
+                                             if(defpositive==T){
+                                               idpos<-ifelse(any(eigen.values<=eps.eigen),1,0)
+                                             }else{
+                                               idpos<-ifelse(any(diag(V)==0),1,0)
+                                             }
                                              
                                              
                                              idpos0<-idpos
@@ -5373,8 +5443,11 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                                if(sum(V==Inf)>0|sum(V==-Inf)>0){break}
                                                eigen.values<-diag(V)
                                                # check if hessienne defined positive
-                                               idpos<-ifelse(any(eigen.values<=eps.eigen),1,0)
-                                               
+                                               if(defpositive==T){
+                                                 idpos<-ifelse(any(eigen.values<=eps.eigen),1,0)
+                                               }else{
+                                                 idpos<-ifelse(any(diag(V)==0),1,0)
+                                               }
                                                
                                                
                                              }
@@ -5538,6 +5611,7 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                                
                                                
                                                betanew<-beta+delta*sears$vw
+                                               betanew<-ifelse(abs(betanew)<=0.0001,0,betanew)
                                                b<-c(s,betanew)
                                                
                                                
@@ -5609,7 +5683,7 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                              if(npmspline!=0){
                                              output.mla<- marqLevAlg::mla(b=b,
                                                                           fn=gaussDYNidmlLikelihood,
-                                                                          gr=deriva.gradient.DYNspline,
+                             
                                                                           epsa=epsa,
                                                                           epsb=epsb,
                                                                           epsd=epsd,

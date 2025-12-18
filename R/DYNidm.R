@@ -217,6 +217,7 @@ DYNidm <- function(formula01,
                 analytics=T,
                 partialH=F,
                 clustertype="FORK",
+                defpositive=T,
                 modelY=NULL,
                 seed=123,
                 envir=parent.frame()){
@@ -1494,7 +1495,8 @@ DYNidm <- function(formula01,
                              dimp01=dimp01,
                              dimp02=dimp02,
                              dimp12=dimp12,
-                             scale.X=scale.X)
+                             scale.X=scale.X,
+                             defpositive=defpositive)
             }
             
 ############################## Output   ########################################
@@ -1672,7 +1674,8 @@ DYNidm <- function(formula01,
                                            dimp01=dimp01,
                                            dimp02=dimp02,
                                            dimp12=dimp12,
-                                           scale.X=scale.X)
+                                           scale.X=scale.X,
+                                         defpositive=defpositive)
             }
             
              
