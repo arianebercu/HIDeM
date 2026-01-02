@@ -67,6 +67,12 @@ DYNderivaweib<-function(h,b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
            PACKAGE="HIDeM")$likelihood_res
   
 
+  if(any(fu==Inf)| any(fu==-Inf) | any(is.na(fu)) | any(is.nan(fu))){
+    
+    fu[any(fu==Inf)|any(is.na(fu)) | any(is.nan(fu))]<-.Machine$double.eps
+    fu[any(fu==-Inf)]<--.Machine$double.eps
+    
+  }
   npm <- length(b)
   bh2 <- bh <- rep(0,npm)
   v <- matrix(0,npm,npm)
@@ -274,7 +280,12 @@ DYNderivaweibdiag<-function(h,b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
                likelihood_res=as.double(res),
                PACKAGE="HIDeM")$likelihood_res
   
-  
+  if(any(fu==Inf)| any(fu==-Inf) | any(is.na(fu)) | any(is.nan(fu))){
+    
+    fu[any(fu==Inf)|any(is.na(fu)) | any(is.nan(fu))]<-.Machine$double.eps
+    fu[any(fu==-Inf)]<--.Machine$double.eps
+    
+  }
   npm <- length(b)
   bh2 <- bh <- rep(0,npm)
   v <- rep(0,npm)

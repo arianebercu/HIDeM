@@ -2795,9 +2795,10 @@ else
 						 
                         res1=res2*(su12**vet12)
 						
-						if(res1.ne.0) then 
+						! should return infinity 18/12/2025
+						!if(res1.ne.0) then 
 						res1=dLOG(res1)
-						end if 
+						!end if 
 						
                 else  
                     if(c(i).eq.3)then ! obs 0-->1
@@ -2808,15 +2809,16 @@ else
                        call fonctdep(t1(i),the12,ri12,&
 					   gl12,su12,y12t(225:240))
 					   
-					   if(ri01.eq.0) then 
-					   res1=0
-					   else
+					  ! should return infinity 18/12/2025
+					 !  if(ri01.eq.0) then 
+					 !  res1=0
+					 !  else
                         res1 = -(gl01*vet01)-(gl02*vet02)+&
                         dLOG(ri01*vet01)+(gl12*vet12)
                         call fonctdep(t3(i),the12,ri12,gl12,&
 						su12,y12t(241:256))
                         res1 = res1 -(gl12*vet12)
-					   end if 
+					 !  end if 
 					   
                     else   
                        if(c(i).eq.4)then ! cpi 0-->1 et obs 1-->2
@@ -2830,10 +2832,11 @@ else
 						y01t(1:240),y02t(1:240),y12t(1:240))
 						 
                         res1=res2*(su12**vet12)*ri12*vet12
-						 
-						if(res1.ne.0) then 
+						
+					! should return infinity 18/12/2025						
+					!	if(res1.ne.0) then 
 						res1=dLOG(res1)
-						end if 
+					!	end if 
 						
                        else
                          if(c(i).eq.5)then ! obs 0-->1 et obs 1-->2
@@ -2843,20 +2846,20 @@ else
 								su02,y02t(225:240))
                                 call fonctdep(t1(i),the12,ri12,gl12,&
 								su12,y12t(225:240))
-								
-								if(ri01.eq.0) then 
-								res1=0
-								else 
+							! should return infinity 18/12/2025	
+							!	if(ri01.eq.0) then 
+							!	res1=0
+							!	else 
                                 res1 = -(gl01*vet01)-(gl02*vet02)+&
                                 dLOG(ri01*vet01)+(gl12*vet12)
                                 call fonctdep(t3(i),the12,ri12,&
 								gl12,su12,y12t(241:256))
-								if(ri12.eq.0) then 
-								res1=0
-								else
+							!	if(ri12.eq.0) then 
+							!	res1=0
+							!	else
                                 res1 = res1 -(gl12*vet12) + dLOG(ri12*vet12)
-								end if
-								end if
+							!	end if
+							!	end if
                          else
                             if(c(i).eq.6)then ! vivant ???
 						
@@ -2876,9 +2879,9 @@ else
                                 ((su01**vet01)*(su02**vet02))
 								
                                 
-								if(res1.ne.0) then 
+							!	if(res1.ne.0) then 
 								res1=dLOG(res1)
-								end if 
+							!	end if 
 								
                             else ! passage 0-->2  
 					
@@ -2898,9 +2901,9 @@ else
                                 res1 = (res2*(su12**vet12)*ri12*vet12)+&
                                 ((su01**vet01)*(su02**vet02)*ri02*vet02)
 								
-                                if(res1.ne.0) then 
+                            !    if(res1.ne.0) then 
 								res1=dLOG(res1)
-								end if 
+							!	end if 
 								
 						
                             endif
@@ -3212,9 +3215,9 @@ if(p01.gt.0) then
 						  !  write(6,*)'res1',res1
 						   ! write(6,*)'res2',res2
 							! write(6,*)'su12',su12
-						if(res1.ne.0) then 
+						!if(res1.ne.0) then 
 						res1=dLOG(res1)
-						end if 
+						!end if 
 
                 else  
                     if(c(i).eq.3)then ! obs 0-->1
@@ -3222,15 +3225,15 @@ if(p01.gt.0) then
                     call suspdep(t1(i),the02,nz02,su02,ri02,zi02,gl02,y02t(225:240))
 					call suspdep(t1(i),the12,nz12,su12,ri12,zi12,gl12,y12t(225:240))
 					
-					   if(ri01.eq.0) then 
-					   res1=0
-					   else
+					  ! if(ri01.eq.0) then 
+					  ! res1=0
+					  ! else
                         res1 = -(gl01*vet01)-(gl02*vet02)+&
                         dLOG(ri01*vet01)+(gl12*vet12)
 						call suspdep(t3(i),the12,nz12,su12,ri12,zi12, &
 						gl12,y12t(241:256))
                         res1 = res1 -(gl12*vet12)
-					   end if 
+					  ! end if 
 					   
                     else   
                        if(c(i).eq.4)then ! cpi 0-->1 et obs 1-->2
@@ -3247,9 +3250,9 @@ if(p01.gt.0) then
 						!		   write(6,*)'res2',res2
 						!		   write(6,*)'su12',su12
 						!		   write(6,*)'ri12',ri12
-						if(res1.ne.0) then 
+						!if(res1.ne.0) then 
 						res1=dLOG(res1)
-						end if 
+						!end if 
 						
                        else
                          if(c(i).eq.5)then ! obs 0-->1 et obs 1-->2
@@ -3261,19 +3264,19 @@ if(p01.gt.0) then
                          call suspdep(t1(i),the02,nz02,su02,ri02,zi02,gl02, & 
 						 y02t(225:240))
 						 
-								if(ri01.eq.0) then 
-								res1=0
-								else 
+								!if(ri01.eq.0) then 
+								!res1=0
+								!else 
                                 res1 = -(gl01*vet01)-(gl02*vet02)+&
                                 dLOG(ri01*vet01)+(gl12*vet12)
                                 call suspdep(t3(i),the12,nz12,su12,ri12,zi12,gl12, & 
 								y12t(241:256))
-								if(ri12.eq.0) then 
-								res1=0
-								else
+								!if(ri12.eq.0) then 
+								!res1=0
+								!else
                                 res1 = res1 -(gl12*vet12) + dLOG(ri12*vet12)
-								end if
-								end if
+								!end if
+								!end if
 
                          else
                             if(c(i).eq.6)then ! vivant ???
@@ -3298,9 +3301,9 @@ if(p01.gt.0) then
 							!	   write(6,*)'su02',su02
 							!	   write(6,*)'su01',su01
 								   
-								if(res1.ne.0) then 
+								!if(res1.ne.0) then 
 								res1=dLOG(res1)
-								end if 
+								!end if 
 
                             else ! passage 0-->2  
 
@@ -3323,9 +3326,9 @@ if(p01.gt.0) then
 								  ! write(6,*)'su02',su02
 								  ! write(6,*)'su01',su01
 								  !  write(6,*)'ri12',ri12
-								if(res1.ne.0) then 
+								!if(res1.ne.0) then 
 								res1=dLOG(res1)
-								end if 
+								!end if 
 								
                             endif
                           endif  
@@ -37491,7 +37494,8 @@ end module
 			!					write(6,*)'res212numY',res212numY
 		!						call flush(6)
 
-			if(v.NE.0) then 
+		! should return infinity 18/12/2025
+		!	if(v.NE.0) then 
 			if(nva01nofix.gt.0) then
 
 			u1=res201num*(su12**vet12)
@@ -37522,29 +37526,29 @@ end module
 			 
 			end if 
 			
-			else 
+		!	else 
 			
-			if(nva01nofix.gt.0) then
-			res1(1:nva01nofix)=tronc01
-			end if 
+		!	if(nva01nofix.gt.0) then
+		!	res1(1:nva01nofix)=tronc01
+		!	end if 
 
 			
-			if(nva02nofix.gt.0) then
-			res1((nva01nofix+1):nva0102)=tronc02
-			end if 
+		!	if(nva02nofix.gt.0) then
+		!	res1((nva01nofix+1):nva0102)=tronc02
+		!	end if 
 
 			
-			if(nva12nofix.gt.0) then 
+		!	if(nva12nofix.gt.0) then 
 
-			res1((nva0102+1):nvamax)=0
-			end if 
+		!	res1((nva0102+1):nvamax)=0
+		!	end if 
 			
-			end if 
+		!	end if 
 			
 			v=res2denum
 
 
-			if(v.NE.0) then 
+		!	if(v.NE.0) then 
 			if(nva01nofixY.gt.0) then 
 			
 			
@@ -37572,26 +37576,26 @@ end module
 			
 			end if 
 			
-			else 
+		!	else 
 			
-			if(nva01nofixY.gt.0) then 
+		!	if(nva01nofixY.gt.0) then 
 			
-			res1((nvamax+1):nvamax01Y)=tronc01Y
+		!	res1((nvamax+1):nvamax01Y)=tronc01Y
 			
-			end if 
+		!	end if 
 			
-			if(nva02nofixY.gt.0) then 
-			res1((nvamax01Y+1):nvamax02Y)=tronc02Y
+		!	if(nva02nofixY.gt.0) then 
+		!	res1((nvamax01Y+1):nvamax02Y)=tronc02Y
 			
-			end if 
+		!	end if 
 			
-			if(nva12nofixY.gt.0) then 
-			call fonctdepfirstderiv(t3(i),the12,ri12,gl12,su12,res212numY,y12t(241:256),logy12(241:256,:),nY12)
-			res1((nvamax02Y+1):np0)=-res212numY*vet12
+		!	if(nva12nofixY.gt.0) then 
+		!	call fonctdepfirstderiv(t3(i),the12,ri12,gl12,su12,res212numY,y12t(241:256),logy12(241:256,:),nY12)
+		!	res1((nvamax02Y+1):np0)=-res212numY*vet12
 			
-			end if 
+		!	end if 
 			
-			end if 
+		!	end if 
 			
 		!	write(6,*)'res1',res1
 		!	call flush(6)
@@ -37628,7 +37632,7 @@ end module
 		!						call flush(6)
 
 
-			if(v.NE.0) then 
+		!	if(v.NE.0) then 
 			if(nva01nofix.gt.0) then 
 			
 			u1=res201num*(su12**vet12)*ri12*vet12
@@ -37662,31 +37666,31 @@ end module
 			
 			end if 
 			
-			else 
+		!	else 
 			
-			if(nva01nofix.gt.0) then 
-			
-			res1(1:nva01nofix)=tronc01
-			end if 
+		!	if(nva01nofix.gt.0) then 
+		!	
+		!	res1(1:nva01nofix)=tronc01
+		!	end if 
 
 			
-			if(nva02nofix.gt.0) then 
+		!	if(nva02nofix.gt.0) then 
 
-			res1((nva01nofix+1):nva0102)=tronc02
-			end if 
+		!	res1((nva01nofix+1):nva0102)=tronc02
+		!	end if 
 
 
 			
-			if(nva12nofix.gt.0) then 
+		!	if(nva12nofix.gt.0) then 
 
-			res1((nva0102+1):nvamax)=0
+		!	res1((nva0102+1):nvamax)=0
 			
-			end if 
-			end if 
+		!	end if 
+		!	end if 
 			
 			v=res2denum
 			
-			if(v.NE.0) then 
+		!	if(v.NE.0) then 
 			if(nva01nofixY.gt.0) then 
 			 
 			res1((nvamax+1):nvamax01Y)= res201numY/v
@@ -37713,30 +37717,30 @@ end module
 			
 			end if 
 			
-			else 
+		!	else 
 			
-			if(nva01nofixY.gt.0) then 
-			
-			
-			res1((nvamax+1):nvamax01Y)=tronc01Y
-			
-			end if 
-			
-			if(nva02nofixY.gt.0) then 
+		!	if(nva01nofixY.gt.0) then 
 			
 			
-			res1((nvamax01Y+1):nvamax02Y)=tronc02Y
+		!	res1((nvamax+1):nvamax01Y)=tronc01Y
 			
-			end if 
+		!	end if 
 			
-			if(nva12nofixY.gt.0) then 
+		!	if(nva02nofixY.gt.0) then 
 			
 			
-			call fonctdepfirstderiv(t3(i),the12,ri12,gl12,su12,res212numY,y12t(241:256),logy12(241:256,:),nY12)
-			res1((nvamax02Y+1):np0)=-res212numY*vet12+logy12(256,:)
+		!	res1((nvamax01Y+1):nvamax02Y)=tronc02Y
 			
-			end if 
-			end if 
+		!	end if 
+			
+		!	if(nva12nofixY.gt.0) then 
+			
+			
+		!	call fonctdepfirstderiv(t3(i),the12,ri12,gl12,su12,res212numY,y12t(241:256),logy12(241:256,:),nY12)
+		!	res1((nvamax02Y+1):np0)=-res212numY*vet12+logy12(256,:)
+			
+		!	end if 
+		!	end if 
 			
 			! write(6,*)'res1',res1
 			!call flush(6)
@@ -37779,7 +37783,7 @@ end module
 							!	write(6,*)'res212numY',res212numY
 							!	call flush(6)
 						
-								if(v.NE.0) then 
+							!	if(v.NE.0) then 
 								if(nva01nofix.gt.0) then 
 
 								u1=(-gl01*vet01)*(su01**vet01)*(su02**vet02)+&
@@ -37847,48 +37851,48 @@ end module
 								
 								end if 
 								
-								else 
+							!	else 
 								
-								if(nva01nofix.gt.0) then 
+							!	if(nva01nofix.gt.0) then 
 
-								res1(1:nva01nofix)=tronc01
-								end if 
+							!	res1(1:nva01nofix)=tronc01
+							!	end if 
 								
-								if(nva02nofix.gt.0) then 
+							!	if(nva02nofix.gt.0) then 
 
 								
-								res1((nva01nofix+1):nva0102)=tronc02
-								end if 
+							!	res1((nva01nofix+1):nva0102)=tronc02
+							!	end if 
 
-								if(nva12nofix.gt.0) then 
+							!	if(nva12nofix.gt.0) then 
 								
-								res1((nva0102+1):nvamax)=0
-								end if 
-								
-								
-								u1=(su01**vet01)*(su02**vet02)
-								
-								if(nva01nofixY.gt.0) then 
+							!	res1((nva0102+1):nvamax)=0
+							!	end if 
 								
 								
-								res1((nvamax+1):nvamax01Y)=tronc01Y
+							!	u1=(su01**vet01)*(su02**vet02)
 								
-								end if 
-								
-								if(nva02nofixY.gt.0) then 
+							!	if(nva01nofixY.gt.0) then 
 								
 								
-								res1((nvamax01Y+1):nvamax02Y)=tronc02Y
+							!	res1((nvamax+1):nvamax01Y)=tronc01Y
 								
-								end if 
+							!	end if 
 								
-								if(nva12nofixY.gt.0) then 
+							!	if(nva02nofixY.gt.0) then 
 								
-								res1((nvamax02Y+1):np0)=0
 								
-								end if 
+							!	res1((nvamax01Y+1):nvamax02Y)=tronc02Y
 								
-								end if 
+							!	end if 
+								
+							!	if(nva12nofixY.gt.0) then 
+								
+							!	res1((nvamax02Y+1):np0)=0
+								
+							!	end if 
+								
+							!	end if 
 								
 							!	write(6,*)'res1',res1
 							!	call flush(6)
@@ -37926,7 +37930,7 @@ end module
 							!	write(6,*)'res212numY',res212numY
 							!	call flush(6)
 
-							if(v.NE.0) then 
+						!	if(v.NE.0) then 
 								if(nva01nofix.gt.0) then 
 
 								u1=-gl01*vet01*(su01**vet01)
@@ -37999,47 +38003,47 @@ end module
 								
 								end if 
 								
-								else 
+							!	else 
 								
 								
-								if(nva01nofix.gt.0) then 
+							!	if(nva01nofix.gt.0) then 
 
-								res1(1:nva01nofix)=tronc01
-								end if 
+							!	res1(1:nva01nofix)=tronc01
+							!	end if 
 
-								if(nva02nofix.gt.0) then 
+							!	if(nva02nofix.gt.0) then 
 
-								res1((nva01nofix+1):nva0102)=tronc02
+							!	res1((nva01nofix+1):nva0102)=tronc02
 
-								end if 
+							!	end if 
 
-								if(nva12nofix.gt.0) then 
+							!	if(nva12nofix.gt.0) then 
 
-								res1((nva0102+1):nvamax)=0
+							!	res1((nva0102+1):nvamax)=0
 								
-								end if 
+							!	end if 
 												
 								
-								u1=(su01**vet01)*(su02**vet02)
+							!	u1=(su01**vet01)*(su02**vet02)
 								
-								if(nva01nofixY.gt.0) then 
+							!	if(nva01nofixY.gt.0) then 
 								
-								res1((nvamax+1):nvamax01Y)=tronc01Y
+							!	res1((nvamax+1):nvamax01Y)=tronc01Y
 								
-								end if 
+							!	end if 
 								
-								if(nva02nofixY.gt.0) then 
+							!	if(nva02nofixY.gt.0) then 
 								
-								res1((nvamax01Y+1):nvamax02Y)=tronc02Y
+							!	res1((nvamax01Y+1):nvamax02Y)=tronc02Y
 								
-								end if 
+							!	end if 
 								
-								if(nva12nofixY.gt.0) then 
+							!	if(nva12nofixY.gt.0) then 
 								
-								res1((nvamax02Y+1):np0)=0
+							!	res1((nvamax02Y+1):np0)=0
 								
-								end if 
-								end if 
+							!	end if 
+							!	end if 
 								
 							!	write(6,*)'res1',res1
 							!	call flush(6)
@@ -38401,7 +38405,7 @@ end subroutine firstderivaidmlikelihoodweibtimedep
                         
 			
 			nweib = 0
-			if(res2denum.NE.0) then 
+		!	if(res2denum.NE.0) then 
 			if(fix(1).eq.0)then
 				nweib = nweib + 1
 				v=(dlog(the01(2))+(1/the01(1)))*res2denum +&
@@ -38461,46 +38465,46 @@ end subroutine firstderivaidmlikelihoodweibtimedep
 				
 			endif	
 			
-			else 
+		!	else 
 			
-			if(fix(1).eq.0)then
-				nweib = nweib + 1
-				res1(nweib)=troncweib01011
+		!	if(fix(1).eq.0)then
+		!		nweib = nweib + 1
+		!		res1(nweib)=troncweib01011
 				
-			endif
+		!	endif
 			
-			if(fix(2).eq.0)then
-				nweib = nweib + 1
-				res1(nweib)=troncweib01012
+		!	if(fix(2).eq.0)then
+		!		nweib = nweib + 1
+		!		res1(nweib)=troncweib01012
 				
-			endif
+		!	endif
 			
-			if(fix(3).eq.0)then
-				nweib = nweib + 1
-				res1(nweib)=troncweib02021
+		!	if(fix(3).eq.0)then
+		!		nweib = nweib + 1
+		!		res1(nweib)=troncweib02021
 				
-			endif
+		!	endif
 			
-			if(fix(4).eq.0)then
-				nweib = nweib + 1
-				res1(nweib)=troncweib02022
+		!	if(fix(4).eq.0)then
+		!		nweib = nweib + 1
+		!		res1(nweib)=troncweib02022
 				
-			endif
+		!	endif
 			
-			if(fix(5).eq.0)then
-				nweib = nweib + 1
-				res1(nweib)=-dlog(the12(2)*t3(i))*gl12*vet12
+		!	if(fix(5).eq.0)then
+		!		nweib = nweib + 1
+		!		res1(nweib)=-dlog(the12(2)*t3(i))*gl12*vet12
 				
-			endif
+		!	endif
 			
 			
-			if(fix(6).eq.0)then
-				nweib = nweib + 1
-				res1(nweib)=-the12(1)*gl12*vet12/the12(2)
+		!	if(fix(6).eq.0)then
+		!		nweib = nweib + 1
+		!		res1(nweib)=-the12(1)*gl12*vet12/the12(2)
 				
-			endif	
+		!	endif	
 			
-			endif 
+		!	endif 
 			
 			
 		!	write(6,*)'res1',res1
@@ -38526,7 +38530,7 @@ end subroutine firstderivaidmlikelihoodweibtimedep
 			
 		
 
-			if(res2denum.NE.0) then 
+		!	if(res2denum.NE.0) then 
 			if(fix(1).eq.0)then
 				nweib = nweib + 1
 				
@@ -38583,46 +38587,46 @@ end subroutine firstderivaidmlikelihoodweibtimedep
 				the12(1)*(1-gl12*vet12)/the12(2)
 			endif	
 			
-			else
+		!	else
 			
-			if(fix(1).eq.0)then
-				nweib = nweib + 1
-				res1(nweib)=troncweib01011
+		!	if(fix(1).eq.0)then
+		!		nweib = nweib + 1
+		!		res1(nweib)=troncweib01011
 				
-			endif
+		!	endif
 	
-			if(fix(2).eq.0)then
-				nweib = nweib + 1
-				res1(nweib)=troncweib01012
-			endif
+		!	if(fix(2).eq.0)then
+		!		nweib = nweib + 1
+		!		res1(nweib)=troncweib01012
+		!	endif
 
 				
-			if(fix(3).eq.0)then
-				nweib = nweib + 1
-				res1(nweib)=troncweib02021
-			endif
+		!	if(fix(3).eq.0)then
+		!		nweib = nweib + 1
+		!		res1(nweib)=troncweib02021
+		!	endif
 			
-			if(fix(4).eq.0)then
-				nweib = nweib + 1
-				res1(nweib)=troncweib02022
-			endif	
+		!	if(fix(4).eq.0)then
+		!		nweib = nweib + 1
+		!		res1(nweib)=troncweib02022
+		!	endif	
 
-			if(fix(5).eq.0)then
-				nweib = nweib + 1
-				res1(nweib)=dlog(the12(2)*t3(i))*(1-gl12*vet12)+1/ &
-				the12(1)
-				
-			endif
+		!	if(fix(5).eq.0)then
+		!		nweib = nweib + 1
+		!		res1(nweib)=dlog(the12(2)*t3(i))*(1-gl12*vet12)+1/ &
+		!		the12(1)
+		!		
+		!	endif
 			
-			if(fix(6).eq.0)then
-				nweib = nweib + 1
-				res1(nweib)=the12(1)*(1-gl12*vet12)/the12(2)
-			endif	
+		!	if(fix(6).eq.0)then
+		!		nweib = nweib + 1
+		!		res1(nweib)=the12(1)*(1-gl12*vet12)/the12(2)
+		!	endif	
 			
 		!	write(6,*)'res1',res1
 		!	call flush(6)
 			
-			endif 
+		!	endif 
 						
                        else
                          if(c(i).eq.5)then ! obs 0-->1 et obs 1-->2
@@ -38661,7 +38665,7 @@ end subroutine firstderivaidmlikelihoodweibtimedep
 							!	write(6,*)'res202numY',res202numY
 							!	write(6,*)'res212numY',res212numY
 							!	call flush(6)
-						if(u1.NE.0)then 
+					!	if(u1.NE.0)then 
 						
 						if(fix(1).eq.0)then
 				nweib = nweib + 1
@@ -38751,50 +38755,50 @@ end subroutine firstderivaidmlikelihoodweibtimedep
 				
 			endif	
 			
-			else 
+		!	else 
 			
-			if(fix(1).eq.0)then
-				nweib = nweib + 1
-				res1(nweib)=troncweib01011
-				
-				endif
+		!	if(fix(1).eq.0)then
+		!		nweib = nweib + 1
+		!		res1(nweib)=troncweib01011
+		!		
+		!		endif
 			
 			
-			if(fix(2).eq.0)then
-				nweib = nweib + 1
-				res1(nweib)=troncweib01012
-			endif
+		!	if(fix(2).eq.0)then
+		!		nweib = nweib + 1
+		!		res1(nweib)=troncweib01012
+		!	endif
 			
 				
 				
-			if(fix(3).eq.0)then
-				nweib = nweib + 1
-				res1(nweib)=troncweib02021
+		!	if(fix(3).eq.0)then
+		!		nweib = nweib + 1
+		!		res1(nweib)=troncweib02021
 				
-			endif
+		!	endif
 			
             
-			if(fix(4).eq.0)then
-				nweib = nweib + 1
-				res1(nweib)=troncweib02022
-				
-			endif	
+		!	if(fix(4).eq.0)then
+		!		nweib = nweib + 1
+		!		res1(nweib)=troncweib02022
+		!		
+		!	endif	
 
 			
-			if(fix(5).eq.0)then
-				nweib = nweib + 1
-				res1(nweib)=0
-				
-			endif
+		!	if(fix(5).eq.0)then
+		!		nweib = nweib + 1
+		!		res1(nweib)=0
+		!		
+		!	endif
 			
 			 
-			if(fix(6).eq.0)then
-				nweib = nweib + 1
-				res1(nweib)=0
+		!	if(fix(6).eq.0)then
+		!		nweib = nweib + 1
+		!		res1(nweib)=0
 				
-			endif	
+		!	endif	
 			
-			endif 
+		!	endif 
 								
 							!	write(6,*)'res1',res1
 							!	call flush(6)
@@ -38822,7 +38826,7 @@ end subroutine firstderivaidmlikelihoodweibtimedep
 								
 								nweib = 0
 								
-							if(u1.NE.0) then 
+						!	if(u1.NE.0) then 
 							
 							if(fix(1).eq.0)then
 				nweib = nweib + 1
@@ -38913,43 +38917,43 @@ end subroutine firstderivaidmlikelihoodweibtimedep
 				
 			endif
 			
-			else 
+		!	else 
 			
-			if(fix(1).eq.0)then
-				nweib = nweib + 1
-				res1(nweib)=troncweib01011
-			endif
+		!	if(fix(1).eq.0)then
+		!		nweib = nweib + 1
+		!		res1(nweib)=troncweib01011
+		!	endif
 			
 		
-			if(fix(2).eq.0)then
-				nweib = nweib + 1
-				res1(nweib)=troncweib01012
-			endif
+		!	if(fix(2).eq.0)then
+		!		nweib = nweib + 1
+		!		res1(nweib)=troncweib01012
+		!	endif
 			
-			if(fix(3).eq.0)then
-				nweib = nweib + 1
-				res1(nweib)=troncweib02021
-			endif
+		!	if(fix(3).eq.0)then
+		!		nweib = nweib + 1
+		!		res1(nweib)=troncweib02021
+		!	endif
 			
-			if(fix(4).eq.0)then
-				nweib = nweib + 1
-				res1(nweib)=troncweib02022
-			endif	
+		!	if(fix(4).eq.0)then
+		!		nweib = nweib + 1
+		!		res1(nweib)=troncweib02022
+		!	endif	
 		
-			if(fix(5).eq.0)then
-				nweib = nweib + 1
-				res1(nweib)=0
+		!	if(fix(5).eq.0)then
+		!		nweib = nweib + 1
+		!		res1(nweib)=0
 				
-			endif
+		!	endif
 			
 			
-			if(fix(6).eq.0)then
-				nweib = nweib + 1
-				res1(nweib)=0
+		!	if(fix(6).eq.0)then
+		!		nweib = nweib + 1
+		!		res1(nweib)=0
 				
-			endif
+		!	endif
 			
-			endif 
+		!	endif 
 							!	write(6,*)'res1',res1
 							!	call flush(6)
 								
@@ -39193,8 +39197,8 @@ end subroutine derivaweibfirstderivtimedep
          
                do i=1,no0
 			   
-			write(6,*) 'subject',i
-			call flush(6)
+			!write(6,*) 'subject',i
+			!call flush(6)
 		
 	i12 = 0
 	m12 = 0
@@ -39319,7 +39323,7 @@ end subroutine derivaweibfirstderivtimedep
 					   
                 else
                 if(c(i).eq.2)then ! cpi 0-->1
-				write(6,*)'c=2'
+			!	write(6,*)'c=2'
 			!	call flush(6)
 			
 			call  qgaussbetafirstderivtimedep(t1(i),t2(i),the01,the02,&
@@ -39334,14 +39338,14 @@ end subroutine derivaweibfirstderivtimedep
 		
 			u=res2denum
 			
-				write(6,*)'u',u
-								write(6,*)'res2denum',res2denum
-								write(6,*)'res2i01num',res2i01num
-								write(6,*)'res2i02num',res2i02num
-								write(6,*)'res2i12num',res2i12num
-							    write(6,*)'res2m01num',res2m01num
+			!	write(6,*)'u',u
+			!					write(6,*)'res2denum',res2denum
+			!					write(6,*)'res2i01num',res2i01num
+			!					write(6,*)'res2i02num',res2i02num
+			!					write(6,*)'res2i12num',res2i12num
+			!				    write(6,*)'res2m01num',res2m01num
 			
-			if(res2denum.NE.0) then 
+			!if(res2denum.NE.0) then 
 			
 			if(nz01.GT.0) then
 			res1(1:(nz01+2))=(res2m01num-res2i01num)* &
@@ -39363,28 +39367,28 @@ end subroutine derivaweibfirstderivtimedep
 			res2i12num*vet12/u-i12*vet12*y12t(256)
 			
 			end if
-			else 
+			!else 
 			
-			if(nz01.GT.0) then
-			res1(1:(nz01+2))=tronc01
-			end if 
+			!if(nz01.GT.0) then
+			!res1(1:(nz01+2))=tronc01
+			!end if 
 			
-			if(nz02.GT.0) then
-			res1((nz01+3):(nz02+nz01+4))=tronc02
-			end if 
+			!if(nz02.GT.0) then
+			!res1((nz01+3):(nz02+nz01+4))=tronc02
+			!end if 
 			
 			
-			if(nz12.GT.0) then
+			!if(nz12.GT.0) then
 			
-			call suspMI(t3(i),nz12,zi12,i12,m12)
+			!call suspMI(t3(i),nz12,zi12,i12,m12)
 			
-			res1((nz01+nz02+5):(nz02+nz01+nz12+6))= &
-			-i12*vet12*y12t(256)
+			!res1((nz01+nz02+5):(nz02+nz01+nz12+6))= &
+			!-i12*vet12*y12t(256)
 			
-			end if
-			endif 
+			!end if
+			!endif 
 			
-			write(6,*)'res1',res1
+		!	write(6,*)'res1',res1
 			
 			
 		!	write(6,*)'res1',res1
@@ -39395,7 +39399,7 @@ end subroutine derivaweibfirstderivtimedep
 			             
                     else   
                        if(c(i).eq.4)then ! cpi 0-->1 et obs 1-->2
-					   write(6,*)'c=4'
+					!   write(6,*)'c=4'
 					!   call flush(6)
 					  call  qgaussbetafirstderivtimedep(t1(i),t2(i),the01,the02,&
                          the12,res2denum,&
@@ -39407,14 +39411,14 @@ end subroutine derivaweibfirstderivtimedep
 						 
 			u=res2denum
 			
-				write(6,*)'u',u
-								write(6,*)'res2denum',res2denum
-								write(6,*)'res2i01num',res2i01num
-								write(6,*)'res2i02num',res2i02num
-								write(6,*)'res2i12num',res2i12num
-							    write(6,*)'res2m01num',res2m01num
+			!	write(6,*)'u',u
+			!					write(6,*)'res2denum',res2denum
+			!					write(6,*)'res2i01num',res2i01num
+			!					write(6,*)'res2i02num',res2i02num
+			!					write(6,*)'res2i12num',res2i12num
+			!				    write(6,*)'res2m01num',res2m01num
 
-			if(res2denum.NE.0) then 
+			!if(res2denum.NE.0) then 
 			
 			if(nz01.GT.0) then
 			res1(1:(nz01+2))=(res2m01num-res2i01num)* &
@@ -39440,39 +39444,39 @@ end subroutine derivaweibfirstderivtimedep
 			(res2i12num)*vet12/u-i12*vet12*y12t(256) + m12*y12t(256)/ri12
 			
 			end if
-			else
+			!else
 			
-			if(nz01.GT.0) then
-			res1(1:(nz01+2))=tronc01
-			end if 
+			!if(nz01.GT.0) then
+			!res1(1:(nz01+2))=tronc01
+			!end if 
 			
 			
-			if(nz02.GT.0) then
-			res1((nz01+3):(nz02+nz01+4))=tronc02
-			end if 
+			!if(nz02.GT.0) then
+			!res1((nz01+3):(nz02+nz01+4))=tronc02
+			!end if 
 			
 		
 			
-			if(nz12.GT.0) then
+			!if(nz12.GT.0) then
 			
-			call suspMI(t3(i),nz12,zi12,i12,m12)
-			call suspdep(t3(i),the12,nz12,su12,ri12,zi12,gl12,dble(y12t(241:256)))
+			!call suspMI(t3(i),nz12,zi12,i12,m12)
+			!call suspdep(t3(i),the12,nz12,su12,ri12,zi12,gl12,dble(y12t(241:256)))
 			
-			res1((nz01+nz02+5):(nz02+nz01+nz12+6))= &
-			-i12*vet12*y12t(256) + m12*y12t(256)/ri12
+			!res1((nz01+nz02+5):(nz02+nz01+nz12+6))= &
+			!-i12*vet12*y12t(256) + m12*y12t(256)/ri12
 			
-			end if
+			!end if
 			
-			endif 
+			!endif 
 			
-			write(6,*)'res1',res1
+			!write(6,*)'res1',res1
 						
                        else
                          if(c(i).eq.5)then ! obs 0-->1 et obs 1-->2
 								
                          else
                             if(c(i).eq.6)then ! vivant ???
-						 write(6,*)'c=6'
+						! write(6,*)'c=6'
 						
 								
 		call  qgaussbetafirstderivtimedep(t1(i),t3(i),the01,the02,&
@@ -39492,16 +39496,16 @@ end subroutine derivaweibfirstderivtimedep
 			u1=(su12**vet12)*res2denum+&
 			(su01**vet01)*(su02**vet02)
 						 
-								write(6,*)'u1',u1
-								write(6,*)'res2denum',res2denum
-								write(6,*)'res2i01num',res2i01num
-								write(6,*)'res2i02num',res2i02num
-								write(6,*)'res2i12num',res2i12num
-							    write(6,*)'res2m01num',res2m01num
+			!					write(6,*)'u1',u1
+			!					write(6,*)'res2denum',res2denum
+			!					write(6,*)'res2i01num',res2i01num
+			!					write(6,*)'res2i02num',res2i02num
+			!					write(6,*)'res2i12num',res2i12num
+			!				    write(6,*)'res2m01num',res2m01num
 							!	write(6,*)'res202numY',res202numY
 							!	write(6,*)'res212numY',res212numY
 							!	call flush(6)
-						if(u1.NE.0)then 
+			!			if(u1.NE.0)then 
 						
 					if(nz01.GT.0) then
 			res1(1:(nz01+2))=(res2m01num-res2i01num)* &
@@ -39535,33 +39539,33 @@ end subroutine derivaweibfirstderivtimedep
 			res1((nz01+nz02+5):(nz02+nz01+nz12+6))/u1
 			
 			end if
-			else 
+			!else 
 			
-					if(nz01.GT.0) then
-			res1(1:(nz01+2))=tronc01
-			end if 
+			!		if(nz01.GT.0) then
+			!res1(1:(nz01+2))=tronc01
+			!end if 
 			
-			if(nz02.GT.0) then
-			
-			
-			res1((nz01+2+1):(nz02+nz01+4))=tronc02
-			end if 
-			
-			if(nz12.GT.0) then
+			!if(nz02.GT.0) then
 			
 			
-			res1((nz01+nz02+5):(nz02+nz01+nz12+6))= 0
+			!res1((nz01+2+1):(nz02+nz01+4))=tronc02
+			!end if 
+			
+			!if(nz12.GT.0) then
+			
+			
+			!res1((nz01+nz02+5):(nz02+nz01+nz12+6))= 0
 			
 				
-			endif	
+			!endif	
 			
-			endif 
+			!endif 
 								
 							!	write(6,*)'res1',res1
 							!	call flush(6)
                             else ! passage 0-->2  
 					
-write(6,*)'c=7'
+!write(6,*)'c=7'
 								
 							call  qgaussbetafirstderivtimedep(t1(i),t3(i),the01,the02,&
                          the12,res2denum,&
@@ -39581,14 +39585,14 @@ write(6,*)'c=7'
 				
 			u1=(su12**vet12)*res2denum*ri12*vet12+&
 			(su01**vet01)*(su02**vet02)*ri02*vet02
-								
-									write(6,*)'u1',u1
-								write(6,*)'res2denum',res2denum
-								write(6,*)'res2i01num',res2i01num
-								write(6,*)'res2i02num',res2i02num
-								write(6,*)'res2i12num',res2i12num
-							    write(6,*)'res2m01num',res2m01num
-							if(u1.NE.0) then 
+			!					
+			!						write(6,*)'u1',u1
+			!					write(6,*)'res2denum',res2denum
+			!					write(6,*)'res2i01num',res2i01num
+			!					write(6,*)'res2i02num',res2i02num
+			!					write(6,*)'res2i12num',res2i12num
+			!				    write(6,*)'res2m01num',res2m01num
+			!				if(u1.NE.0) then 
 							
 						if(nz01.GT.0) then
 			res1(1:(nz01+2))=(res2m01num-res2i01num)* &
@@ -39627,29 +39631,29 @@ write(6,*)'c=7'
 			
 			endif
 			
-			else 
+			!else 
 			
-						if(nz01.GT.0) then
-			res1(1:(nz01+2))=tronc01
-			end if 
+			!			if(nz01.GT.0) then
+			!res1(1:(nz01+2))=tronc01
+			!end if 
 			
-			if(nz02.GT.0) then
-			
-			
-			res1((nz01+2+1):(nz02+nz01+4))=tronc02
-			end if 
-			
-			if(nz12.GT.0) then
+			!if(nz02.GT.0) then
 			
 			
-			res1((nz01+nz02+5):(nz02+nz01+nz12+6))= 0
+			!res1((nz01+2+1):(nz02+nz01+4))=tronc02
+			!end if 
 			
-			endif
+			!if(nz12.GT.0) then
 			
-			endif 
+			
+			!res1((nz01+nz02+5):(nz02+nz01+nz12+6))= 0
+			
+			!endif
+			
+			!endif 
 							!	write(6,*)'res1',res1
 							!	call flush(6)
-							write(6,*)'res1',res1	
+						!	write(6,*)'res1',res1	
 						
                             endif
                          endif                        
@@ -39658,7 +39662,7 @@ write(6,*)'c=7'
                 endif   
                 endif  				
 
-			write(6,*)'res',res
+		!	write(6,*)'res',res
                 res = res + res1 
 
 
@@ -40967,7 +40971,7 @@ end module
 		!						write(6,*)'res212numY',res212numY
 		!						call flush(6)
 
-			if(v.NE.0) then 
+			!if(v.NE.0) then 
 			if(nva01nofix.gt.0) then
 
 			u1=res201num*(su12**vet12)
@@ -40999,33 +41003,33 @@ end module
 			end if 
 			
 			
-			else 
+			!else 
 			
 			
-			if(nva01nofix.gt.0) then
+			!if(nva01nofix.gt.0) then
 
-			res1(1:nva01nofix)=tronc01
-			end if 
-
-			
-			if(nva02nofix.gt.0) then
-
-			res1((nva01nofix+1):nva0102)=tronc02
-			end if 
+			!res1(1:nva01nofix)=tronc01
+			!end if 
 
 			
-			if(nva12nofix.gt.0) then 
+			!if(nva02nofix.gt.0) then
 
-			res1((nva0102+1):nvamax)=0
-			end if 
+			!res1((nva01nofix+1):nva0102)=tronc02
+			!end if 
+
 			
-			end if 
+			!if(nva12nofix.gt.0) then 
+
+			!res1((nva0102+1):nvamax)=0
+			!end if 
+			
+			!end if 
 			
 			
 			
 			v=res2denum
 
-			if(v.NE.0) then 
+			!if(v.NE.0) then 
 			
 			if(nva01nofixY.gt.0) then 
 			
@@ -41054,28 +41058,28 @@ end module
 			
 			end if 
 			
-			else 
-			if(nva01nofixY.gt.0) then 
+			!else 
+			!if(nva01nofixY.gt.0) then 
 			
-			res1((nvamax+1):nvamax01Y)=tronc01Y
+			!res1((nvamax+1):nvamax01Y)=tronc01Y
 			
-			end if 
+			!end if 
 			
-			if(nva02nofixY.gt.0) then 
+			!if(nva02nofixY.gt.0) then 
 			
-			res1((nvamax01Y+1):nvamax02Y)=tronc02Y
+			!res1((nvamax01Y+1):nvamax02Y)=tronc02Y
 			
-			end if 
+			!end if 
 			
-			if(nva12nofixY.gt.0) then 
+			!if(nva12nofixY.gt.0) then 
 			
 			
-			call suspdepfirstderiv(t3(i),the12,zi12,nz12,ri12,gl12,su12,&
-			res212numY,y12t(241:256),logy12(241:256,:),nY12)
-			res1((nvamax02Y+1):np0)=-res212numY*vet12
+			!call suspdepfirstderiv(t3(i),the12,zi12,nz12,ri12,gl12,su12,&
+			!res212numY,y12t(241:256),logy12(241:256,:),nY12)
+			!res1((nvamax02Y+1):np0)=-res212numY*vet12
 			
-			end if 
-			end if 
+			!end if 
+			!end if 
 		!	write(6,*)'res1',res1
 		!	call flush(6)
 						
@@ -41112,7 +41116,7 @@ end module
 		!						write(6,*)'res212numY',res212numY
 		!						call flush(6)
 
-			if(v.NE.0) then
+		!	if(v.NE.0) then
 			if(nva01nofix.gt.0) then 
 			
 			u1=res201num*(su12**vet12)*ri12*vet12
@@ -41147,32 +41151,32 @@ end module
 
 			end if 
 			
-			else 
+			!else 
 			
-			if(nva01nofix.gt.0) then 
+			!if(nva01nofix.gt.0) then 
 			
-			res1(1:nva01nofix)=tronc01
-			end if 
-
-			
-			if(nva02nofix.gt.0) then 
-
-			res1((nva01nofix+1):nva0102)=tronc02
-			end if 
-
+			!res1(1:nva01nofix)=tronc01
+			!end if 
 
 			
-			if(nva12nofix.gt.0) then 
+			!if(nva02nofix.gt.0) then 
 
-			res1((nva0102+1):nvamax)=0
+			!res1((nva01nofix+1):nva0102)=tronc02
+			!end if 
 
-			end if 
+
 			
-			end if 
+			!if(nva12nofix.gt.0) then 
+
+			!res1((nva0102+1):nvamax)=0
+
+			!end if 
+			
+			!end if 
 			
 			v=res2denum
 			
-			if(v.NE.0) then
+			!if(v.NE.0) then
 			if(nva01nofixY.gt.0) then 
 			
 			res1((nvamax+1):nvamax01Y)= res201numY/v
@@ -41200,29 +41204,29 @@ end module
 			
 			end if 
 			
-			else 
+			!else 
 			
-			if(nva01nofixY.gt.0) then 
+			!if(nva01nofixY.gt.0) then 
 			
-			res1((nvamax+1):nvamax01Y)=tronc01Y
+			!res1((nvamax+1):nvamax01Y)=tronc01Y
 			
-			end if 
+			!end if 
 			
-			if(nva02nofixY.gt.0) then 
+			!if(nva02nofixY.gt.0) then 
 			
-			res1((nvamax01Y+1):nvamax02Y)=tronc02Y
+			!res1((nvamax01Y+1):nvamax02Y)=tronc02Y
 			
-			end if 
+			!end if 
 			
-			if(nva12nofixY.gt.0) then 
+			!if(nva12nofixY.gt.0) then 
 			
-			call suspdepfirstderiv(t3(i),the12,zi12,nz12,ri12,&
-			gl12,su12,res212numY,y12t(241:256),logy12(241:256,:),nY12)
-			res1((nvamax02Y+1):np0)=-res212numY*vet12+logy12(256,:)
+			!call suspdepfirstderiv(t3(i),the12,zi12,nz12,ri12,&
+			!gl12,su12,res212numY,y12t(241:256),logy12(241:256,:),nY12)
+			!res1((nvamax02Y+1):np0)=-res212numY*vet12+logy12(256,:)
 			
-			end if 
+			!end if 
 			
-			end if 
+			!end if 
 			
 			!write(6,*)'res1',res1
 			!call flush(6)
@@ -41264,7 +41268,7 @@ end module
 							!	write(6,*)'res212numY',res212numY
 							!	call flush(6)
 
-							if(v.NE.0) then
+						!	if(v.NE.0) then
 								if(nva01nofix.gt.0) then 
 
 								u1=(-gl01*vet01)*(su01**vet01)*(su02**vet02)+&
@@ -41334,47 +41338,47 @@ end module
 
 								end if 
 								
-							else 
+						!	else 
 							
 							
-							if(nva01nofix.gt.0) then 
+						!	if(nva01nofix.gt.0) then 
 
-								res1(1:nva01nofix)=tronc01
-								end if 
+						!		res1(1:nva01nofix)=tronc01
+						!		end if 
 								
-								if(nva02nofix.gt.0) then 
+						!		if(nva02nofix.gt.0) then 
 
-								res1((nva01nofix+1):nva0102)=tronc02
-								end if 
+						!		res1((nva01nofix+1):nva0102)=tronc02
+						!		end if 
 
-								if(nva12nofix.gt.0) then 
+						!		if(nva12nofix.gt.0) then 
 								
-								res1((nva0102+1):nvamax)=0
-								end if 
-								
-								
-								u1=(su01**vet01)*(su02**vet02)
-								
-								if(nva01nofixY.gt.0) then 
-								
-								res1((nvamax+1):nvamax01Y)=tronc01Y
-								
-								end if 
-								
-								if(nva02nofixY.gt.0) then 
-								
-								res1((nvamax01Y+1):nvamax02Y)=tronc02Y
-								
-								end if 
-								
-								if(nva12nofixY.gt.0) then 
+						!		res1((nva0102+1):nvamax)=0
+						!		end if 
 								
 								
-								res1((nvamax02Y+1):np0)=0
+						!		u1=(su01**vet01)*(su02**vet02)
+								
+						!		if(nva01nofixY.gt.0) then 
+								
+						!		res1((nvamax+1):nvamax01Y)=tronc01Y
+						!		
+						!		end if 
+						!		
+						!!		if(nva02nofixY.gt.0) then 
+							!	
+							!	res1((nvamax01Y+1):nvamax02Y)=tronc02Y
+								
+							!	end if 
+								
+							!	if(nva12nofixY.gt.0) then 
+							!	
+								
+							!	res1((nvamax02Y+1):np0)=0
 
-								end if 
+							!	end if 
 								
-							end if 
+							!end if 
 								
 							!	write(6,*)'res1',res1
 							!	call flush(6)
@@ -41414,7 +41418,7 @@ end module
 							!	write(6,*)'res212numY',res212numY
 							!	call flush(6)
 
-							if(v.NE.0) then
+						!	if(v.NE.0) then
 								if(nva01nofix.gt.0) then 
 
 								u1=-gl01*vet01*(su01**vet01)
@@ -41490,48 +41494,48 @@ end module
 
 								end if 
 								
-							else 
+					!		else 
 							
 							
-							if(nva01nofix.gt.0) then 
+					!		if(nva01nofix.gt.0) then 
 
-								res1(1:nva01nofix)=tronc01
-								end if 
+					!			res1(1:nva01nofix)=tronc01
+					!			end if 
 
-								if(nva02nofix.gt.0) then 
+					!			if(nva02nofix.gt.0) then 
 
-								res1((nva01nofix+1):nva0102)=tronc02
+					!			res1((nva01nofix+1):nva0102)=tronc02
 
-								end if 
+					!			end if 
 
-								if(nva12nofix.gt.0) then 
+					!			if(nva12nofix.gt.0) then 
 
-								res1((nva0102+1):nvamax)=0
+					!			res1((nva0102+1):nvamax)=0
 
-								end if 
+					!			end if 
 												
 								
-								u1=(su01**vet01)*(su02**vet02)
+					!			u1=(su01**vet01)*(su02**vet02)
 								
-								if(nva01nofixY.gt.0) then 
+					!			if(nva01nofixY.gt.0) then 
 								
-								res1((nvamax+1):nvamax01Y)=tronc01Y
+					!			res1((nvamax+1):nvamax01Y)=tronc01Y
 								
-								end if 
+					!			end if 
 								
-								if(nva02nofixY.gt.0) then 
+					!			if(nva02nofixY.gt.0) then 
 								
-								res1((nvamax01Y+1):nvamax02Y)=tronc02Y
+					!			res1((nvamax01Y+1):nvamax02Y)=tronc02Y
 								
-								end if 
+					!			end if 
 								
-								if(nva12nofixY.gt.0) then 
+					!			if(nva12nofixY.gt.0) then 
 								
-								res1((nvamax02Y+1):np0)=0
+					!			res1((nvamax02Y+1):np0)=0
 
-								end if 
+					!			end if 
 							
-							end if 
+					!		end if 
 								
 							!	write(6,*)'res1',res1
 							!	call flush(6)

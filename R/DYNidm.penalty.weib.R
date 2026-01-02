@@ -3139,7 +3139,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                          # h=1e-8 --> no issue
                                          output<-output$v
                                          
-                                         #browser()
+                                         
                                          if(ite==0){
                                            fn.value<-gaussDYNidmlLikelihoodweibpena(b=b,
                                                                                     npm=npm,
@@ -3353,7 +3353,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                          # if not better or do not exist need to readjust
                                          # value of beta 
                                    
-                                         
+                                         #browser()
                                          if(res %in%c(-1e9,1e9) | res < fn.value){
                                            
                                            print(paste0("needed update at ite :",ite))
@@ -3530,45 +3530,77 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                                       dimp02=dimp02,
                                                                       dimp12=dimp12,
                                                                       Ntime=NtimePoints)
+                                         
+                                         gaussDYNidmlLikelihoodweib(b=c(output.mla$b,bfix),
+                                                                    npm=size_V,
+                                                                    npar=size_V,
+                                                                    bfix=1,
+                                                                    fix=fix00,
+                                                                    ctime=ctime,
+                                                                    no=N,
+                                                                    ve01=ve01,
+                                                                    ve02=ve02,
+                                                                    ve12=ve12,
+                                                                    dimnva01=dimnva01,
+                                                                    dimnva02=dimnva02,
+                                                                    dimnva12=dimnva12,
+                                                                    nva01=nvat01,
+                                                                    nva02=nvat02,
+                                                                    nva12=nvat12,
+                                                                    t0=t0,
+                                                                    t1=t1,
+                                                                    t2=t2,
+                                                                    t3=t3,
+                                                                    troncature=troncature,
+                                                                    y01=y01k,
+                                                                    y02=y02k,
+                                                                    y12=y12k,
+                                                                    p01=p01,
+                                                                    p02=p02,
+                                                                    p12=p12,
+                                                                    dimp01=dimp01,
+                                                                    dimp02=dimp02,
+                                                                    dimp12=dimp12,
+                                                                    Ntime=NtimePoints)
                                        
-                                         # output.mla2<- marqLevAlg::mla(b=b,
-                                         #                              fn=gaussDYNidmlLikelihoodweib,
-                                         # 
-                                         #                              epsa=epsa,
-                                         #                              epsb=epsb,
-                                         #                              epsd=epsd,
-                                         #                              maxiter=maxiter.pena,
-                                         #                              minimize=F,
-                                         #                              npm=npmweib,
-                                         #                              npar=size_V,
-                                         #                              bfix=bfix,
-                                         #                              fix=fix0.beta,
-                                         #                              ctime=ctime,
-                                         #                              no=N,
-                                         #                              ve01=ve01,
-                                         #                              ve02=ve02,
-                                         #                              ve12=ve12,
-                                         #                              dimnva01=dimnva01,
-                                         #                              dimnva02=dimnva02,
-                                         #                              dimnva12=dimnva12,
-                                         #                              nva01=nvat01,
-                                         #                              nva02=nvat02,
-                                         #                              nva12=nvat12,
-                                         #                              t0=t0,
-                                         #                              t1=t1,
-                                         #                              t2=t2,
-                                         #                              t3=t3,
-                                         #                              troncature=troncature,
-                                         #                              y01=y01k,
-                                         #                              y02=y02k,
-                                         #                              y12=y12k,
-                                         #                              p01=p01,
-                                         #                              p02=p02,
-                                         #                              p12=p12,
-                                         #                              dimp01=dimp01,
-                                         #                              dimp02=dimp02,
-                                         #                              dimp12=dimp12,
-                                         #                              Ntime=NtimePoints)
+                                         output.mla2<- marqLevAlg::mla(b=b,
+                                                                      fn=gaussDYNidmlLikelihoodweib,
+
+                                                                      epsa=epsa,
+                                                                      epsb=epsb,
+                                                                      epsd=epsd,
+                                                                      maxiter=maxiter.pena,
+                                                                      minimize=F,
+                                                                      npm=npmweib,
+                                                                      npar=size_V,
+                                                                      bfix=bfix,
+                                                                      fix=fix0.beta,
+                                                                      ctime=ctime,
+                                                                      no=N,
+                                                                      ve01=ve01,
+                                                                      ve02=ve02,
+                                                                      ve12=ve12,
+                                                                      dimnva01=dimnva01,
+                                                                      dimnva02=dimnva02,
+                                                                      dimnva12=dimnva12,
+                                                                      nva01=nvat01,
+                                                                      nva02=nvat02,
+                                                                      nva12=nvat12,
+                                                                      t0=t0,
+                                                                      t1=t1,
+                                                                      t2=t2,
+                                                                      t3=t3,
+                                                                      troncature=troncature,
+                                                                      y01=y01k,
+                                                                      y02=y02k,
+                                                                      y12=y12k,
+                                                                      p01=p01,
+                                                                      p02=p02,
+                                                                      p12=p12,
+                                                                      dimp01=dimp01,
+                                                                      dimp02=dimp02,
+                                                                      dimp12=dimp12,
+                                                                      Ntime=NtimePoints)
                                          # output.mla3<- marqLevAlg::mla(b=b,
                                          #                              fn=gaussDYNidmlLikelihoodweib,
                                          #                              gr=deriva.gradient.DYNweib,
@@ -3716,6 +3748,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                          
                                          # eval.cv beta valid only if validity.param=T
                                          # add ite >1 so that do not stop at first ite ?
+                                        # browser()
                                          if(((eval.cv.beta[ite]+eval.cv.spline[ite])<epsa) & eval.cv.loglik[ite]<epsb & validity==T ){
                                            converged<-T}
                                          
