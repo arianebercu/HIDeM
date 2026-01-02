@@ -121,6 +121,7 @@ DYNidmRE.penalty.weib<-function(b,fix0,size_V,
                           modelY=modelY,
                           seed=seed+idsample,
                           BLUP=BLUP,
+                        assoc=assoc,
                         scale.X=scale.X)
     }
     
@@ -248,6 +249,7 @@ DYNidmRE.penalty.weib<-function(b,fix0,size_V,
                             modelY=modelY,
                             seed=seed+idsample,
                             BLUP=BLUP,
+                            assoc=assoc,
                             scale.X=scale.X)
         }
         
@@ -382,6 +384,7 @@ DYNidmRE.penalty.weib<-function(b,fix0,size_V,
                                                        modelY=modelY,
                                                        seed=seed+idsample,
                                                        BLUP=BLUP,
+                                                       assoc=assoc,
                                                        scale.X=scale.X)
                                    }
                                    

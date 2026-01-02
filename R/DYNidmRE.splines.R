@@ -112,6 +112,7 @@ DYNidmRE.splines<-function(b,clustertype,epsa,epsb,epsd,nproc,maxiter,size_V,siz
                           modelY=modelY,
                           seed=seed+k,
                           BLUP=BLUP,
+                          assoc=assoc,
                           scale.X=scale.X)
       }
       

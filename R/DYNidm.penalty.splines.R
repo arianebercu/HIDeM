@@ -3031,6 +3031,7 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,size_spline,
                             modelY=modelY,
                             seed=seed+idsample,
                             BLUP=BLUP,
+                            assoc=assoc,
                             scale.X=scale.X)
         }
         
@@ -4505,6 +4506,7 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                                      modelY=modelY,
                                                      seed=seed+idsample,
                                                      BLUP=BLUP,
+                                                     assoc=assoc,
                                                      scale.X=scale.X)
                                  }
         

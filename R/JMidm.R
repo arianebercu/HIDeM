@@ -40,7 +40,7 @@ JMidm<-function(timeVar,
                              n_chains=n_chain, data_Surv = dataSurv,
                              cores=nproc,save_random_effects=T)
   
-    browser()
+
   #keep only necessary info#
     if(lightmode==T){
     JMmodel<-list(model_info=JMmodel$model_info,

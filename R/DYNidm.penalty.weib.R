@@ -188,6 +188,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                           modelY=modelY,
                           seed=seed+idsample,
                           BLUP=BLUP,
+                        assoc=assoc,
                         scale.X=scale.X)
     }
     
@@ -2996,6 +2997,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                             modelY=modelY,
                             seed=seed+idsample,
                             BLUP=BLUP,
+                            assoc=assoc,
                             scale.X=scale.X)
         }
         
@@ -3302,7 +3304,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                                 lambda=lambda[id.lambda,],
                                                                 alpha=alpha
                                          )
-                                         
+                                      
                                          # verify validity of parameters update 
                                          # and that we are better than previous estimates 
                                          
@@ -3353,7 +3355,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                          # if not better or do not exist need to readjust
                                          # value of beta 
                                    
-                                         #browser()
+                                  
                                          if(res %in%c(-1e9,1e9) | res < fn.value){
                                            
                                            print(paste0("needed update at ite :",ite))
@@ -4512,6 +4514,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                        ctime=ctime,
                                                        modelY=modelY,
                                                        seed=seed+idsample,
+                                                       assoc=assoc,
                                                        BLUP=BLUP,
                                                        scale.X=scale.X)
                                    }

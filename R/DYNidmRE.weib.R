@@ -107,6 +107,7 @@ DYNidmRE.weib<-function(b,fix0,size_V,
                           modelY=modelY,
                           seed=seed+k,
                           BLUP=BLUP,
+                          assoc=assoc,
                           scale.X=scale.X)
       }
       
