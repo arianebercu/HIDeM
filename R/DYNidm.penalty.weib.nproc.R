@@ -9,7 +9,7 @@ DYNidm.penalty.weib.nproc<-function(beta.start,
                                     npm01Y,
                                     npm02Y,
                                     npm12Y,
-                                    npm,
+                                    npm,npmweib,
                                     fix0,fix00,fix0.beta,
                                     size_V,
                                     clustertype,epsa,epsb,epsd,eps.eigen,nproc,maxiter,maxiter.pena,
@@ -2630,9 +2630,6 @@ if(warmstart==F){
   }
 }
   
-  
-  
-  parallel::stopCluster(clustpar)
   
   return(outputNsample)
   

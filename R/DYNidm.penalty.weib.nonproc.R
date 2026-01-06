@@ -9,7 +9,7 @@ DYNidm.penalty.weib.nonproc<-function(beta.start,
                                     npm01Y,
                                     npm02Y,
                                     npm12Y,
-                                    npm,
+                                    npm,npmweib,
                                     fix0,fix00,fix0.beta,
                                     size_V,epsa,epsb,epsd,eps.eigen,maxiter,maxiter.pena,
                                     ctime,N,
@@ -1330,7 +1330,8 @@ DYNidm.penalty.weib.nonproc<-function(beta.start,
                                       }
     }
   }else{
-    
+    outputNsample<-list()
+    length(outputNsample)<-nlambda
      if(partialH==F){
        for(id.lambda in 1:nlambda){
          if(id.lambda>1){
