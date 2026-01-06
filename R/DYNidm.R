@@ -214,7 +214,7 @@ DYNidm <- function(formula01,
                              ifelse(penalty=="mcp",3,
                                     ifelse(penalty%in%c("elasticnet"),0.5,1))),
                 nproc=1,
-                analytics=T,
+                warmstart=F,
                 partialH=F,
                 clustertype="FORK",
                 defpositive=T,
@@ -249,10 +249,9 @@ DYNidm <- function(formula01,
     if(!inherits(formula02,"formula"))stop("The argument formula02 must be a class 'formula'.")
     
     if(!method%in%c("Weib","splines"))stop("The argument method needs to be either splines or Weib")
-    
-    
-    if(length(analytics)!=1)stop("The argument analytics must be either T or F")
-    if(!analytics%in%c(T,F))stop("The argument analytics must be either T or F")
+
+    if(length(warmstart)!=1)stop("The argument warmstart must be either T or F")
+    if(!warmstart%in%c(T,F))stop("The argument warmstart must be either T or F")
     ## if(missing(formula02)) formula02 <- formula01
     if(missing(formula12)) formula12 <- formula02
     # }}}
@@ -1496,7 +1495,8 @@ DYNidm <- function(formula01,
                              dimp02=dimp02,
                              dimp12=dimp12,
                              scale.X=scale.X,
-                             defpositive=defpositive)
+                             defpositive=defpositive,
+                             warmstart=warmstart)
             }
             
 ############################## Output   ########################################
@@ -1675,7 +1675,8 @@ DYNidm <- function(formula01,
                                            dimp02=dimp02,
                                            dimp12=dimp12,
                                            scale.X=scale.X,
-                                         defpositive=defpositive)
+                                         defpositive=defpositive,
+                                         warmstart=warmstart)
             }
             
              

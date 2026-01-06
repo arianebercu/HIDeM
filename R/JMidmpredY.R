@@ -53,6 +53,7 @@ JMidmpredY<-function(timeVar,
     colnames(dataCenter)<-c(id,timeVar)
   }
 
+  #browser()
   for(indice in 1:length(formLong)){
 
 
@@ -61,7 +62,7 @@ JMidmpredY<-function(timeVar,
     terms_FE<-JMmodel$model_info$terms$terms_FE[[1]]
     terms_RE<-JMmodel$model_info$terms$terms_RE[[1]]
       
-    if(scale.X==F){
+  
       X<-model.matrix(reformulate(attr(terms(terms_FE), "term.labels")),data=newdataLongi)
       Z <- model.matrix(reformulate(attr(terms(terms_RE), "term.labels")),data=newdataLongi)
       
@@ -70,27 +71,20 @@ JMidmpredY<-function(timeVar,
       dX <- make_dX(formula(formLong[[indice]]$call$fixed), X=X, timevar = timeVar,data=newdataLongi)
       bars<-findbars(formLong[[indice]]$call$random)
       dZ <- make_dX(reformulate(deparse(bars[[1]][[2]])), X=Z, timevar = timeVar,data=newdataLongi)
-    }else{
-      X<-model.matrix(reformulate(attr(terms(terms_FE), "term.labels")),data=newdataLongi)
-      Z <- model.matrix(reformulate(attr(terms(terms_RE), "term.labels")),data=newdataLongi)
-      
-      # derivatives of Y(t) design matrix -- does not handle splines so far
-      dX <- make_dX(formula(formLong[[indice]]$call$fixed), X=X, timevar = timeVar,data=newdataLongi)
-      bars<-findbars(formLong[[indice]]$call$random)
-      dZ <- make_dX(reformulate(deparse(bars[[1]][[2]])), X=Z, timevar = timeVar,data=newdataLongi)
-      
+   
+      if(scale.X==T){
       X0<-model.matrix(reformulate(attr(terms(terms_FE), "term.labels")),data=dataCenter)
       X0<-do.call(rbind,rep(list(X0,X0),NtimePoints/2))
       Z0 <- model.matrix(reformulate(attr(terms(terms_RE), "term.labels")),data=dataCenter)
       Z0<-do.call(rbind,rep(list(Z0,Z0),NtimePoints/2))
       dX0 <- make_dX(formula(formLong[[indice]]$call$fixed), X=X0, timevar = timeVar,data=dataCenter)
       dZ0 <- make_dX(reformulate(deparse(bars[[1]][[2]])), X=Z0, timevar = timeVar,data=dataCenter)
-      
-      X[,colnames(X)%in%colnames(X0)]<-X[,colnames(X)%in%colnames(X0)]-X0
-      Z[,colnames(Z)%in%colnames(Z0)]<-Z[,colnames(Z)%in%colnames(Z0)]-Z0
-      dX[,colnames(dX)%in%colnames(dX0)]<-dX[,colnames(dX)%in%colnames(dX0)]-dX0
-      dZ[,colnames(dZ)%in%colnames(dZ0)]<-dZ[,colnames(dZ)%in%colnames(dZ0)]-dZ0
-    }
+      }else{
+        X0<-matrix(0,ncol=ncol(X),nrow=nrow(X))
+        dX0<-matrix(0,ncol=ncol(dX),nrow=nrow(dX))
+        Z0<-matrix(0,ncol=ncol(Z),nrow=nrow(Z))
+        dZ0<-matrix(0,ncol=ncol(dZ),nrow=nrow(dZ))
+      }
       
       betas<-do.call(rbind,JMmodel$mcmc$betas1)
       
@@ -116,26 +110,35 @@ JMidmpredY<-function(timeVar,
       idNsample<-sample(x=c(1:M),size=1)
 
       if("value"%in% choiceY & "slope"%in%choiceY & "RE"%in%choiceY){
+        
       Fixed <- X %*% t(betas[idNsample, , drop = FALSE])   # (n x m)
       slopeFixed<-dX %*% t(betas[idNsample, , drop = FALSE])
       
+      Fixed0 <- X0 %*% t(betas[idNsample, , drop = FALSE])   # (n x m)
+      slopeFixed0<-dX0 %*% t(betas[idNsample, , drop = FALSE])
+      
       # Terme aléatoire, on remplit directement un tableau vide
-      Random_all <- matrix(0, nrow = nrow(Z), ncol = 1)
+      Random_all0<-Random_all <- matrix(0, nrow = nrow(Z), ncol = 1)
       Random<-matrix(0,nrow=nrow(Z),ncol=1*dim(b_mat[1, , 1, drop = FALSE])[2])
-      slopeRandom_all <- matrix(0, nrow = nrow(Z), ncol = 1)
+      slopeRandom_all0<-slopeRandom_all <- matrix(0, nrow = nrow(Z), ncol = 1)
       
       for (j in seq_len(N)) {
         
         rows <- starts[j]:ends[j]
         Zj   <- Z[rows, , drop = FALSE]                        # (nn[j] x q)
+        Z0j   <- Z0[rows, , drop = FALSE]  
         Bj   <- b_mat[j, , idNsample, drop = FALSE] # (q x m)
         
         Random_all[rows, ] <- Zj %*% Bj[1,,]
+        Random_all0[rows, ] <- Z0j %*% Bj[1,,]
+        
         Random[rows,]<-matrix(rep(t(Bj[1,,]),NtimePoints),ncol=dim(Bj)[2]*dim(Bj)[3],
                                                 nrow=NtimePoints, byrow = TRUE)
         
-        dZj   <- dZ[rows, , drop = FALSE]                
+        dZj   <- dZ[rows, , drop = FALSE] 
+        dZ0j   <- dZ0[rows, , drop = FALSE] 
         slopeRandom_all[rows, ] <- dZj %*% Bj[1,,]
+        slopeRandom_all0[rows, ] <- dZ0j %*% Bj[1,,]
       }
      
       nameRandom<-colnames(dZ)
@@ -143,7 +146,16 @@ JMidmpredY<-function(timeVar,
       colnames(Random)<-paste0("RE_",nameRandom,"_",as.character(formula(formLong[[indice]])[[2]]))
       
       PredYx <- Fixed + Random_all
+      PredYx0<-Fixed0 + Random_all0
+      
       slopePredYx<-slopeFixed + slopeRandom_all
+      slopePredYx0<-slopeFixed0 + slopeRandom_all0
+      
+      if(scale.X==T){
+        PredYx<-(PredYx-mean(PredYx0))/sd(PredYx0)
+        slopePredYx<-(slopePredYx-mean(slopePredYx0))/sd(slopePredYx0)
+      }
+      
       REPredYx<-Random
       
       Outcome<-as.character(formula(formLong[[indice]])[[2]])
@@ -169,24 +181,41 @@ JMidmpredY<-function(timeVar,
         slopeFixed<-dX %*% t(betas[idNsample, , drop = FALSE])
         
         # Terme aléatoire, on remplit directement un tableau vide
-        Random_all <- matrix(0, nrow = nrow(Z), ncol = 1)
         
-        slopeRandom_all <- matrix(0, nrow = nrow(Z), ncol = 1)
+        Fixed0 <- X0 %*% t(betas[idNsample, , drop = FALSE])   # (n x m)
+        slopeFixed0<-dX0 %*% t(betas[idNsample, , drop = FALSE])
         
+        # Terme aléatoire, on remplit directement un tableau vide
+        Random_all0<-Random_all <- matrix(0, nrow = nrow(Z), ncol = 1)
+        
+        slopeRandom_all0<-slopeRandom_all <- matrix(0, nrow = nrow(Z), ncol = 1)
         for (j in seq_len(N)) {
           
           rows <- starts[j]:ends[j]
           Zj   <- Z[rows, , drop = FALSE]                        # (nn[j] x q)
+          Z0j   <- Z0[rows, , drop = FALSE]                        # (nn[j] x q)
           Bj   <- b_mat[j, , idNsample, drop = FALSE] # (q x m)
           
           Random_all[rows, ] <- Zj %*% Bj[1,,]
+          Random_all0[rows, ] <- Z0j %*% Bj[1,,]
           
           dZj   <- dZ[rows, , drop = FALSE]                
           slopeRandom_all[rows, ] <- dZj %*% Bj[1,,]
+          dZ0j   <- dZ0[rows, , drop = FALSE]                
+          slopeRandom_all0[rows, ] <- dZ0j %*% Bj[1,,]
         }
         
+    
         PredYx <- Fixed + Random_all
+        PredYx0<-Fixed0 + Random_all0
+        
         slopePredYx<-slopeFixed + slopeRandom_all
+        slopePredYx0<-slopeFixed0 + slopeRandom_all0
+        
+        if(scale.X==T){
+          PredYx<-(PredYx-mean(PredYx0))/sd(PredYx0)
+          slopePredYx<-(slopePredYx-mean(slopePredYx0))/sd(slopePredYx0)
+        }
         
         Outcome<-as.character(formula(formLong[[indice]])[[2]])
         slopeOutcome<-paste0("slope_",as.character(formula(formLong[[indice]])[[2]]))
@@ -203,18 +232,21 @@ JMidmpredY<-function(timeVar,
       
       if("value"%in% choiceY & !"slope"%in%choiceY & "RE"%in%choiceY){
         Fixed <- X %*% t(betas[idNsample, , drop = FALSE])   # (n x m)
-        
+        Fixed0 <- X0 %*% t(betas[idNsample, , drop = FALSE])   # (n x m)
+         
         # Terme aléatoire, on remplit directement un tableau vide
-        Random_all <- matrix(0, nrow = nrow(Z), ncol = 1)
+        Random_all0<-Random_all <- matrix(0, nrow = nrow(Z), ncol = 1)
         Random<-matrix(0,nrow=nrow(Z),ncol=1*dim(b_mat[1, , 1, drop = FALSE])[2])
         
         for (j in seq_len(N)) {
           
           rows <- starts[j]:ends[j]
           Zj   <- Z[rows, , drop = FALSE]                        # (nn[j] x q)
+          Z0j   <- Z0[rows, , drop = FALSE]                        # (nn[j] x q)
           Bj   <- b_mat[j, , idNsample, drop = FALSE] # (q x m)
           
           Random_all[rows, ] <- Zj %*% Bj[1,,]
+          Random_all0[rows, ] <- Z0j %*% Bj[1,,]
           Random[rows,]<-matrix(rep(t(Bj[1,,]),NtimePoints),ncol=dim(Bj)[2]*dim(Bj)[3],
                                 nrow=NtimePoints, byrow = TRUE)
           
@@ -223,7 +255,13 @@ JMidmpredY<-function(timeVar,
         if("(Intercept)"%in%nameRandom){nameRandom[which(nameRandom=="(Intercept)")]<-"Intercept"}
         colnames(Random)<-paste0("RE_",nameRandom,"_",as.character(formula(formLong[[indice]])[[2]]))
         
+        
         PredYx <- Fixed + Random_all
+        PredYx0<-Fixed0 + Random_all0
+        
+        if(scale.X==T){
+          PredYx<-(PredYx-mean(PredYx0))/sd(PredYx0)
+          }
         REPredYx<-Random
         
         Outcome<-as.character(formula(formLong[[indice]])[[2]])
@@ -244,20 +282,33 @@ JMidmpredY<-function(timeVar,
       if("value"%in% choiceY & !"slope"%in%choiceY & !"RE"%in%choiceY){
         Fixed <- X %*% t(betas[idNsample, , drop = FALSE])   # (n x m)
         
+        
+        Fixed0 <- X0 %*% t(betas[idNsample, , drop = FALSE])   # (n x m)
+        
         # Terme aléatoire, on remplit directement un tableau vide
-        Random_all <- matrix(0, nrow = nrow(Z), ncol = 1)
+        Random_all0<-Random_all <- matrix(0, nrow = nrow(Z), ncol = 1)
+       
         
         for (j in seq_len(N)) {
           
           rows <- starts[j]:ends[j]
           Zj   <- Z[rows, , drop = FALSE]                        # (nn[j] x q)
+          Z0j   <- Z0[rows, , drop = FALSE]                        # (nn[j] x q)
           Bj   <- b_mat[j, , idNsample, drop = FALSE] # (q x m)
           
           Random_all[rows, ] <- Zj %*% Bj[1,,]
+          Random_all0[rows, ] <- Z0j %*% Bj[1,,]
          
         }
         
+
+        
         PredYx <- Fixed + Random_all
+        PredYx0<-Fixed0 + Random_all0
+        
+       if(scale.X==T){
+          PredYx<-(PredYx-mean(PredYx0))/sd(PredYx0)
+          }
         
         Outcome<-as.character(formula(formLong[[indice]])[[2]])
         
@@ -273,10 +324,10 @@ JMidmpredY<-function(timeVar,
         
         slopeFixed<-dX %*% t(betas[idNsample, , drop = FALSE])
         
-        # Terme aléatoire, on remplit directement un tableau vide
-        Random<-matrix(0,nrow=nrow(Z),ncol=1*dim(b_mat[1, , 1, drop = FALSE])[2])
+        slopeFixed0<-dX0 %*% t(betas[idNsample, , drop = FALSE])
         
-        slopeRandom_all <- matrix(0, nrow = nrow(Z), ncol = 1)
+        Random<-matrix(0,nrow=nrow(Z),ncol=1*dim(b_mat[1, , 1, drop = FALSE])[2])
+        slopeRandom_all0<-slopeRandom_all <- matrix(0, nrow = nrow(Z), ncol = 1)
         
         for (j in seq_len(N)) {
           
@@ -288,12 +339,20 @@ JMidmpredY<-function(timeVar,
           
           dZj   <- dZ[rows, , drop = FALSE]                
           slopeRandom_all[rows, ] <- dZj %*% Bj[1,,]
+          dZ0j   <- dZ0[rows, , drop = FALSE]                
+          slopeRandom_all0[rows, ] <- dZ0j %*% Bj[1,,]
         }
         nameRandom<-colnames(dZ)
         if("(Intercept)"%in%nameRandom){nameRandom[which(nameRandom=="(Intercept)")]<-"Intercept"}
         colnames(Random)<-paste0("RE_",nameRandom,"_",as.character(formula(formLong[[indice]])[[2]]))
         
+        
         slopePredYx<-slopeFixed + slopeRandom_all
+        slopePredYx0<-slopeFixed0 + slopeRandom_all0
+        
+        if(scale.X==T){
+          slopePredYx<-(slopePredYx-mean(slopePredYx0))/sd(slopePredYx0)
+        }
         REPredYx<-Random
         
         slopeOutcome<-paste0("slope_",as.character(formula(formLong[[indice]])[[2]]))
@@ -313,6 +372,8 @@ JMidmpredY<-function(timeVar,
       
       if(!"value"%in% choiceY & "slope"%in%choiceY & !"RE"%in%choiceY){
         slopeFixed<-dX %*% t(betas[idNsample, , drop = FALSE])
+        slopeFixed0<-dX0 %*% t(betas[idNsample, , drop = FALSE])
+        
         
         for (j in seq_len(N)) {
           
@@ -321,8 +382,16 @@ JMidmpredY<-function(timeVar,
           
           dZj   <- dZ[rows, , drop = FALSE]                
           slopeRandom_all[rows, ] <- dZj %*% Bj[1,,]
+          dZ0j   <- dZ0[rows, , drop = FALSE]                
+          slopeRandom_all0[rows, ] <- dZ0j %*% Bj[1,,]
         }
+        
         slopePredYx<-slopeFixed + slopeRandom_all
+        slopePredYx0<-slopeFixed0 + slopeRandom_all0
+        
+        if(scale.X==T){
+         slopePredYx<-(slopePredYx-mean(slopePredYx0))/sd(slopePredYx0)
+        }
         slopeOutcome<-paste0("slope_",as.character(formula(formLong[[indice]])[[2]]))
         slopePredYx<-cbind(newdataLongi,Outcome=slopeOutcome,slopePredYx)
         colnames(slopePredYx)[4]<-"Sample_1"
@@ -364,17 +433,21 @@ JMidmpredY<-function(timeVar,
       
         if("value"%in% choiceY & "slope"%in%choiceY & "RE"%in%choiceY){
         # Terme aléatoire, on remplit directement un tableau vide
-        Random_mean <- matrix(0,nrow=nrow(Z),ncol=1)
-        slopeRandom_mean <- matrix(0,nrow=nrow(Z),ncol=1)
+          Random_mean0<-Random_mean <- matrix(0,nrow=nrow(Z),ncol=1)
+          slopeRandom_mean0<-slopeRandom_mean <- matrix(0,nrow=nrow(Z),ncol=1)
         Random<-matrix(0,nrow=nrow(Z),ncol=length(JMmodel$statistics$Mean$b[1,]))
         for (j in seq_len(N)) {
           rows <- starts[j]:ends[j]
           Zj   <- Z[rows, , drop = FALSE]
+          Z0j   <- Z0[rows, , drop = FALSE]
           Random_mean[rows, ] <- Zj %*% JMmodel$statistics$Mean$b[j,]
+          Random_mean0[rows, ] <- Z0j %*% JMmodel$statistics$Mean$b[j,]
           Random[rows,]<- JMmodel$statistics$Mean$b[j,]
           
           dZj   <- dZ[rows, , drop = FALSE]
           slopeRandom_mean[rows, ] <- dZj %*% JMmodel$statistics$Mean$b[j,]
+          dZ0j   <- dZ0[rows, , drop = FALSE]
+          slopeRandom_mean0[rows, ] <- dZ0j %*% JMmodel$statistics$Mean$b[j,]
         }
     
         nameRandom<-names(JMmodel$statistics$Mean$b[j,])
@@ -383,6 +456,14 @@ JMidmpredY<-function(timeVar,
         
         PredYmean<-X%*%as.matrix(JMmodel$statistics$Mean$betas1) + Random_mean
         slopePredYmean<-dX%*%as.matrix(JMmodel$statistics$Mean$betas1) + slopeRandom_mean
+        
+        PredYmean0<-X0%*%as.matrix(JMmodel$statistics$Mean$betas1) + Random_mean0
+        slopePredYmean0<-dX0%*%as.matrix(JMmodel$statistics$Mean$betas1) + slopeRandom_mean0
+        
+        if(scale.X==T){
+          PredYmean<-(PredYmean-mean(PredYmean0))/sd(PredYmean0)
+          slopePredYmean<-(slopePredYmean-mean(slopePredYmean0))/sd(slopePredYmean0)
+        }
         REPredYx<- Random
         
         Outcome<-as.character(formula(formLong[[indice]])[[2]])
@@ -404,21 +485,32 @@ JMidmpredY<-function(timeVar,
         
         if("value"%in% choiceY & "slope"%in%choiceY & !"RE"%in%choiceY){
           # Terme aléatoire, on remplit directement un tableau vide
-          Random_mean <- matrix(0,nrow=nrow(Z),ncol=1)
-          slopeRandom_mean <- matrix(0,nrow=nrow(Z),ncol=1)
-          
+          Random_mean0<-Random_mean <- matrix(0,nrow=nrow(Z),ncol=1)
+          slopeRandom_mean0<-slopeRandom_mean <- matrix(0,nrow=nrow(Z),ncol=1)
           for (j in seq_len(N)) {
             rows <- starts[j]:ends[j]
             Zj   <- Z[rows, , drop = FALSE]
             Random_mean[rows, ] <- Zj %*% JMmodel$statistics$Mean$b[j,]
+            Z0j   <- Z0[rows, , drop = FALSE]
+            Random_mean0[rows, ] <- Z0j %*% JMmodel$statistics$Mean$b[j,]
             
             dZj   <- dZ[rows, , drop = FALSE]
             slopeRandom_mean[rows, ] <- dZj %*% JMmodel$statistics$Mean$b[j,]
+            dZ0j   <- dZ0[rows, , drop = FALSE]
+            slopeRandom_mean0[rows, ] <- dZ0j %*% JMmodel$statistics$Mean$b[j,]
           }
           
           
           PredYmean<-X%*%as.matrix(JMmodel$statistics$Mean$betas1) + Random_mean
           slopePredYmean<-dX%*%as.matrix(JMmodel$statistics$Mean$betas1) + slopeRandom_mean
+          
+          PredYmean0<-X0%*%as.matrix(JMmodel$statistics$Mean$betas1) + Random_mean0
+          slopePredYmean0<-dX0%*%as.matrix(JMmodel$statistics$Mean$betas1) + slopeRandom_mean0
+          
+          if(scale.X==T){
+            PredYmean<-(PredYmean-mean(PredYmean0))/sd(PredYmean0)
+            slopePredYmean<-(slopePredYmean-mean(slopePredYmean0))/sd(slopePredYmean0)
+          }
           
           
           Outcome<-as.character(formula(formLong[[indice]])[[2]])
@@ -435,13 +527,17 @@ JMidmpredY<-function(timeVar,
         
         if("value"%in% choiceY & !"slope"%in%choiceY & "RE"%in%choiceY){
           # Terme aléatoire, on remplit directement un tableau vide
-          Random_mean <- matrix(0,nrow=nrow(Z),ncol=1)
           Random<-matrix(0,nrow=nrow(Z),ncol=length(JMmodel$statistics$Mean$b[1,]))
+          Random_mean0<-Random_mean <- matrix(0,nrow=nrow(Z),ncol=1)
+          
           for (j in seq_len(N)) {
             rows <- starts[j]:ends[j]
             Zj   <- Z[rows, , drop = FALSE]
             Random_mean[rows, ] <- Zj %*% JMmodel$statistics$Mean$b[j,]
             Random[rows,]<-JMmodel$statistics$Mean$b[j,]
+            Z0j   <- Z0[rows, , drop = FALSE]
+            Random_mean0[rows, ] <- Z0j %*% JMmodel$statistics$Mean$b[j,]
+            
             
             
           }
@@ -451,6 +547,12 @@ JMidmpredY<-function(timeVar,
           colnames(Random)<-paste0("RE_",nameRandom,"_",as.character(formula(formLong[[indice]])[[2]]))
           
           PredYmean<-X%*%as.matrix(JMmodel$statistics$Mean$betas1) + Random_mean
+          PredYmean0<-X0%*%as.matrix(JMmodel$statistics$Mean$betas1) + Random_mean0
+         
+          
+          if(scale.X==T){
+            PredYmean<-(PredYmean-mean(PredYmean0))/sd(PredYmean0)
+          }
           REPredYx<- Random
           
           Outcome<-as.character(formula(formLong[[indice]])[[2]])
@@ -469,17 +571,25 @@ JMidmpredY<-function(timeVar,
         
         if("value"%in% choiceY & !"slope"%in%choiceY & !"RE"%in%choiceY){
           # Terme aléatoire, on remplit directement un tableau vide
-          Random_mean <- matrix(0,nrow=nrow(Z),ncol=1)
-         
+          Random_mean0<-Random_mean <- matrix(0,nrow=nrow(Z),ncol=1)
+          
           for (j in seq_len(N)) {
             rows <- starts[j]:ends[j]
             Zj   <- Z[rows, , drop = FALSE]
             Random_mean[rows, ] <- Zj %*% JMmodel$statistics$Mean$b[j,]
+            Z0j   <- Z0[rows, , drop = FALSE]
+            Random_mean0[rows, ] <- Z0j %*% JMmodel$statistics$Mean$b[j,]
             
           }
           
          
           PredYmean<-X%*%as.matrix(JMmodel$statistics$Mean$betas1) + Random_mean
+          
+          PredYmean0<-X0%*%as.matrix(JMmodel$statistics$Mean$betas1) + Random_mean0
+          
+          if(scale.X==T){
+            PredYmean<-(PredYmean-mean(PredYmean0))/sd(PredYmean0)
+          }
           
           Outcome<-as.character(formula(formLong[[indice]])[[2]])
           
@@ -493,15 +603,15 @@ JMidmpredY<-function(timeVar,
         if(!"value"%in% choiceY & "slope"%in%choiceY & "RE"%in%choiceY){
           # Terme aléatoire, on remplit directement un tableau vide
           Random<-matrix(0,nrow=nrow(Z),ncol=length(JMmodel$statistics$Mean$b[1,]))
-          slopeRandom_mean <- matrix(0,nrow=nrow(Z),ncol=1)
-          
+          slopeRandom_mean0<-slopeRandom_mean <- matrix(0,nrow=nrow(Z),ncol=1)
           for (j in seq_len(N)) {
             rows <- starts[j]:ends[j]
-            Zj   <- Z[rows, , drop = FALSE]
             Random[rows,]<- JMmodel$statistics$Mean$b[j,]
             
             dZj   <- dZ[rows, , drop = FALSE]
             slopeRandom_mean[rows, ] <- dZj %*% JMmodel$statistics$Mean$b[j,]
+            dZ0j   <- dZ0[rows, , drop = FALSE]
+            slopeRandom_mean0[rows, ] <- dZ0j %*% JMmodel$statistics$Mean$b[j,]
           }
           
           nameRandom<-names(JMmodel$statistics$Mean$b[j,])
@@ -509,6 +619,13 @@ JMidmpredY<-function(timeVar,
           colnames(Random)<-paste0("RE_",nameRandom,"_",as.character(formula(formLong[[indice]])[[2]]))
           
           slopePredYmean<-dX%*%as.matrix(JMmodel$statistics$Mean$betas1) + slopeRandom_mean
+          
+         
+          slopePredYmean0<-dX0%*%as.matrix(JMmodel$statistics$Mean$betas1) + slopeRandom_mean0
+          
+          if(scale.X==T){
+            slopePredYmean<-(slopePredYmean-mean(slopePredYmean0))/sd(slopePredYmean0)
+          }
           REPredYx<- Random
           
           slopeOutcome<-paste0("slope_",as.character(formula(formLong[[indice]])[[2]]))
@@ -528,15 +645,23 @@ JMidmpredY<-function(timeVar,
         if(!"value"%in% choiceY & "slope"%in%choiceY & !"RE"%in%choiceY){
           # Terme aléatoire, on remplit directement un tableau vide
          
-          slopeRandom_mean <- matrix(0,nrow=nrow(Z),ncol=1)
-          
+          slopeRandom_mean0<-slopeRandom_mean <- matrix(0,nrow=nrow(Z),ncol=1)
           for (j in seq_len(N)) {
             rows <- starts[j]:ends[j]
             dZj   <- dZ[rows, , drop = FALSE]
             slopeRandom_mean[rows, ] <- dZj %*% JMmodel$statistics$Mean$b[j,]
+            dZ0j   <- dZ0[rows, , drop = FALSE]
+            slopeRandom_mean0[rows, ] <- dZ0j %*% JMmodel$statistics$Mean$b[j,]
           }
           
           slopePredYmean<-dX%*%as.matrix(JMmodel$statistics$Mean$betas1) + slopeRandom_mean
+          
+          slopePredYmean0<-dX0%*%as.matrix(JMmodel$statistics$Mean$betas1) + slopeRandom_mean0
+          
+          if(scale.X==T){
+            slopePredYmean<-(slopePredYmean-mean(slopePredYmean0))/sd(slopePredYmean0)
+          }
+          
           slopeOutcome<-paste0("slope_",as.character(formula(formLong[[indice]])[[2]]))
           slopePredYx<-cbind(newdataLongi,Outcome=slopeOutcome,slopePredYmean)
           colnames(slopePredYx)[4]<-"Sample_1"
@@ -550,7 +675,6 @@ JMidmpredY<-function(timeVar,
           Random<-matrix(0,nrow=nrow(Z),ncol=length(JMmodel$statistics$Mean$b[1,]))
           for (j in seq_len(N)) {
             rows <- starts[j]:ends[j]
-            Zj   <- Z[rows, , drop = FALSE]
             Random[rows,]<- JMmodel$statistics$Mean$b[j,]
             }
           

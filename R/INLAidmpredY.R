@@ -57,7 +57,6 @@ INLAidmpredY<-function(timeVar,truncated,formLong,dataSurv,dataLongi,id,
     dataCenter<-data.frame(ID=idsubjects,time=tcenter)
     colnames(dataCenter)<-c(id,timeVar)
   }
-  #browser()
   # should center by median or mean ? 
   if(nproc==1){
     
