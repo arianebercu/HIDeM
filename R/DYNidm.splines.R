@@ -40,7 +40,7 @@
 #' @author R: Ariane Bercu <ariane.bercu@@u-bordeaux.fr> 
 #' @useDynLib HIDeM
 
-DYNidm.splines<-function(b,clustertype,epsa,epsb,epsd,nproc,maxiter,size_V,size_spline,noVar,bfix,
+DYNidm.splines<-function(b,clustertype,partialH,epsa,epsb,epsd,nproc,maxiter,size_V,size_spline,noVar,bfix,
                          fix0,knots01,knots02,knots12,ctime,N,nknots01,nknots02,nknots12,
                          ve01,ve02,ve12,dimnva01,dimnva02,dimnva12,nvat01,nvat02,nvat12,
                          t0,t1,t2,t3,troncature,modelY,
@@ -57,13 +57,19 @@ DYNidm.splines<-function(b,clustertype,epsa,epsb,epsd,nproc,maxiter,size_V,size_
     npm<-size_V-sum(fix0)
     out<-list()
     length(out)<-Nsample
+    
+    if(partialH==T){
+      partialH<-c(1:size_spline)
+    }else{
+      partialH<-NULL
+    }
 
     
     for(k in 1:Nsample){
       print(paste0("Estimating illness-death model on sample ",k))
       
       
-      if(dataY$method=="INLA"){
+      if(modelY$method=="INLA"){
         
         dataY<-INLAidmpredY(timeVar=timeVar,
                             truncated=troncature,
@@ -139,6 +145,7 @@ DYNidm.splines<-function(b,clustertype,epsa,epsb,epsd,nproc,maxiter,size_V,size_
       }
       
       out[[k]]<- tryCatch({ marqLevAlg::mla(b=b,
+                                            partialH=partialH,
                                             fn=gaussDYNidmlLikelihood,
                                             epsa=epsa,
                                             epsb=epsb,
@@ -188,9 +195,9 @@ DYNidm.splines<-function(b,clustertype,epsa,epsb,epsd,nproc,maxiter,size_V,size_
         # Return NULL on error to skip this patient
         NULL
       })
-      if(out[[k]]$istop==1){
-        b<-out[[k]]$b
-      }
+     # if(out[[k]]$istop==1){
+     #    b<-out[[k]]$b
+     # }
       
     }
     

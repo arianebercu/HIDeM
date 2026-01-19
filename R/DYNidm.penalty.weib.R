@@ -105,7 +105,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
   
   outputall<-list()
   length(outputall)<-Nsample
-  browser()
+
   if(nlambda>1){
   
   for(idsample in 1:Nsample){
@@ -338,12 +338,10 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                       fix00=fix00,
                                                       fix0.beta=fix0.beta,
                                                       size_V=size_V,
-                                                      clustertype=clustertype,
                                                       epsa=epsa,
                                                       epsb=epsb,
                                                       epsd=epsd,
                                                       eps.eigen=eps.eigen,
-                                                      nproc=nproc,
                                                       maxiter=maxiter,
                                                       maxiter.pena=maxiter.pena,
                                                       ctime=ctime,
@@ -389,7 +387,8 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                       id=id,
                                                       assoc=assoc,
                                                       seed=seed,
-                                                      BLUP=BLUP)
+                                                      BLUP=BLUP,
+                                                      scale.X=scale.X)
       
       
       }else{
@@ -460,7 +459,8 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                              id=id,
                                              assoc=assoc,
                                              seed=seed,
-                                             BLUP=BLUP)
+                                             BLUP=BLUP,
+                                             scale.X=scale.X)
         
        
       }

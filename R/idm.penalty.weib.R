@@ -177,7 +177,7 @@ idm.penalty.weib<-function(b,fix0,size_V,
   fix0.beta[(6+1):size_V]<-rep(1,size_V-6)
   nweib<-sum(fix00[1:6])
   
-  browser()
+
   if(nproc >1){
     
     

@@ -23,12 +23,12 @@ DYNidm.penalty.weib.nonproc<-function(beta.start,
                                     defpositive,warmstart,
                                     y01k,y02k,y12k,min){
   
-  combine<-0
+ 
   pbr_compu<-0
   # combine model 
   combine_lambda_mla<-function(x,newx){
     
-    if(newx$combine==2){
+    
       list(b=cbind(x$b,newx$b),
            V=cbind(x$V,newx$V),
            H=cbind(x$H,newx$H),
@@ -43,22 +43,6 @@ DYNidm.penalty.weib.nonproc<-function(beta.start,
            ca.spline=cbind(x$ca.spline,newx$ca.spline),
            ca.validity=cbind(x$ca.validity,newx$ca.validity),
            cb=cbind(x$cb,newx$cb))
-      
-    }else{
-      list(b=cbind(x$b,newx$b),
-           V=cbind(x$V,newx$V),
-           H=cbind(x$H,newx$H),
-           fix=cbind(x$fix,newx$fix),
-           lambda=cbind(x$lambda,newx$lambda),
-           alpha=c(x$alpha,newx$alpha),
-           fn.value=c(x$fn.value,newx$fn.value),
-           fn.value.pena=c(x$fn.value.pena,newx$fn.value.pena),
-           ni=c(x$ni,newx$ni),
-           istop=c(x$istop,newx$istop),
-           ca.beta=cbind(x$ca.beta,newx$ca.beta),
-           ca.spline=cbind(x$ca.spline,newx$ca.spline),
-           ca.validity=cbind(x$ca.validity,newx$ca.validity),
-           cb=cbind(x$cb,newx$cb))}
     
   }
   
@@ -687,8 +671,6 @@ DYNidm.penalty.weib.nonproc<-function(beta.start,
                                         
                                         # if stop==1 we can give matrix of second derivatives 
                                         
-                                        
-                                        combine<-combine+1
                                         return(list(b=c(s,beta),
                                                     H=V0,
                                                     lambda=as.double(lambda[id.lambda,]),
@@ -701,7 +683,7 @@ DYNidm.penalty.weib.nonproc<-function(beta.start,
                                                     ca.validity=eval.validity,
                                                     cb=eval.loglik,
                                                     istop=istop,
-                                                    combine=combine))
+                                                    combine=id.lambda))
                                       }
     }else{
       outputNsample<-foreach::foreach(id.lambda=1:nlambda,
@@ -1313,7 +1295,6 @@ DYNidm.penalty.weib.nonproc<-function(beta.start,
                                         # if stop==1 we can give matrix of second derivatives 
                                         
                                         
-                                        combine<-combine+1
                                         return(list(b=c(s,beta),
                                                     H=V0,
                                                     lambda=as.double(lambda[id.lambda,]),
@@ -1326,7 +1307,7 @@ DYNidm.penalty.weib.nonproc<-function(beta.start,
                                                     ca.validity=eval.validity,
                                                     cb=eval.loglik,
                                                     istop=istop,
-                                                    combine=combine))
+                                                    combine=id.lambda))
                                       }
     }
   }else{
@@ -1336,7 +1317,13 @@ DYNidm.penalty.weib.nonproc<-function(beta.start,
        for(id.lambda in 1:nlambda){
          if(id.lambda>1){
            
-           ids <- which(!vapply(outputNsample, is.null, logical(1)))
+           #ids <- which(!vapply(outputNsample, is.null, logical(1)))
+           ids <- which(unlist(lapply(outputNsample, FUN=function(x){
+             if(is.null(x)){return(F)}else{
+               if(x$istop==1){
+                 return(T)
+               }else{return(F)}
+             }})))
            last_id <- if (length(ids) == 0) NA_integer_ else max(ids)
            if(!is.na(last_id)){
              beta.start<-outputNsample[[last_id]]$b[7:size_V]
@@ -1960,8 +1947,7 @@ DYNidm.penalty.weib.nonproc<-function(beta.start,
                                         # if stop==1 we can give matrix of second derivatives 
                                         
                                         
-                                        combine<-combine+1
-                                        return(list(b=c(s,beta),
+                                        list(b=c(s,beta),
                                                     H=V0,
                                                     lambda=as.double(lambda[id.lambda,]),
                                                     alpha=alpha,
@@ -1973,7 +1959,7 @@ DYNidm.penalty.weib.nonproc<-function(beta.start,
                                                     ca.validity=eval.validity,
                                                     cb=eval.loglik,
                                                     istop=istop,
-                                                    combine=combine))
+                                                    combine=id.lambda)
          },error=function(e) NULL)
        }
        outputNsample<-Filter(Negate(is.null), outputNsample)
@@ -1982,7 +1968,13 @@ DYNidm.penalty.weib.nonproc<-function(beta.start,
        for(id.lambda in 1:nlambda){
          if(id.lambda>1){
            
-           ids <- which(!vapply(outputNsample, is.null, logical(1)))
+           #ids <- which(!vapply(outputNsample, is.null, logical(1)))
+           ids <- which(unlist(lapply(outputNsample, FUN=function(x){
+             if(is.null(x)){return(F)}else{
+               if(x$istop==1){
+                 return(T)
+               }else{return(F)}
+             }})))
            last_id <- if (length(ids) == 0) NA_integer_ else max(ids)
            if(!is.na(last_id)){
              beta.start<-outputNsample[[last_id]]$b[7:size_V]
@@ -2595,8 +2587,7 @@ DYNidm.penalty.weib.nonproc<-function(beta.start,
                                         # if stop==1 we can give matrix of second derivatives 
                                         
                                         
-                                        combine<-combine+1
-                                        return(list(b=c(s,beta),
+                                        list(b=c(s,beta),
                                                     H=V0,
                                                     lambda=as.double(lambda[id.lambda,]),
                                                     alpha=alpha,
@@ -2608,7 +2599,7 @@ DYNidm.penalty.weib.nonproc<-function(beta.start,
                                                     ca.validity=eval.validity,
                                                     cb=eval.loglik,
                                                     istop=istop,
-                                                    combine=combine))
+                                                    combine=id.lambda)
                                       },error=function(e) NULL)
      }
     outputNsample<-Filter(Negate(is.null), outputNsample)

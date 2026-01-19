@@ -123,8 +123,6 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,size_spline,
                           modelY=modelY,
                           seed=seed+idsample,
                           BLUP=BLUP,
-                          nproc=1,
-                          clustertype=clustertype,
                           scale.X=scale.X)
     }else{
       
@@ -402,7 +400,8 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                                    id=id,
                                                    assoc=assoc,
                                                    seed=seed,
-                                                   BLUP=BLUP)
+                                                   BLUP=BLUP,
+                                                   scale.X=scale.X)
     }else{
       
       outputall<-DYNidm.penalty.spline.nonproc.onepenalty(beta.start=beta.start,
@@ -477,7 +476,8 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                                           seed=seed,
                                                           BLUP=BLUP,
                                                           nproc=nproc,
-                                                          clustertype=clustertype)
+                                                          clustertype=clustertype,
+                                                          scale.X=scale.X)
       
       
     }

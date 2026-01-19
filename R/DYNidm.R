@@ -92,7 +92,7 @@
 #' @param penalty Which penalty to consider, either "lasso","elasticnet","mcp" or "scad".
 #' @param penalty.factor A vector of size the number of explanatory variables, each element value 1 (default) if we should apply the penalization on the regression parameters associated, otherwise 0.
 #' @param step.sequential TRUE, if we want to fix some M-splines parameters if their value is too close to 0, otherwise FALSE (default).
-#' @param partialH TRUE, if only the diagonal terms of the second derivatives of the regression parameters should be used, otherwise FALSE (default). 
+#' @param partialH TRUE, when performing penalization only the diagonal terms of the second derivatives of the regression parameters should be used, without penalization baseline intensity parameters are not included for the rdm parameter of mla, otherwise FALSE (default). 
 #' @param clustertype In which cluster to work
 #' @param nproc Number of cluster
 #' @param option.sequential Parameters to give step.sequential=TRUE, the cutoff underwhich the M-spline parameter is fixed to 0, min the minimum number of iteration at start, step the number of iteration to perform after stopping to fix some parameters.
@@ -1047,6 +1047,7 @@ DYNidm <- function(formula01,
           
           out<-DYNidmRE.splines(b=b,
                               clustertype=clustertype,
+                              partialH=partialH,
                               epsa=epsa,
                               epsb=epsb,
                               epsd=epsd,
@@ -1101,6 +1102,7 @@ DYNidm <- function(formula01,
         }else{
         out<-DYNidm.splines(b=b,
                          clustertype=clustertype,
+                         partialH=partialH,
                          epsa=epsa,
                          epsb=epsb,
                          epsd=epsd,
@@ -1169,6 +1171,7 @@ DYNidm <- function(formula01,
                              fix0=fix0,
                              size_V=size_V,
                              clustertype=clustertype,
+                             partialH=partialH,
                              epsa=epsa,
                              epsb=epsb,
                              epsd=epsd,
@@ -1218,6 +1221,7 @@ DYNidm <- function(formula01,
                                     fix0=fix0,
                                     size_V=size_V,
                                     clustertype=clustertype,
+                           partialH=partialH,
                                     epsa=epsa,
                                     epsb=epsb,
                                     epsd=epsd,

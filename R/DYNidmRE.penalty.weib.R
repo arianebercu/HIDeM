@@ -105,8 +105,6 @@ DYNidmRE.penalty.weib<-function(b,fix0,size_V,
                           modelY=modelY,
                           seed=seed+idsample,
                           BLUP=BLUP,
-                          nproc=1,
-                          clustertype=clustertype,
                           scale.X=scale.X)
     }else{
       
@@ -233,8 +231,6 @@ DYNidmRE.penalty.weib<-function(b,fix0,size_V,
                               modelY=modelY,
                               seed=seed+idsample,
                               BLUP=BLUP,
-                              nproc=1,
-                              clustertype=clustertype,
                               scale.X=scale.X)
         }else{
           
@@ -368,8 +364,7 @@ DYNidmRE.penalty.weib<-function(b,fix0,size_V,
                                                          modelY=modelY,
                                                          seed=seed+idsample,
                                                          BLUP=BLUP,
-                                                         nproc=1,
-                                                         clustertype=clustertype,
+                                                         
                                                          scale.X=scale.X)
                                    }else{
                                      

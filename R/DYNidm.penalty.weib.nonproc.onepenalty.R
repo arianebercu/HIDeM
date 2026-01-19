@@ -24,14 +24,14 @@ DYNidm.penalty.weib.nonproc.onepenalty<-function(beta.start,
                                     min,
                                     modelY,outcome01,outcome02,outcome12,
                                     timeVar,formLong,dataSurv,dataLongi,id,
-                                    assoc,seed,BLUP){
+                                    assoc,seed,BLUP,scale.X){
   
-  combine<-0
+ 
   pbr_compu<-0
   # combine model 
   combine_lambda_mla<-function(x,newx){
     
-    if(newx$combine==2){
+    
       list(b=cbind(x$b,newx$b),
            V=cbind(x$V,newx$V),
            H=cbind(x$H,newx$H),
@@ -46,22 +46,6 @@ DYNidm.penalty.weib.nonproc.onepenalty<-function(beta.start,
            ca.spline=cbind(x$ca.spline,newx$ca.spline),
            ca.validity=cbind(x$ca.validity,newx$ca.validity),
            cb=cbind(x$cb,newx$cb))
-      
-    }else{
-      list(b=cbind(x$b,newx$b),
-           V=cbind(x$V,newx$V),
-           H=cbind(x$H,newx$H),
-           fix=cbind(x$fix,newx$fix),
-           lambda=cbind(x$lambda,newx$lambda),
-           alpha=c(x$alpha,newx$alpha),
-           fn.value=c(x$fn.value,newx$fn.value),
-           fn.value.pena=c(x$fn.value.pena,newx$fn.value.pena),
-           ni=c(x$ni,newx$ni),
-           istop=c(x$istop,newx$istop),
-           ca.beta=cbind(x$ca.beta,newx$ca.beta),
-           ca.spline=cbind(x$ca.spline,newx$ca.spline),
-           ca.validity=cbind(x$ca.validity,newx$ca.validity),
-           cb=cbind(x$cb,newx$cb))}
     
   }
 
@@ -920,7 +904,6 @@ DYNidm.penalty.weib.nonproc.onepenalty<-function(beta.start,
                                         
                                         # if stop==1 we can give matrix of second derivatives 
                                         
-                                        combine<-combine+1
                                         return(list(b=c(s,beta),
                                                     H=V0,
                                                     lambda=as.double(lambda[id.lambda,]),
@@ -933,7 +916,7 @@ DYNidm.penalty.weib.nonproc.onepenalty<-function(beta.start,
                                                     ca.validity=eval.validity,
                                                     cb=eval.loglik,
                                                     istop=istop,
-                                                    combine=combine))
+                                                    combine=id.lambda))
                                       }
       
       
@@ -949,13 +932,9 @@ DYNidm.penalty.weib.nonproc.onepenalty<-function(beta.start,
                                             pbr_compu<-0
                                             
                                             
-                                            if(idsample==1){
                                               beta<-beta.start
                                               s<-s.start
-                                            }else{
-                                              s<-output[[1]]$b[1:6]
-                                              beta<-output[[1]]$b[7:size_V]
-                                            }
+                                           
                                             
                                             
                                             
@@ -1555,8 +1534,6 @@ DYNidm.penalty.weib.nonproc.onepenalty<-function(beta.start,
                                             
                                             # if stop==1 we can give matrix of second derivatives 
                                             
-                                            combine<-combine+1
-                                            
                                             return(list(b=c(s,beta),
                                                         H=V0,
                                                         lambda=as.double(lambda[id.lambda,]),
@@ -1569,7 +1546,7 @@ DYNidm.penalty.weib.nonproc.onepenalty<-function(beta.start,
                                                         ca.validity=eval.validity,
                                                         cb=eval.loglik,
                                                         istop=istop,
-                                                        combine=combine))
+                                                        combine=id.lambda))
                                           }
       
                                             

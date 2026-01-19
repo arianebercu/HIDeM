@@ -40,7 +40,7 @@
 #' @author R: Ariane Bercu <ariane.bercu@@u-bordeaux.fr> 
 #' @useDynLib HIDeM
 
-DYNidmRE.splines<-function(b,clustertype,epsa,epsb,epsd,nproc,maxiter,size_V,size_spline,noVar,bfix,
+DYNidmRE.splines<-function(b,clustertype,partialH,epsa,epsb,epsd,nproc,maxiter,size_V,size_spline,noVar,bfix,
                          fix0,knots01,knots02,knots12,ctime,N,nknots01,nknots02,nknots12,
                          ve01,ve02,ve12,dimnva01,dimnva02,dimnva12,nvat01,nvat02,nvat12,
                          t0,t1,t2,t3,troncature,modelY,
@@ -58,7 +58,11 @@ DYNidmRE.splines<-function(b,clustertype,epsa,epsb,epsd,nproc,maxiter,size_V,siz
     out<-list()
     length(out)<-Nsample
 
-    size_spline<-6
+    if(partialH==T){
+      partialH<-c(1:size_spline)
+    }else{
+      partialH<-NULL
+    }
     
     npm01<-ifelse(nvat01>0,sum(fix0[(size_spline+1):(size_spline+nvat01)]==0),0)
     npm01Y<-ifelse(p01>0,sum(fix0[(size_spline+1+nvat01+nvat02+nvat12):(size_spline+nvat01+nvat02+nvat12+p01)]==0),0)
@@ -82,7 +86,7 @@ DYNidmRE.splines<-function(b,clustertype,epsa,epsb,epsd,nproc,maxiter,size_V,siz
       print(paste0("Estimating illness-death model on sample ",k))
       
       
-      if(dataY$method=="INLA"){
+      if(modelY$method=="INLA"){
         
         dataY<-INLAidmpredY(timeVar=timeVar,
                             truncated=troncature,
@@ -96,8 +100,6 @@ DYNidmRE.splines<-function(b,clustertype,epsa,epsb,epsd,nproc,maxiter,size_V,siz
                             modelY=modelY,
                             seed=seed+k,
                             BLUP=BLUP,
-                            nproc=1,
-                            clustertype=clustertype,
                             scale.X=scale.X)
       }else{
         
@@ -160,6 +162,7 @@ DYNidmRE.splines<-function(b,clustertype,epsa,epsb,epsd,nproc,maxiter,size_V,siz
       }
       
       out[[k]]<- tryCatch({ marqLevAlg::mla(b=b,
+                                            partialH=partialH,
                                             fn=idmlLikelihood,
                                             epsa=epsa,
                                             epsb=epsb,
@@ -200,9 +203,9 @@ DYNidmRE.splines<-function(b,clustertype,epsa,epsb,epsd,nproc,maxiter,size_V,siz
         # Return NULL on error to skip this patient
         NULL
       })
-      if(out[[k]]$istop==1){
-        b<-out[[k]]$b
-      }
+     # if(out[[k]]$istop==1){
+     #   b<-out[[k]]$b
+    #  }
       
     }
     

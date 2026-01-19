@@ -22,15 +22,15 @@ DYNidm.penalty.splines.nproc.onepenalty<-function(beta.start,
                                     defpositive,min,
                                     modelY,outcome01,outcome02,outcome12,
                                     timeVar,formLong,dataSurv,dataLongi,id,
-                                    assoc,seed,BLUP){
+                                    assoc,seed,BLUP,scale.X){
   
-  combine<-0
+ 
   pbr_compu<-0
 
 # combine model 
 combine_lambda_mla<-function(x,newx){
   
-  if(newx$combine==2){
+ 
     list(b=cbind(x$b,newx$b),
          V=cbind(x$V,newx$V),
          H=cbind(x$H,newx$H),
@@ -45,22 +45,6 @@ combine_lambda_mla<-function(x,newx){
          ca.spline=cbind(x$ca.spline,newx$ca.spline),
          ca.validity=cbind(x$ca.validity,newx$ca.validity),
          cb=cbind(x$cb,newx$cb))
-    
-  }else{
-    list(b=cbind(x$b,newx$b),
-         V=cbind(x$V,newx$V),
-         H=cbind(x$H,newx$H),
-         fix=cbind(x$fix,newx$fix),
-         lambda=cbind(x$lambda,newx$lambda),
-         alpha=c(x$alpha,newx$alpha),
-         fn.value=c(x$fn.value,newx$fn.value),
-         fn.value.pena=c(x$fn.value.pena,newx$fn.value.pena),
-         ni=c(x$ni,newx$ni),
-         istop=c(x$istop,newx$istop),
-         ca.beta=cbind(x$ca.beta,newx$ca.beta),
-         ca.spline=cbind(x$ca.spline,newx$ca.spline),
-         ca.validity=cbind(x$ca.validity,newx$ca.validity),
-         cb=cbind(x$cb,newx$cb))}
   
 }
 
@@ -95,8 +79,6 @@ outputall<-foreach::foreach(idsample=1:Nsample,
                                                     modelY=modelY,
                                                     seed=seed+idsample,
                                                     BLUP=BLUP,
-                                                    nproc=1,
-                                                    clustertype=clustertype,
                                                     scale.X=scale.X)
                               }else{
                                 
@@ -848,7 +830,6 @@ outputall<-foreach::foreach(idsample=1:Nsample,
                                                                   
                                                                   # if stop==1 we can give matrix of second derivatives 
                                                                   
-                                                                  combine<-combine+1
                                                                   return(list(b=c(s,beta),
                                                                               H=V0,
                                                                               lambda=as.double(lambda[id.lambda,]),
@@ -861,7 +842,7 @@ outputall<-foreach::foreach(idsample=1:Nsample,
                                                                               ca.validity=eval.validity,
                                                                               cb=eval.loglik,
                                                                               istop=istop,
-                                                                              combine=combine))
+                                                                              combine=id.lambda))
                                                                 }
                               }else{outputNsample<-foreach::foreach(id.lambda=1:nlambda,
                                                                     .combine = combine_lambda_mla,
@@ -876,7 +857,7 @@ outputall<-foreach::foreach(idsample=1:Nsample,
                                                                       beta<-beta.start
                                                                       s<-s.start
                                                                       
-                                                                      
+
                                                                       converged<-F
                                                                       ite<-0
                                                                       # if beta not change do not need to recalculate weights 
@@ -1514,7 +1495,6 @@ outputall<-foreach::foreach(idsample=1:Nsample,
                                                                       
                                                                       # if stop==1 we can give matrix of second derivatives 
                                                                       
-                                                                      combine<-combine+1
                                                                       
                                                                       return(list(b=c(s,beta),
                                                                                   H=V0,
@@ -1528,7 +1508,7 @@ outputall<-foreach::foreach(idsample=1:Nsample,
                                                                                   ca.validity=eval.validity,
                                                                                   cb=eval.loglik,
                                                                                   istop=istop,
-                                                                                  combine=combine))
+                                                                                  combine=id.lambda))
                                                                     }}
                               
                               

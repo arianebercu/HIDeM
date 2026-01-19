@@ -34,7 +34,7 @@
 #' @useDynLib HIDeM
 
 DYNidm.weib<-function(b,fix0,size_V,
-                      clustertype,epsa,epsb,epsd,nproc,maxiter,
+                      clustertype,partialH,epsa,epsb,epsd,nproc,maxiter,
                       ctime,N,
                       ve01,ve02,ve12,dimnva01,dimnva02,dimnva12,nvat01,nvat02,nvat12,
                       t0,t1,t2,t3,idd,idm,ts,troncature, modelY,
@@ -52,12 +52,18 @@ DYNidm.weib<-function(b,fix0,size_V,
     
     out<-list()
     length(out)<-Nsample
- browser()
+    
+    if(partialH==T){
+      partialH<-c(1:6)
+    }else{
+      partialH<-NULL
+    }
+
 
     for(k in 1:Nsample){
       print(paste0("Estimating illness-death model on sample ",k))
-      
-      if(dataY$method=="INLA"){
+  
+      if(modelY$method=="INLA"){
         
         dataY<-INLAidmpredY(timeVar=timeVar,
                             truncated=troncature,
@@ -71,8 +77,6 @@ DYNidm.weib<-function(b,fix0,size_V,
                             modelY=modelY,
                             seed=seed+k,
                             BLUP=BLUP,
-                            nproc=1,
-                            clustertype=clustertype,
                             scale.X=scale.X)
       }else{
         
@@ -133,8 +137,10 @@ DYNidm.weib<-function(b,fix0,size_V,
       }else{
         y12<-rep(0,N*NtimePoints)
       }
-      
+
+
       out[[k]]<- tryCatch({ marqLevAlg::mla(b=b,
+                                           partialH=partialH,
                                             fn=gaussDYNidmlLikelihoodweib,
                                             epsa=epsa,
                                             epsb=epsb,
@@ -143,7 +149,6 @@ DYNidm.weib<-function(b,fix0,size_V,
                                             clustertype=clustertype,
                                             maxiter=maxiter,
                                             minimize=F,
-                                            print.info = T,
                                             npm=npm,
                                             npar=size_V,
                                             bfix=bfix,
@@ -178,9 +183,9 @@ DYNidm.weib<-function(b,fix0,size_V,
         # Return NULL on error to skip this patient
         NULL
       })
-      if(out[[k]]$istop==1){
-        b<-out[[k]]$b
-      }
+     # if(out[[k]]$istop==1){
+    #    b<-out[[k]]$b
+    #  }
       
     }
     

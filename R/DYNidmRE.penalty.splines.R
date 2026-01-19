@@ -104,8 +104,6 @@ DYNidmRE.penalty.splines<-function(b,fix0,size_V,size_spline,
                           modelY=modelY,
                           seed=seed+idsample,
                           BLUP=BLUP,
-                          nproc=1,
-                          clustertype=clustertype,
                           scale.X=scale.X)
     }else{
       
@@ -240,8 +238,6 @@ DYNidmRE.penalty.splines<-function(b,fix0,size_V,size_spline,
                               modelY=modelY,
                               seed=seed+idsample,
                               BLUP=BLUP,
-                              nproc=1,
-                              clustertype=clustertype,
                               scale.X=scale.X)
         }else{
           
@@ -382,8 +378,7 @@ DYNidmRE.penalty.splines<-function(b,fix0,size_V,size_spline,
                                                        modelY=modelY,
                                                        seed=seed+idsample,
                                                        BLUP=BLUP,
-                                                       nproc=1,
-                                                       clustertype=clustertype,
+                                                       
                                                        scale.X=scale.X)
                                  }else{
                                    

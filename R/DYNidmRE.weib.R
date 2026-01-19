@@ -34,7 +34,7 @@
 #' @useDynLib HIDeM
 
 DYNidmRE.weib<-function(b,fix0,size_V,
-                      clustertype,epsa,epsb,epsd,nproc,maxiter,
+                      clustertype,partialH,epsa,epsb,epsd,nproc,maxiter,
                       ctime,N,
                       ve01,ve02,ve12,dimnva01,dimnva02,dimnva12,nvat01,nvat02,nvat12,
                       t0,t1,t2,t3,idd,idm,ts,troncature, modelY,
@@ -55,6 +55,11 @@ DYNidmRE.weib<-function(b,fix0,size_V,
  browser()
  
  size_spline<-6
+ if(partialH==T){
+   partialH<-c(1:6)
+ }else{
+   partialH<-NULL
+ }
  
  npm01<-ifelse(nvat01>0,sum(fix0[(size_spline+1):(size_spline+nvat01)]==0),0)
  npm01Y<-ifelse(p01>0,sum(fix0[(size_spline+1+nvat01+nvat02+nvat12):(size_spline+nvat01+nvat02+nvat12+p01)]==0),0)
@@ -77,7 +82,7 @@ DYNidmRE.weib<-function(b,fix0,size_V,
     for(k in 1:Nsample){
       print(paste0("Estimating illness-death model on sample ",k))
       
-      if(dataY$method=="INLA"){
+      if(modelY$method=="INLA"){
         
         dataY<-INLAidmpredY(timeVar=timeVar,
                             truncated=troncature,
@@ -91,8 +96,6 @@ DYNidmRE.weib<-function(b,fix0,size_V,
                             modelY=modelY,
                             seed=seed+k,
                             BLUP=BLUP,
-                            nproc=1,
-                            clustertype=clustertype,
                             scale.X=scale.X)
       }else{
         
@@ -155,6 +158,7 @@ DYNidmRE.weib<-function(b,fix0,size_V,
       }
       
       out[[k]]<- tryCatch({ marqLevAlg::mla(b=b,
+                                            partialH=partialH,
                                             fn=idmlLikelihoodweib,
                                             epsa=epsa,
                                             epsb=epsb,
@@ -189,9 +193,9 @@ DYNidmRE.weib<-function(b,fix0,size_V,
         # Return NULL on error to skip this patient
         NULL
       })
-      if(out[[k]]$istop==1){
-        b<-out[[k]]$b
-      }
+    #  if(out[[k]]$istop==1){
+    #    b<-out[[k]]$b
+    #  }
       
     }
     
