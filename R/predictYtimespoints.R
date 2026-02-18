@@ -7,6 +7,7 @@
 ##' @param entry.time time of entry in the study (values 0 if no left truncation, otherwise >0)
 #' @useDynLib HIDeM
 #' @author R: Ariane Bercu <ariane.bercu@@u-bordeaux.fr>  
+#' @export
 
 gauss_kronrod_points <- function(lower.intdouble, 
                                  upper.intdouble,

@@ -7,6 +7,7 @@
 DYNidm.splines(
   b,
   clustertype,
+  partialH,
   epsa,
   epsb,
   epsd,

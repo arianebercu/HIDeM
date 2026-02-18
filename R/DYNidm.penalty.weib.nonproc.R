@@ -49,7 +49,7 @@ DYNidm.penalty.weib.nonproc<-function(beta.start,
   
   id.lambda<-NULL # for cran check 
   V0<-NA
-  
+  #browser()
   if(warmstart==F){
     if(partialH==F){
       outputNsample<-foreach::foreach(id.lambda=1:nlambda,
@@ -1393,8 +1393,44 @@ DYNidm.penalty.weib.nonproc<-function(beta.start,
                                                                  dimp02=dimp02,
                                                                  dimp12=dimp12,
                                                                  Ntime=NtimePoints)
-                                          output<-output$v
                                           
+                                          
+                                          # outputb<-deriva( h=1e-4,
+                                          #                  funcpa=gaussDYNidmlLikelihoodweib,
+                                          #                        b=b,
+                                          #                        npm=npm,
+                                          #                        npar=size_V,
+                                          #                        bfix=bfix,
+                                          #                        fix=fix0,
+                                          #                        ctime=ctime,
+                                          #                        no=N,
+                                          #                        ve01=ve01,
+                                          #                        ve02=ve02,
+                                          #                        ve12=ve12,
+                                          #                        dimnva01=dimnva01,
+                                          #                        dimnva02=dimnva02,
+                                          #                        dimnva12=dimnva12,
+                                          #                        nva01=nvat01,
+                                          #                        nva02=nvat02,
+                                          #                        nva12=nvat12,
+                                          #                        t0=t0,
+                                          #                        t1=t1,
+                                          #                        t2=t2,
+                                          #                        t3=t3,
+                                          #                        troncature=troncature,
+                                          #                        y01=y01k,
+                                          #                        y02=y02k,
+                                          #                        y12=y12k,
+                                          #                        p01=p01,
+                                          #                        p02=p02,
+                                          #                        p12=p12,
+                                          #                        dimp01=dimp01,
+                                          #                        dimp02=dimp02,
+                                          #                        dimp12=dimp12,
+                                          #                        Ntime=NtimePoints)
+                                          # output<-outputb$v
+                                          # 
+                                          output<-output$v
                                           if(ite==0){# loglik penalised
                                             fn.value<-gaussDYNidmlLikelihoodweibpena(b=b,
                                                                                      npm=npm,

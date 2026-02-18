@@ -41,9 +41,10 @@ DYNidm(
   alpha = ifelse(penalty == "scad", 3.7, ifelse(penalty == "mcp", 3, ifelse(penalty
     \%in\% c("elasticnet"), 0.5, 1))),
   nproc = 1,
-  analytics = T,
+  warmstart = F,
   partialH = F,
   clustertype = "FORK",
+  defpositive = T,
   modelY = NULL,
   seed = 123,
   envir = parent.frame()
@@ -151,7 +152,7 @@ is na.omit. Another possible value is NULL.}
 
 \item{nproc}{Number of cluster}
 
-\item{partialH}{TRUE, if only the diagonal terms of the second derivatives of the regression parameters should be used, otherwise FALSE (default).}
+\item{partialH}{TRUE, when performing penalization only the diagonal terms of the second derivatives of the regression parameters should be used, without penalization baseline intensity parameters are not included for the rdm parameter of mla, otherwise FALSE (default).}
 
 \item{clustertype}{In which cluster to work}
 

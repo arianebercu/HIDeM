@@ -193,9 +193,11 @@ DYNidmRE.weib<-function(b,fix0,size_V,
         # Return NULL on error to skip this patient
         NULL
       })
-    #  if(out[[k]]$istop==1){
-    #    b<-out[[k]]$b
-    #  }
+      if(!is.null(out[[k]])){
+        if(out[[k]]$istop%in%c(1,3)){
+          b<-out[[k]]$b
+        }
+      }
       
     }
     

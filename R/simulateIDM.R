@@ -268,12 +268,22 @@ simdep.idmModel <- function(x,
 
   
   #delete measure of longitudinal marker after Tdeath or censoring
-  
+  #browser()
   col<-colnames(x)[1:(which(colnames(x)=="latent.illtime")-1)]
   dat<-merge(dat[,!colnames(dat)%in%c("num.visit","visit",col[4:length(col)])],x[,c(1:(which(colnames(x)=="latent.illtime")-1))],by=c("ID"))
   
+  # Y censoring after diagnosis visit, death or censoring 
   dat<-do.call(rbind,apply(dat,MARGIN = 1,FUN=function(x){
-    if(x[names(x)=="seen.exit"]==1){
+    if(x[names(x)=="seen.ill"]==1){
+      
+      if(x[names(x)=="R"]<x[names(x)=="visit"] |x[names(x)=="censtime"]<x[names(x)=="visit"]){
+        return(NULL)
+      }else{
+        return(x)
+      }
+      
+    }else{
+      if(x[names(x)=="seen.exit"]==1){
       if(x[names(x)=="observed.lifetime"]<x[names(x)=="visit"] |x[names(x)=="censtime"]<x[names(x)=="visit"]){
         return(NULL)
       }else{
@@ -285,7 +295,33 @@ simdep.idmModel <- function(x,
       }else{
       return(x)}
     }
+    }
   }))
+
+  # censoring Y after first event or censoring 
+  # dat<-do.call(rbind,apply(dat,MARGIN = 1,FUN=function(x){
+  #   if(x[names(x)=="seen.ill"]==1){
+  #     
+  #     if(x[names(x)=="R"]<x[names(x)=="visit"] ){
+  #       return(NULL)
+  #     }else{
+  #       return(x)
+  #     }
+  #   }else{
+  #   if(x[names(x)=="seen.exit"]==1){
+  #     if(x[names(x)=="observed.lifetime"]<x[names(x)=="visit"] |x[names(x)=="censtime"]<x[names(x)=="visit"]){
+  #       return(NULL)
+  #     }else{
+  #       return(x)
+  #     }
+  #   }else{
+  #     if(x[names(x)=="censtime"]<x[names(x)=="visit"]){
+  #       return(NULL)
+  #     }else{
+  #       return(x)}
+  #   }
+  #   }
+  # }))
   dat<-as.data.frame(dat)
   return(dat)
 }

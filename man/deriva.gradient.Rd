@@ -4,12 +4,12 @@
 \alias{deriva.gradient}
 \title{Numerical derivatives}
 \usage{
-deriva.gradient(nproc = 1, b, funcpa, .packages = NULL, ...)
+deriva.gradient(b, nproc = 1, funcpa, .packages = NULL, ...)
 }
 \arguments{
-\item{nproc}{number of processors for parallel computing}
-
 \item{b}{value of parameters to be optimized over}
+
+\item{nproc}{number of processors for parallel computing}
 
 \item{funcpa}{function to be minimized (or maximized), with argument the vector
 of parameters over which minimization isto take place.

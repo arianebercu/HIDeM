@@ -453,7 +453,7 @@ DYNmodelY <- function(formula01,
   ################################################################################
   ############################## RUN INLA or JM MODEL ################################## ################################################################################
   if(missing(threshold)){
-    threshold<-max(t2-t1)
+    threshold<-mean(t2-t1)
   }else{
     if(!inherits(threshold,c("numeric","integer")))stop("threshold has to be a numeric or integer.")
     if(threshold<=0)stop("threshold has be strictly positive")
@@ -469,7 +469,6 @@ DYNmodelY <- function(formula01,
     if(class(dataLongi[,colnames(dataLongi)%in%id])!="integer"){stop("ID for subject needs to be an integer ")}
     if(length(id)!=1){stop("id need to be a character")}
     if(!id%in%colnames(data)|!id%in%colnames(dataLongi)){stop("id need to be in data and dataLongi")}}
-  
   
   # competing risk definition 
   iddCR<-ifelse(idm==1,0,
@@ -524,7 +523,8 @@ DYNmodelY <- function(formula01,
                      idm=idm, 
                      idd=idd,
                      clustertype=clustertype,
-                     lightmode=lightmode)
+                     lightmode=lightmode,
+                     envir=envir)
       
       
     }else{

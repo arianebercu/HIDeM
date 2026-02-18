@@ -2778,7 +2778,7 @@ else
 		
                 if(c(i).eq.1)then ! cad 0-->1 et 0-->2
 
-			           call fonctdep(t1(i),the01,ri01,gl01,&
+			           call fonctdep(t3(i),the01,ri01,gl01,&
 					   su01,y01t(241:256))
                        call fonctdep(t3(i),the02,ri02,gl02,&
 					   su02,y02t(241:256))
@@ -35746,6 +35746,7 @@ subroutine fonctdepfirstderiv(x,p,risq,glam,surv,inty,y,dlogy,nY)
 
 end subroutine fonctdepfirstderiv
 
+
 subroutine fonctdep0firstderiv(x,p,glam,inty,y,dlogy,nY)
 
         implicit none
@@ -35812,6 +35813,7 @@ subroutine fonctdep0firstderiv(x,p,glam,inty,y,dlogy,nY)
 
 		  if(a.eq.b)then
                 glam = 0.d0
+				inty = 0.d0
             else
 			
 			
@@ -36032,7 +36034,7 @@ logy01,logy02,logy12)
 
 
 
-            resdenum = 0.d0
+        resdenum = 0.d0
 	    res01num = 0.d0
 	    res02num = 0.d0
 	    res12num = 0.d0
@@ -37484,8 +37486,8 @@ end module
 			res1((nva0102+1):nvamax)=0
 			end if 
 			
-			call fonctdep0firstderiv(t3(i),the01,gl01,res201numY,y01t(241:256),logy01(241:256,:),nY01)
-			call fonctdep0firstderiv(t3(i),the02,gl02,res202numY,y02t(241:256),logy02(241:256,:),nY02)
+			call fonctdep0firstderiv(t3(i),the01,gl01,res201numY,y01t(241:255),logy01(241:255,:),nY01)
+			call fonctdep0firstderiv(t3(i),the02,gl02,res202numY,y02t(241:255),logy02(241:255,:),nY02)
 			
 			if(nva01nofixY.gt.0) then 
 			res1((nvamax+1):nvamax01Y)= -res201numY*vet01+tronc01Y
@@ -37663,9 +37665,9 @@ end module
 			
 			end if 
 			
-			call fonctdep0firstderiv(t1(i),the01,gl01,res201numY,y01t(225:240),logy01(225:240,:),nY01)
-			call fonctdep0firstderiv(t1(i),the02,gl02,res202numY,y02t(225:240),logy02(225:240,:),nY02)
-			call fonctdep0firstderiv(t1(i),the12,gl12,res212numY,y12t(225:240),logy12(225:240,:),nY12)
+			call fonctdep0firstderiv(t1(i),the01,gl01,res201numY,y01t(225:239),logy01(225:239,:),nY01)
+			call fonctdep0firstderiv(t1(i),the02,gl02,res202numY,y02t(225:239),logy02(225:239,:),nY02)
+			call fonctdep0firstderiv(t1(i),the12,gl12,res212numY,y12t(225:239),logy12(225:239,:),nY12)
 			
 			if(nva01nofixY.gt.0) then 
 			res1((nvamax+1):nvamax01Y)= -res201numY*vet01+&
@@ -37679,7 +37681,7 @@ end module
 			
 			if(nva12nofixY.gt.0) then 
 			res1((nvamax02Y+1):np0)= res212numY*vet12
-			call fonctdep0firstderiv(t3(i),the12,gl12,res212numY,y12t(241:256),logy12(241:256,:),nY12)
+			call fonctdep0firstderiv(t3(i),the12,gl12,res212numY,y12t(241:255),logy12(241:255,:),nY12)
 			res1((nvamax02Y+1):np0)= &
 			res1((nvamax02Y+1):np0)-res212numY*vet12
 			end if 
@@ -37857,9 +37859,9 @@ end module
 			
 			end if 
 			
-			call fonctdep0firstderiv(t1(i),the01,gl01,res201numY,y01t(225:240),logy01(225:240,:),nY01)
-			call fonctdep0firstderiv(t1(i),the02,gl02,res202numY,y02t(225:240),logy02(225:240,:),nY02)
-			call fonctdep0firstderiv(t1(i),the12,gl12,res212numY,y12t(225:240),logy12(225:240,:),nY12)
+			call fonctdep0firstderiv(t1(i),the01,gl01,res201numY,y01t(225:239),logy01(225:239,:),nY01)
+			call fonctdep0firstderiv(t1(i),the02,gl02,res202numY,y02t(225:239),logy02(225:239,:),nY02)
+			call fonctdep0firstderiv(t1(i),the12,gl12,res212numY,y12t(225:239),logy12(225:239,:),nY12)
 			
 			if(nva01nofixY.gt.0) then 
 			res1((nvamax+1):nvamax01Y)= -res201numY*vet01+&
@@ -37873,7 +37875,7 @@ end module
 			
 			if(nva12nofixY.gt.0) then 
 			res1((nvamax02Y+1):np0)= res212numY*vet12
-			call fonctdep0firstderiv(t3(i),the12,gl12,res212numY,y12t(241:256),logy12(241:256,:),nY12)
+			call fonctdep0firstderiv(t3(i),the12,gl12,res212numY,y12t(241:255),logy12(241:255,:),nY12)
 			res1((nvamax02Y+1):np0)= &
 			res1((nvamax02Y+1):np0)-res212numY*vet12+&
 			logy12(256,:)
@@ -38031,13 +38033,16 @@ end module
 					
 					! write(6,*)'c=7'
 			!		call flush(6)
-				                call fonctdep(t3(i),the01,ri01,gl01,&
+				               
+          
+							if(t1(i).ne.t3(i)) then
+							
+							 call fonctdep(t3(i),the01,ri01,gl01,&
 								su01, dble(y01t(241:256)))
                                 call fonctdep(t3(i),the02,ri02,gl02,&
 								su02, dble(y02t(241:256)))
                                 call fonctdep(t3(i),the12,ri12,gl12,&
 								su12, dble(y12t(241:256)))
-          
 								
 								call  qgaussweibfirstderivtimedep(t1(i),t3(i),the01,the02,&
                          the12,res2denum,res201num,&
@@ -38133,6 +38138,49 @@ end module
 								res1((nvamax02Y+1):np0)=res1((nvamax02Y+1):np0)/v
 								
 								end if 
+								
+								
+							else 
+							
+							
+							call fonctdep(t1(i),the01,ri01,gl01,su01, dble(y01t(225:240)))
+							call fonctdep(t1(i),the02,ri02,gl02,su02, dble(y02t(225:240)))
+							
+							if(nva01nofix.gt.0) then
+							res1(1:nva01nofix)=-ve01nofix(i,:)*gl01*vet01+ & 
+							tronc01
+							end if 
+
+							
+							if(nva02nofix.gt.0) then
+							res1((nva01nofix+1):nva0102)=-ve02nofix(i,:)*gl02*vet02+&
+							tronc02+ve02nofix(i,:)
+							end if 
+
+							
+							if(nva12nofix.gt.0) then 
+							res1((nva0102+1):nvamax)=0
+							
+							end if 
+							
+							call fonctdep0firstderiv(t1(i),the01,gl01,res201numY,y01t(225:239),logy01(225:239,:),nY01)
+							call fonctdep0firstderiv(t1(i),the02,gl02,res202numY,y02t(225:239),logy02(225:239,:),nY02)
+							
+							if(nva01nofixY.gt.0) then 
+							res1((nvamax+1):nvamax01Y)= -res201numY*vet01+&
+							tronc01Y
+							end if 
+							
+							if(nva02nofixY.gt.0) then 
+							res1((nvamax01Y+1):nvamax02Y)=  -res202numY*vet02+&
+							tronc02Y+logy02(256,:)
+							end if 
+							
+							if(nva12nofixY.gt.0) then 
+							res1((nvamax02Y+1):np0)= 0
+							end if 
+							
+							end if 
 								
 							!	else 
 								
@@ -40318,6 +40366,7 @@ subroutine suspdep0firstderiv(x,p,z,n,glam,inty,y,dlogy,nY)
 
 		  if(a.eq.b)then
                 glam = 0.d0
+				inty = 0.d0
             else
 			
 			
@@ -41331,9 +41380,9 @@ end module
 			
 
 			call suspdep0firstderiv(t3(i),the01,zi01,nz01,gl01,&
-				res201numY,y01t(241:256),logy01(241:256,:),nY01)
+				res201numY,y01t(241:255),logy01(241:255,:),nY01)
 			call suspdep0firstderiv(t3(i),the02,zi02,nz02,&
-				gl02,res202numY,y02t(241:256),logy02(241:256,:),nY02)
+				gl02,res202numY,y02t(241:255),logy02(241:255,:),nY02)
 				
 			if(nva01nofixY.gt.0) then 
 			res1((nvamax+1):nvamax01Y)= -res201numY*vet01+tronc01Y
@@ -41525,11 +41574,11 @@ end module
 			end if 
 			
 			call suspdep0firstderiv(t1(i),the01,zi01,nz01,gl01,&
-				res201numY,y01t(225:240),logy01(225:240,:),nY01)
+				res201numY,y01t(225:239),logy01(225:239,:),nY01)
 			call suspdep0firstderiv(t1(i),the02,zi02,nz02,&
-				gl02,res202numY,y02t(225:240),logy02(225:240,:),nY02)
+				gl02,res202numY,y02t(225:239),logy02(225:239,:),nY02)
 			call suspdep0firstderiv(t1(i),the12,zi12,nz12,&
-				gl12,res212numY,y12t(225:240),logy12(225:240,:),nY12)
+				gl12,res212numY,y12t(225:239),logy12(225:239,:),nY12)
 				
 			if(nva01nofixY.gt.0) then 
 			res1((nvamax+1):nvamax01Y)= -res201numY*vet01+&
@@ -41544,7 +41593,7 @@ end module
 			if(nva12nofixY.gt.0) then 
 			res1((nvamax02Y+1):np0)= res212numY*vet12
 			call suspdep0firstderiv(t3(i),the12,zi12,nz12,&
-				gl12,res212numY,y12t(241:256),logy12(241:256,:),nY12)
+				gl12,res212numY,y12t(241:255),logy12(241:255,:),nY12)
 			res1((nvamax02Y+1):np0)= &
 			res1((nvamax02Y+1):np0)-res212numY*vet12
 			end if 
@@ -41729,11 +41778,11 @@ end module
 			end if 
 			
 			call suspdep0firstderiv(t1(i),the01,zi01,nz01,gl01,&
-				res201numY,y01t(225:240),logy01(225:240,:),nY01)
+				res201numY,y01t(225:239),logy01(225:239,:),nY01)
 			call suspdep0firstderiv(t1(i),the02,zi02,nz02,&
-				gl02,res202numY,y02t(225:240),logy02(225:240,:),nY02)
+				gl02,res202numY,y02t(225:239),logy02(225:239,:),nY02)
 			call suspdep0firstderiv(t1(i),the12,zi12,nz12,&
-				gl12,res212numY,y12t(225:240),logy12(225:240,:),nY12)
+				gl12,res212numY,y12t(225:239),logy12(225:239,:),nY12)
 				
 			if(nva01nofixY.gt.0) then 
 			res1((nvamax+1):nvamax01Y)= -res201numY*vet01+&
@@ -41748,7 +41797,7 @@ end module
 			if(nva12nofixY.gt.0) then 
 			res1((nvamax02Y+1):np0)= res212numY*vet12
 			call suspdep0firstderiv(t3(i),the12,zi12,nz12,&
-				gl12,res212numY,y12t(241:256),logy12(241:256,:),nY12)
+				gl12,res212numY,y12t(241:255),logy12(241:255,:),nY12)
 			res1((nvamax02Y+1):np0)= &
 			res1((nvamax02Y+1):np0)-res212numY*vet12+&
 			logy12(256,:)
@@ -41907,13 +41956,16 @@ end module
 			!		call flush(6)
 				              
 								
-								call suspdep(t3(i),the01,nz01,su01,ri01,zi01,gl01,&
+								
+          
+						if(t1(i).ne.t3(i)) then 
+						
+						call suspdep(t3(i),the01,nz01,su01,ri01,zi01,gl01,&
 								y01t(241:256))
 								call suspdep(t3(i),the02,nz02,su02,ri02,zi02,gl02,&
 								y02t(241:256))
 								call suspdep(t3(i),the12,nz12,su12,ri12,zi12,gl12,&
 								y12t(241:256))
-          
 								
 								call  qgausssplinesfirstderivtimedep(t1(i),t3(i),the01,the02,&
                          the12,res2denum,res201num,&
@@ -42012,6 +42064,50 @@ end module
 								res1((nvamax02Y+1):np0)=res1((nvamax02Y+1):np0)/v
 
 								end if 
+								
+						else 
+						
+					call suspdep(t1(i),the01,nz01,su01,ri01,zi01,gl01,&
+										y01t(225:240))
+					call suspdep(t1(i),the02,nz02,su02,ri02,zi02,gl02,&
+										y02t(225:240))
+					
+					if(nva01nofix.gt.0) then
+					res1(1:nva01nofix)=-ve01nofix(i,:)*gl01*vet01+ & 
+					tronc01
+					end if 
+
+					
+					if(nva02nofix.gt.0) then
+					res1((nva01nofix+1):nva0102)=-ve02nofix(i,:)*gl02*vet02+&
+					tronc02+ve02nofix(i,:)
+					end if 
+
+					
+					if(nva12nofix.gt.0) then 
+					res1((nva0102+1):nvamax)=0
+					
+					end if 
+					
+					call suspdep0firstderiv(t1(i),the01,zi01,nz01,gl01,&
+						res201numY,y01t(225:239),logy01(225:239,:),nY01)
+					call suspdep0firstderiv(t1(i),the02,zi02,nz02,&
+						gl02,res202numY,y02t(225:239),logy02(225:239,:),nY02)
+						
+					if(nva01nofixY.gt.0) then 
+					res1((nvamax+1):nvamax01Y)= -res201numY*vet01+&
+					tronc01Y
+					end if 
+					
+					if(nva02nofixY.gt.0) then 
+					res1((nvamax01Y+1):nvamax02Y)=  -res202numY*vet02+&
+					tronc02Y+logy02(256,:)
+					end if 
+					
+					if(nva12nofixY.gt.0) then 
+					res1((nvamax02Y+1):np0)= 0
+					end if 
+						end if 
 								
 					!		else 
 							

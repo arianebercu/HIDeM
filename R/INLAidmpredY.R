@@ -36,8 +36,6 @@ INLAidmpredY<-function(timeVar,truncated,formLong,dataSurv,dataLongi,id,
   
   
   
-
-  
   ## augmentation of the data 
   colnames(timePointsdata)<-c(id,timeVar)
   dataLongi_augmented<-merge(timePointsdata,dataLongi,by=c(id,timeVar),all.x=T,all.y=T)

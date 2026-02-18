@@ -59,7 +59,6 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                    dimp01,dimp02,dimp12,scale.X,defpositive,warmstart){
   
 
-
   # need to keep original fix to calculate for beta 
   
   fix00<-fix0
@@ -192,7 +191,6 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
     }
     
  
-
 
   if(nproc >1){
     

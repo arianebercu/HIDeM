@@ -9,6 +9,7 @@ DYNidm.weib(
   fix0,
   size_V,
   clustertype,
+  partialH,
   epsa,
   epsb,
   epsd,

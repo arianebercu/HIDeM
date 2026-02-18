@@ -62,7 +62,9 @@ DYNidm.penalty.weib(
   dimp01,
   dimp02,
   dimp12,
-  scale.X
+  scale.X,
+  defpositive,
+  warmstart
 )
 }
 \arguments{

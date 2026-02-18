@@ -69,7 +69,9 @@ DYNidm.penalty.splines(
   dimp01,
   dimp02,
   dimp12,
-  scale.X
+  scale.X,
+  defpositive,
+  warmstart
 )
 }
 \arguments{

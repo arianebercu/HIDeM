@@ -8,7 +8,7 @@
 INLAidm<-function(timeVar,family,basRisk,assoc,
                   truncated,formLong,formSurv,dataSurv,dataLongi,id,
                   nproc,t0,t1,t2,t3,
-                  idm,idd,clustertype,lightmode){
+                  idm,idd,clustertype,lightmode,envir){
   
   # define timePoints of prediction : 
 
@@ -59,10 +59,10 @@ INLAidm<-function(timeVar,family,basRisk,assoc,
 
       # need to have all elements of joint
       # global variables otherwise error in predict
-     # formLonginla<<-formLong[[indice]]
-    #  familyinla<<-family[indice]
-    #  basRiskinla<<-basRisk[indice]
-    #  associnla<<-assoc[[indice]]
+      # formLonginla<<-formLong[[indice]]
+      # familyinla<<-family[indice]
+      # basRiskinla<<-basRisk[indice]
+      # associnla<<-assoc[[indice]]
     
       # cannot have lightmode as need BLUP
       
@@ -72,16 +72,22 @@ INLAidm<-function(timeVar,family,basRisk,assoc,
       
       print(paste0("For marker: ",formLong[[indice]][[2]]))
      
-     
       #int.strategy="eb" in previous version later 4.5.1
+     form_i<-formLong[[indice]]
+     fam_i<-family[indice]
+     base_i<-basRisk[indice]
+     assoc_i<-assoc[[indice]]
+     environment(form_i)<-environment(fam_i)<-environment(base_i)<-environment(assoc_i)<-envir
+     
+ 
       INLAmodel<-INLAjoint::joint(formSurv = formSurv,
-                                       formLong = formLong[[indice]],
+                                       formLong = form_i,
                                        dataLong = dataLongi_augmented, dataSurv=dataSurv, id = id, timeVar = timeVar,
-                                       family = family[indice],
-                                       basRisk = basRisk[indice], NbasRisk = 15, assoc = assoc[[indice]],
+                                       family = fam_i,
+                                       basRisk = base_i, NbasRisk = 15, assoc = assoc_i,
                                        control=list(int.strategy="eb"))
       
-      #browser()
+      
       if(lightmode==T){
         erase<-c(".args","marginals.random","dic","waic","mode","residuals",
                  "logfile","selection","internal.marginals.hyperpar",
