@@ -578,6 +578,16 @@ DYNmodelY <- function(formula01,
        method=methodlongi,
        runtime=proc.time()-ptm)
   
+  res$formSurv<-formSurv
+  res$formLong<-formLong
+  if(methodlongi=="INLA"){
+    res$assoc<-methodINLA$assoc
+    res$basRisk<-methodINLA$basRisk
+    res$family<-methodINLA$family
+  }
+  res$timeVar<-timeVar
+  res$ID<-id
+  
 
   class(res) <- "predYidm"
   return(res)

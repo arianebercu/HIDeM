@@ -48,6 +48,7 @@ INLAidm<-function(timeVar,family,basRisk,assoc,
   
   dataSurv<-dataSurv[order(dataSurv[,colnames(dataSurv)%in%id]),]
   
+  environment(dataSurv)<-environment(id)<-environment(timeVar)<-environment(dataLongi_augmented)<-envir
  # formSurvinla<<-formSurv
 #  dataLongiinla<<-dataLongi_augmented
 #  dataSurvinla<<-dataSurv
@@ -79,6 +80,7 @@ INLAidm<-function(timeVar,family,basRisk,assoc,
      assoc_i<-assoc[[indice]]
      environment(form_i)<-environment(fam_i)<-environment(base_i)<-environment(assoc_i)<-envir
      
+    # browser()
  
       INLAmodel<-INLAjoint::joint(formSurv = formSurv,
                                        formLong = form_i,
@@ -89,22 +91,58 @@ INLAidm<-function(timeVar,family,basRisk,assoc,
       
       
       if(lightmode==T){
-        erase<-c(".args","marginals.random","dic","waic","mode","residuals",
-                 "logfile","selection","internal.marginals.hyperpar",
+        
+        # keep for prediction : args, selection, summary.hyperpar, SurvInfo, call,basRisk, survOutcome,
+        # REStruct, assoc, id, timeVar, famLongi, corLong, corRE, dataLong, dataSurv
+        # marginals.random necessary for sd of prediction
+        # 
+        # erase<-c(".args","marginals.random","dic","waic","mode","residuals",
+        #          "logfile","selection","internal.marginals.hyperpar",
+        #          "marginals.hyperpar","size.random","priors_used","marginals.fixed",
+        #          "internal.summary.hyperpar","joint.hyper","formLong",
+        #          "summary.hyperpar","formSurv","SurvInfo","cpu.intern","call",
+        #          "size.linear.predictor","version","mlik","gcpo","cpo","cpu.used",
+        #          "model.random","basRisk","survOutcome","REstruc","assoc","names.fixed",
+        #          "assoc_Names","famLongi","fixRE","timeVar","id","longOutcome","cureVar",
+        #          "dataSurv","dataLong","corRE","mat_k","range","control.link","corLong",
+        #          "NbasRisk","variant","run","nhyper","survFacChar","lonFacChar",
+        #          "marginals.fitted.values","marginals.linear.predictor",
+        #          "summary.fitted.values","po","all.hyper")
+        # for BLUP need : "summary.random","summary.fixed"
+        
+        erase<-c("marginals.random","dic","waic",
+                 "mode","residuals",
+                 "logfile","internal.marginals.hyperpar",
                  "marginals.hyperpar","size.random","priors_used","marginals.fixed",
                  "internal.summary.hyperpar","joint.hyper","formLong",
-                 "summary.hyperpar","formSurv","SurvInfo","cpu.intern","call",
+                 "formSurv","cpu.intern",
                  "size.linear.predictor","version","mlik","gcpo","cpo","cpu.used",
-                 "model.random","basRisk","survOutcome","REstruc","assoc","names.fixed",
-                 "assoc_Names","famLongi","fixRE","timeVar","id","longOutcome","cureVar",
-                 "dataSurv","dataLong","corRE","mat_k","range","control.link","corLong",
+                 "model.random","names.fixed",
+                 "assoc_Names","fixRE","longOutcome","cureVar",
+                 "mat_k","range","control.link",
                  "NbasRisk","variant","run","nhyper","survFacChar","lonFacChar",
                  "marginals.fitted.values","marginals.linear.predictor",
                  "summary.fitted.values","po","all.hyper")
-        # for BLUP need : "summary.random","summary.fixed"
+        
         nameINLA<-names(INLAmodel)
         classINLA<-class(INLAmodel)
         INLAmodel<-INLAmodel[-which(nameINLA%in%erase)]
+        
+        # erase part of .args
+        # ATTENTION NOT POSSIBLE to erase some controls of .args and family
+        erase<-c("data","control.predictor","offset","E","control.lp.scale",
+                 "lincomb","control.inla","control.compute","control.expert",
+                 "control.pardiso","control.mode","selection",
+                 "control.stiles","control.taucs","control.lincomb","control.numa",
+                 "control.update","inla.call","inla.mode","num.threads","quantiles",
+                 ".parent.frame","debug","safe","silent","keep","only.hyperparam","verbose")
+        nameINLA<-names(INLAmodel$.args)
+        INLAmodel$.args<-INLAmodel$.args[-which(nameINLA%in%erase)]
+        
+        #erase part of selection 
+        nameINLA<-names(INLAmodel$selection)
+        INLAmodel$selection<-INLAmodel$selection[-which(nameINLA%in%".private")]
+        
         class(INLAmodel)<-classINLA
         
       }

@@ -6282,6 +6282,178 @@ subroutine qgaussPL15weibtimedep(a,b,the01,the02,the12,res,&
 	endif
     
           end subroutine qgaussPL15weibtimedep
+		  
+		  
+		  
+!=============================================================================================  
+!==== QGAUS15 out a 15 point Gauss-Kronrod quadrature rule for weib  =========================
+!==== for cumulative incidence ===============================================================
+!=============================================================================================  
+
+						 
+subroutine ciqgaussPL15weibtimedep(a,b,the01,the02,res,&
+       v01,v02,y01,y02)
+         
+		 
+		 implicit none
+         
+         integer::j,jtw,jtwm1
+         double precision::a,b,dx,xm,xr,res,resk,v01,v02,&
+         d1mach(5),epmach,uflow,the01(2),the02(2)
+         double precision,dimension(8)::xgk,wgk
+		 double precision,dimension(240)::y01,y02
+	 double precision,dimension(4)::wg
+         double precision::xx,f1,su01,ri01,f2,&
+		 su02,ri02,fc,gl01,gl02
+         save wgk,xgk
+
+   	D1MACH(1)=2.23D-308
+    	D1MACH(2)=1.79D+308
+    	D1MACH(3)=1.11D-16
+    	D1MACH(4)=2.22D-16
+    	D1MACH(5)=0.301029995663981195D0
+
+    	epmach = d1mach(4)
+    	uflow = d1mach(1)
+
+	wg(1)=0.129484966168869693270611432679082d0
+   	wg(2)=0.279705391489276667901467771423780d0
+    	wg(3)=0.381830050505118944950369775488975d0
+    	wg(4)=0.417959183673469387755102040816327d0
+
+    	xgk(1)=0.991455371120812639206854697526329d0
+    	xgk(2)=0.949107912342758524526189684047851d0
+    	xgk(3)=0.864864423359769072789712788640926d0
+    	xgk(4)=0.741531185599394439863864773280788d0
+    	xgk(5)=0.586087235467691130294144838258730d0
+    	xgk(6)=0.405845151377397166906606412076961d0
+    	xgk(7)=0.207784955007898467600689403773245d0
+    	xgk(8)=0.000000000000000000000000000000000d0
+
+    	wgk(1)=0.022935322010529224963732008058970d0
+    	wgk(2)=0.063092092629978553290700663189204d0
+    	wgk(3)=0.104790010322250183839876322541518d0
+    	wgk(4)=0.140653259715525918745189590510238d0
+    	wgk(5)=0.169004726639267902826583426598550d0
+    	wgk(6)=0.190350578064785409913256402421014d0
+    	wgk(7)=0.204432940075298892414161999234649d0
+    	wgk(8)=0.209482141084727828012999174891714d0
+     
+
+        xm = 0.5d+00*(b+a)
+        xr = 0.5d+00*(b-a)
+        call fonctdep(xm,the01,ri01,gl01,su01,y01(1:16))
+        call fonctdep(xm,the02,ri02,gl02,su02,y02(1:16))
+        fc = (su01**v01)*(su02**v02)*ri01*v01  ! valeur fct f au milieu de intervalle (a,b), cas pnt 0
+
+    	
+        resk = fc*wgk(8)       ! init res Kronrod   ! fc * 8e poids Kronrod
+         
+            if(a.eq.b)then
+               res = 0.d0
+            else
+			
+			j=4
+			
+			jtwm1 = j*2-1
+               dx=xr*xgk(jtwm1)
+               xx = xm+dx
+               call fonctdep(xx,the01,ri01,gl01,su01,y01(33:48))
+               call fonctdep(xx,the02,ri02,gl02,su02,y02(33:48))
+               f1 = (su01**v01)*(su02**v02)*ri01*v01
+               xx = xm-dx
+               call fonctdep(xx,the01,ri01,gl01,su01,y01(17:32))
+               call fonctdep(xx,the02,ri02,gl02,su02,y02(17:32))
+               f2 = (su01**v01)*(su02**v02)*ri01*v01
+			   resk = resk + wgk(jtwm1)*(f1+f2)
+		   
+		   j=3
+		   
+		   jtw = j*2
+               	dx=xr*xgk(jtw)
+               	xx = xm+dx
+               	call fonctdep(xx,the01,ri01,gl01,su01,y01(65:80))
+               	call fonctdep(xx,the02,ri02,gl02,su02,y02(65:80))
+               	f1 = (su01**v01)*(su02**v02)*ri01*v01
+               	xx = xm-dx
+               	call fonctdep(xx,the01,ri01,gl01,su01,y01(49:64))
+               	call fonctdep(xx,the02,ri02,gl02,su02,y02(49:64))
+               	f2 = (su01**v01)*(su02**v02)*ri01*v01
+	       	
+               	resk = resk + wgk(jtw)*(f1+f2)
+				
+			jtwm1 = j*2-1
+               dx=xr*xgk(jtwm1)
+               xx = xm+dx
+               call fonctdep(xx,the01,ri01,gl01,su01,y01(97:112))
+               call fonctdep(xx,the02,ri02,gl02,su02,y02(97:112))
+               f1 = (su01**v01)*(su02**v02)*ri01*v01
+               xx = xm-dx
+               call fonctdep(xx,the01,ri01,gl01,su01,y01(81:96))
+               call fonctdep(xx,the02,ri02,gl02,su02,y02(81:96))
+               f2 = (su01**v01)*(su02**v02)*ri01*v01
+	       resk = resk + wgk(jtwm1)*(f1+f2)
+		   
+		   j=2
+		   
+            
+			    jtw = j*2
+               	dx=xr*xgk(jtw)
+               	xx = xm+dx
+               	call fonctdep(xx,the01,ri01,gl01,su01,y01(129:144))
+               	call fonctdep(xx,the02,ri02,gl02,su02,y02(129:144))
+               	f1 = (su01**v01)*(su02**v02)*ri01*v01
+               	xx = xm-dx
+               	call fonctdep(xx,the01,ri01,gl01,su01,y01(113:128))
+               	call fonctdep(xx,the02,ri02,gl02,su02,y02(113:128))
+               	f2 = (su01**v01)*(su02**v02)*ri01*v01
+               	resk = resk + wgk(jtw)*(f1+f2)
+				
+				
+			 jtwm1 = j*2-1
+               dx=xr*xgk(jtwm1)
+               xx = xm+dx
+               call fonctdep(xx,the01,ri01,gl01,su01,y01(161:176))
+               call fonctdep(xx,the02,ri02,gl02,su02,y02(161:176))
+               f1 = (su01**v01)*(su02**v02)*ri01*v01
+               xx = xm-dx
+               call fonctdep(xx,the01,ri01,gl01,su01,y01(145:160))
+               call fonctdep(xx,the02,ri02,gl02,su02,y02(145:160))
+               f2 = (su01**v01)*(su02**v02)*ri01*v01
+	       resk = resk + wgk(jtwm1)*(f1+f2)
+		   
+		   j=1
+		   
+		    jtw = j*2
+               	dx=xr*xgk(jtw)
+               	xx = xm+dx
+               	call fonctdep(xx,the01,ri01,gl01,su01,y01(193:208))
+               	call fonctdep(xx,the02,ri02,gl02,su02,y02(193:208))
+               	f1 = (su01**v01)*(su02**v02)*ri01*v01
+               	xx = xm-dx
+               	call fonctdep(xx,the01,ri01,gl01,su01,y01(177:192))
+               	call fonctdep(xx,the02,ri02,gl02,su02,y02(177:192))
+               	f2 = (su01**v01)*(su02**v02)*ri01*v01
+	       	
+               	resk = resk + wgk(jtw)*(f1+f2)
+				
+				jtwm1 = j*2-1
+               dx=xr*xgk(jtwm1)
+               xx = xm+dx
+               call fonctdep(xx,the01,ri01,gl01,su01,y01(225:240))
+               call fonctdep(xx,the02,ri02,gl02,su02,y02(225:240))
+               f1 = (su01**v01)*(su02**v02)*ri01*v01
+               xx = xm-dx
+               call fonctdep(xx,the01,ri01,gl01,su01,y01(209:224))
+               call fonctdep(xx,the02,ri02,gl02,su02,y02(209:224))
+               f2 = (su01**v01)*(su02**v02)*ri01*v01
+	       resk = resk + wgk(jtwm1)*(f1+f2)
+
+	    
+    	res = xr*resk
+	endif
+    
+          end subroutine ciqgaussPL15weibtimedep
 
 
 !=============================================================================================  
@@ -6472,6 +6644,178 @@ subroutine qgaussPL15timedep(a,b,the01,the02,the12,res,&
     
           end subroutine qgaussPL15timedep
 
+
+!=============================================================================================  
+!==== QGAUS15 out a 15 point Gauss-Kronrod quadrature rule for splines  =========================
+!=============================================================================================  
+
+subroutine ciqgaussPL15timedep(a,b,the01,the02,res,&
+       v01,v02,y01,y02)
+         
+		 use commun,only:zi01,zi02,nz01,nz02
+		 implicit none
+         
+         integer::j,jtw,jtwm1
+         double precision::a,b,dx,xm,xr,res,resk,v01,v02,&
+         d1mach(5),epmach,uflow
+		 
+		 double precision,dimension(-2:(nz01-1))::the01
+         double precision,dimension(-2:(nz02-1))::the02
+         double precision,dimension(8)::xgk,wgk
+		 
+		 double precision,dimension(240)::y01,y02
+	 double precision,dimension(4)::wg
+         double precision::xx,f1,su01,ri01,f2,&
+		 su02,ri02,fc,gl01,gl02
+         save wgk,xgk
+
+   	D1MACH(1)=2.23D-308
+    	D1MACH(2)=1.79D+308
+    	D1MACH(3)=1.11D-16
+    	D1MACH(4)=2.22D-16
+    	D1MACH(5)=0.301029995663981195D0
+
+    	epmach = d1mach(4)
+    	uflow = d1mach(1)
+
+	wg(1)=0.129484966168869693270611432679082d0
+   	wg(2)=0.279705391489276667901467771423780d0
+    	wg(3)=0.381830050505118944950369775488975d0
+    	wg(4)=0.417959183673469387755102040816327d0
+
+    	xgk(1)=0.991455371120812639206854697526329d0
+    	xgk(2)=0.949107912342758524526189684047851d0
+    	xgk(3)=0.864864423359769072789712788640926d0
+    	xgk(4)=0.741531185599394439863864773280788d0
+    	xgk(5)=0.586087235467691130294144838258730d0
+    	xgk(6)=0.405845151377397166906606412076961d0
+    	xgk(7)=0.207784955007898467600689403773245d0
+    	xgk(8)=0.000000000000000000000000000000000d0
+
+    	wgk(1)=0.022935322010529224963732008058970d0
+    	wgk(2)=0.063092092629978553290700663189204d0
+    	wgk(3)=0.104790010322250183839876322541518d0
+    	wgk(4)=0.140653259715525918745189590510238d0
+    	wgk(5)=0.169004726639267902826583426598550d0
+    	wgk(6)=0.190350578064785409913256402421014d0
+    	wgk(7)=0.204432940075298892414161999234649d0
+    	wgk(8)=0.209482141084727828012999174891714d0
+     
+
+        xm = 0.5d+00*(b+a)
+        xr = 0.5d+00*(b-a)
+        call suspdep(xm,the01,nz01,su01,ri01,zi01,gl01,y01(1:16))
+        call suspdep(xm,the02,nz02,su02,ri02,zi02,gl02,y02(1:16))
+        fc = (su01**v01)*(su02**v02)*ri01*v01 ! valeur fct f au milieu de intervalle (a,b), cas pnt 0
+
+    	
+        resk = fc*wgk(8)       ! init res Kronrod   ! fc * 8e poids Kronrod
+         
+            if(a.eq.b)then
+               res = 0.d0
+            else
+			
+			j=4
+			
+			jtwm1 = j*2-1
+               dx=xr*xgk(jtwm1)
+               xx = xm+dx
+               call suspdep(xx,the01,nz01,su01,ri01,zi01,gl01,y01(33:48))
+               call suspdep(xx,the02,nz02,su02,ri02,zi02,gl02,y02(33:48))
+               f1 = (su01**v01)*(su02**v02)*ri01*v01
+               xx = xm-dx
+               call suspdep(xx,the01,nz01,su01,ri01,zi01,gl01,y01(17:32))
+               call suspdep(xx,the02,nz02,su02,ri02,zi02,gl02,y02(17:32))
+               f2 = (su01**v01)*(su02**v02)*ri01*v01
+			   resk = resk + wgk(jtwm1)*(f1+f2)
+		   
+		   j=3
+		   
+		   jtw = j*2
+               	dx=xr*xgk(jtw)
+               	xx = xm+dx
+               call suspdep(xx,the01,nz01,su01,ri01,zi01,gl01,y01(65:80))
+               call suspdep(xx,the02,nz02,su02,ri02,zi02,gl02,y02(65:80))
+               	f1 = (su01**v01)*(su02**v02)*ri01*v01
+               	xx = xm-dx
+               call suspdep(xx,the01,nz01,su01,ri01,zi01,gl01,y01(49:64))
+               call suspdep(xx,the02,nz02,su02,ri02,zi02,gl02,y02(49:64))
+               	f2 = (su01**v01)*(su02**v02)*ri01*v01
+	       	
+               	resk = resk + wgk(jtw)*(f1+f2)
+				
+			jtwm1 = j*2-1
+               dx=xr*xgk(jtwm1)
+               xx = xm+dx
+               call suspdep(xx,the01,nz01,su01,ri01,zi01,gl01,y01(97:112))
+               call suspdep(xx,the02,nz02,su02,ri02,zi02,gl02,y02(97:112))
+               f1 = (su01**v01)*(su02**v02)*ri01*v01
+               xx = xm-dx
+               call suspdep(xx,the01,nz01,su01,ri01,zi01,gl01,y01(81:96))
+               call suspdep(xx,the02,nz02,su02,ri02,zi02,gl02,y02(81:96))
+               f2 = (su01**v01)*(su02**v02)*ri01*v01
+	       resk = resk + wgk(jtwm1)*(f1+f2)
+		   
+		   j=2
+		   
+            
+			    jtw = j*2
+               	dx=xr*xgk(jtw)
+               	xx = xm+dx
+               	call suspdep(xx,the01,nz01,su01,ri01,zi01,gl01,y01(129:144))
+               call suspdep(xx,the02,nz02,su02,ri02,zi02,gl02,y02(129:144))
+               	f1 = (su01**v01)*(su02**v02)*ri01*v01
+               	xx = xm-dx
+               	call suspdep(xx,the01,nz01,su01,ri01,zi01,gl01,y01(113:128))
+               call suspdep(xx,the02,nz02,su02,ri02,zi02,gl02,y02(113:128))
+               	f2 = (su01**v01)*(su02**v02)*ri01*v01
+               	resk = resk + wgk(jtw)*(f1+f2)
+				
+				
+			 jtwm1 = j*2-1
+               dx=xr*xgk(jtwm1)
+               xx = xm+dx
+               call suspdep(xx,the01,nz01,su01,ri01,zi01,gl01,y01(161:176))
+               call suspdep(xx,the02,nz02,su02,ri02,zi02,gl02,y02(161:176))
+               f1 = (su01**v01)*(su02**v02)*ri01*v01
+               xx = xm-dx
+               call suspdep(xx,the01,nz01,su01,ri01,zi01,gl01,y01(145:160))
+               call suspdep(xx,the02,nz02,su02,ri02,zi02,gl02,y02(145:160))
+               f2 = (su01**v01)*(su02**v02)*ri01*v01
+	       resk = resk + wgk(jtwm1)*(f1+f2)
+		   
+		   j=1
+		   
+		    jtw = j*2
+               	dx=xr*xgk(jtw)
+               	xx = xm+dx
+               	call suspdep(xx,the01,nz01,su01,ri01,zi01,gl01,y01(193:208))
+               call suspdep(xx,the02,nz02,su02,ri02,zi02,gl02,y02(193:208))
+               	f1 = (su01**v01)*(su02**v02)*ri01*v01
+               	xx = xm-dx
+               	call suspdep(xx,the01,nz01,su01,ri01,zi01,gl01,y01(177:192))
+               call suspdep(xx,the02,nz02,su02,ri02,zi02,gl02,y02(177:192))
+               	f2 = (su01**v01)*(su02**v02)*ri01*v01
+	       	
+               	resk = resk + wgk(jtw)*(f1+f2)
+				
+				jtwm1 = j*2-1
+               dx=xr*xgk(jtwm1)
+               xx = xm+dx
+               call suspdep(xx,the01,nz01,su01,ri01,zi01,gl01,y01(225:240))
+               call suspdep(xx,the02,nz02,su02,ri02,zi02,gl02,y02(225:240))
+               f1 = (su01**v01)*(su02**v02)*ri01*v01
+               xx = xm-dx
+               call suspdep(xx,the01,nz01,su01,ri01,zi01,gl01,y01(209:224))
+               call suspdep(xx,the02,nz02,su02,ri02,zi02,gl02,y02(209:224))
+               f2 = (su01**v01)*(su02**v02)*ri01*v01
+	       resk = resk + wgk(jtwm1)*(f1+f2)
+
+	    
+    	res = xr*resk
+	endif
+    
+          end subroutine ciqgaussPL15timedep
 
 !=============================================================================================  
 !==== QGAUS15 out a 15 point Gauss-Kronrod quadrature rule for splines   =====================
@@ -42182,3 +42526,488 @@ end module
 	res202numY,res212numY,tronc01Y,tronc01,tronc02Y,tronc02)
 
 end subroutine firstderivaidmlikelihoodsplinetimedep
+
+
+
+!============================================================================================= 
+!========================        cumulative intensity         ====================================
+!========================    with baseline weibull and time dependent covariates  ============
+!======================== using gaussian quadrature 15 points ================================
+!============================================================================================= 
+
+
+      subroutine ciweibtimedep(b0,np0,npar0,bfix0,fix0,&
+      no0,ve010,ve020,y010,y020, &
+	  p01,p02,p12,dimp01,dimp02,dimp12, Ntime, &
+	  dimnva01,dimnva12,dimnva02,nva01,&
+      nva12,nva02,t00,t10,troncature0,likelihood_res)
+
+	    use commun
+        implicit none
+         
+    double precision::res2,tronc, &
+        vet01,vet02
+	
+        integer::np0,i,j,l,w,k,npar0,nva01,nva12,nva02,no0, &
+	troncature0,dimnva01,dimnva02,dimnva12, &
+	p01,p02,p12,dimp01,dimp02,dimp12,Ntime
+
+	double precision,dimension(np0)::b0
+        double precision,dimension(npar0)::bh
+	double precision,dimension(npar0-np0)::bfix0
+	integer,dimension(npar0)::fix0
+	double precision,dimension(2)::the01
+	double precision,dimension(2)::the12
+	double precision,dimension(2)::the02
+    
+	double precision,dimension(no0,dimnva01)::ve010
+	double precision,dimension(no0,dimnva02)::ve020
+	
+	double precision,dimension(no0*dimp01*Ntime)::y010
+	double precision,dimension(no0*dimp02*Ntime)::y020
+	
+	
+	double precision,dimension(Ntime)::y01t,y02t
+	double precision, dimension(no0), intent(inout)::likelihood_res
+
+!	integer, dimension(16) :: indices
+	
+    double precision::su01,ri01,su02,ri02,gl01,gl02
+	double precision,dimension(no0)::t00,t10,res
+
+	allocate(b(np0),bfix(npar0-np0))
+	allocate(fix(npar0))
+	
+
+	troncature=troncature0
+
+	b=b0
+	bfix=bfix0
+	fix=fix0
+
+
+
+	if(nva01.gt.0) then 
+		allocate(ve01(no0,nva01))
+	else 
+		allocate(ve01(no0,1))
+	end if 
+	
+	if(nva02.gt.0) then 
+		allocate(ve02(no0,nva02))
+	else 
+		allocate(ve02(no0,1))
+	end if 
+
+
+	
+	
+	if(p01.gt.0) then 
+		allocate(y01(no0*p01*Ntime))
+		y01=y010
+	else 
+		allocate(y01(no0*Ntime))
+		y01=0
+	end if 
+	
+	if(p02.gt.0) then 
+		allocate(y02(no0*p02*Ntime))
+		y02=y020
+	else 
+		allocate(y02(no0*Ntime))
+		y02=0
+	end if 
+
+
+
+	ve01=ve010
+	ve02=ve020
+
+	allocate(t0(no0),t1(no0))
+
+	t0=t00
+	t1=t10
+
+         
+        ! we need to put bh at its original values if in posfix 
+
+! attention here so far Y dependent of time cannot be fixed 
+! fix = 0 
+       l=0
+       w=0
+
+       do k=1,(np0+sum(fix))
+         if(fix(k).eq.0) then
+            l=l+1
+            bh(k)=b(l)
+         end if
+         if(fix(k).eq.1) then
+            w=w+1
+            bh(k)=bfix(w)
+         end if
+      end do
+ 
+	
+
+
+         do i=1,2
+            the01(i)=(bh(i))*(bh(i))
+         end do
+         do i=1,2
+            j = 2+i
+            the02(i)=(bh(j))*(bh(j))
+         end do
+         do i=1,2
+            j = 4+i
+            the12(i)=(bh(j))*(bh(j))
+         end do
+
+
+		res = 0.d0
+!---------- calcul de la vraisemblance ------------------
+
+
+         
+               do i=1,no0
+			   
+			
+         
+                vet01 = 0.d0
+                vet02 = 0.d0
+
+				y01t = 0
+                y02t = 0
+				
+			
+
+                if(nva01.gt.0)then
+                        do j=1,nva01
+                                vet01 =vet01 +&
+                                bh(6+j)*dble(ve01(i,j))
+                        end do
+                endif  
+ 
+                if(nva02.gt.0)then
+                        do j=1,nva02
+                                vet02 =vet02 +&
+                                bh(6+nva01+j)*dble(ve02(i,j))
+                        end do
+                endif
+	
+			
+				if(p01.gt.0)then
+					do l=1,Ntime
+                        do j=1,p01
+								k = (i-1)*Ntime*p01+(l-1)*p01+j
+						
+                                y01t(l) =y01t(l) +&
+                                bh(6+nva01+nva02+nva12+j)*y01(k)
+                        end do
+					end do 
+                endif  
+ 
+                if(p02.gt.0)then
+					do l=1,Ntime
+                        do j=1,p02
+								k = (i-1)*Ntime*p02+ (l-1)*p02+j
+                                y02t(l) =y02t(l) +&
+                                bh(6+nva01+nva02+nva12+p01+j)*y02(k)
+                        end do
+					end do 
+                endif  
+
+                 
+				
+				y01t=dexp(y01t)
+				y02t=dexp(y02t)
+
+                vet01 = dexp(vet01)
+                vet02 = dexp(vet02)
+
+
+                res(i) = 0.d0
+                
+                if(troncature.eq.1)then
+                        if(t0(i).eq.0.d0)then
+                                tronc = 0.d0
+                        else 
+                                call fonctdep0(t0(i),the01,gl01,y01t(257:271))
+                                call fonctdep0(t0(i),the02,gl02,y02t(257:271))
+                                tronc=dexp((gl01*vet01)+(gl02*vet02))
+                        end if
+                else
+                        tronc = 1
+                end if
+
+                         call  ciqgaussPL15weibtimedep(t0(i),t1(i),the01,the02,&
+                         res2,vet01,vet02,&
+						 y01t(1:240),y02t(1:240))
+						 
+                        res(i)=res2*tronc
+						
+					
+        end do   
+ 
+
+
+        likelihood_res = res
+
+
+123     continue 
+
+	deallocate(b,bfix,fix,ve01,ve02,y01,y02, & 
+	t0,t1)
+
+end subroutine ciweibtimedep
+
+
+
+!============================================================================================= 
+!========================          idmlLikelihood         ====================================
+!========================   with baseline M-splines       ==================================== 
+!============================================================================================= 
+
+      subroutine citimedep(b0,np0,npar0,bfix0,fix0,&
+	  zi010,zi120,zi020,&
+      no0,nz010,nz120,nz020,ve010,ve020,&
+	  y010,y020,&
+	  p01,p02,p12,dimp01,dimp02,dimp12, Ntime, &
+      dimnva01,dimnva12,dimnva02,nva01,nva12,nva02,t00,t10,&
+      troncature0,likelihood_res)
+
+	use commun
+        implicit none
+         
+        double precision::res2,tronc, &
+        vet01,vet12,vet02
+
+        integer::np0,i,j,l,w,k,npar0,nva01,nva12,nva02,no0, &
+	nz010,nz020,nz120,troncature0, & 
+        dimnva01,dimnva02,dimnva12, & 
+		p01,p02,p12,dimp01,dimp02,dimp12,Ntime, &
+		nspline
+
+	double precision,dimension(np0)::b0
+        double precision,dimension(npar0)::bh
+	double precision,dimension(npar0-np0)::bfix0
+	integer,dimension(npar0)::fix0
+	double precision,dimension(-2:(nz010+3))::zi010
+	double precision,dimension(-2:(nz020+3))::zi020
+	double precision,dimension(-2:(nz120+3))::zi120
+	double precision,dimension(-2:(nz010-1))::the01
+	double precision,dimension(-2:(nz120-1))::the12
+	double precision,dimension(-2:(nz020-1))::the02
+        double precision,dimension(no0,dimnva01)::ve010
+	double precision,dimension(no0,dimnva02)::ve020
+	double precision,dimension(no0,dimnva12)::ve120
+	
+	double precision,dimension(no0*dimp01*Ntime)::y010
+	double precision,dimension(no0*dimp02*Ntime)::y020
+	
+	
+	double precision,dimension(Ntime)::y01t,y02t
+
+	double precision,dimension(no0), intent(inout)::likelihood_res
+
+	
+        double precision::su01,ri01,su02,ri02,gl01,gl02
+	double precision,dimension(no0)::t00,t10,res
+
+
+	allocate(b(np0),bfix(npar0-np0),fix(npar0))
+	b=b0
+	bfix=bfix0
+	fix=fix0
+	allocate(zi01(-2:(nz01+3)),zi12(-2:(nz12+3)),zi02(-2:(nz02+3)))
+	zi01=zi010
+	zi02=zi020
+	zi12=zi120
+
+	
+	nz01=nz010
+	nz02=nz020
+	nz12=nz120
+	troncature=troncature0
+
+
+	if(nva01.gt.0) then 
+		allocate(ve01(no0,nva01))
+	else 
+		allocate(ve01(no0,1))
+	end if 
+	
+	if(nva02.gt.0) then 
+		allocate(ve02(no0,nva02))
+	else 
+		allocate(ve02(no0,1))
+	end if 
+
+	
+
+
+if(p01.gt.0) then 
+		allocate(y01(no0*p01*Ntime))
+		y01=y010
+	else 
+		allocate(y01(no0*Ntime))
+		y01=0
+	end if 
+	
+	if(p02.gt.0) then 
+		allocate(y02(no0*p02*Ntime))
+		y02=y020
+	else 
+		allocate(y02(no0*Ntime))
+		y02=0
+	end if 
+
+	
+
+	ve01=ve010
+	ve02=ve020
+
+	allocate(t0(no0),t1(no0))
+
+	t0=t00
+	t1=t10
+
+         
+        ! we need to put bh at its original values if in posfix 
+
+
+       l=0
+       w=0
+
+
+       do k=1,(np0+sum(fix))
+         if(fix(k).eq.0) then
+            l=l+1
+            bh(k)=b(l)
+         end if
+         if(fix(k).eq.1) then
+            w=w+1
+            bh(k)=bfix(w)
+         end if
+      end do
+    
+	
+
+         do i=1,nz01+2
+            the01(i-3)=(bh(i))*(bh(i))
+!       the01(i-3)=dexp(bh(i))
+         end do
+         do i=1,nz02+2
+            j = nz01+2+i
+            the02(i-3)=(bh(j))*(bh(j))
+!       the12(i-3)=dexp(bh(j))
+         end do
+         do i=1,nz12+2
+            j = nz02+2+nz01+2+i
+            the12(i-3)=(bh(j))*(bh(j))
+!       the02(i-3)=dexp(bh(j))
+         end do
+	
+	
+		nspline = nz01+nz12+nz02+6
+!---------- calcul de la vraisemblance ------------------
+
+  
+        res = 0.d0
+		res2= 0.d0
+        do i=1,no0
+
+  ! write(6,*)'subject ',i
+		  
+                vet01 = 0.d0
+                vet02 = 0.d0
+
+
+                
+				y01t = 0
+                y02t = 0
+
+                if(nva01.gt.0)then
+                        do j=1,nva01
+                                vet01 =vet01 +&
+                                bh(nspline+j)*dble(ve01(i,j))
+                        end do
+                endif  
+ 
+                if(nva02.gt.0)then
+                        do j=1,nva02
+                                vet02 =vet02 +&
+                                bh(nspline+nva01+j)*dble(ve02(i,j))
+                        end do
+                endif
+
+				
+
+
+				if(p01.gt.0)then
+					do l=1,Ntime
+                        do j=1,p01
+								k = (i-1)*Ntime*p01+(l-1)*p01+j
+                                y01t(l) =y01t(l) +&
+                                bh(nspline+nva01+nva02+nva12+j)*y01(k)
+
+                        end do
+					end do 
+                endif  
+ 
+                if(p02.gt.0)then
+					do l=1,Ntime
+                        do j=1,p02
+								k = (i-1)*Ntime*p02+ (l-1)*p02+j
+                                y02t(l) =y02t(l) +&
+                                bh(nspline+nva01+nva02+nva12+p01+j)*y02(k)
+                        end do
+					end do 
+                endif  
+
+                 
+				
+				y01t=dexp(y01t)
+				y02t=dexp(y02t)
+				
+				
+				
+                vet01 = dexp(vet01)
+                vet02 = dexp(vet02)
+
+
+                res(i) = 0.d0
+                
+                if(troncature.eq.1)then
+                        if(t0(i).eq.0.d0)then
+                                tronc = 0.d0
+                        else 
+                                
+								call suspdept0(t0(i),the01,nz01,su01,ri01,zi01,gl01,y01t(257:271))
+                                call suspdept0(t0(i),the02,nz02,su02,ri02,zi02,gl02,y02t(257:271))
+                                tronc=dexp((gl01*vet01)+(gl02*vet02))
+                        end if
+                else
+                        tronc = 1
+                end if
+
+		
+               
+                  call ciqgaussPL15timedep(t0(i),t1(i),the01,the02,&
+                        	res2,vet01,vet02,& 
+							 y01t(1:240),y02t(1:240))
+                  
+				  res(i)=res2*tronc
+					
+                
+          end do 
+   
+
+        likelihood_res = res
+
+
+123     continue 
+	 
+	deallocate(b,bfix,fix,zi01,zi02,zi12,ve01,ve02,ve12, &
+	y01,y02,y12,t0,t1)
+
+        end subroutine citimedep
