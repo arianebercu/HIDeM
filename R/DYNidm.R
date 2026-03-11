@@ -181,13 +181,10 @@ DYNidm <- function(formula01,
                 formula02,
                 formula12,
                 data,
-                formLong,
                 Longitransition,
                 assoc,
                 threshold,
                 dataLongi,
-                timeVar,
-                id,
                 Nsample,
                 method="Weib",
                 scale.X=T,
@@ -234,6 +231,10 @@ DYNidm <- function(formula01,
     if(is.null(modelY)){stop("First need to run univariate joint model for the longitudinal markers.")}
     
     if(!inherits(modelY,"predYidm"))stop("The argument modelY must be a class 'predYidm' obtained using DYNpredY.")
+    
+    timeVar<-modelY$timeVar
+    id<-modelY$id
+    formLong<-modelY$formLong
       
     if(!BLUP%in%c(T,F))stop("Argument BLUP needs to be T or F")
     if(missing(Nsample))stop("Need to specify the number of samples in Nsample")
@@ -629,15 +630,18 @@ DYNidm <- function(formula01,
       if("01"%in%x){
         return(T)}else{return(F)}
     }))]
+    Ynames01<-outcome01
     outcome02<-  ynames[unlist(lapply(Longitransition,FUN=function(x){
       if("02"%in%x){
         return(T)}else{return(F)}
     }))]
+    Ynames02<-outcome02
     
     outcome12<-  ynames[unlist(lapply(Longitransition,FUN=function(x){
       if("12"%in%x){
         return(T)}else{return(F)}
     }))]
+    Ynames12<-outcome12
     
     if(length(outcome01)>=1){
       outcome01<-unlist(lapply(c(1:length(assoc)),FUN=function(x){
@@ -653,12 +657,13 @@ DYNidm <- function(formula01,
         }
         return(res)
       }))
-    
+      linkYnames01<-outcome01
       p01<-length(outcome01)
       dimp01<-length(outcome01)
     }else{
       p01<-0
       dimp01<-1
+      linkYnames01<-NA
     }
     
     if(length(outcome02)>=1){
@@ -676,11 +681,13 @@ DYNidm <- function(formula01,
         }
         return(res)
       }))
+      linkYnames02<-outcome02
       p02<-length(outcome02)
       dimp02<-length(outcome02)
     }else{
       p02<-0
       dimp02<-1
+      linkYnames02<-NA
     }
     
     if(length(outcome12)>=1){
@@ -699,12 +706,14 @@ DYNidm <- function(formula01,
         }
         return(res)
       }))
+      linkYnames12<-outcome12
       p12<-length(outcome12)
       dimp12<-length(outcome12)
       
     }else{
       p12<-0
       dimp12<-1
+      linkYnames12<-NA
     }
     
 
@@ -1276,6 +1285,7 @@ DYNidm <- function(formula01,
       }
       
       
+ 
     }else{
 
       ############################################################################
@@ -1690,8 +1700,39 @@ DYNidm <- function(formula01,
               
              
 
-        }
+          }
+          
 
-}
-        return(out)
+    }
+    
+    res<-list(DYNidm=out,
+              call=call,
+              Longitransition=Longitransition,
+              assoc=assoc,
+              timeVar=timeVar,
+              id=id,
+              method=method,
+              scale.X=scale.X,
+              Xnames01=Xnames01,
+              Xnames02=Xnames02,
+              Xnames12=Xnames12,
+              timedepXnames01=Ynames01,
+              timedepXnames02=Ynames02,
+              timedepXnames12=Ynames12,
+              linktimedepXnames01=linkYnames01,
+              linktimedepXnames02=linkYnames02,
+              linktimedepXnames12=linkYnames12)
+  if(penalty=="none"){
+    class(res)<-"DYNidm"
+  }else{
+      class(res)<-"regDYNidm"
+  }
+    
+    if(method=="splines"){
+      res$knots01<-knots01
+      res$knots02<-knots02
+      res$knots12<-knots12
+    }
+   
+        return(res)
 }

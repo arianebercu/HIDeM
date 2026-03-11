@@ -574,20 +574,21 @@ DYNmodelY <- function(formula01,
                    lightmode=lightmode)
       
     }
-  res<-list(modelY=modelY,
-       method=methodlongi,
-       runtime=proc.time()-ptm)
   
-  res$formSurv<-formSurv
-  res$formLong<-formLong
+  res<-list(modelY=modelY,
+            formSurv=formSurv,
+            formLong=formLong,
+            timeVar=timeVar,
+            id=id,
+            method=methodlongi,
+            runtime=proc.time()-ptm)
+  
   if(methodlongi=="INLA"){
     res$assoc<-methodINLA$assoc
     res$basRisk<-methodINLA$basRisk
     res$family<-methodINLA$family
   }
-  res$timeVar<-timeVar
-  res$ID<-id
-  
+
 
   class(res) <- "predYidm"
   return(res)

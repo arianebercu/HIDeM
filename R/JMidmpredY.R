@@ -48,7 +48,7 @@ JMidmpredY<-function(timeVar,
   length(Yall)<-length(formLong)
   
   if(scale.X==T){
-    tcenter<-ifelse(truncated==T,0,min(t0))
+    tcenter<-min(t0)
     dataCenter<-data.frame(ID=idsubjects,time=tcenter)
     colnames(dataCenter)<-c(id,timeVar)
   }

@@ -130,7 +130,7 @@ INLAidm<-function(timeVar,family,basRisk,assoc,
         
         # erase part of .args
         # ATTENTION NOT POSSIBLE to erase some controls of .args and family
-        erase<-c("data","control.predictor","offset","E","control.lp.scale",
+        erase<-c("control.predictor","offset","E","control.lp.scale",
                  "lincomb","control.inla","control.compute","control.expert",
                  "control.pardiso","control.mode","selection",
                  "control.stiles","control.taucs","control.lincomb","control.numa",
@@ -138,6 +138,11 @@ INLAidm<-function(timeVar,family,basRisk,assoc,
                  ".parent.frame","debug","safe","silent","keep","only.hyperparam","verbose")
         nameINLA<-names(INLAmodel$.args)
         INLAmodel$.args<-INLAmodel$.args[-which(nameINLA%in%erase)]
+        
+        # in .args$data keep object$.args$data[[paste0("baseline", m, ".hazard.values")]]
+        keep<-c("baseline1.hazard.values","baseline2.hazard.values")
+        nameINLA<-names(INLAmodel$.args$data)
+        INLAmodel$.args$data<-INLAmodel$.args$data[which(nameINLA%in%keep)]
         
         #erase part of selection 
         nameINLA<-names(INLAmodel$selection)

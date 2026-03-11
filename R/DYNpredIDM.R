@@ -1,448 +1,317 @@
 ### Code:
 ##' @title Calculate predictions for time-depend covariates using INLA
+##' @param objectY  A predYidm object from HIDeM package containing the univariate joint model with competing risk from step 1
+##' @param objectSurvival A DYNidm object from HIDeM package containing the illness-death model estimation with time-dependent covariates 
+##' @param newdata The newdata on which we want to do survival predictions 
+##' @param s entry time 
+##' @param horizon horizon time 
+##' @param envir working environment 
 #' @importFrom foreach "%do%"
 #' @importFrom foreach "%dopar%"
 #' @importFrom Deriv "Deriv"
-#' @importFrom INLA "inla.posterior.sample"
 #' @useDynLib HIDeM
 #' @author R: Ariane Bercu <ariane.bercu@@u-bordeaux.fr>  
+#' @export
 
 
-DYNpredIDM_INLA<-function(object,newdata,s,horizon,scale.X){
+DYNpredIDM<-function(objectY,
+                          objectSurvival,
+                          newdata,s,horizon,
+                          envir=parent.frame()){
 
-  browser()
-  id<-object$ID
-  timeVar<-object$timeVar
-  formLong<-object$formLong
-  formSurv<-object$formSurv
-  # define timePoints of prediction : 
+  call <- match.call()
+  ptm <- proc.time()
+
+  if(missing(objectY)){stop("Need to specify objectY as a predYidm object")}
+  if(!inherits(objectY,"predYidm")){stop("Need to specify objectY as a predYidm object")}
+  if(missing(objectSurvival)){stop("Need to specify objectSurvival as a regDYNidm or DYNidm object")}
+  if(!inherits(objectSurvival,"DYNidm")){stop("Need to specify objectSurvival as a DYNidm object")}
 
   
-  idsubjects<-unique(newdata[,colnames(newdata)%in%id])
+  if(missing(newdata)){stop("Need to provide newData as a data.frame")}
+  if(!inherits(newdata,"data.frame")){stop("Need to provide newData as a data.frame")}
   
-  # force only observation before s or at s 
+  if(sum(is.na(newdata))>0)stop("Need a new data frame with no missing data.")
+  if(missing(s)|missing(horizon))stop("Need to specify s and horizon")
+  if(!inherits(s,c("numeric","integer")))stop("s need to be an integer or numeric")
+  if(!inherits(horizon,c("numeric","integer")))stop("horizon need to be an integer or numeric")
+  if(length(s)!=1)stop("Length of s need to be 1")
+  if(length(horizon)!=1)stop("Length of horizon need to be 1")
+  if((s < 0) | (horizon < 0) | (s >= horizon))stop("s and horizon need to be numeric superior or equal to 0 with s < horizon")
+  
+  timeVar<-objectY$timeVar
+  id<-objectY$id
+  
+  variables<-c(id,
+               timeVar,
+               objectSurvival$Xnames01,
+               objectSurvival$Xnames02,
+               objectSurvival$Xnames12,
+               objectSurvival$timedepXnames01,
+               objectSurvival$timedepXnames02,
+               objectSurvival$timedepXnames12)
+  variables<-unique(variables)
+  
+  if(any((variables%in%colnames(newdata))==F)){stop(paste0("Need a new data frame with no missing data on the variables : ",paste0(variables,collapse = ", ")))}
+  
+  if(objectY$method!="INLA"){stop("Prediction not available with JMBayes 2 method")}
+  
+  ############################## supress info before s #########################
+  
   newdata<-newdata[newdata[,colnames(newdata)%in%timeVar]<=s,]
+  newdata<-newdata[,colnames(newdata)%in%variables]
+  newdata<-na.omit(newdata)
+  if(dim(newdata)[1]==0){stop("No follow-up after s, should proceed with smaller values for s")}
+  N<-length(unique(newdata[,colnames(newdata)%in%objectY$id]))
   
-
-  #create gauss kronrod time point between s and s+t
-  timePointsdata<-do.call(rbind, lapply(idsubjects,FUN=function(x){
-    timePoints<-gauss_kronrod_points(lower.intdouble=s,
-                                     upper.intdouble=horizon,
-                                     end.time=horizon,
-                                     truncated=T,
-                                     entry.time=s)
-    return(data.frame(index=x,timePoints=timePoints))}))
   
-
+  ######################## prepare for survival ################################
   
-  ## augmentation of the newdata 
-  colnames(timePointsdata)<-c(id,timeVar)
-  dataLongi_augmented<-merge(timePointsdata,newdata,by=c(id,timeVar),all.x=T,all.y=T)
-  rownames(dataLongi_augmented)<-NULL
-  dataLongi_augmented<-dataLongi_augmented[order(dataLongi_augmented[,colnames(dataLongi_augmented)%in%id],
-                                                 dataLongi_augmented[,colnames(dataLongi_augmented)%in%timeVar]),]
-  
-  newdata<-newdata[order(newdata[,colnames(newdata)%in%id],
-                         newdata[,colnames(newdata)%in%timeVar]),]
-  Yall<-list()
-  length(Yall)<-length(formLong)
-  
-  #
-#  if(scale.X==T){
-#    tcenter<-ifelse(truncated==T,0,min(t0))
-#    dataCenter<-data.frame(ID=idsubjects,time=tcenter)
-#    colnames(dataCenter)<-c(id,timeVar)
-#  }
-  
-  timepred<-unique(timePointsdata[,colnames(timePointsdata)%in%timeVar])
-  NtimePoints<-length(unique(timepred))
-  # should center by median or mean ? 
-  
+  ######################### association check RE ###############################
+  assoc<-objectSurvival$assoc
+  verifRE<-0
+  for(k in 1:length(assoc)){
+      vv<-na.omit(unlist(assoc[[k]]))
+      if(sum(vv%in%"RE")==length(vv)){verifRE<-verifRE+1}
+    }
     
-    for(indice in 1:length(formLong)){
-
-      INLAmodel<-object$modelY[[indice]]
-      
-      form_i<-formLong[[indice]]
-      assoc_i<-object$assoc[[indice]]
-
-      base_i<-object$basRisk[indice]
-      fam_i<-object$family[indice]
-
-      browser()
-      P_RE <- predict(INLAmodel,
-                      horizon=horizon,
-                      newData = newdata,
-                      NsampleHY = 1, # use hyperparameters mode
-                      NsampleFE = 1, # use baseline hazard mode (if survival model included)
-                      return.RE = TRUE,NidLoop = F)
-      
-      INLAmodel$P_RE<-P_RE
-      
-      # data structure
-      ct <- INLAmodel$misc$configs$contents
-      
-      if(is.null(INLAmodel)){stop("The inla model for your marker could not be run, see above warnings.")}
-      choiceY<-na.omit(unlist(object$assoc[[indice]]))
-        
-        
-        res<-NULL
-        key1 <- do.call(paste, c(dataLongi_augmented[,colnames(dataLongi_augmented)%in%c(id,timeVar)], sep = "\r"))
-        key2 <- do.call(paste, c(timePointsdata, sep = "\r"))
-        # keep only indice we want: 
-        # Collapse each row into a string
-        
-        # Find indices of rows from data1 that are in data2
-        # while keeping order of key2
-        indices <- match(key2, key1)
-        
-        if("value"%in% choiceY){
-          Y<-as.matrix(make_XINLA_PRED(formula=formLong[[indice]], timeVar=timeVar, data=dataLongi_augmented,ct=ct,id=id,SMP=INLAmodel))
-          Y<-Y[indices,]
-          Outcome<-all.vars(terms(formLong[[indice]]))[1]
-          PredYx<-cbind(timePointsdata,Outcome=Outcome,Y)
-          
-          if(scale.X==T){
-            Ycenter<-make_XINLA_PRED(formula=formLong[[indice]], timeVar=timeVar, data=dataCenter,ct=ct,id=id,SMP=INLAmodel)
-            PredYx$Y<-(PredYx$Y-mean(Ycenter))/sd(Ycenter)
-          }
-          colnames(PredYx)[4]<-"Sample_1"
-          res<-rbind(res,PredYx)
-        }
-        
-        if("slope"%in% choiceY){
-        dY<-as.matrix(make_dXINLA_PRED(formula=formLong[[indice]], timeVar=timeVar, data=dataLongi_augmented,ct=ct,id=id,SMP=INLAmodel))
-        dY<-dY[indices,]
-        slopeOutcome<-paste0("slope_",Outcome)
-        slopePredYx<-cbind(timePointsdata,Outcome=slopeOutcome,dY)
-        
-        if(scale.X==T){
-          dYcenter<-make_dXINLA_PRED(formula=formLong[[indice]], timeVar=timeVar, data=dataCenter,ct=ct,id=id,SMP=INLAmodel)
-          slopePredYx$dY<-(slopePredYx$dY-mean(dYcenter))/sd(dYcenter)
-        }
-        colnames(slopePredYx)[4]<-"Sample_1"
-        res<-rbind(res,slopePredYx)
-        }
-        
-        if("RE"%in% choiceY){
-        REY<-as.matrix(make_REXINLA_PRED(formula=formLong[[indice]], timeVar=timeVar, data=dataLongi_augmented,ct=ct,id=id,SMP=INLAmodel))
-        REY<-REY[indices,]
-        
-        if(scale.X==T){
-          REYcenter<-as.matrix(make_REXINLA_PRED(formula=formLong[[indice]], timeVar=timeVar, data=dataCenter,ct=ct,id=id,SMP=INLAmodel))
-          REY<-do.call(cbind,lapply(c(1:dim(REY)[2]),FUN=function(x){
-            (REY[,x]-mean(REYcenter[,x]))/sd(REYcenter[,x])
-          }))
-        }
-        namesREY<-unlist(lapply(1:dim(REY)[2],FUN=function(x){
-          rep(paste0("RE_",colnames(REY)[x],"_",Outcome),dim(REY)[1])
-        }))
-        dataREY<- do.call(rbind, replicate(dim(REY)[2], timePointsdata, simplify = FALSE))
-        REPredYx<-cbind(dataREY,Outcome=namesREY,as.vector(REY))
-        colnames(REPredYx)[4]<-"Sample_1"
-        res<-rbind(res,REPredYx)
-        }
-        
-        Yall[[indice]]<- res
-        
-        
-        
-      }
-
-      
-
-
-  Yall<-do.call(rbind,Yall)
+  ####################### time fixed var #######################################
+  x01<-newdata[,colnames(newdata)%in%c(objectSurvival$Xnames01,id)]
+  x01<-unique(newdata)
+  x01<-x01[,colnames(x01)%in%c(objectSurvival$Xnames01)]
+  NC01<-NCOL(x01)
   
+  x02<-newdata[,colnames(newdata)%in%c(objectSurvival$Xnames02,id)]
+  x02<-unique(newdata)
+  x02<-x02[,colnames(x02)%in%c(objectSurvival$Xnames02)]
+  NC02<-NCOL(x02)
   
-  return(Yall[,colnames(Yall)%in%c(id,timeVar,"Outcome","Sample_1")])
+  size1 <- NC01+NC02
+  
+  noVar<-c(ifelse(as.integer(NC01)>0,0,1),
+           ifelse(as.integer(NC02)>0,0,1))
+  
+  nvat01 <- ifelse(noVar[1]==1,0,NC01)
+  nvat02 <- ifelse(noVar[2]==1,0,NC02)
+  nvat12<-length(unique(objectSurvival$Xnames12))
+  
+  dimnva01<-ifelse(nvat01==0,1,nvat01)
+  dimnva02<-ifelse(nvat02==0,1,nvat02)
+  
+  NC<-c(NC01,NC02)
+  
+  if(noVar[1]==1){ve01<-as.double(rep(0,N))}else{ve01<-as.double(x01)}
+  if(noVar[2]==1){ve02<-as.double(rep(0,N))}else{ve02<-as.double(x02)}
+  
+  t0<-rep(s,N)
+  t1<-rep(horizon,N)
+  
+  ########################## time dep var ######################################
+  outcome01<-objectSurvival$linktimedepXnames01
+  outcome02<-objectSurvival$linktimedepXnames02
+  
+  p01<-length(outcome01)
+  dimp01<-ifelse(length(outcome01)>0,length(outcome01),1)
+  p02<-length(outcome02)
+  dimp02<-ifelse(length(outcome02)>0,length(outcome02),1)
+  if(p01==0 & p02==0){stop("No time dependent variable please refer to HIDeM::intensity for calculation of intensities with only time fixed covariates")}
+  
+  if(objectSurvival$method=="splines"){
+    
+   nknots01 <- length(unique(objectSurvival$knots01))
+   nknots02<- length(unique(objectSurvival$knots02))
+   amin<-min(newdata[,colnames(newdata)%in%timeVar])
+   amax<-max(newdata[,colnames(newdata)%in%timeVar])
+   
+   if(knots01[1]> amin) stop(paste("Transition 0->1: Smallest time point should not appear before the starting knots at :",knots01[1]))
+   if (knots01[length(knots01)] < amax) stop(paste("Transition 0->1: Highest time point should not appear after the last knots at :",knots01[length(knots01)]))
+   
+   if(knots02[1]> amin) stop(paste("Transition 0->2: Smallest time point should not appear before the starting knots at :",knots02[1]))
+   if (knots02[length(knots02)] < amax) stop(paste("Transition 0->2: Highest time point should not appear after the last knots at :",knots02[length(knots02)]))
+   
+      
+    size_spline<-nknots01+nknots02+4
+    index_size1<-c(1:(nknots01+nknots02+4))
+    start<-nknots01+nknots02+nknots12+6
+    if(nvat01>0|nvat02>0){
+    index_size1<-c(index_size1,((start+1):(nvat01+nvat02+start)))
+    }
+    start<-nvat01+nvat02+nvat12+start
+
+  }else{ 
+    index_size1<-c(1:4)
+    
+    if(nvat01>0|nvat02>0){
+    index_size1<-c(index_size1,(7:(nvat01+nvat02+6)))
+    }
+    start<-nvat01+nvat02+nvat12+6
+    size_spline<-4 }
   
 
+  size1<-size1+size_spline
   
+  ### index to keep with binit
+  # jump x12 and end after p02
+  index<-c(index_size1,(start+1):(start+p01+p02))
+  
+  size_V<-length(index)
+  ############################################################################
+  #################### defines initiate values ###############################
+  ############################################################################
+  
+  # if length of regDYNidm or DYNidm superior to 1 need to summaries over replicates 
+  if(length(objectSurvival$DYNidm)!=1){
+    istop<-lapply(objectSurvival$DYNidm,FUN = function(x){
+      if(x$istop%in%c(1,3)){return(T)}else{return(F)}
+    })
+    istop<-do.call(c,istop)
+    if(sum(istop==F)==length(istop)){stop("All the survival models did not converged")}
+    binit<-prepareData(object=objectSurvival$DYNidm,istop=istop,index=index)
+  }else{
+    if(!objectSurvival$DYNidm[[1]]$istop%in%c(1,3)){stop("The survival model did not converged")}
+    
+    binit<-objectSurvival$DYNidm[[1]]$b[index]
+  }
+
+  ############################ keep index of variables selected ################
+  
+  varY<-unique(c(objectSurvival$timedepXnames01,
+           objectSurvival$timedepXnames02,
+           objectSurvival$timedepXnames12))
+  Yindex<-lapply(objectY$formLong,FUN=function(x){as.character(x[[2]])})
+  Yindex<-do.call(c,Yindex)
+  index<-which(Yindex%in%varY)
+  
+  ############################ perform prediction of Y #########################
+  
+  dataY<-DYNINLAidmpredY(object=objectY$modelY,
+                         newdata=newdata,
+                         s=s,
+                         horizon=horizon,
+                         scale.X=objectSurvival$scale.X,
+                         assoc=objectY$assoc,
+                         assocSurv=objectSurvival$assoc,
+                         id=id,
+                         timeVar=timeVar,
+                         formLong=objectY$formLong,
+                         formSurv=objectY$formSurv,
+                         basRisk=objectY$basRisk,
+                         index=index,
+                         family=objectY$family,
+                         envir=envir)
+  
+  
+  ########################## check prediction ##################################
+  NtimePoints<-255
+  for( m in unique(c(outcome01,outcome02))){
+    subdata<-dataY[dataY$Outcome==m,]
+    x<-table(subdata[,colnames(subdata)%in%id])
+    if(any(x!=NtimePoints)){stop("Prediction of marker ",m," could not be perform for each quadrature points")}
+    
+  }
+  
+  dataY$Outcome<-as.character(dataY$Outcome)
+  # attention if NtimePoints equidistant with INLA then NtimePoints takes 
+  # need ID to be numeric -- then 
+  dataY[,colnames(dataY)%in%id]<-as.numeric(dataY[,colnames(dataY)%in%id])
+  # to keep tracks of time order for each individual 
+  dataY$order<-as.numeric(ave(dataY[,colnames(dataY)%in%id], cumsum(c(TRUE, diff(dataY[,colnames(dataY)%in%id]) != 0)), FUN = seq_along))
+  
+  
+  if(length(outcome01)>=1){
+    y01<-dataY[dataY$Outcome%in%outcome01,]
+    # order  by individual and timeline 
+    y01<-y01[order(y01[,colnames(y01)%in%id],y01$order),4]
+    
+    
+  }else{
+    y01<-rep(0,N*NtimePoints)
+  }
+  
+  if(length(outcome02)>=1){
+    y02<-dataY[dataY$Outcome%in%outcome02,]
+    # order  by individual and timeline 
+    y02<-y02[order(y02[,colnames(y02)%in%id],y02$order),4]
+    
+  }else{
+    y02<-rep(0,N*NtimePoints)
+  }
+  
+ 
+  if(objectSurvival$method=="splines"){
+    res<-rep(0,N)
+    out<- tryCatch({  .Fortran("citimedep",
+                             ## input
+                             as.double(binit),
+                             as.integer(sizeV),
+                             as.double(knots01),
+                             as.double(knots02),
+                             as.integer(N),
+                             as.integer(nknots01),
+                             as.integer(nknots02),
+                             as.double(ve01),
+                             as.double(ve02),
+                             as.double(y01),
+                             as.double(y02),
+                             as.integer(p01),
+                             as.integer(p02),
+                             as.integer(dimp01),
+                             as.integer(dimp02),
+                             as.integer(NtimePoints),
+                             as.integer(dimnva01),
+                             as.integer(dimnva12),
+                             as.integer(nvat01),
+                             as.integer(nvat02),
+                             as.double(t0),
+                             as.double(t1),
+                             likelihood_res=as.double(res),
+                             PACKAGE="HIDeM")$likelihood_res
+  }, error = function(e) {
+    # Return NULL on error to skip this patient
+    NULL
+  })
+  }else{
+    res<-rep(0,N)
+    out<- tryCatch({   .Fortran("ciweibtimedep",
+                                ## input
+                                as.double(binit),
+                                as.integer(size_V),
+                                as.integer(N),
+                                as.double(ve01),
+                                as.double(ve02),
+                                as.double(y01),
+                                as.double(y02),
+                                as.integer(p01),
+                                as.integer(p02),
+                                as.integer(dimp01),
+                                as.integer(dimp02),
+                                as.integer(NtimePoints),
+                                as.integer(dimnva01),
+                                as.integer(dimnva02),
+                                as.integer(nvat01),
+                                as.integer(nvat02),
+                                as.double(t0),
+                                as.double(t1),
+                                likelihood_res=as.double(res),
+                                PACKAGE="HIDeM")$likelihood_res
+    }, error = function(e) {
+      # Return NULL on error to skip this patient
+      NULL
+    })
+  }
+  
+  return(out)
+ 
 }
 
 
-make_XINLA_PRED <- function(formula, timeVar, data, use_splines = FALSE, ct, id, SMP, ...) {
-  n <- nrow(data)
-  N<-length(unique(data[,colnames(data)%in%id]))
-  # --- parse terms ---
-  terms_labels <- attr(terms(formula), "term.labels")
-  terms_fixed <- terms_labels[!grepl(id, terms_labels)]
-  terms_RE <- terms_labels[grepl(id, terms_labels)][1]
-  terms_RE <- gsub("\\|.*", "", terms_RE)
-  terms_RE <- attr(terms(as.formula(paste("~", terms_RE))), "term.labels")
+prepareData<-function(object,istop,index){
   
-  # intercept handling
-  if (paste0(id, "Intercept_L1") %in% ct$tag) {
-    terms_RE <- c("Intercept", terms_RE)
-  }
-  if ("Intercept_L1" %in% ct$tag) {
-    terms_fixed <- c("Intercept", terms_fixed)
-  }
-  
-  # --- prepare lookups ---
-  # fixed summary modes by rowname
-  sf <- SMP$summary.fixed
-  fixed_mode <- if (!is.null(sf)) setNames(sf[, "mode"], rownames(sf)) else numeric(0)
-  
-  # random summary list names
-  sr_names <- names(SMP$summary.random)
-  sr_list <- SMP$summary.random
-  
-  id_values <- data[[id]]
-  id_levels <- unique(id_values)        # preserves original order (like your idd)
-  n_id <- length(id_levels)
-  id_index <- match(id_values, id_levels) # vector of positions 1..n_id for each row
-  
-  # --- Fixed effects (design X and coefficient B) ---
-  n_fixed <- length(terms_fixed)
-  X <- matrix(NA_real_, nrow = n, ncol = n_fixed)
-  B <- matrix(0, nrow = n, ncol = n_fixed)
-  colnames(X) <- paste0(terms_fixed, "_L1")
-  
-  #browser()
-  for (k in seq_along(terms_fixed)) {
-    lab <- terms_fixed[k]
-    tag <- paste0(gsub("[()]", "", lab), "_L1")
-    
-    if (lab == "Intercept") {
-      X[, k] <- 1
-    } else if (lab == timeVar) {
-      # linear time
-      expr <- if (grepl("\\(", lab)) str2lang(lab) else as.name(lab)
-      X[, k] <- eval(expr, data)
-    } else if (grepl("\\(", lab) && grepl(timeVar, lab)) {
-      expr <- str2lang(lab)
-      X[, k] <- eval(expr, data)
-      colnames(X)[k] <- paste0(gsub("[())]", "", lab), "_L1")
-    } else {
-      # other fixed terms (if any)
-      X[, k] <- data[[lab]]
-    }
-    
-    if (tag %in% names(fixed_mode)) {
-      B[, k] <- fixed_mode[tag]
-    }
-  }
-  
-  # --- Random effects (B_RE) ---
-  n_re <- length(terms_RE)
-  X_RE <- matrix(NA_real_, nrow = n, ncol = n_re)
-  B_RE <- matrix(0, nrow = n, ncol = n_re)
-  colnames(X_RE) <- paste0(id, terms_RE, "_L1")
-  
-  for (k in seq_along(terms_RE)) {
-    lab <- terms_RE[k]
-    # form summary.random tag name exactly like original
-    if (lab == "Intercept") {
-      sr_tag <- paste0(id, lab, "_L1")
-    } else if (grepl("\\(", lab) && grepl(timeVar, lab)) {
-      sr_tag <- paste0(id, gsub("[())]", "", lab), "_L1")
-    } else {
-      sr_tag <- paste0(id, lab, "_L1")
-    }
-    
-    pos <- which(sr_names == sr_tag)
-    if (length(pos) == 0) {
-      # no random summary for that term -> leave zeros
-      # still compute X_RE if needed
-      if (lab == "Intercept") X_RE[, k] <- 1
-      else if (lab == timeVar) X_RE[, k] <- eval(str2lang(lab), data)
-      else if (grepl("\\(", lab) && grepl(timeVar, lab)) X_RE[, k] <- eval(str2lang(lab), data)
-      next
-    }
-    
-    # design column
-    if (lab == "Intercept") {
-      X_RE[, k] <- 1
-    } else if (lab == timeVar) {
-      X_RE[, k] <- eval(str2lang(lab), data)
-    } else if (grepl("\\(", lab) && grepl(timeVar, lab)) {
-      X_RE[, k] <- eval(str2lang(lab), data)
-      colnames(X_RE)[k] <- paste0(id, gsub("[())]", "", lab), "_L1")
-    } else {
-      X_RE[, k] <- data[[lab]]
-    }
-    browser()
-    # extract modes for each id (rows in the summary.random element)
-    modes_vec <- sr_list[[pos]][((k-1)*N+1):(k*N), "mode"]
-    # names correspond to id_levels order only if sr was built that way; original code used idd order (unique(data[[id]]))
-    # so we set names using id_levels to replicate original replication logic
-    names(modes_vec) <- id_levels
-    B_RE[, k] <- unname(modes_vec[id_values])
-  }
-  
-  # --- combine and return ---
-  Y <- rowSums(X * B + X_RE * B_RE)
-  return(Y)
+  Nrep<-sum(istop==T)
+  b<-lapply(object,FUN=function(x){
+    if(x$istop%in%c(1,3)){return(x$b[index])}else{return(rep(NA,length(x$b[index])))}})
+  b<-do.call(rbind,b)
+  b<-na.omit(b)
+  b<-colSums(b)/Nrep
+  return(b)
 }
-
-make_REXINLA_PRED <- function(formula, timeVar, data, use_splines = FALSE, ct, id, SMP, ...) {
-  # --- parse random-effect terms ---
-  n <- nrow(data)
-  N<-length(unique(data[,colnames(data)%in%id]))
-  terms_labels <- attr(terms(formula), "term.labels")
-  terms_RE <- terms_labels[grepl(id, terms_labels)][1]
-  terms_RE <- gsub("\\|.*", "", terms_RE)
-  terms_RE <- attr(terms(as.formula(paste("~", terms_RE))), "term.labels")
-  
-  # add intercept if present in ct$tag
-  if (paste0(id, "Intercept_L1") %in% ct$tag)
-    terms_RE <- c("Intercept", terms_RE)
-  
-  # --- precompute ID mapping ---
-  id_values <- data[[id]]
-  id_levels <- unique(id_values)       # preserve original order (like your idd)
-  n <- nrow(data)
-  n_id <- length(id_levels)
-  id_index <- match(id_values, id_levels) # each row gets an index 1..n_id
-  
-  # --- prepare output matrix ---
-  n_re <- length(terms_RE)
-  B_RE <- matrix(0, nrow = n, ncol = n_re)
-  names_RE <- character(n_re)
-  
-  # --- get list names once ---
-  sr_names <- names(SMP$summary.random)
-  sr_list  <- SMP$summary.random
-  
-  # --- main loop (vectorized per term) ---
-  for (k in seq_along(terms_RE)) {
-    lab <- terms_RE[k]
-    
-    # Build tag name for summary.random lookup
-    if (lab == "Intercept") {
-      sr_tag <- paste0(id, lab, "_L1")
-    } else if (grepl("\\(", lab) && grepl(timeVar, lab)) {
-      sr_tag <- paste0(id, gsub("[())]", "", lab), "_L1")
-    } else {
-      sr_tag <- paste0(id, lab, "_L1")
-    }
-    
-    pos <- which(sr_names == sr_tag)
-    if (length(pos) == 0) next  # skip missing RE terms
-    
-    # Extract PRED modes for each ID
-    modes_vec <- sr_list[[pos]][((k-1)*N+1):(k*N), "mode"]
-    names(modes_vec) <- id_levels  # align with unique(data[[id]]) order
-    
-    # Vectorized mapping
-    B_RE[, k] <- unname(modes_vec[id_values])
-    
-    names_RE[k] <- lab
-  }
-  
-  colnames(B_RE) <- names_RE
-  return(B_RE)
-}
-
-make_dXINLA_PRED <- function(formula, timeVar, data, use_splines = FALSE, ct, id, SMP, ...) {
-  n <- nrow(data)
-  N<-length(unique(data[,colnames(data)%in%id]))
-  # parse terms
-  terms_labels <- attr(terms(formula), "term.labels")
-  terms_fixed <- terms_labels[!grepl(id, terms_labels)]
-  terms_RE <- terms_labels[grepl(id, terms_labels)][1]
-  terms_RE <- gsub("\\|.*", "", terms_RE)
-  terms_RE <- attr(terms(as.formula(paste("~", terms_RE))), "term.labels")
-  
-  # precompute lookups
-  sf <- SMP$summary.fixed
-  fixed_mode <- if (!is.null(sf)) setNames(sf[, "mode"], rownames(sf)) else numeric(0)
-  sr_names <- names(SMP$summary.random)
-  sr_list  <- SMP$summary.random
-  
-  id_values <- data[[id]]
-  id_levels <- unique(id_values)      # preserve original order (like idd)
-  n_id <- length(id_levels)
-  
-  # --- Fixed effects derivative (X and B) ---
-  n_fixed <- length(terms_fixed)
-  X <- matrix(NA_real_, nrow = n, ncol = n_fixed)
-  B <- matrix(0, nrow = n, ncol = n_fixed)
-  colnames(X) <- paste0(terms_fixed, "_L1")
-  
-  for (k in seq_along(terms_fixed)) {
-    lab <- terms_fixed[k]
-    tag <- paste0(gsub("[()]", "", lab), "_L1")
-    
-    if (lab == timeVar) {
-      # derivative of linear time is 1
-      X[, k] <- 1
-      if (tag %in% names(fixed_mode)) B[, k] <- fixed_mode[tag]
-      
-    } else if (grepl("\\(", lab) && grepl(timeVar, lab)) {
-      # derivative of function of time
-      expr <- str2lang(lab)
-      dexpr <- Deriv::Deriv(expr, timeVar)
-      X[, k] <- eval(dexpr, envir = data)
-      colnames(X)[k] <- paste0(gsub("[())]", "", lab), "_L1")
-      if (tag %in% names(fixed_mode)) B[, k] <- fixed_mode[tag]
-      
-    } else {
-      # other fixed (not depending on time) -> derivative 0 (leave X as NA? original didn't handle else)
-      # original only treated timeVar or function of time; keep behavior by leaving NA -> treat as 0 contribution
-      X[, k] <- 0
-      if (tag %in% names(fixed_mode)) B[, k] <- fixed_mode[tag]
-    }
-  }
-  
-  # --- Random effects derivative (X_RE and B_RE) ---
-  n_re <- length(terms_RE)
-  X_RE <- matrix(NA_real_, nrow = n, ncol = n_re)
-  B_RE <- matrix(0, nrow = n, ncol = n_re)
-  colnames(X_RE) <- paste0(id, terms_RE, "_L1")
-  
-  for (k in seq_along(terms_RE)) {
-    lab <- terms_RE[k]
-    
-    # build summary.random tag exactly as original
-    if (lab == "Intercept") {
-      sr_tag <- paste0(id, lab, "_L1")
-    } else if (grepl("\\(", lab) && grepl(timeVar, lab)) {
-      sr_tag <- paste0(id, gsub("[())]", "", lab), "_L1")
-    } else {
-      sr_tag <- paste0(id, lab, "_L1")
-    }
-    
-    pos <- which(sr_names == sr_tag)
-    if (length(pos) == 0) {
-      # no summary.random for term -> X_RE maybe computed, B_RE remains zero
-      if (lab == "Intercept") X_RE[, k] <- 1
-      else if (lab == timeVar) X_RE[, k] <- 1
-      else if (grepl("\\(", lab) && grepl(timeVar, lab)) {
-        expr <- str2lang(lab)
-        dexpr <- Deriv::Deriv(expr, timeVar)
-        X_RE[, k] <- eval(dexpr, envir = data)
-      } else X_RE[, k] <- 0
-      next
-    }
-    
-    # design derivative
-    if (lab == "Intercept") {
-      X_RE[, k] <- 1
-    } else if (lab == timeVar) {
-      X_RE[, k] <- 1
-    } else if (grepl("\\(", lab) && grepl(timeVar, lab)) {
-      expr <- str2lang(lab)
-      dexpr <- Deriv::Deriv(expr, timeVar)
-      X_RE[, k] <- eval(dexpr, envir = data)
-      colnames(X_RE)[k] <- paste0(id, gsub("[())]", "", lab), "_L1")
-    } else {
-      X_RE[, k] <- 0
-    }
-    
-    # extract PRED modes for each id (the sr_list[[pos]] rows correspond to ids in original order)
-    modes_vec <- sr_list[[pos]][((k-1)*N+1):(k*N), "mode"]
-    # align names to id_levels so mapping equals original replication logic
-    names(modes_vec) <- id_levels
-    B_RE[, k] <- unname(modes_vec[id_values])
-  }
-  
-  # combine
-  dY <- rowSums(X * B + X_RE * B_RE)
-  return(dY)
-}
-
-
-

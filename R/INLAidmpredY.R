@@ -51,7 +51,7 @@ INLAidmpredY<-function(timeVar,truncated,formLong,dataSurv,dataLongi,id,
 
   #
   if(scale.X==T){
-    tcenter<-ifelse(truncated==T,0,min(t0))
+    tcenter<-min(t0)
     dataCenter<-data.frame(ID=idsubjects,time=tcenter)
     colnames(dataCenter)<-c(id,timeVar)
   }
@@ -240,6 +240,7 @@ make_XINLA <- function(formula, timeVar, data, use_splines = FALSE, ct, id, SMP,
   latent <- SMP$latent
   id_values <- data[[id]]
   id_levels <- unique(id_values)
+  id_index  <- match(id_values, id_levels)
   n_id <- length(id_levels)
   
   # --- Fixed effects ---
@@ -291,7 +292,7 @@ make_XINLA <- function(formula, timeVar, data, use_splines = FALSE, ct, id, SMP,
     
     latents_for_ids <- latent[start:end]
     id_to_latent <- setNames(latents_for_ids, id_levels)
-    B_RE[, k] <- unname(id_to_latent[id_values])
+    B_RE[, k] <- unname(id_to_latent[id_index])
   }
   
   # Combine
@@ -318,6 +319,7 @@ make_REXINLA <- function(formula, timeVar, data, use_splines = FALSE, ct, id, SM
   latent <- SMP$latent
   id_values <- data[[id]]
   id_levels <- unique(id_values)
+  id_index  <- match(id_values, id_levels)
   n_id <- length(id_levels)
   
   # --- Allocate output ---
@@ -348,7 +350,7 @@ make_REXINLA <- function(formula, timeVar, data, use_splines = FALSE, ct, id, SM
     
     # Map each data row to its corresponding latent
     id_to_latent <- setNames(latents_for_ids, id_levels)
-    B_RE[, k] <- unname(id_to_latent[id_values])
+    B_RE[, k] <- unname(id_to_latent[id_index])
   }
   
   return(B_RE)
@@ -370,6 +372,7 @@ make_dXINLA<- function(formula, timeVar, data, use_splines = FALSE, ct, id, SMP,
   latent <- SMP$latent
   id_values <- data[[id]]
   id_levels <- unique(id_values)
+  id_index  <- match(id_values, id_levels)
   n_id <- length(id_levels)
   
   # --- Fixed effects part ---
@@ -383,6 +386,7 @@ make_dXINLA<- function(formula, timeVar, data, use_splines = FALSE, ct, id, SMP,
     tag <- paste0(gsub("[()]", "", lab), "_L1")
     
     # Handle derivative wrt time
+    
     if (lab == timeVar) {
       X[, k] <- 1
       if (!is.na(ct_start[tag])) B[, k] <- latent[ct_start[tag]]
@@ -393,7 +397,13 @@ make_dXINLA<- function(formula, timeVar, data, use_splines = FALSE, ct, id, SMP,
       X[, k] <- eval(dexpr, data)
       colnames(X)[k] <- paste0(gsub("[())]", "", lab), "_L1")
       if (!is.na(ct_start[tag])) B[, k] <- latent[ct_start[tag]]
+    } else {
+      # other fixed (not depending on time) -> derivative 0 (leave X as NA? original didn't handle else)
+      # original only treated timeVar or function of time; keep behavior by leaving NA -> treat as 0 contribution
+      X[, k] <- 0
+      if (!is.na(ct_start[tag])) B[, k] <- latent[ct_start[tag]]
     }
+    
   }
   
   # --- Random effects part ---
@@ -410,6 +420,7 @@ make_dXINLA<- function(formula, timeVar, data, use_splines = FALSE, ct, id, SMP,
     base_start <- ct_start[tag]
     if (is.na(base_start)) next
     
+   
     if (lab == timeVar) {
       X_RE[, k] <- 1
       
@@ -418,7 +429,11 @@ make_dXINLA<- function(formula, timeVar, data, use_splines = FALSE, ct, id, SMP,
       dexpr <- Deriv::Deriv(expr, timeVar)
       X_RE[, k] <- eval(dexpr, data)
       colnames(X_RE)[k] <- paste0(id, gsub("[())]", "", lab), "_L1")
+    } else {
+      
+      X_RE[, k] <- 0
     }
+      
     
     # Offset logic identical to original
     j_offset <- (j_offset_base + (k - 1)) * n_id
@@ -427,7 +442,7 @@ make_dXINLA<- function(formula, timeVar, data, use_splines = FALSE, ct, id, SMP,
     
     latents_for_ids <- latent[start:end]
     id_to_latent <- setNames(latents_for_ids, id_levels)
-    B_RE[, k] <- unname(id_to_latent[id_values])
+    B_RE[, k] <- unname(id_to_latent[id_index])
   }
   
   # --- Combine fixed and random derivatives ---
@@ -542,7 +557,7 @@ make_XINLA_BLUP <- function(formula, timeVar, data, use_splines = FALSE, ct, id,
     # names correspond to id_levels order only if sr was built that way; original code used idd order (unique(data[[id]]))
     # so we set names using id_levels to replicate original replication logic
     names(modes_vec) <- id_levels
-    B_RE[, k] <- unname(modes_vec[id_values])
+    B_RE[, k] <- unname(modes_vec[id_index])
   }
   
   # --- combine and return ---
@@ -600,7 +615,7 @@ make_REXINLA_BLUP <- function(formula, timeVar, data, use_splines = FALSE, ct, i
     names(modes_vec) <- id_levels  # align with unique(data[[id]]) order
     
     # Vectorized mapping
-    B_RE[, k] <- unname(modes_vec[id_values])
+    B_RE[, k] <- unname(modes_vec[id_index])
     
     names_RE[k] <- lab
   }
@@ -626,6 +641,8 @@ make_dXINLA_BLUP <- function(formula, timeVar, data, use_splines = FALSE, ct, id
   
   id_values <- data[[id]]
   id_levels <- unique(id_values)      # preserve original order (like idd)
+  id_index <- match(id_values, id_levels) # each row gets an index 1..n_id
+  
   n_id <- length(id_levels)
   
   # --- Fixed effects derivative (X and B) ---
@@ -637,6 +654,7 @@ make_dXINLA_BLUP <- function(formula, timeVar, data, use_splines = FALSE, ct, id
   for (k in seq_along(terms_fixed)) {
     lab <- terms_fixed[k]
     tag <- paste0(gsub("[()]", "", lab), "_L1")
+    
     
     if (lab == timeVar) {
       # derivative of linear time is 1
@@ -680,7 +698,7 @@ make_dXINLA_BLUP <- function(formula, timeVar, data, use_splines = FALSE, ct, id
     pos <- which(sr_names == sr_tag)
     if (length(pos) == 0) {
       # no summary.random for term -> X_RE maybe computed, B_RE remains zero
-      if (lab == "Intercept") X_RE[, k] <- 1
+      if (lab == "Intercept") X_RE[, k] <- 0
       else if (lab == timeVar) X_RE[, k] <- 1
       else if (grepl("\\(", lab) && grepl(timeVar, lab)) {
         expr <- str2lang(lab)
@@ -692,7 +710,7 @@ make_dXINLA_BLUP <- function(formula, timeVar, data, use_splines = FALSE, ct, id
     
     # design derivative
     if (lab == "Intercept") {
-      X_RE[, k] <- 1
+      X_RE[, k] <- 0
     } else if (lab == timeVar) {
       X_RE[, k] <- 1
     } else if (grepl("\\(", lab) && grepl(timeVar, lab)) {
@@ -708,7 +726,7 @@ make_dXINLA_BLUP <- function(formula, timeVar, data, use_splines = FALSE, ct, id
     modes_vec <- sr_list[[pos]][((k-1)*N+1):(k*N), "mode"]
     # align names to id_levels so mapping equals original replication logic
     names(modes_vec) <- id_levels
-    B_RE[, k] <- unname(modes_vec[id_values])
+    B_RE[, k] <- unname(modes_vec[id_index])
   }
   
   # combine

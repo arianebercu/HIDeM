@@ -1,31 +1,54 @@
 
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
 # HIDeM
 
 <!-- badges: start -->
+
 <!-- badges: end -->
 
-The goal of HIDeM is to perform variable selection on illness-death models with interval-censored data. 
+The goal of HIDeM is to …
 
 ## Installation
 
-You can install the development version of HIDeM from [GitHub](https://github.com/) with:
+You can install the development version of HIDeM from
+[GitHub](https://github.com/) with:
 
 ``` r
-# install.packages("devtools")
-library("devtools")
-install_github("arianebercu/HIDeM",build_vignettes=T)
+# install.packages("pak")
+pak::pak("arianebercu/HIDeM")
 ```
 
-## Examples
+## Example
 
-In this package, we choose to illustrate a simulated scenario and an application to Paquid data set using vignettes: Reg-IDM-ICT-example and Reg-IDM-ICT-Paq1000. The Reg-IDM-ICT-example takes back the simulated Scenario B -see paper- and presents the variable selection process. 
-
-👉 See the [Getting Started vignette](doc/Reg-IDM-ICT-example.html and doc/Reg-IDM-ICT-Paq1000.html)
+This is a basic example which shows you how to solve a common problem:
 
 ``` r
-library("HIDeM")
-vignette("Reg-IDM-ICT-example", package = "HIDeM")
-vignette("Reg-IDM-ICT-Paq1000", package = "HIDeM")
+library(HIDeM)
+#> Le chargement a nécessité le package : prodlim
 ## basic example code
 ```
 
+What is special about using `README.Rmd` instead of just `README.md`?
+You can include R chunks like so:
+
+``` r
+summary(cars)
+#>      speed           dist       
+#>  Min.   : 4.0   Min.   :  2.00  
+#>  1st Qu.:12.0   1st Qu.: 26.00  
+#>  Median :15.0   Median : 36.00  
+#>  Mean   :15.4   Mean   : 42.98  
+#>  3rd Qu.:19.0   3rd Qu.: 56.00  
+#>  Max.   :25.0   Max.   :120.00
+```
+
+You’ll still need to render `README.Rmd` regularly, to keep `README.md`
+up-to-date. `devtools::build_readme()` is handy for this.
+
+You can also embed plots, for example:
+
+<img src="man/figures/README-pressure-1.png" width="100%" />
+
+In that case, don’t forget to commit and push the resulting figure
+files, so they display on GitHub and CRAN.
