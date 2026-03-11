@@ -17,25 +17,20 @@ You can install the development version of HIDeM from
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("arianebercu/HIDeM")
+devtools::install_github("arianebercu/HIDeM", build_vignettes = T)
 ```
 
 ## Tutorials
 
-For the scenarios presented in the scientific paper, see the [tutorial
-vignette
-1](https://github.com/arianebercu/HIDeM/doc/Reg-IDM-ICT-example.htlm)
+- Scientific paper scenarios: [Vignette
+  1](https://github.com/arianebercu/HIDeM/blob/main/vignettes/Reg-IDM-ICT-example.Rmd)
+
+- Paquid simulated cohort example: [Vignette
+  2](https://github.com/arianebercu/HIDeM/blob/main/vignettes/Reg-IDM-ICT-Paq1000.Rmd)
+
+After installing the package you can open them with:
 
 ``` r
 vignette("Reg-IDM-ICT-example", package = "HIDeM")
-#> Warning: vignette 'Reg-IDM-ICT-example' introuvable
-```
-
-For an application on simulated data following Paquid cohort, see the
-[tutorial vignette
-2](https://github.com/arianebercu/HIDeM/doc/Reg-IDM-ICT-example.htlm)
-
-``` r
 vignette("Reg-IDM-ICT-Paq1000", package = "HIDeM")
-#> Warning: vignette 'Reg-IDM-ICT-Paq1000' introuvable
 ```
