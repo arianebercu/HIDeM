@@ -1226,6 +1226,8 @@ DYNidm <- function(formula01,
                              dimp12=dimp12,
                              scale.X=scale.X)
         }else{
+          
+          browser()
         out <- DYNidm.weib(b=b,
                                     fix0=fix0,
                                     size_V=size_V,

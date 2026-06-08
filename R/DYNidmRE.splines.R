@@ -161,7 +161,7 @@ DYNidmRE.splines<-function(b,clustertype,partialH,epsa,epsb,epsd,nproc,maxiter,s
         ve12k<-ve12
       }
       
-      out[[k]]<- tryCatch({ marqLevAlg::mla(b=b,
+      outk<- tryCatch({ model<-marqLevAlg::mla(b=b,
                                             partialH=partialH,
                                             fn=idmlLikelihood,
                                             epsa=epsa,
@@ -199,15 +199,17 @@ DYNidmRE.splines<-function(b,clustertype,partialH,epsa,epsb,epsd,nproc,maxiter,s
                                             t3=t3,
                                             troncature=troncature,
                                             gausspoint=15)
+      return(model)
       }, error = function(e) {
         # Return NULL on error to skip this patient
         NULL
       })
-      if(!is.null(out[[k]])){
-      if(out[[k]]$istop%in%c(1,3)){
-        b<-out[[k]]$b
+      if(!is.null(outk)){
+      if(outk$istop%in%c(1,3)){
+        b<-outk$b
       }
       }
+      out[[k]]<-outk
       
     }
     

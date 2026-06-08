@@ -42,7 +42,8 @@ JMidmpredY<-function(timeVar,
   newdataLongi<-timePointsdata
   colnames(newdataLongi)<-c(id,timeVar)
   NtimePoints<-ifelse(truncated==F,256,271)
-  
+  # for adjusting on variables necessary 
+  newdataLongi<-merge(x=newdataLongi,y=dataLongi,all.x=T,all.y=F)
   
   Yall<-list()
   length(Yall)<-length(formLong)
@@ -53,6 +54,7 @@ JMidmpredY<-function(timeVar,
     colnames(dataCenter)<-c(id,timeVar)
   }
 
+  
   #browser()
   for(indice in 1:length(formLong)){
 
@@ -168,9 +170,10 @@ JMidmpredY<-function(timeVar,
                       Outcome=REOutcome,
                       as.vector(REPredYx))
       
-      colnames(PredYx)[4]<-paste0("Sample_1")
-      colnames(slopePredYx)[4]<-paste0("Sample_1")
-      colnames(REPredYx)[4]<-paste0("Sample_1")
+
+      colnames(PredYx)[dim(PredYx)[2]]<-"Sample_1"
+      colnames(slopePredYx)[dim(slopePredYx)[2]]<-"Sample_1"
+      colnames(REPredYx)[dim(REPredYx)[2]]<-"Sample_1"
       
       Yall[[indice]]<- rbind(PredYx,slopePredYx,REPredYx)
       
@@ -223,8 +226,8 @@ JMidmpredY<-function(timeVar,
         PredYx<-cbind(newdataLongi,Outcome=Outcome,PredYx)
         slopePredYx<-cbind(newdataLongi,Outcome=slopeOutcome,slopePredYx)
         
-        colnames(PredYx)[4]<-"Sample_1"
-        colnames(slopePredYx)[4]<-"Sample_1"
+        colnames(PredYx)[dim(PredYx)[2]]<-"Sample_1"
+        colnames(slopePredYx)[dim(slopePredYx)[2]]<-"Sample_1"
         
         Yall[[indice]]<- rbind(PredYx,slopePredYx)
         
@@ -272,8 +275,9 @@ JMidmpredY<-function(timeVar,
                         Outcome=REOutcome,
                         as.vector(REPredYx))
         
-        colnames(PredYx)[4]<-"Sample_1"
-        colnames(REPredYx)[4]<-"Sample_1"
+       
+        colnames(PredYx)[dim(PredYx)[2]]<-"Sample_1"
+        colnames(REPredYx)[dim(REPredYx)[2]]<-"Sample_1"
         
         Yall[[indice]]<- rbind(PredYx,REPredYx)
         
@@ -314,7 +318,7 @@ JMidmpredY<-function(timeVar,
         
         PredYx<-cbind(newdataLongi,Outcome=Outcome,PredYx)
         
-        colnames(PredYx)[4]<-"Sample_1"
+        colnames(PredYx)[dim(PredYx)[2]]<-"Sample_1"
         
         Yall[[indice]]<- PredYx
         
@@ -363,8 +367,10 @@ JMidmpredY<-function(timeVar,
                         Outcome=REOutcome,
                         as.vector(REPredYx))
         
-        colnames(slopePredYx)[4]<-"Sample_1"
-        colnames(REPredYx)[4]<-"Sample_1"
+
+        colnames(slopePredYx)[dim(slopePredYx)[2]]<-"Sample_1"
+        colnames(REPredYx)[dim(REPredYx)[2]]<-"Sample_1"
+
         
         Yall[[indice]]<- rbind(slopePredYx,REPredYx)
         
@@ -394,7 +400,9 @@ JMidmpredY<-function(timeVar,
         }
         slopeOutcome<-paste0("slope_",as.character(formula(formLong[[indice]])[[2]]))
         slopePredYx<-cbind(newdataLongi,Outcome=slopeOutcome,slopePredYx)
-        colnames(slopePredYx)[4]<-"Sample_1"
+        
+
+        colnames(slopePredYx)[dim(slopePredYx)[2]]<-"Sample_1"
         
         Yall[[indice]]<- slopePredYx
         
@@ -423,7 +431,7 @@ JMidmpredY<-function(timeVar,
         REPredYx<-cbind(do.call(rbind, replicate(dim(Random)[2], newdataLongi, simplify = FALSE)),
                         Outcome=REOutcome,
                         as.vector(REPredYx))
-        colnames(REPredYx)[4]<-"Sample_1"
+        colnames(REPredYx)[dim(REPredYx)[2]]<-"Sample_1"
         
         Yall[[indice]]<- REPredYx
         
@@ -476,9 +484,10 @@ JMidmpredY<-function(timeVar,
                         Outcome=REOutcome,
                         as.vector(REPredYx))
         
-        colnames(PredYx)[4]<-"Sample_1"
-        colnames(slopePredYx)[4]<-"Sample_1"
-        colnames(REPredYx)[4]<-"Sample_1"
+        
+        colnames(PredYx)[dim(PredYx)[2]]<-"Sample_1"
+        colnames(slopePredYx)[dim(slopePredYx)[2]]<-"Sample_1"
+        colnames(REPredYx)[dim(REPredYx)[2]]<-"Sample_1"
         
         Yall[[indice]]<- rbind(PredYx,slopePredYx,REPredYx)
         }
@@ -518,9 +527,10 @@ JMidmpredY<-function(timeVar,
           
           PredYx<-cbind(newdataLongi,Outcome=Outcome,PredYmean)
           slopePredYx<-cbind(newdataLongi,Outcome=slopeOutcome,slopePredYmean)
+
           
-          colnames(PredYx)[4]<-"Sample_1"
-          colnames(slopePredYx)[4]<-"Sample_1"
+          colnames(PredYx)[dim(PredYx)[2]]<-"Sample_1"
+          colnames(slopePredYx)[dim(slopePredYx)[2]]<-"Sample_1"
           
           Yall[[indice]]<- rbind(PredYx,slopePredYx)
         }
@@ -563,8 +573,9 @@ JMidmpredY<-function(timeVar,
                           Outcome=REOutcome,
                           as.vector(REPredYx))
           
-          colnames(PredYx)[4]<-"Sample_1"
-          colnames(REPredYx)[4]<-"Sample_1"
+
+          colnames(PredYx)[dim(PredYx)[2]]<-"Sample_1"
+          colnames(REPredYx)[dim(REPredYx)[2]]<-"Sample_1"
           
           Yall[[indice]]<- rbind(PredYx,REPredYx)
         }
@@ -595,7 +606,7 @@ JMidmpredY<-function(timeVar,
           
           PredYx<-cbind(newdataLongi,Outcome=Outcome,PredYmean)
           
-          colnames(PredYx)[4]<-"Sample_1"
+          colnames(PredYx)[dim(PredYx)[2]]<-"Sample_1"
           
           Yall[[indice]]<- PredYx
         }
@@ -636,8 +647,8 @@ JMidmpredY<-function(timeVar,
                           Outcome=REOutcome,
                           as.vector(REPredYx))
           
-          colnames(slopePredYx)[4]<-"Sample_1"
-          colnames(REPredYx)[4]<-"Sample_1"
+          colnames(slopePredYx)[dim(slopePredYx)[2]]<-"Sample_1"
+          colnames(REPredYx)[dim(REPredYx)[2]]<-"Sample_1"
           
           Yall[[indice]]<- rbind(slopePredYx,REPredYx)
         }
@@ -664,7 +675,7 @@ JMidmpredY<-function(timeVar,
           
           slopeOutcome<-paste0("slope_",as.character(formula(formLong[[indice]])[[2]]))
           slopePredYx<-cbind(newdataLongi,Outcome=slopeOutcome,slopePredYmean)
-          colnames(slopePredYx)[4]<-"Sample_1"
+          colnames(slopePredYx)[dim(slopePredYx)[2]]<-"Sample_1"
           
           
           Yall[[indice]]<- slopePredYx
@@ -687,8 +698,7 @@ JMidmpredY<-function(timeVar,
           REPredYx<-cbind(do.call(rbind, replicate(dim(Random)[2], newdataLongi, simplify = FALSE)),
                           Outcome=REOutcome,
                           as.vector(REPredYx))
-          colnames(REPredYx)[4]<-"Sample_1"
-          
+          colnames(REPredYx)[dim(REPredYx)[2]]<-"Sample_1"
           Yall[[indice]]<- REPredYx
         }
         

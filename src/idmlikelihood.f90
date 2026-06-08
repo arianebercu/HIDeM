@@ -2686,6 +2686,7 @@ else
          
                do i=1,no0
 			   
+			   PRINT *, "subject", i
 			
          
                 vet01 = 0.d0
@@ -2795,6 +2796,9 @@ else
 						 
                         res1=res2*(su12**vet12)
 						
+					!	PRINT *, "res 1", res1
+					!	PRINT *, "res 2", res2
+					!	CALL FLUSH(6)
 						! should return infinity 18/12/2025
 						!if(res1.ne.0) then 
 						res1=dLOG(res1)
@@ -2833,6 +2837,9 @@ else
 						 
                         res1=res2*(su12**vet12)*ri12*vet12
 						
+					!	PRINT *, "res 1", res1
+					!	PRINT *, "res 2", res2
+					!	CALL FLUSH(6)
 					! should return infinity 18/12/2025						
 					!	if(res1.ne.0) then 
 						res1=dLOG(res1)
@@ -2878,7 +2885,9 @@ else
                                 res1 = (res2*(su12**vet12))+&
                                 ((su01**vet01)*(su02**vet02))
 								
-                                
+                            !    PRINT *, "res 1", res1
+							!	PRINT *, "res 2", res2
+							!	CALL FLUSH(6)
 							!	if(res1.ne.0) then 
 								res1=dLOG(res1)
 							!	end if 
@@ -2901,6 +2910,9 @@ else
                                 res1 = (res2*(su12**vet12)*ri12*vet12)+&
                                 ((su01**vet01)*(su02**vet02)*ri02*vet02)
 								
+							!	PRINT *, "res 1", res1
+							!	PRINT *, "res 2", res2
+							!	CALL FLUSH(6)
                             !    if(res1.ne.0) then 
 								res1=dLOG(res1)
 							!	end if 
@@ -37650,19 +37662,19 @@ end module
 			  ! call flush(6)
 				! ---- nva01 ----
 				if (nva01.gt.0) then
-					vet01 = vet01 + dot_product( bh(6+1 : 6+nva01), dble(ve01(i,1:nva01)) )
+					vet01 = vet01 + dot_product( bh(7 : (6+nva01)), dble(ve01(i,1:nva01)) )
 				endif
 ! write(6,*) 'start vet02 allocattion'
 ! call flush(6)
 				! ---- nva02 ----
 				if (nva02.gt.0) then
-					vet02 = vet02 + dot_product( bh(6+nva01+1 : 6+nva01+nva02), dble(ve02(i,1:nva02)) )
+					vet02 = vet02 + dot_product( bh((7+nva01) : (6+nva01+nva02)), dble(ve02(i,1:nva02)) )
 				endif
 ! write(6,*) 'start vet12 allocattion'
 ! call flush(6)
 				! ---- nva12 ----
 				if (nva12.gt.0) then
-					vet12 = vet12 + dot_product( bh(6+nva01+nva02+1 : 6+nva01+nva02+nva12), dble(ve12(i,1:nva12)) )
+					vet12 = vet12 + dot_product( bh((7+nva01+nva02) : (6+nva01+nva02+nva12)), dble(ve12(i,1:nva12)) )
 				endif
 
 				
@@ -37687,11 +37699,11 @@ end module
 						!	write(6,*) 'dy01(w+1:w+p01)',dy01(w+1:w+p01)
 				         !   call flush(6)
 							! produit scalaire entre bh et y01(k)
-							y01t(l) = y01t(l) + dot_product( bh(k+1:k+p01), dy01(w+1:w+p01) )
+							y01t(l) = y01t(l) + dot_product( bh((k+1):(k+p01)), dy01((w+1):(w+p01)) )
 							! copie vectorisée
 						!	write(6,*) 'y01t=',y01t(l)
 				        !    call flush(6)
-							logy01(l,1:p01) =  pack(dy01(w+1:w+p01),mask=(fix((m+1):(m+p01))==0))
+							logy01(l,1:p01) =  pack(dy01((w+1):(w+p01)),mask=(fix((m+1):(m+p01))==0))
 						!	write(6,*) 'logy01=',logy01(l,1:p01)
 				        !   call flush(6)
 						end do
@@ -37728,10 +37740,10 @@ end module
 						w = j + (l-1)*p02
 
 						! produit scalaire
-						y02t(l) = y02t(l) + dot_product( bh(k+1:k+p02),  dble(dy02(w+1:w+p02) ))
+						y02t(l) = y02t(l) + dot_product( bh((k+1):(k+p02)),  dble(dy02((w+1):(w+p02)) ))
 
 						! copie vectorisée
-						logy02(l,1:p02) = pack(dy02(w+1:w+p02),mask=(fix((m+1):(m+p02))==0))
+						logy02(l,1:p02) = pack(dy02((w+1):(w+p02)),mask=(fix((m+1):(m+p02))==0))
 					end do
 				endif
 
@@ -37748,10 +37760,10 @@ end module
 						w = j + (l-1)*p12
 
 						! produit scalaire
-						y12t(l) = y12t(l) + dot_product( bh(k+1:k+p12),  dble(dy12(w+1:w+p12) ))
+						y12t(l) = y12t(l) + dot_product( bh((k+1):(k+p12)),  dble(dy12((w+1):(w+p12)) ))
 
 						! copie vectorisée
-						logy12(l,1:p12) = pack(dy12(w+1:w+p12),mask=(fix((m+1):(m+p12))==0))
+						logy12(l,1:p12) = pack(dy12((w+1):(w+p12)),mask=(fix((m+1):(m+p12))==0))
 					end do
 				endif
 				

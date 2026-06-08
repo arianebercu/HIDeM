@@ -17,7 +17,7 @@ DYNINLAidmpredY<-function(object,newdata,s,
   formSurv<<-formSurv
   # define timePoints of prediction : 
   
-  
+  idtag<-"ID"
   idsubjects<-unique(newdata[,colnames(newdata)%in%id])
   
   # force only observation before s or at s 
@@ -36,9 +36,31 @@ DYNINLAidmpredY<-function(object,newdata,s,
   ## augmentation of the newdata 
   colnames(timePointsdata)<-c(id,timeVar)
   dataLongi_augmented<-merge(timePointsdata,newdata,by=c(id,timeVar),all.x=T,all.y=T)
+  
+  
+  # keep adjustment value  for fixed variables merge on ID
+  
+  terms_labels <- apply(formLong,FUN=function(x){
+    terms_labels<-attr(terms(formLong[[x]]), "term.labels")
+    idvar<-c(which(grepl(timeVar, terms_labels)),which(grepl(id, terms_labels)))
+  idvar<-unique(idvar)
+  return(terms_labels[-idvar])
+  })
+  terms_labels<-do.call(c,terms_labels)
+  terms_labels<-unique(terms_labels)
+  
+  dataLongi_augmented<-dataLongi_augmented[,!colnames(dataLongi_augmented)%in%terms_labels]
+  dataLongi_augmented<-merge(dataLongi_augmented,newdata,by=id,all.x=T,all.y=T)
+  
+  rownames(dataLongi_augmented_indice)<-NULL
+  dataLongi_augmented_indice<-dataLongi_augmented_indice[order(dataLongi_augmented[,colnames(dataLongi_augmented)%in%id],
+                                                               dataLongi_augmented[,colnames(dataLongi_augmented)%in%timeVar]),]
   rownames(dataLongi_augmented)<-NULL
   dataLongi_augmented<-dataLongi_augmented[order(dataLongi_augmented[,colnames(dataLongi_augmented)%in%id],
                                                  dataLongi_augmented[,colnames(dataLongi_augmented)%in%timeVar]),]
+  
+  # for data of adjustment suppose fix and add it 
+ 
   
   newdata<-newdata[order(newdata[,colnames(newdata)%in%id],
                          newdata[,colnames(newdata)%in%timeVar]),]
@@ -70,6 +92,8 @@ DYNINLAidmpredY<-function(object,newdata,s,
     base_i<<-basRisk[indice]
     fam_i<<-family[indice]
     
+    
+    
     print(paste0("prediction of marker ",formLong[[indice]][2]))
     #browser()
     P_RE <- predict(INLAmodel,
@@ -99,13 +123,13 @@ DYNINLAidmpredY<-function(object,newdata,s,
     indices <- match(key2, key1)
     
     if("value"%in% choiceY){
-      Y<-as.matrix(make_XINLA_PRED(formula=formLong[[indice]], timeVar=timeVar, data=dataLongi_augmented,ct=ct,id=id,SMP=INLAmodel))
+      Y<-as.matrix(make_XINLA_PRED(formula=formLong[[indice]], timeVar=timeVar, data=dataLongi_augmented,ct=ct,id=id,idtag=idtag,SMP=INLAmodel))
       Y<-Y[indices,]
       Outcome<-all.vars(terms(formLong[[indice]]))[1]
       PredYx<-cbind(timePointsdata,Outcome=Outcome,Y)
       
       if(scale.X==T){
-        Ycenter<-make_XINLA_PRED(formula=formLong[[indice]], timeVar=timeVar, data=dataCenter,ct=ct,id=id,SMP=INLAmodel)
+        Ycenter<-make_XINLA_PRED(formula=formLong[[indice]], timeVar=timeVar, data=dataCenter,ct=ct,id=id,idtag=idtag,SMP=INLAmodel)
         PredYx$Y<-(PredYx$Y-mean(Ycenter))/sd(Ycenter)
       }
       colnames(PredYx)[4]<-"Sample_1"
@@ -113,13 +137,13 @@ DYNINLAidmpredY<-function(object,newdata,s,
     }
     
     if("slope"%in% choiceY){
-      dY<-as.matrix(make_dXINLA_PRED(formula=formLong[[indice]], timeVar=timeVar, data=dataLongi_augmented,ct=ct,id=id,SMP=INLAmodel))
+      dY<-as.matrix(make_dXINLA_PRED(formula=formLong[[indice]], timeVar=timeVar, data=dataLongi_augmented,ct=ct,id=id,idtag=idtag,SMP=INLAmodel))
       dY<-dY[indices,]
       slopeOutcome<-paste0("slope_",Outcome)
       slopePredYx<-cbind(timePointsdata,Outcome=slopeOutcome,dY)
       
       if(scale.X==T){
-        dYcenter<-make_dXINLA_PRED(formula=formLong[[indice]], timeVar=timeVar, data=dataCenter,ct=ct,id=id,SMP=INLAmodel)
+        dYcenter<-make_dXINLA_PRED(formula=formLong[[indice]], timeVar=timeVar, data=dataCenter,ct=ct,id=id,idtag=idtag,SMP=INLAmodel)
         slopePredYx$dY<-(slopePredYx$dY-mean(dYcenter))/sd(dYcenter)
       }
       colnames(slopePredYx)[4]<-"Sample_1"
@@ -127,11 +151,11 @@ DYNINLAidmpredY<-function(object,newdata,s,
     }
     
     if("RE"%in% choiceY){
-      REY<-as.matrix(make_REXINLA_PRED(formula=formLong[[indice]], timeVar=timeVar, data=dataLongi_augmented,ct=ct,id=id,SMP=INLAmodel))
+      REY<-as.matrix(make_REXINLA_PRED(formula=formLong[[indice]], timeVar=timeVar, data=dataLongi_augmented,ct=ct,id=id,idtag=idtag,SMP=INLAmodel))
       REY<-REY[indices,]
       
       if(scale.X==T){
-        REYcenter<-as.matrix(make_REXINLA_PRED(formula=formLong[[indice]], timeVar=timeVar, data=dataCenter,ct=ct,id=id,SMP=INLAmodel))
+        REYcenter<-as.matrix(make_REXINLA_PRED(formula=formLong[[indice]], timeVar=timeVar, data=dataCenter,ct=ct,id=id,idtag=idtag,SMP=INLAmodel))
         REY<-do.call(cbind,lapply(c(1:dim(REY)[2]),FUN=function(x){
           (REY[,x]-mean(REYcenter[,x]))/sd(REYcenter[,x])
         }))
@@ -163,7 +187,7 @@ DYNINLAidmpredY<-function(object,newdata,s,
 }
 
 
-make_XINLA_PRED <- function(formula, timeVar, data, use_splines = FALSE, ct, id, SMP, ...) {
+make_XINLA_PRED <- function(formula, timeVar, data, use_splines = FALSE, ct, id,idtag, SMP, ...) {
   n <- nrow(data)
   N<-length(unique(data[,colnames(data)%in%id]))
   # --- parse terms ---
@@ -174,7 +198,7 @@ make_XINLA_PRED <- function(formula, timeVar, data, use_splines = FALSE, ct, id,
   terms_RE <- attr(terms(as.formula(paste("~", terms_RE))), "term.labels")
   
   # intercept handling
-  if (paste0(id, "Intercept_L1") %in% ct$tag) {
+  if (paste0(idtag, "Intercept_L1") %in% ct$tag) {
     terms_RE <- c("Intercept", terms_RE)
   }
   if ("Intercept_L1" %in% ct$tag) {
@@ -236,11 +260,11 @@ make_XINLA_PRED <- function(formula, timeVar, data, use_splines = FALSE, ct, id,
     lab <- terms_RE[k]
     # form summary.random tag name exactly like original
     if (lab == "Intercept") {
-      sr_tag <- paste0(id, lab, "_L1")
+      sr_tag <- paste0(idtag, lab, "_L1")
     } else if (grepl("\\(", lab) && grepl(timeVar, lab)) {
-      sr_tag <- paste0(id, gsub("[())]", "", lab), "_L1")
+      sr_tag <- paste0(idtag, gsub("[())]", "", lab), "_L1")
     } else {
-      sr_tag <- paste0(id, lab, "_L1")
+      sr_tag <- paste0(idtag, lab, "_L1")
     }
     
     pos <-  which(sr_names == sr_tag)
@@ -260,7 +284,7 @@ make_XINLA_PRED <- function(formula, timeVar, data, use_splines = FALSE, ct, id,
       X_RE[, k] <- eval(str2lang(lab), data)
     } else if (grepl("\\(", lab) && grepl(timeVar, lab)) {
       X_RE[, k] <- eval(str2lang(lab), data)
-      colnames(X_RE)[k] <- paste0(id, gsub("[())]", "", lab), "_L1")
+      colnames(X_RE)[k] <- paste0(idtag, gsub("[())]", "", lab), "_L1")
     } else {
       X_RE[, k] <- data[[lab]]
     }
@@ -274,11 +298,11 @@ make_XINLA_PRED <- function(formula, timeVar, data, use_splines = FALSE, ct, id,
   }
   
   # --- combine and return ---
-  Y <- rowSums(X * B + X_RE * B_RE)
+  Y <- rowSums(X * B) + rowSums(X_RE * B_RE)
   return(Y)
 }
 
-make_REXINLA_PRED <- function(formula, timeVar, data, use_splines = FALSE, ct, id, SMP, ...) {
+make_REXINLA_PRED <- function(formula, timeVar, data, use_splines = FALSE, ct, id,idtag, SMP, ...) {
   # --- parse random-effect terms ---
   n <- nrow(data)
   N<-length(unique(data[,colnames(data)%in%id]))
@@ -288,7 +312,7 @@ make_REXINLA_PRED <- function(formula, timeVar, data, use_splines = FALSE, ct, i
   terms_RE <- attr(terms(as.formula(paste("~", terms_RE))), "term.labels")
   
   # add intercept if present in ct$tag
-  if (paste0(id, "Intercept_L1") %in% ct$tag)
+  if (paste0(idtag, "Intercept_L1") %in% ct$tag)
     terms_RE <- c("Intercept", terms_RE)
   
   # --- precompute ID mapping ---
@@ -313,11 +337,11 @@ make_REXINLA_PRED <- function(formula, timeVar, data, use_splines = FALSE, ct, i
     
     # Build tag name for summary.random lookup
     if (lab == "Intercept") {
-      sr_tag <- paste0(id, lab, "_L1")
+      sr_tag <- paste0(idtag, lab, "_L1")
     } else if (grepl("\\(", lab) && grepl(timeVar, lab)) {
-      sr_tag <- paste0(id, gsub("[())]", "", lab), "_L1")
+      sr_tag <- paste0(idtag, gsub("[())]", "", lab), "_L1")
     } else {
-      sr_tag <- paste0(id, lab, "_L1")
+      sr_tag <- paste0(idtag, lab, "_L1")
     }
     
     pos <-  which(sr_names == sr_tag)
@@ -337,7 +361,7 @@ make_REXINLA_PRED <- function(formula, timeVar, data, use_splines = FALSE, ct, i
   return(B_RE)
 }
 
-make_dXINLA_PRED <- function(formula, timeVar, data, use_splines = FALSE, ct, id, SMP, ...) {
+make_dXINLA_PRED <- function(formula, timeVar, data, use_splines = FALSE, ct, id,idtag, SMP, ...) {
   n <- nrow(data)
   N<-length(unique(data[,colnames(data)%in%id]))
   # parse terms
@@ -400,11 +424,11 @@ make_dXINLA_PRED <- function(formula, timeVar, data, use_splines = FALSE, ct, id
     
     # build summary.random tag exactly as original
     if (lab == "Intercept") {
-      sr_tag <- paste0(id, lab, "_L1")
+      sr_tag <- paste0(idtag, lab, "_L1")
     } else if (grepl("\\(", lab) && grepl(timeVar, lab)) {
-      sr_tag <- paste0(id, gsub("[())]", "", lab), "_L1")
+      sr_tag <- paste0(idtag, gsub("[())]", "", lab), "_L1")
     } else {
-      sr_tag <- paste0(id, lab, "_L1")
+      sr_tag <- paste0(idtag, lab, "_L1")
     }
     
     pos <- which(sr_names == sr_tag)
@@ -429,7 +453,7 @@ make_dXINLA_PRED <- function(formula, timeVar, data, use_splines = FALSE, ct, id
       expr <- str2lang(lab)
       dexpr <- Deriv::Deriv(expr, timeVar)
       X_RE[, k] <- eval(dexpr, envir = data)
-      colnames(X_RE)[k] <- paste0(id, gsub("[())]", "", lab), "_L1")
+      colnames(X_RE)[k] <- paste0(idtag, gsub("[())]", "", lab), "_L1")
     } else {
       X_RE[, k] <- 0
     }
@@ -442,7 +466,7 @@ make_dXINLA_PRED <- function(formula, timeVar, data, use_splines = FALSE, ct, id
   }
   
   # combine
-  dY <- rowSums(X * B + X_RE * B_RE)
+  dY <- rowSums(X * B) + rowSums(X_RE * B_RE)
   return(dY)
 }
 
