@@ -152,6 +152,7 @@ INLAidmpredY<-function(timeVar,truncated,formLong,dataSurv,dataLongi,id,
         # while keeping order of key2
         indices <- match(key2, key1)
         
+     
         if("value"%in% choiceY){
           Y<-as.matrix(make_XINLA_BLUP(formula=formLong[[indice]], timeVar=timeVar, data=dataLongi_augmented,ct=ct,id=id,idtag=idtag,SMP=INLAmodel))
           Y<-Y[indices,]
@@ -559,6 +560,7 @@ make_XINLA_BLUP <- function(formula, timeVar, data, use_splines = FALSE, ct, id,
     names(modes_vec) <- id_levels
     B_RE[, k] <- unname(modes_vec[id_index])
   }
+  
   
   # --- combine and return ---
   Y <- rowSums(X * B) + rowSums(X_RE * B_RE)

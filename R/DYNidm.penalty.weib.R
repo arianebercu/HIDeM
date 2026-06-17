@@ -111,6 +111,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
     
     # do prediction for the sample 
     
+ 
     if(modelY$method=="INLA"){
       
       dataY<-INLAidmpredY(timeVar=timeVar,

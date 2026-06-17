@@ -916,6 +916,7 @@ simulateDYNIDM <- function(n=100,
     minInv12 <- S_inv(time = 0,f=S_12, val = U12[i], di = i)
     
     if(minInv01>0 | minInv02>0 | minInv12>0 ){
+    
       data_long$latent.illtime[data_long$ID==i]<-0
       data_long$latent.lifetime[data_long$ID==i]<-0
       data_long$latent.waittime[data_long$ID==i]<-0
@@ -971,6 +972,7 @@ simulateDYNIDM <- function(n=100,
       maxInv12 <- S_inv(time = administrative.censoring,f=S_12, val = u12_corrige, di = i)
 
       if(minInv12>0){
+      
         data_long$latent.illtime[data_long$ID==i]<-0
         data_long$latent.lifetime[data_long$ID==i]<-0
         data_long$latent.waittime[data_long$ID==i]<-0
@@ -998,8 +1000,8 @@ simulateDYNIDM <- function(n=100,
 
       # check if infinity in integrand over C --> T_02
       # if it is the case do not consider this case 
-      S_surv <- Vectorize(function(tstar, i) {
-        lower <- unique(data_long$censtime[data_long$ID == i])
+      S_surv <- Vectorize(function(tstar, i,ci) {
+        lower<-ci
         
         res12 <- integrate(S_12, lower = lower, upper = tstar, i = i)$value
         res01 <- integrate(S_01, lower = lower, upper = tstar, i = i)$value
@@ -1011,7 +1013,7 @@ simulateDYNIDM <- function(n=100,
       
       ci<-data_long$visit[data_long$ID==i & data_long$visit<=T_02]
       ci<-ifelse(length(ci)==0,0,max(ci))
-      check<-try(integrate(S_surv,lower=ci,upper=min(T_02,administrative.censoring),i=i)$value
+      check<-try(integrate(S_surv,lower=ci,upper=min(T_02,administrative.censoring),i=i,ci=ci)$value
                  ,
                  silent = TRUE
       )
@@ -1022,7 +1024,7 @@ simulateDYNIDM <- function(n=100,
       }
       
       if(check>1e+6 | check < 0){
-       
+   
         data_long$latent.illtime[data_long$ID==i]<-0
         data_long$latent.lifetime[data_long$ID==i]<-0
         data_long$latent.waittime[data_long$ID==i]<-0

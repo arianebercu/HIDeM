@@ -59,7 +59,8 @@ DYNidm.weib<-function(b,fix0,size_V,
       partialH<-NULL
     }
 
-    for(k in 1:Nsample){
+    
+    for(k in c(1:Nsample)){
       print(paste0("Estimating illness-death model on sample ",k))
   
       if(modelY$method=="INLA"){
@@ -137,7 +138,8 @@ DYNidm.weib<-function(b,fix0,size_V,
         y12<-rep(0,N*NtimePoints)
       }
 
-      outk<- tryCatch({ model<-marqLevAlg::mla(b=b,
+      
+      outk<- tryCatch({ marqLevAlg::mla(b=b,
                                             partialH=partialH,
                                             fn=gaussDYNidmlLikelihoodweib,
                                             epsa=epsa,
@@ -177,13 +179,12 @@ DYNidm.weib<-function(b,fix0,size_V,
                                             dimp02=dimp02,
                                             dimp12=dimp12,
                                             Ntime=NtimePoints)
-      return(model)
+     
       }, error = function(e) {
         # Return NULL on error to skip this patient
         NULL
       })
       
-  
       if(!is.null(outk)){
         if(outk$istop%in%c(1,3)){
           b<-outk$b

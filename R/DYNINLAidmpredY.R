@@ -10,7 +10,8 @@
 DYNINLAidmpredY<-function(object,newdata,s,
                           horizon,scale.X,assoc,assocSurv,id,
                           timeVar,formLong,formSurv,
-                          basRisk,index,family,envir){
+                          basRisk,index,family,envir,
+                          NsampleHY,NsampleFE,NsampleRE){
 
   timeVar<<-timeVar
  # formLong<<-formLong
@@ -38,10 +39,10 @@ DYNINLAidmpredY<-function(object,newdata,s,
   dataLongi_augmented<-merge(timePointsdata,newdata,by=c(id,timeVar),all.x=T,all.y=T)
   
   
-  # keep adjustment value  for fixed variables merge on ID
+  # keep adjustment value for fixed variables merge on ID
   
-  terms_labels <- apply(formLong,FUN=function(x){
-    terms_labels<-attr(terms(formLong[[x]]), "term.labels")
+  terms_labels <- lapply(formLong,FUN=function(x){
+    terms_labels<-attr(terms(x), "term.labels")
     idvar<-c(which(grepl(timeVar, terms_labels)),which(grepl(id, terms_labels)))
   idvar<-unique(idvar)
   return(terms_labels[-idvar])
@@ -49,11 +50,13 @@ DYNINLAidmpredY<-function(object,newdata,s,
   terms_labels<-do.call(c,terms_labels)
   terms_labels<-unique(terms_labels)
   
+  if(length(terms_labels)>0){
   dataLongi_augmented<-dataLongi_augmented[,!colnames(dataLongi_augmented)%in%terms_labels]
-  dataLongi_augmented<-merge(dataLongi_augmented,newdata,by=id,all.x=T,all.y=T)
+  dataLongi_augmented<-merge(dataLongi_augmented,newdata,by=id,all.x=T,all.y=T)}
   
-  rownames(dataLongi_augmented_indice)<-NULL
-  dataLongi_augmented_indice<-dataLongi_augmented_indice[order(dataLongi_augmented[,colnames(dataLongi_augmented)%in%id],
+  rownames(dataLongi_augmented)<-NULL
+  
+  dataLongi_augmented<-dataLongi_augmented[order(dataLongi_augmented[,colnames(dataLongi_augmented)%in%id],
                                                                dataLongi_augmented[,colnames(dataLongi_augmented)%in%timeVar]),]
   rownames(dataLongi_augmented)<-NULL
   dataLongi_augmented<-dataLongi_augmented[order(dataLongi_augmented[,colnames(dataLongi_augmented)%in%id],
@@ -77,8 +80,7 @@ DYNINLAidmpredY<-function(object,newdata,s,
   timepred<-unique(timePointsdata[,colnames(timePointsdata)%in%timeVar])
   NtimePoints<-length(unique(timepred))
   # should center by median or mean ? 
-  
-  
+
   for(indice in index){
     
     INLAmodel<-object[[indice]]
@@ -95,13 +97,15 @@ DYNINLAidmpredY<-function(object,newdata,s,
     
     
     print(paste0("prediction of marker ",formLong[[indice]][2]))
-    #browser()
+  
     P_RE <- predict(INLAmodel,
                     horizon=horizon,
                     newData = newdata,
-                    NsampleHY = 1, # use hyperparameters mode
-                    NsampleFE = 1, # use baseline hazard mode (if survival model included)
-                    return.RE = TRUE,NidLoop = length(unique(newdata[,colnames(newdata)%in%id])))
+                    NsampleRE=NsampleRE,
+                    NsampleHY = NsampleHY, # use hyperparameters mode
+                    NsampleFE = NsampleFE, # use baseline hazard mode (if survival model included)
+                    return.RE = TRUE,
+                    NidLoop = length(unique(newdata[,colnames(newdata)%in%id])))
     
     INLAmodel$P_RE<-do.call(rbind,P_RE$RE)
     
@@ -168,6 +172,7 @@ DYNINLAidmpredY<-function(object,newdata,s,
       colnames(REPredYx)[4]<-"Sample_1"
       res<-rbind(res,REPredYx)
     }
+ 
     
     Yall[[indice]]<- res
     

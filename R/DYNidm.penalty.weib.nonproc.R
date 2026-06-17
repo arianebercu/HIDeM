@@ -49,7 +49,7 @@ DYNidm.penalty.weib.nonproc<-function(beta.start,
   
   id.lambda<-NULL # for cran check 
   V0<-NA
-  #browser()
+
   if(warmstart==F){
     if(partialH==F){
       outputNsample<-foreach::foreach(id.lambda=1:nlambda,
@@ -1350,8 +1350,7 @@ DYNidm.penalty.weib.nonproc<-function(beta.start,
                                         eval.loglik<-rep(NA,maxiter+1)
                                         eval.validity<-rep(NA,maxiter+1)
                                         
-                                        
-                                        
+                                       # browser()
                                         
                                         while(converged==F & ite<=maxiter){
                                           
@@ -1394,7 +1393,7 @@ DYNidm.penalty.weib.nonproc<-function(beta.start,
                                                                  dimp12=dimp12,
                                                                  Ntime=NtimePoints)
                                           
-                                          
+                                        
                                           # outputb<-deriva( h=1e-4,
                                           #                  funcpa=gaussDYNidmlLikelihoodweib,
                                           #                        b=b,
@@ -1565,6 +1564,7 @@ DYNidm.penalty.weib.nonproc<-function(beta.start,
                                           }
                                           
                                           
+                                          
                                           # update for beta 
                                           output.cv<-DYNcv.model(beta=beta,
                                                                  nva01=npm01,
@@ -1581,7 +1581,7 @@ DYNidm.penalty.weib.nonproc<-function(beta.start,
                                                                  lambda=lambda[id.lambda,],
                                                                  alpha=alpha
                                           )
-                                          
+                                         # browser()
                                           # verify validity of parameters update 
                                           # and that we are better than previous estimates 
                                           
@@ -1631,6 +1631,8 @@ DYNidm.penalty.weib.nonproc<-function(beta.start,
                                           # we have issue if res is NA or if not higher than previous one 
                                           # if not better or do not exist need to readjust
                                           # value of beta 
+                                          
+                                          validity<-T
                                           if(res %in%c(-1e9,1e9) | res < fn.value){
                                             
                                             th<-1e-5
@@ -1699,7 +1701,7 @@ DYNidm.penalty.weib.nonproc<-function(beta.start,
                                             
                                             
                                             betanew<-beta+delta*sears$vw
-                                            betanew<-ifelse(abs(betanew)<=0.0001,0,betanew)
+                                            betanew<-ifelse(abs(betanew)<=0.0001,0,betanew) 
                                             b<-c(s,betanew)
                                             
                                             
@@ -1738,6 +1740,8 @@ DYNidm.penalty.weib.nonproc<-function(beta.start,
                                                                                 alpha=alpha,
                                                                                 penalty.factor=penalty.factor,
                                                                                 penalty=penalty)
+                                            
+                                            #validity<-F #09/06/2026
                                           }
                                           # if not better or do not exist need to readjust
                                           # value of beta 
@@ -1751,7 +1755,7 @@ DYNidm.penalty.weib.nonproc<-function(beta.start,
                                             
                                             pbr_compu<-3
                                             break
-                                          }else{validity<-T}
+                                          }
                                           
                                           
                                           # betanew already include s
@@ -1760,6 +1764,7 @@ DYNidm.penalty.weib.nonproc<-function(beta.start,
                                           bfix<-b[fix0.beta==1]
                                           b<-b[fix0.beta==0]
                                           # update for modelPar
+                                         
                                           if(npmweib!=0){
                                             output.mla<- marqLevAlg::mla(b=b,
                                                                          fn=gaussDYNidmlLikelihoodweib,
@@ -1898,7 +1903,7 @@ DYNidm.penalty.weib.nonproc<-function(beta.start,
                                           }
                                           
                                           ite<-ite+1
-                                          
+                                         
                                           #check cv 
                                           eval.cv.spline[ite]<-sum((snew-s)^2)
                                           eval.cv.beta[ite]<-sum((betanew-beta)^2)
@@ -1910,6 +1915,7 @@ DYNidm.penalty.weib.nonproc<-function(beta.start,
                                           beta<-betanew
                                           fn.value<-fn.valuenew
                                           
+                                         
                                           # eval.cv beta valid only if validity.param=T
                                           if(((eval.cv.beta[ite] + eval.cv.spline[ite])<epsa) & eval.cv.loglik[ite]<epsb & validity==T){
                                             converged<-T}

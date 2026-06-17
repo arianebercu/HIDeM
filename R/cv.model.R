@@ -215,7 +215,7 @@ DYNcv.model<-function(beta,
                    lambda,
                    alpha){
   
-  
+
   # add to do base::which for CRAN check 
   BETA<-beta[fix==0]
   NEW.BETA.all<-beta
@@ -296,7 +296,7 @@ DYNcv.model<-function(beta,
   
   NEWBETA<-rep(NA,length(num))
   idbeta<-NULL
-  
+ 
   # if penalty update beta all at once 
   if(penalty%in%c("lasso","ridge","elasticnet")){
     # 0 -> 1
@@ -503,6 +503,7 @@ DYNcv.model<-function(beta,
     NEWBETA[idbeta+nva01+nva02+nva12+nva01Y+nva02Y]<-0
   }
   
+ 
   idbeta<-base::which(penalty.factor==0)
   # if no penalty on parameter, beta_k=A_k/-x_kk
   NEWBETA[idbeta]<-sign[idbeta]*num[idbeta]/denum[idbeta]
@@ -699,7 +700,6 @@ cv.model.onestep<-function(beta,
   # if no penalty on parameter, beta_k=A_k/-x_kk
   NEWBETA[idbeta]<-sign[idbeta]*num[idbeta]/denum[idbeta]
 # does not work try update weibull parameters according to new update beta :
-#  browser()
   # BETA<-beta[fix==0]
   # idbeta<-base::which(penalty.factor==1)
   # BETA[idbeta]<-NEWBETA[idbeta]

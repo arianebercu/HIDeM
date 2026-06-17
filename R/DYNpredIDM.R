@@ -17,7 +17,9 @@
 DYNpredIDM<-function(objectY,
                           objectSurvival,
                           newdata,s,horizon,
-                          envir=parent.frame()){
+                          envir=parent.frame(),
+                         predicted.newdata=NULL,
+                     control=list(NsampleHY=1,NsampleFE=1,NsampleRE=1,return.data=F)){
 
   call <- match.call()
   ptm <- proc.time()
@@ -56,12 +58,15 @@ DYNpredIDM<-function(objectY,
   
   if(objectY$method!="INLA"){stop("Prediction not available with JMBayes 2 method")}
   
-  ############################## supress info before s #########################
+  ############################## supress subjects censored or having the event before s ###
+  #iderase<-newdata[which(newdata[,colnames(newdata])]
+  ############################## supress info after s #########################
   
   newdata<-newdata[newdata[,colnames(newdata)%in%timeVar]<=s,]
   newdata<-newdata[,colnames(newdata)%in%variables]
   newdata<-na.omit(newdata)
   if(dim(newdata)[1]==0){stop("No follow-up after s, should proceed with smaller values for s")}
+  #erase subjects having the event before s 
   N<-length(unique(newdata[,colnames(newdata)%in%objectY$id]))
   
   
@@ -181,9 +186,10 @@ DYNpredIDM<-function(objectY,
   Yindex<-lapply(objectY$formLong,FUN=function(x){as.character(x[[2]])})
   Yindex<-do.call(c,Yindex)
   index<-which(Yindex%in%varY)
-  
+
   ############################ perform prediction of Y #########################
   
+  if(is.null(predicted.newdata)){
   dataY<-DYNINLAidmpredY(object=objectY$modelY,
                          newdata=newdata,
                          s=s,
@@ -198,7 +204,11 @@ DYNpredIDM<-function(objectY,
                          basRisk=objectY$basRisk,
                          index=index,
                          family=objectY$family,
-                         envir=envir)
+                         envir=envir,
+                         NsampleRE=control$NsampleRE,
+                         NsampleHY=control$NsampleHY,
+                         NsampleFE=control$NsampleFE)
+  }else{dataY<-predicted.newdata}
   
   
   ########################## check prediction ##################################
@@ -300,6 +310,7 @@ DYNpredIDM<-function(objectY,
     })
   }
   
+  res<-list(CIF=out,s=s,horizon=horizon,predicted.newdata=ifelse(control$return.data==T,dataY,NULL) )
   return(out)
  
 }

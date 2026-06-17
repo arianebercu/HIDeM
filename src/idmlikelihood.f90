@@ -2686,7 +2686,7 @@ else
          
                do i=1,no0
 			   
-			   PRINT *, "subject", i
+			!   PRINT *, "subject", i
 			
          
                 vet01 = 0.d0
@@ -42930,9 +42930,7 @@ if(p01.gt.0) then
                                 tronc=dexp((gl01*vet01)+(gl02*vet02))
                         end if
            
-
-		
-               
+   
                   call ciqgaussPL15timedep(t0(i),t1(i),the01,the02,&
                         	res2,vet01,vet02,& 
 							 y01t(1:240),y02t(1:240))

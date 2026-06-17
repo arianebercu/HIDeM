@@ -65,7 +65,7 @@ DYNidm.splines<-function(b,clustertype,partialH,epsa,epsb,epsd,nproc,maxiter,siz
     }
 
     
-    for(k in 1:Nsample){
+    for(k in c(1:Nsample)){
       print(paste0("Estimating illness-death model on sample ",k))
       
       
@@ -144,7 +144,7 @@ DYNidm.splines<-function(b,clustertype,partialH,epsa,epsb,epsd,nproc,maxiter,siz
         y12<-rep(0,N*NtimePoints)
       }
       
-      outk<- tryCatch({ model<-marqLevAlg::mla(b=b,
+      outk<- tryCatch({ marqLevAlg::mla(b=b,
                                             partialH=partialH,
                                             fn=gaussDYNidmlLikelihood,
                                             epsa=epsa,
@@ -191,7 +191,7 @@ DYNidm.splines<-function(b,clustertype,partialH,epsa,epsb,epsd,nproc,maxiter,siz
                                             dimp02=dimp02,
                                             dimp12=dimp12,
                                             Ntime=NtimePoints)
-      return(model)
+
       }, error = function(e) {
         # Return NULL on error to skip this patient
         NULL

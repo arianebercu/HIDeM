@@ -79,8 +79,6 @@ INLAidm<-function(timeVar,family,basRisk,assoc,
      base_i<-basRisk[indice]
      assoc_i<-assoc[[indice]]
      environment(form_i)<-environment(fam_i)<-environment(base_i)<-environment(assoc_i)<-envir
-     
-    # browser()
  
       INLAmodel<-INLAjoint::joint(formSurv = formSurv,
                                        formLong = form_i,
