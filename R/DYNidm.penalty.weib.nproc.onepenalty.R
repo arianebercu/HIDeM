@@ -16,7 +16,7 @@ DYNidm.penalty.weib.nproc.onepenalty<-function(beta.start,
                                     ctime,N,
                                     ve01,ve02,ve12,dimnva01,dimnva02,dimnva12,nvat01,nvat02,nvat12,
                                     t0,t1,t2,t3,troncature,nlambda,lambda,
-                                    alpha,penalty.factor,penalty,partialH,
+                                    alpha,penalty.factor,penalty,penalty.weights,partialH,
                                     Nsample,
                                     NtimePoints,
                                     p01,p02,p12,
@@ -257,7 +257,8 @@ DYNidm.penalty.weib.nproc.onepenalty<-function(beta.start,
                                                                                                                  lambda=lambda[id.lambda,],
                                                                                                                  alpha=alpha,
                                                                                                                  penalty.factor=penalty.factor,
-                                                                                                                 penalty=penalty)
+                                                                                                                 penalty=penalty,
+                                                                                                                 penalty.weights=penalty.weights[,id.lambda])
                                                                       }
                                                                       
                                                                       
@@ -383,7 +384,8 @@ DYNidm.penalty.weib.nproc.onepenalty<-function(beta.start,
                                                                                              v=V,
                                                                                              fu=fu,
                                                                                              lambda=lambda[id.lambda,],
-                                                                                             alpha=alpha
+                                                                                             alpha=alpha,
+                                                                                             penalty.weights=penalty.weights[,id.lambda]
                                                                       )
                                                                       
                                                                       # verify validity of parameters update 
@@ -428,7 +430,8 @@ DYNidm.penalty.weib.nproc.onepenalty<-function(beta.start,
                                                                                                           lambda=lambda[id.lambda,],
                                                                                                           alpha=alpha,
                                                                                                           penalty.factor=penalty.factor,
-                                                                                                          penalty=penalty)
+                                                                                                          penalty=penalty,
+                                                                                                          penalty.weights=penalty.weights[,id.lambda])
                                                                       
                                                                       
                                                                       # we want to maximise the loglik thus : 
@@ -505,7 +508,8 @@ DYNidm.penalty.weib.nproc.onepenalty<-function(beta.start,
                                                                                        lambda=lambda[id.lambda,],
                                                                                        alpha=alpha,
                                                                                        penalty.factor=penalty.factor,
-                                                                                       penalty=penalty)
+                                                                                       penalty=penalty,
+                                                                                       penalty.weights=penalty.weights[,id.lambda])
                                                                         
                                                                         
                                                                         betanew<-beta+delta*sears$vw
@@ -547,7 +551,8 @@ DYNidm.penalty.weib.nproc.onepenalty<-function(beta.start,
                                                                                                             lambda=lambda[id.lambda,],
                                                                                                             alpha=alpha,
                                                                                                             penalty.factor=penalty.factor,
-                                                                                                            penalty=penalty)
+                                                                                                            penalty=penalty,
+                                                                                                            penalty.weights=penalty.weights[,id.lambda])
                                                                         
                                                                       }
                                                                       # if not better or do not exist need to readjust
@@ -618,43 +623,57 @@ DYNidm.penalty.weib.nproc.onepenalty<-function(beta.start,
                                                                         snew[fix00[1:6]==0]<-output.mla$b
                                                                         if(nvat01>0){
                                                                           b01<-betanew[1:nvat01][penalty.factor[1:nvat01]==1]
+                                                                          penalty.01<-penalty.weights[1:nvat01][penalty.factor[1:nvat01]==1]
                                                                           if(p01>0){
                                                                             b01<-c(b01,betanew[(nvat01+nvat02+nvat12+1):(nvat01+nvat02+nvat12+p01)][penalty.factor[(nvat01+nvat02+nvat12+1):(nvat01+nvat02+nvat12+p01)]==1])
+                                                                            penalty.01<-c(penalty.01,penalty.weights[(nvat01+nvat02+nvat12+1):(nvat01+nvat02+nvat12+p01)][penalty.factor[(nvat01+nvat02+nvat12+1):(nvat01+nvat02+nvat12+p01)]==1])
                                                                           }
                                                                         }else{
                                                                           if(p01>0){
                                                                             b01<-betanew[(nvat01+nvat02+nvat12+1):(nvat01+nvat02+nvat12+p01)][penalty.factor[(nvat01+nvat02+nvat12+1):(nvat01+nvat02+nvat12+p01)]==1]
+                                                                            penalty.01<-penalty.weights[(nvat01+nvat02+nvat12+1):(nvat01+nvat02+nvat12+p01)][penalty.factor[(nvat01+nvat02+nvat12+1):(nvat01+nvat02+nvat12+p01)]==1]
                                                                           }else{
                                                                             b01<-0
+                                                                            penalty.01<-1
                                                                           }
                                                                         }
                                                                         
                                                                         if(nvat02>0){
                                                                           b02<-betanew[(nvat01+1):(nvat01+nvat02)][penalty.factor[(nvat01+1):(nvat01+nvat02)]==1]
+                                                                          penalty.02<-penalty.weights[(nvat01+1):(nvat01+nvat02)][penalty.factor[(nvat01+1):(nvat01+nvat02)]==1]
                                                                           if(p02>0){
                                                                             b02<-c(b02,betanew[(nvat01+nvat02+nvat12+p01+1):(nvat01+nvat02+nvat12+p01+p02)][penalty.factor[(nvat01+nvat02+nvat12+p01+1):(nvat01+nvat02+nvat12+p01+p02)]==1])
+                                                                            penalty.02<-c(penalty.02,penalty.weights[(nvat01+nvat02+nvat12+p01+1):(nvat01+nvat02+nvat12+p01+p02)][penalty.factor[(nvat01+nvat02+nvat12+p01+1):(nvat01+nvat02+nvat12+p01+p02)]==1])
                                                                           }
                                                                         }else{
                                                                           if(p02>0){
                                                                             b02<-betanew[(nvat01+nvat02+nvat12+p01+1):(nvat01+nvat02+nvat12+p01+p02)][penalty.factor[(nvat01+nvat02+nvat12+p01+1):(nvat01+nvat02+nvat12+p01+p02)]==1]
-                                                                          }else{b02<-0}
+                                                                            penalty.02<-penalty.weights[(nvat01+nvat02+nvat12+p01+1):(nvat01+nvat02+nvat12+p01+p02)][penalty.factor[(nvat01+nvat02+nvat12+p01+1):(nvat01+nvat02+nvat12+p01+p02)]==1]
+                                                                          }else{
+                                                                            b02<-0
+                                                                            penalty.02<-1}
                                                                         }
                                                                         
                                                                         if(nvat12>0){
                                                                           b12<-betanew[(nvat01+nvat02+1):(nvat01+nvat02+nvat12)][penalty.factor[(nvat01+nvat02+1):(nvat01+nvat02+nvat12)]==1]
+                                                                          penalty.12<-penalty.weights[(nvat01+nvat02+1):(nvat01+nvat02+nvat12)][penalty.factor[(nvat01+nvat02+1):(nvat01+nvat02+nvat12)]==1]
                                                                           if(p12>0){
                                                                             b12<-c(b12,betanew[(nvat01+nvat02+nvat12+p01+p02+1):(nvat01+nvat02+nvat12+p01+p02+p12)][penalty.factor[(nvat01+nvat02+nvat12+p01+p02+1):(nvat01+nvat02+nvat12+p01+p02+p12)]==1])
+                                                                            penalty.12<-c(penalty.12,penalty.weights[(nvat01+nvat02+nvat12+p01+p02+1):(nvat01+nvat02+nvat12+p01+p02+p12)][penalty.factor[(nvat01+nvat02+nvat12+p01+p02+1):(nvat01+nvat02+nvat12+p01+p02+p12)]==1])
                                                                           }
                                                                         }else{
                                                                           if(p12>0){
                                                                             b12<-betanew[(nvat01+nvat02+nvat12+p01+p02+1):(nvat01+nvat02+nvat12+p01+p02+p12)][penalty.factor[(nvat01+nvat02+nvat12+p01+p02+1):(nvat01+nvat02+nvat12+p01+p02+p12)]==1]
-                                                                          }else{b12<-0}
+                                                                            penalty.12<-penalty.weights[(nvat01+nvat02+nvat12+p01+p02+1):(nvat01+nvat02+nvat12+p01+p02+p12)][penalty.factor[(nvat01+nvat02+nvat12+p01+p02+1):(nvat01+nvat02+nvat12+p01+p02+p12)]==1]
+                                                                          }else{
+                                                                            b12<-0
+                                                                            penalty.12<-1}
                                                                         }
                                                                         # maximisation issue : lpen =l - pen
-                                                                        if(penalty%in%c("lasso","ridge","elasticnet","corrected.elasticnet")){
-                                                                          fn.valuenew<-output.mla$fn.value-lambda[id.lambda,1]*alpha*sum(abs(b01))-lambda[id.lambda,1]*(1-alpha)*sum(b01*b01)
-                                                                          fn.valuenew<-fn.valuenew-lambda[id.lambda,2]*alpha*sum(abs(b02))-lambda[id.lambda,2]*(1-alpha)*sum(b02*b02)
-                                                                          fn.valuenew<-fn.valuenew-lambda[id.lambda,3]*alpha*sum(abs(b12))-lambda[id.lambda,3]*(1-alpha)*sum(b12*b12)
+                                                                        if(penalty%in%c("lasso","adaptative.lasso","ridge","elasticnet","corrected.elasticnet")){
+                                                                          fn.valuenew<-output.mla$fn.value-lambda[id.lambda,1]*alpha*sum(penalty.01*abs(b01))-lambda[id.lambda,1]*(1-alpha)*sum(b01*b01)
+                                                                          fn.valuenew<-fn.valuenew-lambda[id.lambda,2]*alpha*sum(penalty.02*abs(b02))-lambda[id.lambda,2]*(1-alpha)*sum(b02*b02)
+                                                                          fn.valuenew<-fn.valuenew-lambda[id.lambda,3]*alpha*sum(penalty.12*abs(b12))-lambda[id.lambda,3]*(1-alpha)*sum(b12*b12)
                                                                           
                                                                         }
                                                                         
@@ -906,7 +925,8 @@ DYNidm.penalty.weib.nproc.onepenalty<-function(beta.start,
                                                                                                                      lambda=lambda[id.lambda,],
                                                                                                                      alpha=alpha,
                                                                                                                      penalty.factor=penalty.factor,
-                                                                                                                     penalty=penalty)
+                                                                                                                     penalty=penalty,
+                                                                                                                     penalty.weights=penalty.weights[,id.lambda])
                                                                           }
                                                                           
                                                                           if(any(is.na(output$V))|any(output$V==Inf) |any(output$V==-Inf)|any(is.na(output$fu))|any(output$fu==Inf) |any(output$fu==-Inf)){
@@ -1010,7 +1030,8 @@ DYNidm.penalty.weib.nproc.onepenalty<-function(beta.start,
                                                                                                  v=V,
                                                                                                  fu=fu,
                                                                                                  lambda=lambda[id.lambda,],
-                                                                                                 alpha=alpha
+                                                                                                 alpha=alpha,
+                                                                                                 penalty.weights=penalty.weights[,id.lambda]
                                                                           )
                                                                           
                                                                           # verify validity of parameters update 
@@ -1056,7 +1077,8 @@ DYNidm.penalty.weib.nproc.onepenalty<-function(beta.start,
                                                                                                               lambda=lambda[id.lambda,],
                                                                                                               alpha=alpha,
                                                                                                               penalty.factor=penalty.factor,
-                                                                                                              penalty=penalty)
+                                                                                                              penalty=penalty,
+                                                                                                              penalty.weights=penalty.weights[,id.lambda])
                                                                           
                                                                           # we want to maximise the loglik thus : 
                                                                           # we have issue if res is NA or if not higher than previous one 
@@ -1130,7 +1152,8 @@ DYNidm.penalty.weib.nproc.onepenalty<-function(beta.start,
                                                                                            lambda=lambda[id.lambda,],
                                                                                            alpha=alpha,
                                                                                            penalty.factor=penalty.factor,
-                                                                                           penalty=penalty)
+                                                                                           penalty=penalty,
+                                                                                           penalty.weights=penalty.weights[,id.lambda])
                                                                             
                                                                             
                                                                             betanew<-beta+delta*sears$vw
@@ -1173,7 +1196,8 @@ DYNidm.penalty.weib.nproc.onepenalty<-function(beta.start,
                                                                                                                 lambda=lambda[id.lambda,],
                                                                                                                 alpha=alpha,
                                                                                                                 penalty.factor=penalty.factor,
-                                                                                                                penalty=penalty)
+                                                                                                                penalty=penalty,
+                                                                                                                penalty.weights=penalty.weights[,id.lambda])
                                                                             
                                                                           }
                                                                           # if not better or do not exist need to readjust
@@ -1245,43 +1269,57 @@ DYNidm.penalty.weib.nproc.onepenalty<-function(beta.start,
                                                                             snew[fix00[1:6]==0]<-output.mla$b
                                                                             if(nvat01>0){
                                                                               b01<-betanew[1:nvat01][penalty.factor[1:nvat01]==1]
+                                                                              penalty.01<-penalty.weights[1:nvat01][penalty.factor[1:nvat01]==1]
                                                                               if(p01>0){
                                                                                 b01<-c(b01,betanew[(nvat01+nvat02+nvat12+1):(nvat01+nvat02+nvat12+p01)][penalty.factor[(nvat01+nvat02+nvat12+1):(nvat01+nvat02+nvat12+p01)]==1])
+                                                                                penalty.01<-c(penalty.01,penalty.weights[(nvat01+nvat02+nvat12+1):(nvat01+nvat02+nvat12+p01)][penalty.factor[(nvat01+nvat02+nvat12+1):(nvat01+nvat02+nvat12+p01)]==1])
                                                                               }
                                                                             }else{
                                                                               if(p01>0){
                                                                                 b01<-betanew[(nvat01+nvat02+nvat12+1):(nvat01+nvat02+nvat12+p01)][penalty.factor[(nvat01+nvat02+nvat12+1):(nvat01+nvat02+nvat12+p01)]==1]
+                                                                                penalty.01<-penalty.weights[(nvat01+nvat02+nvat12+1):(nvat01+nvat02+nvat12+p01)][penalty.factor[(nvat01+nvat02+nvat12+1):(nvat01+nvat02+nvat12+p01)]==1]
                                                                               }else{
                                                                                 b01<-0
+                                                                                penalty.01<-1
                                                                               }
                                                                             }
                                                                             
                                                                             if(nvat02>0){
                                                                               b02<-betanew[(nvat01+1):(nvat01+nvat02)][penalty.factor[(nvat01+1):(nvat01+nvat02)]==1]
+                                                                              penalty.02<-penalty.weights[(nvat01+1):(nvat01+nvat02)][penalty.factor[(nvat01+1):(nvat01+nvat02)]==1]
                                                                               if(p02>0){
                                                                                 b02<-c(b02,betanew[(nvat01+nvat02+nvat12+p01+1):(nvat01+nvat02+nvat12+p01+p02)][penalty.factor[(nvat01+nvat02+nvat12+p01+1):(nvat01+nvat02+nvat12+p01+p02)]==1])
+                                                                                penalty.02<-c(penalty.02,penalty.weights[(nvat01+nvat02+nvat12+p01+1):(nvat01+nvat02+nvat12+p01+p02)][penalty.factor[(nvat01+nvat02+nvat12+p01+1):(nvat01+nvat02+nvat12+p01+p02)]==1])
                                                                               }
                                                                             }else{
                                                                               if(p02>0){
                                                                                 b02<-betanew[(nvat01+nvat02+nvat12+p01+1):(nvat01+nvat02+nvat12+p01+p02)][penalty.factor[(nvat01+nvat02+nvat12+p01+1):(nvat01+nvat02+nvat12+p01+p02)]==1]
-                                                                              }else{b02<-0}
+                                                                                penalty.02<-penalty.weights[(nvat01+nvat02+nvat12+p01+1):(nvat01+nvat02+nvat12+p01+p02)][penalty.factor[(nvat01+nvat02+nvat12+p01+1):(nvat01+nvat02+nvat12+p01+p02)]==1]
+                                                                              }else{
+                                                                                b02<-0
+                                                                                penalty.02<-1}
                                                                             }
                                                                             
                                                                             if(nvat12>0){
                                                                               b12<-betanew[(nvat01+nvat02+1):(nvat01+nvat02+nvat12)][penalty.factor[(nvat01+nvat02+1):(nvat01+nvat02+nvat12)]==1]
+                                                                              penalty.12<-penalty.weights[(nvat01+nvat02+1):(nvat01+nvat02+nvat12)][penalty.factor[(nvat01+nvat02+1):(nvat01+nvat02+nvat12)]==1]
                                                                               if(p12>0){
                                                                                 b12<-c(b12,betanew[(nvat01+nvat02+nvat12+p01+p02+1):(nvat01+nvat02+nvat12+p01+p02+p12)][penalty.factor[(nvat01+nvat02+nvat12+p01+p02+1):(nvat01+nvat02+nvat12+p01+p02+p12)]==1])
+                                                                                penalty.12<-c(penalty.12,penalty.weights[(nvat01+nvat02+nvat12+p01+p02+1):(nvat01+nvat02+nvat12+p01+p02+p12)][penalty.factor[(nvat01+nvat02+nvat12+p01+p02+1):(nvat01+nvat02+nvat12+p01+p02+p12)]==1])
                                                                               }
                                                                             }else{
                                                                               if(p12>0){
                                                                                 b12<-betanew[(nvat01+nvat02+nvat12+p01+p02+1):(nvat01+nvat02+nvat12+p01+p02+p12)][penalty.factor[(nvat01+nvat02+nvat12+p01+p02+1):(nvat01+nvat02+nvat12+p01+p02+p12)]==1]
-                                                                              }else{b12<-0}
+                                                                                penalty.12<-penalty.weights[(nvat01+nvat02+nvat12+p01+p02+1):(nvat01+nvat02+nvat12+p01+p02+p12)][penalty.factor[(nvat01+nvat02+nvat12+p01+p02+1):(nvat01+nvat02+nvat12+p01+p02+p12)]==1]
+                                                                              }else{
+                                                                                b12<-0
+                                                                                penalty.12<-1}
                                                                             }
                                                                             # maximisation issue : lpen =l - pen
-                                                                            if(penalty%in%c("lasso","ridge","elasticnet","corrected.elasticnet")){
-                                                                              fn.valuenew<-output.mla$fn.value-lambda[id.lambda,1]*alpha*sum(abs(b01))-lambda[id.lambda,1]*(1-alpha)*sum(b01*b01)
-                                                                              fn.valuenew<-fn.valuenew-lambda[id.lambda,2]*alpha*sum(abs(b02))-lambda[id.lambda,2]*(1-alpha)*sum(b02*b02)
-                                                                              fn.valuenew<-fn.valuenew-lambda[id.lambda,3]*alpha*sum(abs(b12))-lambda[id.lambda,3]*(1-alpha)*sum(b12*b12)
+                                                                            if(penalty%in%c("lasso","adaptative.lasso","ridge","elasticnet","corrected.elasticnet")){
+                                                                              fn.valuenew<-output.mla$fn.value-lambda[id.lambda,1]*alpha*sum(penalty.01*abs(b01))-lambda[id.lambda,1]*(1-alpha)*sum(b01*b01)
+                                                                              fn.valuenew<-fn.valuenew-lambda[id.lambda,2]*alpha*sum(penalty.02*abs(b02))-lambda[id.lambda,2]*(1-alpha)*sum(b02*b02)
+                                                                              fn.valuenew<-fn.valuenew-lambda[id.lambda,3]*alpha*sum(penalty.12*abs(b12))-lambda[id.lambda,3]*(1-alpha)*sum(b12*b12)
                                                                               
                                                                             }
                                                                             

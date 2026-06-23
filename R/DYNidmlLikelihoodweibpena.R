@@ -37,7 +37,7 @@ DYNidmlLikelihoodweibpena<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
                                     dimnva01,dimnva02,dimnva12,nva01,nva02,nva12,
                                     t0,t1,t2,t3,troncature,
                                     y01,y02,y12,p01,p02,p12,
-                                    dimp01,dimp02,dimp12,Ntime,time,lambda,alpha,penalty.factor,penalty){
+                                    dimp01,dimp02,dimp12,Ntime,time,lambda,alpha,penalty.factor,penalty,penalty.weights){
   
   res<-0
   b0<-b
@@ -83,43 +83,58 @@ DYNidmlLikelihoodweibpena<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
   b[fix==1]<-bfix
   if(nva01>0){
   b01<-b[(6+1):(6+nva01)][penalty.factor[1:nva01]==1]
+  penalty.01<-penalty.weights[(6+1):(6+nva01)][penalty.factor[1:nva01]==1]
   if(p01>0){
     b01<-c(b01,b[(nva01+nva02+nva12+7):(nva01+nva02+nva12+6+p01)][penalty.factor[(nva01+nva02+nva12+1):(nva01+nva02+nva12+p01)]==1])
+    penalty.01<-c( penalty.01,penalty.weights[(nva01+nva02+nva12+7):(nva01+nva02+nva12+6+p01)][penalty.factor[(nva01+nva02+nva12+1):(nva01+nva02+nva12+p01)]==1])
   }
   }else{
     if(p01>0){
       b01<-b[(nva01+nva02+nva12+7):(nva01+nva02+nva12+6+p01)][penalty.factor[(nva01+nva02+nva12+1):(nva01+nva02+nva12+p01)]==1]
+      penalty.01<-penalty.weights[(nva01+nva02+nva12+7):(nva01+nva02+nva12+6+p01)][penalty.factor[(nva01+nva02+nva12+1):(nva01+nva02+nva12+p01)]==1]
     }else{
       b01<-0
+      penalty.01<-1
     }
     }
   
   if(nva02>0){
   b02<-b[(6+1+nva01):(6+nva01+nva02)][penalty.factor[(nva01+1):(nva01+nva02)]==1]
+  penalty.02<-penalty.weights[(6+1+nva01):(6+nva01+nva02)][penalty.factor[(nva01+1):(nva01+nva02)]==1]
+  
   if(p02>0){
     b02<-c(b02,b[(nva01+nva02+nva12+p01+7):(nva01+nva02+nva12+6+p01+p02)][penalty.factor[(nva01+nva02+nva12+p01+1):(nva01+nva02+nva12+p01+p02)]==1])
+    penalty.02<-c(penalty.02,penalty.weights[(nva01+nva02+nva12+p01+7):(nva01+nva02+nva12+6+p01+p02)][penalty.factor[(nva01+nva02+nva12+p01+1):(nva01+nva02+nva12+p01+p02)]==1])
   }
   }else{
     if(p02>0){
       b02<-b[(nva01+nva02+nva12+p01+7):(nva01+nva02+nva12+6+p01+p02)][penalty.factor[(nva01+nva02+nva12+p01+1):(nva01+nva02+nva12+p01+p02)]==1]
-    }else{b02<-0}
+      penalty.02<-penalty.weights[(nva01+nva02+nva12+p01+7):(nva01+nva02+nva12+6+p01+p02)][penalty.factor[(nva01+nva02+nva12+p01+1):(nva01+nva02+nva12+p01+p02)]==1]
+    }else{
+      b02<-0
+      penalty.02<-1}
   }
   
   if(nva12>0){
   b12<-b[(6+1+nva01+nva02):npar][penalty.factor[(nva01+nva02+1):(nva01+nva02+nva12)]==1]
+  penalty.12<-penalty.weights[(6+1+nva01+nva02):npar][penalty.factor[(nva01+nva02+1):(nva01+nva02+nva12)]==1]
   if(p12>0){
     b12<-c(b12,b[(nva01+nva02+nva12+p01+p02+7):(nva01+nva02+nva12+6+p01+p02+p12)][penalty.factor[(nva01+nva02+nva12+p01+p02+1):(nva01+nva02+nva12+p01+p02+p12)]==1])
+    penalty.12<-c(penalty.12,penalty.weights[(nva01+nva02+nva12+p01+p02+7):(nva01+nva02+nva12+6+p01+p02+p12)][penalty.factor[(nva01+nva02+nva12+p01+p02+1):(nva01+nva02+nva12+p01+p02+p12)]==1])
   }
   }else{
     if(p12>0){
       b12<-b[(nva01+nva02+nva12+p01+p02+7):(nva01+nva02+nva12+6+p01+p02+p12)][penalty.factor[(nva01+nva02+nva12+p01+p02+1):(nva01+nva02+nva12+p01+p02+p12)]==1]
-    }else{b12<-0}
+      penalty.12<-penalty.weights[(nva01+nva02+nva12+p01+p02+7):(nva01+nva02+nva12+6+p01+p02+p12)][penalty.factor[(nva01+nva02+nva12+p01+p02+1):(nva01+nva02+nva12+p01+p02+p12)]==1]
+    }else{
+      b12<-0
+      penalty.12<-1}
   }
   # lpen = l-pen
-  if(penalty%in%c("lasso","ridge","elasticnet")){
-    res<-res-lambda[,1]*alpha*sum(abs(b01))-lambda[,1]*(1-alpha)*sum(b01*b01)
-    res<-res-lambda[,2]*alpha*sum(abs(b02))-lambda[,2]*(1-alpha)*sum(b02*b02)
-    res<-res-lambda[,3]*alpha*sum(abs(b12))-lambda[,3]*(1-alpha)*sum(b12*b12)
+  if(penalty%in%c("lasso","adaptative.lasso","ridge","elasticnet")){
+    res<-res-lambda[,1]*alpha*sum(penalty.01*abs(b01))-lambda[,1]*(1-alpha)*sum(b01*b01)
+    res<-res-lambda[,2]*alpha*sum(penalty.02*abs(b02))-lambda[,2]*(1-alpha)*sum(b02*b02)
+    res<-res-lambda[,3]*alpha*sum(penalty.12*abs(b12))-lambda[,3]*(1-alpha)*sum(b12*b12)
   }
 
    if(penalty=="mcp"){
@@ -171,7 +186,7 @@ gaussDYNidmlLikelihoodweibpena<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,
                                     dimnva01,dimnva02,dimnva12,nva01,nva02,nva12,
                                     t0,t1,t2,t3,troncature,
                                     y01,y02,y12,p01,p02,p12,
-                                    dimp01,dimp02,dimp12,Ntime,time,lambda,alpha,penalty.factor,penalty){
+                                    dimp01,dimp02,dimp12,Ntime,time,lambda,alpha,penalty.factor,penalty,penalty.weights){
   
   res<-0
   b0<-b
@@ -215,45 +230,61 @@ gaussDYNidmlLikelihoodweibpena<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,
   b<-rep(NA,npar)
   b[fix==0]<-b0
   b[fix==1]<-bfix
+  
   if(nva01>0){
     b01<-b[(6+1):(6+nva01)][penalty.factor[1:nva01]==1]
+    penalty.01<-penalty.weights[(6+1):(6+nva01)][penalty.factor[1:nva01]==1]
     if(p01>0){
       b01<-c(b01,b[(nva01+nva02+nva12+7):(nva01+nva02+nva12+6+p01)][penalty.factor[(nva01+nva02+nva12+1):(nva01+nva02+nva12+p01)]==1])
+      penalty.01<-c( penalty.01,penalty.weights[(nva01+nva02+nva12+7):(nva01+nva02+nva12+6+p01)][penalty.factor[(nva01+nva02+nva12+1):(nva01+nva02+nva12+p01)]==1])
     }
   }else{
     if(p01>0){
       b01<-b[(nva01+nva02+nva12+7):(nva01+nva02+nva12+6+p01)][penalty.factor[(nva01+nva02+nva12+1):(nva01+nva02+nva12+p01)]==1]
+      penalty.01<-penalty.weights[(nva01+nva02+nva12+7):(nva01+nva02+nva12+6+p01)][penalty.factor[(nva01+nva02+nva12+1):(nva01+nva02+nva12+p01)]==1]
     }else{
       b01<-0
+      penalty.01<-1
     }
   }
   
   if(nva02>0){
     b02<-b[(6+1+nva01):(6+nva01+nva02)][penalty.factor[(nva01+1):(nva01+nva02)]==1]
+    penalty.02<-penalty.weights[(6+1+nva01):(6+nva01+nva02)][penalty.factor[(nva01+1):(nva01+nva02)]==1]
+    
     if(p02>0){
       b02<-c(b02,b[(nva01+nva02+nva12+p01+7):(nva01+nva02+nva12+6+p01+p02)][penalty.factor[(nva01+nva02+nva12+p01+1):(nva01+nva02+nva12+p01+p02)]==1])
+      penalty.02<-c(penalty.02,penalty.weights[(nva01+nva02+nva12+p01+7):(nva01+nva02+nva12+6+p01+p02)][penalty.factor[(nva01+nva02+nva12+p01+1):(nva01+nva02+nva12+p01+p02)]==1])
     }
   }else{
     if(p02>0){
       b02<-b[(nva01+nva02+nva12+p01+7):(nva01+nva02+nva12+6+p01+p02)][penalty.factor[(nva01+nva02+nva12+p01+1):(nva01+nva02+nva12+p01+p02)]==1]
-    }else{b02<-0}
+      penalty.02<-penalty.weights[(nva01+nva02+nva12+p01+7):(nva01+nva02+nva12+6+p01+p02)][penalty.factor[(nva01+nva02+nva12+p01+1):(nva01+nva02+nva12+p01+p02)]==1]
+    }else{
+      b02<-0
+      penalty.02<-1}
   }
   
   if(nva12>0){
     b12<-b[(6+1+nva01+nva02):npar][penalty.factor[(nva01+nva02+1):(nva01+nva02+nva12)]==1]
+    penalty.12<-penalty.weights[(6+1+nva01+nva02):npar][penalty.factor[(nva01+nva02+1):(nva01+nva02+nva12)]==1]
     if(p12>0){
       b12<-c(b12,b[(nva01+nva02+nva12+p01+p02+7):(nva01+nva02+nva12+6+p01+p02+p12)][penalty.factor[(nva01+nva02+nva12+p01+p02+1):(nva01+nva02+nva12+p01+p02+p12)]==1])
+      penalty.12<-c(penalty.12,penalty.weights[(nva01+nva02+nva12+p01+p02+7):(nva01+nva02+nva12+6+p01+p02+p12)][penalty.factor[(nva01+nva02+nva12+p01+p02+1):(nva01+nva02+nva12+p01+p02+p12)]==1])
     }
   }else{
     if(p12>0){
       b12<-b[(nva01+nva02+nva12+p01+p02+7):(nva01+nva02+nva12+6+p01+p02+p12)][penalty.factor[(nva01+nva02+nva12+p01+p02+1):(nva01+nva02+nva12+p01+p02+p12)]==1]
-    }else{b12<-0}
+      penalty.12<-penalty.weights[(nva01+nva02+nva12+p01+p02+7):(nva01+nva02+nva12+6+p01+p02+p12)][penalty.factor[(nva01+nva02+nva12+p01+p02+1):(nva01+nva02+nva12+p01+p02+p12)]==1]
+    }else{
+      b12<-0
+      penalty.12<-1}
   }
   # lpen = l-pen
-  if(penalty%in%c("lasso","ridge","elasticnet")){
-    res<-res-lambda[,1]*alpha*sum(abs(b01))-lambda[,1]*(1-alpha)*sum(b01*b01)
-    res<-res-lambda[,2]*alpha*sum(abs(b02))-lambda[,2]*(1-alpha)*sum(b02*b02)
-    res<-res-lambda[,3]*alpha*sum(abs(b12))-lambda[,3]*(1-alpha)*sum(b12*b12)
+  if(penalty%in%c("lasso","ridge","elasticnet","adaptative.lasso")){
+    res<-res-lambda[,1]*alpha*sum(penalty.01*abs(b01))-lambda[,1]*(1-alpha)*sum(b01*b01)
+    res<-res-lambda[,2]*alpha*sum(penalty.02*abs(b02))-lambda[,2]*(1-alpha)*sum(b02*b02)
+    res<-res-lambda[,3]*alpha*sum(penalty.12*abs(b12))-lambda[,3]*(1-alpha)*sum(b12*b12)
   }
   
   if(penalty=="mcp"){

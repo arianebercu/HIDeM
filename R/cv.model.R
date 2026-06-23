@@ -213,7 +213,8 @@ DYNcv.model<-function(beta,
                    v,
                    fu,
                    lambda,
-                   alpha){
+                   alpha,
+                   penalty.weights){
   
 
   # add to do base::which for CRAN check 
@@ -223,7 +224,7 @@ DYNcv.model<-function(beta,
   
   #browser()
   num<-sapply(c(1:dim(v)[1]),FUN=function(x){
-    fu[x]-sum(v[x,-x]*BETA[-x])+sum(BETA*v[x,])
+    penalty.weights[x]*(fu[x]-sum(v[x,-x]*BETA[-x])+sum(BETA*v[x,]))
   }) 
   
   
@@ -236,9 +237,11 @@ DYNcv.model<-function(beta,
   denum01<-NULL
   sign01<-NULL
   
+  
   num02<-NULL
   denum02<-NULL
   sign02<-NULL
+  
   
   num12<-NULL
   denum12<-NULL
@@ -249,13 +252,16 @@ DYNcv.model<-function(beta,
   denum01Y<-NULL
   sign01Y<-NULL
   
+  
   num02Y<-NULL
   denum02Y<-NULL
   sign02Y<-NULL
+
   
   num12Y<-NULL
   denum12Y<-NULL
   sign12Y<-NULL
+ 
   
   if(nva01>0){
     num01<-num[1:nva01]
@@ -267,6 +273,7 @@ DYNcv.model<-function(beta,
     num01Y<-num[(nva01+nva02+nva12+1):(nva01+nva02+nva12+nva01Y)]
     denum01Y<-denum[(nva01+nva02+nva12+1):(nva01+nva02+nva12+nva01Y)]
     sign01Y<-sign[(nva01+nva02+nva12+1):(nva01+nva02+nva12+nva01Y)]
+    
   }
   
   if(nva02>0){
@@ -280,6 +287,7 @@ DYNcv.model<-function(beta,
     num02Y<-num[(nva01+nva02+nva12+nva01Y+1):(nva01+nva02+nva12+nva01Y+nva02Y)]
     denum02Y<-denum[(nva01+nva02+nva12+nva01Y+1):(nva01+nva02+nva12+nva01Y+nva02Y)]
     sign02Y<-sign[(nva01+nva02+nva12+nva01Y+1):(nva01+nva02+nva12+nva01Y+nva02Y)]
+    
   }
   
   if(nva12>0){
@@ -292,13 +300,14 @@ DYNcv.model<-function(beta,
     num12Y<-num[(nva01+nva02+nva12+nva01Y+nva02Y+1):(nva01+nva02+nva12+nva01Y+nva02Y+nva12Y)]
     denum12Y<-denum[(nva01+nva02+nva12+nva01Y+nva02Y+1):(nva01+nva02+nva12+nva01Y+nva02Y+nva12Y)]
     sign12Y<-sign[(nva01+nva02+nva12+nva01Y+nva02Y+1):(nva01+nva02+nva12+nva01Y+nva02Y+nva12Y)]
+    
   }
   
   NEWBETA<-rep(NA,length(num))
   idbeta<-NULL
  
   # if penalty update beta all at once 
-  if(penalty%in%c("lasso","ridge","elasticnet")){
+  if(penalty%in%c("lasso","ridge","elasticnet","adaptive.lasso")){
     # 0 -> 1
     if(nva01>0){
       idbeta<-base::which(num01>(lambda[,1]*alpha))

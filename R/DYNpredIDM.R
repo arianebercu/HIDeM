@@ -40,6 +40,7 @@ DYNpredIDM<-function(objectY,
   if(length(s)!=1)stop("Length of s need to be 1")
   if(length(horizon)!=1)stop("Length of horizon need to be 1")
   if((s < 0) | (horizon < 0) | (s >= horizon))stop("s and horizon need to be numeric superior or equal to 0 with s < horizon")
+ 
   
   timeVar<-objectY$timeVar
   id<-objectY$id
@@ -121,6 +122,7 @@ DYNpredIDM<-function(objectY,
   dimp02<-ifelse(length(outcome02)>0,length(outcome02),1)
   if(p01==0 & p02==0){stop("No time dependent variable please refer to HIDeM::intensity for calculation of intensities with only time fixed covariates")}
   
+ 
   if(objectSurvival$method=="splines"){
     
    nknots01 <- length(unique(objectSurvival$knots01))
@@ -144,10 +146,16 @@ DYNpredIDM<-function(objectY,
     start<-nvat01+nvat02+nvat12+start
 
   }else{ 
+    
     index_size1<-c(1:4)
+    if(!is.null(objectSurvival$posfix)){
+    nstart<-sum(objectSurvival$posfix%in%c(1:4))
+    }else{
+      nstart<-7
+    }
     
     if(nvat01>0|nvat02>0){
-    index_size1<-c(index_size1,(7:(nvat01+nvat02+6)))
+    index_size1<-c(index_size1,(nstart:(nvat01+nvat02+nstart-1)))
     }
     start<-nvat01+nvat02+nvat12+6
     size_spline<-4 }
@@ -171,11 +179,18 @@ DYNpredIDM<-function(objectY,
     })
     istop<-do.call(c,istop)
     if(sum(istop==F)==length(istop)){stop("All the survival models did not converged")}
-    binit<-prepareData(object=objectSurvival$DYNidm,istop=istop,index=index)
+    binit<-prepareData(object=objectSurvival,istop=istop,index=index)
   }else{
     if(!objectSurvival$DYNidm[[1]]$istop%in%c(1,3)){stop("The survival model did not converged")}
     
-    binit<-objectSurvival$DYNidm[[1]]$b[index]
+    b_all<-rep(NA,length(objectSurvival$DYNidm[[1]]$b)+length(objectSurvival$posfix))
+    if(!is.null(objectSurvival$posfix)){
+    b_all[objectSurvival$posfix]<-objectSurvival$bfix
+    b_all[-objectSurvival$posfix]<-objectSurvival$DYNidm[[1]]$b
+    }else{
+      b_all<-objectSurvival$DYNidm[[1]]$b
+    }
+    binit<-b_all[index]
   }
 
   ############################ keep index of variables selected ################
@@ -208,17 +223,6 @@ DYNpredIDM<-function(objectY,
                          NsampleRE=control$NsampleRE,
                          NsampleHY=control$NsampleHY,
                          NsampleFE=control$NsampleFE)
-  }else{dataY<-predicted.newdata}
-  
-  
-  ########################## check prediction ##################################
-  NtimePoints<-255
-  for( m in unique(c(outcome01,outcome02))){
-    subdata<-dataY[dataY$Outcome==m,]
-    x<-table(subdata[,colnames(subdata)%in%id])
-    if(any(x!=NtimePoints)){stop("Prediction of marker ",m," could not be perform for each quadrature points")}
-    
-  }
   
   dataY$Outcome<-as.character(dataY$Outcome)
   # attention if NtimePoints equidistant with INLA then NtimePoints takes 
@@ -228,6 +232,27 @@ DYNpredIDM<-function(objectY,
   dataY$order<-as.numeric(ave(dataY[,colnames(dataY)%in%id], cumsum(c(TRUE, diff(dataY[,colnames(dataY)%in%id]) != 0)), FUN = seq_along))
   
   
+  
+  }else{
+    dataY<-predicted.newdata
+    dataY<-data.frame(dataY)
+  }
+  
+  ########################## check prediction ##################################
+  NtimePoints<-255
+  
+  for( m in unique(c(outcome01,outcome02))){
+    subdata<-dataY[dataY$Outcome==m,]
+    x<-table(subdata[,colnames(subdata)%in%id])
+    if(any(x!=NtimePoints)){stop("Prediction of marker ",m," could not be perform for each quadrature points")}
+    
+  }
+  
+
+  
+  
+ 
+ 
   if(length(outcome01)>=1){
     y01<-dataY[dataY$Outcome%in%outcome01,]
     # order  by individual and timeline 
@@ -310,17 +335,35 @@ DYNpredIDM<-function(objectY,
     })
   }
   
-  res<-list(CIF=out,s=s,horizon=horizon,predicted.newdata=ifelse(control$return.data==T,dataY,NULL) )
-  return(out)
+  if(control$return.data==T){
+    predicted.newdata<-dataY
+  }else{predicted.newdata<-NULL}
+  
+  res<-list(CIF=out,
+            s=s,
+            horizon=horizon,
+            predicted.newdata= predicted.newdata)
+  return(res)
  
 }
 
 
 prepareData<-function(object,istop,index){
   
+
+  posfix<-object$posfix
+  bfix<-object$bfix
+  object<-object$DYNidm
   Nrep<-sum(istop==T)
+  
   b<-lapply(object,FUN=function(x){
-    if(x$istop%in%c(1,3)){return(x$b[index])}else{return(rep(NA,length(x$b[index])))}})
+    if(x$istop%in%c(1,3)){
+      b_all<-rep(NA,length(x$b)+length(posfix))
+      if(!is.null(posfix)){
+      b_all[posfix]<-bfix
+      b_all[-posfix]<-x$b
+      }else{ b_all<-x$b}
+      return(b_all[index])}else{return(rep(NA,length(b_all[index])))}})
   b<-do.call(rbind,b)
   b<-na.omit(b)
   b<-colSums(b)/Nrep

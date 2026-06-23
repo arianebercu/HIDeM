@@ -930,13 +930,14 @@ simulateDYNIDM <- function(n=100,
       data_long$latent.lifetime[data_long$ID==i]<-100000000
       data_long$latent.waittime[data_long$ID==i]<-100000000
       
+      
     }
     # minIn > 0 then event at inclusion 
     
     T_01 <- try(
       uniroot(
         function(time) S_inv(time, f = S_01, val = U01[i], di = i),
-        interval = c(0, 300)
+        interval = c(0, administrative.censoring)
       )$root,
       silent = TRUE
     )
@@ -1013,6 +1014,7 @@ simulateDYNIDM <- function(n=100,
       
       ci<-data_long$visit[data_long$ID==i & data_long$visit<=T_02]
       ci<-ifelse(length(ci)==0,0,max(ci))
+      ci<-min(ci,administrative.censoring,T_02)
       check<-try(integrate(S_surv,lower=ci,upper=min(T_02,administrative.censoring),i=i,ci=ci)$value
                  ,
                  silent = TRUE

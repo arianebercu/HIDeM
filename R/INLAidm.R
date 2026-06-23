@@ -85,70 +85,70 @@ INLAidm<-function(timeVar,family,basRisk,assoc,
                                        dataLong = dataLongi_augmented, dataSurv=dataSurv, id = id, timeVar = timeVar,
                                        family = fam_i,
                                        basRisk = base_i, NbasRisk = 15, assoc = assoc_i,
-                                       control=list(int.strategy="eb"))
+                                       control=list(int.strategy="eb",lightmode=1))
       
-      
-      if(lightmode==T){
-        
-        # keep for prediction : args, selection, summary.hyperpar, SurvInfo, call,basRisk, survOutcome,
-        # REStruct, assoc, id, timeVar, famLongi, corLong, corRE, dataLong, dataSurv
-        # marginals.random necessary for sd of prediction
-        # 
-        # erase<-c(".args","marginals.random","dic","waic","mode","residuals",
-        #          "logfile","selection","internal.marginals.hyperpar",
-        #          "marginals.hyperpar","size.random","priors_used","marginals.fixed",
-        #          "internal.summary.hyperpar","joint.hyper","formLong",
-        #          "summary.hyperpar","formSurv","SurvInfo","cpu.intern","call",
-        #          "size.linear.predictor","version","mlik","gcpo","cpo","cpu.used",
-        #          "model.random","basRisk","survOutcome","REstruc","assoc","names.fixed",
-        #          "assoc_Names","famLongi","fixRE","timeVar","id","longOutcome","cureVar",
-        #          "dataSurv","dataLong","corRE","mat_k","range","control.link","corLong",
-        #          "NbasRisk","variant","run","nhyper","survFacChar","lonFacChar",
-        #          "marginals.fitted.values","marginals.linear.predictor",
-        #          "summary.fitted.values","po","all.hyper")
-        # for BLUP need : "summary.random","summary.fixed"
-        
-        erase<-c("marginals.random","dic","waic",
-                 "mode","residuals",
-                 "logfile","internal.marginals.hyperpar",
-                 "marginals.hyperpar","size.random","priors_used","marginals.fixed",
-                 "internal.summary.hyperpar","joint.hyper","formLong",
-                 "formSurv","cpu.intern",
-                 "size.linear.predictor","version","mlik","gcpo","cpo","cpu.used",
-                 "model.random","names.fixed",
-                 "assoc_Names","fixRE","longOutcome","cureVar",
-                 "mat_k","range","control.link",
-                 "NbasRisk","variant","run","nhyper","survFacChar","lonFacChar",
-                 "marginals.fitted.values","marginals.linear.predictor",
-                 "summary.fitted.values","po","all.hyper")
-        
-        nameINLA<-names(INLAmodel)
-        classINLA<-class(INLAmodel)
-        INLAmodel<-INLAmodel[-which(nameINLA%in%erase)]
-        
-        # erase part of .args
-        # ATTENTION NOT POSSIBLE to erase some controls of .args and family
-        erase<-c("control.predictor","offset","E","control.lp.scale",
-                 "lincomb","control.inla","control.compute","control.expert",
-                 "control.pardiso","control.mode","selection",
-                 "control.stiles","control.taucs","control.lincomb","control.numa",
-                 "control.update","inla.call","inla.mode","num.threads","quantiles",
-                 ".parent.frame","debug","safe","silent","keep","only.hyperparam","verbose")
-        nameINLA<-names(INLAmodel$.args)
-        INLAmodel$.args<-INLAmodel$.args[-which(nameINLA%in%erase)]
-        
-        # in .args$data keep object$.args$data[[paste0("baseline", m, ".hazard.values")]]
-        keep<-c("baseline1.hazard.values","baseline2.hazard.values")
-        nameINLA<-names(INLAmodel$.args$data)
-        INLAmodel$.args$data<-INLAmodel$.args$data[which(nameINLA%in%keep)]
-        
-        #erase part of selection 
-        nameINLA<-names(INLAmodel$selection)
-        INLAmodel$selection<-INLAmodel$selection[-which(nameINLA%in%".private")]
-        
-        class(INLAmodel)<-classINLA
-        
-      }
+ 
+      # if(lightmode==T){
+      #   
+      #   # keep for prediction : args, selection, summary.hyperpar, SurvInfo, call,basRisk, survOutcome,
+      #   # REStruct, assoc, id, timeVar, famLongi, corLong, corRE, dataLong, dataSurv
+      #   # marginals.random necessary for sd of prediction
+      #   # 
+      #   # erase<-c(".args","marginals.random","dic","waic","mode","residuals",
+      #   #          "logfile","selection","internal.marginals.hyperpar",
+      #   #          "marginals.hyperpar","size.random","priors_used","marginals.fixed",
+      #   #          "internal.summary.hyperpar","joint.hyper","formLong",
+      #   #          "summary.hyperpar","formSurv","SurvInfo","cpu.intern","call",
+      #   #          "size.linear.predictor","version","mlik","gcpo","cpo","cpu.used",
+      #   #          "model.random","basRisk","survOutcome","REstruc","assoc","names.fixed",
+      #   #          "assoc_Names","famLongi","fixRE","timeVar","id","longOutcome","cureVar",
+      #   #          "dataSurv","dataLong","corRE","mat_k","range","control.link","corLong",
+      #   #          "NbasRisk","variant","run","nhyper","survFacChar","lonFacChar",
+      #   #          "marginals.fitted.values","marginals.linear.predictor",
+      #   #          "summary.fitted.values","po","all.hyper")
+      #   # for BLUP need : "summary.random","summary.fixed"
+      #   
+      #   erase<-c("marginals.random","dic","waic",
+      #            "mode","residuals",
+      #            "logfile","internal.marginals.hyperpar",
+      #            "marginals.hyperpar","size.random","priors_used","marginals.fixed",
+      #            "internal.summary.hyperpar","joint.hyper","formLong",
+      #            "formSurv","cpu.intern",
+      #            "size.linear.predictor","version","mlik","gcpo","cpo","cpu.used",
+      #            "model.random","names.fixed",
+      #            "assoc_Names","fixRE","longOutcome","cureVar",
+      #            "mat_k","range","control.link",
+      #            "NbasRisk","variant","run","nhyper","survFacChar","lonFacChar",
+      #            "marginals.fitted.values","marginals.linear.predictor",
+      #            "summary.fitted.values","po","all.hyper")
+      #   
+      #   nameINLA<-names(INLAmodel)
+      #   classINLA<-class(INLAmodel)
+      #   INLAmodel<-INLAmodel[-which(nameINLA%in%erase)]
+      #   
+      #   # erase part of .args
+      #   # ATTENTION NOT POSSIBLE to erase some controls of .args and family
+      #   erase<-c("control.predictor","offset","E","control.lp.scale",
+      #            "lincomb","control.inla","control.compute","control.expert",
+      #            "control.pardiso","control.mode","selection",
+      #            "control.stiles","control.taucs","control.lincomb","control.numa",
+      #            "control.update","inla.call","inla.mode","num.threads","quantiles",
+      #            ".parent.frame","debug","safe","silent","keep","only.hyperparam","verbose")
+      #   nameINLA<-names(INLAmodel$.args)
+      #   INLAmodel$.args<-INLAmodel$.args[-which(nameINLA%in%erase)]
+      #   
+      #   # in .args$data keep object$.args$data[[paste0("baseline", m, ".hazard.values")]]
+      #   keep<-c("baseline1.hazard.values","baseline2.hazard.values")
+      #   nameINLA<-names(INLAmodel$.args$data)
+      #   INLAmodel$.args$data<-INLAmodel$.args$data[which(nameINLA%in%keep)]
+      #   
+      #   #erase part of selection 
+      #   nameINLA<-names(INLAmodel$selection)
+      #   INLAmodel$selection<-INLAmodel$selection[-which(nameINLA%in%".private")]
+      #   
+      #   class(INLAmodel)<-classINLA
+      #   
+      # }
       
 
       modelY[[indice]]<-INLAmodel

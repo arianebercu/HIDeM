@@ -50,7 +50,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                    ve01,ve02,ve12,dimnva01,dimnva02,dimnva12,nvat01,nvat02,nvat12,
                    t0,t1,t2,t3,troncature,
                    nlambda01,lambda01,nlambda02,lambda02,nlambda12,lambda12,
-                   alpha,penalty.factor,penalty,partialH,
+                   alpha,penalty.factor,penalty,penalty.weights,partialH,
                    modelY,dataLongi,dataSurv,
                    Nsample,BLUP,seed,timeVar,id,formLong,
                    outcome01,outcome02,
@@ -67,6 +67,18 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
   lambda<-expand.grid(lambda01,lambda02,lambda12)
   lambda<-unique(lambda)
   nlambda<-dim(lambda)[1]
+  
+  if(is.null(penalty.weights)){
+    penalty.weights<-matrix(1,ncol=nlambda,nrow=nvat01+nvat02+nvat12+p01+p02+p12)
+  }else{
+    if((class(penalty.weights)[1]!="matrix")|(class(penalty.weights)[2]!="array")){stop(paste0("penalty.weights needs to be matrix of size",nvat01+nvat02+nvat12+p01+p02+p12," x ",nlambda,"."))}
+
+    
+    if((dim(penalty.weights)[1]!= (nvat01+nvat02+nvat12+p01+p02+p12))|(dim(penalty.weights)[2]!=nlambda)){stop(paste0("penalty.weights needs to be matrix of size",nvat01+nvat02+nvat12+p01+p02+p12," x ",nlambda,"."))}
+    
+  }
+  
+  
   
 
   # need to check that same variable in each transition :
@@ -238,6 +250,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                     alpha=alpha,
                                     penalty.factor=penalty.factor,
                                     penalty=penalty,
+                                    penalty.weights=penalty.weights,
                                     partialH=partialH,
                                     Nsample=Nsample,
                                     NtimePoints=NtimePoints,
@@ -298,6 +311,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                alpha=alpha,
                                                penalty.factor=penalty.factor,
                                                penalty=penalty,
+                                               penalty.weights=penalty.weights,
                                                partialH=partialH,
                                                Nsample=Nsample,
                                                NtimePoints=NtimePoints,
@@ -364,6 +378,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                                       alpha=alpha,
                                                       penalty.factor=penalty.factor,
                                                       penalty=penalty,
+                                                      penalty.weights=penalty.weights,
                                                       partialH=partialH,
                                                       Nsample=Nsample,
                                                       NtimePoints=NtimePoints,
@@ -436,6 +451,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
                                              alpha=alpha,
                                              penalty.factor=penalty.factor,
                                              penalty=penalty,
+                                             penalty.weights=penalty.weights,
                                              partialH=partialH,
                                              Nsample=Nsample,
                                              NtimePoints=NtimePoints,

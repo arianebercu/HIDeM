@@ -93,9 +93,6 @@ DYNINLAidmpredY<-function(object,newdata,s,
     assoc_i<<-assoc[[indice]]
     base_i<<-basRisk[indice]
     fam_i<<-family[indice]
-    
-    
-    
     print(paste0("prediction of marker ",formLong[[indice]][2]))
   
     P_RE <- predict(INLAmodel,

@@ -51,7 +51,7 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,size_spline,
                    t0,t1,t2,t3,troncature,knots01,knots02,knots12,
                    nknots01,nknots02,nknots12,
                    nlambda01,lambda01,nlambda02,lambda02,nlambda12,lambda12,
-                   alpha,penalty.factor,penalty,partialH,
+                   alpha,penalty.factor,penalty,penalty.weights,partialH,
                    modelY,dataLongi,dataSurv,
                    Nsample,BLUP,seed,timeVar,id,formLong,
                    outcome01,outcome02,
@@ -70,6 +70,17 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,size_spline,
   lambda<-expand.grid(lambda01,lambda02,lambda12)
   lambda<-unique(lambda)
   nlambda<-dim(lambda)[1]
+  
+  
+  if(is.null(penalty.weights)){
+    penalty.weights<-matrix(1,ncol=nlambda,nrow=nvat01+nvat02+nvat12+p01+p02+p12)
+  }else{
+    if((class(penalty.weights)[1]!="matrix")|(class(penalty.weights)[2]!="array")){stop(paste0("penalty.weights needs to be matrix of size",nvat01+nvat02+nvat12+p01+p02+p12," x ",nlambda,"."))}
+    
+    
+    if((dim(penalty.weights)[1]!= (nvat01+nvat02+nvat12+p01+p02+p12))|(dim(penalty.weights)[2]!=nlambda)){stop(paste0("penalty.weights needs to be matrix of size",nvat01+nvat02+nvat12+p01+p02+p12," x ",nlambda,"."))}
+    
+  }
 
   # need to check that same variable in each transition :
   
@@ -237,6 +248,7 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                              alpha=alpha,
                                              penalty.factor=penalty.factor,
                                              penalty=penalty,
+                                             penalty.weights=penalty.weights,
                                              partialH=partialH,
                                              Nsample=Nsample,
                                              NtimePoints=NtimePoints,
@@ -302,6 +314,7 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                                lambda=lambda,
                                                alpha=alpha,
                                                penalty.factor=penalty.factor,
+                                               penalty.weights=penalty.weights,
                                                penalty=penalty,
                                                partialH=partialH,
                                                Nsample=Nsample,
@@ -378,6 +391,7 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                                    alpha=alpha,
                                                    penalty.factor=penalty.factor,
                                                    penalty=penalty,
+                                                   penalty.weights=penalty.weights,
                                                    partialH=partialH,
                                                    Nsample=Nsample,
                                                    NtimePoints=NtimePoints,
@@ -452,6 +466,7 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                                           alpha=alpha,
                                                           penalty.factor=penalty.factor,
                                                           penalty=penalty,
+                                                          penalty.weights=penalty.weights,
                                                           partialH=partialH,
                                                           Nsample=Nsample,
                                                           NtimePoints=NtimePoints,

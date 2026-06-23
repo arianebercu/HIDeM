@@ -207,6 +207,7 @@ DYNidm <- function(formula01,
                 nlambda12=50,
                 penalty=NULL,
                 penalty.factor=NULL,
+                penalty.weights=NULL,
                 alpha=ifelse(penalty=="scad",3.7,
                              ifelse(penalty=="mcp",3,
                                     ifelse(penalty%in%c("elasticnet"),0.5,1))),
@@ -893,8 +894,8 @@ DYNidm <- function(formula01,
     fix0<-rep(0,size_V)
     if(is.null(penalty)){
       penalty<-"none"}
-    if(!penalty%in%c("none","lasso","ridge","elasticnet","mcp","scad")){
-      stop(paste0("Parameter penalty must be either : lasso, ridge, elasticnet, mcp or scad"))}
+    if(!penalty%in%c("none","lasso","adaptive.lasso","ridge","elasticnet","mcp","scad")){
+      stop(paste0("Parameter penalty must be either : lasso, adaptive.lasso, ridge, elasticnet, mcp or scad"))}
     
     
     if(!is.null(posfix)){
@@ -1041,6 +1042,10 @@ DYNidm <- function(formula01,
       NtimePoints<-256
     }
  
+    if(sum(fix0)>0){
+      bstartfix<-b[fix0==1]
+    }else{bstartfix<-NULL}
+    
     if(penalty=="none"){
  
 ######################### with M-spline baseline risk  #########################
@@ -1306,11 +1311,11 @@ DYNidm <- function(formula01,
               stop(paste0("Penalty.factor need to be a vector of 0 and 1 of length : ",nvat01+nvat02+nvat12+p01+p02+p12))
             }
           }
-
-
+      
+     
            
 ############################ set value of penalty parameters ###################
-          if(penalty=="lasso"){alpha<-1}
+          if(penalty%in%c("lasso","adaptive.lasso")){alpha<-1}
           if(penalty=="ridge"){alpha<-0}
           if(length(alpha)>1)stop("Can only specify one value for alpha")
           if(penalty=="mcp"){
@@ -1489,6 +1494,7 @@ DYNidm <- function(formula01,
                              alpha=alpha,
                              penalty.factor=penalty.factor,
                              penalty=penalty,
+                             penalty.weights=penalty.weights,
                              partialH=partialH,
                              modelY=modelY,
                              dataLongi=dataLongi,
@@ -1669,6 +1675,7 @@ DYNidm <- function(formula01,
                                            alpha=alpha,
                                            penalty.factor=penalty.factor,
                                            penalty=penalty,
+                                         penalty.weights=penalty.weights,
                                            partialH=partialH,
                                            modelY=modelY,
                                            dataLongi=dataLongi,
@@ -1707,6 +1714,8 @@ DYNidm <- function(formula01,
 
     }
     
+    
+    
     res<-list(DYNidm=out,
               call=call,
               Longitransition=Longitransition,
@@ -1726,7 +1735,9 @@ DYNidm <- function(formula01,
               timedepXnames12=Ynames12,
               linktimedepXnames01=linkYnames01,
               linktimedepXnames02=linkYnames02,
-              linktimedepXnames12=linkYnames12)
+              linktimedepXnames12=linkYnames12,
+              posfix=posfix,
+              bfix=bstartfix)
   if(penalty=="none"){
     class(res)<-"DYNidm"
   }else{
