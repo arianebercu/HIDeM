@@ -224,7 +224,7 @@ DYNcv.model<-function(beta,
   
   #browser()
   num<-sapply(c(1:dim(v)[1]),FUN=function(x){
-    penalty.weights[x]*(fu[x]-sum(v[x,-x]*BETA[-x])+sum(BETA*v[x,]))
+    (fu[x]-sum(v[x,-x]*BETA[-x])+sum(BETA*v[x,]))/penalty.weights[x]
   }) 
   
   
