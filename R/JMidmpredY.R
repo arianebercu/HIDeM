@@ -55,7 +55,7 @@ JMidmpredY<-function(timeVar,
   }
 
   
-  #browser()
+
   for(indice in 1:length(formLong)){
 
 
@@ -559,7 +559,7 @@ JMidmpredY<-function(timeVar,
           PredYmean<-X%*%as.matrix(JMmodel$statistics$Mean$betas1) + Random_mean
           PredYmean0<-X0%*%as.matrix(JMmodel$statistics$Mean$betas1) + Random_mean0
          
-          
+          browser()
           if(scale.X==T){
             PredYmean<-(PredYmean-mean(PredYmean0))/sd(PredYmean0)
           }

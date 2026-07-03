@@ -272,13 +272,13 @@ DYNpredIDM<-function(objectY,
     y02<-rep(0,N*NtimePoints)
   }
   
- 
+
   if(objectSurvival$method=="splines"){
     res<-rep(0,N)
     out<- tryCatch({  .Fortran("citimedep",
                              ## input
                              as.double(binit),
-                             as.integer(sizeV),
+                             as.integer(size_V),
                              as.double(knots01),
                              as.double(knots02),
                              as.integer(N),

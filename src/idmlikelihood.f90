@@ -6302,7 +6302,6 @@ subroutine qgaussPL15weibtimedep(a,b,the01,the02,the12,res,&
 !==== for cumulative incidence ===============================================================
 !=============================================================================================  
 
-						 
 subroutine ciqgaussPL15weibtimedep(a,b,the01,the02,res,&
        v01,v02,y01,y02)
          
@@ -42555,7 +42554,7 @@ end subroutine firstderivaidmlikelihoodsplinetimedep
 	    use commun
         implicit none
          
-    double precision::res2,tronc, &
+    double precision::res2,tronc01ci,tronc02ci, &
         vet01,vet02
 	
         integer::np0,i,j,l,w,k,npar0,nva01,nva02,no0, &
@@ -42651,7 +42650,8 @@ end subroutine firstderivaidmlikelihoodsplinetimedep
          
                do i=1,no0
 			   
-			
+			!	write(6,*) 'subject',i
+		    !	call flush(6)
          
                 vet01 = 0.d0
                 vet02 = 0.d0
@@ -42710,11 +42710,13 @@ end subroutine firstderivaidmlikelihoodsplinetimedep
                 
                 
                         if(t0(i).eq.0.d0)then
-                                tronc = 1
+                                tronc01ci = 1
+								tronc02ci = 1
                         else 
                                 call fonctdep0(t0(i),the01,gl01,y01t(241:255))
                                 call fonctdep0(t0(i),the02,gl02,y02t(241:255))
-                                tronc=dexp((gl01*vet01)+(gl02*vet02))
+                                tronc01ci=dexp(-gl01*vet01)
+								tronc02ci=dexp(-gl02*vet02)
                         end if
               
 
@@ -42722,7 +42724,22 @@ end subroutine firstderivaidmlikelihoodsplinetimedep
                          res2,vet01,vet02,&
 						 y01t(1:240),y02t(1:240))
 						 
-                        res(i)=res2*tronc
+						! write(6,*) 'tronc01ci',tronc01ci
+						!  write(6,*) 'tronc02ci',tronc02ci
+		     	        ! call flush(6)
+						! write(6,*) 'res2',res2
+		     	        ! call flush(6)
+						 
+						 if(res2.eq.0.d0) then 
+							res(i)=0
+						else 
+						 
+                       res(i)=res2/(tronc01ci*tronc02ci)
+					   
+					   end if 
+						
+					!	write(6,*) 'res',res(i)
+		     	     !    call flush(6)
 						
 					
         end do   

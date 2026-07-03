@@ -76,7 +76,7 @@ DYNidm.penalty.weib.nonproc<-function(beta.start,
                                         eval.validity<-rep(NA,maxiter+1)
                                         
                                         
-                                        
+                                        #browser()
                                         
                                         while(converged==F & ite<=maxiter){
                                           
@@ -392,7 +392,7 @@ DYNidm.penalty.weib.nonproc<-function(beta.start,
                                             
                                             
                                             betanew<-beta+delta*sears$vw
-                                            betanew<-ifelse(abs(betanew)<=0.0001,0,betanew)
+                                            #betanew<-ifelse(abs(betanew)<=0.0001,0,betanew)
                                             b<-c(s,betanew)
                                             
                                             
@@ -616,7 +616,7 @@ DYNidm.penalty.weib.nonproc<-function(beta.start,
                                           s<-snew
                                           beta<-betanew
                                           fn.value<-fn.valuenew
-                                          
+                                         # browser()
                                           # eval.cv beta valid only if validity.param=T
                                           if(((eval.cv.beta[ite] + eval.cv.spline[ite])<epsa) & eval.cv.loglik[ite]<epsb & validity==T){
                                             converged<-T}
@@ -1038,7 +1038,7 @@ DYNidm.penalty.weib.nonproc<-function(beta.start,
                                                            penalty.weights=penalty.weights[,id.lambda])
                                             
                                             betanew<-beta+delta*sears$vw
-                                            betanew<-ifelse(abs(betanew)<=0.0001,0,betanew)
+                                           # betanew<-ifelse(abs(betanew)<=0.0001,0,betanew)
                                             b<-c(s,betanew)
                                             
                                             
@@ -1742,7 +1742,7 @@ DYNidm.penalty.weib.nonproc<-function(beta.start,
                                             
                                             
                                             betanew<-beta+delta*sears$vw
-                                            betanew<-ifelse(abs(betanew)<=0.0001,0,betanew) 
+                                           # betanew<-ifelse(abs(betanew)<=0.0001,0,betanew) 
                                             b<-c(s,betanew)
                                             
                                             
@@ -2409,7 +2409,7 @@ DYNidm.penalty.weib.nonproc<-function(beta.start,
                                                            penalty.weights=penalty.weights[,id.lambda])
                                             
                                             betanew<-beta+delta*sears$vw
-                                            betanew<-ifelse(abs(betanew)<=0.0001,0,betanew)
+                                         #   betanew<-ifelse(abs(betanew)<=0.0001,0,betanew)
                                             b<-c(s,betanew)
                                             
                                             

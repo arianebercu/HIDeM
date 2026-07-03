@@ -55,10 +55,6 @@ DYNINLAidmpredY<-function(object,newdata,s,
   dataLongi_augmented<-merge(dataLongi_augmented,newdata,by=id,all.x=T,all.y=T)}
   
   rownames(dataLongi_augmented)<-NULL
-  
-  dataLongi_augmented<-dataLongi_augmented[order(dataLongi_augmented[,colnames(dataLongi_augmented)%in%id],
-                                                               dataLongi_augmented[,colnames(dataLongi_augmented)%in%timeVar]),]
-  rownames(dataLongi_augmented)<-NULL
   dataLongi_augmented<-dataLongi_augmented[order(dataLongi_augmented[,colnames(dataLongi_augmented)%in%id],
                                                  dataLongi_augmented[,colnames(dataLongi_augmented)%in%timeVar]),]
   
@@ -101,8 +97,8 @@ DYNINLAidmpredY<-function(object,newdata,s,
                     NsampleRE=NsampleRE,
                     NsampleHY = NsampleHY, # use hyperparameters mode
                     NsampleFE = NsampleFE, # use baseline hazard mode (if survival model included)
-                    return.RE = TRUE,
-                    NidLoop = length(unique(newdata[,colnames(newdata)%in%id])))
+                    #NidLoop = length(unique(newdata[,colnames(newdata)%in%id])),
+                    return.RE = TRUE)
     
     INLAmodel$P_RE<-do.call(rbind,P_RE$RE)
     
@@ -125,6 +121,7 @@ DYNINLAidmpredY<-function(object,newdata,s,
     
     if("value"%in% choiceY){
       Y<-as.matrix(make_XINLA_PRED(formula=formLong[[indice]], timeVar=timeVar, data=dataLongi_augmented,ct=ct,id=id,idtag=idtag,SMP=INLAmodel))
+     
       Y<-Y[indices,]
       Outcome<-all.vars(terms(formLong[[indice]]))[1]
       PredYx<-cbind(timePointsdata,Outcome=Outcome,Y)
@@ -227,7 +224,7 @@ make_XINLA_PRED <- function(formula, timeVar, data, use_splines = FALSE, ct, id,
   B <- matrix(0, nrow = n, ncol = n_fixed)
   colnames(X) <- paste0(terms_fixed, "_L1")
   
-  #browser()
+
   for (k in seq_along(terms_fixed)) {
     lab <- terms_fixed[k]
     tag <- paste0(gsub("[()]", "", lab), "_L1")
@@ -298,7 +295,7 @@ make_XINLA_PRED <- function(formula, timeVar, data, use_splines = FALSE, ct, id,
     names(modes_vec) <- id_levels
     B_RE[, k] <- unname(modes_vec[id_index])
   }
-  
+
   # --- combine and return ---
   Y <- rowSums(X * B) + rowSums(X_RE * B_RE)
   return(Y)

@@ -159,7 +159,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
    
       
     }
-    
+   
     for( m in unique(c(outcome01,outcome02,outcome12))){
       subdata<-dataY[dataY$Outcome==m,]
       x<-table(subdata[,colnames(subdata)%in%id])

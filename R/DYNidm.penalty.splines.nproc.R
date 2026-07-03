@@ -420,7 +420,7 @@ if(partialH==F){
                                         
                                         
                                         betanew<-beta+delta*sears$vw
-                                        betanew<-ifelse(abs(betanew)<=0.0001,0,betanew)
+                                       # betanew<-ifelse(abs(betanew)<=0.0001,0,betanew)
                                         b<-c(s,betanew)
                                         
                                         
@@ -1112,7 +1112,7 @@ if(partialH==F){
                                                        penalty=penalty, penalty.weights=penalty.weights[,id.lambda])
                                         
                                         betanew<-beta+delta*sears$vw
-                                        betanew<-ifelse(abs(betanew)<=0.0001,0,betanew)
+                                       # betanew<-ifelse(abs(betanew)<=0.0001,0,betanew)
                                         b<-c(s,betanew)
                                         
                                         
@@ -1818,7 +1818,7 @@ parallel::stopCluster(clustpar)
                                             
                                             
                                             betanew<-beta+delta*sears$vw
-                                            betanew<-ifelse(abs(betanew)<=0.0001,0,betanew)
+                                          #  betanew<-ifelse(abs(betanew)<=0.0001,0,betanew)
                                             b<-c(s,betanew)
                                             
                                             
@@ -2526,7 +2526,7 @@ parallel::stopCluster(clustpar)
                                                            penalty=penalty, penalty.weights=penalty.weights[,id.lambda])
                                             
                                             betanew<-beta+delta*sears$vw
-                                            betanew<-ifelse(abs(betanew)<=0.0001,0,betanew)
+                                          #  betanew<-ifelse(abs(betanew)<=0.0001,0,betanew)
                                             b<-c(s,betanew)
                                             
                                             

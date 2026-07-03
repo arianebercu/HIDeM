@@ -34,6 +34,7 @@ JMidm<-function(timeVar,
     # global variables otherwise error in predict
     print(paste0("For marker: ",names(functional_forms)[[indice]]))
 
+
     JMmodel<-JMbayes2::jm(formSurv, list(formLong[[indice]]), time_var = timeVar, 
                              functional_forms = functional_forms[[indice]],
                              n_iter =n_iter, n_burnin = n_burnin, n_thin =n_thin,

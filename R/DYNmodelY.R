@@ -549,13 +549,13 @@ DYNmodelY <- function(formula01,
       
       
       
-
+      formSurv<-CoxFit_CR
       
       modelY<-JMidm(timeVar = timeVar,
                    functional_forms = CR_forms, 
                    truncated=truncated,
                    formLong=formLong,
-                   formSurv=CoxFit_CR ,
+                   formSurv=formSurv ,
                    dataSurv=dataJM,
                    dataLongi=dataLongi,
                    id=id,
@@ -574,6 +574,8 @@ DYNmodelY <- function(formula01,
                    lightmode=lightmode)
       
     }
+  
+  browser()
   
   res<-list(modelY=modelY,
             formSurv=formSurv,

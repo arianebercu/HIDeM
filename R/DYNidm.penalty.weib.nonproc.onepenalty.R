@@ -516,7 +516,7 @@ DYNidm.penalty.weib.nonproc.onepenalty<-function(beta.start,
                                             betanew<-beta+delta*sears$vw
                                             # add close to 0 check 
                                             #browser()
-                                            betanew<-ifelse(abs(betanew)<=0.0001,0,betanew)
+                                           # betanew<-ifelse(abs(betanew)<=0.0001,0,betanew)
                                             b<-c(s,betanew)
                                             
                                             
@@ -1202,7 +1202,7 @@ DYNidm.penalty.weib.nonproc.onepenalty<-function(beta.start,
                                                 
                                                 
                                                 betanew<-beta+delta*sears$vw
-                                                betanew<-ifelse(abs(betanew)<=0.0001,0,betanew)
+                                               # betanew<-ifelse(abs(betanew)<=0.0001,0,betanew)
                                                 b<-c(s,betanew)
                                                 
                                                 
