@@ -392,7 +392,7 @@ DYNidm.penalty.weib.nonproc<-function(beta.start,
                                             
                                             
                                             betanew<-beta+delta*sears$vw
-                                            #betanew<-ifelse(abs(betanew)<=0.0001,0,betanew)
+                                            betanew<-ifelse(abs(betanew)<=epsa,0,betanew)
                                             b<-c(s,betanew)
                                             
                                             
@@ -1038,7 +1038,7 @@ DYNidm.penalty.weib.nonproc<-function(beta.start,
                                                            penalty.weights=penalty.weights[,id.lambda])
                                             
                                             betanew<-beta+delta*sears$vw
-                                           # betanew<-ifelse(abs(betanew)<=0.0001,0,betanew)
+                                            betanew<-ifelse(abs(betanew)<=epsa,0,betanew)
                                             b<-c(s,betanew)
                                             
                                             
@@ -1742,7 +1742,7 @@ DYNidm.penalty.weib.nonproc<-function(beta.start,
                                             
                                             
                                             betanew<-beta+delta*sears$vw
-                                           # betanew<-ifelse(abs(betanew)<=0.0001,0,betanew) 
+                                            betanew<-ifelse(abs(betanew)<=epsa,0,betanew) 
                                             b<-c(s,betanew)
                                             
                                             
@@ -2409,7 +2409,7 @@ DYNidm.penalty.weib.nonproc<-function(beta.start,
                                                            penalty.weights=penalty.weights[,id.lambda])
                                             
                                             betanew<-beta+delta*sears$vw
-                                         #   betanew<-ifelse(abs(betanew)<=0.0001,0,betanew)
+                                            betanew<-ifelse(abs(betanew)<=epsa,0,betanew)
                                             b<-c(s,betanew)
                                             
                                             

@@ -523,7 +523,7 @@ for(idsample in 1:Nsample){
                                           
                                           
                                           betanew<-beta+delta*sears$vw
-                                         # betanew<-ifelse(abs(betanew)<=0.0001,0,betanew)
+                                          betanew<-ifelse(abs(betanew)<=epsa,0,betanew)
                                           b<-c(s,betanew)
                                           
                                           
@@ -1203,7 +1203,7 @@ for(idsample in 1:Nsample){
                                               
                                               
                                               betanew<-beta+delta*sears$vw
-                                             # betanew<-ifelse(abs(betanew)<=0.0001,0,betanew)
+                                              betanew<-ifelse(abs(betanew)<=epsa,0,betanew)
                                               b<-c(s,betanew)
                                               
                                               

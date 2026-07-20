@@ -575,7 +575,6 @@ DYNmodelY <- function(formula01,
       
     }
   
-  browser()
   
   res<-list(modelY=modelY,
             formSurv=formSurv,
