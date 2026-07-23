@@ -1306,6 +1306,7 @@ DYNidm <- function(formula01,
           # permits to not penalise on some parameters
           if(is.null(penalty.factor)){
             penalty.factor<-rep(1, nvat01+nvat02+nvat12+p01+p02+p12)
+            
           }else{
             if(any(min(penalty.factor)<0) | any(max(penalty.factor)>1) | any(round(penalty.factor)!=penalty.factor) | length(penalty.factor)!=(nvat01+nvat02+nvat12+p01+p02+p12)){
               stop(paste0("Penalty.factor need to be a vector of 0 and 1 of length : ",nvat01+nvat02+nvat12+p01+p02+p12))
@@ -1313,7 +1314,15 @@ DYNidm <- function(formula01,
           }
       
      
-           
+      # permits to not penalise on some parameters
+      # if(is.null(penalty.weights)){
+      #   penalty.weights<-rep(1, nvat01+nvat02+nvat12+p01+p02+p12)
+      #   
+      # }else{
+      #   if(class(penalty.weights)!="numeric"){
+      #     stop(paste0("Penalty.weights need to be a numeric of length : ",nvat01+nvat02+nvat12+p01+p02+p12))
+      #   }
+      # }
 ############################ set value of penalty parameters ###################
           if(penalty%in%c("lasso","adaptive.lasso")){alpha<-1}
           if(penalty=="ridge"){alpha<-0}

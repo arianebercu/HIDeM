@@ -725,15 +725,15 @@ idm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                  if(penalty=="mcp"){
                                    
                                    p01<-rep(alpha[id.lambda,1]*lambda[id.lambda,1]*lambda[id.lambda,1]/2,length(b01))
-                                   idbeta<-which(b01<=alpha[id.lambda,1]*lambda[id.lambda,1])
+                                   idbeta<-which(abs(b01)<=alpha[id.lambda,1]*lambda[id.lambda,1])
                                    p01[idbeta]<-lambda[id.lambda,1]*abs(b01[idbeta])-((b01[idbeta]*b01[idbeta])/2*alpha[id.lambda,1])
                                    
                                    p02<-rep(alpha[id.lambda,2]*lambda[id.lambda,2]*lambda[id.lambda,2]/2,length(b02))
-                                   idbeta<-which(b02<=alpha[id.lambda,2]*lambda[id.lambda,2])
+                                   idbeta<-which(abs(b02)<=alpha[id.lambda,2]*lambda[id.lambda,2])
                                    p02[idbeta]<-lambda[id.lambda,2]*abs(b02[idbeta])-((b02[idbeta]*b02[idbeta])/2*alpha[id.lambda,2])
                                    
                                    p12<-rep(alpha[id.lambda,3]*lambda[id.lambda,3]*lambda[id.lambda,3]/2,length(b12))
-                                   idbeta<-which(b12<=alpha[id.lambda,3]*lambda[id.lambda,3])
+                                   idbeta<-which(abs(b12)<=alpha[id.lambda,3]*lambda[id.lambda,3])
                                    p12[idbeta]<-lambda[id.lambda,3]*abs(b12[idbeta])-((b12[idbeta]*b12[idbeta])/2*alpha[id.lambda,3])
                                    
                                   
@@ -744,21 +744,21 @@ idm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                  if(penalty=="scad"){
                                    
                                    p01<-rep((lambda[id.lambda,1]^2)*(alpha[id.lambda,1]+1)/2,length(b01))
-                                   idbeta<-which(b01<=lambda[id.lambda,1])
+                                   idbeta<-which(abs(b01)<=lambda[id.lambda,1])
                                    p01[idbeta]<-lambda[id.lambda,1]*abs(b01[idbeta])
-                                   idbeta<-which(abs(b01)<lambda[id.lambda,1]*alpha[id.lambda,1])
+                                   idbeta<-which(abs(b01)<lambda[id.lambda,1]*alpha[id.lambda,1] & abs(b01)>lambda[id.lambda,1])
                                    p01[idbeta]<-(2*alpha[id.lambda,1]*lambda[id.lambda,1]*abs(b01[idbeta])-b01[idbeta]^2-lambda[id.lambda,1]^2)/(2*(alpha[id.lambda,1]-1))
                                    
                                    p02<-rep((lambda[id.lambda,2]^2)*(alpha[id.lambda,2]+1)/2,length(b02))
-                                   idbeta<-which(b02<=lambda[id.lambda,2])
+                                   idbeta<-which(abs(b02)<=lambda[id.lambda,2])
                                    p02[idbeta]<-lambda[id.lambda,2]*abs(b02[idbeta])
-                                   idbeta<-which(abs(b02)<lambda[id.lambda,2]*alpha[id.lambda,2])
+                                   idbeta<-which(abs(b02)<lambda[id.lambda,2]*alpha[id.lambda,2] & abs(b02)>lambda[id.lambda,2])
                                    p02[idbeta]<-(2*alpha[id.lambda,2]*lambda[id.lambda,2]*abs(b02[idbeta])-b02[idbeta]^2-lambda[id.lambda,2]^2)/(2*(alpha[id.lambda,2]-1))
                                    
                                    p12<-rep((lambda[id.lambda,3]^2)*(alpha[id.lambda,3]+1)/2,length(b12))
-                                   idbeta<-which(b12<=lambda[id.lambda,3])
+                                   idbeta<-which(abs(b12)<=lambda[id.lambda,3])
                                    p12[idbeta]<-lambda[id.lambda,3]*abs(b12[idbeta])
-                                   idbeta<-which(abs(b12)<lambda[id.lambda,3]*alpha[id.lambda,3])
+                                   idbeta<-which(abs(b12)<lambda[id.lambda,3]*alpha[id.lambda,3] & abs(b12)>lambda[id.lambda,3])
                                    p12[idbeta]<-(2*alpha[id.lambda,3]*lambda[id.lambda,3]*abs(b12[idbeta])-b12[idbeta]^2-lambda[id.lambda,3]^2)/(2*(alpha[id.lambda,3]-1))
                                    
                                    
@@ -1384,15 +1384,15 @@ idm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                    if(penalty=="mcp"){
                                      
                                      p01<-rep(alpha[id.lambda,1]*lambda[id.lambda,1]*lambda[id.lambda,1]/2,length(b01))
-                                     idbeta<-which(b01<=alpha[id.lambda,1]*lambda[id.lambda,1])
+                                     idbeta<-which(abs(b01)<=alpha[id.lambda,1]*lambda[id.lambda,1])
                                      p01[idbeta]<-lambda[id.lambda,1]*abs(b01[idbeta])-((b01[idbeta]*b01[idbeta])/2*alpha[id.lambda,1])
                                      
                                      p02<-rep(alpha[id.lambda,2]*lambda[id.lambda,2]*lambda[id.lambda,2]/2,length(b02))
-                                     idbeta<-which(b02<=alpha[id.lambda,2]*lambda[id.lambda,2])
+                                     idbeta<-which(abs(b02)<=alpha[id.lambda,2]*lambda[id.lambda,2])
                                      p02[idbeta]<-lambda[id.lambda,2]*abs(b02[idbeta])-((b02[idbeta]*b02[idbeta])/2*alpha[id.lambda,2])
                                      
                                      p12<-rep(alpha[id.lambda,3]*lambda[id.lambda,3]*lambda[id.lambda,3]/2,length(b12))
-                                     idbeta<-which(b12<=alpha[id.lambda,3]*lambda[id.lambda,3])
+                                     idbeta<-which(abs(b12)<=alpha[id.lambda,3]*lambda[id.lambda,3])
                                      p12[idbeta]<-lambda[id.lambda,3]*abs(b12[idbeta])-((b12[idbeta]*b12[idbeta])/2*alpha[id.lambda,3])
                                      
                                      
@@ -1403,21 +1403,21 @@ idm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                    if(penalty=="scad"){
                                      
                                      p01<-rep((lambda[id.lambda,1]^2)*(alpha[id.lambda,1]+1)/2,length(b01))
-                                     idbeta<-which(b01<=lambda[id.lambda,1])
+                                     idbeta<-which(abs(b01)<=lambda[id.lambda,1])
                                      p01[idbeta]<-lambda[id.lambda,1]*abs(b01[idbeta])
-                                     idbeta<-which(abs(b01)<lambda[id.lambda,1]*alpha[id.lambda,1])
+                                     idbeta<-which(abs(b01)<lambda[id.lambda,1]*alpha[id.lambda,1] & abs(b01)>lambda[id.lambda,1])
                                      p01[idbeta]<-(2*alpha[id.lambda,1]*lambda[id.lambda,1]*abs(b01[idbeta])-b01[idbeta]^2-lambda[id.lambda,1]^2)/(2*(alpha[id.lambda,1]-1))
                                      
                                      p02<-rep((lambda[id.lambda,2]^2)*(alpha[id.lambda,2]+1)/2,length(b02))
-                                     idbeta<-which(b02<=lambda[id.lambda,2])
+                                     idbeta<-which(abs(b02)<=lambda[id.lambda,2])
                                      p02[idbeta]<-lambda[id.lambda,2]*abs(b02[idbeta])
-                                     idbeta<-which(abs(b02)<lambda[id.lambda,2]*alpha[id.lambda,2])
+                                     idbeta<-which(abs(b02)<lambda[id.lambda,2]*alpha[id.lambda,2] & abs(b02)>lambda[id.lambda,2])
                                      p02[idbeta]<-(2*alpha[id.lambda,2]*lambda[id.lambda,2]*abs(b02[idbeta])-b02[idbeta]^2-lambda[id.lambda,2]^2)/(2*(alpha[id.lambda,2]-1))
                                      
                                      p12<-rep((lambda[id.lambda,3]^2)*(alpha[id.lambda,3]+1)/2,length(b12))
-                                     idbeta<-which(b12<=lambda[id.lambda,3])
+                                     idbeta<-which(abs(b12)<=lambda[id.lambda,3])
                                      p12[idbeta]<-lambda[id.lambda,3]*abs(b12[idbeta])
-                                     idbeta<-which(abs(b12)<lambda[id.lambda,3]*alpha[id.lambda,3])
+                                     idbeta<-which(abs(b12)<lambda[id.lambda,3]*alpha[id.lambda,3] & abs(b12)>lambda[id.lambda,3])
                                      p12[idbeta]<-(2*alpha[id.lambda,3]*lambda[id.lambda,3]*abs(b12[idbeta])-b12[idbeta]^2-lambda[id.lambda,3]^2)/(2*(alpha[id.lambda,3]-1))
                                      
                                      
@@ -2141,15 +2141,15 @@ idm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                  if(penalty=="mcp"){
                                    
                                  p01<-rep(alpha[id.lambda,1]*lambda[id.lambda,1]*lambda[id.lambda,1]/2,length(b01))
-                                 idbeta<-which(b01<=alpha[id.lambda,1]*lambda[id.lambda,1])
+                                 idbeta<-which(abs(b01)<=alpha[id.lambda,1]*lambda[id.lambda,1])
                                  p01[idbeta]<-lambda[id.lambda,1]*abs(b01[idbeta])-((b01[idbeta]*b01[idbeta])/2*alpha[id.lambda,1])
                                      
                                  p02<-rep(alpha[id.lambda,2]*lambda[id.lambda,2]*lambda[id.lambda,2]/2,length(b02))
-                                 idbeta<-which(b02<=alpha[id.lambda,2]*lambda[id.lambda,2])
+                                 idbeta<-which(abs(b02)<=alpha[id.lambda,2]*lambda[id.lambda,2])
                                  p02[idbeta]<-lambda[id.lambda,2]*abs(b02[idbeta])-((b02[idbeta]*b02[idbeta])/2*alpha[id.lambda,2])
                                  
                                  p12<-rep(alpha[id.lambda,3]*lambda[id.lambda,3]*lambda[id.lambda,3]/2,length(b12))
-                                 idbeta<-which(b12<=alpha[id.lambda,3]*lambda[id.lambda,3])
+                                 idbeta<-which(abs(b12)<=alpha[id.lambda,3]*lambda[id.lambda,3])
                                  p12[idbeta]<-lambda[id.lambda,3]*abs(b12[idbeta])-((b12[idbeta]*b12[idbeta])/2*alpha[id.lambda,3])
                                  
                                  
@@ -2159,21 +2159,21 @@ idm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                  if(penalty=="scad"){
                                    
                                    p01<-rep((lambda[id.lambda,1]^2)*(alpha[id.lambda,1]+1)/2,length(b01))
-                                   idbeta<-which(b01<=lambda[id.lambda,1])
+                                   idbeta<-which(abs(b01)<=lambda[id.lambda,1])
                                    p01[idbeta]<-lambda[id.lambda,1]*abs(b01[idbeta])
-                                   idbeta<-which(abs(b01)<lambda[id.lambda,1]*alpha[id.lambda,1])
+                                   idbeta<-which(abs(b01)<lambda[id.lambda,1]*alpha[id.lambda,1] & abs(b01)>lambda[id.lambda,1])
                                    p01[idbeta]<-(2*alpha[id.lambda,1]*lambda[id.lambda,1]*abs(b01[idbeta])-b01[idbeta]^2-lambda[id.lambda,1]^2)/(2*(alpha[id.lambda,1]-1))
                                    
                                    p02<-rep((lambda[id.lambda,2]^2)*(alpha[id.lambda,2]+1)/2,length(b02))
-                                   idbeta<-which(b02<=lambda[id.lambda,2])
+                                   idbeta<-which(abs(b02)<=lambda[id.lambda,2])
                                    p02[idbeta]<-lambda[id.lambda,2]*abs(b02[idbeta])
-                                   idbeta<-which(abs(b02)<lambda[id.lambda,2]*alpha[id.lambda,2])
+                                   idbeta<-which(abs(b02)<lambda[id.lambda,2]*alpha[id.lambda,2] & abs(b02)>lambda[id.lambda,2])
                                    p02[idbeta]<-(2*alpha[id.lambda,2]*lambda[id.lambda,2]*abs(b02[idbeta])-b02[idbeta]^2-lambda[id.lambda,2]^2)/(2*(alpha[id.lambda,2]-1))
                                    
                                    p12<-rep((lambda[id.lambda,3]^2)*(alpha[id.lambda,3]+1)/2,length(b12))
-                                   idbeta<-which(b12<=lambda[id.lambda,3])
+                                   idbeta<-which(abs(b12)<=lambda[id.lambda,3])
                                    p12[idbeta]<-lambda[id.lambda,3]*abs(b12[idbeta])
-                                   idbeta<-which(abs(b12)<lambda[id.lambda,3]*alpha[id.lambda,3])
+                                   idbeta<-which(abs(b12)<lambda[id.lambda,3]*alpha[id.lambda,3] & abs(b12)>lambda[id.lambda,3])
                                    p12[idbeta]<-(2*alpha[id.lambda,3]*lambda[id.lambda,3]*abs(b12[idbeta])-b12[idbeta]^2-lambda[id.lambda,3]^2)/(2*(alpha[id.lambda,3]-1))
                                    
                                    fn.valuenew<-output.mla$fn.value-sum(p01)-sum(p02)-sum(p12)
@@ -2791,15 +2791,15 @@ idm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                    if(penalty=="mcp"){
                                      
                                      p01<-rep(alpha[id.lambda,1]*lambda[id.lambda,1]*lambda[id.lambda,1]/2,length(b01))
-                                     idbeta<-which(b01<=alpha[id.lambda,1]*lambda[id.lambda,1])
+                                     idbeta<-which(abs(b01)<=alpha[id.lambda,1]*lambda[id.lambda,1])
                                      p01[idbeta]<-lambda[id.lambda,1]*abs(b01[idbeta])-((b01[idbeta]*b01[idbeta])/2*alpha[id.lambda,1])
                                      
                                      p02<-rep(alpha[id.lambda,2]*lambda[id.lambda,2]*lambda[id.lambda,2]/2,length(b02))
-                                     idbeta<-which(b02<=alpha[id.lambda,2]*lambda[id.lambda,2])
+                                     idbeta<-which(abs(b02)<=alpha[id.lambda,2]*lambda[id.lambda,2])
                                      p02[idbeta]<-lambda[id.lambda,2]*abs(b02[idbeta])-((b02[idbeta]*b02[idbeta])/2*alpha[id.lambda,2])
                                      
                                      p12<-rep(alpha[id.lambda,3]*lambda[id.lambda,3]*lambda[id.lambda,3]/2,length(b12))
-                                     idbeta<-which(b12<=alpha[id.lambda,3]*lambda[id.lambda,3])
+                                     idbeta<-which(abs(b12)<=alpha[id.lambda,3]*lambda[id.lambda,3])
                                      p12[idbeta]<-lambda[id.lambda,3]*abs(b12[idbeta])-((b12[idbeta]*b12[idbeta])/2*alpha[id.lambda,3])
                                      
                                      
@@ -2809,21 +2809,21 @@ idm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                    if(penalty=="scad"){
                                      
                                      p01<-rep((lambda[id.lambda,1]^2)*(alpha[id.lambda,1]+1)/2,length(b01))
-                                     idbeta<-which(b01<=lambda[id.lambda,1])
+                                     idbeta<-which(abs(b01)<=lambda[id.lambda,1])
                                      p01[idbeta]<-lambda[id.lambda,1]*abs(b01[idbeta])
-                                     idbeta<-which(abs(b01)<lambda[id.lambda,1]*alpha[id.lambda,1])
+                                     idbeta<-which(abs(b01)<lambda[id.lambda,1]*alpha[id.lambda,1] & abs(b01)>lambda[id.lambda,1])
                                      p01[idbeta]<-(2*alpha[id.lambda,1]*lambda[id.lambda,1]*abs(b01[idbeta])-b01[idbeta]^2-lambda[id.lambda,1]^2)/(2*(alpha[id.lambda,1]-1))
                                      
                                      p02<-rep((lambda[id.lambda,2]^2)*(alpha[id.lambda,2]+1)/2,length(b02))
-                                     idbeta<-which(b02<=lambda[id.lambda,2])
+                                     idbeta<-which(abs(b02)<=lambda[id.lambda,2])
                                      p02[idbeta]<-lambda[id.lambda,2]*abs(b02[idbeta])
-                                     idbeta<-which(abs(b02)<lambda[id.lambda,2]*alpha[id.lambda,2])
+                                     idbeta<-which(abs(b02)<lambda[id.lambda,2]*alpha[id.lambda,2] & abs(b02)>lambda[id.lambda,2])
                                      p02[idbeta]<-(2*alpha[id.lambda,2]*lambda[id.lambda,2]*abs(b02[idbeta])-b02[idbeta]^2-lambda[id.lambda,2]^2)/(2*(alpha[id.lambda,2]-1))
                                      
                                      p12<-rep((lambda[id.lambda,3]^2)*(alpha[id.lambda,3]+1)/2,length(b12))
-                                     idbeta<-which(b12<=lambda[id.lambda,3])
+                                     idbeta<-which(abs(b12)<=lambda[id.lambda,3])
                                      p12[idbeta]<-lambda[id.lambda,3]*abs(b12[idbeta])
-                                     idbeta<-which(abs(b12)<lambda[id.lambda,3]*alpha[id.lambda,3])
+                                     idbeta<-which(abs(b12)<lambda[id.lambda,3]*alpha[id.lambda,3] & abs(b12)>lambda[id.lambda,3])
                                      p12[idbeta]<-(2*alpha[id.lambda,3]*lambda[id.lambda,3]*abs(b12[idbeta])-b12[idbeta]^2-lambda[id.lambda,3]^2)/(2*(alpha[id.lambda,3]-1))
                                      
                                      fn.valuenew<-output.mla$fn.value-sum(p01)-sum(p02)-sum(p12)
