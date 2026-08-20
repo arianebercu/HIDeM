@@ -22,16 +22,16 @@ DYNINLAidmpredY<-function(object,newdata,s,
   idsubjects<-unique(newdata[,colnames(newdata)%in%id])
   
   # force only observation before s or at s 
+
   
-  
-  #create gauss kronrod time point between s and s+t
+  #create gauss kronrod time point between s and s+t and between 0 and t
   timePointsdata<-do.call(rbind, lapply(idsubjects,FUN=function(x){
     timePoints<-gauss_kronrod_points(lower.intdouble=s,
                                      upper.intdouble=horizon,
                                      end.time=horizon,
                                      truncated=T,
                                      entry.time=s)
-    timePoints<-timePoints[c(1:240,257:271)]
+    #timePoints<-timePoints[c(1:240,257:271)]
     return(data.frame(index=x,timePoints=timePoints))}))
   
   ## augmentation of the newdata 

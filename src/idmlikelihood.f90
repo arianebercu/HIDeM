@@ -42547,38 +42547,40 @@ end subroutine firstderivaidmlikelihoodsplinetimedep
 !============================================================================================= 
 
 
-      subroutine ciweibtimedep(b0,npar0,no0,ve010,ve020,y010,y020, &
-	  p01,p02,dimp01,dimp02, Ntime,dimnva01,dimnva02,nva01,&
-      nva02,t00,t10,likelihood_res)
+      subroutine ciweibtimedep(b0,npar0,no0,ve010,ve020,ve120,y010,y020,y120, &
+	  p01,p02,p12,dimp01,dimp02,dimp12, Ntime,dimnva01,dimnva02,dimnva12, &
+	  nva01,nva02,nva12,t00,t10,likelihood_res)
 
 	    use commun
         implicit none
          
     double precision::res2,tronc01ci,tronc02ci, &
-        vet01,vet02
+        vet01,vet02,vet12
 	
-        integer::np0,i,j,l,w,k,npar0,nva01,nva02,no0, &
-	dimnva01,dimnva02, &
-	p01,p02,dimp01,dimp02,Ntime
+        integer::np0,i,j,l,w,k,npar0,nva01,nva02,nva12,no0, &
+	dimnva01,dimnva02, dimnva12, &
+	p01,p02,dimp01,dimp02,Ntime,p12,dimp12
 
 
     double precision,dimension(npar0)::b0
 	double precision,dimension(2)::the01
 	double precision,dimension(2)::the02
-    
+    double precision,dimension(2)::the12
+	
 	double precision,dimension(no0,dimnva01)::ve010
 	double precision,dimension(no0,dimnva02)::ve020
+	double precision,dimension(no0,dimnva12)::ve120
 	
 	double precision,dimension(no0*dimp01*Ntime)::y010
 	double precision,dimension(no0*dimp02*Ntime)::y020
+	double precision,dimension(no0*dimp12*Ntime)::y120
 	
-	
-	double precision,dimension(Ntime)::y01t,y02t
-	double precision, dimension(no0), intent(inout)::likelihood_res
+	double precision,dimension(Ntime)::y01t,y02t,y12t
+	double precision, dimension(4*no0), intent(inout)::likelihood_res
 
 !	integer, dimension(16) :: indices
 	
-    double precision::su01,ri01,su02,ri02,gl01,gl02
+    double precision::su01,ri01,su02,ri02,gl01,gl02,su12,ri12,gl12
 	double precision,dimension(no0)::t00,t10,res
 
 	
@@ -42599,6 +42601,12 @@ end subroutine firstderivaidmlikelihoodsplinetimedep
 	else 
 		allocate(ve02(no0,1))
 	end if 
+	
+	if(nva12.gt.0) then 
+		allocate(ve12(no0,nva12))
+	else 
+		allocate(ve12(no0,1))
+	end if 
 
 
 	
@@ -42618,11 +42626,20 @@ end subroutine firstderivaidmlikelihoodsplinetimedep
 		allocate(y02(no0*Ntime))
 		y02=0
 	end if 
+	
+	if(p12.gt.0) then 
+		allocate(y12(no0*p12*Ntime))
+		y12=y120
+	else 
+		allocate(y12(no0*Ntime))
+		y12=0
+	end if 
 
 
 
 	ve01=ve010
 	ve02=ve020
+	ve12=ve120
 
 	allocate(t0(no0),t1(no0))
 
@@ -42640,6 +42657,10 @@ end subroutine firstderivaidmlikelihoodsplinetimedep
             j = 2+i
             the02(i)=(b(j))*(b(j))
          end do
+		 do i=1,2
+            j = 4+i
+            the12(i)=(b(j))*(b(j))
+         end do
 
 
 
@@ -42655,23 +42676,32 @@ end subroutine firstderivaidmlikelihoodsplinetimedep
          
                 vet01 = 0.d0
                 vet02 = 0.d0
+				vet12 = 0.d0
 
 				y01t = 0
                 y02t = 0
+				y12t = 0
 				
 			
 
                 if(nva01.gt.0)then
                         do j=1,nva01
                                 vet01 =vet01 +&
-                                b(4+j)*dble(ve01(i,j))
+                                b(6+j)*dble(ve01(i,j))
                         end do
                 endif  
  
                 if(nva02.gt.0)then
                         do j=1,nva02
                                 vet02 =vet02 +&
-                                b(4+nva01+j)*dble(ve02(i,j))
+                                b(6+nva01+j)*dble(ve02(i,j))
+                        end do
+                endif
+				
+				if(nva12.gt.0)then
+                        do j=1,nva12
+                                vet12 =vet12 +&
+                                b(6+nva01+nva02+j)*dble(ve12(i,j))
                         end do
                 endif
 	
@@ -42682,7 +42712,7 @@ end subroutine firstderivaidmlikelihoodsplinetimedep
 								k = (i-1)*Ntime*p01+(l-1)*p01+j
 						
                                 y01t(l) =y01t(l) +&
-                                b(4+nva01+nva02+j)*y01(k)
+                                b(6+nva01+nva02+nva12+j)*y01(k)
                         end do
 					end do 
                 endif  
@@ -42692,19 +42722,28 @@ end subroutine firstderivaidmlikelihoodsplinetimedep
                         do j=1,p02
 								k = (i-1)*Ntime*p02+ (l-1)*p02+j
                                 y02t(l) =y02t(l) +&
-                                b(4+nva01+nva02+p01+j)*y02(k)
+                                b(6+nva01+nva02+nva12+p01+j)*y02(k)
                         end do
 					end do 
                 endif  
 
-                 
+                  if(p12.gt.0)then
+					do l=1,Ntime
+                        do j=1,p12
+								k = (i-1)*Ntime*p12+ (l-1)*p12+j
+                                y12t(l) =y12t(l) +&
+                                b(6+nva01+nva02+nva12+p01+p02+j)*y12(k)
+                        end do
+					end do 
+                endif  
 				
 				y01t=dexp(y01t)
 				y02t=dexp(y02t)
+				y12t=dexp(y12t)
 
                 vet01 = dexp(vet01)
                 vet02 = dexp(vet02)
-
+				vet12 = dexp(vet12)
 
                 res(i) = 0.d0
                 
@@ -42713,8 +42752,8 @@ end subroutine firstderivaidmlikelihoodsplinetimedep
                                 tronc01ci = 1
 								tronc02ci = 1
                         else 
-                                call fonctdep0(t0(i),the01,gl01,y01t(241:255))
-                                call fonctdep0(t0(i),the02,gl02,y02t(241:255))
+                                call fonctdep0(t0(i),the01,gl01,y01t(257:271))
+                                call fonctdep0(t0(i),the02,gl02,y02t(257:271))
                                 tronc01ci=dexp(-gl01*vet01)
 								tronc02ci=dexp(-gl02*vet02)
                         end if
@@ -42737,9 +42776,20 @@ end subroutine firstderivaidmlikelihoodsplinetimedep
                        res(i)=res2/(tronc01ci*tronc02ci)
 					   
 					   end if 
+					   
+					   call fonctdep(t1(i),the01,ri01,gl01,&
+								su01, dble(y01t(241:256)))
+                       call fonctdep(t1(i),the02,ri02,gl02,&
+								su02, dble(y02t(241:256)))
+					   call fonctdep(t1(i),the12,ri12,gl12,&
+								su12, dble(y12t(241:256)))
 						
 					!	write(6,*) 'res',res(i)
 		     	     !    call flush(6)
+					 
+					 res(i+no0)=dexp((gl01*vet01)+(gl02*vet02))/(tronc01ci*tronc02ci)
+				     res(i+2*no0)=ri02*vet02
+				     res(i+3*no0)=ri12*vet12
 						
 					
         end do   
@@ -42751,7 +42801,7 @@ end subroutine firstderivaidmlikelihoodsplinetimedep
 
 123     continue 
 
-	deallocate(b,ve01,ve02,y01,y02, & 
+	deallocate(b,ve01,ve02,ve12,y01,y02,y12, & 
 	t0,t1)
 
 end subroutine ciweibtimedep
@@ -42763,51 +42813,59 @@ end subroutine ciweibtimedep
 !========================   with baseline M-splines       ==================================== 
 !============================================================================================= 
 
-      subroutine citimedep(b0,npar0,zi010,zi020,no0,nz010,nz020,ve010,ve020,&
-	  y010,y020,p01,p02,dimp01,dimp02, Ntime,dimnva01,&
-	  dimnva02,nva01,nva02,t00,t10,likelihood_res)
+      subroutine citimedep(b0,npar0,zi010,zi020,zi120,no0,nz010,nz020,&
+	  nz120,ve010,ve020,ve120,&
+	  y010,y020,y120,p01,p02,p12,dimp01,dimp02,dimp12,Ntime,dimnva01,&
+	  dimnva02,dimnva12,nva01,nva02,nva12,t00,t10,likelihood_res)
 
 	use commun
         implicit none
          
-        double precision::res2,tronc, &
+        double precision::res2,tronc01ci,tronc02ci, &
         vet01,vet12,vet02
 
-        integer::np0,i,j,l,w,k,npar0,nva01,nva02,no0, &
+        integer::np0,i,j,l,w,k,npar0,nva01,nva02,nva12,no0, &
 	    nz010,nz020,dimnva01,dimnva02, & 
-		p01,p02,dimp01,dimp02,Ntime, &
-		nspline
+		p01,p02,dimp01,dimp02,dimp12,Ntime, &
+		nspline,nz120,dimnva12,p12
 
 	double precision,dimension(npar0)::b0
 	double precision,dimension(-2:(nz010+3))::zi010
 	double precision,dimension(-2:(nz020+3))::zi020
+	double precision,dimension(-2:(nz120+3))::zi120
 	double precision,dimension(-2:(nz010-1))::the01
 	double precision,dimension(-2:(nz020-1))::the02
+	double precision,dimension(-2:(nz120-1))::the12
+	
         double precision,dimension(no0,dimnva01)::ve010
 	double precision,dimension(no0,dimnva02)::ve020
+	double precision,dimension(no0,dimnva12)::ve120
 	
 	double precision,dimension(no0*dimp01*Ntime)::y010
 	double precision,dimension(no0*dimp02*Ntime)::y020
+	double precision,dimension(no0*dimp12*Ntime)::y120
 	
 	
-	double precision,dimension(Ntime)::y01t,y02t
+	double precision,dimension(Ntime)::y01t,y02t,y12t
 
-	double precision,dimension(no0), intent(inout)::likelihood_res
+	double precision,dimension(4*no0), intent(inout)::likelihood_res
 
 	
-        double precision::su01,ri01,su02,ri02,gl01,gl02
+        double precision::su01,ri01,su02,ri02,gl01,gl02,su12,ri12,gl12
 	double precision,dimension(no0)::t00,t10,res
 
 
 	allocate(b(npar0))
 	b=b0
 	
-	allocate(zi01(-2:(nz01+3)),zi02(-2:(nz02+3)))
+	allocate(zi01(-2:(nz01+3)),zi02(-2:(nz02+3)),zi12(-2:(nz12+3)))
 	zi01=zi010
 	zi02=zi020
+	zi12=zi120
 	
 	nz01=nz010
 	nz02=nz020
+	nz12=nz120
 
 
 	if(nva01.gt.0) then 
@@ -42820,6 +42878,12 @@ end subroutine ciweibtimedep
 		allocate(ve02(no0,nva02))
 	else 
 		allocate(ve02(no0,1))
+	end if 
+	
+	if(nva12.gt.0) then 
+		allocate(ve12(no0,nva12))
+	else 
+		allocate(ve12(no0,1))
 	end if 
 
 	
@@ -42841,10 +42905,19 @@ if(p01.gt.0) then
 		y02=0
 	end if 
 
+if(p12.gt.0) then 
+		allocate(y12(no0*p12*Ntime))
+		y12=y120
+	else 
+		allocate(y12(no0*Ntime))
+		y12=0
+	end if 
+
 	
 
 	ve01=ve010
 	ve02=ve020
+	ve12=ve120
 
 	allocate(t0(no0),t1(no0))
 
@@ -42867,8 +42940,14 @@ if(p01.gt.0) then
             the02(i-3)=(b(j))*(b(j))
 !       the12(i-3)=dexp(bh(j))
          end do
+		 
+		 do i=1,nz12+2
+            j = nz02+2+nz01+2+i
+            the12(i-3)=(b(j))*(b(j))
+!       the12(i-3)=dexp(bh(j))
+         end do
 
-		nspline = nz01+nz02+4
+		nspline = nz01+nz02+nz12+6
 !---------- calcul de la vraisemblance ------------------
 
   
@@ -42880,11 +42959,13 @@ if(p01.gt.0) then
 		  
                 vet01 = 0.d0
                 vet02 = 0.d0
+				vet12 = 0.d0
 
 
                 
 				y01t = 0
                 y02t = 0
+				y12t = 0
 
                 if(nva01.gt.0)then
                         do j=1,nva01
@@ -42897,6 +42978,14 @@ if(p01.gt.0) then
                         do j=1,nva02
                                 vet02 =vet02 +&
                                 b(nspline+nva01+j)*dble(ve02(i,j))
+                        end do
+                endif
+				
+				
+				if(nva12.gt.0)then
+                        do j=1,nva12
+                                vet12 =vet12 +&
+                                b(nspline+nva01+nva02+j)*dble(ve12(i,j))
                         end do
                 endif
 
@@ -42923,28 +43012,42 @@ if(p01.gt.0) then
                         end do
 					end do 
                 endif  
+				
+				if(p12.gt.0)then
+					do l=1,Ntime
+                        do j=1,p12
+								k = (i-1)*Ntime*p12+ (l-1)*p12+j
+                                y12t(l) =y12t(l) +&
+                                b(nspline+nva01+nva02+nva12+p01+p02+j)*y12(k)
+                        end do
+					end do 
+                endif  
 
                  
 				
 				y01t=dexp(y01t)
 				y02t=dexp(y02t)
+				y12t=dexp(y12t)
 				
 				
 				
                 vet01 = dexp(vet01)
                 vet02 = dexp(vet02)
+				vet12 = dexp(vet12)
 
 
                 res(i) = 0.d0
                 
                 
                         if(t0(i).eq.0.d0)then
-                                tronc = 1
+                                tronc01ci = 1
+								tronc02ci = 1
                         else 
                                 
-								call suspdept0(t0(i),the01,nz01,su01,ri01,zi01,gl01,y01t(241:255))
-                                call suspdept0(t0(i),the02,nz02,su02,ri02,zi02,gl02,y02t(241:255))
-                                tronc=dexp((gl01*vet01)+(gl02*vet02))
+								call suspdept0(t0(i),the01,nz01,su01,ri01,zi01,gl01,y01t(257:271))
+                                call suspdept0(t0(i),the02,nz02,su02,ri02,zi02,gl02,y02t(257:271))
+                                tronc01ci=dexp(-gl01*vet01)
+								tronc02ci=dexp(-gl02*vet02)
                         end if
            
    
@@ -42952,7 +43055,20 @@ if(p01.gt.0) then
                         	res2,vet01,vet02,& 
 							 y01t(1:240),y02t(1:240))
                   
-				  res(i)=res2*tronc
+				   if(res2.eq.0.d0) then 
+							res(i)=0
+						else 
+						 
+                       res(i)=res2/(tronc01ci*tronc02ci)
+					   
+					   end if 
+				  
+				  call suspdep(t1(i),the01,nz01,su01,ri01,zi01,gl01,y01t(241:256))
+                  call suspdep(t1(i),the02,nz02,su02,ri02,zi02,gl02,y02t(241:256))
+				  call suspdep(t1(i),the12,nz12,su12,ri12,zi12,gl12,y12t(241:256))
+                  res(i+no0)=dexp((gl01*vet01)+(gl02*vet02))/(tronc01ci*tronc02ci)
+				  res(i+2*no0)=ri02*vet02
+				  res(i+3*no0)=ri12*vet12
 					
                 
           end do 
@@ -42963,7 +43079,7 @@ if(p01.gt.0) then
 
 123     continue 
 	 
-	deallocate(b,zi01,zi02,ve01,ve02, &
-	y01,y02,t0,t1)
+	deallocate(b,zi01,zi02,zi12,ve01,ve02,ve12, &
+	y01,y02,y12,t0,t1)
 
         end subroutine citimedep

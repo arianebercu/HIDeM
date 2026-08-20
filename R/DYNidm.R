@@ -227,6 +227,7 @@ DYNidm <- function(formula01,
     ################################ check what has been given ##################
   #################################################################################
   
+  
     call <- match.call()
     ptm <- proc.time()
     if(is.null(modelY)){stop("First need to run univariate joint model for the longitudinal markers.")}
@@ -962,6 +963,7 @@ DYNidm <- function(formula01,
                            iddCR=iddCR,
                            TimeCR=TimeCR)
 
+      colnames(dataSurvCR)[1]<-id
     }else{
       
       
@@ -1648,6 +1650,8 @@ DYNidm <- function(formula01,
                                dimp12=dimp12,
                                scale.X=scale.X)
             }else{
+              
+              
               out <- DYNidm.penalty.weib(b=b,
                                            fix0=fix0,
                                            size_V=size_V,

@@ -12,14 +12,29 @@ INLAidmpredY<-function(timeVar,truncated,formLong,dataSurv,dataLongi,id,
                   t0,t1,t2,t3,assoc,
                   ctime,modelY,seed,BLUP,scale.X){
 
-  
+
   # define timePoints of prediction : 
 
   set.seed(seed)
   
   idsubjects<-unique(dataSurv[,colnames(dataSurv)%in%id])
   
+  # keep adjustment value for fixed variables merge on ID
+  
+  terms_labels <- lapply(formLong,FUN=function(x){
+    terms_labels<-attr(terms(x), "term.labels")
+    idvar<-c(which(grepl(timeVar, terms_labels)),which(grepl(id, terms_labels)))
+    idvar<-unique(idvar)
+    return(terms_labels[-idvar])
+  })
+  terms_labels<-do.call(c,terms_labels)
+  terms_labels<-unique(terms_labels)
 
+
+  if(length(terms_labels)>0){
+    dataAdjust<-dataLongi[,colnames(dataLongi)%in%c(id,terms_labels)]
+    dataAdjust<-unique(dataAdjust)
+    }
   
   timePointsdata<-do.call(rbind, lapply(idsubjects,FUN=function(x){
     index<-which(dataSurv[,colnames(dataSurv)%in%id]==x)
@@ -32,13 +47,25 @@ INLAidmpredY<-function(timeVar,truncated,formLong,dataSurv,dataLongi,id,
                                      end.time=t3[index],
                                      truncated=truncated,
                                      entry.time=t0[index])
-    return(data.frame(index=x,timePoints=timePoints))}))
+    
+    res<-data.frame(index=x,timePoints=timePoints)
+    colnames(res)<-c(id,timeVar)
+    if(length(terms_labels)>0){
+      dataAdjust_i<-dataAdjust[dataAdjust[,colnames(dataAdjust)%in%id]==x,]
+
+    res<-merge(x=res,y=dataAdjust_i,by=id,all.x=T)
+    }
+    
+    return(res)}))
   
   
   
   ## augmentation of the data 
-  colnames(timePointsdata)<-c(id,timeVar)
-  dataLongi_augmented<-merge(timePointsdata,dataLongi,by=c(id,timeVar),all.x=T,all.y=T)
+  
+  dataLongi_augmented<-merge(timePointsdata,dataLongi,by=c(id,timeVar,terms_labels),all.x=T,all.y=T)
+  
+  
+
   rownames(dataLongi_augmented)<-NULL
   dataLongi_augmented<-dataLongi_augmented[order(dataLongi_augmented[,colnames(dataLongi_augmented)%in%id],
                                                  dataLongi_augmented[,colnames(dataLongi_augmented)%in%timeVar]),]
@@ -452,6 +479,8 @@ make_dXINLA<- function(formula, timeVar, data, use_splines = FALSE, ct, id,idtag
 }
 
 make_XINLA_BLUP <- function(formula, timeVar, data, use_splines = FALSE, ct, id,idtag, SMP, ...) {
+  
+
   n <- nrow(data)
   N<-length(unique(data[,colnames(data)%in%id]))
   # --- parse terms ---
@@ -489,7 +518,7 @@ make_XINLA_BLUP <- function(formula, timeVar, data, use_splines = FALSE, ct, id,
   B <- matrix(0, nrow = n, ncol = n_fixed)
   colnames(X) <- paste0(terms_fixed, "_L1")
   
-  #browser()
+
   for (k in seq_along(terms_fixed)) {
     lab <- terms_fixed[k]
     tag <- paste0(gsub("[()]", "", lab), "_L1")
@@ -520,6 +549,7 @@ make_XINLA_BLUP <- function(formula, timeVar, data, use_splines = FALSE, ct, id,
   B_RE <- matrix(0, nrow = n, ncol = n_re)
   colnames(X_RE) <- paste0(id, terms_RE, "_L1")
   
+
   for (k in seq_along(terms_RE)) {
     lab <- terms_RE[k]
     # form summary.random tag name exactly like original
@@ -561,7 +591,7 @@ make_XINLA_BLUP <- function(formula, timeVar, data, use_splines = FALSE, ct, id,
     B_RE[, k] <- unname(modes_vec[id_index])
   }
   
-  
+
   # --- combine and return ---
   Y <- rowSums(X * B) + rowSums(X_RE * B_RE)
   return(Y)

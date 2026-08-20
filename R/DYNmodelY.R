@@ -211,10 +211,11 @@ DYNmodelY <- function(formula01,
   if(!lightmode%in%c(T,F))stop("Argument lightmode must be T or F ")
  
     if(missing(dataLongi)) stop("Need a dataLongi frame.")
-    if(sum(is.na(dataLongi))>0)stop("Need a longitudinal data frame with no missing data.")
+    #if(sum(is.na(dataLongi))>0)stop("Need a longitudinal data frame with no missing data.")
     
     if(!inherits(dataLongi,"data.frame"))stop("Argument 'dataLongi' must be a data.frame")
   
+
   ############################################################################
   ############################### get database defined by formulas ###########
   ############################################################################
@@ -237,12 +238,12 @@ DYNmodelY <- function(formula01,
   }
   
   
-    if(anyNA(dataLongi)){
-      variables=unique(c(all.vars(formula01),all.vars(formula02),all.vars(formula12)))
-      dataLongi=dataLongi[,variables]
-      dataLongi=na.omit(dataLongi)
-      # m01[[2]] <- m02[[2]] <- m12[[2]] <- data
-    }
+    # if(anyNA(dataLongi)){
+    #   variables=unique(c(all.vars(formula01),all.vars(formula02),all.vars(formula12)))
+    #   dataLongi=dataLongi[,variables]
+    #   dataLongi=na.omit(dataLongi)
+    #   # m01[[2]] <- m02[[2]] <- m12[[2]] <- data
+    # }
   
   m01 <- eval(m01,parent.frame())
   m02 <- eval(m02,parent.frame())
@@ -503,7 +504,7 @@ DYNmodelY <- function(formula01,
                            idm=idm,
                            iddCR=iddCR,
                            TimeCR=TimeCR)
-      
+      colnames(dataINLA)[1]<-id
       
       modelY<-INLAidm(timeVar = timeVar,
                      family = methodINLA$family,

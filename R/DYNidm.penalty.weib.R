@@ -61,6 +61,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
 
   # need to keep original fix to calculate for beta 
   
+  
   fix00<-fix0
   
   # create grid 3
