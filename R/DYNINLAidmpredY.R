@@ -12,6 +12,7 @@ DYNINLAidmpredY<-function(object,newdata,s,
                           timeVar,formLong,formSurv,
                           basRisk,index,family,envir,
                           NsampleHY,NsampleFE,NsampleRE){
+                          # 31/08/2026 : do not estimate weights with our model : t0,t1,t2,t3,t4, casei,isIntervalCensored){
 
   timeVar<<-timeVar
  # formLong<<-formLong
@@ -22,19 +23,95 @@ DYNINLAidmpredY<-function(object,newdata,s,
   idsubjects<-unique(newdata[,colnames(newdata)%in%id])
   
   # force only observation before s or at s 
-
-  
   #create gauss kronrod time point between s and s+t and between 0 and t
   timePointsdata<-do.call(rbind, lapply(idsubjects,FUN=function(x){
-    timePoints<-gauss_kronrod_points(lower.intdouble=s,
-                                     upper.intdouble=horizon,
-                                     end.time=horizon,
-                                     truncated=T,
-                                     entry.time=s)
-    #timePoints<-timePoints[c(1:240,257:271)]
-    return(data.frame(index=x,timePoints=timePoints))}))
+    timePoints1<-gauss_kronrod_points_pred1(lower.intdouble=s,
+                                     upper.intdouble=horizon)
+    #create gauss kronrod time point between l_i and r_i and between 0 and l_i
+    # 31/08/2026 : do not estimate weights with our model 
+    # if(isIntervalCensored){
+    # if(casei[x]==0){
+    #   
+    #   timePoints2<-gauss_kronrod_points_pred0(lower.intdouble=0, 
+    #                                          upper.intdouble=t2[x]) 
+    #   timePoints3<-gauss_kronrod_points_pred0(lower.intdouble=0, 
+    #                                           upper.intdouble=t1[x]) 
+    #   return(data.frame(index=c(rep(x,length(timePoints1)),
+    #                             rep(x,length(timePoints2)),
+    #                             rep(x,length(timePoints3))),
+    #                     timePoints=c(timePoints1,timePoints2,timePoints3)))
+    # 
+    # }
+    # 
+    # if(casei[x]==1){
+    #   timePoints2<-gauss_kronrod_points_pred1(lower.intdouble=t1[x],
+    #                                     upper.intdouble=t2[x])
+    #   
+    #   #timePoints<-timePoints[c(1:240,257:271)]
+    #   return(data.frame(index=c(rep(x,length(timePoints1)),
+    #                             rep(x,length(timePoints2))),
+    #                     timePoints=c(timePoints1,
+    #                                  timePoints2)))
+    #   
+    # }
+    #   
+    #   if(casei[x]==6){
+    #    
+    #     #create gauss kronrod time point between 0 and r_i
+    #     timePoints2<-gauss_kronrod_points_pred2(lower.intdouble=0,
+    #                                             upper.intdouble=t1[x])
+    #     #create gauss kronrod time point between 0 and l_i
+    #     timePoints3<-gauss_kronrod_points_pred2(lower.intdouble=0,
+    #                                             upper.intdouble=t2[x])
+    #     
+    #     #timePoints<-timePoints[c(1:240,257:271)]
+    #     return(data.frame(index=c(rep(x,length(timePoints1)),
+    #                               rep(x,length(timePoints2)),
+    #                               rep(x,length(timePoints3))),
+    #                       timePoints=c(timePoints1,
+    #                                    timePoints2,
+    #                                    timePoints3
+    #                                    )))
+    #     
+    #   }
+    # 
+    # if(casei[x]>=2 & casei[x]<=5){
+    #   timePoints2<-gauss_kronrod_points_pred1(lower.intdouble=t1[x],
+    #                                     upper.intdouble=t2[x])
+    #   #create gauss kronrod time point between 0 and r_i
+    #   timePoints3<-gauss_kronrod_points_pred2(lower.intdouble=0,
+    #                                           upper.intdouble=t1[x])
+    #   #create gauss kronrod time point between 0 and l_i
+    #   timePoints4<-gauss_kronrod_points_pred2(lower.intdouble=0,
+    #                                          upper.intdouble=t2[x])
+    #   
+    #   #timePoints<-timePoints[c(1:240,257:271)]
+    #   return(data.frame(index=c(rep(x,length(timePoints1)),
+    #                             rep(x,length(timePoints2)),
+    #                             rep(x,length(timePoints3)),
+    #                             rep(x,length(timePoints4))),
+    #                     timePoints=c(timePoints1,
+    #                                  timePoints2,
+    #                                  timePoints3,
+    #                                  timePoints4)))
+    #   
+    # }
+    # 
+    # }else{
+    #   return(data.frame(index=c(rep(x,length(timePoints1))),
+    #                     timePoints=c(timePoints1)))
+    # }
+     
+    return(data.frame(index=c(rep(x,length(timePoints1))),
+                      timePoints=c(timePoints1)))
+   
+    }))
+  
+  
+
   
   ## augmentation of the newdata 
+
   colnames(timePointsdata)<-c(id,timeVar)
   dataLongi_augmented<-merge(timePointsdata,newdata,by=c(id,timeVar),all.x=T,all.y=T)
   
@@ -73,9 +150,6 @@ DYNINLAidmpredY<-function(object,newdata,s,
     colnames(dataCenter)<-c(id,timeVar)
   }
   
-  timepred<-unique(timePointsdata[,colnames(timePointsdata)%in%timeVar])
-  NtimePoints<-length(unique(timepred))
-  # should center by median or mean ? 
 
   for(indice in index){
     
@@ -119,6 +193,7 @@ DYNINLAidmpredY<-function(object,newdata,s,
     # while keeping order of key2
     indices <- match(key2, key1)
     
+
     if("value"%in% choiceY){
       Y<-as.matrix(make_XINLA_PRED(formula=formLong[[indice]], timeVar=timeVar, data=dataLongi_augmented,ct=ct,id=id,idtag=idtag,SMP=INLAmodel))
      

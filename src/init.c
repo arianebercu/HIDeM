@@ -146,14 +146,19 @@ extern void F77_NAME(derivasplinessecondderiv)(double *,int *, int *, double *,i
                 int *,int *,int *,int *,int *,int *, double *,double*, double *, double *,int *,double *);
 
 
-extern void F77_NAME(ciweibtimedep)(double *,int *, int *,double *,double*,  double *,double*,
-              int *,int *,int *,int *,int *,int *,int *, int *,int *, double *,double*,double*);
+extern void F77_NAME(ciweibtimedep)(double *,int *, int *,double *,double*, double *,  double *,
+               double*, double *,int *,int *,int*,int *,int *,int *, int *,
+               int *,int *, int *, int *,int *, int *, double *,double*, double*);
+
+extern void F77_NAME(idmciweibtimedep)(double *,int *, int *,double *,double*, double *,  double *,
+               double*, double *,int *,int *,int*,int *,int *,int *, int *,
+               int *,int *, int *, int *,int *, int *, double *,double*, int *,int *,int *,int *,  double*);
 
 
-extern void F77_NAME(citimedep)(double *,int *, double *,double*,
-              int *,int *,int *,double *,double *,double *, double *,
-              int *,int *,int *,int *,int *,int *, int *,
-              int *, int *,double *,double*,double *);
+extern void F77_NAME(citimedep)(double *,int *, double *,double*,double*,
+              int *,int *,int *,int*,double *,double *,double *,double *, double *, double *,
+              int *,int *,int *,int *,int *,int *,int *,int *, int *, int *,
+              int *, int *, int *,double *,double*,double *);
 
 static const R_FortranMethodDef FortranEntries[] = {
     {"idmlikelihood",(DL_FUNC) &F77_NAME(idmlikelihood),    29},
@@ -161,8 +166,9 @@ static const R_FortranMethodDef FortranEntries[] = {
     {"idmlikelihoodsemimark",(DL_FUNC) &F77_NAME(idmlikelihoodsemimark),    28},
     {"idmlikelihoodweibsemimark",(DL_FUNC) &F77_NAME(idmlikelihoodweibsemimark),    22},
     {"idmlikelihoodweibtimedep",(DL_FUNC) &F77_NAME(idmlikelihoodweibtimedep),    32},
-    {"ciweibtimedep",(DL_FUNC) &F77_NAME(ciweibtimedep),    19},
-    {"citimedep",(DL_FUNC) &F77_NAME(citimedep),    23},
+    {"ciweibtimedep",(DL_FUNC) &F77_NAME(ciweibtimedep),    25},
+     {"idmciweibtimedep",(DL_FUNC) &F77_NAME(idmciweibtimedep),    29},
+    {"citimedep",(DL_FUNC) &F77_NAME(citimedep),    31},
      {"firstderivaidmlikelihoodweibtimedep",(DL_FUNC) &F77_NAME(firstderivaidmlikelihoodweibtimedep),    32},
       {"derivaweibfirstderivtimedep",(DL_FUNC) &F77_NAME(derivaweibfirstderivtimedep),    32},
 	 {"idmlikelihoodtimedep",(DL_FUNC) &F77_NAME(idmlikelihoodtimedep),    38},

@@ -22,6 +22,7 @@ DYNpredIDM<-function(objectY,
                          predicted.newdata=NULL,
                      control=list(NsampleHY=1,NsampleFE=1,NsampleRE=1,return.data=F)){
 
+
   call <- match.call()
   ptm <- proc.time()
 
@@ -31,8 +32,8 @@ DYNpredIDM<-function(objectY,
   if(!inherits(objectSurvival,"DYNidm")){stop("Need to specify objectSurvival as a DYNidm object")}
 
   
-  if(missing(newdata)){stop("Need to provide newData as a data.frame")}
-  if(!inherits(newdata,"data.frame")){stop("Need to provide newData as a data.frame")}
+  if(missing(newdata)){stop("Need to provide newdata as a data.frame")}
+  if(!inherits(newdata,"data.frame")){stop("Need to provide newdata as a data.frame")}
   
   if(sum(is.na(newdata))>0)stop("Need a new data frame with no missing data.")
   if(missing(s)|missing(horizon))stop("Need to specify s and horizon")
@@ -70,7 +71,7 @@ DYNpredIDM<-function(objectY,
   ############################## supress info after s #########################
   
   newdata<-newdata[newdata[,colnames(newdata)%in%timeVar]<=s,]
-  newdata<-newdata[,colnames(newdata)%in%variables]
+  #newdata<-newdata[,colnames(newdata)%in%variables]
   newdata<-na.omit(newdata)
   if(dim(newdata)[1]==0){stop("No follow-up after s, should proceed with smaller values for s")}
   #erase subjects having the event before s 
@@ -83,92 +84,105 @@ DYNpredIDM<-function(objectY,
   ####################  prepare censored event times  #############################
   #################################################################################
   
-
-  horizon1<-s1<-rep(NA,N)
-    
-  m01 <- model.frame(objectSurvival$formula01, data = newdata)
-  m02 <- model.frame(objectSurvival$formula01, data = newdata)
- 
-  responseTrans <- stats::model.response(m01)
-  responseAbs <- stats::model.response(m02)
-  
-  isIntervalCensored <- attr(responseTrans,"cens.type")=="intervalCensored"
-  truncated <- nchar(attr(responseAbs,"entry.type"))>1
-  abstime <- as.double(responseAbs[,"time"])
-  ## It may happen that the illness time is observed exactly, in which case
-  ## the status is 1, thus we need two criteria to declare illness status:
-  ## 1. exact observations with illness status ==1
-  ## 2. interval censored with any illness status. FIXME: check the corresponding likelihood
-  
-  idm <- responseTrans[,"status"]==(as.integer(isIntervalCensored)+1)
-  if (isIntervalCensored)
-    idm[(responseTrans[,"status"]==1 & (responseTrans[,"L"]==responseTrans[,"R"]))] <- 1
-  ## exit status
-  idd <- responseAbs[,"status"]==1
-  
-  
-  N <- length(abstime)
-  if (truncated==0){
-    entrytime <- as.double(NULL)
-  }else{
-    entrytime <- as.double(responseAbs[,"entry"])
-  }
-  if (isIntervalCensored){
-    Ltime <- as.double(responseTrans[,"L",drop=TRUE])
-    Rtime <- as.double(responseTrans[,"R",drop=TRUE])
-    ## if (any(Rtime<abstime & idm ==0))
-    ## warning(paste("For ",
-    ## sum(Rtime<abstime & idm ==0),
-    ## " cases where the ill status is not observed\n and the last inspection time (R) is smaller than the right censored time (T)\n the time R is set to T."))
-  }else{# exactly observed transition times
-    Ltime <- as.double(responseTrans[,"time",drop=TRUE])
-    Rtime <- as.double(responseTrans[,"time",drop=TRUE])
-    Ltime[idm==0] <- abstime[idm==0]
-    Rtime[idm==0] <- abstime[idm==0]
-  }
-  ## find time boundaries 
-  if (length(entrytime)>0){
-    alltimes <- sort(unique(c(Ltime, Rtime,entrytime,abstime)))
-    amax <- max(alltimes)
-    amin <- min(alltimes)
-  }
-  else{
-    alltimes <- sort(unique(c(Ltime, Rtime,abstime)))
-    amax <- max(alltimes)
-    amin <- 0
-  }
-  
- 
-  t0<-rep(s,N)
-  
-  t1<-Ltime
-  t2<-Rtime
-  t3<-abstime
-  t4<-rep(NA,N)
-  ctime<-rep(NA,N)
-  
-  
-  ctime<-ifelse(idm==0 & idd==0 & t1==t3,1,NA)
-  ctime<-ifelse(idm==1 & idd==0 & t1<t2,2,ctime)
-  ctime<-ifelse(idm==1 & idd==0 & t1==t2,3,ctime)
-  ctime<-ifelse(idm==1 & idd==1 & t1<t2,4,ctime)
-  ctime<-ifelse(idm==1 & idd==1 & t1==t2,5,ctime)
-  ctime<-ifelse(idm==0 & idd==0 & t1<t3,6,ctime)
-  ctime<-ifelse(idm==0 & idd==1,7,ctime)
-  
-  if(sum(is.na(ctime))>0){stop("For subject with no event, time for event 01 cannot be equal to time for 12 and 02")}
-  
-  t2<-ifelse(ctime==1 | ctime==3 | ctime==5,t1,
-             ifelse(ctime==2 | ctime==4,t2,
-                    ifelse(ctime==6 | ctime==7, t3,NA)
-             )
-  )
-  
-  t3<-ifelse(ctime==1, t1,
-             ifelse(ctime==2 | ctime==3 | ctime==4 | ctime==5 | ctime==6 | ctime==7,t3,NA))
-  
-  t4<-ifelse(ctime==1 | ctime==2 | ctime==3 | ctime==4 | ctime==5, t1,
-             ifelse( ctime==6 | ctime==7,t3,NA))
+  #browser()
+  # 31/08/2026 : do not estimate weights with our model 
+  # horizon1<-s1<-rep(NA,N)
+  #   
+  # newdataS <- newdata[!duplicated(newdata[,colnames(newdata)%in%objectY$id], fromLast = TRUE), ]
+  # m01 <- model.frame(objectSurvival$formula01, data = newdataS)
+  # m02 <- model.frame(objectSurvival$formula02, data = newdataS)
+  # 
+  # responseTrans <- stats::model.response(m01)
+  # responseAbs <- stats::model.response(m02)
+  # 
+  # isIntervalCensored <- attr(responseTrans,"cens.type")=="intervalCensored"
+  # truncated <- nchar(attr(responseAbs,"entry.type"))>1
+  # abstime <- as.double(responseAbs[,"time"])
+  # ## It may happen that the illness time is observed exactly, in which case
+  # ## the status is 1, thus we need two criteria to declare illness status:
+  # ## 1. exact observations with illness status ==1
+  # ## 2. interval censored with any illness status. FIXME: check the corresponding likelihood
+  # 
+  # 
+  # idm <- responseTrans[,"status"]==(as.integer(isIntervalCensored)+1)
+  # if (isIntervalCensored)
+  #   idm[(responseTrans[,"status"]==1 & (responseTrans[,"L"]==responseTrans[,"R"]))] <- 1
+  # ## exit status
+  # idd <- responseAbs[,"status"]==1
+  # 
+  # 
+  # #N <- length(abstime)
+  # if (truncated==0){
+  #   entrytime <- as.double(NULL)
+  # }else{
+  #   entrytime <- as.double(responseAbs[,"entry"])
+  # }
+  # if (isIntervalCensored){
+  #   Ltime <- as.double(responseTrans[,"L",drop=TRUE])
+  #   Rtime <- as.double(responseTrans[,"R",drop=TRUE])
+  #   ## if (any(Rtime<abstime & idm ==0))
+  #   ## warning(paste("For ",
+  #   ## sum(Rtime<abstime & idm ==0),
+  #   ## " cases where the ill status is not observed\n and the last inspection time (R) is smaller than the right censored time (T)\n the time R is set to T."))
+  # }else{# exactly observed transition times
+  #   Ltime <- as.double(responseTrans[,"time",drop=TRUE])
+  #   Rtime <- as.double(responseTrans[,"time",drop=TRUE])
+  #   Ltime[idm==0] <- abstime[idm==0]
+  #   Rtime[idm==0] <- abstime[idm==0]
+  # }
+  # ## find time boundaries 
+  # if (length(entrytime)>0){
+  #   alltimes <- sort(unique(c(Ltime, Rtime,entrytime,abstime)))
+  #   amax <- max(alltimes)
+  #   amin <- min(alltimes)
+  # }
+  # else{
+  #   alltimes <- sort(unique(c(Ltime, Rtime,abstime)))
+  #   amax <- max(alltimes)
+  #   amin <- 0
+  # }
+  # 
+  # 
+  # t0<-rep(s,N)
+  # t1<-Ltime
+  # t2<-Rtime
+  # t3<-abstime
+  # t4<-rep(horizon,N)
+  # ctime<-rep(NA,N)
+  # if (isIntervalCensored){
+  # 
+  # 
+  # 
+  # ctime<-ifelse(t1>horizon,0,NA)
+  # ctime<-ifelse((t1>s) & (t2<=horizon) & (idm==1),1,ctime)
+  # ctime<-ifelse((t1<=horizon) & (t1>s) & (t3>horizon),2,ctime)
+  # ctime<-ifelse((idm==1) & (t1<s) & (t2>s) & (t2<=horizon),3,ctime)
+  # ctime<-ifelse((idd==1) & (t1<=horizon) & (t1>s) & (idm==0) & (t3<=horizon),4,ctime)
+  # ctime<-ifelse((idd==1) & (t1<=s) & (idm==0) & (t3<=horizon) & (t3>s),5,ctime)
+  # ctime<-ifelse((t1<=s) & (idm==1) & (t2>=horizon) & (t3>=horizon),6,ctime)
+  # 
+  # # recode times l and r 
+  # # case 0
+  # t1[which(ctime==0)]<-s
+  # t2[which(ctime==0)]<-horizon
+  # #case 1 no changes 
+  # #case 2 
+  # t2[which(ctime==2)]<-horizon
+  # # case 3
+  # t1[which(ctime==3)]<-s
+  # #case 4
+  # t2[which(ctime==4)]<-t3[which(ctime==4)]
+  # #case 5 
+  # t1[which(ctime==5)]<-s
+  # t2[which(ctime==5)]<-t3[which(ctime==5)]
+  # 
+  # #case 6
+  # t1[which(ctime==6)]<-s
+  # t2[which(ctime==6)]<-horizon
+  # 
+  # if(sum(is.na(ctime))>0){stop("For subject with no event, time for event 01 cannot be equal to time for 12 and 02")}
+  # 
+  # }
   
   ######################### association check RE ###############################
   assoc<-objectSurvival$assoc
@@ -224,16 +238,21 @@ DYNpredIDM<-function(objectY,
   outcome01<-objectSurvival$linktimedepXnames01
   outcome02<-objectSurvival$linktimedepXnames02
   outcome12<-objectSurvival$linktimedepXnames12
+  outcome01<-outcome01[!is.na(outcome01)]
+  outcome02<-outcome02[!is.na(outcome02)]
+  outcome12<-outcome12[!is.na(outcome12)]
   
   p01<-length(outcome01)
-  dimp01<-ifelse(length(outcome01)>0,length(outcome01),1)
+  dimp01<-ifelse(p01>0,p01,1)
   p02<-length(outcome02)
-  dimp02<-ifelse(length(outcome02)>0,length(outcome02),1)
+  dimp02<-ifelse(p02>0,p02,1)
   p12<-length(outcome12)
-  dimp12<-ifelse(length(outcome12)>0,length(outcome12),1)
+  dimp12<-ifelse(p12>0,p12,1)
+  
   if(p01==0 & p02==0){stop("No time dependent variable please refer to HIDeM::intensity for calculation of intensities with only time fixed covariates")}
   
  
+  size1 <- size1+p01+p02+p12
   if(objectSurvival$method=="splines"){
     
    nknots01 <- length(unique(objectSurvival$knots01))
@@ -342,6 +361,14 @@ DYNpredIDM<-function(objectY,
                          NsampleRE=control$NsampleRE,
                          NsampleHY=control$NsampleHY,
                          NsampleFE=control$NsampleFE)
+                         # 31/08/2026 : do not estimate weights with our model 
+                         # t0=t0,
+                         # t1=t1,
+                         # t2=t2,
+                         # t3=t3,
+                         # t4=t4,
+                        # casei=ctime,
+                        # isIntervalCensored=isIntervalCensored)
   
   dataY$Outcome<-as.character(dataY$Outcome)
   # attention if NtimePoints equidistant with INLA then NtimePoints takes 
@@ -358,48 +385,97 @@ DYNpredIDM<-function(objectY,
   }
   
   ########################## check prediction ##################################
-  NtimePoints<-271
   
+ # browser()
+  NtimePoints_0<-255
+  # 31/08/2026 : do not estimate weights with our model 
+  # if(isIntervalCensored){
+  # NtimePoints_1<-sum(ctime>=2)*(255*3)+sum(ctime==0)*30+sum(ctime==1)*255
+  # NtimePoints_check<-sum(ctime>=2 & ctime<=5)*(255*3)+sum(ctime==0)*30+sum(ctime==1)*255+sum(ctime==6)*(255*2)
+  # Ntime01<-NtimePoints_1*p01
+  # Ntime02<-NtimePoints_1*p02
+  # Ntime12<-NtimePoints_1*p12
+  # NtimePoints_1max<-ifelse(sum(ctime==2)>0,255*3,
+  #                          ifelse(sum(ctime==1)>0,255,30))
+  # }
+
+  #browser()
+    
   for( m in unique(c(outcome01,outcome02,outcome12))){
     subdata<-dataY[dataY$Outcome==m,]
-    x<-table(subdata[,colnames(subdata)%in%id])
-    if(any(x!=NtimePoints)){stop("Prediction of marker ",m," could not be perform for each quadrature points")}
+    
+    # 31/08/2026 : do not estimate weights with our model 
+    #if(dim(subdata)[1]!=(N*NtimePoints_0+NtimePoints_check)){stop("Prediction of marker ",m," could not be perform for each quadrature points")}
+    
+    if(dim(subdata)[1]!=(N*NtimePoints_0)){stop("Prediction of marker ",m," could not be perform for each quadrature points")}
     
   }
   
-
-  
-  
- 
- 
+  #names(ctime)<-unique(newdata[,colnames(newdata)%in%id])
+  #browser()
   if(length(outcome01)>=1){
     y01<-dataY[dataY$Outcome%in%outcome01,]
+    y01_0<-y01[order(y01[,colnames(y01)%in%id],y01$order),4]
     # order  by individual and timeline 
-    y01<-y01[order(y01[,colnames(y01)%in%id],y01$order),4]
-    
+    # 31/08/2026 : do not estimate weights with our model 
+    # y01<-y01[order(y01[,colnames(y01)%in%id],y01$order),]
+    # y01_0<-y01[y01$order<=NtimePoints_0,4]
+    # y01_1<-y01[y01$order>NtimePoints_0,4]
+    # 
+    # idcol <- colnames(y01)[colnames(y01) %in% id]
+    # grpidx <- split(seq_len(nrow(y01)), y01[[idcol]])
+    # 
+    # y01_1 <- unlist(Map(function(idx, ct) y01[[4]][idx][if (ct == 6) TRUE else y01$order[idx] > NtimePoints_0],
+    #                     grpidx, ctime[names(grpidx)]), use.names = FALSE)
+    # 
     
   }else{
-    y01<-rep(0,N*NtimePoints)
+    y01_0<-rep(0,N*NtimePoints_0)
+   # y01_1<-rep(0,N*NtimePoints_1)
   }
+ 
+
+  
   
   if(length(outcome02)>=1){
     y02<-dataY[dataY$Outcome%in%outcome02,]
+    y02_0<-y02[order(y02[,colnames(y02)%in%id],y02$order),4]
+    # 31/08/2026 : do not estimate weights with our model 
     # order  by individual and timeline 
-    y02<-y02[order(y02[,colnames(y02)%in%id],y02$order),4]
-    
+    # y02<-y02[order(y02[,colnames(y02)%in%id],y02$order),]
+    # y02_0<-y02[y02$order<=NtimePoints_0,4]
+    # idcol <- colnames(y02)[colnames(y02) %in% id]
+    # grpidx <- split(seq_len(nrow(y02)), y02[[idcol]])
+    # 
+    # y02_1 <- unlist(Map(function(idx, ct) y02[[4]][idx][if (ct == 6) TRUE else y02$order[idx] > NtimePoints_0],
+    #                     grpidx, ctime[names(grpidx)]), use.names = FALSE)
+    # 
   }else{
-    y02<-rep(0,N*NtimePoints)
+    y02_0<-rep(0,N*NtimePoints_0)
+   # y02_1<-rep(0,N*NtimePoints_1)
   }
+  
   
   if(length(outcome12)>=1){
     y12<-dataY[dataY$Outcome%in%outcome12,]
+    y12_0<-y12[order(y12[,colnames(y12)%in%id],y12$order),4]
+    # 31/08/2026 : do not estimate weights with our model 
     # order  by individual and timeline 
-    y12<-y12[order(y12[,colnames(y12)%in%id],y12$order),4]
-    
+    # y12<-y12[order(y12[,colnames(y12)%in%id],y12$order),]
+    # y12_0<-y12[y12$order<=NtimePoints_0,4]
+    # idcol <- colnames(y12)[colnames(y12) %in% id]
+    # grpidx <- split(seq_len(nrow(y12)), y12[[idcol]])
+    # 
+    # y12_1 <- unlist(Map(function(idx, ct) y12[[4]][idx][if (ct == 6) TRUE else y12$order[idx] > NtimePoints_0],
+    #                     grpidx, ctime[names(grpidx)]), use.names = FALSE)
+    # 
+    # 
   }else{
-    y12<-rep(0,N*NtimePoints)
+    y12_0<-rep(0,N*NtimePoints_0)
+    #y12_1<-rep(0,N*NtimePoints_1)
   }
-
+  
+  #browser()
   if(objectSurvival$method=="splines"){
     res<-rep(0,N)
     out1<- tryCatch({  .Fortran("citimedep",
@@ -416,16 +492,16 @@ DYNpredIDM<-function(objectY,
                              as.double(ve01),
                              as.double(ve02),
                              as.double(ve12),
-                             as.double(y01),
-                             as.double(y02),
-                             as.double(y12),
+                             as.double(y01_0),
+                             as.double(y02_0),
+                             as.double(y12_0),
                              as.integer(p01),
                              as.integer(p02),
                              as.integer(p12),
                              as.integer(dimp01),
                              as.integer(dimp02),
                              as.integer(dimp12),
-                             as.integer(NtimePoints),
+                             as.integer(NtimePoints_0),
                              as.integer(dimnva01),
                              as.integer(dimnva02),
                              as.integer(dimnva12),
@@ -440,6 +516,8 @@ DYNpredIDM<-function(objectY,
     # Return NULL on error to skip this patient
     NULL
   })
+    
+    
   }else{
     res<-rep(0,N)
     out1<- tryCatch({   .Fortran("ciweibtimedep",
@@ -450,16 +528,16 @@ DYNpredIDM<-function(objectY,
                                 as.double(ve01),
                                 as.double(ve02),
                                 as.double(ve12),
-                                as.double(y01),
-                                as.double(y02),
-                                as.double(y12),
+                                as.double(y01_0),
+                                as.double(y02_0),
+                                as.double(y12_0),
                                 as.integer(p01),
                                 as.integer(p02),
                                 as.integer(p12),
                                 as.integer(dimp01),
                                 as.integer(dimp02),
                                 as.integer(dimp12),
-                                as.integer(NtimePoints),
+                                as.integer(NtimePoints_0),
                                 as.integer(dimnva01),
                                 as.integer(dimnva02),
                                 as.integer(dimnva12),
@@ -474,16 +552,84 @@ DYNpredIDM<-function(objectY,
       # Return NULL on error to skip this patient
       NULL
     })
+    
+    # 31/08/2026 : do not estimate weights with our model 
+    # if(isIntervalCensored){
+    # res<-rep(0,4*N)
+    # out2<- tryCatch({   .Fortran("idmciweibtimedep",
+    #                              ## input
+    #                              as.double(binit),
+    #                              as.integer(size_V),
+    #                              as.integer(N),
+    #                              as.double(ve01),
+    #                              as.double(ve02),
+    #                              as.double(ve12),
+    #                              as.double(y01_1),
+    #                              as.double(y02_1),
+    #                              as.double(y12_1),
+    #                              as.integer(p01),
+    #                              as.integer(p02),
+    #                              as.integer(p12),
+    #                              as.integer(dimp01),
+    #                              as.integer(dimp02),
+    #                              as.integer(dimp12),
+    #                              as.integer(NtimePoints_1max),
+    #                              as.integer(dimnva01),
+    #                              as.integer(dimnva02),
+    #                              as.integer(dimnva12),
+    #                              as.integer(nvat01),
+    #                              as.integer(nvat02),
+    #                              as.integer(nvat12),
+    #                              as.double(t1),
+    #                              as.double(t2),
+    #                              as.integer(ctime),
+    #                              as.integer(Ntime01),
+    #                              as.integer(Ntime02),
+    #                              as.integer(Ntime12),
+    #                              likelihood_res=as.double(res),
+    #                              PACKAGE="HIDeM")$likelihood_res
+    # }, error = function(e) {
+    #   # Return NULL on error to skip this patient
+    #   NULL
+    # })
+    # }else{out2<-NULL}
   }
   
   if(control$return.data==T){
     predicted.newdata<-dataY
   }else{predicted.newdata<-NULL}
   
-  res<-list(CIF01=ifelse(!is.null(out1),out1[1:N],NULL),
-            p00=ifelse(!is.null(out1),out1[(N+1):(2*N)],NULL),
-            p02_0=ifelse(!is.null(out1),out1[(2*N+1):(3*N)],NULL),
-            p12=ifelse(!is.null(out1),out1[(2*N+1):(3*N)],NULL),
+  if(!is.null(out1)){
+    CIF01<-out1[1:N]
+  }else{
+    CIF01<-NULL
+  }
+  
+  # 31/08/2026 : do not estimate weights with our model 
+  # if(!is.null(out2)){
+  #   BS<-sum(out2[1:N])/N
+  #   p01<-out2[(N+1):(2*N)]
+  #   p00<-out2[(2*N+1):(3*N)]
+  #   weights<-out2[(3*N+1):(4*N)]
+  # }else{
+  #   BS<-p01<-p00<-weights<-NULL
+  # }
+  # cases<-ctime
+  # Ltime<-t1
+  # Rtime<-t2
+  # res<-list(CIF01=CIF01,
+  #           BS=BS,
+  #           p01=p01,
+  #           p00=p00,
+  #           weights=weights,
+  #           cases=cases,
+  #           s=s,
+  #           horizon=horizon,
+  #           Ltime=Ltime,
+  #           Rtime=Rtime,
+  #           predicted.newdata= predicted.newdata)
+  
+  res<-list(CIF01=CIF01,
             s=s,
             horizon=horizon,
             predicted.newdata= predicted.newdata)

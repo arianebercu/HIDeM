@@ -42576,7 +42576,7 @@ end subroutine firstderivaidmlikelihoodsplinetimedep
 	double precision,dimension(no0*dimp12*Ntime)::y120
 	
 	double precision,dimension(Ntime)::y01t,y02t,y12t
-	double precision, dimension(4*no0), intent(inout)::likelihood_res
+	double precision, dimension(no0), intent(inout)::likelihood_res
 
 !	integer, dimension(16) :: indices
 	
@@ -42752,8 +42752,8 @@ end subroutine firstderivaidmlikelihoodsplinetimedep
                                 tronc01ci = 1
 								tronc02ci = 1
                         else 
-                                call fonctdep0(t0(i),the01,gl01,y01t(257:271))
-                                call fonctdep0(t0(i),the02,gl02,y02t(257:271))
+                                call fonctdep0(t0(i),the01,gl01,y01t(241:255))
+                                call fonctdep0(t0(i),the02,gl02,y02t(241:255))
                                 tronc01ci=dexp(-gl01*vet01)
 								tronc02ci=dexp(-gl02*vet02)
                         end if
@@ -42763,11 +42763,11 @@ end subroutine firstderivaidmlikelihoodsplinetimedep
                          res2,vet01,vet02,&
 						 y01t(1:240),y02t(1:240))
 						 
-						! write(6,*) 'tronc01ci',tronc01ci
-						!  write(6,*) 'tronc02ci',tronc02ci
-		     	        ! call flush(6)
-						! write(6,*) 'res2',res2
-		     	        ! call flush(6)
+					!	 write(6,*) 'tronc01ci',tronc01ci
+					!	  write(6,*) 'tronc02ci',tronc02ci
+		     	     !    call flush(6)
+					!	 write(6,*) 'res2',res2
+		     	    !     call flush(6)
 						 
 						 if(res2.eq.0.d0) then 
 							res(i)=0
@@ -42777,19 +42777,19 @@ end subroutine firstderivaidmlikelihoodsplinetimedep
 					   
 					   end if 
 					   
-					   call fonctdep(t1(i),the01,ri01,gl01,&
-								su01, dble(y01t(241:256)))
-                       call fonctdep(t1(i),the02,ri02,gl02,&
-								su02, dble(y02t(241:256)))
-					   call fonctdep(t1(i),the12,ri12,gl12,&
-								su12, dble(y12t(241:256)))
+					!   call fonctdep(t1(i),the01,ri01,gl01,&
+					!			su01, dble(y01t(241:256)))
+                     !  call fonctdep(t1(i),the02,ri02,gl02,&
+					!			su02, dble(y02t(241:256)))
+					!   call fonctdep(t1(i),the12,ri12,gl12,&
+					!			su12, dble(y12t(241:256)))
 						
 					!	write(6,*) 'res',res(i)
 		     	     !    call flush(6)
 					 
-					 res(i+no0)=dexp((gl01*vet01)+(gl02*vet02))/(tronc01ci*tronc02ci)
-				     res(i+2*no0)=ri02*vet02
-				     res(i+3*no0)=ri12*vet12
+					! res(i+no0)=dexp((gl01*vet01)+(gl02*vet02))/(tronc01ci*tronc02ci)
+				    ! res(i+2*no0)=ri02*vet02
+				    ! res(i+3*no0)=ri12*vet12
 						
 					
         end do   
@@ -42808,6 +42808,451 @@ end subroutine ciweibtimedep
 
 
 
+!============================================================================================= 
+!========================       IDM cumulative intensity         ====================================
+!========================    with baseline weibull and time dependent covariates  ============
+!======================== using gaussian quadrature 15 points ================================
+!============================================================================================= 
+
+
+    subroutine idmciweibtimedep(b0,npar0,no0,ve010,ve020,ve120,y010,y020,y120, &
+	  p01,p02,p12,dimp01,dimp02,dimp12,Ntime,dimnva01,dimnva02,dimnva12, &
+	  nva01,nva02,nva12,t00,t10,casei,Ntime01,Ntime02,Ntime12,likelihood_res)
+
+	    use commun
+        implicit none
+
+    double precision::res2,tronc01ci,tronc02ci, &
+        vet01,vet02,vet12,wi
+
+        integer::np0,i,j,l,w,k,npar0,nva01,nva02,nva12,no0, &
+	dimnva01,dimnva02, dimnva12, Ntime_index, Ntimei
+
+	integer:: p01,p02,dimp01,dimp02,Ntime,p12,dimp12, &
+	Ntime01,Ntime02,Ntime12,dbg
+
+    double precision,dimension(npar0)::b0
+	double precision,dimension(2)::the01
+	double precision,dimension(2)::the02
+    double precision,dimension(2)::the12
+
+	double precision,dimension(no0,dimnva01)::ve010
+	double precision,dimension(no0,dimnva02)::ve020
+	double precision,dimension(no0,dimnva12)::ve120
+
+	double precision,dimension(Ntime01)::y010
+	double precision,dimension(Ntime02)::y020
+	double precision,dimension(Ntime12)::y120
+	integer,dimension(no0)::casei
+
+	double precision, dimension(Ntime) :: y01t, y02t, y12t
+	double precision, dimension(4*no0):: res
+
+	double precision, dimension(4*no0), intent(inout)::likelihood_res
+
+    double precision::su01,ri01,su02,ri02,gl01,gl02,su12,ri12,gl12
+	double precision,dimension(no0)::t00,t10
+
+	! ============ ENTRY: open debug log first, before anything else ============
+	!open(newunit=dbg, file='idmci_debug.log', status='unknown', &
+	!     position='append', action='write')
+	!write(dbg,*) '=== entering idmciweibtimedep ==='
+	!write(dbg,*) 'no0=',no0,' npar0=',npar0
+	!write(dbg,*) 'nva01=',nva01,' dimnva01=',dimnva01
+	!write(dbg,*) 'nva02=',nva02,' dimnva02=',dimnva02
+	!write(dbg,*) 'nva12=',nva12,' dimnva12=',dimnva12
+	!write(dbg,*) 'Ntime=',Ntime,' Ntime01=',Ntime01,' Ntime02=',Ntime02,' Ntime12=',Ntime12
+	!flush(dbg)
+
+	! ============ guarded allocation of module-level arrays (commun) ============
+	!if (allocated(b))   deallocate(b)
+	!if (allocated(ve01)) deallocate(ve01)
+	!if (allocated(ve02)) deallocate(ve02)
+	!if (allocated(ve12)) deallocate(ve12)
+	!if (allocated(y01))  deallocate(y01)
+	!if (allocated(y02))  deallocate(y02)
+	!if (allocated(y12))  deallocate(y12)
+	!if (allocated(t0))   deallocate(t0)
+	!if (allocated(t1))   deallocate(t1)
+	
+	allocate(b(npar0))
+
+	b=b0
+
+	if(nva01.gt.0) then 
+		allocate(ve01(no0,nva01))
+		ve01=ve010
+	else 
+		allocate(ve01(no0,1))
+		ve01=0.d0
+	end if 
+	
+	if(nva02.gt.0) then 
+		allocate(ve02(no0,nva02))
+		ve02=ve020
+	else 
+		allocate(ve02(no0,1))
+		ve02=0.d0
+	end if 
+	
+	if(nva12.gt.0) then 
+		allocate(ve12(no0,nva12))
+		ve12=ve120
+	else 
+		allocate(ve12(no0,1))
+		ve12=0.d0
+	end if 
+
+
+	
+	
+	if(p01.gt.0) then 
+		allocate(y01(Ntime01))
+		y01=y010
+	else 
+		allocate(y01(no0*Ntime))
+		y01=0.d0
+	end if 
+	
+	if(p02.gt.0) then 
+		allocate(y02(Ntime02))
+		y02=y020
+	else 
+		allocate(y02(no0*Ntime))
+		y02=0.d0
+	end if 
+	
+	if(p12.gt.0) then 
+		allocate(y12(Ntime12))
+		y12=y120
+	else 
+		allocate(y12(no0*Ntime))
+		y12=0.d0
+	end if 
+
+
+
+	allocate(t0(no0),t1(no0))
+
+	t0=t00
+	t1=t10
+
+         
+	
+
+
+         do i=1,2
+            the01(i)=(b(i))*(b(i))
+         end do
+         do i=1,2
+            j = 2+i
+            the02(i)=(b(j))*(b(j))
+         end do
+		 do i=1,2
+            j = 4+i
+            the12(i)=(b(j))*(b(j))
+         end do
+
+
+
+		res = 0.d0
+!---------- calcul de la vraisemblance ------------------
+
+
+         Ntime_index=0
+               do i=1,no0
+			   
+				!write(dbg,*) 'subject',i
+		    	!flush(dbg)
+			
+			    !print *, 'subject',i
+         
+                vet01 = 0.d0
+                vet02 = 0.d0
+				vet12 = 0.d0
+
+				y01t = 0.d0
+                y02t = 0.d0
+				y12t = 0.d0
+				
+			
+			    if(casei(i).eq.0) then 
+					Ntimei = 30
+				else 
+					if(casei(i).eq.1) then 
+					Ntimei = 255
+					else 
+					Ntimei = 765
+					end if 
+				end if 
+
+                if(nva01.gt.0)then
+                        do j=1,nva01
+                                vet01 =vet01 +&
+                                b(6+j)*dble(ve01(i,j))
+                        end do
+                endif  
+ 
+                if(nva02.gt.0)then
+                        do j=1,nva02
+                                vet02 =vet02 +&
+                                b(6+nva01+j)*dble(ve02(i,j))
+                        end do
+                endif
+				
+				if(nva12.gt.0)then
+                        do j=1,nva12
+                                vet12 =vet12 +&
+                                b(6+nva01+nva02+j)*dble(ve12(i,j))
+                        end do
+                endif
+	
+			
+				if(p01.gt.0)then
+					do l=1,Ntimei
+                        do j=1,p01
+								k = Ntime_index*p01+(l-1)*p01+j
+						
+                                y01t(l) =y01t(l) +&
+                                b(6+nva01+nva02+nva12+j)*y01(k)
+                        end do
+					end do 
+                endif  
+ 
+                if(p02.gt.0)then
+					do l=1,Ntimei
+                        do j=1,p02
+								k = Ntime_index*p02+ (l-1)*p02+j
+                                y02t(l) =y02t(l) +&
+                                b(6+nva01+nva02+nva12+p01+j)*y02(k)
+                        end do
+					end do 
+                endif  
+
+                  if(p12.gt.0)then
+					do l=1,Ntimei
+                        do j=1,p12
+								k = Ntime_index*p12+ (l-1)*p12+j
+                                y12t(l) =y12t(l) +&
+                                b(6+nva01+nva02+nva12+p01+p02+j)*y12(k)
+                        end do
+					end do 
+                endif  
+				
+				if(casei(i).eq.0) then 
+					Ntime_index = Ntime_index+30
+				else 
+					if(casei(i).eq.1) then 
+					Ntime_index = Ntime_index+255
+					else 
+					Ntime_index = Ntime_index+765
+					end if 
+				end if 
+				
+				y01t=dexp(y01t)
+				y02t=dexp(y02t)
+				y12t=dexp(y12t)
+
+                vet01 = dexp(vet01)
+                vet02 = dexp(vet02)
+				vet12 = dexp(vet12)
+
+                res(i) = 0.d0
+				
+				
+				if(casei(i).eq.0) then 
+				
+				!print *, 'case=0'
+				!write(dbg,*) 'case=0'
+		    	!flush(dbg)
+				if(t1(i).eq.0.d0)then
+				                tronc01ci = 1
+								tronc02ci = 1
+                        else 
+				call fonctdep0(t1(i),the01,gl01,y01t(1:15))
+                call fonctdep0(t1(i),the02,gl02,y02t(1:15))
+				tronc01ci=dexp(-gl01*vet01)
+				tronc02ci=dexp(-gl02*vet02)
+				
+				end if 
+				res(i)=tronc01ci*tronc02ci
+				
+				if(t0(i).eq.0.d0)then
+	                            tronc01ci = 1
+								tronc02ci = 1
+                        else 
+				call fonctdep0(t0(i),the01,gl01,y01t(16:30))
+                call fonctdep0(t0(i),the02,gl02,y02t(16:30))
+				tronc01ci=dexp(gl01*vet01)
+				tronc02ci=dexp(gl02*vet02)
+				
+				end if 
+				
+				
+				res(i)=res(i)*(tronc01ci*tronc02ci)
+				
+				res(i+no0)=0
+				res(i+2*no0)=res(i)
+				res(i+3*no0)=0
+				
+				res(i)=(1-res(i))**2
+				end if 
+				
+				if(casei(i).eq.1) then 
+				
+				!print *, 'case=1'
+				!write(dbg,*) 'case=1'
+		    	!flush(dbg)
+				
+				if(t0(i).eq.0.d0)then
+                                tronc01ci = 1
+								tronc02ci = 1
+                        else 
+                                call fonctdep0(t0(i),the01,gl01,y01t(241:255))
+                                call fonctdep0(t0(i),the02,gl02,y02t(241:255))
+                                tronc01ci=dexp(-gl01*vet01)
+								tronc02ci=dexp(-gl02*vet02)
+                end if
+				
+				
+				 call  ciqgaussPL15weibtimedep(t0(i),t1(i),the01,the02,&
+                         res2,vet01,vet02,&
+						 y01t(1:240),y02t(1:240))
+						 
+						 
+			    if(res2.eq.0.d0) then 
+							res(i)=0
+						else 
+						 
+                       res(i)=res2/(tronc01ci*tronc02ci)
+					   
+			    end if 
+				
+				res(i+no0)=res(i)
+				res(i+2*no0)=0
+				res(i+3*no0)=1
+				res(i)=(1-res(i))**2
+				
+				end if 
+				
+				
+				
+				if(casei(i).GE.2) then 
+				
+				!print *, 'case>=2'
+				!write(dbg,*) 'case>=2'
+		    	!flush(dbg)
+				! 0 to 1 : for weight pi01(0,ri)
+				 if(t1(i).eq.0.d0)then
+				 res2=0
+				 else 
+				 call  ciqgaussPL15weibtimedep(0.d0,t1(i),the01,the02,&
+                         res2,vet01,vet02,&
+						 y01t(256:495),y02t(256:495))
+				end if 
+						 
+				wi=res2	
+				
+				! 0 to 1 : for weight pi01(0,li)
+				if(t0(i).eq.0.d0)then
+				res2=0
+				else 
+				  call  ciqgaussPL15weibtimedep(0.d0,t0(i),the01,the02,&
+                         res2,vet01,vet02,&
+						 y01t(511:750),y02t(511:750))
+				end if 
+				wi=wi/(1-res2)	
+				
+				
+				! 0 to 1 : for proba pi01(ri,li)
+				 if(t0(i).eq.0.d0)then
+                                tronc01ci = 1
+								tronc02ci = 1
+                        else 
+                                call fonctdep0(t0(i),the01,gl01,y01t(241:255))
+                                call fonctdep0(t0(i),the02,gl02,y02t(241:255))
+                                tronc01ci=dexp(-gl01*vet01)
+								tronc02ci=dexp(-gl02*vet02)
+                end if
+				
+				call  ciqgaussPL15weibtimedep(t0(i),t1(i),the01,the02,&
+                         res2,vet01,vet02,&
+						 y01t(1:240),y02t(1:240))
+						 
+			    if(res2.eq.0.d0) then 
+							res(i)=0
+						else 
+						 
+                       res(i)=res2/(tronc01ci*tronc02ci)
+					   
+			    end if 
+				
+				
+				
+				if(casei(i).ne.3) then 
+				
+				! 0 to 0 : for proba pi00(ri,li)
+				if(t1(i).eq.0.d0)then
+				                tronc01ci = 1
+								tronc02ci = 1
+                        else 
+				call fonctdep0(t1(i),the01,gl01,y01t(496:510))
+                call fonctdep0(t1(i),the02,gl02,y02t(496:510))
+				tronc01ci=dexp(-gl01*vet01)
+				tronc02ci=dexp(-gl02*vet02)
+				
+				end if 
+				res2=tronc01ci*tronc02ci
+				
+				if(t0(i).eq.0.d0)then
+	                            tronc01ci = 1
+								tronc02ci = 1
+                        else 
+				call fonctdep0(t0(i),the01,gl01,y01t(751:765))
+                call fonctdep0(t0(i),the02,gl02,y02t(751:765))
+				tronc01ci=dexp(gl01*vet01)
+				tronc02ci=dexp(gl02*vet02)
+				
+				end if 
+				
+				res2=res2*(tronc01ci*tronc02ci)
+				
+				res(i+no0)=res(i)
+				res(i+2*no0)=res2
+				res(i+3*no0)=wi
+				
+				res(i)=((1-res(i))**2)*wi+(1-wi)*((1-res2)**2)
+				else
+				
+				res(i+no0)=res(i)
+				res(i+2*no0)=0
+				res(i+3*no0)=wi
+				
+				res(i)=((1-res(i))**2)*wi
+				end if
+				
+				end if 
+                
+                
+						
+					
+        end do   
+ 
+
+
+        likelihood_res = res
+
+
+123     continue 
+
+!write(dbg,*) '=== finished idmciweibtimedep normally ==='
+!	close(dbg)
+
+	deallocate(b,ve01,ve02,ve12,y01,y02,y12, & 
+	t0,t1)
+	
+	
+end subroutine idmciweibtimedep
 !============================================================================================= 
 !========================          idmlLikelihood         ====================================
 !========================   with baseline M-splines       ==================================== 
@@ -42848,7 +43293,7 @@ end subroutine ciweibtimedep
 	
 	double precision,dimension(Ntime)::y01t,y02t,y12t
 
-	double precision,dimension(4*no0), intent(inout)::likelihood_res
+	double precision,dimension(no0), intent(inout)::likelihood_res
 
 	
         double precision::su01,ri01,su02,ri02,gl01,gl02,su12,ri12,gl12
@@ -43044,8 +43489,8 @@ if(p12.gt.0) then
 								tronc02ci = 1
                         else 
                                 
-								call suspdept0(t0(i),the01,nz01,su01,ri01,zi01,gl01,y01t(257:271))
-                                call suspdept0(t0(i),the02,nz02,su02,ri02,zi02,gl02,y02t(257:271))
+								call suspdept0(t0(i),the01,nz01,su01,ri01,zi01,gl01,y01t(241:255))
+                                call suspdept0(t0(i),the02,nz02,su02,ri02,zi02,gl02,y02t(241:255))
                                 tronc01ci=dexp(-gl01*vet01)
 								tronc02ci=dexp(-gl02*vet02)
                         end if
@@ -43063,12 +43508,12 @@ if(p12.gt.0) then
 					   
 					   end if 
 				  
-				  call suspdep(t1(i),the01,nz01,su01,ri01,zi01,gl01,y01t(241:256))
-                  call suspdep(t1(i),the02,nz02,su02,ri02,zi02,gl02,y02t(241:256))
-				  call suspdep(t1(i),the12,nz12,su12,ri12,zi12,gl12,y12t(241:256))
-                  res(i+no0)=dexp((gl01*vet01)+(gl02*vet02))/(tronc01ci*tronc02ci)
-				  res(i+2*no0)=ri02*vet02
-				  res(i+3*no0)=ri12*vet12
+				!  call suspdep(t1(i),the01,nz01,su01,ri01,zi01,gl01,y01t(241:256))
+                !  call suspdep(t1(i),the02,nz02,su02,ri02,zi02,gl02,y02t(241:256))
+				!  call suspdep(t1(i),the12,nz12,su12,ri12,zi12,gl12,y12t(241:256))
+                !  res(i+no0)=dexp((gl01*vet01)+(gl02*vet02))/(tronc01ci*tronc02ci)
+				!  res(i+2*no0)=ri02*vet02
+				!  res(i+3*no0)=ri12*vet12
 					
                 
           end do 

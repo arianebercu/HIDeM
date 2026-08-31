@@ -665,7 +665,8 @@ simulateDYNIDM <- function(n=100,
                            beta0=0.5, beta1=0.5,
                            alpha_y_01=0.5, alpha_slope_01=0,
                            alpha_y_02=0.5, alpha_slope_02=0,
-                           alpha_y_12=0.5, alpha_slope_12=0){
+                           alpha_y_12=0.5, alpha_slope_12=0,
+                           semi_markov=F){
   
   ##############################################################################
   ####################### check entry parameters ###############################
@@ -816,6 +817,9 @@ simulateDYNIDM <- function(n=100,
   data_long$latent.illtime<-NA
   data_long$latent.lifetime<-NA
   data_long$latent.waittime<-NA
+  data_long$error_integrand12<-0
+  data_long$T12_inferior_T01<-0
+  data_long$error_integrand12_previous<-0
   
   ## generate dropout as Viviane 
   Tdrop <- rep(administrative.censoring,n)
@@ -899,6 +903,15 @@ simulateDYNIDM <- function(n=100,
       
     }
     
+    S_12_semiMarkov <- function(tstar,i,t){
+      
+      
+      CLy<-computeCL(fixed=c(beta0,beta1),random=c(B0[i,],B1[i,]),ny=ny,time=tstar+t,alpha_y=alpha_y_12,mY=mY,sdY=sdY)
+      return(shape.waittime*(scale.waittime^shape.waittime)*((tstar)^(shape.waittime-1))*exp(CLy))
+      
+      
+    }
+    
     
     
     
@@ -917,6 +930,8 @@ simulateDYNIDM <- function(n=100,
     
     if(minInv01>0 | minInv02>0 | minInv12>0 ){
     
+      #browser()
+      #event prior to entry 
       data_long$latent.illtime[data_long$ID==i]<-0
       data_long$latent.lifetime[data_long$ID==i]<-0
       data_long$latent.waittime[data_long$ID==i]<-0
@@ -926,6 +941,7 @@ simulateDYNIDM <- function(n=100,
     ## if S(Tdrop) > u, ie maxInv < 0, then subject is censored
     if(maxInv01<0 & maxInv02<0){
       
+      #paste0(paste0("For subject ",i," censored at end "))
       data_long$latent.illtime[data_long$ID==i]<-100000000
       data_long$latent.lifetime[data_long$ID==i]<-100000000
       data_long$latent.waittime[data_long$ID==i]<-100000000
@@ -966,6 +982,8 @@ simulateDYNIDM <- function(n=100,
 
       # attention needed integrate otherwise did not correct for survival 
       # 23/04/2026
+      
+      if(semi_markov==F){
  
       u12_corrige <- U12[i]*exp(-integrate(S_12,lower=0,upper=T_01,i=i)$value)
       
@@ -974,12 +992,15 @@ simulateDYNIDM <- function(n=100,
 
       if(minInv12>0){
       
+        # had 1->2 before T01
+        data_long$T12_inferior_T01[data_long$ID==i]<-1
         data_long$latent.illtime[data_long$ID==i]<-0
         data_long$latent.lifetime[data_long$ID==i]<-0
         data_long$latent.waittime[data_long$ID==i]<-0
         next} 
       
       if(maxInv12<0){ # censored before death 
+        paste0(paste0("For subject ",i," censored 01 before death "))
         data_long$latent.waittime[data_long$ID==i]<-100000000
         next} # had the event prior to the time 
       
@@ -996,14 +1017,65 @@ simulateDYNIDM <- function(n=100,
       }
       
       data_long$latent.waittime[data_long$ID==i]<-T_12
+      
+      }else{
+        
+      
+        
+        minInv12 <- S_inv(time = 0,f=S_12_semiMarkov, val = U12[i], di = i)
+        maxInv12 <- S_inv(time = administrative.censoring,f=S_12_semiMarkov, val = U12[i], di = i)
+        
+        if(minInv12>0){
+          
+          # had 1->2 before T01
+          data_long$T12_inferior_T01[data_long$ID==i]<-1
+          data_long$latent.illtime[data_long$ID==i]<-0
+          data_long$latent.lifetime[data_long$ID==i]<-0
+          data_long$latent.waittime[data_long$ID==i]<-0
+          next} 
+        
+        if(maxInv12<0){ # censored before death 
+          paste0(paste0("For subject ",i," censored 01 before death "))
+          data_long$latent.waittime[data_long$ID==i]<-100000000
+          next} # had the event prior to the time 
+        
+        T_12 <- try(
+          uniroot(
+            function(time) S_inv(time, f = S_12_semiMarkov, val = U12[i], di = i,t=T_01),
+            interval = c(0, administrative.censoring)
+          )$root,
+          silent = TRUE
+        )
+        
+        if(inherits(T_12, "try-error")){
+          T_12 <- 100000000
+        }
+        data_long$latent.waittime[data_long$ID==i]<-T_01+T_12
+      }
+      
+    
     }else{
       
 
       # check if infinity in integrand over C --> T_02
       # if it is the case do not consider this case 
-      S_surv <- Vectorize(function(tstar, i,ci) {
+      S_surv <- Vectorize(function(tstar, i,ci,tdeath) {
         lower<-ci
+        res12 <- integrate(S_12, lower = tstar, upper = tdeath, i = i)$value
+        res01 <- integrate(S_01, lower = lower, upper = tstar, i = i)$value
+        res02 <- integrate(S_02, lower = lower, upper = tstar, i = i)$value
         
+        #res <- exp(-res01 - res02 + res12) * S_01(tstar, i)
+        if(tdeath<administrative.censoring){
+        res <- exp(-res01 - res02 -res12) * S_01(tstar, i)* S_12(tdeath, i)
+        }else{
+          res <- exp(-res01 - res02 -res12) * S_01(tstar, i)
+        }
+        return(res)
+      })
+      
+      S_surv_previous <- Vectorize(function(tstar, i,ci) {
+        lower<-ci
         res12 <- integrate(S_12, lower = lower, upper = tstar, i = i)$value
         res01 <- integrate(S_01, lower = lower, upper = tstar, i = i)$value
         res02 <- integrate(S_02, lower = lower, upper = tstar, i = i)$value
@@ -1015,18 +1087,31 @@ simulateDYNIDM <- function(n=100,
       ci<-data_long$visit[data_long$ID==i & data_long$visit<=T_02]
       ci<-ifelse(length(ci)==0,0,max(ci))
       ci<-min(ci,administrative.censoring,T_02)
-      check<-try(integrate(S_surv,lower=ci,upper=min(T_02,administrative.censoring),i=i,ci=ci)$value
+      tdeath<-min(max(ci,T_02),administrative.censoring)
+      check<-try(integrate(S_surv,lower=ci,upper=min(T_02,administrative.censoring),i=i,ci=ci,tdeath=tdeath)$value
+                 ,
+                 silent = TRUE
+      )
+      
+      check_previous<-try(integrate(S_surv_previous,lower=ci,upper=min(T_02,administrative.censoring),i=i,ci=ci)$value
                  ,
                  silent = TRUE
       )
       #check T_12 identifiable à T_02
       
+      if(inherits(check_previous, "try-error")|check_previous>1e+6 | check_previous < 0){
+      data_long$error_integrand12_previous[data_long$ID==i]<-1
+      }
+      
       if(inherits(check, "try-error")){
+        browser()
         check <- 1e+8
+        data_long$error_integrand12[data_long$ID==i]<-1
       }
       
       if(check>1e+6 | check < 0){
    
+        data_long$error_integrand12[data_long$ID==i]<-1
         data_long$latent.illtime[data_long$ID==i]<-0
         data_long$latent.lifetime[data_long$ID==i]<-0
         data_long$latent.waittime[data_long$ID==i]<-0
