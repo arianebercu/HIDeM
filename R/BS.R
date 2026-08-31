@@ -140,10 +140,10 @@ BS<-function(pred,
   }else{ #t1=t2
     
     ctime<-ifelse(t1>horizon,0,NA)
-    ctime<-ifelse((t1>s) & (t1<=horizon) & (idm==0) & (t3<horizon) & (idd==1),1,ctime)
+    ctime<-ifelse((t1>s) & (t1<=horizon) & (idm==1),1,ctime)
     ctime<-ifelse((t1>s) & (t1<=horizon) & (idm==0) & (t3>horizon),2,ctime)
-    ctime<-ifelse((t1>s) & (t1<=horizon) & (idm==1),3,ctime)
-    ctime<-ifelse((t1<s) & (idm==0) & (idd==1) & (t3<horizon)& (t3>s),4,ctime)
+    ctime<-ifelse((t1<s) & (idm==0) & (idd==1) & (t3<horizon)& (t3>s),3,ctime)
+    ctime<-ifelse((t1>s) & (t1<=horizon) & (idm==0) & (t3<horizon) & (idd==1),4,ctime)
     ctime<-ifelse((t1<s) & (idm==0) & (t3>horizon),5,ctime)
     
     if(sum(is.na(ctime))>0){
@@ -251,7 +251,7 @@ BS<-function(pred,
     w1<-unlist(lapply(c(1:N),function(x){
       
       if(ctime[x]==0){return(0)}
-      if(ctime[x]==3){return(1)}
+      if(ctime[x]==1){return(1)}
       if(ctime[x]%in%c(2,5)){
         predtiming<-predict(objectSurvival,s=t1[x],t=horizon,conf.int=F,nsim=1)
         p01<-predtiming$p01
@@ -269,7 +269,7 @@ BS<-function(pred,
       }
       
       
-      if(ctime[x]%in%c(1,4)){
+      if(ctime[x]%in%c(3,4)){
         
         predtiming<-predict(objectSurvival,s=t1[x],t=t3[x],conf.int=F,nsim=1)
         p01<-predtiming$p01
@@ -291,13 +291,13 @@ BS<-function(pred,
     w0<-unlist(lapply(c(1:N),function(x){
       
       if(ctime[x]==0){return(1)}
-      if(ctime[x]==3){return(0)}
-      if(ctime[x]%in%c(1,2)){
+      if(ctime[x]==1){return(0)}
+      if(ctime[x]%in%c(4,2)){
         return(1-w1[x])
       }
       
       
-      if(ctime[x]==4){
+      if(ctime[x]==3){
         
         predtiming<-predict(objectSurvival,s=t1[x],t=t3[x],conf.int=F,nsim=1)
         p01<-predtiming$p01
