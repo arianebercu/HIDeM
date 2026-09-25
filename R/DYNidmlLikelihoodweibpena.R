@@ -41,7 +41,6 @@ DYNidmlLikelihoodweibpena<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
   
   res<-0
   b0<-b
-  #browser()
   res<-.Fortran("idmlikelihoodweibtimedepgrid",
                 ## input
                 as.double(b),
@@ -116,7 +115,7 @@ DYNidmlLikelihoodweibpena<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
   }
   
   if(nva12>0){
-  b12<-b[(6+1+nva01+nva02):npar][penalty.factor[(nva01+nva02+1):(nva01+nva02+nva12)]==1]
+  b12<-b[(6+1+nva01+nva02):(nva01+nva02+nva12+6)][penalty.factor[(nva01+nva02+1):(nva01+nva02+nva12)]==1]
   penalty.12<-penalty.weights[(1+nva01+nva02):(nva01+nva02+nva12)][penalty.factor[(nva01+nva02+1):(nva01+nva02+nva12)]==1]
   if(p12>0){
     b12<-c(b12,b[(nva01+nva02+nva12+p01+p02+7):(nva01+nva02+nva12+6+p01+p02+p12)][penalty.factor[(nva01+nva02+nva12+p01+p02+1):(nva01+nva02+nva12+p01+p02+p12)]==1])
@@ -188,9 +187,9 @@ gaussDYNidmlLikelihoodweibpena<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,
                                     y01,y02,y12,p01,p02,p12,
                                     dimp01,dimp02,dimp12,Ntime,time,lambda,alpha,penalty.factor,penalty,penalty.weights){
   
+ 
   res<-0
   b0<-b
-  
   res<-.Fortran("idmlikelihoodweibtimedep",
            ## input
            as.double(b),
@@ -227,10 +226,14 @@ gaussDYNidmlLikelihoodweibpena<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,
            likelihood_res=as.double(res),
            PACKAGE="HIDeM")$likelihood_res
 
+  
+  if(res%in%c(-1e9,1e9) ){return(as.double(res))}
+  
   b<-rep(NA,npar)
   b[fix==0]<-b0
   b[fix==1]<-bfix
   
+
   if(nva01>0){
     b01<-b[(6+1):(6+nva01)][penalty.factor[1:nva01]==1]
     penalty.01<-penalty.weights[(1):(nva01)][penalty.factor[1:nva01]==1]
@@ -266,7 +269,7 @@ gaussDYNidmlLikelihoodweibpena<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,
   }
   
   if(nva12>0){
-    b12<-b[(6+1+nva01+nva02):npar][penalty.factor[(nva01+nva02+1):(nva01+nva02+nva12)]==1]
+    b12<-b[(6+1+nva01+nva02):(nva01+nva02+nva12+6)][penalty.factor[(nva01+nva02+1):(nva01+nva02+nva12)]==1]
     penalty.12<-penalty.weights[(1+nva01+nva02):(nva01+nva02+nva12)][penalty.factor[(nva01+nva02+1):(nva01+nva02+nva12)]==1]
     if(p12>0){
       b12<-c(b12,b[(nva01+nva02+nva12+p01+p02+7):(nva01+nva02+nva12+6+p01+p02+p12)][penalty.factor[(nva01+nva02+nva12+p01+p02+1):(nva01+nva02+nva12+p01+p02+p12)]==1])

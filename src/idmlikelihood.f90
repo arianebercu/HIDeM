@@ -4451,6 +4451,754 @@ if(p01.gt.0) then
 
         end subroutine suspdep
 
+
+        subroutine suspdeppred(xp,x,the,n,su,lam,zi,gl,y)
+
+        implicit none
+        
+        integer::j,k,n,i,jtwm1
+        double precision::x,ht,ht2,h2,som,su,lam,htm,h2t,h3,h2n,hn, &
+        im,im1,im2,mm1,mm3,ht3,hht,h4,h3m,hh3,hh2,mm,im3,mm2,h,gl,hh,&
+		gl1,gl2,xp
+        double precision,dimension(-2:(n+3))::zi
+		double precision,dimension(16)::y
+        double precision,dimension(-2:(n-1))::the 
+		
+		double precision::a,b,dx,xm,xr,&
+		d1mach(5),epmach,uflow,xx
+		double precision,dimension(8)::xgk,wgk
+	    double precision,dimension(4)::wg
+         save wgk,xgk
+		 
+		 D1MACH(1)=2.23D-308
+    	D1MACH(2)=1.79D+308
+    	D1MACH(3)=1.11D-16
+    	D1MACH(4)=2.22D-16
+    	D1MACH(5)=0.301029995663981195D0
+
+    	epmach = d1mach(4)
+    	uflow = d1mach(1)
+		
+		
+		
+		wg(1)=0.129484966168869693270611432679082d0
+		wg(2)=0.279705391489276667901467771423780d0
+    	wg(3)=0.381830050505118944950369775488975d0
+    	wg(4)=0.417959183673469387755102040816327d0
+
+    	xgk(1)=0.991455371120812639206854697526329d0
+    	xgk(2)=0.949107912342758524526189684047851d0
+    	xgk(3)=0.864864423359769072789712788640926d0
+    	xgk(4)=0.741531185599394439863864773280788d0
+    	xgk(5)=0.586087235467691130294144838258730d0
+    	xgk(6)=0.405845151377397166906606412076961d0
+    	xgk(7)=0.207784955007898467600689403773245d0
+    	xgk(8)=0.000000000000000000000000000000000d0
+
+    	wgk(1)=0.022935322010529224963732008058970d0
+    	wgk(2)=0.063092092629978553290700663189204d0
+    	wgk(3)=0.104790010322250183839876322541518d0
+    	wgk(4)=0.140653259715525918745189590510238d0
+    	wgk(5)=0.169004726639267902826583426598550d0
+    	wgk(6)=0.190350578064785409913256402421014d0
+    	wgk(7)=0.204432940075298892414161999234649d0
+    	wgk(8)=0.209482141084727828012999174891714d0
+     
+		b=x
+		a=xp
+		
+		
+		xm = 0.5d+00*(b+a)
+        xr = 0.5d+00*(b-a)
+		
+		if(a.eq.b)then
+               su = 1.d0
+                gl = 0.d0
+                lam = 0.d0
+            else
+	
+		! xm hors indice va rendre 1 - ici pas besoin de ce check vu qu'on 
+		! donne nous même les temps --> soit sans erreur 
+		
+		if(xm.ge.zi(n))then 
+                lam = 4.d0*the(n-1)/(zi(n)-zi(n-1))
+        else
+		 if (xm < zi(1)) then
+		  lam = 0.d0
+		  else 
+			j = count(zi(1:(n-1)) <= xm)
+			
+			ht = xm-zi(j)
+			htm= xm-zi(j-1)
+			h2t= xm-zi(j+2)
+			ht2 = zi(j+1)-xm
+			ht3 = zi(j+3)-xm
+			hht = xm-zi(j-2)
+							
+			h = zi(j+1)-zi(j)
+			hh= zi(j+1)-zi(j-1)
+			h2= zi(j+2)-zi(j)
+			h3= zi(j+3)-zi(j)
+			h4= zi(j+4)-zi(j)
+			h3m= zi(j+3)-zi(j-1)
+			h2n=zi(j+2)-zi(j-1)
+			hn= zi(j+1)-zi(j-2)
+			hh3 = zi(j+1)-zi(j-3)
+			hh2 = zi(j+2)-zi(j-2)
+							
+			mm3 = ((4.d0*ht2*ht2*ht2)/(h*hh*hn*hh3))
+			mm2 = ((4.d0*hht*ht2*ht2)/(hh2*hh*h*hn))+((-4.d0*h2t*htm &
+							*ht2)/(hh2*h2n*hh*h))+((4.d0*h2t*h2t*ht)/(hh2*h2*h*h2n))
+			mm1 = (4.d0*(htm*htm*ht2)/(h3m*h2n*hh*h))+((-4.d0*htm*ht* &
+							h2t)/(h3m*h2*h*h2n))+((4.d0*ht3*ht*ht)/(h3m*h3*h2*h))
+			mm  = 4.d0*(ht*ht*ht)/(h4*h3*h2*h)
+							
+			
+			lam = (the(j-3)*mm3)+(the(j-2)*mm2)+(the(j-1)*mm1)+(the(j)*mm)
+			end if 
+		end if 
+        
+		    
+		gl = lam*y(1)*wgk(8) 
+
+		jtwm1 = 4*2-1
+        dx=xr*xgk(jtwm1)
+        xx = xm+dx
+		
+        if(xx.ge.zi(n))then 
+                lam = 4.d0*the(n-1)/(zi(n)-zi(n-1))
+        else
+		if (xx< zi(1)) then
+		  lam = 0.d0
+		  else 
+		  j = count(zi(1:(n-1)) <= xx)
+		
+        ht = xx-zi(j)
+        htm= xx-zi(j-1)
+        h2t= xx-zi(j+2)
+        ht2 = zi(j+1)-xx
+        ht3 = zi(j+3)-xx
+        hht = xx-zi(j-2)
+						
+        h = zi(j+1)-zi(j)
+        hh= zi(j+1)-zi(j-1)
+        h2= zi(j+2)-zi(j)
+        h3= zi(j+3)-zi(j)
+        h4= zi(j+4)-zi(j)
+        h3m= zi(j+3)-zi(j-1)
+        h2n=zi(j+2)-zi(j-1)
+        hn= zi(j+1)-zi(j-2)
+        hh3 = zi(j+1)-zi(j-3)
+        hh2 = zi(j+2)-zi(j-2)
+						
+        mm3 = ((4.d0*ht2*ht2*ht2)/(h*hh*hn*hh3))
+        mm2 = ((4.d0*hht*ht2*ht2)/(hh2*hh*h*hn))+((-4.d0*h2t*htm &
+                        *ht2)/(hh2*h2n*hh*h))+((4.d0*h2t*h2t*ht)/(hh2*h2*h*h2n))
+        mm1 = (4.d0*(htm*htm*ht2)/(h3m*h2n*hh*h))+((-4.d0*htm*ht* &
+                        h2t)/(h3m*h2*h*h2n))+((4.d0*ht3*ht*ht)/(h3m*h3*h2*h))
+        mm  = 4.d0*(ht*ht*ht)/(h4*h3*h2*h)
+						
+						
+        lam = (the(j-3)*mm3)+(the(j-2)*mm2)+(the(j-1)*mm1)+(the(j)*mm)
+        end if 
+		end if 
+        
+		gl1=lam*y(3) 
+        xx = xm-dx
+        if(xx.ge.zi(n))then 
+                lam = 4.d0*the(n-1)/(zi(n)-zi(n-1))
+        else
+		if (xx< zi(1)) then
+		  lam = 0.d0
+		  else 
+		j = count(zi(1:(n-1)) <= xx)
+						
+        ht = xx-zi(j)
+        htm= xx-zi(j-1)
+        h2t= xx-zi(j+2)
+        ht2 = zi(j+1)-xx
+        ht3 = zi(j+3)-xx
+        hht = xx-zi(j-2)
+						
+        h = zi(j+1)-zi(j)
+        hh= zi(j+1)-zi(j-1)
+        h2= zi(j+2)-zi(j)
+        h3= zi(j+3)-zi(j)
+        h4= zi(j+4)-zi(j)
+        h3m= zi(j+3)-zi(j-1)
+        h2n=zi(j+2)-zi(j-1)
+        hn= zi(j+1)-zi(j-2)
+        hh3 = zi(j+1)-zi(j-3)
+        hh2 = zi(j+2)-zi(j-2)
+						
+        mm3 = ((4.d0*ht2*ht2*ht2)/(h*hh*hn*hh3))
+        mm2 = ((4.d0*hht*ht2*ht2)/(hh2*hh*h*hn))+((-4.d0*h2t*htm &
+                        *ht2)/(hh2*h2n*hh*h))+((4.d0*h2t*h2t*ht)/(hh2*h2*h*h2n))
+        mm1 = (4.d0*(htm*htm*ht2)/(h3m*h2n*hh*h))+((-4.d0*htm*ht* &
+                        h2t)/(h3m*h2*h*h2n))+((4.d0*ht3*ht*ht)/(h3m*h3*h2*h))
+        mm  = 4.d0*(ht*ht*ht)/(h4*h3*h2*h)
+						
+						
+        lam = (the(j-3)*mm3)+(the(j-2)*mm2)+(the(j-1)*mm1)+(the(j)*mm)
+        end if 
+		end if 
+        
+		gl2=lam*y(2)   ! svgrd valeurs fct f a drte du centre
+	       
+		gl=gl+wgk(jtwm1)*(gl1+gl2)
+		   
+		jtwm1 = 3*2
+        dx=xr*xgk(jtwm1)
+        xx = xm+dx
+        if(xx.ge.zi(n))then 
+                lam = 4.d0*the(n-1)/(zi(n)-zi(n-1))
+        else
+		if (xx< zi(1)) then
+		  lam = 0.d0
+		  else 
+		j = count(zi(1:(n-1)) <= xx)
+		
+        ht = xx-zi(j)
+        htm= xx-zi(j-1)
+        h2t= xx-zi(j+2)
+        ht2 = zi(j+1)-xx
+        ht3 = zi(j+3)-xx
+        hht = xx-zi(j-2)
+						
+        h = zi(j+1)-zi(j)
+        hh= zi(j+1)-zi(j-1)
+        h2= zi(j+2)-zi(j)
+        h3= zi(j+3)-zi(j)
+        h4= zi(j+4)-zi(j)
+        h3m= zi(j+3)-zi(j-1)
+        h2n=zi(j+2)-zi(j-1)
+        hn= zi(j+1)-zi(j-2)
+        hh3 = zi(j+1)-zi(j-3)
+        hh2 = zi(j+2)-zi(j-2)
+						
+        mm3 = ((4.d0*ht2*ht2*ht2)/(h*hh*hn*hh3))
+        mm2 = ((4.d0*hht*ht2*ht2)/(hh2*hh*h*hn))+((-4.d0*h2t*htm &
+                        *ht2)/(hh2*h2n*hh*h))+((4.d0*h2t*h2t*ht)/(hh2*h2*h*h2n))
+        mm1 = (4.d0*(htm*htm*ht2)/(h3m*h2n*hh*h))+((-4.d0*htm*ht* &
+                        h2t)/(h3m*h2*h*h2n))+((4.d0*ht3*ht*ht)/(h3m*h3*h2*h))
+        mm  = 4.d0*(ht*ht*ht)/(h4*h3*h2*h)
+						
+						
+        lam = (the(j-3)*mm3)+(the(j-2)*mm2)+(the(j-1)*mm1)+(the(j)*mm)
+        end if 
+		end if 
+        gl1=lam*y(5)
+        xx = xm-dx
+        if(xx.ge.zi(n))then 
+                lam = 4.d0*the(n-1)/(zi(n)-zi(n-1))
+        else
+		if (xx< zi(1)) then
+		  lam = 0.d0
+		  else 
+		j = count(zi(1:(n-1)) <= xx)
+						
+        ht = xx-zi(j)
+        htm= xx-zi(j-1)
+        h2t= xx-zi(j+2)
+        ht2 = zi(j+1)-xx
+        ht3 = zi(j+3)-xx
+        hht = xx-zi(j-2)
+						
+        h = zi(j+1)-zi(j)
+        hh= zi(j+1)-zi(j-1)
+        h2= zi(j+2)-zi(j)
+        h3= zi(j+3)-zi(j)
+        h4= zi(j+4)-zi(j)
+        h3m= zi(j+3)-zi(j-1)
+        h2n=zi(j+2)-zi(j-1)
+        hn= zi(j+1)-zi(j-2)
+        hh3 = zi(j+1)-zi(j-3)
+        hh2 = zi(j+2)-zi(j-2)
+						
+        mm3 = ((4.d0*ht2*ht2*ht2)/(h*hh*hn*hh3))
+        mm2 = ((4.d0*hht*ht2*ht2)/(hh2*hh*h*hn))+((-4.d0*h2t*htm &
+                        *ht2)/(hh2*h2n*hh*h))+((4.d0*h2t*h2t*ht)/(hh2*h2*h*h2n))
+        mm1 = (4.d0*(htm*htm*ht2)/(h3m*h2n*hh*h))+((-4.d0*htm*ht* &
+                        h2t)/(h3m*h2*h*h2n))+((4.d0*ht3*ht*ht)/(h3m*h3*h2*h))
+        mm  = 4.d0*(ht*ht*ht)/(h4*h3*h2*h)
+						
+						
+        lam = (the(j-3)*mm3)+(the(j-2)*mm2)+(the(j-1)*mm1)+(the(j)*mm)
+        end if 
+		end if 
+        gl2=lam*y(4)   ! svgrd valeurs fct f a drte du centre
+	       
+		gl=gl+wgk(jtwm1)*(gl1+gl2)
+		   
+		jtwm1 = 3*2-1
+        dx=xr*xgk(jtwm1)
+        xx = xm+dx
+        if(xx.ge.zi(n))then 
+                lam = 4.d0*the(n-1)/(zi(n)-zi(n-1))
+        else
+		if (xx< zi(1)) then
+		  lam = 0.d0
+		  else 
+		j = count(zi(1:(n-1)) <= xx)
+						
+        ht = xx-zi(j)
+        htm= xx-zi(j-1)
+        h2t= xx-zi(j+2)
+        ht2 = zi(j+1)-xx
+        ht3 = zi(j+3)-xx
+        hht = xx-zi(j-2)
+						
+        h = zi(j+1)-zi(j)
+        hh= zi(j+1)-zi(j-1)
+        h2= zi(j+2)-zi(j)
+        h3= zi(j+3)-zi(j)
+        h4= zi(j+4)-zi(j)
+        h3m= zi(j+3)-zi(j-1)
+        h2n=zi(j+2)-zi(j-1)
+        hn= zi(j+1)-zi(j-2)
+        hh3 = zi(j+1)-zi(j-3)
+        hh2 = zi(j+2)-zi(j-2)
+						
+        mm3 = ((4.d0*ht2*ht2*ht2)/(h*hh*hn*hh3))
+        mm2 = ((4.d0*hht*ht2*ht2)/(hh2*hh*h*hn))+((-4.d0*h2t*htm &
+                        *ht2)/(hh2*h2n*hh*h))+((4.d0*h2t*h2t*ht)/(hh2*h2*h*h2n))
+        mm1 = (4.d0*(htm*htm*ht2)/(h3m*h2n*hh*h))+((-4.d0*htm*ht* &
+                        h2t)/(h3m*h2*h*h2n))+((4.d0*ht3*ht*ht)/(h3m*h3*h2*h))
+        mm  = 4.d0*(ht*ht*ht)/(h4*h3*h2*h)
+						
+						
+        lam = (the(j-3)*mm3)+(the(j-2)*mm2)+(the(j-1)*mm1)+(the(j)*mm)
+        end if 
+		end if 
+		
+        gl1=lam*y(7) 
+        xx = xm-dx
+        if(xx.ge.zi(n))then 
+                lam = 4.d0*the(n-1)/(zi(n)-zi(n-1))
+        else
+		if (xx< zi(1)) then
+		  lam = 0.d0
+		  else 
+		j = count(zi(1:(n-1)) <= xx)
+		
+        ht = xx-zi(j)
+        htm= xx-zi(j-1)
+        h2t= xx-zi(j+2)
+        ht2 = zi(j+1)-xx
+        ht3 = zi(j+3)-xx
+        hht = xx-zi(j-2)
+						
+        h = zi(j+1)-zi(j)
+        hh= zi(j+1)-zi(j-1)
+        h2= zi(j+2)-zi(j)
+        h3= zi(j+3)-zi(j)
+        h4= zi(j+4)-zi(j)
+        h3m= zi(j+3)-zi(j-1)
+        h2n=zi(j+2)-zi(j-1)
+        hn= zi(j+1)-zi(j-2)
+        hh3 = zi(j+1)-zi(j-3)
+        hh2 = zi(j+2)-zi(j-2)
+						
+        mm3 = ((4.d0*ht2*ht2*ht2)/(h*hh*hn*hh3))
+        mm2 = ((4.d0*hht*ht2*ht2)/(hh2*hh*h*hn))+((-4.d0*h2t*htm &
+                        *ht2)/(hh2*h2n*hh*h))+((4.d0*h2t*h2t*ht)/(hh2*h2*h*h2n))
+        mm1 = (4.d0*(htm*htm*ht2)/(h3m*h2n*hh*h))+((-4.d0*htm*ht* &
+                        h2t)/(h3m*h2*h*h2n))+((4.d0*ht3*ht*ht)/(h3m*h3*h2*h))
+        mm  = 4.d0*(ht*ht*ht)/(h4*h3*h2*h)
+						
+						
+        lam = (the(j-3)*mm3)+(the(j-2)*mm2)+(the(j-1)*mm1)+(the(j)*mm)
+        end if 
+		end if 
+        gl2=lam*y(6)   ! svgrd valeurs fct f a drte du centre
+	    gl=gl+wgk(jtwm1)*(gl1+gl2)
+		   
+		jtwm1 = 2*2
+        dx=xr*xgk(jtwm1)
+        xx = xm+dx
+        if(xx.ge.zi(n))then 
+                lam = 4.d0*the(n-1)/(zi(n)-zi(n-1))
+        else
+		if (xx< zi(1)) then
+		  lam = 0.d0
+		  else 
+		j = count(zi(1:(n-1)) <= xx)
+						
+        ht = xx-zi(j)
+        htm= xx-zi(j-1)
+        h2t= xx-zi(j+2)
+        ht2 = zi(j+1)-xx
+        ht3 = zi(j+3)-xx
+        hht = xx-zi(j-2)
+						
+        h = zi(j+1)-zi(j)
+        hh= zi(j+1)-zi(j-1)
+        h2= zi(j+2)-zi(j)
+        h3= zi(j+3)-zi(j)
+        h4= zi(j+4)-zi(j)
+        h3m= zi(j+3)-zi(j-1)
+        h2n=zi(j+2)-zi(j-1)
+        hn= zi(j+1)-zi(j-2)
+        hh3 = zi(j+1)-zi(j-3)
+        hh2 = zi(j+2)-zi(j-2)
+						
+        mm3 = ((4.d0*ht2*ht2*ht2)/(h*hh*hn*hh3))
+        mm2 = ((4.d0*hht*ht2*ht2)/(hh2*hh*h*hn))+((-4.d0*h2t*htm &
+                        *ht2)/(hh2*h2n*hh*h))+((4.d0*h2t*h2t*ht)/(hh2*h2*h*h2n))
+        mm1 = (4.d0*(htm*htm*ht2)/(h3m*h2n*hh*h))+((-4.d0*htm*ht* &
+                        h2t)/(h3m*h2*h*h2n))+((4.d0*ht3*ht*ht)/(h3m*h3*h2*h))
+        mm  = 4.d0*(ht*ht*ht)/(h4*h3*h2*h)
+						
+						
+        lam = (the(j-3)*mm3)+(the(j-2)*mm2)+(the(j-1)*mm1)+(the(j)*mm)
+        end if 
+		end if 
+		
+        gl1=lam*y(9)
+        xx = xm-dx
+        if(xx.ge.zi(n))then 
+                lam = 4.d0*the(n-1)/(zi(n)-zi(n-1))
+        else
+		if (xx< zi(1)) then
+		  lam = 0.d0
+		  else 
+		j = count(zi(1:(n-1)) <= xx)
+		
+        ht = xx-zi(j)
+        htm= xx-zi(j-1)
+        h2t= xx-zi(j+2)
+        ht2 = zi(j+1)-xx
+        ht3 = zi(j+3)-xx
+        hht = xx-zi(j-2)
+						
+        h = zi(j+1)-zi(j)
+        hh= zi(j+1)-zi(j-1)
+        h2= zi(j+2)-zi(j)
+        h3= zi(j+3)-zi(j)
+        h4= zi(j+4)-zi(j)
+        h3m= zi(j+3)-zi(j-1)
+        h2n=zi(j+2)-zi(j-1)
+        hn= zi(j+1)-zi(j-2)
+        hh3 = zi(j+1)-zi(j-3)
+        hh2 = zi(j+2)-zi(j-2)
+						
+        mm3 = ((4.d0*ht2*ht2*ht2)/(h*hh*hn*hh3))
+        mm2 = ((4.d0*hht*ht2*ht2)/(hh2*hh*h*hn))+((-4.d0*h2t*htm &
+                        *ht2)/(hh2*h2n*hh*h))+((4.d0*h2t*h2t*ht)/(hh2*h2*h*h2n))
+        mm1 = (4.d0*(htm*htm*ht2)/(h3m*h2n*hh*h))+((-4.d0*htm*ht* &
+                        h2t)/(h3m*h2*h*h2n))+((4.d0*ht3*ht*ht)/(h3m*h3*h2*h))
+        mm  = 4.d0*(ht*ht*ht)/(h4*h3*h2*h)
+						
+						
+        lam = (the(j-3)*mm3)+(the(j-2)*mm2)+(the(j-1)*mm1)+(the(j)*mm)
+        end if 
+		end if 
+		
+        gl2=lam*y(8)   ! svgrd valeurs fct f a drte du centre
+	    gl=gl+wgk(jtwm1)*(gl1+gl2)
+		
+		jtwm1 = 2*2-1
+        dx=xr*xgk(jtwm1)
+        xx = xm+dx
+        if(xx.ge.zi(n))then 
+                lam = 4.d0*the(n-1)/(zi(n)-zi(n-1))
+        else
+		if (xx< zi(1)) then
+		  lam = 0.d0
+		  else 
+		j = count(zi(1:(n-1)) <= xx)
+						
+        ht = xx-zi(j)
+        htm= xx-zi(j-1)
+        h2t= xx-zi(j+2)
+        ht2 = zi(j+1)-xx
+        ht3 = zi(j+3)-xx
+        hht = xx-zi(j-2)
+						
+        h = zi(j+1)-zi(j)
+        hh= zi(j+1)-zi(j-1)
+        h2= zi(j+2)-zi(j)
+        h3= zi(j+3)-zi(j)
+        h4= zi(j+4)-zi(j)
+        h3m= zi(j+3)-zi(j-1)
+        h2n=zi(j+2)-zi(j-1)
+        hn= zi(j+1)-zi(j-2)
+        hh3 = zi(j+1)-zi(j-3)
+        hh2 = zi(j+2)-zi(j-2)
+						
+        mm3 = ((4.d0*ht2*ht2*ht2)/(h*hh*hn*hh3))
+        mm2 = ((4.d0*hht*ht2*ht2)/(hh2*hh*h*hn))+((-4.d0*h2t*htm &
+                        *ht2)/(hh2*h2n*hh*h))+((4.d0*h2t*h2t*ht)/(hh2*h2*h*h2n))
+        mm1 = (4.d0*(htm*htm*ht2)/(h3m*h2n*hh*h))+((-4.d0*htm*ht* &
+                        h2t)/(h3m*h2*h*h2n))+((4.d0*ht3*ht*ht)/(h3m*h3*h2*h))
+        mm  = 4.d0*(ht*ht*ht)/(h4*h3*h2*h)
+						
+						
+        lam = (the(j-3)*mm3)+(the(j-2)*mm2)+(the(j-1)*mm1)+(the(j)*mm)
+        end if 
+		end if 
+		gl1=lam*y(11) 
+        xx = xm-dx
+        if(xx.ge.zi(n))then 
+                lam = 4.d0*the(n-1)/(zi(n)-zi(n-1))
+        else
+		if (xx< zi(1)) then
+		  lam = 0.d0
+		  else 
+		j = count(zi(1:(n-1)) <= xx)
+						
+        ht = xx-zi(j)
+        htm= xx-zi(j-1)
+        h2t= xx-zi(j+2)
+        ht2 = zi(j+1)-xx
+        ht3 = zi(j+3)-xx
+        hht = xx-zi(j-2)
+						
+        h = zi(j+1)-zi(j)
+        hh= zi(j+1)-zi(j-1)
+        h2= zi(j+2)-zi(j)
+        h3= zi(j+3)-zi(j)
+        h4= zi(j+4)-zi(j)
+        h3m= zi(j+3)-zi(j-1)
+        h2n=zi(j+2)-zi(j-1)
+        hn= zi(j+1)-zi(j-2)
+        hh3 = zi(j+1)-zi(j-3)
+        hh2 = zi(j+2)-zi(j-2)
+						
+        mm3 = ((4.d0*ht2*ht2*ht2)/(h*hh*hn*hh3))
+        mm2 = ((4.d0*hht*ht2*ht2)/(hh2*hh*h*hn))+((-4.d0*h2t*htm &
+                        *ht2)/(hh2*h2n*hh*h))+((4.d0*h2t*h2t*ht)/(hh2*h2*h*h2n))
+        mm1 = (4.d0*(htm*htm*ht2)/(h3m*h2n*hh*h))+((-4.d0*htm*ht* &
+                        h2t)/(h3m*h2*h*h2n))+((4.d0*ht3*ht*ht)/(h3m*h3*h2*h))
+        mm  = 4.d0*(ht*ht*ht)/(h4*h3*h2*h)
+						
+						
+        lam = (the(j-3)*mm3)+(the(j-2)*mm2)+(the(j-1)*mm1)+(the(j)*mm)
+        end if 
+		end if 
+	    gl2=lam*y(10)   ! svgrd valeurs fct f a drte du centre
+	    gl=gl+wgk(jtwm1)*(gl1+gl2)
+		   
+		jtwm1 = 1*2
+        dx=xr*xgk(jtwm1)
+        xx = xm+dx
+        if(xx.ge.zi(n))then 
+                lam = 4.d0*the(n-1)/(zi(n)-zi(n-1))
+        else
+		if (xx< zi(1)) then
+		  lam = 0.d0
+		  else 
+		j = count(zi(1:(n-1)) <= xx)
+						
+        ht = xx-zi(j)
+        htm= xx-zi(j-1)
+        h2t= xx-zi(j+2)
+        ht2 = zi(j+1)-xx
+        ht3 = zi(j+3)-xx
+        hht = xx-zi(j-2)
+						
+        h = zi(j+1)-zi(j)
+        hh= zi(j+1)-zi(j-1)
+        h2= zi(j+2)-zi(j)
+        h3= zi(j+3)-zi(j)
+        h4= zi(j+4)-zi(j)
+        h3m= zi(j+3)-zi(j-1)
+        h2n=zi(j+2)-zi(j-1)
+        hn= zi(j+1)-zi(j-2)
+        hh3 = zi(j+1)-zi(j-3)
+        hh2 = zi(j+2)-zi(j-2)
+						
+        mm3 = ((4.d0*ht2*ht2*ht2)/(h*hh*hn*hh3))
+        mm2 = ((4.d0*hht*ht2*ht2)/(hh2*hh*h*hn))+((-4.d0*h2t*htm &
+                        *ht2)/(hh2*h2n*hh*h))+((4.d0*h2t*h2t*ht)/(hh2*h2*h*h2n))
+        mm1 = (4.d0*(htm*htm*ht2)/(h3m*h2n*hh*h))+((-4.d0*htm*ht* &
+                        h2t)/(h3m*h2*h*h2n))+((4.d0*ht3*ht*ht)/(h3m*h3*h2*h))
+        mm  = 4.d0*(ht*ht*ht)/(h4*h3*h2*h)
+						
+						
+        lam = (the(j-3)*mm3)+(the(j-2)*mm2)+(the(j-1)*mm1)+(the(j)*mm)
+        end if 
+		end if 
+		
+        gl1=lam*y(13) 
+        xx = xm-dx
+        if(xx.ge.zi(n))then 
+                lam = 4.d0*the(n-1)/(zi(n)-zi(n-1))
+        else
+		if (xx< zi(1)) then
+		  lam = 0.d0
+		  else 
+		j = count(zi(1:(n-1)) <= xx)
+						
+        ht = xx-zi(j)
+        htm= xx-zi(j-1)
+        h2t= xx-zi(j+2)
+        ht2 = zi(j+1)-xx
+        ht3 = zi(j+3)-xx
+        hht = xx-zi(j-2)
+						
+        h = zi(j+1)-zi(j)
+        hh= zi(j+1)-zi(j-1)
+        h2= zi(j+2)-zi(j)
+        h3= zi(j+3)-zi(j)
+        h4= zi(j+4)-zi(j)
+        h3m= zi(j+3)-zi(j-1)
+        h2n=zi(j+2)-zi(j-1)
+        hn= zi(j+1)-zi(j-2)
+        hh3 = zi(j+1)-zi(j-3)
+        hh2 = zi(j+2)-zi(j-2)
+						
+        mm3 = ((4.d0*ht2*ht2*ht2)/(h*hh*hn*hh3))
+        mm2 = ((4.d0*hht*ht2*ht2)/(hh2*hh*h*hn))+((-4.d0*h2t*htm &
+                        *ht2)/(hh2*h2n*hh*h))+((4.d0*h2t*h2t*ht)/(hh2*h2*h*h2n))
+        mm1 = (4.d0*(htm*htm*ht2)/(h3m*h2n*hh*h))+((-4.d0*htm*ht* &
+                        h2t)/(h3m*h2*h*h2n))+((4.d0*ht3*ht*ht)/(h3m*h3*h2*h))
+        mm  = 4.d0*(ht*ht*ht)/(h4*h3*h2*h)
+						
+						
+        lam = (the(j-3)*mm3)+(the(j-2)*mm2)+(the(j-1)*mm1)+(the(j)*mm)
+        end if 
+		end if 
+		
+        gl2=lam*y(12)   ! svgrd valeurs fct f a drte du centre
+	    gl=gl+wgk(jtwm1)*(gl1+gl2)
+		   
+		jtwm1 = 1*2-1
+        dx=xr*xgk(jtwm1)
+        xx = xm+dx
+        if(xx.ge.zi(n))then 
+                lam = 4.d0*the(n-1)/(zi(n)-zi(n-1))
+        else
+		if (xx< zi(1)) then
+		  lam = 0.d0
+		  else 
+		j = count(zi(1:(n-1)) <= xx)
+						
+        ht = xx-zi(j)
+        htm= xx-zi(j-1)
+        h2t= xx-zi(j+2)
+        ht2 = zi(j+1)-xx
+        ht3 = zi(j+3)-xx
+        hht = xx-zi(j-2)
+						
+        h = zi(j+1)-zi(j)
+        hh= zi(j+1)-zi(j-1)
+        h2= zi(j+2)-zi(j)
+        h3= zi(j+3)-zi(j)
+        h4= zi(j+4)-zi(j)
+        h3m= zi(j+3)-zi(j-1)
+        h2n=zi(j+2)-zi(j-1)
+        hn= zi(j+1)-zi(j-2)
+        hh3 = zi(j+1)-zi(j-3)
+        hh2 = zi(j+2)-zi(j-2)
+						
+        mm3 = ((4.d0*ht2*ht2*ht2)/(h*hh*hn*hh3))
+        mm2 = ((4.d0*hht*ht2*ht2)/(hh2*hh*h*hn))+((-4.d0*h2t*htm &
+                        *ht2)/(hh2*h2n*hh*h))+((4.d0*h2t*h2t*ht)/(hh2*h2*h*h2n))
+        mm1 = (4.d0*(htm*htm*ht2)/(h3m*h2n*hh*h))+((-4.d0*htm*ht* &
+                        h2t)/(h3m*h2*h*h2n))+((4.d0*ht3*ht*ht)/(h3m*h3*h2*h))
+        mm  = 4.d0*(ht*ht*ht)/(h4*h3*h2*h)
+						
+						
+        lam = (the(j-3)*mm3)+(the(j-2)*mm2)+(the(j-1)*mm1)+(the(j)*mm)
+        end if 
+		end if 
+		
+	    gl1=lam*y(15) 
+        xx = xm-dx
+        if(xx.ge.zi(n))then 
+                lam = 4.d0*the(n-1)/(zi(n)-zi(n-1))
+        else
+		if (xx< zi(1)) then
+		  lam = 0.d0
+		  else 
+		j = count(zi(1:(n-1)) <= xx)
+						
+        ht = xx-zi(j)
+        htm= xx-zi(j-1)
+        h2t= xx-zi(j+2)
+        ht2 = zi(j+1)-xx
+        ht3 = zi(j+3)-xx
+        hht = xx-zi(j-2)
+						
+        h = zi(j+1)-zi(j)
+        hh= zi(j+1)-zi(j-1)
+        h2= zi(j+2)-zi(j)
+        h3= zi(j+3)-zi(j)
+        h4= zi(j+4)-zi(j)
+        h3m= zi(j+3)-zi(j-1)
+        h2n=zi(j+2)-zi(j-1)
+        hn= zi(j+1)-zi(j-2)
+        hh3 = zi(j+1)-zi(j-3)
+        hh2 = zi(j+2)-zi(j-2)
+						
+        mm3 = ((4.d0*ht2*ht2*ht2)/(h*hh*hn*hh3))
+        mm2 = ((4.d0*hht*ht2*ht2)/(hh2*hh*h*hn))+((-4.d0*h2t*htm &
+                        *ht2)/(hh2*h2n*hh*h))+((4.d0*h2t*h2t*ht)/(hh2*h2*h*h2n))
+        mm1 = (4.d0*(htm*htm*ht2)/(h3m*h2n*hh*h))+((-4.d0*htm*ht* &
+                        h2t)/(h3m*h2*h*h2n))+((4.d0*ht3*ht*ht)/(h3m*h3*h2*h))
+        mm  = 4.d0*(ht*ht*ht)/(h4*h3*h2*h)
+						
+						
+        lam = (the(j-3)*mm3)+(the(j-2)*mm2)+(the(j-1)*mm1)+(the(j)*mm)
+        end if 
+		end if 
+		
+	    gl2=lam*y(14)   ! svgrd valeurs fct f a drte du centre
+	       
+		gl=gl+wgk(jtwm1)*(gl1+gl2)
+
+	!	risq = xr*risq
+	!	surv = xr*surv
+		gl = xr*gl
+		su=dexp(-gl)
+		xx=b
+		if(xx.ge.zi(n))then 
+                lam = 4.d0*the(n-1)/(zi(n)-zi(n-1))
+        else
+		if (xx< zi(1)) then
+		  lam = 0.d0
+		  else 
+		j = count(zi(1:(n-1)) <= xx)
+						
+        ht = xx-zi(j)
+        htm= xx-zi(j-1)
+        h2t= xx-zi(j+2)
+        ht2 = zi(j+1)-xx
+        ht3 = zi(j+3)-xx
+        hht = xx-zi(j-2)
+						
+        h = zi(j+1)-zi(j)
+        hh= zi(j+1)-zi(j-1)
+        h2= zi(j+2)-zi(j)
+        h3= zi(j+3)-zi(j)
+        h4= zi(j+4)-zi(j)
+        h3m= zi(j+3)-zi(j-1)
+        h2n=zi(j+2)-zi(j-1)
+        hn= zi(j+1)-zi(j-2)
+        hh3 = zi(j+1)-zi(j-3)
+        hh2 = zi(j+2)-zi(j-2)
+						
+        mm3 = ((4.d0*ht2*ht2*ht2)/(h*hh*hn*hh3))
+        mm2 = ((4.d0*hht*ht2*ht2)/(hh2*hh*h*hn))+((-4.d0*h2t*htm &
+                        *ht2)/(hh2*h2n*hh*h))+((4.d0*h2t*h2t*ht)/(hh2*h2*h*h2n))
+        mm1 = (4.d0*(htm*htm*ht2)/(h3m*h2n*hh*h))+((-4.d0*htm*ht* &
+                        h2t)/(h3m*h2*h*h2n))+((4.d0*ht3*ht*ht)/(h3m*h3*h2*h))
+        mm  = 4.d0*(ht*ht*ht)/(h4*h3*h2*h)
+						
+						
+        lam = (the(j-3)*mm3)+(the(j-2)*mm2)+(the(j-1)*mm1)+(the(j)*mm)
+        end if 
+		end if 
+		
+		lam=lam*y(16)
+		
+		
+		end if 
+        return
+
+        end subroutine suspdeppred
+
         subroutine suspdept0(x,the,n,su,lam,zi,gl,y)
 
         implicit none
@@ -5503,6 +6251,174 @@ subroutine fonctdep(x,p,risq,glam,surv,y)
 
 end subroutine fonctdep
 
+subroutine fonctdeppred(xp,x,p,risq,glam,surv,y)
+
+        implicit none
+
+        double precision,dimension(2)::p
+		double precision,dimension(16)::y
+        double precision::x,surv,risq,glam,ri,gl,su,gl1,gl2
+		integer::j,jtw,jtwm1
+        double precision::a,b,dx,xm,xr,&
+		d1mach(5),epmach,uflow,xp
+		double precision,dimension(8)::xgk,wgk
+	    double precision,dimension(4)::wg
+         double precision::xx
+         save wgk,xgk
+		 
+		 D1MACH(1)=2.23D-308
+    	D1MACH(2)=1.79D+308
+    	D1MACH(3)=1.11D-16
+    	D1MACH(4)=2.22D-16
+    	D1MACH(5)=0.301029995663981195D0
+
+    	epmach = d1mach(4)
+    	uflow = d1mach(1)
+		
+		
+		
+		wg(1)=0.129484966168869693270611432679082d0
+		wg(2)=0.279705391489276667901467771423780d0
+    	wg(3)=0.381830050505118944950369775488975d0
+    	wg(4)=0.417959183673469387755102040816327d0
+
+    	xgk(1)=0.991455371120812639206854697526329d0
+    	xgk(2)=0.949107912342758524526189684047851d0
+    	xgk(3)=0.864864423359769072789712788640926d0
+    	xgk(4)=0.741531185599394439863864773280788d0
+    	xgk(5)=0.586087235467691130294144838258730d0
+    	xgk(6)=0.405845151377397166906606412076961d0
+    	xgk(7)=0.207784955007898467600689403773245d0
+    	xgk(8)=0.000000000000000000000000000000000d0
+
+    	wgk(1)=0.022935322010529224963732008058970d0
+    	wgk(2)=0.063092092629978553290700663189204d0
+    	wgk(3)=0.104790010322250183839876322541518d0
+    	wgk(4)=0.140653259715525918745189590510238d0
+    	wgk(5)=0.169004726639267902826583426598550d0
+    	wgk(6)=0.190350578064785409913256402421014d0
+    	wgk(7)=0.204432940075298892414161999234649d0
+    	wgk(8)=0.209482141084727828012999174891714d0
+     
+		b=x
+		a=xp
+
+		
+		
+		xm = 0.5d+00*(b+a)
+        xr = 0.5d+00*(b-a)
+        call fonctrisq(xm,p,ri)
+        
+		glam = ri*y(1)*wgk(8)   !integral over 0 to x of base risk
+       
+
+		  if(a.eq.b)then
+               surv = 1.d0
+                glam = 0.d0
+                risq = 0.d0
+            else
+			
+			
+			j=4
+			
+			jtwm1 = j*2-1
+               dx=xr*xgk(jtwm1)
+               xx = xm+dx
+               call fonctrisq(xx,p,ri)
+               gl1=ri*y(3) 
+               xx = xm-dx
+               call fonctrisq(xx,p,ri)
+               gl2=ri*y(2)   ! svgrd valeurs fct f a drte du centre
+	       
+		  glam=glam+wgk(jtwm1)*(gl1+gl2)
+		   
+		   j=3
+		   
+		   jtwm1 = j*2
+               dx=xr*xgk(jtwm1)
+               xx = xm+dx
+               call fonctrisq(xx,p,ri)
+               gl1=ri*y(5)
+               xx = xm-dx
+               call fonctrisq(xx,p,ri)
+               gl2=ri*y(4)   ! svgrd valeurs fct f a drte du centre
+	       
+		  glam=glam+wgk(jtwm1)*(gl1+gl2)
+		   
+		    jtwm1 = j*2-1
+               dx=xr*xgk(jtwm1)
+               xx = xm+dx
+               call fonctrisq(xx,p,ri)
+               gl1=ri*y(7) 
+               xx = xm-dx
+               call fonctrisq(xx,p,ri)
+               gl2=ri*y(6)   ! svgrd valeurs fct f a drte du centre
+	       
+		  glam=glam+wgk(jtwm1)*(gl1+gl2)
+		   
+		   
+		   j=2
+		   
+		    jtwm1 = j*2
+               dx=xr*xgk(jtwm1)
+               xx = xm+dx
+               call fonctrisq(xx,p,ri)
+               gl1=ri*y(9)
+               xx = xm-dx
+               call fonctrisq(xx,p,ri)
+               gl2=ri*y(8)   ! svgrd valeurs fct f a drte du centre
+	       
+		   glam=glam+wgk(jtwm1)*(gl1+gl2)
+		   
+		    jtwm1 = j*2-1
+               dx=xr*xgk(jtwm1)
+               xx = xm+dx
+               call fonctrisq(xx,p,ri)
+				gl1=ri*y(11) 
+               xx = xm-dx
+               call fonctrisq(xx,p,ri)
+				gl2=ri*y(10)   ! svgrd valeurs fct f a drte du centre
+	       
+			glam=glam+wgk(jtwm1)*(gl1+gl2)
+		   
+		   j=1
+		   
+		    jtwm1 = j*2
+               dx=xr*xgk(jtwm1)
+               xx = xm+dx
+               call fonctrisq(xx,p,ri)
+               gl1=ri*y(13) 
+               xx = xm-dx
+               call fonctrisq(xx,p,ri)
+               gl2=ri*y(12)   ! svgrd valeurs fct f a drte du centre
+	       
+		 glam=glam+wgk(jtwm1)*(gl1+gl2)
+		   
+		    jtwm1 = j*2-1
+               dx=xr*xgk(jtwm1)
+               xx = xm+dx
+               call fonctrisq(xx,p,ri)
+			   gl1=ri*y(15) 
+               xx = xm-dx
+               call fonctrisq(xx,p,ri)
+			   gl2=ri*y(14)   ! svgrd valeurs fct f a drte du centre
+	       
+		glam=glam+wgk(jtwm1)*(gl1+gl2)
+
+	!	risq = xr*risq
+	!	surv = xr*surv
+		glam = xr*glam
+		surv=dexp(-glam)
+		call fonctrisq(b,p,ri)
+		risq=ri*y(16)
+		
+        return
+		
+		end if 
+         
+        
+
+end subroutine fonctdeppred
 
 subroutine fonctdep0(x,p,glam,y)
 
@@ -6302,6 +7218,170 @@ subroutine qgaussPL15weibtimedep(a,b,the01,the02,the12,res,&
 !==== for cumulative incidence ===============================================================
 !=============================================================================================  
 
+subroutine ciqgaussPL15weibtimedepV2(a,b,the01,the02,res,&
+       v01,v02,y01,y02)
+         
+		 
+		 implicit none
+         
+         integer::j,jtw,jtwm1
+         double precision::a,b,dx,xm,xr,res,resk,v01,v02,&
+         d1mach(5),epmach,uflow,the01(2),the02(2)
+         double precision,dimension(8)::xgk,wgk
+		 double precision,dimension(240)::y01,y02
+	 double precision,dimension(4)::wg
+         double precision::xx,f1,su01,ri01,f2,&
+		 su02,ri02,fc,gl01,gl02
+         save wgk,xgk
+
+   	D1MACH(1)=2.23D-308
+    	D1MACH(2)=1.79D+308
+    	D1MACH(3)=1.11D-16
+    	D1MACH(4)=2.22D-16
+    	D1MACH(5)=0.301029995663981195D0
+
+    	epmach = d1mach(4)
+    	uflow = d1mach(1)
+
+	wg(1)=0.129484966168869693270611432679082d0
+   	wg(2)=0.279705391489276667901467771423780d0
+    	wg(3)=0.381830050505118944950369775488975d0
+    	wg(4)=0.417959183673469387755102040816327d0
+
+    	xgk(1)=0.991455371120812639206854697526329d0
+    	xgk(2)=0.949107912342758524526189684047851d0
+    	xgk(3)=0.864864423359769072789712788640926d0
+    	xgk(4)=0.741531185599394439863864773280788d0
+    	xgk(5)=0.586087235467691130294144838258730d0
+    	xgk(6)=0.405845151377397166906606412076961d0
+    	xgk(7)=0.207784955007898467600689403773245d0
+    	xgk(8)=0.000000000000000000000000000000000d0
+
+    	wgk(1)=0.022935322010529224963732008058970d0
+    	wgk(2)=0.063092092629978553290700663189204d0
+    	wgk(3)=0.104790010322250183839876322541518d0
+    	wgk(4)=0.140653259715525918745189590510238d0
+    	wgk(5)=0.169004726639267902826583426598550d0
+    	wgk(6)=0.190350578064785409913256402421014d0
+    	wgk(7)=0.204432940075298892414161999234649d0
+    	wgk(8)=0.209482141084727828012999174891714d0
+     
+
+        xm = 0.5d+00*(b+a)
+        xr = 0.5d+00*(b-a)
+        call fonctdeppred(a,xm,the01,ri01,gl01,su01,y01(1:16))
+        call fonctdeppred(a,xm,the02,ri02,gl02,su02,y02(1:16))
+        fc = (su01**v01)*(su02**v02)*ri01*v01  ! valeur fct f au milieu de intervalle (a,b), cas pnt 0
+
+    	
+        resk = fc*wgk(8)       ! init res Kronrod   ! fc * 8e poids Kronrod
+         
+            if(a.eq.b)then
+               res = 0.d0
+            else
+			
+			j=4
+			
+			jtwm1 = j*2-1
+               dx=xr*xgk(jtwm1)
+               xx = xm+dx
+               call fonctdeppred(a,xx,the01,ri01,gl01,su01,y01(33:48))
+               call fonctdeppred(a,xx,the02,ri02,gl02,su02,y02(33:48))
+               f1 = (su01**v01)*(su02**v02)*ri01*v01
+               xx = xm-dx
+               call fonctdeppred(a,xx,the01,ri01,gl01,su01,y01(17:32))
+               call fonctdeppred(a,xx,the02,ri02,gl02,su02,y02(17:32))
+               f2 = (su01**v01)*(su02**v02)*ri01*v01
+			   resk = resk + wgk(jtwm1)*(f1+f2)
+		   
+		   j=3
+		   
+		   jtw = j*2
+               	dx=xr*xgk(jtw)
+               	xx = xm+dx
+               	call fonctdeppred(a,xx,the01,ri01,gl01,su01,y01(65:80))
+               	call fonctdeppred(a,xx,the02,ri02,gl02,su02,y02(65:80))
+               	f1 = (su01**v01)*(su02**v02)*ri01*v01
+               	xx = xm-dx
+               	call fonctdeppred(a,xx,the01,ri01,gl01,su01,y01(49:64))
+               	call fonctdeppred(a,xx,the02,ri02,gl02,su02,y02(49:64))
+               	f2 = (su01**v01)*(su02**v02)*ri01*v01
+	       	
+               	resk = resk + wgk(jtw)*(f1+f2)
+				
+			jtwm1 = j*2-1
+               dx=xr*xgk(jtwm1)
+               xx = xm+dx
+               call fonctdeppred(a,xx,the01,ri01,gl01,su01,y01(97:112))
+               call fonctdeppred(a,xx,the02,ri02,gl02,su02,y02(97:112))
+               f1 = (su01**v01)*(su02**v02)*ri01*v01
+               xx = xm-dx
+               call fonctdeppred(a,xx,the01,ri01,gl01,su01,y01(81:96))
+               call fonctdeppred(a,xx,the02,ri02,gl02,su02,y02(81:96))
+               f2 = (su01**v01)*(su02**v02)*ri01*v01
+	       resk = resk + wgk(jtwm1)*(f1+f2)
+		   
+		   j=2
+		   
+            
+			    jtw = j*2
+               	dx=xr*xgk(jtw)
+               	xx = xm+dx
+               	call fonctdeppred(a,xx,the01,ri01,gl01,su01,y01(129:144))
+               	call fonctdeppred(a,xx,the02,ri02,gl02,su02,y02(129:144))
+               	f1 = (su01**v01)*(su02**v02)*ri01*v01
+               	xx = xm-dx
+               	call fonctdeppred(a,xx,the01,ri01,gl01,su01,y01(113:128))
+               	call fonctdeppred(a,xx,the02,ri02,gl02,su02,y02(113:128))
+               	f2 = (su01**v01)*(su02**v02)*ri01*v01
+               	resk = resk + wgk(jtw)*(f1+f2)
+				
+				
+			 jtwm1 = j*2-1
+               dx=xr*xgk(jtwm1)
+               xx = xm+dx
+               call fonctdeppred(a,xx,the01,ri01,gl01,su01,y01(161:176))
+               call fonctdeppred(a,xx,the02,ri02,gl02,su02,y02(161:176))
+               f1 = (su01**v01)*(su02**v02)*ri01*v01
+               xx = xm-dx
+               call fonctdeppred(a,xx,the01,ri01,gl01,su01,y01(145:160))
+               call fonctdeppred(a,xx,the02,ri02,gl02,su02,y02(145:160))
+               f2 = (su01**v01)*(su02**v02)*ri01*v01
+	       resk = resk + wgk(jtwm1)*(f1+f2)
+		   
+		   j=1
+		   
+		    jtw = j*2
+               	dx=xr*xgk(jtw)
+               	xx = xm+dx
+               	call fonctdeppred(a,xx,the01,ri01,gl01,su01,y01(193:208))
+               	call fonctdeppred(a,xx,the02,ri02,gl02,su02,y02(193:208))
+               	f1 = (su01**v01)*(su02**v02)*ri01*v01
+               	xx = xm-dx
+               	call fonctdeppred(a,xx,the01,ri01,gl01,su01,y01(177:192))
+               	call fonctdeppred(a,xx,the02,ri02,gl02,su02,y02(177:192))
+               	f2 = (su01**v01)*(su02**v02)*ri01*v01
+	       	
+               	resk = resk + wgk(jtw)*(f1+f2)
+				
+				jtwm1 = j*2-1
+               dx=xr*xgk(jtwm1)
+               xx = xm+dx
+               call fonctdeppred(a,xx,the01,ri01,gl01,su01,y01(225:240))
+               call fonctdeppred(a,xx,the02,ri02,gl02,su02,y02(225:240))
+               f1 = (su01**v01)*(su02**v02)*ri01*v01
+               xx = xm-dx
+               call fonctdeppred(a,xx,the01,ri01,gl01,su01,y01(209:224))
+               call fonctdeppred(a,xx,the02,ri02,gl02,su02,y02(209:224))
+               f2 = (su01**v01)*(su02**v02)*ri01*v01
+	       resk = resk + wgk(jtwm1)*(f1+f2)
+
+	    
+    	res = xr*resk
+	endif
+    
+          end subroutine ciqgaussPL15weibtimedepV2
+		  
 subroutine ciqgaussPL15weibtimedep(a,b,the01,the02,res,&
        v01,v02,y01,y02)
          
@@ -6827,6 +7907,175 @@ subroutine ciqgaussPL15timedep(a,b,the01,the02,res,&
 	endif
     
           end subroutine ciqgaussPL15timedep
+
+
+subroutine ciqgaussPL15timedepV2(a,b,the01,the02,res,&
+       v01,v02,y01,y02)
+         
+		 use commun,only:zi01,zi02,nz01,nz02
+		 implicit none
+         
+         integer::j,jtw,jtwm1
+         double precision::a,b,dx,xm,xr,res,resk,v01,v02,&
+         d1mach(5),epmach,uflow
+		 
+		 double precision,dimension(-2:(nz01-1))::the01
+         double precision,dimension(-2:(nz02-1))::the02
+         double precision,dimension(8)::xgk,wgk
+		 
+		 double precision,dimension(240)::y01,y02
+	 double precision,dimension(4)::wg
+         double precision::xx,f1,su01,ri01,f2,&
+		 su02,ri02,fc,gl01,gl02
+         save wgk,xgk
+
+   	D1MACH(1)=2.23D-308
+    	D1MACH(2)=1.79D+308
+    	D1MACH(3)=1.11D-16
+    	D1MACH(4)=2.22D-16
+    	D1MACH(5)=0.301029995663981195D0
+
+    	epmach = d1mach(4)
+    	uflow = d1mach(1)
+
+	wg(1)=0.129484966168869693270611432679082d0
+   	wg(2)=0.279705391489276667901467771423780d0
+    	wg(3)=0.381830050505118944950369775488975d0
+    	wg(4)=0.417959183673469387755102040816327d0
+
+    	xgk(1)=0.991455371120812639206854697526329d0
+    	xgk(2)=0.949107912342758524526189684047851d0
+    	xgk(3)=0.864864423359769072789712788640926d0
+    	xgk(4)=0.741531185599394439863864773280788d0
+    	xgk(5)=0.586087235467691130294144838258730d0
+    	xgk(6)=0.405845151377397166906606412076961d0
+    	xgk(7)=0.207784955007898467600689403773245d0
+    	xgk(8)=0.000000000000000000000000000000000d0
+
+    	wgk(1)=0.022935322010529224963732008058970d0
+    	wgk(2)=0.063092092629978553290700663189204d0
+    	wgk(3)=0.104790010322250183839876322541518d0
+    	wgk(4)=0.140653259715525918745189590510238d0
+    	wgk(5)=0.169004726639267902826583426598550d0
+    	wgk(6)=0.190350578064785409913256402421014d0
+    	wgk(7)=0.204432940075298892414161999234649d0
+    	wgk(8)=0.209482141084727828012999174891714d0
+     
+
+        xm = 0.5d+00*(b+a)
+        xr = 0.5d+00*(b-a)
+        call suspdeppred(a,xm,the01,nz01,su01,ri01,zi01,gl01,y01(1:16))
+        call suspdeppred(a,xm,the02,nz02,su02,ri02,zi02,gl02,y02(1:16))
+        fc = (su01**v01)*(su02**v02)*ri01*v01 ! valeur fct f au milieu de intervalle (a,b), cas pnt 0
+
+    	
+        resk = fc*wgk(8)       ! init res Kronrod   ! fc * 8e poids Kronrod
+         
+            if(a.eq.b)then
+               res = 0.d0
+            else
+			
+			j=4
+			
+			jtwm1 = j*2-1
+               dx=xr*xgk(jtwm1)
+               xx = xm+dx
+               call suspdeppred(a,xx,the01,nz01,su01,ri01,zi01,gl01,y01(33:48))
+               call suspdeppred(a,xx,the02,nz02,su02,ri02,zi02,gl02,y02(33:48))
+               f1 = (su01**v01)*(su02**v02)*ri01*v01
+               xx = xm-dx
+               call suspdeppred(a,xx,the01,nz01,su01,ri01,zi01,gl01,y01(17:32))
+               call suspdeppred(a,xx,the02,nz02,su02,ri02,zi02,gl02,y02(17:32))
+               f2 = (su01**v01)*(su02**v02)*ri01*v01
+			   resk = resk + wgk(jtwm1)*(f1+f2)
+		   
+		   j=3
+		   
+		   jtw = j*2
+               	dx=xr*xgk(jtw)
+               	xx = xm+dx
+               call suspdeppred(a,xx,the01,nz01,su01,ri01,zi01,gl01,y01(65:80))
+               call suspdeppred(a,xx,the02,nz02,su02,ri02,zi02,gl02,y02(65:80))
+               	f1 = (su01**v01)*(su02**v02)*ri01*v01
+               	xx = xm-dx
+               call suspdeppred(a,xx,the01,nz01,su01,ri01,zi01,gl01,y01(49:64))
+               call suspdeppred(a,xx,the02,nz02,su02,ri02,zi02,gl02,y02(49:64))
+               	f2 = (su01**v01)*(su02**v02)*ri01*v01
+	       	
+               	resk = resk + wgk(jtw)*(f1+f2)
+				
+			jtwm1 = j*2-1
+               dx=xr*xgk(jtwm1)
+               xx = xm+dx
+               call suspdeppred(a,xx,the01,nz01,su01,ri01,zi01,gl01,y01(97:112))
+               call suspdeppred(a,xx,the02,nz02,su02,ri02,zi02,gl02,y02(97:112))
+               f1 = (su01**v01)*(su02**v02)*ri01*v01
+               xx = xm-dx
+               call suspdeppred(a,xx,the01,nz01,su01,ri01,zi01,gl01,y01(81:96))
+               call suspdeppred(a,xx,the02,nz02,su02,ri02,zi02,gl02,y02(81:96))
+               f2 = (su01**v01)*(su02**v02)*ri01*v01
+	       resk = resk + wgk(jtwm1)*(f1+f2)
+		   
+		   j=2
+		   
+            
+			    jtw = j*2
+               	dx=xr*xgk(jtw)
+               	xx = xm+dx
+               	call suspdeppred(a,xx,the01,nz01,su01,ri01,zi01,gl01,y01(129:144))
+               call suspdeppred(a,xx,the02,nz02,su02,ri02,zi02,gl02,y02(129:144))
+               	f1 = (su01**v01)*(su02**v02)*ri01*v01
+               	xx = xm-dx
+               	call suspdeppred(a,xx,the01,nz01,su01,ri01,zi01,gl01,y01(113:128))
+               call suspdeppred(a,xx,the02,nz02,su02,ri02,zi02,gl02,y02(113:128))
+               	f2 = (su01**v01)*(su02**v02)*ri01*v01
+               	resk = resk + wgk(jtw)*(f1+f2)
+				
+				
+			 jtwm1 = j*2-1
+               dx=xr*xgk(jtwm1)
+               xx = xm+dx
+               call suspdeppred(a,xx,the01,nz01,su01,ri01,zi01,gl01,y01(161:176))
+               call suspdeppred(a,xx,the02,nz02,su02,ri02,zi02,gl02,y02(161:176))
+               f1 = (su01**v01)*(su02**v02)*ri01*v01
+               xx = xm-dx
+               call suspdeppred(a,xx,the01,nz01,su01,ri01,zi01,gl01,y01(145:160))
+               call suspdeppred(a,xx,the02,nz02,su02,ri02,zi02,gl02,y02(145:160))
+               f2 = (su01**v01)*(su02**v02)*ri01*v01
+	       resk = resk + wgk(jtwm1)*(f1+f2)
+		   
+		   j=1
+		   
+		    jtw = j*2
+               	dx=xr*xgk(jtw)
+               	xx = xm+dx
+               	call suspdeppred(a,xx,the01,nz01,su01,ri01,zi01,gl01,y01(193:208))
+               call suspdeppred(a,xx,the02,nz02,su02,ri02,zi02,gl02,y02(193:208))
+               	f1 = (su01**v01)*(su02**v02)*ri01*v01
+               	xx = xm-dx
+               	call suspdeppred(a,xx,the01,nz01,su01,ri01,zi01,gl01,y01(177:192))
+               call suspdeppred(a,xx,the02,nz02,su02,ri02,zi02,gl02,y02(177:192))
+               	f2 = (su01**v01)*(su02**v02)*ri01*v01
+	       	
+               	resk = resk + wgk(jtw)*(f1+f2)
+				
+				jtwm1 = j*2-1
+               dx=xr*xgk(jtwm1)
+               xx = xm+dx
+               call suspdeppred(a,xx,the01,nz01,su01,ri01,zi01,gl01,y01(225:240))
+               call suspdeppred(a,xx,the02,nz02,su02,ri02,zi02,gl02,y02(225:240))
+               f1 = (su01**v01)*(su02**v02)*ri01*v01
+               xx = xm-dx
+               call suspdeppred(a,xx,the01,nz01,su01,ri01,zi01,gl01,y01(209:224))
+               call suspdeppred(a,xx,the02,nz02,su02,ri02,zi02,gl02,y02(209:224))
+               f2 = (su01**v01)*(su02**v02)*ri01*v01
+	       resk = resk + wgk(jtwm1)*(f1+f2)
+
+	    
+    	res = xr*resk
+	endif
+    
+          end subroutine ciqgaussPL15timedepV2
 
 !=============================================================================================  
 !==== QGAUS15 out a 15 point Gauss-Kronrod quadrature rule for splines   =====================
@@ -42555,7 +43804,7 @@ end subroutine firstderivaidmlikelihoodsplinetimedep
         implicit none
          
     double precision::res2,tronc01ci,tronc02ci, &
-        vet01,vet02,vet12
+        vet01,vet02,vet12,tronc
 	
         integer::np0,i,j,l,w,k,npar0,nva01,nva02,nva12,no0, &
 	dimnva01,dimnva02, dimnva12, &
@@ -42671,7 +43920,8 @@ end subroutine firstderivaidmlikelihoodsplinetimedep
          
                do i=1,no0
 			   
-			!	write(6,*) 'subject',i
+			!write(6,*) 'subject',i
+			!print *, 'subject',i
 		    !	call flush(6)
          
                 vet01 = 0.d0
@@ -42748,34 +43998,39 @@ end subroutine firstderivaidmlikelihoodsplinetimedep
                 res(i) = 0.d0
                 
                 
-                        if(t0(i).eq.0.d0)then
-                                tronc01ci = 1
-								tronc02ci = 1
-                        else 
-                                call fonctdep0(t0(i),the01,gl01,y01t(241:255))
-                                call fonctdep0(t0(i),the02,gl02,y02t(241:255))
-                                tronc01ci=dexp(-gl01*vet01)
-								tronc02ci=dexp(-gl02*vet02)
-                        end if
+                    !    if(t0(i).eq.0.d0)then
+                    !            tronc01ci = 1
+					!			tronc02ci = 1
+                    !    else 
+                    !            call fonctdep0(t0(i),the01,gl01,y01t(241:255))
+                    !            call fonctdep0(t0(i),the02,gl02,y02t(241:255))
+                    !            tronc01ci=dexp(-gl01*vet01)
+				!				tronc02ci=dexp(-gl02*vet02)
+				!				tronc=tronc01ci*tronc02ci
+                 !       end if
               
 
-                         call  ciqgaussPL15weibtimedep(t0(i),t1(i),the01,the02,&
+					!	if (dabs(tronc).lt.1.d-6) then
+					!		res(i)=0
+					!	else 
+						call  ciqgaussPL15weibtimedepV2(t0(i),t1(i),the01,the02,&
                          res2,vet01,vet02,&
 						 y01t(1:240),y02t(1:240))
 						 
-					!	 write(6,*) 'tronc01ci',tronc01ci
-					!	  write(6,*) 'tronc02ci',tronc02ci
-		     	     !    call flush(6)
-					!	 write(6,*) 'res2',res2
-		     	    !     call flush(6)
+						! write(6,*) 'tronc01ci',tronc01ci
+						! write(6,*) 'tronc02ci',tronc02ci
+						! write(6,*) 'res2',res2
 						 
-						 if(res2.eq.0.d0) then 
-							res(i)=0
-						else 
+		     	        ! call flush(6)
 						 
-                       res(i)=res2/(tronc01ci*tronc02ci)
+					!	 if(dabs(res2).lt.1.d-6) then 
+					!		res(i)=0
+					!	else 
+						 res(i)=res2
+                    !   res(i)=res2/tronc
+					!   end if 
 					   
-					   end if 
+					! end if 
 					   
 					!   call fonctdep(t1(i),the01,ri01,gl01,&
 					!			su01, dble(y01t(241:256)))
@@ -43267,7 +44522,7 @@ end subroutine idmciweibtimedep
         implicit none
          
         double precision::res2,tronc01ci,tronc02ci, &
-        vet01,vet12,vet02
+        vet01,vet12,vet02,tronc
 
         integer::np0,i,j,l,w,k,npar0,nva01,nva02,nva12,no0, &
 	    nz010,nz020,dimnva01,dimnva02, & 
@@ -43484,29 +44739,34 @@ if(p12.gt.0) then
                 res(i) = 0.d0
                 
                 
-                        if(t0(i).eq.0.d0)then
-                                tronc01ci = 1
-								tronc02ci = 1
-                        else 
-                                
-								call suspdept0(t0(i),the01,nz01,su01,ri01,zi01,gl01,y01t(241:255))
-                                call suspdept0(t0(i),the02,nz02,su02,ri02,zi02,gl02,y02t(241:255))
-                                tronc01ci=dexp(-gl01*vet01)
-								tronc02ci=dexp(-gl02*vet02)
-                        end if
+                      !  if(t0(i).eq.0.d0)then
+                      !          tronc01ci = 1
+					  !			tronc02ci = 1
+                      !  else 
+                      !          
+					  !			call suspdept0(t0(i),the01,nz01,su01,ri01,zi01,gl01,y01t(241:255))
+                      !          call suspdept0(t0(i),the02,nz02,su02,ri02,zi02,gl02,y02t(241:255))
+                      !          tronc01ci=dexp(-gl01*vet01)
+						!		tronc02ci=dexp(-gl02*vet02)
+					!			tronc= tronc01ci* tronc02ci
+                     !   end if
            
    
-                  call ciqgaussPL15timedep(t0(i),t1(i),the01,the02,&
+				!	if (dabs(tronc).lt.1.d-6) then
+				!			res(i)=0
+				!		else 
+                  call ciqgaussPL15timedepV2(t0(i),t1(i),the01,the02,&
                         	res2,vet01,vet02,& 
 							 y01t(1:240),y02t(1:240))
                   
-				   if(res2.eq.0.d0) then 
-							res(i)=0
-						else 
+				!  if(dabs(res2).lt.1.d-6) then 
+				!			res(i)=0
+				!		else 
 						 
-                       res(i)=res2/(tronc01ci*tronc02ci)
-					   
-					   end if 
+                 !      res(i)=res2/(tronc01ci*tronc02ci)
+					 res(i)=res2  
+				!	   end if 
+				!	end if 
 				  
 				!  call suspdep(t1(i),the01,nz01,su01,ri01,zi01,gl01,y01t(241:256))
                 !  call suspdep(t1(i),the02,nz02,su02,ri02,zi02,gl02,y02t(241:256))

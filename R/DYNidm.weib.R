@@ -63,6 +63,7 @@ DYNidm.weib<-function(b,fix0,size_V,
     for(k in c(1:Nsample)){
       print(paste0("Estimating illness-death model on sample ",k))
   
+     
       if(modelY$method=="INLA"){
         
         dataY<-INLAidmpredY(timeVar=timeVar,
@@ -138,7 +139,7 @@ DYNidm.weib<-function(b,fix0,size_V,
         y12<-rep(0,N*NtimePoints)
       }
 
-      
+ 
       outk<- tryCatch({ marqLevAlg::mla(b=b,
                                             partialH=partialH,
                                             fn=gaussDYNidmlLikelihoodweib,

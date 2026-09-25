@@ -77,7 +77,8 @@
 #' na.action attribute of data, second a na.action setting of options,
 #' and third 'na.fail' if that is unset. The 'factory-fresh' default
 #' is na.omit. Another possible value is NULL.
-#' @param scale.X TRUE (default), if you want to center and reduce your explanatory variables.
+#' @param scale.X TRUE (default), if you want to center and reduce your time fixed explanatory variables. 
+#' @param scale.Y TRUE (default), if you want to center and reduce your time dependent explanatory variables. Otherwise give a list, where for each element we have (m,s) such that : scale.Y[[k]]=(m,sd) gives (Y_k-m)/sd
 #' @param posfix The index of parameters that we want to fix, by default no parameters are fixed.
 #' @param timedep12 TRUE if time dependent on 1 --> 2 otherwise FALSE (default).
 #' @param semiMarkov TRUE if semi Markov on 1 --> 2 otherwise FALSE (default)
@@ -188,6 +189,7 @@ DYNidm <- function(formula01,
                 Nsample,
                 method="Weib",
                 scale.X=T,
+                scale.Y=T,
                 BLUP=T,
                 maxiter=100,
                 maxiter.pena=10,
@@ -283,7 +285,7 @@ DYNidm <- function(formula01,
     #################################################################################
     #################### dealing with missing data ##################################
     #################################################################################
-   
+  
     if(anyNA(data)){
       variables=unique(c(all.vars(formula01),all.vars(formula02),all.vars(formula12)))
       data=data[,variables]
@@ -396,7 +398,7 @@ DYNidm <- function(formula01,
     #################################################################################
     ####################  prepare censored event times  #############################
     #################################################################################
-    
+   
     isIntervalCensored <- attr(responseTrans,"cens.type")=="intervalCensored"
     truncated <- nchar(attr(responseAbs,"entry.type"))>1
     abstime <- as.double(responseAbs[,"time"])
@@ -543,7 +545,7 @@ DYNidm <- function(formula01,
     #################### defines knots placements for splines ##################
     #####################         and initiate values         ##################
     ############################################################################
-    
+ 
     if(modelY$method=="INLA"){
     
       
@@ -720,7 +722,7 @@ DYNidm <- function(formula01,
     
 
     size1<-size1+p01+p02+p12
-    
+   
   
     if(method=="splines"){
       
@@ -954,7 +956,7 @@ DYNidm <- function(formula01,
     TimeCR<-ifelse(idm==1,(t1+t2)/2,
                ifelse(idd==1 & t3<=t2+threshold,t3,t2))
     
-
+  
     
     if(modelY$method=="INLA"){
       
@@ -1114,7 +1116,7 @@ DYNidm <- function(formula01,
                               dimp01=dimp01,
                               dimp02=dimp02,
                               dimp12=dimp12,
-                              scale.X=scale.X)
+                              scale.X=scale.Y)
         }else{
         out<-DYNidm.splines(b=b,
                          clustertype=clustertype,
@@ -1169,7 +1171,7 @@ DYNidm <- function(formula01,
                          dimp01=dimp01,
                          dimp02=dimp02,
                          dimp12=dimp12,
-                         scale.X=scale.X)
+                         scale.X=scale.Y)
         }
       }
   
@@ -1231,7 +1233,7 @@ DYNidm <- function(formula01,
                              dimp01=dimp01,
                              dimp02=dimp02,
                              dimp12=dimp12,
-                             scale.X=scale.X)
+                             scale.X=scale.Y)
         }else{
           
        
@@ -1283,7 +1285,7 @@ DYNidm <- function(formula01,
                         dimp01=dimp01,
                         dimp02=dimp02,
                         dimp12=dimp12,
-                        scale.X=scale.X)
+                        scale.X=scale.Y)
         }
         
         
@@ -1351,7 +1353,7 @@ DYNidm <- function(formula01,
 ########################## perform penalty algorithm ###########################
 ##########################   with M-splines baseline risk ######################
 ################################################################################
-          
+       
           if(method=="splines"){
             # if user did not specified the lambda values 
             if(is.null(lambda01)|is.null(lambda02)|is.null(lambda12)){
@@ -1460,7 +1462,7 @@ DYNidm <- function(formula01,
                                           dimp01=dimp01,
                                           dimp02=dimp02,
                                           dimp12=dimp12,
-                                          scale.X=scale.X)
+                                          scale.X=scale.Y)
             }else{
             out<-DYNidm.penalty.splines(b=b,
                              fix0=fix0,
@@ -1527,7 +1529,7 @@ DYNidm <- function(formula01,
                              dimp01=dimp01,
                              dimp02=dimp02,
                              dimp12=dimp12,
-                             scale.X=scale.X,
+                             scale.X=scale.Y,
                              defpositive=defpositive,
                              warmstart=warmstart)
             }
@@ -1648,7 +1650,7 @@ DYNidm <- function(formula01,
                                dimp01=dimp01,
                                dimp02=dimp02,
                                dimp12=dimp12,
-                               scale.X=scale.X)
+                               scale.X=scale.Y)
             }else{
               
               
@@ -1710,7 +1712,7 @@ DYNidm <- function(formula01,
                                            dimp01=dimp01,
                                            dimp02=dimp02,
                                            dimp12=dimp12,
-                                           scale.X=scale.X,
+                                           scale.X=scale.Y,
                                          defpositive=defpositive,
                                          warmstart=warmstart)
             }
@@ -1737,6 +1739,7 @@ DYNidm <- function(formula01,
               id=id,
               method=method,
               scale.X=scale.X,
+              scale.Y=scale.Y,
               formula01=formula01,
               formula02=formula02,
               formula12=formula12,

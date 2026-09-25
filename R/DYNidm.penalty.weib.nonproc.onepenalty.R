@@ -28,6 +28,9 @@ DYNidm.penalty.weib.nonproc.onepenalty<-function(beta.start,
   
  
   pbr_compu<-0
+  
+  fix0start<-rep(0,size_V)
+  fix0start[1:6]<-1
   # combine model 
   combine_lambda_mla<-function(x,newx){
     
@@ -178,7 +181,7 @@ DYNidm.penalty.weib.nonproc.onepenalty<-function(beta.start,
                                         eval.cv.loglik<-rep(NA,maxiter+1)
                                         eval.loglik<-rep(NA,maxiter+1)
                                         eval.validity<-rep(NA,maxiter+1)
-                                        
+                                        validity<-T
                                         
                                         while(converged==F & ite<=maxiter){
                                           
@@ -374,80 +377,124 @@ DYNidm.penalty.weib.nonproc.onepenalty<-function(beta.start,
                                           
                                           
                                           # update beta
+                                          # 
+                                          # output.cv<-DYNcv.model(beta=beta,
+                                          #                        nva01=npm01,
+                                          #                        nva02=npm02,
+                                          #                        nva12=npm12,
+                                          #                        nva01Y=npm01Y,
+                                          #                        nva02Y=npm02Y,
+                                          #                        nva12Y=npm12Y,
+                                          #                        fix=fix0[7:size_V],
+                                          #                        penalty.factor=penalty.factor,
+                                          #                        penalty=penalty,penalty.weights=penalty.weights[,id.lambda],
+                                          #                        v=V,
+                                          #                        fu=fu,
+                                          #                        lambda=lambda[id.lambda,],
+                                          #                        alpha=alpha
+                                          # )
+                                          # 
+                                          # # verify validity of parameters update 
+                                          # # and that we are better than previous estimates 
+                                          # 
+                                          # b<-c(s,output.cv$b)
+                                          # 
+                                          # betanew<-b[(6+1):size_V]
+                                          # 
+                                          # # penalised loglik see if inferior to previous
+                                          # res<-gaussDYNidmlLikelihoodweibpena(b=b,
+                                          #                                     npm=size_V,
+                                          #                                     npar=size_V,
+                                          #                                     bfix=1,
+                                          #                                     fix=rep(0,size_V),
+                                          #                                     ctime=ctime,
+                                          #                                     no=N,
+                                          #                                     ve01=ve01,
+                                          #                                     ve02=ve02,
+                                          #                                     ve12=ve12,
+                                          #                                     dimnva01=dimnva01,
+                                          #                                     dimnva02=dimnva02,
+                                          #                                     dimnva12=dimnva12,
+                                          #                                     nva01=nvat01,
+                                          #                                     nva02=nvat02,
+                                          #                                     nva12=nvat12,
+                                          #                                     t0=t0,
+                                          #                                     t1=t1,
+                                          #                                     t2=t2,
+                                          #                                     t3=t3,
+                                          #                                     troncature=troncature,
+                                          #                                     y01=y01k,
+                                          #                                     y02=y02k,
+                                          #                                     y12=y12k,
+                                          #                                     p01=p01,
+                                          #                                     p02=p02,
+                                          #                                     p12=p12,
+                                          #                                     dimp01=dimp01,
+                                          #                                     dimp02=dimp02,
+                                          #                                     dimp12=dimp12,
+                                          #                                     Ntime=NtimePoints,
+                                          #                                     lambda=lambda[id.lambda,],
+                                          #                                     alpha=alpha,
+                                          #                                     penalty.factor=penalty.factor,
+                                          #                                     penalty=penalty,penalty.weights=penalty.weights[,id.lambda])
+                                          # 
+                                          # 
+                                          #25/09/2026 : update of beta with a walk around best
+                                          step<-0.1*max(abs(fu/diag(V)))
+                                          step<-log(step)
                                           
-                                          output.cv<-DYNcv.model(beta=beta,
-                                                                 nva01=npm01,
-                                                                 nva02=npm02,
-                                                                 nva12=npm12,
-                                                                 nva01Y=npm01Y,
-                                                                 nva02Y=npm02Y,
-                                                                 nva12Y=npm12Y,
-                                                                 fix=fix0[7:size_V],
-                                                                 penalty.factor=penalty.factor,
-                                                                 penalty=penalty,penalty.weights=penalty.weights[,id.lambda],
-                                                                 v=V,
-                                                                 fu=fu,
-                                                                 lambda=lambda[id.lambda,],
-                                                                 alpha=alpha
-                                          )
-                                          
-                                          # verify validity of parameters update 
-                                          # and that we are better than previous estimates 
-                                          
-                                          b<-c(s,output.cv$b)
-                                          
-                                          betanew<-b[(6+1):size_V]
-                                          
-                                          # penalised loglik see if inferior to previous
-                                          res<-gaussDYNidmlLikelihoodweibpena(b=b,
-                                                                              npm=size_V,
-                                                                              npar=size_V,
-                                                                              bfix=1,
-                                                                              fix=rep(0,size_V),
-                                                                              ctime=ctime,
-                                                                              no=N,
-                                                                              ve01=ve01,
-                                                                              ve02=ve02,
-                                                                              ve12=ve12,
-                                                                              dimnva01=dimnva01,
-                                                                              dimnva02=dimnva02,
-                                                                              dimnva12=dimnva12,
-                                                                              nva01=nvat01,
-                                                                              nva02=nvat02,
-                                                                              nva12=nvat12,
-                                                                              t0=t0,
-                                                                              t1=t1,
-                                                                              t2=t2,
-                                                                              t3=t3,
-                                                                              troncature=troncature,
-                                                                              y01=y01k,
-                                                                              y02=y02k,
-                                                                              y12=y12k,
-                                                                              p01=p01,
-                                                                              p02=p02,
-                                                                              p12=p12,
-                                                                              dimp01=dimp01,
-                                                                              dimp02=dimp02,
-                                                                              dimp12=dimp12,
-                                                                              Ntime=NtimePoints,
-                                                                              lambda=lambda[id.lambda,],
-                                                                              alpha=alpha,
-                                                                              penalty.factor=penalty.factor,
-                                                                              penalty=penalty,penalty.weights=penalty.weights[,id.lambda])
+                                          DYNres<-DYNsearpas_weib(step=step,
+                                                                  b=beta,
+                                                                  res.out.error=res.out.error,
+                                                                  fistart=fn.value,
+                                                                  s=s,
+                                                                  nva01Y=npm01Y,
+                                                                  nva02Y=npm02Y,
+                                                                  nva12Y=npm12Y,
+                                                                  fix=fix0[7:size_V],
+                                                                  v=V,
+                                                                  ctime=ctime,
+                                                                  no=N,
+                                                                  fu=fu,
+                                                                  ve01=ve01,
+                                                                  ve02=ve02,
+                                                                  ve12=ve12,
+                                                                  dimnva01=dimnva01,
+                                                                  dimnva02=dimnva02,
+                                                                  dimnva12=dimnva12,
+                                                                  nva01=nvat01,
+                                                                  nva02=nvat02,
+                                                                  nva12=nvat12,
+                                                                  t0=t0,
+                                                                  t1=t1,
+                                                                  t2=t2,
+                                                                  t3=t3,
+                                                                  troncature=troncature,
+                                                                  y01=y01k,
+                                                                  y02=y02k,
+                                                                  y12=y12k,
+                                                                  p01=p01,
+                                                                  p02=p02,
+                                                                  p12=p12,
+                                                                  dimp01=dimp01,
+                                                                  dimp02=dimp02,
+                                                                  dimp12=dimp12,
+                                                                  Ntime=NtimePoints,
+                                                                  lambda=lambda[id.lambda,],
+                                                                  alpha=alpha,
+                                                                  penalty.factor=penalty.factor,
+                                                                  penalty=penalty,
+                                                                  penalty.weights=penalty.weights[,id.lambda])
                                           
                                           
-                                          # we want to maximise the loglik thus : 
-                                          # we have issue if res is NA or if not higher than previous one 
-                                          # if not better or do not exist need to readjust
-                                          # value of beta 
-                                          
+                                          res<-DYNres$fim
+                                          betanew<-DYNres$bim[7:size_V]
                                           
                                           if(res %in%c(-1e9,1e9) | res < fn.value){
                                             
-                                            print(paste0("needed update at ite :",ite))
                                             th<-1e-5
                                             step<-log(1.5)
-                                            delta<-output.cv$b-c(beta)
+                                            delta<-betanew-c(beta)
                                             
                                             maxt <- max(abs(delta)) 
                                             
@@ -480,7 +527,7 @@ DYNidm.penalty.weib.nonproc.onepenalty<-function(beta.start,
                                                            npm=npm,
                                                            npar=size_V,
                                                            bfix=s,
-                                                           fix=fix0,
+                                                           fix=fix0start,
                                                            ctime=ctime,
                                                            no=N,
                                                            ve01=ve01,
@@ -895,7 +942,7 @@ DYNidm.penalty.weib.nonproc.onepenalty<-function(beta.start,
                                             eval.cv.loglik<-rep(NA,maxiter+1)
                                             eval.loglik<-rep(NA,maxiter+1)
                                             eval.validity<-rep(NA,maxiter+1)
-                                            
+                                            validity<-T
                                             
                                             while(converged==F & ite<=maxiter){
                                               # browser()
@@ -1065,77 +1112,123 @@ DYNidm.penalty.weib.nonproc.onepenalty<-function(beta.start,
                                               
                                               
                                               # update beta
-                                              output.cv<-DYNcv.model(beta=beta,
-                                                                     nva01=npm01,
-                                                                     nva02=npm02,
-                                                                     nva12=npm12,
-                                                                     nva01Y=npm01Y,
-                                                                     nva02Y=npm02Y,
-                                                                     nva12Y=npm12Y,
-                                                                     fix=fix0[7:size_V],
-                                                                     penalty.factor=penalty.factor,
-                                                                     penalty=penalty,penalty.weights=penalty.weights[,id.lambda],
-                                                                     v=V,
-                                                                     fu=fu,
-                                                                     lambda=lambda[id.lambda,],
-                                                                     alpha=alpha
-                                              )
+                                              # output.cv<-DYNcv.model(beta=beta,
+                                              #                        nva01=npm01,
+                                              #                        nva02=npm02,
+                                              #                        nva12=npm12,
+                                              #                        nva01Y=npm01Y,
+                                              #                        nva02Y=npm02Y,
+                                              #                        nva12Y=npm12Y,
+                                              #                        fix=fix0[7:size_V],
+                                              #                        penalty.factor=penalty.factor,
+                                              #                        penalty=penalty,penalty.weights=penalty.weights[,id.lambda],
+                                              #                        v=V,
+                                              #                        fu=fu,
+                                              #                        lambda=lambda[id.lambda,],
+                                              #                        alpha=alpha
+                                              # )
+                                              # 
+                                              # # verify validity of parameters update 
+                                              # # and that we are better than previous estimates 
+                                              # 
+                                              # b<-c(s,output.cv$b)
+                                              # 
+                                              # betanew<-b[(6+1):size_V]
+                                              # 
+                                              # # penalised loglik see if inferior to previous
+                                              # res<-gaussDYNidmlLikelihoodweibpena(b=b,
+                                              #                                     npm=size_V,
+                                              #                                     npar=size_V,
+                                              #                                     bfix=1,
+                                              #                                     fix=rep(0,size_V),
+                                              #                                     ctime=ctime,
+                                              #                                     no=N,
+                                              #                                     ve01=ve01,
+                                              #                                     ve02=ve02,
+                                              #                                     ve12=ve12,
+                                              #                                     dimnva01=dimnva01,
+                                              #                                     dimnva02=dimnva02,
+                                              #                                     dimnva12=dimnva12,
+                                              #                                     nva01=nvat01,
+                                              #                                     nva02=nvat02,
+                                              #                                     nva12=nvat12,
+                                              #                                     t0=t0,
+                                              #                                     t1=t1,
+                                              #                                     t2=t2,
+                                              #                                     t3=t3,
+                                              #                                     troncature=troncature,
+                                              #                                     y01=y01k,
+                                              #                                     y02=y02k,
+                                              #                                     y12=y12k,
+                                              #                                     p01=p01,
+                                              #                                     p02=p02,
+                                              #                                     p12=p12,
+                                              #                                     dimp01=dimp01,
+                                              #                                     dimp02=dimp02,
+                                              #                                     dimp12=dimp12,
+                                              #                                     Ntime=NtimePoints,
+                                              #                                     
+                                              #                                     lambda=lambda[id.lambda,],
+                                              #                                     alpha=alpha,
+                                              #                                     penalty.factor=penalty.factor,
+                                              #                                     penalty=penalty,penalty.weights=penalty.weights[,id.lambda])
+                                              # 
+                                              #25/09/2026 : update of beta with a walk around best
+                                              step<-0.1*max(abs(fu/diag(V)))
+                                              step<-log(step)
                                               
-                                              # verify validity of parameters update 
-                                              # and that we are better than previous estimates 
+                                              DYNres<-DYNsearpas_weib(step=step,
+                                                                      b=beta,
+                                                                      res.out.error=res.out.error,
+                                                                      fistart=fn.value,
+                                                                      s=s,
+                                                                      nva01Y=npm01Y,
+                                                                      nva02Y=npm02Y,
+                                                                      nva12Y=npm12Y,
+                                                                      fix=fix0[7:size_V],
+                                                                      v=V,
+                                                                      ctime=ctime,
+                                                                      no=N,
+                                                                      fu=fu,
+                                                                      ve01=ve01,
+                                                                      ve02=ve02,
+                                                                      ve12=ve12,
+                                                                      dimnva01=dimnva01,
+                                                                      dimnva02=dimnva02,
+                                                                      dimnva12=dimnva12,
+                                                                      nva01=nvat01,
+                                                                      nva02=nvat02,
+                                                                      nva12=nvat12,
+                                                                      t0=t0,
+                                                                      t1=t1,
+                                                                      t2=t2,
+                                                                      t3=t3,
+                                                                      troncature=troncature,
+                                                                      y01=y01k,
+                                                                      y02=y02k,
+                                                                      y12=y12k,
+                                                                      p01=p01,
+                                                                      p02=p02,
+                                                                      p12=p12,
+                                                                      dimp01=dimp01,
+                                                                      dimp02=dimp02,
+                                                                      dimp12=dimp12,
+                                                                      Ntime=NtimePoints,
+                                                                      lambda=lambda[id.lambda,],
+                                                                      alpha=alpha,
+                                                                      penalty.factor=penalty.factor,
+                                                                      penalty=penalty,
+                                                                      penalty.weights=penalty.weights[,id.lambda])
                                               
-                                              b<-c(s,output.cv$b)
                                               
-                                              betanew<-b[(6+1):size_V]
-                                              
-                                              # penalised loglik see if inferior to previous
-                                              res<-gaussDYNidmlLikelihoodweibpena(b=b,
-                                                                                  npm=size_V,
-                                                                                  npar=size_V,
-                                                                                  bfix=1,
-                                                                                  fix=rep(0,size_V),
-                                                                                  ctime=ctime,
-                                                                                  no=N,
-                                                                                  ve01=ve01,
-                                                                                  ve02=ve02,
-                                                                                  ve12=ve12,
-                                                                                  dimnva01=dimnva01,
-                                                                                  dimnva02=dimnva02,
-                                                                                  dimnva12=dimnva12,
-                                                                                  nva01=nvat01,
-                                                                                  nva02=nvat02,
-                                                                                  nva12=nvat12,
-                                                                                  t0=t0,
-                                                                                  t1=t1,
-                                                                                  t2=t2,
-                                                                                  t3=t3,
-                                                                                  troncature=troncature,
-                                                                                  y01=y01k,
-                                                                                  y02=y02k,
-                                                                                  y12=y12k,
-                                                                                  p01=p01,
-                                                                                  p02=p02,
-                                                                                  p12=p12,
-                                                                                  dimp01=dimp01,
-                                                                                  dimp02=dimp02,
-                                                                                  dimp12=dimp12,
-                                                                                  Ntime=NtimePoints,
-                                                                                  
-                                                                                  lambda=lambda[id.lambda,],
-                                                                                  alpha=alpha,
-                                                                                  penalty.factor=penalty.factor,
-                                                                                  penalty=penalty,penalty.weights=penalty.weights[,id.lambda])
-                                              
-                                              # we want to maximise the loglik thus : 
-                                              # we have issue if res is NA or if not higher than previous one 
-                                              # if not better or do not exist need to readjust
-                                              # value of beta 
+                                              res<-DYNres$fim
+                                              betanew<-DYNres$bim[7:size_V]
                                               
                                               if(res %in%c(-1e9,1e9) | res < fn.value){
                                                 
                                                 th<-1e-5
                                                 step<-log(1.5)
-                                                delta<-output.cv$b-c(beta)
+                                                delta<-betanew-c(beta)
                                                 
                                                 maxt <- max(abs(delta)) 
                                                 
@@ -1168,7 +1261,7 @@ DYNidm.penalty.weib.nonproc.onepenalty<-function(beta.start,
                                                                npm=npm,
                                                                npar=size_V,
                                                                bfix=s,
-                                                               fix=fix0,
+                                                               fix=fix0start,
                                                                ctime=ctime,
                                                                no=N,
                                                                ve01=ve01,

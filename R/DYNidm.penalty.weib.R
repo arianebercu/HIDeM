@@ -118,6 +118,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
   outputall<-list()
   length(outputall)<-Nsample
 
+  browser()
   if(nlambda>1){
   
   for(idsample in 1:Nsample){
@@ -161,6 +162,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
       
     }
    
+   
     for( m in unique(c(outcome01,outcome02,outcome12))){
       subdata<-dataY[dataY$Outcome==m,]
       x<-table(subdata[,colnames(subdata)%in%id])
@@ -179,7 +181,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
     if(length(outcome01)>=1){
       y01k<-dataY[dataY$Outcome%in%outcome01,]
       # order  by individual and timeline 
-      y01k<-y01k[order(y01k[,colnames(y01k)%in%id],y01k$order),4]
+      y01k<-y01k[order(y01k[,colnames(y01k)%in%id],y01k$order),"Sample_1"]
       
       
     }else{
@@ -189,7 +191,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
     if(length(outcome02)>=1){
       y02k<-dataY[dataY$Outcome%in%outcome02,]
       # order  by individual and timeline 
-      y02k<-y02k[order(y02k[,colnames(y02k)%in%id],y02k$order),4]
+      y02k<-y02k[order(y02k[,colnames(y02k)%in%id],y02k$order),"Sample_1"]
       
     }else{
       y02k<-rep(0,N*NtimePoints)
@@ -198,13 +200,12 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
     if(length(outcome12)>=1){
       y12k<-dataY[dataY$Outcome%in%outcome12,]
       # order  by individual and timeline 
-      y12k<-y12k[order(y12k[,colnames(y12k)%in%id],y12k$order),4]
+      y12k<-y12k[order(y12k[,colnames(y12k)%in%id],y12k$order),"Sample_1"]
       
     }else{
       y12k<-rep(0,N*NtimePoints)
     }
     
- 
 
   if(nproc >1){
     

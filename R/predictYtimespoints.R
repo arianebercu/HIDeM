@@ -119,14 +119,21 @@ gauss_kronrod_points_pred1 <- function(lower.intdouble,
   # Transform from [-1,1] to [a,b]
   x<-0.5 * ((upper.intdouble - lower.intdouble) * gk15_nodes + (upper.intdouble + lower.intdouble)) # timepoint necessary to estimate the outer integral of int(a,b)int(0,t)f(u)dug(t)dt
    
-  x<-0.5 * (matrix(x,ncol=1)%*% gk15_nodes_ext) # timepoint necessary to estimate the inner integral of int(a,b)int(0,t)f(u)dug(t)dt + needed added one as we have g(t) 
+  #x<-0.5 * (matrix(x,ncol=1)%*% gk15_nodes_ext) # timepoint necessary to estimate the inner integral of int(a,b)int(0,t)f(u)dug(t)dt + needed added one as we have g(t) 
+  # pour chaque u_i, 15 noeuds internes s_ij sur [a, u_i]
+  # noeuds internes s_ij sur [a, u_i] : s_ij = 0.5*(u_i-a)*node_j + 0.5*(u_i+a)
+  diffs <- x - lower.intdouble      # (u_i - a), vecteur longueur 15
+  sums  <- x + lower.intdouble      # (u_i + a), vecteur longueur 15
   
-  # add integral points from 0 to end of study and need end.time value also (death or censoring): 
-  # attention to take row by row t(x)
+  scale_part <- matrix(diffs, ncol = 1) %*% matrix(gk15_nodes_ext, nrow = 1)   # 15 x 16
+  shift_part <- matrix(sums,  ncol = 1) %*% matrix(rep(1, length(gk15_nodes_ext)), nrow = 1)  # 15 x 16
+  
+  x <- 0.5 * (scale_part + shift_part)   # 15 x 16, entrée (i,j) = s_ij
+  
   
   x<-t(x)
   
-  x<-c(x,0.5 * (lower.intdouble * gk15_nodes + lower.intdouble) )
+  #x<-c(x,0.5 * (lower.intdouble * gk15_nodes + lower.intdouble) )
   
   return(as.vector(x))
 }

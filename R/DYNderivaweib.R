@@ -29,6 +29,7 @@ DYNderivaweib<-function(h,b,npm,npar,bfix,fix,ctime,no,ve01,ve02,ve12,
                          y01,y02,y12,p01,p02,p12,
                          dimp01,dimp02,dimp12,Ntime){
   
+
   res<-rep(0,npm)
   fu<-.Fortran("firstderivaidmlikelihoodweibtimedep",
            ## input

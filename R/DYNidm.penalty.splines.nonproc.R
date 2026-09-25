@@ -25,6 +25,8 @@ DYNidm.penalty.splines.nonproc<-function(beta.start,
  
   pbr_compu<-0
 
+  fix0start<-rep(0,size_V)
+  fix0start[1:size_spline]<-1
 # combine model 
 combine_lambda_mla<-function(x,newx){
   
@@ -399,7 +401,7 @@ if(partialH==F){
                                                        npm=npm,
                                                        npar=size_V,
                                                        bfix=s,
-                                                       fix=fix0,
+                                                       fix=fix0start,
                                                        zi01=knots01,
                                                        zi02=knots02,
                                                        zi12=knots12,
@@ -1083,7 +1085,7 @@ if(partialH==F){
                                                            npm=npm,
                                                            npar=size_V,
                                                            bfix=s,
-                                                           fix=fix0,
+                                                           fix=fix0start,
                                                            zi01=knots01,
                                                            zi02=knots02,
                                                            zi12=knots12,
@@ -1815,7 +1817,7 @@ if(partialH==F){
                                                          npm=npm,
                                                          npar=size_V,
                                                          bfix=s,
-                                                         fix=fix0,
+                                                         fix=fix0start,
                                                          zi01=knots01,
                                                          zi02=knots02,
                                                          zi12=knots12,
@@ -2521,7 +2523,7 @@ if(partialH==F){
                                                              npm=npm,
                                                              npar=size_V,
                                                              bfix=s,
-                                                             fix=fix0,
+                                                             fix=fix0start,
                                                              zi01=knots01,
                                                              zi02=knots02,
                                                              zi12=knots12,

@@ -63,8 +63,6 @@ INLAidmpredY<-function(timeVar,truncated,formLong,dataSurv,dataLongi,id,
   ## augmentation of the data 
   
   dataLongi_augmented<-merge(timePointsdata,dataLongi,by=c(id,timeVar,terms_labels),all.x=T,all.y=T)
-  
-  
 
   rownames(dataLongi_augmented)<-NULL
   dataLongi_augmented<-dataLongi_augmented[order(dataLongi_augmented[,colnames(dataLongi_augmented)%in%id],
@@ -81,6 +79,10 @@ INLAidmpredY<-function(timeVar,truncated,formLong,dataSurv,dataLongi,id,
     tcenter<-min(t0)
     dataCenter<-data.frame(ID=idsubjects,time=tcenter)
     colnames(dataCenter)<-c(id,timeVar)
+    if(length(terms_labels)>0){
+      dataCenter<-merge(x=dataCenter,y=dataAdjust,by=id,all.x=T)
+      
+    }
   }
   # should center by median or mean ? 
   
@@ -96,7 +98,7 @@ INLAidmpredY<-function(timeVar,truncated,formLong,dataSurv,dataLongi,id,
       if(is.null(INLAmodel)){stop("The inla model for your marker could not be run, see above warnings.")}
       choiceY<-na.omit(unlist(assoc[[indice]]))
       
-      
+
       if(BLUP==F){
         
         
@@ -105,7 +107,7 @@ INLAidmpredY<-function(timeVar,truncated,formLong,dataSurv,dataLongi,id,
         
         res<-NULL
         key1 <- do.call(paste, c(dataLongi_augmented[,colnames(dataLongi_augmented)%in%c(id,timeVar)], sep = "\r"))
-        key2 <- do.call(paste, c(timePointsdata, sep = "\r"))
+        key2 <- do.call(paste, c(timePointsdata[,colnames(timePointsdata)%in%c(id,timeVar)], sep = "\r"))
         # keep only indice we want: 
         # Collapse each row into a string
         
@@ -123,7 +125,7 @@ INLAidmpredY<-function(timeVar,truncated,formLong,dataSurv,dataLongi,id,
           Ycenter<-make_XINLA(formula=formLong[[indice]], timeVar=timeVar, data=dataCenter,ct=ct,id=id,idtag=idtag,SMP=SMP[[1]])
           PredYx$Y<-(PredYx$Y-mean(Ycenter))/sd(Ycenter)
         }
-        colnames(PredYx)[4]<-"Sample_1"
+        colnames(PredYx)[dim(PredYx)[2]]<-"Sample_1"
         res<-rbind(res,PredYx)
         }
         
@@ -136,7 +138,7 @@ INLAidmpredY<-function(timeVar,truncated,formLong,dataSurv,dataLongi,id,
           dYcenter<-make_dXINLA(formula=formLong[[indice]], timeVar=timeVar, data=dataCenter,ct=ct,id=id,idtag=idtag,SMP=SMP[[1]])
           slopePredYx$dY<-(slopePredYx$dY-mean(dYcenter))/sd(dYcenter)
         }
-        colnames(slopePredYx)[4]<-"Sample_1"
+        colnames(slopePredYx)[dim(slopePredYx)[2]]<-"Sample_1"
         res<-rbind(res,slopePredYx)
         }
         
@@ -158,7 +160,7 @@ INLAidmpredY<-function(timeVar,truncated,formLong,dataSurv,dataLongi,id,
        REPredYx<-cbind(dataREY,Outcome=namesREY,as.vector(REY))
        
        
-       colnames(REPredYx)[4]<-"Sample_1"
+       colnames(REPredYx)[dim(REPredYx)[2]]<-"Sample_1"
        res<-rbind(res,REPredYx)
         }
         
@@ -171,7 +173,7 @@ INLAidmpredY<-function(timeVar,truncated,formLong,dataSurv,dataLongi,id,
         
         res<-NULL
         key1 <- do.call(paste, c(dataLongi_augmented[,colnames(dataLongi_augmented)%in%c(id,timeVar)], sep = "\r"))
-        key2 <- do.call(paste, c(timePointsdata, sep = "\r"))
+        key2 <- do.call(paste, c(timePointsdata[,colnames(timePointsdata)%in%c(id,timeVar)], sep = "\r"))
         # keep only indice we want: 
         # Collapse each row into a string
         
@@ -186,11 +188,12 @@ INLAidmpredY<-function(timeVar,truncated,formLong,dataSurv,dataLongi,id,
           Outcome<-all.vars(terms(formLong[[indice]]))[1]
           PredYx<-cbind(timePointsdata,Outcome=Outcome,Y)
           
+        
           if(scale.X==T){
             Ycenter<-make_XINLA_BLUP(formula=formLong[[indice]], timeVar=timeVar, data=dataCenter,ct=ct,id=id,idtag=idtag,SMP=INLAmodel)
             PredYx$Y<-(PredYx$Y-mean(Ycenter))/sd(Ycenter)
           }
-          colnames(PredYx)[4]<-"Sample_1"
+          colnames(PredYx)[dim(PredYx)[2]]<-"Sample_1"
           res<-rbind(res,PredYx)
         }
         
@@ -204,7 +207,7 @@ INLAidmpredY<-function(timeVar,truncated,formLong,dataSurv,dataLongi,id,
           dYcenter<-make_dXINLA_BLUP(formula=formLong[[indice]], timeVar=timeVar, data=dataCenter,ct=ct,id=id,idtag=idtag,SMP=INLAmodel)
           slopePredYx$dY<-(slopePredYx$dY-mean(dYcenter))/sd(dYcenter)
         }
-        colnames(slopePredYx)[4]<-"Sample_1"
+        colnames(slopePredYx)[dim(slopePredYx)[2]]<-"Sample_1"
         res<-rbind(res,slopePredYx)
         }
         
@@ -223,7 +226,7 @@ INLAidmpredY<-function(timeVar,truncated,formLong,dataSurv,dataLongi,id,
         }))
         dataREY<- do.call(rbind, replicate(dim(REY)[2], timePointsdata, simplify = FALSE))
         REPredYx<-cbind(dataREY,Outcome=namesREY,as.vector(REY))
-        colnames(REPredYx)[4]<-"Sample_1"
+        colnames(REPredYx)[dim(REPredYx)[2]]<-"Sample_1"
         res<-rbind(res,REPredYx)
         }
         
@@ -548,7 +551,6 @@ make_XINLA_BLUP <- function(formula, timeVar, data, use_splines = FALSE, ct, id,
   X_RE <- matrix(NA_real_, nrow = n, ncol = n_re)
   B_RE <- matrix(0, nrow = n, ncol = n_re)
   colnames(X_RE) <- paste0(id, terms_RE, "_L1")
-  
 
   for (k in seq_along(terms_RE)) {
     lab <- terms_RE[k]
@@ -590,7 +592,6 @@ make_XINLA_BLUP <- function(formula, timeVar, data, use_splines = FALSE, ct, id,
     names(modes_vec) <- id_levels
     B_RE[, k] <- unname(modes_vec[id_index])
   }
-  
 
   # --- combine and return ---
   Y <- rowSums(X * B) + rowSums(X_RE * B_RE)

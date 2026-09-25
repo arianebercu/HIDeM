@@ -108,9 +108,10 @@ predict.idm <- function(object,s,
     nvar12 <- object$NC[3]
 
     # keep previous levels 
+    if((nvar01>0)|(nvar02>0)|(nvar12>0)){
     object$levels$class[sapply(object$levels$class, is.null)] <- NA
     if(length(object$levels$values)>0){
-      object$levels$values[sapply(object$levels$values, is.null)] <- NA}
+      object$levels$values[sapply(object$levels$values, is.null)] <- NA}}
     
     # xlevels<-unlist(object$levels$class)
     # if(any(xlevels%in%c("factor","character"))){
@@ -209,17 +210,79 @@ predict.idm <- function(object,s,
         knots01 <- object$knots01
         knots02 <- object$knots02
         knots12 <- object$knots12
-        the01 <- object$theta01
         
         if(s<min(knots01,knots02,knots12))stop(paste0("The argument s must be at least equal to :",min(knots01,knots02,knots12)))
         if(t<min(knots01,knots02,knots12))stop(paste0("The argument t must be at least equal to :",min(knots01,knots02,knots12)))
         
+        the01 <- object$theta01
         names(the01) <- paste0("the01.",1:length(the01))
         the02 <- object$theta02
         names(the02) <- paste0("the02.",1:length(the02))
         the12 <- object$theta12
         names(the12) <- paste0("the12.",1:length(the12))
-        if (do.conf.int == TRUE & nsim>2){
+        
+        
+        knots.unique<-unique(object$knots01)
+        knots.bound<-knots.unique[c(1,length(knots.unique))]
+        knots.int<-knots.unique[-c(1,length(knots.unique))]
+        msplines01<-splinesMI(x=t,knots=sort(knots.int),Boundary.knots=knots.bound)$Mspline
+        isplines01<-(splinesMI(x=t,knots=sort(knots.int),Boundary.knots=knots.bound)$Ispline-splinesMI(x=s,knots=sort(knots.int),Boundary.knots=knots.bound)$Ispline)
+        
+        knots.unique<-unique(object$knots02)
+        knots.bound<-knots.unique[c(1,length(knots.unique))]
+        knots.int<-knots.unique[-c(1,length(knots.unique))]
+        msplines02<-splinesMI(x=t,knots=sort(knots.int),Boundary.knots=knots.bound)$Mspline
+        isplines02<-(splinesMI(x=t,knots=sort(knots.int),Boundary.knots=knots.bound)$Ispline-splinesMI(x=s,knots=sort(knots.int),Boundary.knots=knots.bound)$Ispline)
+        
+        knots.unique<-unique(object$knots12)
+        knots.bound<-knots.unique[c(1,length(knots.unique))]
+        knots.int<-knots.unique[-c(1,length(knots.unique))]
+        msplines12<-splinesMI(x=t,knots=sort(knots.int),Boundary.knots=knots.bound)$Mspline
+        isplines12<-(splinesMI(x=t,knots=sort(knots.int),Boundary.knots=knots.bound)$Ispline-splinesMI(x=s,knots=sort(knots.int),Boundary.knots=knots.bound)$Ispline)
+        
+        
+        theta.square01<-the01^2
+        intensity01<-msplines01%*%theta.square01
+        cumulative.intensity01<-isplines01%*%theta.square01
+        
+        theta.square02<-the02^2
+        intensity02<-msplines02%*%theta.square02
+        cumulative.intensity02<-isplines02%*%theta.square02
+        
+        theta.square12<-the12^2
+        intensity12<-msplines12%*%theta.square12
+        cumulative.intensity12<-isplines12%*%theta.square12
+        
+        if (!is.null(beta01))
+          linPred01<-beta01 %*% t(Z01)
+        else
+          linPred01<-0
+        if (!is.null(beta02))
+          linPred02<-beta02 %*% t(Z02)
+        else
+          linPred02<-0
+        if (!is.null(beta12))
+          linPred12<-beta12 %*% t(Z12)
+        else
+          linPred12<-0
+        
+        
+        e01 <- exp(linPred01)
+        intensity01<-intensity01*e01
+        cumulative.intensity01<-cumulative.intensity01*e01
+        
+        e02 <- exp(linPred02)
+        intensity02<-intensity02*e02
+        cumulative.intensity02<-cumulative.intensity02*e02
+        
+        e12 <- exp(linPred12)
+        intensity12<-intensity12*e12
+        cumulative.intensity12<-cumulative.intensity12*e12
+        
+        intensity<-c(intensity01,intensity02,intensity12)
+        cumulative.intensity<-c(cumulative.intensity01,cumulative.intensity02,cumulative.intensity12)
+        
+        if (do.conf.int == TRUE & nsim>=2){
             ### conf.int prediction by Monte-Carlo
             Vmean <- c(the01,the02,the12,beta01,beta02,beta12) # vector of estimates
             #Vmean<-Vmean[object$fix==0]   # vector of estimates not fixed
@@ -289,67 +352,8 @@ predict.idm <- function(object,s,
         }
         #browser()
         # want to calculate variability based on variance-covariance matrix
-        if (do.conf.int == TRUE & nsim<=2){
+        if (do.conf.int == TRUE & nsim<2){
 
-          knots.unique<-unique(object$knots01)
-          knots.bound<-knots.unique[c(1,length(knots.unique))]
-          knots.int<-knots.unique[-c(1,length(knots.unique))]
-          msplines01<-splinesMI(x=t,knots=sort(knots.int),Boundary.knots=knots.bound)$Mspline
-          isplines01<-(splinesMI(x=t,knots=sort(knots.int),Boundary.knots=knots.bound)$Ispline-splinesMI(x=s,knots=sort(knots.int),Boundary.knots=knots.bound)$Ispline)
-          
-          knots.unique<-unique(object$knots02)
-          knots.bound<-knots.unique[c(1,length(knots.unique))]
-          knots.int<-knots.unique[-c(1,length(knots.unique))]
-          msplines02<-splinesMI(x=t,knots=sort(knots.int),Boundary.knots=knots.bound)$Mspline
-          isplines02<-(splinesMI(x=t,knots=sort(knots.int),Boundary.knots=knots.bound)$Ispline-splinesMI(x=s,knots=sort(knots.int),Boundary.knots=knots.bound)$Ispline)
-          
-          knots.unique<-unique(object$knots12)
-          knots.bound<-knots.unique[c(1,length(knots.unique))]
-          knots.int<-knots.unique[-c(1,length(knots.unique))]
-          msplines12<-splinesMI(x=t,knots=sort(knots.int),Boundary.knots=knots.bound)$Mspline
-          isplines12<-(splinesMI(x=t,knots=sort(knots.int),Boundary.knots=knots.bound)$Ispline-splinesMI(x=s,knots=sort(knots.int),Boundary.knots=knots.bound)$Ispline)
-          
-          
-          theta.square01<-the01^2
-          intensity01<-msplines01%*%theta.square01
-          cumulative.intensity01<-isplines01%*%theta.square01
-          
-          theta.square02<-the02^2
-          intensity02<-msplines02%*%theta.square02
-          cumulative.intensity02<-isplines02%*%theta.square02
-          
-          theta.square12<-the12^2
-          intensity12<-msplines12%*%theta.square12
-          cumulative.intensity12<-isplines12%*%theta.square12
-          
-          if (!is.null(beta01))
-            linPred01<-beta01 %*% t(Z01)
-          else
-            linPred01<-0
-          if (!is.null(beta02))
-            linPred02<-beta02 %*% t(Z02)
-          else
-            linPred02<-0
-          if (!is.null(beta12))
-            linPred12<-beta12 %*% t(Z12)
-          else
-            linPred12<-0
-          
-          
-          e01 <- exp(linPred01)
-          intensity01<-intensity01*e01
-          cumulative.intensity01<-cumulative.intensity01*e01
-          
-          e02 <- exp(linPred02)
-          intensity02<-intensity02*e02
-          cumulative.intensity02<-cumulative.intensity02*e02
-          
-          e12 <- exp(linPred12)
-          intensity12<-intensity12*e12
-          cumulative.intensity12<-cumulative.intensity12*e12
-          
-          intensity<-c(intensity01,intensity02,intensity12)
-          cumulative.intensity<-c(cumulative.intensity01,cumulative.intensity02,cumulative.intensity12)
           
           lowerintensity<-rep(NA,3)
           upperintensity<-rep(NA,3)
@@ -358,12 +362,25 @@ predict.idm <- function(object,s,
           
            #V<-object$V[object$fix==0,object$fix==0]
            Nspline<-object$nknots01+object$nknots02+object$nknots12+6+1
+           if(object$NC[1]>0){
            V01<-object$V[c(1:(object$nknots01+2),Nspline:(Nspline+object$NC[1]-1)),c(1:(object$nknots01+2),Nspline:(Nspline+object$NC[1]-1))]
+           }else{
+             V01<-object$V[c(1:(object$nknots01+2)),c(1:(object$nknots01+2))]
+           }
            Nspline<-object$nknots01+object$nknots02+object$nknots12+6+object$NC[1]+1
+           if(object$NC[2]>0){
            V02<-object$V[c((object$nknots01+3):(object$nknots01+object$nknots02+4),Nspline:(Nspline+object$NC[2]-1)),c((object$nknots01+3):(object$nknots01+object$nknots02+4),Nspline:(Nspline+object$NC[2]-1))]
+           }else{
+             V02<-object$V[c((object$nknots01+3):(object$nknots01+object$nknots02+4)),c((object$nknots01+3):(object$nknots01+object$nknots02+4))]
+             
+           }
            Nspline<-object$nknots01+object$nknots02+object$nknots12+6+object$NC[1]+object$NC[2]+1
-           V12<-object$V[c((object$nknots01+object$nknots02+5):(object$nknots01+object$nknots02+object$nknots12+6),Nspline:(Nspline+object$NC[3]-1)),c((object$nknots01+object$nknots02+5):(object$nknots01+object$nknots02+object$nknots12+6),Nspline:(Nspline+object$NC[3]-1))]
            
+           if(object$NC[3]>0){
+           V12<-object$V[c((object$nknots01+object$nknots02+5):(object$nknots01+object$nknots02+object$nknots12+6),Nspline:(Nspline+object$NC[3]-1)),c((object$nknots01+object$nknots02+5):(object$nknots01+object$nknots02+object$nknots12+6),Nspline:(Nspline+object$NC[3]-1))]
+           }else{
+             V12<-object$V[c((object$nknots01+object$nknots02+5):(object$nknots01+object$nknots02+object$nknots12+6)),c((object$nknots01+object$nknots02+5):(object$nknots01+object$nknots02+object$nknots12+6))]
+           }
            
             deriv01<-c(2*the01*msplines01*as.numeric(e01),as.numeric(intensity01)*Z01)
             se01<-sqrt(deriv01%*%V01%*%deriv01)
@@ -396,6 +413,7 @@ predict.idm <- function(object,s,
             uppercumulative.intensity[1]<-cumulative.intensity01-qnorm((1-conf.int)/2)*se01
             uppercumulative.intensity[2]<-cumulative.intensity02-qnorm((1-conf.int)/2)*se02
             uppercumulative.intensity[3]<-cumulative.intensity12-qnorm((1-conf.int)/2)*se12
+          
             
               }
          
@@ -425,7 +443,49 @@ predict.idm <- function(object,s,
         b02 <- object$modelPar[4]
         a12 <- object$modelPar[5]
         b12 <- object$modelPar[6]
-        if (do.conf.int==TRUE & nsim>2) {
+        
+        modelPar01<-object$modelPar[1:2]^2
+        intensity01<-modelPar01[1]*(modelPar01[2]^modelPar01[1])*t^(modelPar01[1]-1)
+        cumulative.intensity01<-(modelPar01[2]*t)^modelPar01[1]
+        
+        modelPar02<-object$modelPar[3:4]^2
+        intensity02<-modelPar02[1]*(modelPar02[2]^modelPar02[1])*t^(modelPar02[1]-1)
+        cumulative.intensity02<-(modelPar02[2]*t)^modelPar02[1]
+        
+        modelPar12<-object$modelPar[5:6]^2
+        intensity12<-modelPar12[1]*(modelPar12[2]^modelPar12[1])*t^(modelPar12[1]-1)
+        cumulative.intensity12<-(modelPar12[2]*t)^modelPar12[1]
+        
+        if (!is.null(beta01))
+          linPred01<-beta01 %*% t(Z01)
+        else
+          linPred01<-0
+        if (!is.null(beta02))
+          linPred02<-beta02 %*% t(Z02)
+        else
+          linPred02<-0
+        if (!is.null(beta12))
+          linPred12<-beta12 %*% t(Z12)
+        else
+          linPred12<-0
+        
+        
+        e01 <- exp(linPred01)
+        intensity01<-intensity01*e01
+        cumulative.intensity01<-cumulative.intensity01*e01
+        
+        e02 <- exp(linPred02)
+        intensity02<-intensity02*e02
+        cumulative.intensity02<-cumulative.intensity02*e02
+        
+        e12 <- exp(linPred12)
+        intensity12<-intensity12*e12
+        cumulative.intensity12<-cumulative.intensity12*e12
+        
+        intensity<-c(intensity01,intensity02,intensity12)
+        cumulative.intensity<-c(cumulative.intensity01,cumulative.intensity02,cumulative.intensity12)
+        
+        if (do.conf.int==TRUE & nsim>=2) {
             ## conf.int prediction by Monte-Carlo
             ## vector of parameter estimates
             Vmean <- c(a01,b01,a02,b02,a12,b12,beta01,beta02,beta12)
@@ -489,59 +549,31 @@ predict.idm <- function(object,s,
             ci <- apply(simResults,2,function(x)quantile(unlist(x),c(q.lower,q.upper)))
         }
         # want to calculate variability based on variance-covariance matrix
-        if (do.conf.int==TRUE & nsim<=2) {
+        if (do.conf.int==TRUE & nsim<2) {
           # need to test
           
           
-          modelPar01<-object$modelPar[1:2]^2
-          intensity01<-modelPar01[1]*(modelPar01[2]^modelPar01[1])*t^(modelPar01[1]-1)
-          cumulative.intensity01<-(modelPar01[2]*t)^modelPar01[1]
-          
-          modelPar02<-object$modelPar[3:4]^2
-          intensity02<-modelPar02[1]*(modelPar02[2]^modelPar02[1])*t^(modelPar02[1]-1)
-          cumulative.intensity02<-(modelPar02[2]*t)^modelPar02[1]
-          
-          modelPar12<-object$modelPar[5:6]^2
-          intensity12<-modelPar12[1]*(modelPar12[2]^modelPar12[1])*t^(modelPar12[1]-1)
-          cumulative.intensity12<-(modelPar12[2]*t)^modelPar12[1]
-          
-          if (!is.null(beta01))
-            linPred01<-beta01 %*% t(Z01)
-          else
-            linPred01<-0
-          if (!is.null(beta02))
-            linPred02<-beta02 %*% t(Z02)
-          else
-            linPred02<-0
-          if (!is.null(beta12))
-            linPred12<-beta12 %*% t(Z12)
-          else
-            linPred12<-0
-          
-          
-          e01 <- exp(linPred01)
-          intensity01<-intensity01*e01
-          cumulative.intensity01<-cumulative.intensity01*e01
-          
-          e02 <- exp(linPred02)
-          intensity02<-intensity02*e02
-          cumulative.intensity02<-cumulative.intensity02*e02
-          
-          e12 <- exp(linPred12)
-          intensity12<-intensity12*e12
-          cumulative.intensity12<-cumulative.intensity12*e12
-          
-          intensity<-c(intensity01,intensity02,intensity12)
-          cumulative.intensity<-c(cumulative.intensity01,cumulative.intensity02,cumulative.intensity12)
+         
           lowerintensity<-rep(NA,3)
           upperintensity<-rep(NA,3)
           lowercumulative.intensity<-rep(NA,3)
           uppercumulative.intensity<-rep(NA,3)
           
-          
-          V01<-object$V[c(1:2,7:(7+object$NC[1]-1)),c(1:2,7:(7+object$NC[1]-1))]
+          if(object$NC[1]>0){
+          V01<-object$V[c(1:2,7:(7+object$NC[1]-1)),c(1:2,7:(7+object$NC[1]-1))]}else{
+            V01<-object$V[c(1:2),c(1:2)]
+            
+          }
+          if(object$NC[2]>0){
           V02<-object$V[c(3:4,(6+object$NC[1]+1):(6+object$NC[1]+object$NC[2])),c(3:4,(6+object$NC[1]+1):(6+object$NC[1]+object$NC[2]))]
+          }else{
+            V02<-object$V[c(3:4),c(3:4)]
+          }
+          if(object$NC[1]>0){
           V12<-object$V[c(5:6,(6+object$NC[1]+object$NC[2]+1):(6+object$NC[1]+object$NC[2]+object$NC[3])),c(5:6,(6+object$NC[1]+object$NC[2]+1):(6+object$NC[1]+object$NC[2]+object$NC[3]))]
+          }else{
+            V12<-object$V[c(5:6),c(5:6)]
+          }
 
           
           deriv01<-c((t^(modelPar01[1]-1))*(modelPar01[2]^modelPar01[1])*(modelPar01[1]*log(t)+modelPar01[1]*log(modelPar01[2])+1),
@@ -719,6 +751,8 @@ predict.idm <- function(object,s,
 
       uppercumulative.intensity<-lowercumulative.intensity<-cumulative.intensity<-NULL
       upperintensity<-lowerintensity<-intensity<-NULL
+      
+      
       ############### splines ####################################################
       if (object$method=="splines"){
         

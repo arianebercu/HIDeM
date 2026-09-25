@@ -20,7 +20,7 @@ DYNpredIDM<-function(objectY,
                      horizon=NULL,
                           envir=parent.frame(),
                          predicted.newdata=NULL,
-                     control=list(NsampleHY=1,NsampleFE=1,NsampleRE=1,return.data=F)){
+                     control=list(NsampleHY=1,NsampleFE=1,NsampleRE=1,NidLoop="auto",return.data=F)){
 
 
   call <- match.call()
@@ -44,6 +44,30 @@ DYNpredIDM<-function(objectY,
   
   
   if(!inherits(horizon,c("numeric","integer")))stop("horizon need to be an integer or numeric")
+  
+  if(!inherits(control$NsampleHY,c("numeric","integer"))){
+    if(round(control$NsampleHY)!=control$NsampleHY)stop("control$NsampleHY need to be an integer")}
+  if(!inherits(control$NsampleFE,c("numeric","integer"))){
+    if(round(control$NsampleFE)!=control$NsampleFE)stop("control$NsampleFE need to be an integer")}
+  if(!inherits(control$NsampleRE,c("numeric","integer"))){
+    if(round(control$NsampleRE)!=control$NsampleRE)stop("control$NsampleHYneed to be an integer")}
+
+  if(!inherits(control$NidLoop,c("numeric","integer","character")))stop("control$NidLoop to be an integer or character")
+if(length(control$NsampleHY)!=1)stop("Length of control$NsampleHY need to be 1")
+  if(length(control$NsampleFE)!=1)stop("Length of control$NsampleFE need to be 1")
+  if(length(control$NsampleRE)!=1)stop("Length of control$NsampleRE need to be 1")
+  if(length(control$NidLoop)!=1)stop("Length of control$NidLoop need to be 1")
+  if(inherits(control$NidLoop,"character")){
+    if(control$NidLoop!="auto"){
+    stop("control$NidLoop to be auto")}
+  }else{
+    if(round(control$NidLoop)!=control$NidLoop)stop("control$NidLoop to be an integer")
+    if(control$NidLoop<=0)stop("control$NidLoop needs to be greater than 0")
+  }
+  if(control$NsampleFE<=0)stop("control$NsampleFE needs to be greater than 0")
+  if(control$NsampleRE<=0)stop("control$NsampleRE needs to be greater than 0")
+  if(control$NsampleHY<=0)stop("control$NsampleHY needs to be greater than 0")
+  
   if(length(horizon)!=1)stop("Length of horizon need to be 1")
   if(is.null(s))stop("landmark time need to be provided")
   if((s < 0) | (horizon < 0) | (s >= horizon))stop("s and horizon need to be numeric superior or equal to 0 with s < horizon")
@@ -77,7 +101,8 @@ DYNpredIDM<-function(objectY,
   #erase subjects having the event before s 
   N<-length(unique(newdata[,colnames(newdata)%in%objectY$id]))
   
-  
+  if(inherits(control$NidLoop,c("numeric","integer"))){
+  if(control$NidLoop>N)stop(paste0("control$NidLoop needs to less or equal to ",N))}
   ######################## prepare for survival ################################
   
   #################################################################################
@@ -309,12 +334,16 @@ DYNpredIDM<-function(objectY,
   ############################################################################
   
   # if length of regDYNidm or DYNidm superior to 1 need to summaries over replicates 
+  
+  if(!("posfix"%in%names(objectSurvival))){
+    objectSurvival$posfix<-NULL
+  }
   if(length(objectSurvival$DYNidm)!=1){
     istop<-lapply(objectSurvival$DYNidm,FUN = function(x){
       if(x$istop%in%c(1,3)){return(T)}else{return(F)}
     })
     istop<-do.call(c,istop)
-    if(sum(istop==F)==length(istop)){stop("All the survival models did not converged")}
+    if(sum(istop==F)!=length(istop)){warning("All the survival models did not converged")}
     #binit<-prepareData(object=objectSurvival,istop=istop,index=index)
     binit<-prepareData(object=objectSurvival,istop=istop)
   }else{
@@ -360,7 +389,8 @@ DYNpredIDM<-function(objectY,
                          envir=envir,
                          NsampleRE=control$NsampleRE,
                          NsampleHY=control$NsampleHY,
-                         NsampleFE=control$NsampleFE)
+                         NsampleFE=control$NsampleFE,
+                         NidLoop=control$NidLoop)
                          # 31/08/2026 : do not estimate weights with our model 
                          # t0=t0,
                          # t1=t1,
@@ -387,7 +417,9 @@ DYNpredIDM<-function(objectY,
   ########################## check prediction ##################################
   
  # browser()
-  NtimePoints_0<-255
+  #10/09/2026 : change integral from A(s,u) instead of A(0,u)
+  #NtimePoints_0<-255
+  NtimePoints_0<-240
   # 31/08/2026 : do not estimate weights with our model 
   # if(isIntervalCensored){
   # NtimePoints_1<-sum(ctime>=2)*(255*3)+sum(ctime==0)*30+sum(ctime==1)*255
@@ -415,7 +447,7 @@ DYNpredIDM<-function(objectY,
   #browser()
   if(length(outcome01)>=1){
     y01<-dataY[dataY$Outcome%in%outcome01,]
-    y01_0<-y01[order(y01[,colnames(y01)%in%id],y01$order),4]
+    y01_0<-y01[order(y01[,colnames(y01)%in%id],y01$order),"Sample_1"]
     # order  by individual and timeline 
     # 31/08/2026 : do not estimate weights with our model 
     # y01<-y01[order(y01[,colnames(y01)%in%id],y01$order),]
@@ -439,7 +471,7 @@ DYNpredIDM<-function(objectY,
   
   if(length(outcome02)>=1){
     y02<-dataY[dataY$Outcome%in%outcome02,]
-    y02_0<-y02[order(y02[,colnames(y02)%in%id],y02$order),4]
+    y02_0<-y02[order(y02[,colnames(y02)%in%id],y02$order),"Sample_1"]
     # 31/08/2026 : do not estimate weights with our model 
     # order  by individual and timeline 
     # y02<-y02[order(y02[,colnames(y02)%in%id],y02$order),]
@@ -458,7 +490,7 @@ DYNpredIDM<-function(objectY,
   
   if(length(outcome12)>=1){
     y12<-dataY[dataY$Outcome%in%outcome12,]
-    y12_0<-y12[order(y12[,colnames(y12)%in%id],y12$order),4]
+    y12_0<-y12[order(y12[,colnames(y12)%in%id],y12$order),"Sample_1"]
     # 31/08/2026 : do not estimate weights with our model 
     # order  by individual and timeline 
     # y12<-y12[order(y12[,colnames(y12)%in%id],y12$order),]
@@ -475,7 +507,6 @@ DYNpredIDM<-function(objectY,
     #y12_1<-rep(0,N*NtimePoints_1)
   }
   
-  #browser()
   if(objectSurvival$method=="splines"){
     res<-rep(0,N)
     out1<- tryCatch({  .Fortran("citimedep",
@@ -601,8 +632,11 @@ DYNpredIDM<-function(objectY,
   
   if(!is.null(out1)){
     CIF01<-out1[1:N]
+    id_above1<-which(out1[1:N]>1)
+    if(length(id_above1)>0){warnings("Attention some individual have predicted probabilities above 1")}
   }else{
     CIF01<-NULL
+    id_above1<-NULL
   }
   
   # 31/08/2026 : do not estimate weights with our model 
@@ -631,6 +665,7 @@ DYNpredIDM<-function(objectY,
   
   res<-list(CIF01=CIF01,
             s=s,
+            id_above1=id_above1,
             horizon=horizon,
             predicted.newdata= predicted.newdata)
   return(res)
@@ -670,13 +705,14 @@ prepareData<-function(object,istop){
   Nrep<-sum(istop==T)
   
   b<-lapply(object,FUN=function(x){
+    b_all<-rep(NA,length(x$b)+length(posfix))
     if(x$istop%in%c(1,3)){
-      b_all<-rep(NA,length(x$b)+length(posfix))
       if(!is.null(posfix)){
         b_all[posfix]<-bfix
         b_all[-posfix]<-x$b
       }else{ b_all<-x$b}
-      return(b_all)}else{return(rep(NA,length(b_all)))}})
+    }
+      return(b_all)})
   b<-do.call(rbind,b)
   b<-na.omit(b)
   b<-colSums(b)/Nrep

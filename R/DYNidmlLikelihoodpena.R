@@ -125,7 +125,7 @@ gaussDYNidmlLikelihoodpena<-function(b,npm,npar,bfix,fix,zi01,zi02,zi12,ctime,no
   }
   
   if(nva12>0){
-    b12<-b[(nspline+1+nva01+nva02):npar][penalty.factor[(nva01+nva02+1):(nva01+nva02+nva12)]==1]
+    b12<-b[(nspline+1+nva01+nva02):(nspline+nva12+nva01+nva02)][penalty.factor[(nva01+nva02+1):(nva01+nva02+nva12)]==1]
     penalty.12<-penalty.weights[(1+nva01+nva02):(nva01+nva02+nva12)][penalty.factor[(nva01+nva02+1):(nva01+nva02+nva12)]==1]
     if(p12>0){
       b12<-c(b12,b[(nva01+nva02+nva12+p01+p02+nspline+1):(nva01+nva02+nva12+nspline+p01+p02+p12)][penalty.factor[(nva01+nva02+nva12+p01+p02+1):(nva01+nva02+nva12+p01+p02+p12)]==1])

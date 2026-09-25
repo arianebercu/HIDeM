@@ -11,7 +11,7 @@ DYNINLAidmpredY<-function(object,newdata,s,
                           horizon,scale.X,assoc,assocSurv,id,
                           timeVar,formLong,formSurv,
                           basRisk,index,family,envir,
-                          NsampleHY,NsampleFE,NsampleRE){
+                          NsampleHY,NsampleFE,NsampleRE,NidLoop){
                           # 31/08/2026 : do not estimate weights with our model : t0,t1,t2,t3,t4, casei,isIntervalCensored){
 
   timeVar<<-timeVar
@@ -127,6 +127,7 @@ DYNINLAidmpredY<-function(object,newdata,s,
   terms_labels<-do.call(c,terms_labels)
   terms_labels<-unique(terms_labels)
   
+  
   if(length(terms_labels)>0){
   dataLongi_augmented<-dataLongi_augmented[,!colnames(dataLongi_augmented)%in%terms_labels]
   dataLongi_augmented<-merge(dataLongi_augmented,newdata,by=id,all.x=T,all.y=T)}
@@ -143,14 +144,19 @@ DYNINLAidmpredY<-function(object,newdata,s,
   Yall<-list()
   length(Yall)<-length(formLong)
   
-  
+  if(inherits(scale.X,"logical")){
   if(scale.X==T){
+    newdata_first <- newdata[!duplicated(newdata$id), ]
     tcenter<-min(newdata[,colnames(newdata)%in% timeVar])
     dataCenter<-data.frame(ID=idsubjects,time=tcenter)
     colnames(dataCenter)<-c(id,timeVar)
+    if(length(terms_labels)>0){
+      dataCenter<-merge(x=dataCenter,y=newdata_first,by=id,all.x=T,all.y=F)
+    }
+  }
   }
   
-
+  
   for(indice in index){
     
     INLAmodel<-object[[indice]]
@@ -164,15 +170,20 @@ DYNINLAidmpredY<-function(object,newdata,s,
     base_i<<-basRisk[indice]
     fam_i<<-family[indice]
     print(paste0("prediction of marker ",formLong[[indice]][2]))
-  
+    
+    inla.setOption(verbose = TRUE)
+    
+
     P_RE <- predict(INLAmodel,
                     horizon=horizon,
                     newData = newdata,
                     NsampleRE=NsampleRE,
                     NsampleHY = NsampleHY, # use hyperparameters mode
                     NsampleFE = NsampleFE, # use baseline hazard mode (if survival model included)
-                    #NidLoop = length(unique(newdata[,colnames(newdata)%in%id])),
-                    return.RE = TRUE)
+                    NidLoop = NidLoop,
+                    return.RE = TRUE,
+                    verbose= TRUE)
+    
     
     INLAmodel$P_RE<-do.call(rbind,P_RE$RE)
     
@@ -185,7 +196,7 @@ DYNINLAidmpredY<-function(object,newdata,s,
     
     res<-NULL
     key1 <- do.call(paste, c(dataLongi_augmented[,colnames(dataLongi_augmented)%in%c(id,timeVar)], sep = "\r"))
-    key2 <- do.call(paste, c(timePointsdata, sep = "\r"))
+    key2 <- do.call(paste, c(timePointsdata[,colnames(timePointsdata)%in%c(id,timeVar)], sep = "\r"))
     # keep only indice we want: 
     # Collapse each row into a string
     
@@ -201,11 +212,17 @@ DYNINLAidmpredY<-function(object,newdata,s,
       Outcome<-all.vars(terms(formLong[[indice]]))[1]
       PredYx<-cbind(timePointsdata,Outcome=Outcome,Y)
       
+      if(inherits(scale.X,"logical")){
       if(scale.X==T){
         Ycenter<-make_XINLA_PRED(formula=formLong[[indice]], timeVar=timeVar, data=dataCenter,ct=ct,id=id,idtag=idtag,SMP=INLAmodel)
         PredYx$Y<-(PredYx$Y-mean(Ycenter))/sd(Ycenter)
       }
-      colnames(PredYx)[4]<-"Sample_1"
+      }
+      
+      if(inherits(scale.X,"list")){
+        PredYx$Y<-(PredYx$Y-scale.X[[indice]][1])/scale.X[[indice]][2]
+      }
+      colnames(PredYx)[dim(PredYx)[2]]<-"Sample_1"
       res<-rbind(res,PredYx)
     }
     
@@ -215,11 +232,17 @@ DYNINLAidmpredY<-function(object,newdata,s,
       slopeOutcome<-paste0("slope_",Outcome)
       slopePredYx<-cbind(timePointsdata,Outcome=slopeOutcome,dY)
       
+      if(inherits(scale.X,"logical")){
       if(scale.X==T){
         dYcenter<-make_dXINLA_PRED(formula=formLong[[indice]], timeVar=timeVar, data=dataCenter,ct=ct,id=id,idtag=idtag,SMP=INLAmodel)
         slopePredYx$dY<-(slopePredYx$dY-mean(dYcenter))/sd(dYcenter)
       }
-      colnames(slopePredYx)[4]<-"Sample_1"
+      }
+      
+      if(inherits(scale.X,"list")){
+        slopePredYx$Y<-(slopePredYx$Y-scale.X[[indice]][1])/scale.X[[indice]][2]
+      }
+      colnames(slopePredYx)[dim(slopePredYx)[2]]<-"Sample_1"
       res<-rbind(res,slopePredYx)
     }
     
@@ -227,18 +250,22 @@ DYNINLAidmpredY<-function(object,newdata,s,
       REY<-as.matrix(make_REXINLA_PRED(formula=formLong[[indice]], timeVar=timeVar, data=dataLongi_augmented,ct=ct,id=id,idtag=idtag,SMP=INLAmodel))
       REY<-REY[indices,]
       
+      if(inherits(scale.X,"logical")){
       if(scale.X==T){
         REYcenter<-as.matrix(make_REXINLA_PRED(formula=formLong[[indice]], timeVar=timeVar, data=dataCenter,ct=ct,id=id,idtag=idtag,SMP=INLAmodel))
         REY<-do.call(cbind,lapply(c(1:dim(REY)[2]),FUN=function(x){
           (REY[,x]-mean(REYcenter[,x]))/sd(REYcenter[,x])
         }))
       }
+      }
+      
+   
       namesREY<-unlist(lapply(1:dim(REY)[2],FUN=function(x){
         rep(paste0("RE_",colnames(REY)[x],"_",Outcome),dim(REY)[1])
       }))
       dataREY<- do.call(rbind, replicate(dim(REY)[2], timePointsdata, simplify = FALSE))
       REPredYx<-cbind(dataREY,Outcome=namesREY,as.vector(REY))
-      colnames(REPredYx)[4]<-"Sample_1"
+      colnames(REPredYx)[dim(REPredYx)[2]]<-"Sample_1"
       res<-rbind(res,REPredYx)
     }
  
