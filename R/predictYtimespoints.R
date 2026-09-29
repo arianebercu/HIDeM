@@ -88,6 +88,42 @@ gauss_kronrod_points_pred0 <- function(lower.intdouble,
   return(as.vector(x))
 }
 
+
+gauss_kronrod_points_pred0_ext <- function(lower.intdouble, 
+                                       upper.intdouble) {
+  
+  # Gauss-Kronrod 15-point nodes and weights for interval [-1, 1]
+  gk15_nodes <- c(
+    0.0000000000000000,
+    -0.2077849550078985,  0.2077849550078985,
+    -0.4058451513773972,  0.4058451513773972,
+    -0.5860872354676911,  0.5860872354676911,
+    -0.7415311855993945,  0.7415311855993945,
+    -0.8648644233597691,  0.8648644233597691,
+    -0.9491079123427585,  0.9491079123427585,
+    -0.9914553711208126,  0.9914553711208126
+  )
+  # Gauss-Kronrod 15-point nodes and weights for interval [-1, 1]
+  # and external point 1
+  
+  gk15_nodes_ext <- c(
+    0.0000000000000000,
+    -0.2077849550078985,  0.2077849550078985,
+    -0.4058451513773972,  0.4058451513773972,
+    -0.5860872354676911,  0.5860872354676911,
+    -0.7415311855993945,  0.7415311855993945,
+    -0.8648644233597691,  0.8648644233597691,
+    -0.9491079123427585,  0.9491079123427585,
+    -0.9914553711208126,  0.9914553711208126,
+    1
+  )
+  # Transform from [-1,1] to [a,b]
+  x<-0.5 * ((upper.intdouble - lower.intdouble) * gk15_nodes + (upper.intdouble + lower.intdouble)) 
+  x<-as.vector(x)
+  x<-c(x,upper.intdouble)
+  return(as.vector(x))
+}
+
 gauss_kronrod_points_pred1 <- function(lower.intdouble, 
                                       upper.intdouble) {
   
@@ -139,6 +175,131 @@ gauss_kronrod_points_pred1 <- function(lower.intdouble,
 }
 
 
+gauss_kronrod_points_pred1_01 <- function(lower.intdouble, 
+                                       upper.intdouble) {
+  
+  # Gauss-Kronrod 15-point nodes and weights for interval [-1, 1]
+  gk15_nodes <- c(
+    0.0000000000000000,
+    -0.2077849550078985,  0.2077849550078985,
+    -0.4058451513773972,  0.4058451513773972,
+    -0.5860872354676911,  0.5860872354676911,
+    -0.7415311855993945,  0.7415311855993945,
+    -0.8648644233597691,  0.8648644233597691,
+    -0.9491079123427585,  0.9491079123427585,
+    -0.9914553711208126,  0.9914553711208126
+  )
+  # Gauss-Kronrod 15-point nodes and weights for interval [-1, 1]
+  # and external point 1
+  
+  gk15_nodes_ext <- c(
+    0.0000000000000000,
+    -0.2077849550078985,  0.2077849550078985,
+    -0.4058451513773972,  0.4058451513773972,
+    -0.5860872354676911,  0.5860872354676911,
+    -0.7415311855993945,  0.7415311855993945,
+    -0.8648644233597691,  0.8648644233597691,
+    -0.9491079123427585,  0.9491079123427585,
+    -0.9914553711208126,  0.9914553711208126,
+    1
+  )
+  # Transform from [-1,1] to [a,b]
+  x<-0.5 * ((upper.intdouble - lower.intdouble) * gk15_nodes + (upper.intdouble + lower.intdouble)) # timepoint necessary to estimate the outer integral of int(a,b)int(0,t)f(u)dug(t)dt
+  
+  #x<-0.5 * (matrix(x,ncol=1)%*% gk15_nodes_ext) # timepoint necessary to estimate the inner integral of int(a,b)int(0,t)f(u)dug(t)dt + needed added one as we have g(t) 
+  # pour chaque u_i, 15 noeuds internes s_ij sur [a, u_i]
+  # noeuds internes s_ij sur [a, u_i] : s_ij = 0.5*(u_i-a)*node_j + 0.5*(u_i+a)
+  diffs <- x - lower.intdouble      # (u_i - a), vecteur longueur 15
+  sums  <- x + lower.intdouble      # (u_i + a), vecteur longueur 15
+  
+  scale_part <- matrix(diffs, ncol = 1) %*% matrix(gk15_nodes_ext, nrow = 1)   # 15 x 16
+  shift_part <- matrix(sums,  ncol = 1) %*% matrix(rep(1, length(gk15_nodes_ext)), nrow = 1)  # 15 x 16
+  
+  x1 <- 0.5 * (scale_part + shift_part)   # 15 x 16, entrée (i,j) = s_ij
+  
+  # ---- inner nodes on [u_i, b] : 15 x 15 ----
+  diffs2 <- upper.intdouble - x
+  sums2  <- upper.intdouble + x
+  
+  scale_part2 <- matrix(diffs2, ncol = 1) %*% matrix(gk15_nodes, nrow = 1)                    # 15 x 15
+  shift_part2 <- matrix(sums2,  ncol = 1) %*% matrix(rep(1, length(gk15_nodes)), nrow = 1)    # 15 x 15
+  x2 <- 0.5 * (scale_part2 + shift_part2)   # entry (i,j) = v_ij in [u_i, b]
+  
+  x0<-0.5 * ((lower.intdouble) * gk15_nodes + (lower.intdouble)) # to perform [0,lower.intoudble] 15
+
+  # as before: transpose then vectorize (u_i by u_i)
+  x0 <- as.vector(t(x0))    # 15 values
+  x1 <- as.vector(t(x1))    # 15 * 16 = 240 values
+  x2 <- as.vector(t(x2))    # 15 * 15 = 225 values
+
+  
+  #x<-c(x,0.5 * (lower.intdouble * gk15_nodes + lower.intdouble) )
+  
+  return(c(x0,x1,x2))
+}
+
+gauss_kronrod_points_pred1_01_12 <- function(lower.intdouble, 
+                                          upper.intdouble) {
+  
+  # Gauss-Kronrod 15-point nodes and weights for interval [-1, 1]
+  gk15_nodes <- c(
+    0.0000000000000000,
+    -0.2077849550078985,  0.2077849550078985,
+    -0.4058451513773972,  0.4058451513773972,
+    -0.5860872354676911,  0.5860872354676911,
+    -0.7415311855993945,  0.7415311855993945,
+    -0.8648644233597691,  0.8648644233597691,
+    -0.9491079123427585,  0.9491079123427585,
+    -0.9914553711208126,  0.9914553711208126
+  )
+  # Gauss-Kronrod 15-point nodes and weights for interval [-1, 1]
+  # and external point 1
+  
+  gk15_nodes_ext <- c(
+    0.0000000000000000,
+    -0.2077849550078985,  0.2077849550078985,
+    -0.4058451513773972,  0.4058451513773972,
+    -0.5860872354676911,  0.5860872354676911,
+    -0.7415311855993945,  0.7415311855993945,
+    -0.8648644233597691,  0.8648644233597691,
+    -0.9491079123427585,  0.9491079123427585,
+    -0.9914553711208126,  0.9914553711208126,
+    1
+  )
+  # Transform from [-1,1] to [a,b]
+  x<-0.5 * ((upper.intdouble - lower.intdouble) * gk15_nodes + (upper.intdouble + lower.intdouble)) # timepoint necessary to estimate the outer integral of int(a,b)int(0,t)f(u)dug(t)dt
+  
+  #x<-0.5 * (matrix(x,ncol=1)%*% gk15_nodes_ext) # timepoint necessary to estimate the inner integral of int(a,b)int(0,t)f(u)dug(t)dt + needed added one as we have g(t) 
+  # pour chaque u_i, 15 noeuds internes s_ij sur [a, u_i]
+  # noeuds internes s_ij sur [a, u_i] : s_ij = 0.5*(u_i-a)*node_j + 0.5*(u_i+a)
+  diffs <- x - lower.intdouble      # (u_i - a), vecteur longueur 15
+  sums  <- x + lower.intdouble      # (u_i + a), vecteur longueur 15
+  
+  scale_part <- matrix(diffs, ncol = 1) %*% matrix(gk15_nodes_ext, nrow = 1)   # 15 x 16
+  shift_part <- matrix(sums,  ncol = 1) %*% matrix(rep(1, length(gk15_nodes_ext)), nrow = 1)  # 15 x 16
+  
+  x1 <- 0.5 * (scale_part + shift_part)   # 15 x 16, entrée (i,j) = s_ij
+  
+  # ---- inner nodes on [u_i, b] : 15 x 15 ----
+  diffs2 <- upper.intdouble - x
+  sums2  <- upper.intdouble + x
+  
+  scale_part2 <- matrix(diffs2, ncol = 1) %*% matrix(gk15_nodes, nrow = 1)                    # 15 x 15
+  shift_part2 <- matrix(sums2,  ncol = 1) %*% matrix(rep(1, length(gk15_nodes)), nrow = 1)    # 15 x 15
+  x2 <- 0.5 * (scale_part2 + shift_part2)   # entry (i,j) = v_ij in [u_i, b]
+  
+  x0<-0.5 * ((lower.intdouble) * gk15_nodes + (lower.intdouble)) # to perform [0,lower.intoudble] 15
+  
+  # as before: transpose then vectorize (u_i by u_i)
+  x0 <- as.vector(t(x0))    # 15 values
+  x1 <- as.vector(t(x1))    # 15 * 16 = 240 values
+  x2 <- as.vector(t(x2))    # 15 * 15 = 225 values
+  
+  
+  #x<-c(x,0.5 * (lower.intdouble * gk15_nodes + lower.intdouble) )
+  
+  return(c(x0,x1,x2,upper.intdouble))
+}
 
 gauss_kronrod_points_pred2 <- function(lower.intdouble, 
                                       upper.intdouble) {

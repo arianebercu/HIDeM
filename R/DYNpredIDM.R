@@ -16,8 +16,10 @@
 
 DYNpredIDM<-function(objectY,
                           objectSurvival,
-                          newdata,s=NULL,
+                          newdata,
+                     s=NULL,
                      horizon=NULL,
+                     times,
                           envir=parent.frame(),
                          predicted.newdata=NULL,
                      control=list(NsampleHY=1,NsampleFE=1,NsampleRE=1,NidLoop="auto",return.data=F)){
@@ -34,6 +36,40 @@ DYNpredIDM<-function(objectY,
   
   if(missing(newdata)){stop("Need to provide newdata as a data.frame")}
   if(!inherits(newdata,"data.frame")){stop("Need to provide newdata as a data.frame")}
+  if(!missing(times)){
+    if(!inherits(times,"list")){stop("times must be a list of 6 elements")}
+    if(length(times)!=7){stop("times must be a list of 6 elements")}
+    
+    expected <- c("start", "end", "id", "p00", "p01", "p02_0","p02_1")
+    if (!identical(names(times), expected)) {
+      stop(
+        "Invalid names in list.\n",
+        "Expected: ", paste(expected, collapse = ", "), "\n",
+        "Found:    ", paste(names(times), collapse = ", ")
+      )
+    }
+    if(!inherits(times$p00,"logical")){stop("times$p00 must be a logical")}
+    if(!inherits(times$p01,"logical")){stop("times$p01 must be a logical")}
+    if(!inherits(times$p02_0,"logical")){stop("times$p00 must be a logical")}
+    if(!inherits(times$p02_1,"logical")){stop("times$p00 must be a logical")}
+    if(any((times$id%in%newdata[,objectY$id])==F)){stop("All id in times must be in newdata")}
+    
+    lens <- lengths(times)
+    if (length(unique(lens)) != 1) {
+      stop(
+        "All elements must have the same length.\n",
+        "Lengths found: ", paste(names(times), lens, sep = " = ", collapse = ", ")
+      )
+    }
+    
+    if(!inherits(times$start,c("numeric","integer")))stop("times$start need to be an integer or numeric")
+    if((times$start < 0))stop("times$start need to be numeric superior or equal to 0 with s < horizon")
+    if(!inherits(times$end,c("numeric","integer")))stop("times$end need to be an integer or numeric")
+    if((times$end < 0))stop("times$end need to be numeric superior or equal to 0 with s < horizon")
+    
+  }else{
+    times<-NULL
+  }
   
   if(sum(is.na(newdata))>0)stop("Need a new data frame with no missing data.")
   if(missing(s)|missing(horizon))stop("Need to specify s and horizon")
@@ -252,9 +288,110 @@ if(length(control$NsampleHY)!=1)stop("Length of control$NsampleHY need to be 1")
   
   NC<-c(NC01,NC02,NC12)
   
-  if(noVar[1]==1){ve01<-as.double(rep(0,N))}else{ve01<-as.double(x01)}
-  if(noVar[2]==1){ve02<-as.double(rep(0,N))}else{ve02<-as.double(x02)}
-  if(noVar[3]==1){ve12<-as.double(rep(0,N))}else{ve12<-as.double(x12)}
+  if(!is.null(times)){
+    
+    get_ids <- function(col) if (!is.null(times)) times$id[times[[col]] %in% TRUE] else integer(0)
+    ids00   <- get_ids("p00")
+    ids01   <- get_ids("p01")
+    ids02_0 <- get_ids("p02_0")
+    ids02_1 <- get_ids("p02_1")
+    
+    
+  }
+
+  if(noVar[1]==1){
+    ve01<-as.double(rep(0,N))
+    if(!is.null(times)){
+    ve01_00<-as.double(rep(0,length(ids00)))
+    ve01_02_0<-as.double(rep(0,length(ids02_0)))
+    ve01_02_1<-as.double(rep(0,length(ids02_1)))
+    ve01_01<-as.double(rep(0,length(ids01)))
+    }
+  }else{
+      ve01<-as.double(x01)
+      if (!is.null(times)) {
+        
+        Xn  <- objectSurvival$Xnames01
+        
+        x01 <- newdata[, colnames(newdata) %in% c(Xn, id), drop = FALSE]
+        x01 <- x01[!duplicated(x01[[id]]), , drop = FALSE]     # one row per subject
+        
+        pos00   <- match(ids00,   x01[[id]])
+        pos01   <- match(ids01,   x01[[id]])
+        pos02_0 <- match(ids02_0, x01[[id]])
+        pos02_1 <- match(ids02_1, x01[[id]])
+        
+        stopifnot(!anyNA(pos00), !anyNA(pos01), !anyNA(pos02_0), !anyNA(pos02_1))
+        
+        ve01_00 <- as.double(as.matrix(x01[pos00, Xn, drop = FALSE]))
+        ve01_01 <- as.double(as.matrix(x01[pos01, Xn, drop = FALSE]))
+        ve01_02_0 <- as.double(as.matrix(x01[pos02_0, Xn, drop = FALSE]))
+        ve01_02_1 <- as.double(as.matrix(x01[pos02_1, Xn, drop = FALSE]))
+      }
+      
+      }
+  if(noVar[2]==1){
+    ve02<-as.double(rep(0,N))
+    if(!is.null(times)){
+      ve02_00<-as.double(rep(0,length(ids00)))
+      ve02_02_0<-as.double(rep(0,length(ids02_0)))
+      ve02_02_1<-as.double(rep(0,length(ids02_1)))
+      ve02_01<-as.double(rep(0,length(ids01)))
+    }
+  }else{
+      ve02<-as.double(x02)
+      if (!is.null(times)) {
+        
+        Xn  <- objectSurvival$Xnames02
+        
+        x02 <- newdata[, colnames(newdata) %in% c(Xn, id), drop = FALSE]
+        x02 <- x02[!duplicated(x02[[id]]), , drop = FALSE]     # one row per subject
+        
+        pos00   <- match(ids00,   x02[[id]])
+        pos01   <- match(ids01,   x02[[id]])
+        pos02_0 <- match(ids02_0, x02[[id]])
+        pos02_1 <- match(ids02_1, x02[[id]])
+        
+        stopifnot(!anyNA(pos00), !anyNA(pos01), !anyNA(pos02_0), !anyNA(pos02_1))
+        
+        ve02_00 <- as.double(as.matrix(x02[pos00, Xn, drop = FALSE]))
+        ve02_01 <- as.double(as.matrix(x02[pos01, Xn, drop = FALSE]))
+        ve02_02_0 <- as.double(as.matrix(x02[pos02_0, Xn, drop = FALSE]))
+        ve02_02_1 <- as.double(as.matrix(x02[pos02_1, Xn, drop = FALSE]))
+      }
+      
+      }
+  if(noVar[3]==1){
+    ve12<-as.double(rep(0,N))
+    if(!is.null(times)){
+      ve12_00<-as.double(rep(0,length(ids00)))
+      ve12_02_0<-as.double(rep(0,length(ids02_0)))
+      ve12_02_1<-as.double(rep(0,length(ids02_1)))
+      ve12_01<-as.double(rep(0,length(ids01)))
+    }
+  }else{
+      ve12<-as.double(x12)
+      
+      if (!is.null(times)) {
+        
+        Xn  <- objectSurvival$Xnames12
+        
+        x12 <- newdata[, colnames(newdata) %in% c(Xn, id), drop = FALSE]
+        x12 <- x12[!duplicated(x12[[id]]), , drop = FALSE]     # one row per subject
+        
+        pos00   <- match(ids00,   x12[[id]])
+        pos01   <- match(ids01,   x12[[id]])
+        pos02_0 <- match(ids02_0, x12[[id]])
+        pos02_1 <- match(ids02_1, x12[[id]])
+        
+        stopifnot(!anyNA(pos00), !anyNA(pos01), !anyNA(pos02_0), !anyNA(pos02_1))
+        
+        ve12_00 <- as.double(as.matrix(x12[pos00, Xn, drop = FALSE]))
+        ve12_01 <- as.double(as.matrix(x12[pos01, Xn, drop = FALSE]))
+        ve12_02_0 <- as.double(as.matrix(x12[pos02_0, Xn, drop = FALSE]))
+        ve12_02_1 <- as.double(as.matrix(x12[pos02_1, Xn, drop = FALSE]))
+      }}
+
   
   t0<-rep(s,N)
   t1<-rep(horizon,N)
@@ -376,6 +513,7 @@ if(length(control$NsampleHY)!=1)stop("Length of control$NsampleHY need to be 1")
                          newdata=newdata,
                          s=s,
                          horizon=horizon,
+                         times=times,
                          scale.X=objectSurvival$scale.X,
                          assoc=objectY$assoc,
                          assocSurv=objectSurvival$assoc,
@@ -445,13 +583,50 @@ if(length(control$NsampleHY)!=1)stop("Length of control$NsampleHY need to be 1")
   
   #names(ctime)<-unique(newdata[,colnames(newdata)%in%id])
   #browser()
+  
+
   if(length(outcome01)>=1){
     y01<-dataY[dataY$Outcome%in%outcome01,]
-    y01_0<-y01[order(y01[,colnames(y01)%in%id],y01$order),"Sample_1"]
+    #y01_0<-y01[order(y01[,colnames(y01)%in%id],y01$order),"Sample_1"]
     # order  by individual and timeline 
     # 31/08/2026 : do not estimate weights with our model 
-    # y01<-y01[order(y01[,colnames(y01)%in%id],y01$order),]
-    # y01_0<-y01[y01$order<=NtimePoints_0,4]
+     y01<-y01[order(y01[,colnames(y01)%in%id],y01$order),]
+     y01_0<-y01[y01$order<=NtimePoints_0,"Sample_1"]
+     
+     if(!is.null(times)){
+       
+       # position among the rows after NtimePoints_0, within each subject
+       after      <- y01$order > NtimePoints_0
+       rank_after <- ave(as.integer(after), y01[[id]], FUN = cumsum)
+       
+       # offsets, stacked in the order 00, 02_0, 01, 02_1
+       off00   <- 0
+       off02_0 <- off00   + 15  * (y01[[id]] %in% ids00)
+       off01   <- off02_0 + 16  * (y01[[id]] %in% ids02_0)
+       off02_1 <- off01   + 480 * (y01[[id]] %in% ids01)
+     
+     
+       if (length(ids00) > 0) {
+         keep <- (y01[[id]] %in% ids00) & after & rank_after > off00 & rank_after <= off00 + 15
+         y01_00 <- y01[keep, "Sample_1"]
+       }
+       
+       if (length(ids02_0) > 0) {
+         keep <- (y01[[id]] %in% ids02_0) & after & rank_after > off02_0 & rank_after <= off02_0 + 16
+         y01_02_0 <- y01[keep, "Sample_1"]
+       }
+       
+       if (length(ids01) > 0) {
+         keep <- (y01[[id]] %in% ids01) & after & rank_after > off01 & rank_after <= off01 + 480
+         y01_01 <- y01[keep, "Sample_1"]
+       }
+       
+       if (length(ids02_1) > 0) {
+         keep <- (y01[[id]] %in% ids02_1) & after & rank_after > off02_1 & rank_after <= off02_1 + 481
+         y01_02_1 <- y01[keep, "Sample_1"]
+       }
+     }
+     
     # y01_1<-y01[y01$order>NtimePoints_0,4]
     # 
     # idcol <- colnames(y01)[colnames(y01) %in% id]
@@ -463,6 +638,12 @@ if(length(control$NsampleHY)!=1)stop("Length of control$NsampleHY need to be 1")
     
   }else{
     y01_0<-rep(0,N*NtimePoints_0)
+    if(!is.null(times)){
+      y01_00<-rep(0,15*length(ids00))
+      y01_02_0<-rep(0,16*length(ids02_0))
+      y01_01<-rep(0,480*length(ids01))
+      y01_02_1<-rep(0,481*length(ids02_1))
+    }
    # y01_1<-rep(0,N*NtimePoints_1)
   }
  
@@ -471,11 +652,45 @@ if(length(control$NsampleHY)!=1)stop("Length of control$NsampleHY need to be 1")
   
   if(length(outcome02)>=1){
     y02<-dataY[dataY$Outcome%in%outcome02,]
-    y02_0<-y02[order(y02[,colnames(y02)%in%id],y02$order),"Sample_1"]
+    #y02_0<-y02[order(y02[,colnames(y02)%in%id],y02$order),"Sample_1"]
     # 31/08/2026 : do not estimate weights with our model 
     # order  by individual and timeline 
-    # y02<-y02[order(y02[,colnames(y02)%in%id],y02$order),]
-    # y02_0<-y02[y02$order<=NtimePoints_0,4]
+     y02<-y02[order(y02[,colnames(y02)%in%id],y02$order),]
+     y02_0<-y02[y02$order<=NtimePoints_0,,"Sample_1"]
+     
+     if(!is.null(times)){
+       
+       # position among the rows after NtimePoints_0, within each subject
+       after      <- y02$order > NtimePoints_0
+       rank_after <- ave(as.integer(after), y02[[id]], FUN = cumsum)
+       
+       # offsets, stacked in the order 00, 02_0, 01, 02_1
+       off00   <- 0
+       off02_0 <- off00   + 15  * (y02[[id]] %in% ids00)
+       off01   <- off02_0 + 16  * (y02[[id]] %in% ids02_0)
+       off02_1 <- off01   + 480 * (y02[[id]] %in% ids01)
+       
+       
+       if (length(ids00) > 0) {
+         keep <- (y02[[id]] %in% ids00) & after & rank_after > off00 & rank_after <= off00 + 15
+         y02_00 <- y02[keep, "Sample_1"]
+       }
+       
+       if (length(ids02_0) > 0) {
+         keep <- (y02[[id]] %in% ids02_0) & after & rank_after > off02_0 & rank_after <= off02_0 + 16
+         y02_02_0 <- y02[keep, "Sample_1"]
+       }
+       
+       if (length(ids01) > 0) {
+         keep <- (y02[[id]] %in% ids01) & after & rank_after > off01 & rank_after <= off01 + 480
+         y02_01 <- y02[keep, "Sample_1"]
+       }
+       
+       if (length(ids02_1) > 0) {
+         keep <- (y02[[id]] %in% ids02_1) & after & rank_after > off02_1 & rank_after <= off02_1 + 481
+         y02_02_1 <- y02[keep, "Sample_1"]
+       }
+     }
     # idcol <- colnames(y02)[colnames(y02) %in% id]
     # grpidx <- split(seq_len(nrow(y02)), y02[[idcol]])
     # 
@@ -485,16 +700,22 @@ if(length(control$NsampleHY)!=1)stop("Length of control$NsampleHY need to be 1")
   }else{
     y02_0<-rep(0,N*NtimePoints_0)
    # y02_1<-rep(0,N*NtimePoints_1)
+    if(!is.null(times)){
+      y02_00<-rep(0,15*length(ids00))
+      y02_02_0<-rep(0,16*length(ids02_0))
+      y02_01<-rep(0,480*length(ids01))
+      y02_02_1<-rep(0,481*length(ids02_1))
+    }
   }
   
   
   if(length(outcome12)>=1){
     y12<-dataY[dataY$Outcome%in%outcome12,]
-    y12_0<-y12[order(y12[,colnames(y12)%in%id],y12$order),"Sample_1"]
+    #y12_0<-y12[order(y12[,colnames(y12)%in%id],y12$order),"Sample_1"]
     # 31/08/2026 : do not estimate weights with our model 
     # order  by individual and timeline 
-    # y12<-y12[order(y12[,colnames(y12)%in%id],y12$order),]
-    # y12_0<-y12[y12$order<=NtimePoints_0,4]
+     y12<-y12[order(y12[,colnames(y12)%in%id],y12$order),]
+     y12_0<-y12[y12$order<=NtimePoints_0,"Sample_1"]
     # idcol <- colnames(y12)[colnames(y12) %in% id]
     # grpidx <- split(seq_len(nrow(y12)), y12[[idcol]])
     # 
@@ -502,9 +723,49 @@ if(length(control$NsampleHY)!=1)stop("Length of control$NsampleHY need to be 1")
     #                     grpidx, ctime[names(grpidx)]), use.names = FALSE)
     # 
     # 
+     
+     if(!is.null(times)){
+       
+       # position among the rows after NtimePoints_0, within each subject
+       after      <- y12$order > NtimePoints_0
+       rank_after <- ave(as.integer(after), y12[[id]], FUN = cumsum)
+       
+       # offsets, stacked in the order 00, 02_0, 01, 02_1
+       off00   <- 0
+       off02_0 <- off00   + 15  * (y12[[id]] %in% ids00)
+       off01   <- off02_0 + 16  * (y12[[id]] %in% ids02_0)
+       off02_1 <- off01   + 480 * (y12[[id]] %in% ids01)
+       
+       
+       if (length(ids00) > 0) {
+         keep <- (y12[[id]] %in% ids00) & after & rank_after > off00 & rank_after <= off00 + 15
+         y12_00 <- y12[keep, "Sample_1"]
+       }
+       
+       if (length(ids02_0) > 0) {
+         keep <- (y12[[id]] %in% ids02_0) & after & rank_after > off02_0 & rank_after <= off02_0 + 16
+         y12_02_0 <- y12[keep, "Sample_1"]
+       }
+       
+       if (length(ids01) > 0) {
+         keep <- (y12[[id]] %in% ids01) & after & rank_after > off01 & rank_after <= off01 + 480
+         y12_01 <- y12[keep, "Sample_1"]
+       }
+       
+       if (length(ids02_1) > 0) {
+         keep <- (y12[[id]] %in% ids02_1) & after & rank_after > off02_1 & rank_after <= off02_1 + 481
+         y12_02_1 <- y12[keep, "Sample_1"]
+       }
+     }
   }else{
     y12_0<-rep(0,N*NtimePoints_0)
     #y12_1<-rep(0,N*NtimePoints_1)
+    if(!is.null(times)){
+      y12_00<-rep(0,15*length(ids00))
+      y12_02_0<-rep(0,16*length(ids02_0))
+      y12_01<-rep(0,480*length(ids01))
+      y12_02_1<-rep(0,481*length(ids02_1))
+    }
   }
   
   if(objectSurvival$method=="splines"){
@@ -583,6 +844,90 @@ if(length(control$NsampleHY)!=1)stop("Length of control$NsampleHY need to be 1")
       # Return NULL on error to skip this patient
       NULL
     })
+    
+    if(!is.null(times)){
+      if (length(ids00) > 0) {
+        res<-rep(0,length(ids00))
+        out00<- tryCatch({   .Fortran("ciweibtimedep",
+                                     ## input
+                                     as.double(binit),
+                                     as.integer(size_V),
+                                     as.integer(length(ids00)),
+                                     as.double(ve01_00),
+                                     as.double(ve02_00),
+                                     as.double(ve12_00),
+                                     as.double(y01_00),
+                                     as.double(y02_00),
+                                     as.double(y12_00),
+                                     as.integer(p01),
+                                     as.integer(p02),
+                                     as.integer(p12),
+                                     as.integer(dimp01),
+                                     as.integer(dimp02),
+                                     as.integer(dimp12),
+                                     as.integer(15),
+                                     as.integer(dimnva01),
+                                     as.integer(dimnva02),
+                                     as.integer(dimnva12),
+                                     as.integer(nvat01),
+                                     as.integer(nvat02),
+                                     as.integer(nvat12),
+                                     as.double(times$start[ids00]),
+                                     as.double(times$end[ids00]),
+                                     likelihood_res=as.double(res),
+                                     PACKAGE="HIDeM")$likelihood_res
+        }, error = function(e) {
+          # Return NULL on error to skip this patient
+          NULL
+        })
+      }
+      
+      if (length(ids02_0) > 0) {
+        res<-rep(0,length(ids02))
+        out02<- tryCatch({   .Fortran("ciweibtimedep",
+                                      ## input
+                                      as.double(binit),
+                                      as.integer(size_V),
+                                      as.integer(length(ids00)),
+                                      as.double(ve01_00),
+                                      as.double(ve02_00),
+                                      as.double(ve12_00),
+                                      as.double(y01_00),
+                                      as.double(y02_00),
+                                      as.double(y12_00),
+                                      as.integer(p01),
+                                      as.integer(p02),
+                                      as.integer(p12),
+                                      as.integer(dimp01),
+                                      as.integer(dimp02),
+                                      as.integer(dimp12),
+                                      as.integer(15),
+                                      as.integer(dimnva01),
+                                      as.integer(dimnva02),
+                                      as.integer(dimnva12),
+                                      as.integer(nvat01),
+                                      as.integer(nvat02),
+                                      as.integer(nvat12),
+                                      as.double(times$start[ids00]),
+                                      as.double(times$end[ids00]),
+                                      likelihood_res=as.double(res),
+                                      PACKAGE="HIDeM")$likelihood_res
+        }, error = function(e) {
+          # Return NULL on error to skip this patient
+          NULL
+        })
+      }
+      
+      if (length(ids01) > 0) {
+        keep <- (y12[[id]] %in% ids01) & after & rank_after > off01 & rank_after <= off01 + 480
+        y12_01 <- y12[keep, "Sample_1"]
+      }
+      
+      if (length(ids02_1) > 0) {
+        keep <- (y12[[id]] %in% ids02_1) & after & rank_after > off02_1 & rank_after <= off02_1 + 481
+        y12_02_1 <- y12[keep, "Sample_1"]
+      }
+    }
     
     # 31/08/2026 : do not estimate weights with our model 
     # if(isIntervalCensored){

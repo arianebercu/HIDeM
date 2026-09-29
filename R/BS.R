@@ -20,6 +20,7 @@ BS<-function(pred,
              horizon,
              newdata,
              info.death=T,
+             info.after.horizon=F,
              envir=parent.frame(),
              k=get("k",envir=envir),
              ncores=NULL)
@@ -188,7 +189,6 @@ BS<-function(pred,
   }
   ####################### calculate weights over subjects ######################
 
-
   w1func<-function(x){
     
     tryCatch({
@@ -197,6 +197,8 @@ BS<-function(pred,
       if(ctime[x]%in%c(2,6)){
         
         if(info.death==T){
+          
+          if(info.after.horizon==F){
           predtiming<-PR(t1[x],horizon,x)
           p01<-predtiming$transprob[predtiming$transprob$Parameter=="p01",2]
           
@@ -209,8 +211,9 @@ BS<-function(pred,
           
           
           denum<-p00+p01
-          if(k==2){
+          if(ctime[x]==2){
             return(p01/(denum)) #must be [0;1]
+            
           }else{
             
             predtiming<-PR(s,horizon,x)
@@ -222,12 +225,118 @@ BS<-function(pred,
             
             return(p01_1/(denum)) #must be : p01_1 < p01 and [0;1]
           }
+          }else{
+            
+            if(idm[x]==1){
+              predtiming<-PR(t1[x],t2[x],x)
+              p01<-predtiming$transprob[predtiming$transprob$Parameter=="p01",2]
+              predtiming<-PR(0,t1[x],x)
+              p00_1<-predtiming$transprob[predtiming$transprob$Parameter=="p00",2]
+              p01<-p00_1*p01
+              
+              predtiming<-PR(horizon,t2[x],x)
+              p11<-predtiming$transprob[predtiming$transprob$Parameter=="p11",2]
+              
+              if(ctime[x]==2){
+                
+                predtiming<-PR(t1[x],horizon,x)
+                p01_1<-predtiming$transprob[predtiming$transprob$Parameter=="p01",2]
+                p01_1<-p00_1*p01_1
+                
+                return(p11*p01_1/(p01)) #must be [0;1]
+                
+              }else{
+                predtiming<-PR(s,horizon,x)
+                p01_1<-predtiming$transprob[predtiming$transprob$Parameter=="p01",2]
+                predtiming<-PR(0,s,x)
+                p00_1<-predtiming$transprob[predtiming$transprob$Parameter=="p00",2]
+                p01_1<-p00_1*p01_1
+                
+                return(p11*p01_1/(p01)) #must be [0;1]
+              }
+              
+            }else{
+              if(idd[x]==1){
+                
+                predtiming<-PR(t1[x],t3[x],x)
+                p01<-predtiming$transprob[predtiming$transprob$Parameter=="p01",2]*predtiming$intensity[3]
+                
+                predtiming<-PR(0,t1[x],x)
+                p00_1<-predtiming$transprob[predtiming$transprob$Parameter=="p00",2]
+                p01<-p00_1*p01
+                
+                predtiming<-PR(0,t3[x],x)
+                p02<-predtiming$transprob[predtiming$transprob$Parameter=="p00",2]*predtiming$intensity[2]
+                denum<-(p01+p02)
+                
+                if(ctime[x]==2){
+                  predtiming<-PR(t1[x],horizon,x)
+                  p01<-predtiming$transprob[predtiming$transprob$Parameter=="p01",2]*p00_1
+                  predtiming<-PR(horizon,t3[x],x)
+                  p01<-p01*predtiming$transprob[predtiming$transprob$Parameter=="p11",2]*predtiming$intensity[3]
+                  
+                  return((p01/denum))
+                  
+                }else{
+                  
+                  predtiming<-PR(s,horizon,x)
+                  p01<-predtiming$transprob[predtiming$transprob$Parameter=="p01",2]
+                  predtiming<-PR(0,s,x)
+                  p00_1<-predtiming$transprob[predtiming$transprob$Parameter=="p00",2]
+                  p01<-p00_1*p01
+                  
+                  predtiming<-PR(horizon,t3[x],x)
+                  p01<-p01*predtiming$transprob[predtiming$transprob$Parameter=="p11",2]*predtiming$intensity[3]
+                  
+                  return((p01/denum))
+                  
+                }
+                
+              }else{
+                
+                predtiming<-PR(t1[x],t3[x],x)
+                p01<-predtiming$transprob[predtiming$transprob$Parameter=="p01",2]
+                
+                predtiming<-PR(0,t1[x],x)
+                p00_1<-predtiming$transprob[predtiming$transprob$Parameter=="p00",2]
+                p01<-p00_1*p01
+                
+                predtiming<-PR(0,t3[x],x)
+                p00<-predtiming$transprob[predtiming$transprob$Parameter=="p00",2]
+                denum<-(p01+p00)
+                
+                if(ctime[x]==2){
+                  predtiming<-PR(t1[x],horizon,x)
+                  p01<-predtiming$transprob[predtiming$transprob$Parameter=="p01",2]*p00_1
+                  predtiming<-PR(horizon,t3[x],x)
+                  p01<-p01*predtiming$transprob[predtiming$transprob$Parameter=="p11",2]
+                  
+                  return((p01/denum))
+                  
+                }else{
+                  
+                  predtiming<-PR(s,horizon,x)
+                  p01<-predtiming$transprob[predtiming$transprob$Parameter=="p01",2]
+                  predtiming<-PR(0,s,x)
+                  p00_1<-predtiming$transprob[predtiming$transprob$Parameter=="p00",2]
+                  p01<-p00_1*p01
+                  
+                  predtiming<-PR(horizon,t3[x],x)
+                  p01<-p01*predtiming$transprob[predtiming$transprob$Parameter=="p11",2]
+                  
+                  return((p01/denum))
+                  
+                }
+              }
+            }
+          }
+             
         }else{
           
           predtiming<-PR(t1[x],horizon,x)
           F01<-predtiming$transprob[predtiming$transprob$Parameter=="F01",2]
           
-          if(k==2){
+          if(ctime[x]==2){
             return(F01) #must be [0;1]
           }else{
             
@@ -241,6 +350,8 @@ BS<-function(pred,
       if(ctime[x]%in%c(3)){
         
         if(info.death==T){
+          
+          if(info.after.horizon==F){
           predtiming<-PR(s,t2[x],x)
           p01_1<-predtiming$transprob[predtiming$transprob$Parameter=="p01",2]
           
@@ -256,7 +367,7 @@ BS<-function(pred,
           p01_2<-p00_2*p01_2
           
           
-          return(p01_1/p01_2)
+          return(p01_1/p01_2)}
         }else{
           
           predtiming<-PR(t1[x],t2[x],x)
@@ -273,6 +384,8 @@ BS<-function(pred,
       if(ctime[x]%in%c(4,5)){
         
         if(info.death==T){
+          
+          if(info.after.horizon==F){
           predtiming<-PR(t1[x],t3[x],x)
           p01<-predtiming$transprob[predtiming$transprob$Parameter=="p01",2]
           p01<-p01*predtiming$intensity[3]
@@ -287,7 +400,7 @@ BS<-function(pred,
           
           denum<-p02+p01
           
-          if(k==4){
+          if(ctime[x]==4){
             return(p01/denum)
           }else{
             predtiming<-PR(s,t3[x],x)
@@ -300,11 +413,12 @@ BS<-function(pred,
             p01_1<-p01_1*p00
             return((p01_1)/(denum))#must be : p01_1 < p01 and [0;1]
           }
+          }
         }else{
           
           predtiming<-PR(t1[x],t3[x],x)
           F01<-predtiming$transprob[predtiming$transprob$Parameter=="F01",2]
-          if(k==4){
+          if(ctime[x]==4){
             return(F01)
           }else{
             
@@ -328,12 +442,82 @@ BS<-function(pred,
     tryCatch({
       if(ctime[x]==3){return(0)}
       if(ctime[x]%in%c(0,1,2,4)){
+        
+        if(info.after.horizon==F){
         return(1-w1[x])
+        }else{
+          if(ctime[x]%in%c(0,1,4)){
+            return(1-w1[x])
+          }else{
+            if(idm[x]==1){
+              predtiming<-PR(0,horizon,x)
+              p00<-predtiming$transprob[predtiming$transprob$Parameter=="p00",2]
+              
+              predtiming<-PR(horizon,t2[x],x)
+              p01<-predtiming$transprob[predtiming$transprob$Parameter=="p01",2]*p00
+              
+              predtiming<-PR(0,t1[x],x)
+              p00_1<-predtiming$transprob[predtiming$transprob$Parameter=="p00",2]
+              predtiming<-PR(t1[x],t2[x],x)
+              p01_1<-predtiming$transprob[predtiming$transprob$Parameter=="p01",2]*p00_1
+              
+              return(p01/p01_1)
+            }else{
+              
+              if(idd[x]==1){
+                
+                predtiming<-PR(0,t3[x],x)
+                p02<-predtiming$transprob[predtiming$transprob$Parameter=="p00",2]*predtiming$intensity[2]
+                
+                predtiming<-PR(t1[x],t3[x],x)
+                p01<-predtiming$transprob[predtiming$transprob$Parameter=="p01",2]*predtiming$intensity[3]
+                
+                predtiming<-PR(0,t1[x],x)
+                p00_1<-predtiming$transprob[predtiming$transprob$Parameter=="p00",2]
+                p01<-p01*p00_1
+                
+                denum<-p02+p01
+                
+                predtiming<-PR(horizon,t3[x],x)
+                p01<-predtiming$transprob[predtiming$transprob$Parameter=="p01",2]*predtiming$intensity[3]
+                
+                predtiming<-PR(0,horizon,x)
+                p00_1<-predtiming$transprob[predtiming$transprob$Parameter=="p00",2]
+                p01<-p01*p00_1
+                
+                return(((p01+p02)/denum))
+                
+              }else{
+                predtiming<-PR(0,t3[x],x)
+                p02<-predtiming$transprob[predtiming$transprob$Parameter=="p00",2]
+                
+                predtiming<-PR(t1[x],t3[x],x)
+                p01<-predtiming$transprob[predtiming$transprob$Parameter=="p01",2]
+                
+                predtiming<-PR(0,t1[x],x)
+                p00_1<-predtiming$transprob[predtiming$transprob$Parameter=="p00",2]
+                p01<-p01*p00_1
+                
+                denum<-p02+p01
+                
+                predtiming<-PR(horizon,t3[x],x)
+                p01<-predtiming$transprob[predtiming$transprob$Parameter=="p01",2]
+                
+                predtiming<-PR(0,horizon,x)
+                p00_1<-predtiming$transprob[predtiming$transprob$Parameter=="p00",2]
+                p01<-p01*p00_1
+                
+                return(((p01+p02)/denum))
+              }
+            }
+          }
+        }
       }
       
       if(ctime[x]==5){
         
         if(info.death==T){
+          
           
           predtiming<-PR(0,t3[x],x)
           p02<-predtiming$transprob[predtiming$transprob$Parameter=="p00",2]*predtiming$intensity[2]
@@ -354,11 +538,13 @@ BS<-function(pred,
           
         }
         
+        
       }
       
       if(ctime[x]==6){
         
         if(info.death==T){
+          if(info.after.horizon==F){
           predtiming<-PR(0,horizon,x)
           p00<-predtiming$transprob[predtiming$transprob$Parameter=="p00",2]
           
@@ -370,6 +556,69 @@ BS<-function(pred,
           p01<-p01*p00_1
           
           return(p00/(p01+p00)) #must be : p01_1 < p01 and [0;1]
+          }else{
+            if(idm[x]==1){
+              predtiming<-PR(0,horizon,x)
+              p00<-predtiming$transprob[predtiming$transprob$Parameter=="p00",2]
+              
+              predtiming<-PR(horizon,t2[x],x)
+              p01<-predtiming$transprob[predtiming$transprob$Parameter=="p01",2]*p00
+              
+              predtiming<-PR(0,t1[x],x)
+              p00_1<-predtiming$transprob[predtiming$transprob$Parameter=="p00",2]
+              predtiming<-PR(t1[x],t2[x],x)
+              p01_1<-predtiming$transprob[predtiming$transprob$Parameter=="p01",2]*p00_1
+              
+              return(p01/p01_1)
+            }else{
+              if(idd[x]==1){
+                
+                predtiming<-PR(0,t3[x],x)
+                p02<-predtiming$transprob[predtiming$transprob$Parameter=="p00",2]*predtiming$intensity[2]
+                
+                predtiming<-PR(t1[x],t3[x],x)
+                p01<-predtiming$transprob[predtiming$transprob$Parameter=="p01",2]*predtiming$intensity[3]
+                
+                predtiming<-PR(0,t1[x],x)
+                p00_1<-predtiming$transprob[predtiming$transprob$Parameter=="p00",2]
+                p01<-p01*p00_1
+                
+                denum<-p02+p01
+                
+                predtiming<-PR(horizon,t3[x],x)
+                p01<-predtiming$transprob[predtiming$transprob$Parameter=="p01",2]*predtiming$intensity[3]
+                
+                predtiming<-PR(0,horizon,x)
+                p00_1<-predtiming$transprob[predtiming$transprob$Parameter=="p00",2]
+                p01<-p01*p00_1
+                
+                return(((p01+p02)/denum))
+                
+              }else{
+                predtiming<-PR(0,t3[x],x)
+                p02<-predtiming$transprob[predtiming$transprob$Parameter=="p00",2]
+                
+                predtiming<-PR(t1[x],t3[x],x)
+                p01<-predtiming$transprob[predtiming$transprob$Parameter=="p01",2]
+                
+                predtiming<-PR(0,t1[x],x)
+                p00_1<-predtiming$transprob[predtiming$transprob$Parameter=="p00",2]
+                p01<-p01*p00_1
+                
+                denum<-p02+p01
+                
+                predtiming<-PR(horizon,t3[x],x)
+                p01<-predtiming$transprob[predtiming$transprob$Parameter=="p01",2]
+                
+                predtiming<-PR(0,horizon,x)
+                p00_1<-predtiming$transprob[predtiming$transprob$Parameter=="p00",2]
+                p01<-p01*p00_1
+                
+                return(((p01+p02)/denum))
+              }
+              
+            }
+          }
         }else{
           
           predtiming<-PR(t1[x],horizon,x)
@@ -408,7 +657,7 @@ BS<-function(pred,
     parallel::clusterEvalQ(cl, library(HIDeM))
     parallel::clusterEvalQ(cl, .BScache <- new.env(hash = TRUE))
     parallel::clusterExport(cl,
-                            c("objectSurvival","ctime","t1","t2","t3","s","horizon","info.death","k","newdata"),
+                            c("objectSurvival","ctime","t1","t2","t3","s","horizon","info.death","info.after.horizon","newdata"),
                             envir = environment())
     
     if (isIntervalCensored){
