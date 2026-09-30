@@ -150,6 +150,22 @@ extern void F77_NAME(ciweibtimedep)(double *,int *, int *,double *,double*, doub
                double*, double *,int *,int *,int*,int *,int *,int *, int *,
                int *,int *, int *, int *,int *, int *, double *,double*, double*);
 
+extern void F77_NAME(P00weibtimedep)(double *,int *, int *,double *,double*, double *,  double *,
+               double*, double *,int *,int *,int*,int *,int *,int *, int *,
+               int *,int *, int *, int *,int *, int *, double *,double*, double*);
+
+extern void F77_NAME(P02weibtimedep)(double *,int *, int *,double *,double*, double *,  double *,
+               double*, double *,int *,int *,int*,int *,int *,int *, int *,
+               int *,int *, int *, int *,int *, int *, double *,double*, double*);
+
+extern void F77_NAME(P01weibtimedep)(double *,int *, int *,double *,double*, double *,  double *,
+               double*, double *,int *,int *,int*,int *,int *,int *, int *, int *,
+               int *,int *, int *, int *,int *, int *, double *,double*, double*);
+
+extern void F77_NAME(P12weibtimedep)(double *,int *, int *,double *,double*, double *,  double *,
+               double*, double *,int *,int *,int*,int *,int *,int *, int *, int *,
+               int *,int *, int *, int *,int *, int *, double *,double*, double*);
+
 extern void F77_NAME(idmciweibtimedep)(double *,int *, int *,double *,double*, double *,  double *,
                double*, double *,int *,int *,int*,int *,int *,int *, int *,
                int *,int *, int *, int *,int *, int *, double *,double*, int *,int *,int *,int *,  double*);
@@ -160,6 +176,27 @@ extern void F77_NAME(citimedep)(double *,int *, double *,double*,double*,
               int *,int *,int *,int *,int *,int *,int *,int *, int *, int *,
               int *, int *, int *,double *,double*,double *);
 
+extern void F77_NAME(P00timedep)(double *,int *, double *,double*,double*,
+              int *,int *,int *,int*,double *,double *,double *,double *, double *, double *,
+              int *,int *,int *,int *,int *,int *,int *,int *, int *, int *,
+              int *, int *, int *,double *,double*,double *);
+
+extern void F77_NAME(P02timedep)(double *,int *, double *,double*,double*,
+              int *,int *,int *,int*,double *,double *,double *,double *, double *, double *,
+              int *,int *,int *,int *,int *,int *,int *,int *, int *, int *,
+              int *, int *, int *,double *,double*,double *);
+
+
+extern void F77_NAME(P01timedep)(double *,int *, double *,double*,double*,
+              int *,int *,int *,int*,double *,double *,double *,double *, double *, double *,
+              int *,int *,int *,int *,int *,int *,int *,int *, int *, int *, int *,
+              int *, int *, int *,double *,double*,double *);
+
+extern void F77_NAME(P12timedep)(double *,int *, double *,double*,double*,
+              int *,int *,int *,int*,double *,double *,double *,double *, double *, double *,
+              int *,int *,int *,int *,int *,int *,int *,int *, int *, int *, int *,
+              int *, int *, int *,double *,double*,double *);
+
 static const R_FortranMethodDef FortranEntries[] = {
     {"idmlikelihood",(DL_FUNC) &F77_NAME(idmlikelihood),    29},
     {"idmlikelihoodweib",(DL_FUNC) &F77_NAME(idmlikelihoodweib),    23},
@@ -167,8 +204,16 @@ static const R_FortranMethodDef FortranEntries[] = {
     {"idmlikelihoodweibsemimark",(DL_FUNC) &F77_NAME(idmlikelihoodweibsemimark),    22},
     {"idmlikelihoodweibtimedep",(DL_FUNC) &F77_NAME(idmlikelihoodweibtimedep),    32},
     {"ciweibtimedep",(DL_FUNC) &F77_NAME(ciweibtimedep),    25},
+     {"P00weibtimedep",(DL_FUNC) &F77_NAME(P00weibtimedep),    25},
+      {"P02weibtimedep",(DL_FUNC) &F77_NAME(P02weibtimedep),    25},
+       {"P12weibtimedep",(DL_FUNC) &F77_NAME(P12weibtimedep),    26},
+        {"P01weibtimedep",(DL_FUNC) &F77_NAME(P01weibtimedep),    26},
      {"idmciweibtimedep",(DL_FUNC) &F77_NAME(idmciweibtimedep),    29},
     {"citimedep",(DL_FUNC) &F77_NAME(citimedep),    31},
+    {"P00timedep",(DL_FUNC) &F77_NAME(P00timedep),    31},
+    {"P02timedep",(DL_FUNC) &F77_NAME(P02timedep),    31},
+     {"P12timedep",(DL_FUNC) &F77_NAME(P12timedep),    32},
+      {"P01timedep",(DL_FUNC) &F77_NAME(P01timedep),    32},
      {"firstderivaidmlikelihoodweibtimedep",(DL_FUNC) &F77_NAME(firstderivaidmlikelihoodweibtimedep),    32},
       {"derivaweibfirstderivtimedep",(DL_FUNC) &F77_NAME(derivaweibfirstderivtimedep),    32},
 	 {"idmlikelihoodtimedep",(DL_FUNC) &F77_NAME(idmlikelihoodtimedep),    38},
