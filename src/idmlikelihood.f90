@@ -4452,6 +4452,712 @@ if(p01.gt.0) then
         end subroutine suspdep
 
 
+        subroutine suspdeppred0(xp,x,the,n,su,lam,zi,gl,y)
+
+        implicit none
+        
+        integer::j,k,n,i,jtwm1
+        double precision::x,ht,ht2,h2,som,su,lam,htm,h2t,h3,h2n,hn, &
+        im,im1,im2,mm1,mm3,ht3,hht,h4,h3m,hh3,hh2,mm,im3,mm2,h,gl,hh,&
+		gl1,gl2,xp
+        double precision,dimension(-2:(n+3))::zi
+		double precision,dimension(15)::y
+        double precision,dimension(-2:(n-1))::the 
+		
+		double precision::a,b,dx,xm,xr,&
+		d1mach(5),epmach,uflow,xx
+		double precision,dimension(8)::xgk,wgk
+	    double precision,dimension(4)::wg
+         save wgk,xgk
+		 
+		 D1MACH(1)=2.23D-308
+    	D1MACH(2)=1.79D+308
+    	D1MACH(3)=1.11D-16
+    	D1MACH(4)=2.22D-16
+    	D1MACH(5)=0.301029995663981195D0
+
+    	epmach = d1mach(4)
+    	uflow = d1mach(1)
+		
+		
+		
+		wg(1)=0.129484966168869693270611432679082d0
+		wg(2)=0.279705391489276667901467771423780d0
+    	wg(3)=0.381830050505118944950369775488975d0
+    	wg(4)=0.417959183673469387755102040816327d0
+
+    	xgk(1)=0.991455371120812639206854697526329d0
+    	xgk(2)=0.949107912342758524526189684047851d0
+    	xgk(3)=0.864864423359769072789712788640926d0
+    	xgk(4)=0.741531185599394439863864773280788d0
+    	xgk(5)=0.586087235467691130294144838258730d0
+    	xgk(6)=0.405845151377397166906606412076961d0
+    	xgk(7)=0.207784955007898467600689403773245d0
+    	xgk(8)=0.000000000000000000000000000000000d0
+
+    	wgk(1)=0.022935322010529224963732008058970d0
+    	wgk(2)=0.063092092629978553290700663189204d0
+    	wgk(3)=0.104790010322250183839876322541518d0
+    	wgk(4)=0.140653259715525918745189590510238d0
+    	wgk(5)=0.169004726639267902826583426598550d0
+    	wgk(6)=0.190350578064785409913256402421014d0
+    	wgk(7)=0.204432940075298892414161999234649d0
+    	wgk(8)=0.209482141084727828012999174891714d0
+     
+		b=x
+		a=xp
+		
+		
+		xm = 0.5d+00*(b+a)
+        xr = 0.5d+00*(b-a)
+		
+		if(a.eq.b)then
+               su = 1.d0
+                gl = 0.d0
+                lam = 0.d0
+            else
+	
+		! xm hors indice va rendre 1 - ici pas besoin de ce check vu qu'on 
+		! donne nous même les temps --> soit sans erreur 
+		
+		if(xm.ge.zi(n))then 
+                lam = 4.d0*the(n-1)/(zi(n)-zi(n-1))
+        else
+		 if (xm < zi(1)) then
+		  lam = 0.d0
+		  else 
+			j = count(zi(1:(n-1)) <= xm)
+			
+			ht = xm-zi(j)
+			htm= xm-zi(j-1)
+			h2t= xm-zi(j+2)
+			ht2 = zi(j+1)-xm
+			ht3 = zi(j+3)-xm
+			hht = xm-zi(j-2)
+							
+			h = zi(j+1)-zi(j)
+			hh= zi(j+1)-zi(j-1)
+			h2= zi(j+2)-zi(j)
+			h3= zi(j+3)-zi(j)
+			h4= zi(j+4)-zi(j)
+			h3m= zi(j+3)-zi(j-1)
+			h2n=zi(j+2)-zi(j-1)
+			hn= zi(j+1)-zi(j-2)
+			hh3 = zi(j+1)-zi(j-3)
+			hh2 = zi(j+2)-zi(j-2)
+							
+			mm3 = ((4.d0*ht2*ht2*ht2)/(h*hh*hn*hh3))
+			mm2 = ((4.d0*hht*ht2*ht2)/(hh2*hh*h*hn))+((-4.d0*h2t*htm &
+							*ht2)/(hh2*h2n*hh*h))+((4.d0*h2t*h2t*ht)/(hh2*h2*h*h2n))
+			mm1 = (4.d0*(htm*htm*ht2)/(h3m*h2n*hh*h))+((-4.d0*htm*ht* &
+							h2t)/(h3m*h2*h*h2n))+((4.d0*ht3*ht*ht)/(h3m*h3*h2*h))
+			mm  = 4.d0*(ht*ht*ht)/(h4*h3*h2*h)
+							
+			
+			lam = (the(j-3)*mm3)+(the(j-2)*mm2)+(the(j-1)*mm1)+(the(j)*mm)
+			end if 
+		end if 
+        
+		    
+		gl = lam*y(1)*wgk(8) 
+
+		jtwm1 = 4*2-1
+        dx=xr*xgk(jtwm1)
+        xx = xm+dx
+		
+        if(xx.ge.zi(n))then 
+                lam = 4.d0*the(n-1)/(zi(n)-zi(n-1))
+        else
+		if (xx< zi(1)) then
+		  lam = 0.d0
+		  else 
+		  j = count(zi(1:(n-1)) <= xx)
+		
+        ht = xx-zi(j)
+        htm= xx-zi(j-1)
+        h2t= xx-zi(j+2)
+        ht2 = zi(j+1)-xx
+        ht3 = zi(j+3)-xx
+        hht = xx-zi(j-2)
+						
+        h = zi(j+1)-zi(j)
+        hh= zi(j+1)-zi(j-1)
+        h2= zi(j+2)-zi(j)
+        h3= zi(j+3)-zi(j)
+        h4= zi(j+4)-zi(j)
+        h3m= zi(j+3)-zi(j-1)
+        h2n=zi(j+2)-zi(j-1)
+        hn= zi(j+1)-zi(j-2)
+        hh3 = zi(j+1)-zi(j-3)
+        hh2 = zi(j+2)-zi(j-2)
+						
+        mm3 = ((4.d0*ht2*ht2*ht2)/(h*hh*hn*hh3))
+        mm2 = ((4.d0*hht*ht2*ht2)/(hh2*hh*h*hn))+((-4.d0*h2t*htm &
+                        *ht2)/(hh2*h2n*hh*h))+((4.d0*h2t*h2t*ht)/(hh2*h2*h*h2n))
+        mm1 = (4.d0*(htm*htm*ht2)/(h3m*h2n*hh*h))+((-4.d0*htm*ht* &
+                        h2t)/(h3m*h2*h*h2n))+((4.d0*ht3*ht*ht)/(h3m*h3*h2*h))
+        mm  = 4.d0*(ht*ht*ht)/(h4*h3*h2*h)
+						
+						
+        lam = (the(j-3)*mm3)+(the(j-2)*mm2)+(the(j-1)*mm1)+(the(j)*mm)
+        end if 
+		end if 
+        
+		gl1=lam*y(3) 
+        xx = xm-dx
+        if(xx.ge.zi(n))then 
+                lam = 4.d0*the(n-1)/(zi(n)-zi(n-1))
+        else
+		if (xx< zi(1)) then
+		  lam = 0.d0
+		  else 
+		j = count(zi(1:(n-1)) <= xx)
+						
+        ht = xx-zi(j)
+        htm= xx-zi(j-1)
+        h2t= xx-zi(j+2)
+        ht2 = zi(j+1)-xx
+        ht3 = zi(j+3)-xx
+        hht = xx-zi(j-2)
+						
+        h = zi(j+1)-zi(j)
+        hh= zi(j+1)-zi(j-1)
+        h2= zi(j+2)-zi(j)
+        h3= zi(j+3)-zi(j)
+        h4= zi(j+4)-zi(j)
+        h3m= zi(j+3)-zi(j-1)
+        h2n=zi(j+2)-zi(j-1)
+        hn= zi(j+1)-zi(j-2)
+        hh3 = zi(j+1)-zi(j-3)
+        hh2 = zi(j+2)-zi(j-2)
+						
+        mm3 = ((4.d0*ht2*ht2*ht2)/(h*hh*hn*hh3))
+        mm2 = ((4.d0*hht*ht2*ht2)/(hh2*hh*h*hn))+((-4.d0*h2t*htm &
+                        *ht2)/(hh2*h2n*hh*h))+((4.d0*h2t*h2t*ht)/(hh2*h2*h*h2n))
+        mm1 = (4.d0*(htm*htm*ht2)/(h3m*h2n*hh*h))+((-4.d0*htm*ht* &
+                        h2t)/(h3m*h2*h*h2n))+((4.d0*ht3*ht*ht)/(h3m*h3*h2*h))
+        mm  = 4.d0*(ht*ht*ht)/(h4*h3*h2*h)
+						
+						
+        lam = (the(j-3)*mm3)+(the(j-2)*mm2)+(the(j-1)*mm1)+(the(j)*mm)
+        end if 
+		end if 
+        
+		gl2=lam*y(2)   ! svgrd valeurs fct f a drte du centre
+	       
+		gl=gl+wgk(jtwm1)*(gl1+gl2)
+		   
+		jtwm1 = 3*2
+        dx=xr*xgk(jtwm1)
+        xx = xm+dx
+        if(xx.ge.zi(n))then 
+                lam = 4.d0*the(n-1)/(zi(n)-zi(n-1))
+        else
+		if (xx< zi(1)) then
+		  lam = 0.d0
+		  else 
+		j = count(zi(1:(n-1)) <= xx)
+		
+        ht = xx-zi(j)
+        htm= xx-zi(j-1)
+        h2t= xx-zi(j+2)
+        ht2 = zi(j+1)-xx
+        ht3 = zi(j+3)-xx
+        hht = xx-zi(j-2)
+						
+        h = zi(j+1)-zi(j)
+        hh= zi(j+1)-zi(j-1)
+        h2= zi(j+2)-zi(j)
+        h3= zi(j+3)-zi(j)
+        h4= zi(j+4)-zi(j)
+        h3m= zi(j+3)-zi(j-1)
+        h2n=zi(j+2)-zi(j-1)
+        hn= zi(j+1)-zi(j-2)
+        hh3 = zi(j+1)-zi(j-3)
+        hh2 = zi(j+2)-zi(j-2)
+						
+        mm3 = ((4.d0*ht2*ht2*ht2)/(h*hh*hn*hh3))
+        mm2 = ((4.d0*hht*ht2*ht2)/(hh2*hh*h*hn))+((-4.d0*h2t*htm &
+                        *ht2)/(hh2*h2n*hh*h))+((4.d0*h2t*h2t*ht)/(hh2*h2*h*h2n))
+        mm1 = (4.d0*(htm*htm*ht2)/(h3m*h2n*hh*h))+((-4.d0*htm*ht* &
+                        h2t)/(h3m*h2*h*h2n))+((4.d0*ht3*ht*ht)/(h3m*h3*h2*h))
+        mm  = 4.d0*(ht*ht*ht)/(h4*h3*h2*h)
+						
+						
+        lam = (the(j-3)*mm3)+(the(j-2)*mm2)+(the(j-1)*mm1)+(the(j)*mm)
+        end if 
+		end if 
+        gl1=lam*y(5)
+        xx = xm-dx
+        if(xx.ge.zi(n))then 
+                lam = 4.d0*the(n-1)/(zi(n)-zi(n-1))
+        else
+		if (xx< zi(1)) then
+		  lam = 0.d0
+		  else 
+		j = count(zi(1:(n-1)) <= xx)
+						
+        ht = xx-zi(j)
+        htm= xx-zi(j-1)
+        h2t= xx-zi(j+2)
+        ht2 = zi(j+1)-xx
+        ht3 = zi(j+3)-xx
+        hht = xx-zi(j-2)
+						
+        h = zi(j+1)-zi(j)
+        hh= zi(j+1)-zi(j-1)
+        h2= zi(j+2)-zi(j)
+        h3= zi(j+3)-zi(j)
+        h4= zi(j+4)-zi(j)
+        h3m= zi(j+3)-zi(j-1)
+        h2n=zi(j+2)-zi(j-1)
+        hn= zi(j+1)-zi(j-2)
+        hh3 = zi(j+1)-zi(j-3)
+        hh2 = zi(j+2)-zi(j-2)
+						
+        mm3 = ((4.d0*ht2*ht2*ht2)/(h*hh*hn*hh3))
+        mm2 = ((4.d0*hht*ht2*ht2)/(hh2*hh*h*hn))+((-4.d0*h2t*htm &
+                        *ht2)/(hh2*h2n*hh*h))+((4.d0*h2t*h2t*ht)/(hh2*h2*h*h2n))
+        mm1 = (4.d0*(htm*htm*ht2)/(h3m*h2n*hh*h))+((-4.d0*htm*ht* &
+                        h2t)/(h3m*h2*h*h2n))+((4.d0*ht3*ht*ht)/(h3m*h3*h2*h))
+        mm  = 4.d0*(ht*ht*ht)/(h4*h3*h2*h)
+						
+						
+        lam = (the(j-3)*mm3)+(the(j-2)*mm2)+(the(j-1)*mm1)+(the(j)*mm)
+        end if 
+		end if 
+        gl2=lam*y(4)   ! svgrd valeurs fct f a drte du centre
+	       
+		gl=gl+wgk(jtwm1)*(gl1+gl2)
+		   
+		jtwm1 = 3*2-1
+        dx=xr*xgk(jtwm1)
+        xx = xm+dx
+        if(xx.ge.zi(n))then 
+                lam = 4.d0*the(n-1)/(zi(n)-zi(n-1))
+        else
+		if (xx< zi(1)) then
+		  lam = 0.d0
+		  else 
+		j = count(zi(1:(n-1)) <= xx)
+						
+        ht = xx-zi(j)
+        htm= xx-zi(j-1)
+        h2t= xx-zi(j+2)
+        ht2 = zi(j+1)-xx
+        ht3 = zi(j+3)-xx
+        hht = xx-zi(j-2)
+						
+        h = zi(j+1)-zi(j)
+        hh= zi(j+1)-zi(j-1)
+        h2= zi(j+2)-zi(j)
+        h3= zi(j+3)-zi(j)
+        h4= zi(j+4)-zi(j)
+        h3m= zi(j+3)-zi(j-1)
+        h2n=zi(j+2)-zi(j-1)
+        hn= zi(j+1)-zi(j-2)
+        hh3 = zi(j+1)-zi(j-3)
+        hh2 = zi(j+2)-zi(j-2)
+						
+        mm3 = ((4.d0*ht2*ht2*ht2)/(h*hh*hn*hh3))
+        mm2 = ((4.d0*hht*ht2*ht2)/(hh2*hh*h*hn))+((-4.d0*h2t*htm &
+                        *ht2)/(hh2*h2n*hh*h))+((4.d0*h2t*h2t*ht)/(hh2*h2*h*h2n))
+        mm1 = (4.d0*(htm*htm*ht2)/(h3m*h2n*hh*h))+((-4.d0*htm*ht* &
+                        h2t)/(h3m*h2*h*h2n))+((4.d0*ht3*ht*ht)/(h3m*h3*h2*h))
+        mm  = 4.d0*(ht*ht*ht)/(h4*h3*h2*h)
+						
+						
+        lam = (the(j-3)*mm3)+(the(j-2)*mm2)+(the(j-1)*mm1)+(the(j)*mm)
+        end if 
+		end if 
+		
+        gl1=lam*y(7) 
+        xx = xm-dx
+        if(xx.ge.zi(n))then 
+                lam = 4.d0*the(n-1)/(zi(n)-zi(n-1))
+        else
+		if (xx< zi(1)) then
+		  lam = 0.d0
+		  else 
+		j = count(zi(1:(n-1)) <= xx)
+		
+        ht = xx-zi(j)
+        htm= xx-zi(j-1)
+        h2t= xx-zi(j+2)
+        ht2 = zi(j+1)-xx
+        ht3 = zi(j+3)-xx
+        hht = xx-zi(j-2)
+						
+        h = zi(j+1)-zi(j)
+        hh= zi(j+1)-zi(j-1)
+        h2= zi(j+2)-zi(j)
+        h3= zi(j+3)-zi(j)
+        h4= zi(j+4)-zi(j)
+        h3m= zi(j+3)-zi(j-1)
+        h2n=zi(j+2)-zi(j-1)
+        hn= zi(j+1)-zi(j-2)
+        hh3 = zi(j+1)-zi(j-3)
+        hh2 = zi(j+2)-zi(j-2)
+						
+        mm3 = ((4.d0*ht2*ht2*ht2)/(h*hh*hn*hh3))
+        mm2 = ((4.d0*hht*ht2*ht2)/(hh2*hh*h*hn))+((-4.d0*h2t*htm &
+                        *ht2)/(hh2*h2n*hh*h))+((4.d0*h2t*h2t*ht)/(hh2*h2*h*h2n))
+        mm1 = (4.d0*(htm*htm*ht2)/(h3m*h2n*hh*h))+((-4.d0*htm*ht* &
+                        h2t)/(h3m*h2*h*h2n))+((4.d0*ht3*ht*ht)/(h3m*h3*h2*h))
+        mm  = 4.d0*(ht*ht*ht)/(h4*h3*h2*h)
+						
+						
+        lam = (the(j-3)*mm3)+(the(j-2)*mm2)+(the(j-1)*mm1)+(the(j)*mm)
+        end if 
+		end if 
+        gl2=lam*y(6)   ! svgrd valeurs fct f a drte du centre
+	    gl=gl+wgk(jtwm1)*(gl1+gl2)
+		   
+		jtwm1 = 2*2
+        dx=xr*xgk(jtwm1)
+        xx = xm+dx
+        if(xx.ge.zi(n))then 
+                lam = 4.d0*the(n-1)/(zi(n)-zi(n-1))
+        else
+		if (xx< zi(1)) then
+		  lam = 0.d0
+		  else 
+		j = count(zi(1:(n-1)) <= xx)
+						
+        ht = xx-zi(j)
+        htm= xx-zi(j-1)
+        h2t= xx-zi(j+2)
+        ht2 = zi(j+1)-xx
+        ht3 = zi(j+3)-xx
+        hht = xx-zi(j-2)
+						
+        h = zi(j+1)-zi(j)
+        hh= zi(j+1)-zi(j-1)
+        h2= zi(j+2)-zi(j)
+        h3= zi(j+3)-zi(j)
+        h4= zi(j+4)-zi(j)
+        h3m= zi(j+3)-zi(j-1)
+        h2n=zi(j+2)-zi(j-1)
+        hn= zi(j+1)-zi(j-2)
+        hh3 = zi(j+1)-zi(j-3)
+        hh2 = zi(j+2)-zi(j-2)
+						
+        mm3 = ((4.d0*ht2*ht2*ht2)/(h*hh*hn*hh3))
+        mm2 = ((4.d0*hht*ht2*ht2)/(hh2*hh*h*hn))+((-4.d0*h2t*htm &
+                        *ht2)/(hh2*h2n*hh*h))+((4.d0*h2t*h2t*ht)/(hh2*h2*h*h2n))
+        mm1 = (4.d0*(htm*htm*ht2)/(h3m*h2n*hh*h))+((-4.d0*htm*ht* &
+                        h2t)/(h3m*h2*h*h2n))+((4.d0*ht3*ht*ht)/(h3m*h3*h2*h))
+        mm  = 4.d0*(ht*ht*ht)/(h4*h3*h2*h)
+						
+						
+        lam = (the(j-3)*mm3)+(the(j-2)*mm2)+(the(j-1)*mm1)+(the(j)*mm)
+        end if 
+		end if 
+		
+        gl1=lam*y(9)
+        xx = xm-dx
+        if(xx.ge.zi(n))then 
+                lam = 4.d0*the(n-1)/(zi(n)-zi(n-1))
+        else
+		if (xx< zi(1)) then
+		  lam = 0.d0
+		  else 
+		j = count(zi(1:(n-1)) <= xx)
+		
+        ht = xx-zi(j)
+        htm= xx-zi(j-1)
+        h2t= xx-zi(j+2)
+        ht2 = zi(j+1)-xx
+        ht3 = zi(j+3)-xx
+        hht = xx-zi(j-2)
+						
+        h = zi(j+1)-zi(j)
+        hh= zi(j+1)-zi(j-1)
+        h2= zi(j+2)-zi(j)
+        h3= zi(j+3)-zi(j)
+        h4= zi(j+4)-zi(j)
+        h3m= zi(j+3)-zi(j-1)
+        h2n=zi(j+2)-zi(j-1)
+        hn= zi(j+1)-zi(j-2)
+        hh3 = zi(j+1)-zi(j-3)
+        hh2 = zi(j+2)-zi(j-2)
+						
+        mm3 = ((4.d0*ht2*ht2*ht2)/(h*hh*hn*hh3))
+        mm2 = ((4.d0*hht*ht2*ht2)/(hh2*hh*h*hn))+((-4.d0*h2t*htm &
+                        *ht2)/(hh2*h2n*hh*h))+((4.d0*h2t*h2t*ht)/(hh2*h2*h*h2n))
+        mm1 = (4.d0*(htm*htm*ht2)/(h3m*h2n*hh*h))+((-4.d0*htm*ht* &
+                        h2t)/(h3m*h2*h*h2n))+((4.d0*ht3*ht*ht)/(h3m*h3*h2*h))
+        mm  = 4.d0*(ht*ht*ht)/(h4*h3*h2*h)
+						
+						
+        lam = (the(j-3)*mm3)+(the(j-2)*mm2)+(the(j-1)*mm1)+(the(j)*mm)
+        end if 
+		end if 
+		
+        gl2=lam*y(8)   ! svgrd valeurs fct f a drte du centre
+	    gl=gl+wgk(jtwm1)*(gl1+gl2)
+		
+		jtwm1 = 2*2-1
+        dx=xr*xgk(jtwm1)
+        xx = xm+dx
+        if(xx.ge.zi(n))then 
+                lam = 4.d0*the(n-1)/(zi(n)-zi(n-1))
+        else
+		if (xx< zi(1)) then
+		  lam = 0.d0
+		  else 
+		j = count(zi(1:(n-1)) <= xx)
+						
+        ht = xx-zi(j)
+        htm= xx-zi(j-1)
+        h2t= xx-zi(j+2)
+        ht2 = zi(j+1)-xx
+        ht3 = zi(j+3)-xx
+        hht = xx-zi(j-2)
+						
+        h = zi(j+1)-zi(j)
+        hh= zi(j+1)-zi(j-1)
+        h2= zi(j+2)-zi(j)
+        h3= zi(j+3)-zi(j)
+        h4= zi(j+4)-zi(j)
+        h3m= zi(j+3)-zi(j-1)
+        h2n=zi(j+2)-zi(j-1)
+        hn= zi(j+1)-zi(j-2)
+        hh3 = zi(j+1)-zi(j-3)
+        hh2 = zi(j+2)-zi(j-2)
+						
+        mm3 = ((4.d0*ht2*ht2*ht2)/(h*hh*hn*hh3))
+        mm2 = ((4.d0*hht*ht2*ht2)/(hh2*hh*h*hn))+((-4.d0*h2t*htm &
+                        *ht2)/(hh2*h2n*hh*h))+((4.d0*h2t*h2t*ht)/(hh2*h2*h*h2n))
+        mm1 = (4.d0*(htm*htm*ht2)/(h3m*h2n*hh*h))+((-4.d0*htm*ht* &
+                        h2t)/(h3m*h2*h*h2n))+((4.d0*ht3*ht*ht)/(h3m*h3*h2*h))
+        mm  = 4.d0*(ht*ht*ht)/(h4*h3*h2*h)
+						
+						
+        lam = (the(j-3)*mm3)+(the(j-2)*mm2)+(the(j-1)*mm1)+(the(j)*mm)
+        end if 
+		end if 
+		gl1=lam*y(11) 
+        xx = xm-dx
+        if(xx.ge.zi(n))then 
+                lam = 4.d0*the(n-1)/(zi(n)-zi(n-1))
+        else
+		if (xx< zi(1)) then
+		  lam = 0.d0
+		  else 
+		j = count(zi(1:(n-1)) <= xx)
+						
+        ht = xx-zi(j)
+        htm= xx-zi(j-1)
+        h2t= xx-zi(j+2)
+        ht2 = zi(j+1)-xx
+        ht3 = zi(j+3)-xx
+        hht = xx-zi(j-2)
+						
+        h = zi(j+1)-zi(j)
+        hh= zi(j+1)-zi(j-1)
+        h2= zi(j+2)-zi(j)
+        h3= zi(j+3)-zi(j)
+        h4= zi(j+4)-zi(j)
+        h3m= zi(j+3)-zi(j-1)
+        h2n=zi(j+2)-zi(j-1)
+        hn= zi(j+1)-zi(j-2)
+        hh3 = zi(j+1)-zi(j-3)
+        hh2 = zi(j+2)-zi(j-2)
+						
+        mm3 = ((4.d0*ht2*ht2*ht2)/(h*hh*hn*hh3))
+        mm2 = ((4.d0*hht*ht2*ht2)/(hh2*hh*h*hn))+((-4.d0*h2t*htm &
+                        *ht2)/(hh2*h2n*hh*h))+((4.d0*h2t*h2t*ht)/(hh2*h2*h*h2n))
+        mm1 = (4.d0*(htm*htm*ht2)/(h3m*h2n*hh*h))+((-4.d0*htm*ht* &
+                        h2t)/(h3m*h2*h*h2n))+((4.d0*ht3*ht*ht)/(h3m*h3*h2*h))
+        mm  = 4.d0*(ht*ht*ht)/(h4*h3*h2*h)
+						
+						
+        lam = (the(j-3)*mm3)+(the(j-2)*mm2)+(the(j-1)*mm1)+(the(j)*mm)
+        end if 
+		end if 
+	    gl2=lam*y(10)   ! svgrd valeurs fct f a drte du centre
+	    gl=gl+wgk(jtwm1)*(gl1+gl2)
+		   
+		jtwm1 = 1*2
+        dx=xr*xgk(jtwm1)
+        xx = xm+dx
+        if(xx.ge.zi(n))then 
+                lam = 4.d0*the(n-1)/(zi(n)-zi(n-1))
+        else
+		if (xx< zi(1)) then
+		  lam = 0.d0
+		  else 
+		j = count(zi(1:(n-1)) <= xx)
+						
+        ht = xx-zi(j)
+        htm= xx-zi(j-1)
+        h2t= xx-zi(j+2)
+        ht2 = zi(j+1)-xx
+        ht3 = zi(j+3)-xx
+        hht = xx-zi(j-2)
+						
+        h = zi(j+1)-zi(j)
+        hh= zi(j+1)-zi(j-1)
+        h2= zi(j+2)-zi(j)
+        h3= zi(j+3)-zi(j)
+        h4= zi(j+4)-zi(j)
+        h3m= zi(j+3)-zi(j-1)
+        h2n=zi(j+2)-zi(j-1)
+        hn= zi(j+1)-zi(j-2)
+        hh3 = zi(j+1)-zi(j-3)
+        hh2 = zi(j+2)-zi(j-2)
+						
+        mm3 = ((4.d0*ht2*ht2*ht2)/(h*hh*hn*hh3))
+        mm2 = ((4.d0*hht*ht2*ht2)/(hh2*hh*h*hn))+((-4.d0*h2t*htm &
+                        *ht2)/(hh2*h2n*hh*h))+((4.d0*h2t*h2t*ht)/(hh2*h2*h*h2n))
+        mm1 = (4.d0*(htm*htm*ht2)/(h3m*h2n*hh*h))+((-4.d0*htm*ht* &
+                        h2t)/(h3m*h2*h*h2n))+((4.d0*ht3*ht*ht)/(h3m*h3*h2*h))
+        mm  = 4.d0*(ht*ht*ht)/(h4*h3*h2*h)
+						
+						
+        lam = (the(j-3)*mm3)+(the(j-2)*mm2)+(the(j-1)*mm1)+(the(j)*mm)
+        end if 
+		end if 
+		
+        gl1=lam*y(13) 
+        xx = xm-dx
+        if(xx.ge.zi(n))then 
+                lam = 4.d0*the(n-1)/(zi(n)-zi(n-1))
+        else
+		if (xx< zi(1)) then
+		  lam = 0.d0
+		  else 
+		j = count(zi(1:(n-1)) <= xx)
+						
+        ht = xx-zi(j)
+        htm= xx-zi(j-1)
+        h2t= xx-zi(j+2)
+        ht2 = zi(j+1)-xx
+        ht3 = zi(j+3)-xx
+        hht = xx-zi(j-2)
+						
+        h = zi(j+1)-zi(j)
+        hh= zi(j+1)-zi(j-1)
+        h2= zi(j+2)-zi(j)
+        h3= zi(j+3)-zi(j)
+        h4= zi(j+4)-zi(j)
+        h3m= zi(j+3)-zi(j-1)
+        h2n=zi(j+2)-zi(j-1)
+        hn= zi(j+1)-zi(j-2)
+        hh3 = zi(j+1)-zi(j-3)
+        hh2 = zi(j+2)-zi(j-2)
+						
+        mm3 = ((4.d0*ht2*ht2*ht2)/(h*hh*hn*hh3))
+        mm2 = ((4.d0*hht*ht2*ht2)/(hh2*hh*h*hn))+((-4.d0*h2t*htm &
+                        *ht2)/(hh2*h2n*hh*h))+((4.d0*h2t*h2t*ht)/(hh2*h2*h*h2n))
+        mm1 = (4.d0*(htm*htm*ht2)/(h3m*h2n*hh*h))+((-4.d0*htm*ht* &
+                        h2t)/(h3m*h2*h*h2n))+((4.d0*ht3*ht*ht)/(h3m*h3*h2*h))
+        mm  = 4.d0*(ht*ht*ht)/(h4*h3*h2*h)
+						
+						
+        lam = (the(j-3)*mm3)+(the(j-2)*mm2)+(the(j-1)*mm1)+(the(j)*mm)
+        end if 
+		end if 
+		
+        gl2=lam*y(12)   ! svgrd valeurs fct f a drte du centre
+	    gl=gl+wgk(jtwm1)*(gl1+gl2)
+		   
+		jtwm1 = 1*2-1
+        dx=xr*xgk(jtwm1)
+        xx = xm+dx
+        if(xx.ge.zi(n))then 
+                lam = 4.d0*the(n-1)/(zi(n)-zi(n-1))
+        else
+		if (xx< zi(1)) then
+		  lam = 0.d0
+		  else 
+		j = count(zi(1:(n-1)) <= xx)
+						
+        ht = xx-zi(j)
+        htm= xx-zi(j-1)
+        h2t= xx-zi(j+2)
+        ht2 = zi(j+1)-xx
+        ht3 = zi(j+3)-xx
+        hht = xx-zi(j-2)
+						
+        h = zi(j+1)-zi(j)
+        hh= zi(j+1)-zi(j-1)
+        h2= zi(j+2)-zi(j)
+        h3= zi(j+3)-zi(j)
+        h4= zi(j+4)-zi(j)
+        h3m= zi(j+3)-zi(j-1)
+        h2n=zi(j+2)-zi(j-1)
+        hn= zi(j+1)-zi(j-2)
+        hh3 = zi(j+1)-zi(j-3)
+        hh2 = zi(j+2)-zi(j-2)
+						
+        mm3 = ((4.d0*ht2*ht2*ht2)/(h*hh*hn*hh3))
+        mm2 = ((4.d0*hht*ht2*ht2)/(hh2*hh*h*hn))+((-4.d0*h2t*htm &
+                        *ht2)/(hh2*h2n*hh*h))+((4.d0*h2t*h2t*ht)/(hh2*h2*h*h2n))
+        mm1 = (4.d0*(htm*htm*ht2)/(h3m*h2n*hh*h))+((-4.d0*htm*ht* &
+                        h2t)/(h3m*h2*h*h2n))+((4.d0*ht3*ht*ht)/(h3m*h3*h2*h))
+        mm  = 4.d0*(ht*ht*ht)/(h4*h3*h2*h)
+						
+						
+        lam = (the(j-3)*mm3)+(the(j-2)*mm2)+(the(j-1)*mm1)+(the(j)*mm)
+        end if 
+		end if 
+		
+	    gl1=lam*y(15) 
+        xx = xm-dx
+        if(xx.ge.zi(n))then 
+                lam = 4.d0*the(n-1)/(zi(n)-zi(n-1))
+        else
+		if (xx< zi(1)) then
+		  lam = 0.d0
+		  else 
+		j = count(zi(1:(n-1)) <= xx)
+						
+        ht = xx-zi(j)
+        htm= xx-zi(j-1)
+        h2t= xx-zi(j+2)
+        ht2 = zi(j+1)-xx
+        ht3 = zi(j+3)-xx
+        hht = xx-zi(j-2)
+						
+        h = zi(j+1)-zi(j)
+        hh= zi(j+1)-zi(j-1)
+        h2= zi(j+2)-zi(j)
+        h3= zi(j+3)-zi(j)
+        h4= zi(j+4)-zi(j)
+        h3m= zi(j+3)-zi(j-1)
+        h2n=zi(j+2)-zi(j-1)
+        hn= zi(j+1)-zi(j-2)
+        hh3 = zi(j+1)-zi(j-3)
+        hh2 = zi(j+2)-zi(j-2)
+						
+        mm3 = ((4.d0*ht2*ht2*ht2)/(h*hh*hn*hh3))
+        mm2 = ((4.d0*hht*ht2*ht2)/(hh2*hh*h*hn))+((-4.d0*h2t*htm &
+                        *ht2)/(hh2*h2n*hh*h))+((4.d0*h2t*h2t*ht)/(hh2*h2*h*h2n))
+        mm1 = (4.d0*(htm*htm*ht2)/(h3m*h2n*hh*h))+((-4.d0*htm*ht* &
+                        h2t)/(h3m*h2*h*h2n))+((4.d0*ht3*ht*ht)/(h3m*h3*h2*h))
+        mm  = 4.d0*(ht*ht*ht)/(h4*h3*h2*h)
+						
+						
+        lam = (the(j-3)*mm3)+(the(j-2)*mm2)+(the(j-1)*mm1)+(the(j)*mm)
+        end if 
+		end if 
+		
+	    gl2=lam*y(14)   ! svgrd valeurs fct f a drte du centre
+	       
+		gl=gl+wgk(jtwm1)*(gl1+gl2)
+
+	!	risq = xr*risq
+	!	surv = xr*surv
+		gl = xr*gl
+		su=dexp(-gl)
+
+		end if 
+        return
+
+        end subroutine suspdeppred0
+
         subroutine suspdeppred(xp,x,the,n,su,lam,zi,gl,y)
 
         implicit none
@@ -6420,6 +7126,173 @@ subroutine fonctdeppred(xp,x,p,risq,glam,surv,y)
 
 end subroutine fonctdeppred
 
+subroutine fonctdeppred0(xp,x,p,risq,glam,surv,y)
+
+        implicit none
+
+        double precision,dimension(2)::p
+		double precision,dimension(15)::y
+        double precision::x,surv,risq,glam,ri,gl,su,gl1,gl2
+		integer::j,jtw,jtwm1
+        double precision::a,b,dx,xm,xr,&
+		d1mach(5),epmach,uflow,xp
+		double precision,dimension(8)::xgk,wgk
+	    double precision,dimension(4)::wg
+         double precision::xx
+         save wgk,xgk
+		 
+		 D1MACH(1)=2.23D-308
+    	D1MACH(2)=1.79D+308
+    	D1MACH(3)=1.11D-16
+    	D1MACH(4)=2.22D-16
+    	D1MACH(5)=0.301029995663981195D0
+
+    	epmach = d1mach(4)
+    	uflow = d1mach(1)
+		
+		
+		
+		wg(1)=0.129484966168869693270611432679082d0
+		wg(2)=0.279705391489276667901467771423780d0
+    	wg(3)=0.381830050505118944950369775488975d0
+    	wg(4)=0.417959183673469387755102040816327d0
+
+    	xgk(1)=0.991455371120812639206854697526329d0
+    	xgk(2)=0.949107912342758524526189684047851d0
+    	xgk(3)=0.864864423359769072789712788640926d0
+    	xgk(4)=0.741531185599394439863864773280788d0
+    	xgk(5)=0.586087235467691130294144838258730d0
+    	xgk(6)=0.405845151377397166906606412076961d0
+    	xgk(7)=0.207784955007898467600689403773245d0
+    	xgk(8)=0.000000000000000000000000000000000d0
+
+    	wgk(1)=0.022935322010529224963732008058970d0
+    	wgk(2)=0.063092092629978553290700663189204d0
+    	wgk(3)=0.104790010322250183839876322541518d0
+    	wgk(4)=0.140653259715525918745189590510238d0
+    	wgk(5)=0.169004726639267902826583426598550d0
+    	wgk(6)=0.190350578064785409913256402421014d0
+    	wgk(7)=0.204432940075298892414161999234649d0
+    	wgk(8)=0.209482141084727828012999174891714d0
+     
+		b=x
+		a=xp
+
+		
+		
+		xm = 0.5d+00*(b+a)
+        xr = 0.5d+00*(b-a)
+        call fonctrisq(xm,p,ri)
+        
+		glam = ri*y(1)*wgk(8)   !integral over 0 to x of base risk
+       
+
+		  if(a.eq.b)then
+               surv = 1.d0
+                glam = 0.d0
+                risq = 0.d0
+            else
+			
+			
+			j=4
+			
+			jtwm1 = j*2-1
+               dx=xr*xgk(jtwm1)
+               xx = xm+dx
+               call fonctrisq(xx,p,ri)
+               gl1=ri*y(3) 
+               xx = xm-dx
+               call fonctrisq(xx,p,ri)
+               gl2=ri*y(2)   ! svgrd valeurs fct f a drte du centre
+	       
+		  glam=glam+wgk(jtwm1)*(gl1+gl2)
+		   
+		   j=3
+		   
+		   jtwm1 = j*2
+               dx=xr*xgk(jtwm1)
+               xx = xm+dx
+               call fonctrisq(xx,p,ri)
+               gl1=ri*y(5)
+               xx = xm-dx
+               call fonctrisq(xx,p,ri)
+               gl2=ri*y(4)   ! svgrd valeurs fct f a drte du centre
+	       
+		  glam=glam+wgk(jtwm1)*(gl1+gl2)
+		   
+		    jtwm1 = j*2-1
+               dx=xr*xgk(jtwm1)
+               xx = xm+dx
+               call fonctrisq(xx,p,ri)
+               gl1=ri*y(7) 
+               xx = xm-dx
+               call fonctrisq(xx,p,ri)
+               gl2=ri*y(6)   ! svgrd valeurs fct f a drte du centre
+	       
+		  glam=glam+wgk(jtwm1)*(gl1+gl2)
+		   
+		   
+		   j=2
+		   
+		    jtwm1 = j*2
+               dx=xr*xgk(jtwm1)
+               xx = xm+dx
+               call fonctrisq(xx,p,ri)
+               gl1=ri*y(9)
+               xx = xm-dx
+               call fonctrisq(xx,p,ri)
+               gl2=ri*y(8)   ! svgrd valeurs fct f a drte du centre
+	       
+		   glam=glam+wgk(jtwm1)*(gl1+gl2)
+		   
+		    jtwm1 = j*2-1
+               dx=xr*xgk(jtwm1)
+               xx = xm+dx
+               call fonctrisq(xx,p,ri)
+				gl1=ri*y(11) 
+               xx = xm-dx
+               call fonctrisq(xx,p,ri)
+				gl2=ri*y(10)   ! svgrd valeurs fct f a drte du centre
+	       
+			glam=glam+wgk(jtwm1)*(gl1+gl2)
+		   
+		   j=1
+		   
+		    jtwm1 = j*2
+               dx=xr*xgk(jtwm1)
+               xx = xm+dx
+               call fonctrisq(xx,p,ri)
+               gl1=ri*y(13) 
+               xx = xm-dx
+               call fonctrisq(xx,p,ri)
+               gl2=ri*y(12)   ! svgrd valeurs fct f a drte du centre
+	       
+		 glam=glam+wgk(jtwm1)*(gl1+gl2)
+		   
+		    jtwm1 = j*2-1
+               dx=xr*xgk(jtwm1)
+               xx = xm+dx
+               call fonctrisq(xx,p,ri)
+			   gl1=ri*y(15) 
+               xx = xm-dx
+               call fonctrisq(xx,p,ri)
+			   gl2=ri*y(14)   ! svgrd valeurs fct f a drte du centre
+	       
+		glam=glam+wgk(jtwm1)*(gl1+gl2)
+
+	!	risq = xr*risq
+	!	surv = xr*surv
+		glam = xr*glam
+		surv=dexp(-glam)
+		
+        return
+		
+		end if 
+         
+        
+
+end subroutine fonctdeppred0
+
 subroutine fonctdep0(x,p,glam,y)
 
         implicit none
@@ -7382,6 +8255,191 @@ subroutine ciqgaussPL15weibtimedepV2(a,b,the01,the02,res,&
     
           end subroutine ciqgaussPL15weibtimedepV2
 		  
+!=============================================================================================  
+!==== QGAUS15 out a 15 point Gauss-Kronrod quadrature rule for weib  =========================
+!==== for probability transition 0 to 1 ===============================================================
+!=============================================================================================  
+
+subroutine P01qgaussPL15weibtimedepV2(a,b,the01,the02,the12,res,&
+       v01,v02,v12,y01,y02,y12)
+         
+		 
+		 implicit none
+         
+         integer::j,jtw,jtwm1
+         double precision::a,b,dx,xm,xr,res,resk,v01,v02,&
+         v12,d1mach(5),epmach,uflow,the01(2),the02(2),the12(2)
+         double precision,dimension(8)::xgk,wgk
+		 double precision,dimension(240)::y01,y02
+		 double precision,dimension(225)::y12
+	 double precision,dimension(4)::wg
+         double precision::xx,f1,su01,ri01,f2,&
+		 su02,ri02,fc,gl01,gl02,su12,ri12,gl12
+         save wgk,xgk
+
+   	D1MACH(1)=2.23D-308
+    	D1MACH(2)=1.79D+308
+    	D1MACH(3)=1.11D-16
+    	D1MACH(4)=2.22D-16
+    	D1MACH(5)=0.301029995663981195D0
+
+    	epmach = d1mach(4)
+    	uflow = d1mach(1)
+
+	wg(1)=0.129484966168869693270611432679082d0
+   	wg(2)=0.279705391489276667901467771423780d0
+    	wg(3)=0.381830050505118944950369775488975d0
+    	wg(4)=0.417959183673469387755102040816327d0
+
+    	xgk(1)=0.991455371120812639206854697526329d0
+    	xgk(2)=0.949107912342758524526189684047851d0
+    	xgk(3)=0.864864423359769072789712788640926d0
+    	xgk(4)=0.741531185599394439863864773280788d0
+    	xgk(5)=0.586087235467691130294144838258730d0
+    	xgk(6)=0.405845151377397166906606412076961d0
+    	xgk(7)=0.207784955007898467600689403773245d0
+    	xgk(8)=0.000000000000000000000000000000000d0
+
+    	wgk(1)=0.022935322010529224963732008058970d0
+    	wgk(2)=0.063092092629978553290700663189204d0
+    	wgk(3)=0.104790010322250183839876322541518d0
+    	wgk(4)=0.140653259715525918745189590510238d0
+    	wgk(5)=0.169004726639267902826583426598550d0
+    	wgk(6)=0.190350578064785409913256402421014d0
+    	wgk(7)=0.204432940075298892414161999234649d0
+    	wgk(8)=0.209482141084727828012999174891714d0
+     
+
+        xm = 0.5d+00*(b+a)
+        xr = 0.5d+00*(b-a)
+        call fonctdeppred(a,xm,the01,ri01,gl01,su01,y01(1:16))
+        call fonctdeppred(a,xm,the02,ri02,gl02,su02,y02(1:16))
+		call fonctdeppred0(xm,b,the12,ri12,gl12,su12,y12(1:15))
+        fc = (su01**v01)*(su02**v02)*ri01*v01*(su12**v12) ! valeur fct f au milieu de intervalle (a,b), cas pnt 0
+
+    	
+        resk = fc*wgk(8)       ! init res Kronrod   ! fc * 8e poids Kronrod
+         
+            if(a.eq.b)then
+               res = 0.d0
+            else
+			
+			j=4
+			
+			jtwm1 = j*2-1
+               dx=xr*xgk(jtwm1)
+               xx = xm+dx
+               call fonctdeppred(a,xx,the01,ri01,gl01,su01,y01(33:48))
+               call fonctdeppred(a,xx,the02,ri02,gl02,su02,y02(33:48))
+			   call fonctdeppred0(xx,b,the12,ri12,gl12,su12,y12(31:45))
+               f1 = (su01**v01)*(su02**v02)*ri01*v01*(su12**v12)
+               xx = xm-dx
+               call fonctdeppred(a,xx,the01,ri01,gl01,su01,y01(17:32))
+               call fonctdeppred(a,xx,the02,ri02,gl02,su02,y02(17:32))
+			   call fonctdeppred0(xx,b,the12,ri12,gl12,su12,y12(16:30))
+               f2 = (su01**v01)*(su02**v02)*ri01*v01*(su12**v12)
+			   resk = resk + wgk(jtwm1)*(f1+f2)
+		   
+		   j=3
+		   
+		   jtw = j*2
+               	dx=xr*xgk(jtw)
+               	xx = xm+dx
+               	call fonctdeppred(a,xx,the01,ri01,gl01,su01,y01(65:80))
+               	call fonctdeppred(a,xx,the02,ri02,gl02,su02,y02(65:80))
+				call fonctdeppred0(xx,b,the12,ri12,gl12,su12,y12(61:75))
+               	f1 = (su01**v01)*(su02**v02)*ri01*v01*(su12**v12)
+               	xx = xm-dx
+               	call fonctdeppred(a,xx,the01,ri01,gl01,su01,y01(49:64))
+               	call fonctdeppred(a,xx,the02,ri02,gl02,su02,y02(49:64))
+				call fonctdeppred0(xx,b,the12,ri12,gl12,su12,y12(46:60))
+               	f2 = (su01**v01)*(su02**v02)*ri01*v01*(su12**v12)
+	       	
+               	resk = resk + wgk(jtw)*(f1+f2)
+				
+			jtwm1 = j*2-1
+               dx=xr*xgk(jtwm1)
+               xx = xm+dx
+               call fonctdeppred(a,xx,the01,ri01,gl01,su01,y01(97:112))
+               call fonctdeppred(a,xx,the02,ri02,gl02,su02,y02(97:112))
+			    call fonctdeppred0(xx,b,the12,ri12,gl12,su12,y12(91:105))
+               f1 = (su01**v01)*(su02**v02)*ri01*v01*(su12**v12)
+               xx = xm-dx
+               call fonctdeppred(a,xx,the01,ri01,gl01,su01,y01(81:96))
+               call fonctdeppred(a,xx,the02,ri02,gl02,su02,y02(81:96))
+			    call fonctdeppred0(xx,b,the12,ri12,gl12,su12,y12(76:90))
+               f2 = (su01**v01)*(su02**v02)*ri01*v01*(su12**v12)
+	       resk = resk + wgk(jtwm1)*(f1+f2)
+		   
+		   j=2
+		   
+            
+			    jtw = j*2
+               	dx=xr*xgk(jtw)
+               	xx = xm+dx
+               	call fonctdeppred(a,xx,the01,ri01,gl01,su01,y01(129:144))
+               	call fonctdeppred(a,xx,the02,ri02,gl02,su02,y02(129:144))
+				call fonctdeppred0(xx,b,the12,ri12,gl12,su12,y12(121:135))
+               	f1 = (su01**v01)*(su02**v02)*ri01*v01*(su12**v12)
+               	xx = xm-dx
+               	call fonctdeppred(a,xx,the01,ri01,gl01,su01,y01(113:128))
+               	call fonctdeppred(a,xx,the02,ri02,gl02,su02,y02(113:128))
+				call fonctdeppred0(xx,b,the12,ri12,gl12,su12,y12(106:120))
+               	f2 = (su01**v01)*(su02**v02)*ri01*v01*(su12**v12)
+               	resk = resk + wgk(jtw)*(f1+f2)
+				
+				
+			 jtwm1 = j*2-1
+               dx=xr*xgk(jtwm1)
+               xx = xm+dx
+               call fonctdeppred(a,xx,the01,ri01,gl01,su01,y01(161:176))
+               call fonctdeppred(a,xx,the02,ri02,gl02,su02,y02(161:176))
+			   call fonctdeppred0(xx,b,the12,ri12,gl12,su12,y12(151:165))
+               f1 = (su01**v01)*(su02**v02)*ri01*v01*(su12**v12)
+               xx = xm-dx
+               call fonctdeppred(a,xx,the01,ri01,gl01,su01,y01(145:160))
+               call fonctdeppred(a,xx,the02,ri02,gl02,su02,y02(145:160))
+			   call fonctdeppred0(xx,b,the12,ri12,gl12,su12,y12(136:150))
+               f2 = (su01**v01)*(su02**v02)*ri01*v01*(su12**v12)
+	       resk = resk + wgk(jtwm1)*(f1+f2)
+		   
+		   j=1
+		   
+		    jtw = j*2
+               	dx=xr*xgk(jtw)
+               	xx = xm+dx
+               	call fonctdeppred(a,xx,the01,ri01,gl01,su01,y01(193:208))
+               	call fonctdeppred(a,xx,the02,ri02,gl02,su02,y02(193:208))
+				call fonctdeppred0(xx,b,the12,ri12,gl12,su12,y12(181:195))
+               	f1 = (su01**v01)*(su02**v02)*ri01*v01*(su12**v12)
+               	xx = xm-dx
+               	call fonctdeppred(a,xx,the01,ri01,gl01,su01,y01(177:192))
+               	call fonctdeppred(a,xx,the02,ri02,gl02,su02,y02(177:192))
+			    call fonctdeppred0(xx,b,the12,ri12,gl12,su12,y12(166:180))
+               	f2 = (su01**v01)*(su02**v02)*ri01*v01*(su12**v12)
+	       	
+               	resk = resk + wgk(jtw)*(f1+f2)
+				
+				jtwm1 = j*2-1
+               dx=xr*xgk(jtwm1)
+               xx = xm+dx
+               call fonctdeppred(a,xx,the01,ri01,gl01,su01,y01(225:240))
+               call fonctdeppred(a,xx,the02,ri02,gl02,su02,y02(225:240))
+			   call fonctdeppred0(xx,b,the12,ri12,gl12,su12,y12(211:225))
+               f1 = (su01**v01)*(su02**v02)*ri01*v01*(su12**v12)
+               xx = xm-dx
+               call fonctdeppred(a,xx,the01,ri01,gl01,su01,y01(209:224))
+               call fonctdeppred(a,xx,the02,ri02,gl02,su02,y02(209:224))
+			   call fonctdeppred0(xx,b,the12,ri12,gl12,su12,y12(196:210))
+               f2 = (su01**v01)*(su02**v02)*ri01*v01*(su12**v12)
+	       resk = resk + wgk(jtwm1)*(f1+f2)
+
+	    
+    	res = xr*resk
+	endif
+    
+          end subroutine P01qgaussPL15weibtimedepV2
+		  
 subroutine ciqgaussPL15weibtimedep(a,b,the01,the02,res,&
        v01,v02,y01,y02)
          
@@ -8076,6 +9134,195 @@ subroutine ciqgaussPL15timedepV2(a,b,the01,the02,res,&
 	endif
     
           end subroutine ciqgaussPL15timedepV2
+		  
+!============================================================================================
+!==== QGAUS15 FOR probability transition 0 to  1 ============================================
+!============================================================================================
+
+subroutine P01qgaussPL15timedepV2(a,b,the01,the02,the12,res,&
+       v01,v02,v12,y01,y02,y12)
+         
+		 use commun,only:zi01,zi02,zi12,nz01,nz02,nz12
+		 implicit none
+         
+         integer::j,jtw,jtwm1
+         double precision::a,b,dx,xm,xr,res,resk,v01,v02,&
+         d1mach(5),epmach,uflow,v12
+		 
+		 double precision,dimension(-2:(nz01-1))::the01
+         double precision,dimension(-2:(nz02-1))::the02
+		 double precision,dimension(-2:(nz12-1))::the12
+         double precision,dimension(8)::xgk,wgk
+		 
+		 double precision,dimension(240)::y01,y02
+		 double precision,dimension(225)::y12
+	 double precision,dimension(4)::wg
+         double precision::xx,f1,su01,ri01,f2,&
+		 su02,ri02,fc,gl01,gl02,su12,gl12
+         save wgk,xgk
+
+   	D1MACH(1)=2.23D-308
+    	D1MACH(2)=1.79D+308
+    	D1MACH(3)=1.11D-16
+    	D1MACH(4)=2.22D-16
+    	D1MACH(5)=0.301029995663981195D0
+
+    	epmach = d1mach(4)
+    	uflow = d1mach(1)
+
+	wg(1)=0.129484966168869693270611432679082d0
+   	wg(2)=0.279705391489276667901467771423780d0
+    	wg(3)=0.381830050505118944950369775488975d0
+    	wg(4)=0.417959183673469387755102040816327d0
+
+    	xgk(1)=0.991455371120812639206854697526329d0
+    	xgk(2)=0.949107912342758524526189684047851d0
+    	xgk(3)=0.864864423359769072789712788640926d0
+    	xgk(4)=0.741531185599394439863864773280788d0
+    	xgk(5)=0.586087235467691130294144838258730d0
+    	xgk(6)=0.405845151377397166906606412076961d0
+    	xgk(7)=0.207784955007898467600689403773245d0
+    	xgk(8)=0.000000000000000000000000000000000d0
+
+    	wgk(1)=0.022935322010529224963732008058970d0
+    	wgk(2)=0.063092092629978553290700663189204d0
+    	wgk(3)=0.104790010322250183839876322541518d0
+    	wgk(4)=0.140653259715525918745189590510238d0
+    	wgk(5)=0.169004726639267902826583426598550d0
+    	wgk(6)=0.190350578064785409913256402421014d0
+    	wgk(7)=0.204432940075298892414161999234649d0
+    	wgk(8)=0.209482141084727828012999174891714d0
+     
+
+        xm = 0.5d+00*(b+a)
+        xr = 0.5d+00*(b-a)
+        call suspdeppred(a,xm,the01,nz01,su01,ri01,zi01,gl01,y01(1:16))
+        call suspdeppred(a,xm,the02,nz02,su02,ri02,zi02,gl02,y02(1:16))
+		call suspdeppred0(xm,b,the12,nz12,su12,ri12,zi12,gl12,y12(1:15))
+        fc = (su01**v01)*(su02**v02)*ri01*v01*(su12**v12) ! valeur fct f au milieu de intervalle (a,b), cas pnt 0
+
+    	
+        resk = fc*wgk(8)       ! init res Kronrod   ! fc * 8e poids Kronrod
+         
+            if(a.eq.b)then
+               res = 0.d0
+            else
+			
+			j=4
+			
+			jtwm1 = j*2-1
+               dx=xr*xgk(jtwm1)
+               xx = xm+dx
+               call suspdeppred(a,xx,the01,nz01,su01,ri01,zi01,gl01,y01(33:48))
+               call suspdeppred(a,xx,the02,nz02,su02,ri02,zi02,gl02,y02(33:48))
+			   call suspdeppred0(xx,b,the12,nz12,su12,ri12,zi12,gl12,y12(31:45))
+               f1 = (su01**v01)*(su02**v02)*ri01*v01*(su12**v12)
+               xx = xm-dx
+               call suspdeppred(a,xx,the01,nz01,su01,ri01,zi01,gl01,y01(17:32))
+               call suspdeppred(a,xx,the02,nz02,su02,ri02,zi02,gl02,y02(17:32))
+			   call suspdeppred0(xx,b,the12,nz12,su12,ri12,zi12,gl12,y12(16:30))
+               f2 = (su01**v01)*(su02**v02)*ri01*v01*(su12**v12)
+			   resk = resk + wgk(jtwm1)*(f1+f2)
+		   
+		   j=3
+		   
+		   jtw = j*2
+               	dx=xr*xgk(jtw)
+               	xx = xm+dx
+               call suspdeppred(a,xx,the01,nz01,su01,ri01,zi01,gl01,y01(65:80))
+               call suspdeppred(a,xx,the02,nz02,su02,ri02,zi02,gl02,y02(65:80))
+			   call suspdeppred0(xx,b,the12,nz12,su12,ri12,zi12,gl12,y12(61:75))
+               	f1 = (su01**v01)*(su02**v02)*ri01*v01*(su12**v12)
+               	xx = xm-dx
+               call suspdeppred(a,xx,the01,nz01,su01,ri01,zi01,gl01,y01(49:64))
+               call suspdeppred(a,xx,the02,nz02,su02,ri02,zi02,gl02,y02(49:64))
+			   call suspdeppred0(xx,b,the12,nz12,su12,ri12,zi12,gl12,y12(46:60))
+               	f2 = (su01**v01)*(su02**v02)*ri01*v01*(su12**v12)
+	       	
+               	resk = resk + wgk(jtw)*(f1+f2)
+				
+			jtwm1 = j*2-1
+               dx=xr*xgk(jtwm1)
+               xx = xm+dx
+               call suspdeppred(a,xx,the01,nz01,su01,ri01,zi01,gl01,y01(97:112))
+               call suspdeppred(a,xx,the02,nz02,su02,ri02,zi02,gl02,y02(97:112))
+			   call suspdeppred0(xx,b,the12,nz12,su12,ri12,zi12,gl12,y12(91:105))
+               f1 = (su01**v01)*(su02**v02)*ri01*v01*(su12**v12)
+               xx = xm-dx
+               call suspdeppred(a,xx,the01,nz01,su01,ri01,zi01,gl01,y01(81:96))
+               call suspdeppred(a,xx,the02,nz02,su02,ri02,zi02,gl02,y02(81:96))
+			   call suspdeppred0(xx,b,the12,nz12,su12,ri12,zi12,gl12,y12(76:90))
+               f2 = (su01**v01)*(su02**v02)*ri01*v01*(su12**v12)
+	       resk = resk + wgk(jtwm1)*(f1+f2)
+		   
+		   j=2
+		   
+            
+			    jtw = j*2
+               	dx=xr*xgk(jtw)
+               	xx = xm+dx
+               	call suspdeppred(a,xx,the01,nz01,su01,ri01,zi01,gl01,y01(129:144))
+                call suspdeppred(a,xx,the02,nz02,su02,ri02,zi02,gl02,y02(129:144))
+			    call suspdeppred0(xx,b,the12,nz12,su12,ri12,zi12,gl12,y12(121:135))
+               	f1 = (su01**v01)*(su02**v02)*ri01*v01*(su12**v12)
+               	xx = xm-dx
+               	call suspdeppred(a,xx,the01,nz01,su01,ri01,zi01,gl01,y01(113:128))
+                call suspdeppred(a,xx,the02,nz02,su02,ri02,zi02,gl02,y02(113:128))
+			    call suspdeppred0(xx,b,the12,nz12,su12,ri12,zi12,gl12,y12(106:120))
+               	f2 = (su01**v01)*(su02**v02)*ri01*v01*(su12**v12)
+               	resk = resk + wgk(jtw)*(f1+f2)
+				
+				
+			 jtwm1 = j*2-1
+               dx=xr*xgk(jtwm1)
+               xx = xm+dx
+               call suspdeppred(a,xx,the01,nz01,su01,ri01,zi01,gl01,y01(161:176))
+               call suspdeppred(a,xx,the02,nz02,su02,ri02,zi02,gl02,y02(161:176))
+			   call suspdeppred0(xx,b,the12,nz12,su12,ri12,zi12,gl12,y12(151:165))
+               f1 = (su01**v01)*(su02**v02)*ri01*v01*(su12**v12)
+               xx = xm-dx
+               call suspdeppred(a,xx,the01,nz01,su01,ri01,zi01,gl01,y01(145:160))
+               call suspdeppred(a,xx,the02,nz02,su02,ri02,zi02,gl02,y02(145:160))
+			   call suspdeppred0(xx,b,the12,nz12,su12,ri12,zi12,gl12,y12(136:150))
+               f2 = (su01**v01)*(su02**v02)*ri01*v01*(su12**v12)
+	       resk = resk + wgk(jtwm1)*(f1+f2)
+		   
+		   j=1
+		   
+		    jtw = j*2
+               	dx=xr*xgk(jtw)
+               	xx = xm+dx
+               	call suspdeppred(a,xx,the01,nz01,su01,ri01,zi01,gl01,y01(193:208))
+                call suspdeppred(a,xx,the02,nz02,su02,ri02,zi02,gl02,y02(193:208))
+				call suspdeppred0(xx,b,the12,nz12,su12,ri12,zi12,gl12,y12(181:195))
+               	f1 = (su01**v01)*(su02**v02)*ri01*v01*(su12**v12)
+               	xx = xm-dx
+               	call suspdeppred(a,xx,the01,nz01,su01,ri01,zi01,gl01,y01(177:192))
+                call suspdeppred(a,xx,the02,nz02,su02,ri02,zi02,gl02,y02(177:192))
+			    call suspdeppred0(xx,b,the12,nz12,su12,ri12,zi12,gl12,y12(166:180))
+               	f2 = (su01**v01)*(su02**v02)*ri01*v01*(su12**v12)
+	       	
+               	resk = resk + wgk(jtw)*(f1+f2)
+				
+				jtwm1 = j*2-1
+               dx=xr*xgk(jtwm1)
+               xx = xm+dx
+               call suspdeppred(a,xx,the01,nz01,su01,ri01,zi01,gl01,y01(225:240))
+               call suspdeppred(a,xx,the02,nz02,su02,ri02,zi02,gl02,y02(225:240))
+			   call suspdeppred0(xx,b,the12,nz12,su12,ri12,zi12,gl12,y12(211:225))
+               f1 = (su01**v01)*(su02**v02)*ri01*v01*(su12**v12)
+               xx = xm-dx
+               call suspdeppred(a,xx,the01,nz01,su01,ri01,zi01,gl01,y01(209:224))
+               call suspdeppred(a,xx,the02,nz02,su02,ri02,zi02,gl02,y02(209:224))
+			   call suspdeppred0(xx,b,the12,nz12,su12,ri12,zi12,gl12,y12(196:210))
+               f2 = (su01**v01)*(su02**v02)*ri01*v01*(su12**v12)
+	       resk = resk + wgk(jtwm1)*(f1+f2)
+
+	    
+    	res = xr*resk
+	endif
+    
+          end subroutine P01qgaussPL15timedepV2
 
 !=============================================================================================  
 !==== QGAUS15 out a 15 point Gauss-Kronrod quadrature rule for splines   =====================
@@ -44062,7 +45309,962 @@ end subroutine firstderivaidmlikelihoodsplinetimedep
 end subroutine ciweibtimedep
 
 
+!============================================================================================= 
+!========================       probability 0 -> 0       ====================================
+!========================    with baseline weibull and time dependent covariates  ============
+!======================== using gaussian quadrature 15 points ================================
+!============================================================================================= 
 
+
+      subroutine P00weibtimedep(b0,npar0,no0,ve010,ve020,ve120,y010,y020,y120, &
+	  p01,p02,p12,dimp01,dimp02,dimp12, Ntime,dimnva01,dimnva02,dimnva12, &
+	  nva01,nva02,nva12,t00,t10,likelihood_res)
+
+	    use commun
+        implicit none
+         
+    double precision::res2,tronc01ci,tronc02ci, &
+        vet01,vet02,vet12,tronc
+	
+        integer::np0,i,j,l,w,k,npar0,nva01,nva02,nva12,no0, &
+	dimnva01,dimnva02, dimnva12, &
+	p01,p02,dimp01,dimp02,Ntime,p12,dimp12
+
+
+    double precision,dimension(npar0)::b0
+	double precision,dimension(2)::the01
+	double precision,dimension(2)::the02
+    double precision,dimension(2)::the12
+	
+	double precision,dimension(no0,dimnva01)::ve010
+	double precision,dimension(no0,dimnva02)::ve020
+	double precision,dimension(no0,dimnva12)::ve120
+	
+	double precision,dimension(no0*dimp01*Ntime)::y010
+	double precision,dimension(no0*dimp02*Ntime)::y020
+	double precision,dimension(no0*dimp12*Ntime)::y120
+	
+	double precision,dimension(Ntime)::y01t,y02t,y12t
+	double precision, dimension(no0), intent(inout)::likelihood_res
+
+!	integer, dimension(16) :: indices
+	
+    double precision::su01,ri01,su02,ri02,gl01,gl02,su12,ri12,gl12
+	double precision,dimension(no0)::t00,t10,res
+
+	
+	allocate(b(npar0))
+
+	b=b0
+
+
+
+	if(nva01.gt.0) then 
+		allocate(ve01(no0,nva01))
+	else 
+		allocate(ve01(no0,1))
+	end if 
+	
+	if(nva02.gt.0) then 
+		allocate(ve02(no0,nva02))
+	else 
+		allocate(ve02(no0,1))
+	end if 
+	
+	if(nva12.gt.0) then 
+		allocate(ve12(no0,nva12))
+	else 
+		allocate(ve12(no0,1))
+	end if 
+
+
+	
+	
+	if(p01.gt.0) then 
+		allocate(y01(no0*p01*Ntime))
+		y01=y010
+	else 
+		allocate(y01(no0*Ntime))
+		y01=0
+	end if 
+	
+	if(p02.gt.0) then 
+		allocate(y02(no0*p02*Ntime))
+		y02=y020
+	else 
+		allocate(y02(no0*Ntime))
+		y02=0
+	end if 
+	
+	if(p12.gt.0) then 
+		allocate(y12(no0*p12*Ntime))
+		y12=y120
+	else 
+		allocate(y12(no0*Ntime))
+		y12=0
+	end if 
+
+
+
+	ve01=ve010
+	ve02=ve020
+	ve12=ve120
+
+	allocate(t0(no0),t1(no0))
+
+	t0=t00
+	t1=t10
+
+         
+	
+
+
+         do i=1,2
+            the01(i)=(b(i))*(b(i))
+         end do
+         do i=1,2
+            j = 2+i
+            the02(i)=(b(j))*(b(j))
+         end do
+		 do i=1,2
+            j = 4+i
+            the12(i)=(b(j))*(b(j))
+         end do
+
+
+
+		res = 0.d0
+!---------- calcul de la vraisemblance ------------------
+
+
+         
+               do i=1,no0
+			   
+			!write(6,*) 'subject',i
+			!print *, 'subject',i
+		    !	call flush(6)
+         
+                vet01 = 0.d0
+                vet02 = 0.d0
+				vet12 = 0.d0
+
+				y01t = 0
+                y02t = 0
+				y12t = 0
+				
+			
+
+                if(nva01.gt.0)then
+                        do j=1,nva01
+                                vet01 =vet01 +&
+                                b(6+j)*dble(ve01(i,j))
+                        end do
+                endif  
+ 
+                if(nva02.gt.0)then
+                        do j=1,nva02
+                                vet02 =vet02 +&
+                                b(6+nva01+j)*dble(ve02(i,j))
+                        end do
+                endif
+				
+				if(nva12.gt.0)then
+                        do j=1,nva12
+                                vet12 =vet12 +&
+                                b(6+nva01+nva02+j)*dble(ve12(i,j))
+                        end do
+                endif
+	
+			
+				if(p01.gt.0)then
+					do l=1,Ntime
+                        do j=1,p01
+								k = (i-1)*Ntime*p01+(l-1)*p01+j
+						
+                                y01t(l) =y01t(l) +&
+                                b(6+nva01+nva02+nva12+j)*y01(k)
+                        end do
+					end do 
+                endif  
+ 
+                if(p02.gt.0)then
+					do l=1,Ntime
+                        do j=1,p02
+								k = (i-1)*Ntime*p02+ (l-1)*p02+j
+                                y02t(l) =y02t(l) +&
+                                b(6+nva01+nva02+nva12+p01+j)*y02(k)
+                        end do
+					end do 
+                endif  
+
+                  if(p12.gt.0)then
+					do l=1,Ntime
+                        do j=1,p12
+								k = (i-1)*Ntime*p12+ (l-1)*p12+j
+                                y12t(l) =y12t(l) +&
+                                b(6+nva01+nva02+nva12+p01+p02+j)*y12(k)
+                        end do
+					end do 
+                endif  
+				
+				y01t=dexp(y01t)
+				y02t=dexp(y02t)
+				y12t=dexp(y12t)
+
+                vet01 = dexp(vet01)
+                vet02 = dexp(vet02)
+				vet12 = dexp(vet12)
+
+                res(i) = 0.d0
+                
+				 if(t0(i).NE.t1(i)) then 
+                call fonctdeppred0(t0(i),t1(i),the01,ri01,gl01,su01,y01t)
+                call fonctdeppred0(t0(i),t1(i),the02,ri02,gl02,su02,y02t)
+                
+				res(i)=(su01**vet01)*(su02**vet02)
+				else 
+				res(i)=1
+				end if 
+                
+						
+					
+        end do   
+ 
+
+
+        likelihood_res = res
+
+
+123     continue 
+
+	deallocate(b,ve01,ve02,ve12,y01,y02,y12, & 
+	t0,t1)
+
+end subroutine P00weibtimedep
+
+!============================================================================================= 
+!========================       probability 0 -> 2       ====================================
+!========================    with baseline weibull and time dependent covariates  ============
+!======================== using gaussian quadrature 15 points ================================
+!============================================================================================= 
+
+
+      subroutine P02weibtimedep(b0,npar0,no0,ve010,ve020,ve120,y010,y020,y120, &
+	  p01,p02,p12,dimp01,dimp02,dimp12, Ntime,dimnva01,dimnva02,dimnva12, &
+	  nva01,nva02,nva12,t00,t10,likelihood_res)
+
+	    use commun
+        implicit none
+         
+    double precision::res2,tronc01ci,tronc02ci, &
+        vet01,vet02,vet12,tronc
+	
+        integer::np0,i,j,l,w,k,npar0,nva01,nva02,nva12,no0, &
+	dimnva01,dimnva02, dimnva12, &
+	p01,p02,dimp01,dimp02,Ntime,p12,dimp12
+
+
+    double precision,dimension(npar0)::b0
+	double precision,dimension(2)::the01
+	double precision,dimension(2)::the02
+    double precision,dimension(2)::the12
+	
+	double precision,dimension(no0,dimnva01)::ve010
+	double precision,dimension(no0,dimnva02)::ve020
+	double precision,dimension(no0,dimnva12)::ve120
+	
+	double precision,dimension(no0*dimp01*Ntime)::y010
+	double precision,dimension(no0*dimp02*Ntime)::y020
+	double precision,dimension(no0*dimp12*Ntime)::y120
+	
+	double precision,dimension(Ntime)::y01t,y02t,y12t
+	double precision, dimension(no0), intent(inout)::likelihood_res
+
+!	integer, dimension(16) :: indices
+	
+    double precision::su01,ri01,su02,ri02,gl01,gl02,su12,ri12,gl12
+	double precision,dimension(no0)::t00,t10,res
+
+	
+	allocate(b(npar0))
+
+	b=b0
+
+
+
+	if(nva01.gt.0) then 
+		allocate(ve01(no0,nva01))
+	else 
+		allocate(ve01(no0,1))
+	end if 
+	
+	if(nva02.gt.0) then 
+		allocate(ve02(no0,nva02))
+	else 
+		allocate(ve02(no0,1))
+	end if 
+	
+	if(nva12.gt.0) then 
+		allocate(ve12(no0,nva12))
+	else 
+		allocate(ve12(no0,1))
+	end if 
+
+
+	
+	
+	if(p01.gt.0) then 
+		allocate(y01(no0*p01*Ntime))
+		y01=y010
+	else 
+		allocate(y01(no0*Ntime))
+		y01=0
+	end if 
+	
+	if(p02.gt.0) then 
+		allocate(y02(no0*p02*Ntime))
+		y02=y020
+	else 
+		allocate(y02(no0*Ntime))
+		y02=0
+	end if 
+	
+	if(p12.gt.0) then 
+		allocate(y12(no0*p12*Ntime))
+		y12=y120
+	else 
+		allocate(y12(no0*Ntime))
+		y12=0
+	end if 
+
+
+
+	ve01=ve010
+	ve02=ve020
+	ve12=ve120
+
+	allocate(t0(no0),t1(no0))
+
+	t0=t00
+	t1=t10
+
+         
+	
+
+
+         do i=1,2
+            the01(i)=(b(i))*(b(i))
+         end do
+         do i=1,2
+            j = 2+i
+            the02(i)=(b(j))*(b(j))
+         end do
+		 do i=1,2
+            j = 4+i
+            the12(i)=(b(j))*(b(j))
+         end do
+
+
+
+		res = 0.d0
+!---------- calcul de la vraisemblance ------------------
+
+
+         
+               do i=1,no0
+			   
+			!write(6,*) 'subject',i
+			!print *, 'subject',i
+		    !	call flush(6)
+         
+                vet01 = 0.d0
+                vet02 = 0.d0
+				vet12 = 0.d0
+
+				y01t = 0
+                y02t = 0
+				y12t = 0
+				
+			
+
+                if(nva01.gt.0)then
+                        do j=1,nva01
+                                vet01 =vet01 +&
+                                b(6+j)*dble(ve01(i,j))
+                        end do
+                endif  
+ 
+                if(nva02.gt.0)then
+                        do j=1,nva02
+                                vet02 =vet02 +&
+                                b(6+nva01+j)*dble(ve02(i,j))
+                        end do
+                endif
+				
+				if(nva12.gt.0)then
+                        do j=1,nva12
+                                vet12 =vet12 +&
+                                b(6+nva01+nva02+j)*dble(ve12(i,j))
+                        end do
+                endif
+	
+			
+				if(p01.gt.0)then
+					do l=1,Ntime
+                        do j=1,p01
+								k = (i-1)*Ntime*p01+(l-1)*p01+j
+						
+                                y01t(l) =y01t(l) +&
+                                b(6+nva01+nva02+nva12+j)*y01(k)
+                        end do
+					end do 
+                endif  
+ 
+                if(p02.gt.0)then
+					do l=1,Ntime
+                        do j=1,p02
+								k = (i-1)*Ntime*p02+ (l-1)*p02+j
+                                y02t(l) =y02t(l) +&
+                                b(6+nva01+nva02+nva12+p01+j)*y02(k)
+                        end do
+					end do 
+                endif  
+
+                  if(p12.gt.0)then
+					do l=1,Ntime
+                        do j=1,p12
+								k = (i-1)*Ntime*p12+ (l-1)*p12+j
+                                y12t(l) =y12t(l) +&
+                                b(6+nva01+nva02+nva12+p01+p02+j)*y12(k)
+                        end do
+					end do 
+                endif  
+				
+				y01t=dexp(y01t)
+				y02t=dexp(y02t)
+				y12t=dexp(y12t)
+
+                vet01 = dexp(vet01)
+                vet02 = dexp(vet02)
+				vet12 = dexp(vet12)
+
+                res(i) = 0.d0
+                
+                
+				 if(t0(i).NE.t1(i)) then 
+				 call fonctdeppred(t0(i),t1(i),the01,ri01,gl01,su01,y01t)
+                call fonctdeppred(t0(i),t1(i),the02,ri02,gl02,su02,y02t)
+                
+				res(i)=(su01**vet01)*(su02**vet02)*ri02*vet02
+				else 
+				call fonct(t1(i),the02,ri02,gl02,su02)
+				res(i)=ri02*vet02
+				end if 
+                
+						
+					
+        end do   
+ 
+
+
+        likelihood_res = res
+
+
+123     continue 
+
+	deallocate(b,ve01,ve02,ve12,y01,y02,y12, & 
+	t0,t1)
+
+end subroutine P02weibtimedep
+
+!============================================================================================= 
+!========================       probability 0 -> 1       ====================================
+!========================    with baseline weibull and time dependent covariates  ============
+!======================== using gaussian quadrature 15 points ================================
+!============================================================================================= 
+
+
+
+      subroutine P01weibtimedep(b0,npar0,no0,ve010,ve020,ve120,y010,y020,y120, &
+	  p01,p02,p12,dimp01,dimp02,dimp12,Ntime, Ntime12,dimnva01,dimnva02,dimnva12, &
+	  nva01,nva02,nva12,t00,t10,likelihood_res)
+
+	    use commun
+        implicit none
+         
+    double precision::res2,tronc01ci,tronc02ci, &
+        vet01,vet02,vet12,tronc
+	
+        integer::np0,i,j,l,w,k,npar0,nva01,nva02,nva12,no0, &
+	dimnva01,dimnva02, dimnva12, Ntime12,&
+	p01,p02,dimp01,dimp02,Ntime,p12,dimp12
+
+
+    double precision,dimension(npar0)::b0
+	double precision,dimension(2)::the01
+	double precision,dimension(2)::the02
+    double precision,dimension(2)::the12
+	
+	double precision,dimension(no0,dimnva01)::ve010
+	double precision,dimension(no0,dimnva02)::ve020
+	double precision,dimension(no0,dimnva12)::ve120
+	
+	double precision,dimension(no0*dimp01*Ntime)::y010
+	double precision,dimension(no0*dimp02*Ntime)::y020
+	double precision,dimension(no0*dimp12*Ntime12)::y120
+	
+
+	double precision,dimension(Ntime)::y02t,y01t
+	double precision,dimension(Ntime12)::y12t
+	double precision, dimension(no0), intent(inout)::likelihood_res
+
+!	integer, dimension(16) :: indices
+	
+    double precision::su01,ri01,su02,ri02,gl01,gl02,su12,ri12,gl12
+	double precision,dimension(no0)::t00,t10,res
+
+	
+	allocate(b(npar0))
+
+	b=b0
+
+
+	if(nva01.gt.0) then 
+		allocate(ve01(no0,nva01))
+	else 
+		allocate(ve01(no0,1))
+	end if 
+	
+	if(nva02.gt.0) then 
+		allocate(ve02(no0,nva02))
+	else 
+		allocate(ve02(no0,1))
+	end if 
+	
+	if(nva12.gt.0) then 
+		allocate(ve12(no0,nva12))
+	else 
+		allocate(ve12(no0,1))
+	end if 
+
+
+	
+	
+	if(p01.gt.0) then 
+		allocate(y01(no0*p01*Ntime))
+		y01=y010
+	else 
+		allocate(y01(no0*Ntime))
+		y01=0
+	end if 
+	
+	if(p02.gt.0) then 
+		allocate(y02(no0*p02*Ntime))
+		y02=y020
+	else 
+		allocate(y02(no0*Ntime))
+		y02=0
+	end if 
+	
+	if(p12.gt.0) then 
+		allocate(y12(no0*p12*Ntime12))
+		y12=y120
+	else 
+		allocate(y12(no0*Ntime12))
+		y12=0
+	end if 
+
+
+
+	ve01=ve010
+	ve02=ve020
+	ve12=ve120
+
+	allocate(t0(no0),t1(no0))
+
+	t0=t00
+	t1=t10
+
+         
+	
+
+
+         do i=1,2
+            the01(i)=(b(i))*(b(i))
+         end do
+         do i=1,2
+            j = 2+i
+            the02(i)=(b(j))*(b(j))
+         end do
+		 do i=1,2
+            j = 4+i
+            the12(i)=(b(j))*(b(j))
+         end do
+
+
+
+		res = 0.d0
+!---------- calcul de la vraisemblance ------------------
+
+
+         
+               do i=1,no0
+			   
+			!write(6,*) 'subject',i
+			!print *, 'subject',i
+		    !	call flush(6)
+         
+                vet01 = 0.d0
+                vet02 = 0.d0
+				vet12 = 0.d0
+
+				y01t = 0
+                y02t = 0
+				y12t = 0
+				
+			
+
+                if(nva01.gt.0)then
+                        do j=1,nva01
+                                vet01 =vet01 +&
+                                b(6+j)*dble(ve01(i,j))
+                        end do
+                endif  
+ 
+                if(nva02.gt.0)then
+                        do j=1,nva02
+                                vet02 =vet02 +&
+                                b(6+nva01+j)*dble(ve02(i,j))
+                        end do
+                endif
+				
+				if(nva12.gt.0)then
+                        do j=1,nva12
+                                vet12 =vet12 +&
+                                b(6+nva01+nva02+j)*dble(ve12(i,j))
+                        end do
+                endif
+	
+			
+				if(p01.gt.0)then
+					do l=1,Ntime
+                        do j=1,p01
+								k = (i-1)*Ntime*p01+(l-1)*p01+j
+						
+                                y01t(l) =y01t(l) +&
+                                b(6+nva01+nva02+nva12+j)*y01(k)
+                        end do
+					end do 
+                endif  
+ 
+                if(p02.gt.0)then
+					do l=1,Ntime
+                        do j=1,p02
+								k = (i-1)*Ntime*p02+ (l-1)*p02+j
+                                y02t(l) =y02t(l) +&
+                                b(6+nva01+nva02+nva12+p01+j)*y02(k)
+                        end do
+					end do 
+                endif  
+
+                  if(p12.gt.0)then
+					do l=1,Ntime
+                        do j=1,p12
+								k = (i-1)*Ntime12*p12+ (l-1)*p12+j
+                                y12t(l) =y12t(l) +&
+                                b(6+nva01+nva02+nva12+p01+p02+j)*y12(k)
+                        end do
+					end do 
+                endif  
+				
+				y01t=dexp(y01t)
+				y02t=dexp(y02t)
+				y12t=dexp(y12t)
+
+                vet01 = dexp(vet01)
+                vet02 = dexp(vet02)
+				vet12 = dexp(vet12)
+
+                res(i) = 0.d0
+				
+				if(t0(i).GT.0) then 
+				call fonctdep0(t1(i),the01,gl01,y01t(1:15))
+				call fonctdep0(t1(i),the02,gl02,y02t(1:15))
+				  tronc=dexp(-gl01*vet01-gl02*vet02) 
+				else 
+				tronc=1
+				end if 
+                
+                 if(t0(i).NE.t1(i)) then 
+				call  P01qgaussPL15weibtimedepV2(t0(i),t1(i),the01,the02,the12,&
+                res2,vet01,vet02,vet12,y01t(16:255),y02t(16:255),y12t)
+				
+				res(i)=res2*tronc
+				else 
+				res(i)=0
+				end if 
+                 
+						
+					
+        end do   
+ 
+
+
+        likelihood_res = res
+
+
+123     continue 
+
+	deallocate(b,ve01,ve02,ve12,y01,y02,y12, & 
+	t0,t1)
+
+end subroutine P01weibtimedep
+
+!============================================================================================= 
+!========================       probability 0 -> 1  ->2     ====================================
+!========================    with baseline weibull and time dependent covariates  ============
+!======================== using gaussian quadrature 15 points ================================
+!============================================================================================= 
+
+
+
+      subroutine P12weibtimedep(b0,npar0,no0,ve010,ve020,ve120,y010,y020,y120, &
+	  p01,p02,p12,dimp01,dimp02,dimp12,Ntime,Ntime12,dimnva01,dimnva02,dimnva12, &
+	  nva01,nva02,nva12,t00,t10,likelihood_res)
+
+	    use commun
+        implicit none
+         
+    double precision::res2,tronc01ci,tronc02ci, &
+        vet01,vet02,vet12,tronc
+	
+        integer::np0,i,j,l,w,k,npar0,nva01,nva02,nva12,no0, &
+	dimnva01,dimnva02, dimnva12,Ntime12,&
+	p01,p02,dimp01,dimp02,Ntime,p12,dimp12
+
+
+    double precision,dimension(npar0)::b0
+	double precision,dimension(2)::the01
+	double precision,dimension(2)::the02
+    double precision,dimension(2)::the12
+	
+	double precision,dimension(no0,dimnva01)::ve010
+	double precision,dimension(no0,dimnva02)::ve020
+	double precision,dimension(no0,dimnva12)::ve120
+	
+	double precision,dimension(no0*dimp01*Ntime)::y010
+	double precision,dimension(no0*dimp02*Ntime)::y020
+	double precision,dimension(no0*dimp12*Ntime12)::y120
+	
+	double precision,dimension(Ntime)::y01t
+	double precision,dimension(Ntime)::y02t
+	double precision,dimension(Ntime12)::y12t
+	double precision, dimension(no0), intent(inout)::likelihood_res
+
+!	integer, dimension(16) :: indices
+	
+    double precision::su01,ri01,su02,ri02,gl01,gl02,su12,ri12,gl12
+	double precision,dimension(no0)::t00,t10,res
+
+	
+	allocate(b(npar0))
+
+	b=b0
+
+
+	if(nva01.gt.0) then 
+		allocate(ve01(no0,nva01))
+	else 
+		allocate(ve01(no0,1))
+	end if 
+	
+	if(nva02.gt.0) then 
+		allocate(ve02(no0,nva02))
+	else 
+		allocate(ve02(no0,1))
+	end if 
+	
+	if(nva12.gt.0) then 
+		allocate(ve12(no0,nva12))
+	else 
+		allocate(ve12(no0,1))
+	end if 
+
+
+	
+	
+	if(p01.gt.0) then 
+		allocate(y01(no0*p01*Ntime))
+		y01=y010
+	else 
+		allocate(y01(no0*Ntime))
+		y01=0
+	end if 
+	
+	if(p02.gt.0) then 
+		allocate(y02(no0*p02*Ntime))
+		y02=y020
+	else 
+		allocate(y02(no0*Ntime))
+		y02=0
+	end if 
+	
+	if(p12.gt.0) then 
+		allocate(y12(no0*p12*Ntime12))
+		y12=y120
+	else 
+		allocate(y12(no0*(Ntime12)))
+		y12=0
+	end if 
+
+
+
+	ve01=ve010
+	ve02=ve020
+	ve12=ve120
+
+	allocate(t0(no0),t1(no0))
+
+	t0=t00
+	t1=t10
+
+         
+	
+
+
+         do i=1,2
+            the01(i)=(b(i))*(b(i))
+         end do
+         do i=1,2
+            j = 2+i
+            the02(i)=(b(j))*(b(j))
+         end do
+		 do i=1,2
+            j = 4+i
+            the12(i)=(b(j))*(b(j))
+         end do
+
+
+
+		res = 0.d0
+!---------- calcul de la vraisemblance ------------------
+
+
+         
+               do i=1,no0
+			   
+			!write(6,*) 'subject',i
+			!print *, 'subject',i
+		    !	call flush(6)
+         
+                vet01 = 0.d0
+                vet02 = 0.d0
+				vet12 = 0.d0
+
+				y01t = 0
+                y02t = 0
+				y12t = 0
+				
+			
+
+                if(nva01.gt.0)then
+                        do j=1,nva01
+                                vet01 =vet01 +&
+                                b(6+j)*dble(ve01(i,j))
+                        end do
+                endif  
+ 
+                if(nva02.gt.0)then
+                        do j=1,nva02
+                                vet02 =vet02 +&
+                                b(6+nva01+j)*dble(ve02(i,j))
+                        end do
+                endif
+				
+				if(nva12.gt.0)then
+                        do j=1,nva12
+                                vet12 =vet12 +&
+                                b(6+nva01+nva02+j)*dble(ve12(i,j))
+                        end do
+                endif
+	
+			
+				if(p01.gt.0)then
+					do l=1,Ntime
+                        do j=1,p01
+								k = (i-1)*Ntime*p01+(l-1)*p01+j
+						
+                                y01t(l) =y01t(l) +&
+                                b(6+nva01+nva02+nva12+j)*y01(k)
+                        end do
+					end do 
+                endif  
+ 
+                if(p02.gt.0)then
+					do l=1,Ntime
+                        do j=1,p02
+								k = (i-1)*Ntime*p02+ (l-1)*p02+j
+                                y02t(l) =y02t(l) +&
+                                b(6+nva01+nva02+nva12+p01+j)*y02(k)
+                        end do
+					end do 
+                endif  
+
+                  if(p12.gt.0)then
+					do l=1,Ntime
+                        do j=1,p12
+								k = (i-1)*(Ntime12)*p12+ (l-1)*p12+j
+                                y12t(l) =y12t(l) +&
+                                b(6+nva01+nva02+nva12+p01+p02+j)*y12(k)
+                        end do
+					end do 
+                endif  
+				
+				y01t=dexp(y01t)
+				y02t=dexp(y02t)
+				y12t=dexp(y12t)
+
+                vet01 = dexp(vet01)
+                vet02 = dexp(vet02)
+				vet12 = dexp(vet12)
+
+                res(i) = 0.d0
+				
+				if(t0(i).GT.0) then 
+				call fonctdep0(t1(i),the01,gl01,y01t(1:15))
+				call fonctdep0(t1(i),the02,gl02,y02t(1:15))
+				  tronc=dexp(-gl01*vet01-gl02*vet02) 
+				else 
+				tronc=1
+				end if 
+                
+                 if(t0(i).NE.t1(i)) then 
+				call  P01qgaussPL15weibtimedepV2(t0(i),t1(i),the01,the02,the12,&
+                res2,vet01,vet02,vet12,y01t(16:255),y02t(16:255),y12t(1:225))
+				call fonctrisq(t1(i),the12,ri12)
+    
+				res(i)=res2*ri12*y12t(226)*vet12*tronc
+				
+				else 
+				
+				res(i)=0
+				end if 
+                 
+						
+					
+        end do   
+ 
+
+
+        likelihood_res = res
+
+
+123     continue 
+
+	deallocate(b,ve01,ve02,ve12,y01,y02,y12, & 
+	t0,t1)
+
+end subroutine P12weibtimedep
 !============================================================================================= 
 !========================       IDM cumulative intensity         ====================================
 !========================    with baseline weibull and time dependent covariates  ============
@@ -44509,6 +46711,7 @@ end subroutine ciweibtimedep
 	
 end subroutine idmciweibtimedep
 !============================================================================================= 
+!============================= cumulative intensity 0 to 1 ===================================
 !========================          idmlLikelihood         ====================================
 !========================   with baseline M-splines       ==================================== 
 !============================================================================================= 
@@ -44788,3 +46991,1055 @@ if(p12.gt.0) then
 	y01,y02,y12,t0,t1)
 
         end subroutine citimedep
+
+
+!============================================================================================= 
+!============================= cumulative intensity 0 to 1 ===================================
+!========================          idmlLikelihood         ====================================
+!========================   with baseline M-splines       ==================================== 
+!============================================================================================= 
+
+      subroutine P01timedep(b0,npar0,zi010,zi020,zi120,no0,nz010,nz020,&
+	  nz120,ve010,ve020,ve120,&
+	  y010,y020,y120,p01,p02,p12,dimp01,dimp02,dimp12, &
+	  Ntime,Ntime12,dimnva01,&
+	  dimnva02,dimnva12,nva01,nva02,nva12,t00,t10,likelihood_res)
+
+	use commun
+        implicit none
+         
+        double precision::res2,tronc01ci,tronc02ci, &
+        vet01,vet12,vet02,tronc
+
+        integer::np0,i,j,l,w,k,npar0,nva01,nva02,nva12,no0, &
+	    nz010,nz020,dimnva01,dimnva02, & 
+		p01,p02,dimp01,dimp02,dimp12,Ntime, &
+		nspline,nz120,dimnva12,p12
+
+	double precision,dimension(npar0)::b0
+	double precision,dimension(-2:(nz010+3))::zi010
+	double precision,dimension(-2:(nz020+3))::zi020
+	double precision,dimension(-2:(nz120+3))::zi120
+	double precision,dimension(-2:(nz010-1))::the01
+	double precision,dimension(-2:(nz020-1))::the02
+	double precision,dimension(-2:(nz120-1))::the12
+	
+        double precision,dimension(no0,dimnva01)::ve010
+	double precision,dimension(no0,dimnva02)::ve020
+	double precision,dimension(no0,dimnva12)::ve120
+	
+	double precision,dimension(no0*dimp01*Ntime)::y010
+	double precision,dimension(no0*dimp02*Ntime)::y020
+	double precision,dimension(no0*dimp12*Ntime12)::y120
+	
+	
+	double precision,dimension(Ntime12)::y12t
+	double precision,dimension(Ntime)::y02t,y01t
+	
+	double precision,dimension(no0), intent(inout)::likelihood_res
+
+	
+        double precision::su01,ri01,su02,ri02,gl01,gl02,su12,ri12,gl12
+	double precision,dimension(no0)::t00,t10,res
+
+
+	allocate(b(npar0))
+	b=b0
+	
+	allocate(zi01(-2:(nz01+3)),zi02(-2:(nz02+3)),zi12(-2:(nz12+3)))
+	zi01=zi010
+	zi02=zi020
+	zi12=zi120
+	
+	nz01=nz010
+	nz02=nz020
+	nz12=nz120
+
+
+	if(nva01.gt.0) then 
+		allocate(ve01(no0,nva01))
+	else 
+		allocate(ve01(no0,1))
+	end if 
+	
+	if(nva02.gt.0) then 
+		allocate(ve02(no0,nva02))
+	else 
+		allocate(ve02(no0,1))
+	end if 
+	
+	if(nva12.gt.0) then 
+		allocate(ve12(no0,nva12))
+	else 
+		allocate(ve12(no0,1))
+	end if 
+
+	
+
+
+if(p01.gt.0) then 
+		allocate(y01(no0*p01*Ntime))
+		y01=y010
+	else 
+		allocate(y01(no0*Ntime))
+		y01=0
+	end if 
+	
+	if(p02.gt.0) then 
+		allocate(y02(no0*p02*Ntime))
+		y02=y020
+	else 
+		allocate(y02(no0*Ntime))
+		y02=0
+	end if 
+
+if(p12.gt.0) then 
+		allocate(y12(no0*p12*Ntime12))
+		y12=y120
+	else 
+		allocate(y12(no0*Ntime))
+		y12=0
+	end if 
+
+	
+
+	ve01=ve010
+	ve02=ve020
+	ve12=ve120
+
+	allocate(t0(no0),t1(no0))
+
+	t0=t00
+	t1=t10
+
+         
+        ! we need to put bh at its original values if in posfix 
+
+
+    
+	
+
+         do i=1,nz01+2
+            the01(i-3)=(b(i))*(b(i))
+!       the01(i-3)=dexp(bh(i))
+         end do
+         do i=1,nz02+2
+            j = nz01+2+i
+            the02(i-3)=(b(j))*(b(j))
+!       the12(i-3)=dexp(bh(j))
+         end do
+		 
+		 do i=1,nz12+2
+            j = nz02+2+nz01+2+i
+            the12(i-3)=(b(j))*(b(j))
+!       the12(i-3)=dexp(bh(j))
+         end do
+
+		nspline = nz01+nz02+nz12+6
+!---------- calcul de la vraisemblance ------------------
+
+  
+        res = 0.d0
+		res2= 0.d0
+        do i=1,no0
+
+  ! write(6,*)'subject ',i
+		  
+                vet01 = 0.d0
+                vet02 = 0.d0
+				vet12 = 0.d0
+
+
+                
+				y01t = 0
+                y02t = 0
+				y12t = 0
+
+                if(nva01.gt.0)then
+                        do j=1,nva01
+                                vet01 =vet01 +&
+                                b(nspline+j)*dble(ve01(i,j))
+                        end do
+                endif  
+ 
+                if(nva02.gt.0)then
+                        do j=1,nva02
+                                vet02 =vet02 +&
+                                b(nspline+nva01+j)*dble(ve02(i,j))
+                        end do
+                endif
+				
+				
+				if(nva12.gt.0)then
+                        do j=1,nva12
+                                vet12 =vet12 +&
+                                b(nspline+nva01+nva02+j)*dble(ve12(i,j))
+                        end do
+                endif
+
+				
+
+
+				if(p01.gt.0)then
+					do l=1,Ntime
+                        do j=1,p01
+								k = (i-1)*Ntime*p01+(l-1)*p01+j
+                                y01t(l) =y01t(l) +&
+                                b(nspline+nva01+nva02+j)*y01(k)
+
+                        end do
+					end do 
+                endif  
+ 
+                if(p02.gt.0)then
+					do l=1,Ntime
+                        do j=1,p02
+								k = (i-1)*Ntime*p02+ (l-1)*p02+j
+                                y02t(l) =y02t(l) +&
+                                b(nspline+nva01+nva02+p01+j)*y02(k)
+                        end do
+					end do 
+                endif  
+				
+				if(p12.gt.0)then
+					do l=1,Ntime
+                        do j=1,p12
+								k = (i-1)*Ntime12*p12+ (l-1)*p12+j
+                                y12t(l) =y12t(l) +&
+                                b(nspline+nva01+nva02+nva12+p01+p02+j)*y12(k)
+                        end do
+					end do 
+                endif  
+
+                 
+				
+				y01t=dexp(y01t)
+				y02t=dexp(y02t)
+				y12t=dexp(y12t)
+				
+				
+				
+                vet01 = dexp(vet01)
+                vet02 = dexp(vet02)
+				vet12 = dexp(vet12)
+
+
+                res(i) = 0.d0
+				
+				if(t0(i).GT.0) then 
+				  call suspdept0(t0(i),the01,nz01,su01,ri01,zi01,gl01,y01t(1:15))
+				  call suspdept0(t0(i),the02,nz02,su02,ri02,zi02,gl02,y02t(1:15))
+				  tronc=dexp(-gl01*vet01-gl02*vet02) 
+				else 
+				tronc=1
+				end if 
+                
+                
+                 if(t0(i).NE.t1(i)) then 
+                  call P01qgaussPL15timedepV2(t0(i),t1(i),the01,the02,the12,&
+                  res2,vet01,vet02,vet12,y01t(16:255),y02t(16:255),y12t)
+                  res(i)=res2*tronc 
+				else 
+				
+				res(i)=0
+				
+				end if 
+				
+					
+                
+          end do 
+   
+
+        likelihood_res = res
+
+
+123     continue 
+	 
+	deallocate(b,zi01,zi02,zi12,ve01,ve02,ve12, &
+	y01,y02,y12,t0,t1)
+
+        end subroutine P01timedep
+
+!============================================================================================= 
+!============================= cumulative intensity 0 to 1 ===================================
+!========================          idmlLikelihood         ====================================
+!========================   with baseline M-splines       ==================================== 
+!============================================================================================= 
+
+      subroutine P12timedep(b0,npar0,zi010,zi020,zi120,no0,nz010,nz020,&
+	  nz120,ve010,ve020,ve120,&
+	  y010,y020,y120,p01,p02,p12,dimp01,dimp02,dimp12, &
+	  Ntime,Ntime12,dimnva01,&
+	  dimnva02,dimnva12,nva01,nva02,nva12,t00,t10,likelihood_res)
+
+	use commun
+        implicit none
+         
+        double precision::res2,tronc01ci,tronc02ci, &
+        vet01,vet12,vet02,tronc
+
+        integer::np0,i,j,l,w,k,npar0,nva01,nva02,nva12,no0, &
+	    nz010,nz020,dimnva01,dimnva02, & 
+		p01,p02,dimp01,dimp02,dimp12,Ntime, &
+		nspline,nz120,dimnva12,p12,Ntime12
+
+	double precision,dimension(npar0)::b0
+	double precision,dimension(-2:(nz010+3))::zi010
+	double precision,dimension(-2:(nz020+3))::zi020
+	double precision,dimension(-2:(nz120+3))::zi120
+	double precision,dimension(-2:(nz010-1))::the01
+	double precision,dimension(-2:(nz020-1))::the02
+	double precision,dimension(-2:(nz120-1))::the12
+	
+        double precision,dimension(no0,dimnva01)::ve010
+	double precision,dimension(no0,dimnva02)::ve020
+	double precision,dimension(no0,dimnva12)::ve120
+	
+	double precision,dimension(no0*dimp01*Ntime)::y010
+	double precision,dimension(no0*dimp02*Ntime)::y020
+	double precision,dimension(no0*dimp12*Ntime12)::y120
+	
+	
+	double precision,dimension(Ntime12)::y12t
+	double precision,dimension(Ntime)::y02t
+	double precision,dimension(Ntime)::y01t
+	double precision,dimension(no0), intent(inout)::likelihood_res
+
+	
+        double precision::su01,ri01,su02,ri02,gl01,gl02,su12,ri12,gl12
+	double precision,dimension(no0)::t00,t10,res
+
+
+	allocate(b(npar0))
+	b=b0
+	
+	allocate(zi01(-2:(nz01+3)),zi02(-2:(nz02+3)),zi12(-2:(nz12+3)))
+	zi01=zi010
+	zi02=zi020
+	zi12=zi120
+	
+	nz01=nz010
+	nz02=nz020
+	nz12=nz120
+
+
+	if(nva01.gt.0) then 
+		allocate(ve01(no0,nva01))
+	else 
+		allocate(ve01(no0,1))
+	end if 
+	
+	if(nva02.gt.0) then 
+		allocate(ve02(no0,nva02))
+	else 
+		allocate(ve02(no0,1))
+	end if 
+	
+	if(nva12.gt.0) then 
+		allocate(ve12(no0,nva12))
+	else 
+		allocate(ve12(no0,1))
+	end if 
+
+	
+
+
+if(p01.gt.0) then 
+		allocate(y01(no0*p01*Ntime))
+		y01=y010
+	else 
+		allocate(y01(no0*Ntime))
+		y01=0
+	end if 
+	
+	if(p02.gt.0) then 
+		allocate(y02(no0*p02*Ntime))
+		y02=y020
+	else 
+		allocate(y02(no0*Ntime))
+		y02=0
+	end if 
+
+if(p12.gt.0) then 
+		allocate(y12(no0*p12*(Ntime12)))
+		y12=y120
+	else 
+		allocate(y12(no0*(Ntime12)))
+		y12=0
+	end if 
+
+	
+
+	ve01=ve010
+	ve02=ve020
+	ve12=ve120
+
+	allocate(t0(no0),t1(no0))
+
+	t0=t00
+	t1=t10
+
+         
+        ! we need to put bh at its original values if in posfix 
+
+
+    
+	
+
+         do i=1,nz01+2
+            the01(i-3)=(b(i))*(b(i))
+!       the01(i-3)=dexp(bh(i))
+         end do
+         do i=1,nz02+2
+            j = nz01+2+i
+            the02(i-3)=(b(j))*(b(j))
+!       the12(i-3)=dexp(bh(j))
+         end do
+		 
+		 do i=1,nz12+2
+            j = nz02+2+nz01+2+i
+            the12(i-3)=(b(j))*(b(j))
+!       the12(i-3)=dexp(bh(j))
+         end do
+
+		nspline = nz01+nz02+nz12+6
+!---------- calcul de la vraisemblance ------------------
+
+  
+        res = 0.d0
+		res2= 0.d0
+        do i=1,no0
+
+  ! write(6,*)'subject ',i
+		  
+                vet01 = 0.d0
+                vet02 = 0.d0
+				vet12 = 0.d0
+
+
+                
+				y01t = 0
+                y02t = 0
+				y12t = 0
+
+                if(nva01.gt.0)then
+                        do j=1,nva01
+                                vet01 =vet01 +&
+                                b(nspline+j)*dble(ve01(i,j))
+                        end do
+                endif  
+ 
+                if(nva02.gt.0)then
+                        do j=1,nva02
+                                vet02 =vet02 +&
+                                b(nspline+nva01+j)*dble(ve02(i,j))
+                        end do
+                endif
+				
+				
+				if(nva12.gt.0)then
+                        do j=1,nva12
+                                vet12 =vet12 +&
+                                b(nspline+nva01+nva02+j)*dble(ve12(i,j))
+                        end do
+                endif
+
+				
+
+
+				if(p01.gt.0)then
+					do l=1,Ntime
+                        do j=1,p01
+								k = (i-1)*Ntime*p01+(l-1)*p01+j
+                                y01t(l) =y01t(l) +&
+                                b(nspline+nva01+nva02+j)*y01(k)
+
+                        end do
+					end do 
+                endif  
+ 
+                if(p02.gt.0)then
+					do l=1,Ntime
+                        do j=1,p02
+								k = (i-1)*Ntime*p02+ (l-1)*p02+j
+                                y02t(l) =y02t(l) +&
+                                b(nspline+nva01+nva02+p01+j)*y02(k)
+                        end do
+					end do 
+                endif  
+				
+				if(p12.gt.0)then
+					do l=1,Ntime
+                        do j=1,p12
+								k = (i-1)*(Ntime12)*p12+ (l-1)*p12+j
+                                y12t(l) =y12t(l) +&
+                                b(nspline+nva01+nva02+nva12+p01+p02+j)*y12(k)
+                        end do
+					end do 
+                endif  
+
+                 
+				
+				y01t=dexp(y01t)
+				y02t=dexp(y02t)
+				y12t=dexp(y12t)
+				
+				
+				
+                vet01 = dexp(vet01)
+                vet02 = dexp(vet02)
+				vet12 = dexp(vet12)
+
+
+                res(i) = 0.d0
+                
+				if(t0(i).GT.0) then 
+				  call suspdept0(t0(i),the01,nz01,su01,ri01,zi01,gl01,y01t(1:15))
+				  call suspdept0(t0(i),the02,nz02,su02,ri02,zi02,gl02,y02t(1:15))
+				  tronc=dexp(-gl01*vet01-gl02*vet02) 
+				else 
+				tronc=1
+				end if 
+				
+                if(t0(i).NE.t1(i)) then 
+                  
+                  call P01qgaussPL15timedepV2(t0(i),t1(i),the01,the02,the12,&
+                  res2,vet01,vet02,vet12,y01t(16:255),y02t(16:255),y12t(1:225))
+				  call susp(t1(i),the12,nz12,su12,ri12,zi12,gl12)
+				  res(i)=res2*ri12*y12t(226)*vet12*tronc
+				else 
+				
+				res(i)=0
+				
+				end if 
+				
+					
+                
+          end do 
+   
+
+        likelihood_res = res
+
+
+123     continue 
+	 
+	deallocate(b,zi01,zi02,zi12,ve01,ve02,ve12, &
+	y01,y02,y12,t0,t1)
+
+        end subroutine P12timedep
+
+
+!============================================================================================= 
+!============================= probability intensity 0 to 0 ===================================
+!========================          idmlLikelihood         ====================================
+!========================   with baseline M-splines       ==================================== 
+!============================================================================================= 
+
+      subroutine P00timedep(b0,npar0,zi010,zi020,zi120,no0,nz010,nz020,&
+	  nz120,ve010,ve020,ve120,&
+	  y010,y020,y120,p01,p02,p12,dimp01,dimp02,dimp12,Ntime,dimnva01,&
+	  dimnva02,dimnva12,nva01,nva02,nva12,t00,t10,likelihood_res)
+
+	use commun
+        implicit none
+         
+        double precision::res2,tronc01ci,tronc02ci, &
+        vet01,vet12,vet02,tronc
+
+        integer::np0,i,j,l,w,k,npar0,nva01,nva02,nva12,no0, &
+	    nz010,nz020,dimnva01,dimnva02, & 
+		p01,p02,dimp01,dimp02,dimp12,Ntime, &
+		nspline,nz120,dimnva12,p12
+
+	double precision,dimension(npar0)::b0
+	double precision,dimension(-2:(nz010+3))::zi010
+	double precision,dimension(-2:(nz020+3))::zi020
+	double precision,dimension(-2:(nz120+3))::zi120
+	double precision,dimension(-2:(nz010-1))::the01
+	double precision,dimension(-2:(nz020-1))::the02
+	double precision,dimension(-2:(nz120-1))::the12
+	
+        double precision,dimension(no0,dimnva01)::ve010
+	double precision,dimension(no0,dimnva02)::ve020
+	double precision,dimension(no0,dimnva12)::ve120
+	
+	double precision,dimension(no0*dimp01*Ntime)::y010
+	double precision,dimension(no0*dimp02*Ntime)::y020
+	double precision,dimension(no0*dimp12*Ntime)::y120
+	
+	
+	double precision,dimension(Ntime)::y01t,y02t,y12t
+
+	double precision,dimension(no0), intent(inout)::likelihood_res
+
+	
+        double precision::su01,ri01,su02,ri02,gl01,gl02,su12,ri12,gl12
+	double precision,dimension(no0)::t00,t10,res
+
+
+	allocate(b(npar0))
+	b=b0
+	
+	allocate(zi01(-2:(nz01+3)),zi02(-2:(nz02+3)),zi12(-2:(nz12+3)))
+	zi01=zi010
+	zi02=zi020
+	zi12=zi120
+	
+	nz01=nz010
+	nz02=nz020
+	nz12=nz120
+
+
+	if(nva01.gt.0) then 
+		allocate(ve01(no0,nva01))
+	else 
+		allocate(ve01(no0,1))
+	end if 
+	
+	if(nva02.gt.0) then 
+		allocate(ve02(no0,nva02))
+	else 
+		allocate(ve02(no0,1))
+	end if 
+	
+	if(nva12.gt.0) then 
+		allocate(ve12(no0,nva12))
+	else 
+		allocate(ve12(no0,1))
+	end if 
+
+	
+
+
+if(p01.gt.0) then 
+		allocate(y01(no0*p01*Ntime))
+		y01=y010
+	else 
+		allocate(y01(no0*Ntime))
+		y01=0
+	end if 
+	
+	if(p02.gt.0) then 
+		allocate(y02(no0*p02*Ntime))
+		y02=y020
+	else 
+		allocate(y02(no0*Ntime))
+		y02=0
+	end if 
+
+if(p12.gt.0) then 
+		allocate(y12(no0*p12*Ntime))
+		y12=y120
+	else 
+		allocate(y12(no0*Ntime))
+		y12=0
+	end if 
+
+	
+
+	ve01=ve010
+	ve02=ve020
+	ve12=ve120
+
+	allocate(t0(no0),t1(no0))
+
+	t0=t00
+	t1=t10
+
+         
+        ! we need to put bh at its original values if in posfix 
+
+
+    
+	
+
+         do i=1,nz01+2
+            the01(i-3)=(b(i))*(b(i))
+!       the01(i-3)=dexp(bh(i))
+         end do
+         do i=1,nz02+2
+            j = nz01+2+i
+            the02(i-3)=(b(j))*(b(j))
+!       the12(i-3)=dexp(bh(j))
+         end do
+		 
+		 do i=1,nz12+2
+            j = nz02+2+nz01+2+i
+            the12(i-3)=(b(j))*(b(j))
+!       the12(i-3)=dexp(bh(j))
+         end do
+
+		nspline = nz01+nz02+nz12+6
+!---------- calcul de la vraisemblance ------------------
+
+  
+        res = 0.d0
+		res2= 0.d0
+        do i=1,no0
+
+  ! write(6,*)'subject ',i
+		  
+                vet01 = 0.d0
+                vet02 = 0.d0
+				vet12 = 0.d0
+
+
+                
+				y01t = 0
+                y02t = 0
+				y12t = 0
+
+                if(nva01.gt.0)then
+                        do j=1,nva01
+                                vet01 =vet01 +&
+                                b(nspline+j)*dble(ve01(i,j))
+                        end do
+                endif  
+ 
+                if(nva02.gt.0)then
+                        do j=1,nva02
+                                vet02 =vet02 +&
+                                b(nspline+nva01+j)*dble(ve02(i,j))
+                        end do
+                endif
+				
+				
+				if(nva12.gt.0)then
+                        do j=1,nva12
+                                vet12 =vet12 +&
+                                b(nspline+nva01+nva02+j)*dble(ve12(i,j))
+                        end do
+                endif
+
+				
+
+
+				if(p01.gt.0)then
+					do l=1,Ntime
+                        do j=1,p01
+								k = (i-1)*Ntime*p01+(l-1)*p01+j
+                                y01t(l) =y01t(l) +&
+                                b(nspline+nva01+nva02+j)*y01(k)
+
+                        end do
+					end do 
+                endif  
+ 
+                if(p02.gt.0)then
+					do l=1,Ntime
+                        do j=1,p02
+								k = (i-1)*Ntime*p02+ (l-1)*p02+j
+                                y02t(l) =y02t(l) +&
+                                b(nspline+nva01+nva02+p01+j)*y02(k)
+                        end do
+					end do 
+                endif  
+				
+				if(p12.gt.0)then
+					do l=1,Ntime
+                        do j=1,p12
+								k = (i-1)*Ntime*p12+ (l-1)*p12+j
+                                y12t(l) =y12t(l) +&
+                                b(nspline+nva01+nva02+nva12+p01+p02+j)*y12(k)
+                        end do
+					end do 
+                endif  
+
+                 
+				
+				y01t=dexp(y01t)
+				y02t=dexp(y02t)
+				y12t=dexp(y12t)
+				
+				
+				
+                vet01 = dexp(vet01)
+                vet02 = dexp(vet02)
+				vet12 = dexp(vet12)
+
+
+                res(i) = 0.d0
+                
+                
+				 if(t0(i).NE.t1(i)) then 
+				call suspdeppred0(t0(i),t1(i),the01,nz01,su01,ri01,zi01,gl01,y01t)
+                call suspdeppred0(t0(i),t1(i),the02,nz02,su02,ri02,zi02,gl02,y02t)
+                res(i)=(su01**vet01)*(su02**vet02)
+				else 
+				res(i)=1
+				end if 
+				
+					
+                
+          end do 
+   
+
+        likelihood_res = res
+
+
+123     continue 
+	 
+	deallocate(b,zi01,zi02,zi12,ve01,ve02,ve12, &
+	y01,y02,y12,t0,t1)
+
+        end subroutine P00timedep
+
+
+!============================================================================================= 
+!============================= probability intensity 0 to 2 ===================================
+!========================          idmlLikelihood         ====================================
+!========================   with baseline M-splines       ==================================== 
+!============================================================================================= 
+
+      subroutine P02timedep(b0,npar0,zi010,zi020,zi120,no0,nz010,nz020,&
+	  nz120,ve010,ve020,ve120,&
+	  y010,y020,y120,p01,p02,p12,dimp01,dimp02,dimp12,Ntime,dimnva01,&
+	  dimnva02,dimnva12,nva01,nva02,nva12,t00,t10,likelihood_res)
+
+	use commun
+        implicit none
+         
+        double precision::res2,tronc01ci,tronc02ci, &
+        vet01,vet12,vet02,tronc
+
+        integer::np0,i,j,l,w,k,npar0,nva01,nva02,nva12,no0, &
+	    nz010,nz020,dimnva01,dimnva02, & 
+		p01,p02,dimp01,dimp02,dimp12,Ntime, &
+		nspline,nz120,dimnva12,p12
+
+	double precision,dimension(npar0)::b0
+	double precision,dimension(-2:(nz010+3))::zi010
+	double precision,dimension(-2:(nz020+3))::zi020
+	double precision,dimension(-2:(nz120+3))::zi120
+	double precision,dimension(-2:(nz010-1))::the01
+	double precision,dimension(-2:(nz020-1))::the02
+	double precision,dimension(-2:(nz120-1))::the12
+	
+        double precision,dimension(no0,dimnva01)::ve010
+	double precision,dimension(no0,dimnva02)::ve020
+	double precision,dimension(no0,dimnva12)::ve120
+	
+	double precision,dimension(no0*dimp01*Ntime)::y010
+	double precision,dimension(no0*dimp02*Ntime)::y020
+	double precision,dimension(no0*dimp12*Ntime)::y120
+	
+	
+	double precision,dimension(Ntime)::y01t,y02t,y12t
+
+	double precision,dimension(no0), intent(inout)::likelihood_res
+
+	
+        double precision::su01,ri01,su02,ri02,gl01,gl02,su12,ri12,gl12
+	double precision,dimension(no0)::t00,t10,res
+
+
+	allocate(b(npar0))
+	b=b0
+	
+	allocate(zi01(-2:(nz01+3)),zi02(-2:(nz02+3)),zi12(-2:(nz12+3)))
+	zi01=zi010
+	zi02=zi020
+	zi12=zi120
+	
+	nz01=nz010
+	nz02=nz020
+	nz12=nz120
+
+
+	if(nva01.gt.0) then 
+		allocate(ve01(no0,nva01))
+	else 
+		allocate(ve01(no0,1))
+	end if 
+	
+	if(nva02.gt.0) then 
+		allocate(ve02(no0,nva02))
+	else 
+		allocate(ve02(no0,1))
+	end if 
+	
+	if(nva12.gt.0) then 
+		allocate(ve12(no0,nva12))
+	else 
+		allocate(ve12(no0,1))
+	end if 
+
+	
+
+
+if(p01.gt.0) then 
+		allocate(y01(no0*p01*Ntime))
+		y01=y010
+	else 
+		allocate(y01(no0*Ntime))
+		y01=0
+	end if 
+	
+	if(p02.gt.0) then 
+		allocate(y02(no0*p02*Ntime))
+		y02=y020
+	else 
+		allocate(y02(no0*Ntime))
+		y02=0
+	end if 
+
+if(p12.gt.0) then 
+		allocate(y12(no0*p12*Ntime))
+		y12=y120
+	else 
+		allocate(y12(no0*Ntime))
+		y12=0
+	end if 
+
+	
+
+	ve01=ve010
+	ve02=ve020
+	ve12=ve120
+
+	allocate(t0(no0),t1(no0))
+
+	t0=t00
+	t1=t10
+
+         
+        ! we need to put bh at its original values if in posfix 
+
+
+    
+	
+
+         do i=1,nz01+2
+            the01(i-3)=(b(i))*(b(i))
+!       the01(i-3)=dexp(bh(i))
+         end do
+         do i=1,nz02+2
+            j = nz01+2+i
+            the02(i-3)=(b(j))*(b(j))
+!       the12(i-3)=dexp(bh(j))
+         end do
+		 
+		 do i=1,nz12+2
+            j = nz02+2+nz01+2+i
+            the12(i-3)=(b(j))*(b(j))
+!       the12(i-3)=dexp(bh(j))
+         end do
+
+		nspline = nz01+nz02+nz12+6
+!---------- calcul de la vraisemblance ------------------
+
+  
+        res = 0.d0
+		res2= 0.d0
+        do i=1,no0
+
+  ! write(6,*)'subject ',i
+		  
+                vet01 = 0.d0
+                vet02 = 0.d0
+				vet12 = 0.d0
+
+
+                
+				y01t = 0
+                y02t = 0
+				y12t = 0
+
+                if(nva01.gt.0)then
+                        do j=1,nva01
+                                vet01 =vet01 +&
+                                b(nspline+j)*dble(ve01(i,j))
+                        end do
+                endif  
+ 
+                if(nva02.gt.0)then
+                        do j=1,nva02
+                                vet02 =vet02 +&
+                                b(nspline+nva01+j)*dble(ve02(i,j))
+                        end do
+                endif
+				
+				
+				if(nva12.gt.0)then
+                        do j=1,nva12
+                                vet12 =vet12 +&
+                                b(nspline+nva01+nva02+j)*dble(ve12(i,j))
+                        end do
+                endif
+
+				
+
+
+				if(p01.gt.0)then
+					do l=1,Ntime
+                        do j=1,p01
+								k = (i-1)*Ntime*p01+(l-1)*p01+j
+                                y01t(l) =y01t(l) +&
+                                b(nspline+nva01+nva02+j)*y01(k)
+
+                        end do
+					end do 
+                endif  
+ 
+                if(p02.gt.0)then
+					do l=1,Ntime
+                        do j=1,p02
+								k = (i-1)*Ntime*p02+ (l-1)*p02+j
+                                y02t(l) =y02t(l) +&
+                                b(nspline+nva01+nva02+p01+j)*y02(k)
+                        end do
+					end do 
+                endif  
+				
+				if(p12.gt.0)then
+					do l=1,Ntime
+                        do j=1,p12
+								k = (i-1)*Ntime*p12+ (l-1)*p12+j
+                                y12t(l) =y12t(l) +&
+                                b(nspline+nva01+nva02+nva12+p01+p02+j)*y12(k)
+                        end do
+					end do 
+                endif  
+
+                 
+				
+				y01t=dexp(y01t)
+				y02t=dexp(y02t)
+				y12t=dexp(y12t)
+				
+				
+				
+                vet01 = dexp(vet01)
+                vet02 = dexp(vet02)
+				vet12 = dexp(vet12)
+
+
+                res(i) = 0.d0
+                
+				
+                 if(t0(i).NE.t1(i)) then 
+				
+				call suspdeppred(t0(i),t1(i),the01,nz01,su01,ri01,zi01,gl01,y01t)
+                call suspdeppred(t0(i),t1(i),the02,nz02,su02,ri02,zi02,gl02,y02t)
+				
+                res(i)=(su01**vet01)*(su02**vet02)*ri02*vet02
+				
+				else 
+				
+				call susp(t1(i),the02,nz02,su02,ri02,zi02,gl02)
+				res(i)=ri02*vet02
+				
+				end if 
+                
+          end do 
+   
+
+        likelihood_res = res
+
+
+123     continue 
+	 
+	deallocate(b,zi01,zi02,zi12,ve01,ve02,ve12, &
+	y01,y02,y12,t0,t1)
+
+        end subroutine P02timedep

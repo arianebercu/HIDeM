@@ -617,12 +617,12 @@ if(length(control$NsampleHY)!=1)stop("Length of control$NsampleHY need to be 1")
        }
        
        if (length(ids01) > 0) {
-         keep <- (y01[[id]] %in% ids01) & after & rank_after > off01 & rank_after <= off01 + 480
+         keep <- (y01[[id]] %in% ids01) & after & rank_after > off01 & rank_after <= off01 + 255
          y01_01 <- y01[keep, "Sample_1"]
        }
        
        if (length(ids02_1) > 0) {
-         keep <- (y01[[id]] %in% ids02_1) & after & rank_after > off02_1 & rank_after <= off02_1 + 481
+         keep <- (y01[[id]] %in% ids02_1) & after & rank_after > off02_1 & rank_after <= off02_1 + 255
          y01_02_1 <- y01[keep, "Sample_1"]
        }
      }
@@ -641,8 +641,8 @@ if(length(control$NsampleHY)!=1)stop("Length of control$NsampleHY need to be 1")
     if(!is.null(times)){
       y01_00<-rep(0,15*length(ids00))
       y01_02_0<-rep(0,16*length(ids02_0))
-      y01_01<-rep(0,480*length(ids01))
-      y01_02_1<-rep(0,481*length(ids02_1))
+      y01_01<-rep(0,255*length(ids01))
+      y01_02_1<-rep(0,255*length(ids02_1))
     }
    # y01_1<-rep(0,N*NtimePoints_1)
   }
@@ -682,12 +682,12 @@ if(length(control$NsampleHY)!=1)stop("Length of control$NsampleHY need to be 1")
        }
        
        if (length(ids01) > 0) {
-         keep <- (y02[[id]] %in% ids01) & after & rank_after > off01 & rank_after <= off01 + 480
+         keep <- (y02[[id]] %in% ids01) & after & rank_after > off01 & rank_after <= off01 + 255
          y02_01 <- y02[keep, "Sample_1"]
        }
        
        if (length(ids02_1) > 0) {
-         keep <- (y02[[id]] %in% ids02_1) & after & rank_after > off02_1 & rank_after <= off02_1 + 481
+         keep <- (y02[[id]] %in% ids02_1) & after & rank_after > off02_1 & rank_after <= off02_1 + 255
          y02_02_1 <- y02[keep, "Sample_1"]
        }
      }
@@ -703,8 +703,8 @@ if(length(control$NsampleHY)!=1)stop("Length of control$NsampleHY need to be 1")
     if(!is.null(times)){
       y02_00<-rep(0,15*length(ids00))
       y02_02_0<-rep(0,16*length(ids02_0))
-      y02_01<-rep(0,480*length(ids01))
-      y02_02_1<-rep(0,481*length(ids02_1))
+      y02_01<-rep(0,255*length(ids01))
+      y02_02_1<-rep(0,255*length(ids02_1))
     }
   }
   
@@ -748,12 +748,12 @@ if(length(control$NsampleHY)!=1)stop("Length of control$NsampleHY need to be 1")
        }
        
        if (length(ids01) > 0) {
-         keep <- (y12[[id]] %in% ids01) & after & rank_after > off01 & rank_after <= off01 + 480
+         keep <- (y12[[id]] %in% ids01) & after & rank_after > (off01 + 255) & rank_after <= off02_1 
          y12_01 <- y12[keep, "Sample_1"]
        }
        
        if (length(ids02_1) > 0) {
-         keep <- (y12[[id]] %in% ids02_1) & after & rank_after > off02_1 & rank_after <= off02_1 + 481
+         keep <- (y12[[id]] %in% ids02_1) & after & rank_after > (off02_1 + 255) 
          y12_02_1 <- y12[keep, "Sample_1"]
        }
      }
@@ -763,8 +763,8 @@ if(length(control$NsampleHY)!=1)stop("Length of control$NsampleHY need to be 1")
     if(!is.null(times)){
       y12_00<-rep(0,15*length(ids00))
       y12_02_0<-rep(0,16*length(ids02_0))
-      y12_01<-rep(0,480*length(ids01))
-      y12_02_1<-rep(0,481*length(ids02_1))
+      y12_01<-rep(0,225*length(ids01))
+      y12_02_1<-rep(0,226*length(ids02_1))
     }
   }
   
@@ -808,8 +808,178 @@ if(length(control$NsampleHY)!=1)stop("Length of control$NsampleHY need to be 1")
     # Return NULL on error to skip this patient
     NULL
   })
-    
-    
+    if(!is.null(times)){
+      if (length(ids00) > 0){
+        res<-rep(0,length(ids00))
+        out00<- tryCatch({  .Fortran("P00timedep",
+                                    ## input
+                                    as.double(binit),
+                                    as.integer(size_V),
+                                    as.double(knots01),
+                                    as.double(knots02),
+                                    as.double(knots12),
+                                    as.integer(length(ids00)),
+                                    as.integer(nknots01),
+                                    as.integer(nknots02),
+                                    as.integer(nknots12),
+                                    as.double(ve01_00),
+                                    as.double(ve02_00),
+                                    as.double(ve12_00),
+                                    as.double(y01_00),
+                                    as.double(y02_00),
+                                    as.double(y12_00),
+                                    as.integer(p01),
+                                    as.integer(p02),
+                                    as.integer(p12),
+                                    as.integer(dimp01),
+                                    as.integer(dimp02),
+                                    as.integer(dimp12),
+                                    as.integer(15),
+                                    as.integer(dimnva01),
+                                    as.integer(dimnva02),
+                                    as.integer(dimnva12),
+                                    as.integer(nvat01),
+                                    as.integer(nvat02),
+                                    as.integer(nvat12),
+                                    as.double(times$start[ids00]),
+                                    as.double(times$end[ids00]),
+                                    likelihood_res=as.double(res),
+                                    PACKAGE="HIDeM")$likelihood_res
+        }, error = function(e) {
+          # Return NULL on error to skip this patient
+          NULL
+        })
+      }else{out00<-NULL}
+      
+      if (length(ids02_0) > 0){
+        res<-rep(0,length(ids02_0))
+        out00<- tryCatch({  .Fortran("P02timedep",
+                                     ## input
+                                     as.double(binit),
+                                     as.integer(size_V),
+                                     as.double(knots01),
+                                     as.double(knots02),
+                                     as.double(knots12),
+                                     as.integer(length(ids02_0)),
+                                     as.integer(nknots01),
+                                     as.integer(nknots02),
+                                     as.integer(nknots12),
+                                     as.double(ve01_02_0),
+                                     as.double(ve02_02_0),
+                                     as.double(ve12_02_0),
+                                     as.double(y01_02_0),
+                                     as.double(y02_02_0),
+                                     as.double(y12_02_0),
+                                     as.integer(p01),
+                                     as.integer(p02),
+                                     as.integer(p12),
+                                     as.integer(dimp01),
+                                     as.integer(dimp02),
+                                     as.integer(dimp12),
+                                     as.integer(16),
+                                     as.integer(dimnva01),
+                                     as.integer(dimnva02),
+                                     as.integer(dimnva12),
+                                     as.integer(nvat01),
+                                     as.integer(nvat02),
+                                     as.integer(nvat12),
+                                     as.double(times$start[ids02_0]),
+                                     as.double(times$end[ids02_0]),
+                                     likelihood_res=as.double(res),
+                                     PACKAGE="HIDeM")$likelihood_res
+        }, error = function(e) {
+          # Return NULL on error to skip this patient
+          NULL
+        })
+      }else{out02_0<-NULL}
+      
+      if (length(ids02_1) > 0){
+        res<-rep(0,length(ids02_1))
+        out02_1<- tryCatch({  .Fortran("P02timedep",
+                                     ## input
+                                     as.double(binit),
+                                     as.integer(size_V),
+                                     as.double(knots01),
+                                     as.double(knots02),
+                                     as.double(knots12),
+                                     as.integer(length(ids02_1)),
+                                     as.integer(nknots01),
+                                     as.integer(nknots02),
+                                     as.integer(nknots12),
+                                     as.double(ve01_02_1),
+                                     as.double(ve02_02_1),
+                                     as.double(ve12_02_1),
+                                     as.double(y01_02_1),
+                                     as.double(y02_02_1),
+                                     as.double(y12_02_1),
+                                     as.integer(p01),
+                                     as.integer(p02),
+                                     as.integer(p12),
+                                     as.integer(dimp01),
+                                     as.integer(dimp02),
+                                     as.integer(dimp12),
+                                     as.integer(255),
+                                     as.integer(225),
+                                     as.integer(dimnva01),
+                                     as.integer(dimnva02),
+                                     as.integer(dimnva12),
+                                     as.integer(nvat01),
+                                     as.integer(nvat02),
+                                     as.integer(nvat12),
+                                     as.double(times$start[ids02_1]),
+                                     as.double(times$end[ids02_1]),
+                                     likelihood_res=as.double(res),
+                                     PACKAGE="HIDeM")$likelihood_res
+        }, error = function(e) {
+          # Return NULL on error to skip this patient
+          NULL
+        })
+      }else{out02_1<-NULL}
+      
+      
+      if (length(ids01) > 0){
+        res<-rep(0,length(ids01))
+        out01<- tryCatch({  .Fortran("P01timedep",
+                                     ## input
+                                     as.double(binit),
+                                     as.integer(size_V),
+                                     as.double(knots01),
+                                     as.double(knots02),
+                                     as.double(knots12),
+                                     as.integer(length(ids01)),
+                                     as.integer(nknots01),
+                                     as.integer(nknots02),
+                                     as.integer(nknots12),
+                                     as.double(ve01_01),
+                                     as.double(ve02_01),
+                                     as.double(ve12_01),
+                                     as.double(y01_01),
+                                     as.double(y02_01),
+                                     as.double(y12_01),
+                                     as.integer(p01),
+                                     as.integer(p02),
+                                     as.integer(p12),
+                                     as.integer(dimp01),
+                                     as.integer(dimp02),
+                                     as.integer(dimp12),
+                                     as.integer(255),
+                                     as.integer(225),
+                                     as.integer(dimnva01),
+                                     as.integer(dimnva02),
+                                     as.integer(dimnva12),
+                                     as.integer(nvat01),
+                                     as.integer(nvat02),
+                                     as.integer(nvat12),
+                                     as.double(times$start[ids01]),
+                                     as.double(times$end[ids01]),
+                                     likelihood_res=as.double(res),
+                                     PACKAGE="HIDeM")$likelihood_res
+        }, error = function(e) {
+          # Return NULL on error to skip this patient
+          NULL
+        })
+      }else{out01<-NULL}
+    }
   }else{
     res<-rep(0,N)
     out1<- tryCatch({   .Fortran("ciweibtimedep",
@@ -848,7 +1018,7 @@ if(length(control$NsampleHY)!=1)stop("Length of control$NsampleHY need to be 1")
     if(!is.null(times)){
       if (length(ids00) > 0) {
         res<-rep(0,length(ids00))
-        out00<- tryCatch({   .Fortran("ciweibtimedep",
+        out00<- tryCatch({   .Fortran("P00weibtimedep",
                                      ## input
                                      as.double(binit),
                                      as.integer(size_V),
@@ -880,53 +1050,117 @@ if(length(control$NsampleHY)!=1)stop("Length of control$NsampleHY need to be 1")
           # Return NULL on error to skip this patient
           NULL
         })
-      }
+      }else{out00<-NULL}
       
       if (length(ids02_0) > 0) {
-        res<-rep(0,length(ids02))
-        out02<- tryCatch({   .Fortran("ciweibtimedep",
+        res<-rep(0,length(ids02_0))
+        out02_0<- tryCatch({   .Fortran("P02weibtimedep",
                                       ## input
                                       as.double(binit),
                                       as.integer(size_V),
-                                      as.integer(length(ids00)),
-                                      as.double(ve01_00),
-                                      as.double(ve02_00),
-                                      as.double(ve12_00),
-                                      as.double(y01_00),
-                                      as.double(y02_00),
-                                      as.double(y12_00),
+                                      as.integer(length(ids02_0)),
+                                      as.double(ve01_02_0),
+                                      as.double(ve02_02_0),
+                                      as.double(ve12_02_0),
+                                      as.double(y01_02_0),
+                                      as.double(y02_02_0),
+                                      as.double(y12_02_0),
                                       as.integer(p01),
                                       as.integer(p02),
                                       as.integer(p12),
                                       as.integer(dimp01),
                                       as.integer(dimp02),
                                       as.integer(dimp12),
-                                      as.integer(15),
+                                      as.integer(16),
                                       as.integer(dimnva01),
                                       as.integer(dimnva02),
                                       as.integer(dimnva12),
                                       as.integer(nvat01),
                                       as.integer(nvat02),
                                       as.integer(nvat12),
-                                      as.double(times$start[ids00]),
-                                      as.double(times$end[ids00]),
+                                      as.double(times$start[ids02_0]),
+                                      as.double(times$end[ids02_0]),
                                       likelihood_res=as.double(res),
                                       PACKAGE="HIDeM")$likelihood_res
         }, error = function(e) {
           # Return NULL on error to skip this patient
           NULL
         })
-      }
+      }else{out02_0<-NULL}
       
       if (length(ids01) > 0) {
-        keep <- (y12[[id]] %in% ids01) & after & rank_after > off01 & rank_after <= off01 + 480
-        y12_01 <- y12[keep, "Sample_1"]
-      }
+        res<-rep(0,length(ids01))
+        out01<- tryCatch({   .Fortran("P02weibtimedep",
+                                        ## input
+                                        as.double(binit),
+                                        as.integer(size_V),
+                                        as.integer(length(ids01)),
+                                        as.double(ve01_01),
+                                        as.double(ve02_01),
+                                        as.double(ve12_01),
+                                        as.double(y01_01),
+                                        as.double(y02_01),
+                                        as.double(y12_01),
+                                        as.integer(p01),
+                                        as.integer(p02),
+                                        as.integer(p12),
+                                        as.integer(dimp01),
+                                        as.integer(dimp02),
+                                        as.integer(dimp12),
+                                        as.integer(255),
+                                        as.integer(225),
+                                        as.integer(dimnva01),
+                                        as.integer(dimnva02),
+                                        as.integer(dimnva12),
+                                        as.integer(nvat01),
+                                        as.integer(nvat02),
+                                        as.integer(nvat12),
+                                        as.double(times$start[ids01]),
+                                        as.double(times$end[ids01]),
+                                        likelihood_res=as.double(res),
+                                        PACKAGE="HIDeM")$likelihood_res
+        }, error = function(e) {
+          # Return NULL on error to skip this patient
+          NULL
+        })
+      }else{out01<-NULL}
       
       if (length(ids02_1) > 0) {
-        keep <- (y12[[id]] %in% ids02_1) & after & rank_after > off02_1 & rank_after <= off02_1 + 481
-        y12_02_1 <- y12[keep, "Sample_1"]
-      }
+        res<-rep(0,length(ids02_1))
+        out02_1<- tryCatch({   .Fortran("P12weibtimedep",
+                                        ## input
+                                        as.double(binit),
+                                        as.integer(size_V),
+                                        as.integer(length(ids02_1)),
+                                        as.double(ve01_02_1),
+                                        as.double(ve02_02_1),
+                                        as.double(ve12_02_1),
+                                        as.double(y01_02_1),
+                                        as.double(y02_02_1),
+                                        as.double(y12_02_1),
+                                        as.integer(p01),
+                                        as.integer(p02),
+                                        as.integer(p12),
+                                        as.integer(dimp01),
+                                        as.integer(dimp02),
+                                        as.integer(dimp12),
+                                        as.integer(255),
+                                        as.integer(225),
+                                        as.integer(dimnva01),
+                                        as.integer(dimnva02),
+                                        as.integer(dimnva12),
+                                        as.integer(nvat01),
+                                        as.integer(nvat02),
+                                        as.integer(nvat12),
+                                        as.double(times$start[ids02_1]),
+                                        as.double(times$end[ids02_1]),
+                                        likelihood_res=as.double(res),
+                                        PACKAGE="HIDeM")$likelihood_res
+        }, error = function(e) {
+          # Return NULL on error to skip this patient
+          NULL
+        })
+      }else{out02_1<-NULL}
     }
     
     # 31/08/2026 : do not estimate weights with our model 
@@ -982,6 +1216,13 @@ if(length(control$NsampleHY)!=1)stop("Length of control$NsampleHY need to be 1")
   }else{
     CIF01<-NULL
     id_above1<-NULL
+  }
+  
+  if(!is.null(times)){
+    times$prediction_p01<-out01
+    times$prediction_p02_0<-out02_0
+    times$prediction_p02_1<-out02_1
+    times$prediction_p00<-out00
   }
   
   # 31/08/2026 : do not estimate weights with our model 
