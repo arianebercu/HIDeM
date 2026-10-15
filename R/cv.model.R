@@ -853,7 +853,8 @@ threshold.beta_weib<-function(beta,vw,s,nva01Y,nva02Y,nva12Y,npm01,npm02,npm12,f
   NEW.BETA.all<-beta
   penalty.factor0<-penalty.factor
   penalty.factor<-penalty.factor[fix==0]
-  penalty.weights<-penalty.factor[fix==0]
+  penalty.weights0<-penalty.weights
+  penalty.weights<-penalty.weights[fix==0]
   #browser()
   num<-sapply(c(1:dim(v)[1]),FUN=function(x){
     (vw*fu[x]-sum(v[x,-x]*BETA[-x])+sum(BETA*v[x,]))/penalty.weights[x]
@@ -1191,7 +1192,7 @@ threshold.beta_weib<-function(beta,vw,s,nva01Y,nva02Y,nva12Y,npm01,npm02,npm12,f
                                      alpha=alpha,
                                      penalty.factor=penalty.factor0,
                                      penalty=penalty,
-                                     penalty.weights=penalty.weights)
+                                     penalty.weights=penalty.weights0)
 
   return(list(res=res,b=b))
 }
@@ -1204,13 +1205,14 @@ threshold.beta<-function(beta,vw,s,nva01Y,nva02Y,nva12Y,npm01,npm02,npm12,fix,v,
                               p01,p02,p12,dimp01,dimp02,dimp12,Ntime,lambda,alpha,
                               penalty.factor,penalty,penalty.weights){
   
-  browser()
+
   # add to do base::which for CRAN check 
   BETA<-beta[fix==0]
   NEW.BETA.all<-beta
   penalty.factor0<-penalty.factor
   penalty.factor<-penalty.factor[fix==0]
-  penalty.weights<-penalty.factor[fix==0]
+  penalty.weights0<-penalty.weights
+  penalty.weights<-penalty.weights[fix==0]
   
   #browser()
   num<-sapply(c(1:dim(v)[1]),FUN=function(x){
@@ -1555,7 +1557,7 @@ threshold.beta<-function(beta,vw,s,nva01Y,nva02Y,nva12Y,npm01,npm02,npm12,fix,v,
                                       alpha=alpha,
                                       penalty.factor=penalty.factor0,
                                       penalty=penalty,
-                                      penalty.weights=penalty.weights)
+                                      penalty.weights=penalty.weights0)
   
   return(list(res=res,b=b))
 }

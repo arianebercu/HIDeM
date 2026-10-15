@@ -445,7 +445,7 @@ for(idsample in 1:Nsample){
                                         # we have issue if res is NA or if not higher than previous one 
                                         # if not better or do not exist need to readjust
                                         # value of beta 
-                                        step<-0.1*max(abs(fu/diag(V)))
+                                        step<-0.5*max(abs(fu/diag(V)))
                                         step<-log(step)
                                         
                                         DYNres<-DYNsearpas(step=step,
@@ -1184,7 +1184,7 @@ for(idsample in 1:Nsample){
                                             # we have issue if res is NA or if not higher than previous one 
                                             # if not better or do not exist need to readjust
                                             # value of beta 
-                                            step<-0.1*max(abs(fu/diag(V)))
+                                            step<-0.5*max(abs(fu/diag(V)))
                                             step<-log(step)
                                             
                                             DYNres<-DYNsearpas(step=step,

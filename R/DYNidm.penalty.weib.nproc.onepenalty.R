@@ -439,7 +439,7 @@ DYNidm.penalty.weib.nproc.onepenalty<-function(beta.start,
                                                                       # 
                                                                       
                                                                       #25/09/2026 : update of beta with a walk around best
-                                                                      step<-0.1*max(abs(fu/diag(V)))
+                                                                      step<-0.5*max(abs(fu/diag(V)))
                                                                       step<-log(step)
                                                                       
                                                                       DYNres<-DYNsearpas_weib(step=step,
@@ -1132,7 +1132,7 @@ DYNidm.penalty.weib.nproc.onepenalty<-function(beta.start,
                                                                           #                                     penalty.weights=penalty.weights[,id.lambda])
                                                                           # 
                                                                           #25/09/2026 : update of beta with a walk around best
-                                                                          step<-0.1*max(abs(fu/diag(V)))
+                                                                          step<-0.5*max(abs(fu/diag(V)))
                                                                           step<-log(step)
                                                                           
                                                                           DYNres<-DYNsearpas_weib(step=step,

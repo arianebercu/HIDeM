@@ -165,8 +165,7 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,size_spline,
     dataY[,colnames(dataY)%in%id]<-as.numeric(dataY[,colnames(dataY)%in%id])
     # to keep tracks of time order for each individual 
     dataY$order<-as.numeric(ave(dataY[,colnames(dataY)%in%id], cumsum(c(TRUE, diff(dataY[,colnames(dataY)%in%id]) != 0)), FUN = seq_along))
-    
-    browser()
+
     
     if(length(outcome01)>=1){
       y01k<-dataY[dataY$Outcome%in%outcome01,]

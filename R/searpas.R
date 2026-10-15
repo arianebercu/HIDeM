@@ -575,7 +575,7 @@ DYNsearpas <- function(step,b,res.out.error,fistart,s,nva01Y,nva02Y,nva12Y,npm01
     return(list(vm=vm,fim=fim,bim=bim))
   }
   
-  browser()
+
   vlw1 <- 0
   vlw2 <- vlw1+step
   fi1 <- threshold.beta(beta=b,
