@@ -105,7 +105,7 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,size_spline,
   
   npm02<-ifelse(nvat02>0,sum(fix0[(size_spline+1+nvat01):(size_spline+nvat01+nvat02)]==0),0)
   npm02Y<-ifelse(p02>0,sum(fix0[(size_spline+1+nvat01+nvat02+nvat12+p01):(size_spline+nvat01+nvat02+nvat12+p01+p02)]==0),0)
-  npm12<-ifelse(nvat12>0,sum(fix0[(size_spline+1+nvat01+nvat02):(size_spline+1+nvat01+nvat02+nvat12)]==0),0)
+  npm12<-ifelse(nvat12>0,sum(fix0[(size_spline+1+nvat01+nvat02):(size_spline+nvat01+nvat02+nvat12)]==0),0)
   npm12Y<-ifelse(p12>0,sum(fix0[(size_spline+1+nvat01+nvat02+nvat12+p01+p02):(size_spline+nvat01+nvat02+nvat12+p01+p12+p02)]==0),0)
   
   if(partialH==F){
@@ -116,7 +116,7 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,size_spline,
   
   outputall<-list()
   length(outputall)<-Nsample
-
+  
   if(nlambda>1){
   for(idsample in 1:Nsample){
     
@@ -166,6 +166,7 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,size_spline,
     # to keep tracks of time order for each individual 
     dataY$order<-as.numeric(ave(dataY[,colnames(dataY)%in%id], cumsum(c(TRUE, diff(dataY[,colnames(dataY)%in%id]) != 0)), FUN = seq_along))
     
+    browser()
     
     if(length(outcome01)>=1){
       y01k<-dataY[dataY$Outcome%in%outcome01,]
@@ -198,7 +199,7 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,size_spline,
   if(nproc >1){
     
     
-    outputNsample<-DYNidm.penalty.spline.nproc(beta.start=beta.start,
+    outputNsample<-DYNidm.penalty.splines.nproc(beta.start=beta.start,
                                              s.start=s.start,
                                              npm01=npm01,
                                              npm02=npm02,
@@ -267,7 +268,7 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,size_spline,
     
   }else{
     
-    outputNsample<-DYNidm.penalty.spline.nonproc(beta.start=beta.start,
+    outputNsample<-DYNidm.penalty.splines.nonproc(beta.start=beta.start,
                                                s.start=s.start,
                                                npm01=npm01,
                                                npm02=npm02,
@@ -343,7 +344,7 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,size_spline,
   }else{ #can do parallelisation on the sample 
     if(nproc==1){
       
-      outputall<-DYNidm.penalty.spline.nonproc.onepenalty(beta.start=beta.start,
+      outputall<-DYNidm.penalty.splines.nonproc.onepenalty(beta.start=beta.start,
                                                    s.start=s.start,
                                                    npm01=npm01,
                                                    npm02=npm02,
@@ -418,7 +419,7 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                                    scale.X=scale.X)
     }else{
       
-      outputall<-DYNidm.penalty.spline.nonproc.onepenalty(beta.start=beta.start,
+      outputall<-DYNidm.penalty.splines.nproc.onepenalty(beta.start=beta.start,
                                                           s.start=s.start,
                                                           npm01=npm01,
                                                           npm02=npm02,
@@ -439,10 +440,12 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                                           fix00=fix00,
                                                           fix0.beta=fix0.beta,
                                                           size_V=size_V,
+                                                         clustertype=clustertype,
                                                           epsa=epsa,
                                                           epsb=epsb,
                                                           epsd=epsd,
                                                           eps.eigen=eps.eigen,
+                                                         nproc=nproc,
                                                           maxiter=maxiter,
                                                           maxiter.pena=maxiter.pena,
                                                           ctime=ctime,
@@ -490,8 +493,6 @@ DYNidm.penalty.splines<-function(b,fix0,size_V,size_spline,
                                                           assoc=assoc,
                                                           seed=seed,
                                                           BLUP=BLUP,
-                                                          nproc=nproc,
-                                                          clustertype=clustertype,
                                                           scale.X=scale.X)
       
       

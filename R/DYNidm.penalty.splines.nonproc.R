@@ -79,6 +79,7 @@ if(partialH==F){
                                     eval.loglik<-rep(NA,maxiter+1)
                                     eval.validity<-rep(NA,maxiter+1)
                                     
+                                   
                                     
                                     while(converged==F & ite<=maxiter){
                                       
@@ -87,7 +88,7 @@ if(partialH==F){
                                       bfix<-b[fix0==1]
                                       b<-b[fix0==0]
                                       
-                                      
+                                      browser()
                                       output<-DYNderiva(
                                         h=1e-8,
                                         b=b,
@@ -373,6 +374,9 @@ if(partialH==F){
                                                          nva01Y=npm01Y,
                                                          nva02Y=npm02Y,
                                                          nva12Y=npm12Y,
+                                                         npm01=npm01,
+                                                         npm02=npm02,
+                                                         npm12=npm12,
                                                          fix=fix0[(size_spline+1):size_V],
                                                          zi01=knots01,
                                                          zi02=knots02,
@@ -390,9 +394,9 @@ if(partialH==F){
                                                          dimnva01=dimnva01,
                                                          dimnva02=dimnva02,
                                                          dimnva12=dimnva12,
-                                                         nva01=nvat01,
-                                                         nva02=nvat02,
-                                                         nva12=nvat12,
+                                                        nva01=nvat01,
+                                                        nva02=nvat02,
+                                                        nva12=nvat12,
                                                          t0=t0,
                                                          t1=t1,
                                                          t2=t2,
@@ -414,7 +418,7 @@ if(partialH==F){
                                                          penalty=penalty,
                                                          penalty.weights=penalty.weights[,id.lambda])
                                       
-                                      
+                                      browser()
                                       res<-DYNres$fim
                                       betanew<-DYNres$bim[(size_spline+1):size_V]
                                       
@@ -1113,6 +1117,9 @@ if(partialH==F){
                                                              nva01Y=npm01Y,
                                                              nva02Y=npm02Y,
                                                              nva12Y=npm12Y,
+                                                             npm01=npm01,
+                                                             npm02=npm02,
+                                                             npm12=npm12,
                                                              fix=fix0[(size_spline+1):size_V],
                                                              zi01=knots01,
                                                              zi02=knots02,
@@ -1899,6 +1906,9 @@ if(partialH==F){
                                                            nva01Y=npm01Y,
                                                            nva02Y=npm02Y,
                                                            nva12Y=npm12Y,
+                                                           npm01=npm01,
+                                                           npm02=npm02,
+                                                           npm12=npm12,
                                                            fix=fix0[(size_spline+1):size_V],
                                                            zi01=knots01,
                                                            zi02=knots02,
@@ -2661,6 +2671,9 @@ if(partialH==F){
                                                                nva01Y=npm01Y,
                                                                nva02Y=npm02Y,
                                                                nva12Y=npm12Y,
+                                                               npm01=npm01,
+                                                               npm02=npm02,
+                                                               npm12=npm12,
                                                                fix=fix0[(size_spline+1):size_V],
                                                                zi01=knots01,
                                                                zi02=knots02,

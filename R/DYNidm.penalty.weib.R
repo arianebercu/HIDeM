@@ -106,7 +106,7 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
   npm01Y<-ifelse(p01>0,sum(fix0[(7+nvat01+nvat02+nvat12):(6+nvat01+nvat02+nvat12+p01)]==0),0)
   npm02<-ifelse(nvat02>0,sum(fix0[(7+nvat01):(6+nvat01+nvat02)]==0),0)
   npm02Y<-ifelse(p02>0,sum(fix0[(7+nvat01+nvat02+nvat12+p01):(6+nvat01+nvat02+nvat12+p01+p02)]==0),0)
-  npm12<-ifelse(nvat12>0,sum(fix0[(7+nvat01+nvat02):(7+nvat01+nvat02+nvat12)]==0),0)
+  npm12<-ifelse(nvat12>0,sum(fix0[(7+nvat01+nvat02):(6+nvat01+nvat02+nvat12)]==0),0)
   npm12Y<-ifelse(p12>0,sum(fix0[(7+nvat01+nvat02+nvat12+p01+p02):(6+nvat01+nvat02+nvat12+p01+p12+p02)]==0),0)
   
   if(partialH==F){

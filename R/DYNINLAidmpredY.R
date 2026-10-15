@@ -53,44 +53,64 @@ DYNINLAidmpredY<-function(object,newdata,s,
         timePoints00<-NULL
         timePoints02_0<-NULL
         timePoints02_1<-NULL
+        timePoints11<-NULL
+        timePoints12<-NULL
         for(k in idx){
-          if(times$p01[idx]==T){
+          if(times$p01[k]==T){
             timePoints01k<-gauss_kronrod_points_pred1_01(lower.intdouble=times$start[k],
                                                     upper.intdouble=times$end[k])
             timePoints01k<-data.frame(index=c(rep(x,length(timePoints01k))),
-                                      timespoints=c(timePoints01k))
+                                      timePoints=c(timePoints01k))
             timePoints01<-rbind(timePoints01,timePoints01k)
             
           }
-          if(times$p00[idx]==T){
-            timePoints00k<-gauss_kronrod_points_pred0(lower.intouble=times$start[k],
+          if(times$p00[k]==T){
+            timePoints00k<-gauss_kronrod_points_pred0(lower.intdouble=times$start[k],
                                        upper.intdouble=times$end[k])
             timePoints00k<-data.frame(index=c(rep(x,length(timePoints00k))),
-                                      timespoints=c(timePoints00k))
+                                      timePoints=c(timePoints00k))
             timePoints00<-rbind(timePoints00,timePoints00k)
             
           }
-          if(times$p02_0[idx]==T){
+          if(times$p11[k]==T){
+            timePoints11k<-gauss_kronrod_points_pred0(lower.intdouble=times$start[k],
+                                                      upper.intdouble=times$end[k])
+            timePoints11k<-data.frame(index=c(rep(x,length(timePoints11k))),
+                                      timePoints=c(timePoints11k))
+            timePoints11<-rbind(timePoints11,timePoints11k)
             
-            timePoints02_0k<-gauss_kronrod_points_pred0_ext(lower.intouble=times$start[k],
+          }
+          if(times$p02_0[k]==T){
+            
+            timePoints02_0k<-gauss_kronrod_points_pred0_ext(lower.intdouble=times$start[k],
                                                       upper.intdouble=times$end[k])
             timePoints02_0k<-data.frame(index=c(rep(x,length(timePoints02_0k))),
-                                      timespoints=c(timePoints02_0k))
+                                        timePoints=c(timePoints02_0k))
             timePoints02_0<-rbind(timePoints02_0,timePoints02_0k)
             
           }
-          if(times$p02_1[idx]==T){
+          
+          if(times$p12[k]==T){
+            
+            timePoints12k<-gauss_kronrod_points_pred0_ext(lower.intdouble=times$start[k],
+                                                            upper.intdouble=times$end[k])
+            timePoints12k<-data.frame(index=c(rep(x,length(timePoints12k))),
+                                        timePoints=c(timePoints12k))
+            timePoints12<-rbind(timePoints12,timePoints12k)
+            
+          }
+          if(times$p02_1[k]==T){
             
             timePoints02_1k<-gauss_kronrod_points_pred1_01_12(lower.intdouble=times$start[k],
                                                          upper.intdouble=times$end[k])
             timePoints02_1k<-data.frame(index=c(rep(x,length(timePoints02_1k))),
-                                      timespoints=c(timePoints02_1k))
+                                        timePoints=c(timePoints02_1k))
             timePoints02_1<-rbind(timePoints02_1,timePoints02_1k)
             
           }
           
         }
-        timePoints1<-rbind(timePoints1,timePoints00, timePoints02_0,timePoints01,timePoints02_1)
+        timePoints1<-rbind(timePoints1,timePoints00, timePoints02_0,timePoints11,timePoints12,timePoints01,timePoints02_1)
     
       return( timePoints1)
       }
