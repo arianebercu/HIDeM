@@ -1328,26 +1328,35 @@ DYNidm <- function(formula01,
       #   }
       # }
 ############################ set value of penalty parameters ###################
-          if(penalty%in%c("lasso","adaptive.lasso")){alpha<-1}
-          if(penalty=="ridge"){alpha<-0}
-          if(length(alpha)>1)stop("Can only specify one value for alpha")
-          if(penalty=="mcp"){
-            if(!inherits(alpha,c("numeric","integer"))  | alpha<=1)stop("Alpha need to be a numeric and superior to 1")
-            
-          }
       
-          if(penalty=="scad"){
-            if(!inherits(alpha,c("numeric","integer")) | alpha<=2)stop("Alpha need to be a numeric and superior to 2")
-            
-          }
-          if(penalty%in%c("elasticnet")){
-           if(!inherits(alpha,c("numeric","integer"))  | alpha>1 | alpha <0)stop("Alpha need to be a numeric between 0 and 1")
-          }
-          if(!inherits(nlambda01,c("numeric","integer")) | round(nlambda01)!=nlambda01 | nlambda01<1)stop("Nlambda01 need to be an integer superior or equal to 1")
-          if(!inherits(nlambda02,c("numeric","integer")) | round(nlambda02)!=nlambda02 | nlambda02<1)stop("Nlambda02 need to be an integer superior or equal to 1")
-          if(!inherits(nlambda12,c("numeric","integer")) | round(nlambda12)!=nlambda12 | nlambda12<1)stop("Nlambda12 need to be an integer superior or equal to 1")
-          
-          pace.lambda<-ifelse(N<size_V,0.05,0.0001)
+      if(penalty=="lasso"){alpha<-list(rep(1,nlambda01),
+                                       rep(1,nlambda02),rep(1,nlambda12))}
+      if(penalty=="ridge"){alpha<-list(rep(0,nlambda01),
+                                       rep(0,nlambda02),rep(0,nlambda12))}
+      if(!inherits(alpha,c("list"))){
+        stop(paste0("Alpha needs to be list with 3 elements each of length :",nlambda01,",",nlambda02,",",nlambda12,"."))
+      }
+      if(length(alpha)!=3){
+        stop(paste0("Alpha needs to be list with 3 elements each of length :",nlambda01,",",nlambda02,",",nlambda12,"."))
+      }
+      
+      if(length(alpha[[1]])!=nlambda01|length(alpha[[2]])!=nlambda02|length(alpha[[3]])!=nlambda12){
+        stop(paste0("Alpha needs to be list with 3 elements each of length :",nlambda01,",",nlambda02,",",nlambda12,"."))
+      }
+      
+      if(penalty=="mcp"){
+        if(any(unlist(alpha)<=1))stop("Each element of alpha need to be a numeric and superior to 1")
+        
+      }
+      
+      if(penalty=="scad"){
+        if(any(unlist(alpha)<=2))stop("Each element of alpha need to be a numeric and superior to 2")
+        
+      }
+      if(penalty%in%c("elasticnet")){
+        if(any(unlist(alpha)>1) | any(unlist(alpha) <0))stop("Each element of alpha need to be a numeric between 0 and 1")
+      }
+       pace.lambda<-ifelse(N<size_V,0.05,0.0001)
           
 ################################################################################
 ########################## perform penalty algorithm ###########################

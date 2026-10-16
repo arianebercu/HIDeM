@@ -40,7 +40,7 @@ DYNidm.penalty.weib.nonproc.onepenalty<-function(beta.start,
            H=cbind(x$H,newx$H),
            fix=cbind(x$fix,newx$fix),
            lambda=cbind(x$lambda,newx$lambda),
-           alpha=c(x$alpha,newx$alpha),
+           alpha=cbind(x$alpha,newx$alpha),
            fn.value=c(x$fn.value,newx$fn.value),
            fn.value.pena=c(x$fn.value.pena,newx$fn.value.pena),
            ni=c(x$ni,newx$ni),
@@ -265,7 +265,7 @@ DYNidm.penalty.weib.nonproc.onepenalty<-function(beta.start,
                                                                                      Ntime=NtimePoints,
                                                                                      
                                                                                      lambda=lambda[id.lambda,],
-                                                                                     alpha=alpha,
+                                                                                     alpha=alpha[id.lambda,],
                                                                                      penalty.factor=penalty.factor,
                                                                                      penalty=penalty,penalty.weights=penalty.weights[,id.lambda])
                                           }
@@ -484,7 +484,7 @@ DYNidm.penalty.weib.nonproc.onepenalty<-function(beta.start,
                                                                   dimp12=dimp12,
                                                                   Ntime=NtimePoints,
                                                                   lambda=lambda[id.lambda,],
-                                                                  alpha=alpha,
+                                                                  alpha=alpha[id.lambda,],
                                                                   penalty.factor=penalty.factor,
                                                                   penalty=penalty,
                                                                   penalty.weights=penalty.weights[,id.lambda])
@@ -558,7 +558,7 @@ DYNidm.penalty.weib.nonproc.onepenalty<-function(beta.start,
                                                            dimp12=dimp12,
                                                            Ntime=NtimePoints,
                                                            lambda=lambda[id.lambda,],
-                                                           alpha=alpha,
+                                                           alpha=alpha[id.lambda,],
                                                            penalty.factor=penalty.factor,
                                                            penalty=penalty,penalty.weights=penalty.weights[,id.lambda])
                                             
@@ -602,7 +602,7 @@ DYNidm.penalty.weib.nonproc.onepenalty<-function(beta.start,
                                                                                 dimp12=dimp12,
                                                                                 Ntime=NtimePoints,
                                                                                 lambda=lambda[id.lambda,],
-                                                                                alpha=alpha,
+                                                                                alpha=alpha[id.lambda,],
                                                                                 penalty.factor=penalty.factor,
                                                                                 penalty=penalty,penalty.weights=penalty.weights[,id.lambda])
                                             
@@ -767,23 +767,23 @@ DYNidm.penalty.weib.nonproc.onepenalty<-function(beta.start,
                                             
                                             # calculate loglik pen 
                                             if(penalty%in%c("lasso","adaptative.lasso","ridge","elasticnet","corrected.elasticnet")){
-                                              fn.valuenew<-output.mla$fn.value-lambda[id.lambda,1]*alpha*sum(penalty.01*abs(b01))-lambda[id.lambda,1]*(1-alpha)*sum(b01*b01)
-                                              fn.valuenew<-fn.valuenew-lambda[id.lambda,2]*alpha*sum(penalty.02*abs(b02))-lambda[id.lambda,2]*(1-alpha)*sum(b02*b02)
-                                              fn.valuenew<-fn.valuenew-lambda[id.lambda,3]*alpha*sum(penalty.12*abs(b12))-lambda[id.lambda,3]*(1-alpha)*sum(b12*b12)
+                                              fn.valuenew<-output.mla$fn.value-lambda[id.lambda,1]*alpha[id.lambda,1]*sum(penalty.01*abs(b01))-lambda[id.lambda,1]*(1-alpha[id.lambda,1])*sum(b01*b01)
+                                              fn.valuenew<-fn.valuenew-lambda[id.lambda,2]*alpha[id.lambda,2]*sum(penalty.02*abs(b02))-lambda[id.lambda,2]*(1-alpha[id.lambda,2])*sum(b02*b02)
+                                              fn.valuenew<-fn.valuenew-lambda[id.lambda,3]*alpha[id.lambda,3]*sum(penalty.12*abs(b12))-lambda[id.lambda,3]*(1-alpha[id.lambda,3])*sum(b12*b12)
                                             }
                                             if(penalty=="mcp"){
                                               
-                                              p01.threshold<-rep(alpha*lambda[id.lambda,1]*lambda[id.lambda,1]/2,length(b01))
-                                              idbeta<-which(abs(b01)<=alpha*lambda[id.lambda,1])
-                                              p01.threshold[idbeta]<-lambda[id.lambda,1]*abs(b01[idbeta])-((b01[idbeta]*b01[idbeta])/2*alpha)
+                                              p01.threshold<-rep(alpha[id.lambda,1]*lambda[id.lambda,1]*lambda[id.lambda,1]/2,length(b01))
+                                              idbeta<-which(abs(b01)<=alpha[id.lambda,1]*lambda[id.lambda,1])
+                                              p01.threshold[idbeta]<-lambda[id.lambda,1]*abs(b01[idbeta])-((b01[idbeta]*b01[idbeta])/2*alpha[id.lambda,1])
                                               
-                                              p02.threshold<-rep(alpha*lambda[id.lambda,2]*lambda[id.lambda,2]/2,length(b02))
-                                              idbeta<-which(abs(b02)<=alpha*lambda[id.lambda,2])
-                                              p02.threshold[idbeta]<-lambda[id.lambda,2]*abs(b02[idbeta])-((b02[idbeta]*b02[idbeta])/2*alpha)
+                                              p02.threshold<-rep(alpha[id.lambda,2]*lambda[id.lambda,2]*lambda[id.lambda,2]/2,length(b02))
+                                              idbeta<-which(abs(b02)<=alpha[id.lambda,2]*lambda[id.lambda,2])
+                                              p02.threshold[idbeta]<-lambda[id.lambda,2]*abs(b02[idbeta])-((b02[idbeta]*b02[idbeta])/2*alpha[id.lambda,2])
                                               
-                                              p12.threshold<-rep(alpha*lambda[id.lambda,3]*lambda[id.lambda,3]/2,length(b12))
-                                              idbeta<-which(abs(b12)<=alpha*lambda[id.lambda,3])
-                                              p12.threshold[idbeta]<-lambda[id.lambda,3]*abs(b12[idbeta])-((b12[idbeta]*b12[idbeta])/2*alpha)
+                                              p12.threshold<-rep(alpha[id.lambda,3]*lambda[id.lambda,3]*lambda[id.lambda,3]/2,length(b12))
+                                              idbeta<-which(abs(b12)<=alpha[id.lambda,3]*lambda[id.lambda,3])
+                                              p12.threshold[idbeta]<-lambda[id.lambda,3]*abs(b12[idbeta])-((b12[idbeta]*b12[idbeta])/2*alpha[id.lambda,3])
                                               
                                               fn.valuenew<-output.mla$fn.value-sum(p01.threshold)-sum(p02.threshold)-sum(p12.threshold)
                                               
@@ -791,23 +791,23 @@ DYNidm.penalty.weib.nonproc.onepenalty<-function(beta.start,
                                             
                                             if(penalty=="scad"){
                                               
-                                              p01.threshold<-rep((lambda[id.lambda,1]^2)*(alpha+1)/2,length(b01))
+                                              p01.threshold<-rep((lambda[id.lambda,1]^2)*(alpha[id.lambda,1]+1)/2,length(b01))
                                               idbeta<-which(abs(b01)<=lambda[id.lambda,1])
                                               p01.threshold[idbeta]<-lambda[id.lambda,1]*abs(b01[idbeta])
-                                              idbeta<-which(abs(b01)<lambda[id.lambda,1]*alpha & abs(b01)>lambda[id.lambda,1])
-                                              p01.threshold[idbeta]<-(2*alpha*lambda[id.lambda,1]*abs(b01[idbeta])-b01[idbeta]^2-lambda[id.lambda,1]^2)/(2*(alpha-1))
+                                              idbeta<-which(abs(b01)<lambda[id.lambda,1]*alpha[id.lambda,1] & abs(b01)>lambda[id.lambda,1])
+                                              p01.threshold[idbeta]<-(2*alpha[id.lambda,1]*lambda[id.lambda,1]*abs(b01[idbeta])-b01[idbeta]^2-lambda[id.lambda,1]^2)/(2*(alpha[id.lambda,1]-1))
                                               
-                                              p02.threshold<-rep((lambda[id.lambda,2]^2)*(alpha+1)/2,length(b02))
+                                              p02.threshold<-rep((lambda[id.lambda,2]^2)*(alpha[id.lambda,2]+1)/2,length(b02))
                                               idbeta<-which(abs(b02)<=lambda[id.lambda,2])
                                               p02.threshold[idbeta]<-lambda[id.lambda,2]*abs(b02[idbeta])
-                                              idbeta<-which(abs(b02)<lambda[id.lambda,2]*alpha & abs(b02)>lambda[id.lambda,2])
-                                              p02.threshold[idbeta]<-(2*alpha*lambda[id.lambda,2]*abs(b02[idbeta])-b02[idbeta]^2-lambda[id.lambda,2]^2)/(2*(alpha-1))
+                                              idbeta<-which(abs(b02)<lambda[id.lambda,2]*alpha[id.lambda,2] & abs(b02)>lambda[id.lambda,2])
+                                              p02.threshold[idbeta]<-(2*alpha[id.lambda,2]*lambda[id.lambda,2]*abs(b02[idbeta])-b02[idbeta]^2-lambda[id.lambda,2]^2)/(2*(alpha[id.lambda,2]-1))
                                               
-                                              p12.threshold<-rep((lambda[id.lambda,3]^2)*(alpha+1)/2,length(b12))
+                                              p12.threshold<-rep((lambda[id.lambda,3]^2)*(alpha[id.lambda,3]+1)/2,length(b12))
                                               idbeta<-which(abs(b12)<=lambda[id.lambda,3])
                                               p12.threshold[idbeta]<-lambda[id.lambda,3]*abs(b12[idbeta])
-                                              idbeta<-which(abs(b12)<lambda[id.lambda,3]*alpha & abs(b12)>lambda[id.lambda,3])
-                                              p12.threshold[idbeta]<-(2*alpha*lambda[id.lambda,3]*abs(b12[idbeta])-b12[idbeta]^2-lambda[id.lambda,3]^2)/(2*(alpha-1))
+                                              idbeta<-which(abs(b12)<lambda[id.lambda,3]*alpha[id.lambda,3] & abs(b12)>lambda[id.lambda,3])
+                                              p12.threshold[idbeta]<-(2*alpha[id.lambda,3]*lambda[id.lambda,3]*abs(b12[idbeta])-b12[idbeta]^2-lambda[id.lambda,3]^2)/(2*(alpha[id.lambda,3]-1))
                                               
                                               fn.valuenew<-output.mla$fn.value-sum(p01.threshold)-sum(p02.threshold)-sum(p12.threshold)
                                               
@@ -904,7 +904,7 @@ DYNidm.penalty.weib.nonproc.onepenalty<-function(beta.start,
                                         return(list(b=c(s,beta),
                                                     H=V0,
                                                     lambda=as.double(lambda[id.lambda,]),
-                                                    alpha=alpha,
+                                                    alpha=as.double(alpha[id.lambda,]),
                                                     fn.value=ifelse(!exists("output.mla"),NA,output.mla$fn.value),
                                                     fn.value.pena=fn.value,
                                                     ni=ite,
@@ -1024,7 +1024,7 @@ DYNidm.penalty.weib.nonproc.onepenalty<-function(beta.start,
                                                                                          Ntime=NtimePoints,
                                                                                          
                                                                                          lambda=lambda[id.lambda,],
-                                                                                         alpha=alpha,
+                                                                                         alpha=alpha[id.lambda,],
                                                                                          penalty.factor=penalty.factor,
                                                                                          penalty=penalty,penalty.weights=penalty.weights[,id.lambda])
                                               }
@@ -1221,7 +1221,7 @@ DYNidm.penalty.weib.nonproc.onepenalty<-function(beta.start,
                                                                       dimp12=dimp12,
                                                                       Ntime=NtimePoints,
                                                                       lambda=lambda[id.lambda,],
-                                                                      alpha=alpha,
+                                                                      alpha=alpha[id.lambda,],
                                                                       penalty.factor=penalty.factor,
                                                                       penalty=penalty,
                                                                       penalty.weights=penalty.weights[,id.lambda])
@@ -1295,7 +1295,7 @@ DYNidm.penalty.weib.nonproc.onepenalty<-function(beta.start,
                                                                dimp12=dimp12,
                                                                Ntime=NtimePoints,
                                                                lambda=lambda[id.lambda,],
-                                                               alpha=alpha,
+                                                               alpha=alpha[id.lambda,],
                                                                penalty.factor=penalty.factor,
                                                                penalty=penalty,penalty.weights=penalty.weights[,id.lambda])
                                                 
@@ -1338,7 +1338,7 @@ DYNidm.penalty.weib.nonproc.onepenalty<-function(beta.start,
                                                                                     Ntime=NtimePoints,
                                                                                     
                                                                                     lambda=lambda[id.lambda,],
-                                                                                    alpha=alpha,
+                                                                                    alpha=alpha[id.lambda,],
                                                                                     penalty.factor=penalty.factor,
                                                                                     penalty=penalty,penalty.weights=penalty.weights[,id.lambda])
                                                 
@@ -1463,23 +1463,23 @@ DYNidm.penalty.weib.nonproc.onepenalty<-function(beta.start,
                                                 
                                                 # calculate loglik pen 
                                                 if(penalty%in%c("lasso","adaptative.lasso","ridge","elasticnet","corrected.elasticnet")){
-                                                  fn.valuenew<-output.mla$fn.value-lambda[id.lambda,1]*alpha*sum(penalty.01*abs(b01))-lambda[id.lambda,1]*(1-alpha)*sum(b01*b01)
-                                                  fn.valuenew<-fn.valuenew-lambda[id.lambda,2]*alpha*sum(penalty.02*abs(b02))-lambda[id.lambda,2]*(1-alpha)*sum(b02*b02)
-                                                  fn.valuenew<-fn.valuenew-lambda[id.lambda,3]*alpha*sum(penalty.12*abs(b12))-lambda[id.lambda,3]*(1-alpha)*sum(b12*b12)
+                                                  fn.valuenew<-output.mla$fn.value-lambda[id.lambda,1]*alpha[id.lambda,1]*sum(penalty.01*abs(b01))-lambda[id.lambda,1]*(1-alpha[id.lambda,1])*sum(b01*b01)
+                                                  fn.valuenew<-fn.valuenew-lambda[id.lambda,2]*alpha[id.lambda,2]*sum(penalty.02*abs(b02))-lambda[id.lambda,2]*(1-alpha[id.lambda,2])*sum(b02*b02)
+                                                  fn.valuenew<-fn.valuenew-lambda[id.lambda,3]*alpha[id.lambda,3]*sum(penalty.12*abs(b12))-lambda[id.lambda,3]*(1-alpha[id.lambda,3])*sum(b12*b12)
                                                 }
                                                 if(penalty=="mcp"){
                                                   
-                                                  p01.threshold<-rep(alpha*lambda[id.lambda,1]*lambda[id.lambda,1]/2,length(b01))
-                                                  idbeta<-which(abs(b01)<=alpha*lambda[id.lambda,1])
-                                                  p01.threshold[idbeta]<-lambda[id.lambda,1]*abs(b01[idbeta])-((b01[idbeta]*b01[idbeta])/2*alpha)
+                                                  p01.threshold<-rep(alpha[id.lambda,1]*lambda[id.lambda,1]*lambda[id.lambda,1]/2,length(b01))
+                                                  idbeta<-which(abs(b01)<=alpha[id.lambda,1]*lambda[id.lambda,1])
+                                                  p01.threshold[idbeta]<-lambda[id.lambda,1]*abs(b01[idbeta])-((b01[idbeta]*b01[idbeta])/2*alpha[id.lambda,1])
                                                   
-                                                  p02.threshold<-rep(alpha*lambda[id.lambda,2]*lambda[id.lambda,2]/2,length(b02))
-                                                  idbeta<-which(abs(b02)<=alpha*lambda[id.lambda,2])
-                                                  p02.threshold[idbeta]<-lambda[id.lambda,2]*abs(b02[idbeta])-((b02[idbeta]*b02[idbeta])/2*alpha)
+                                                  p02.threshold<-rep(alpha[id.lambda,2]*lambda[id.lambda,2]*lambda[id.lambda,2]/2,length(b02))
+                                                  idbeta<-which(abs(b02)<=alpha[id.lambda,2]*lambda[id.lambda,2])
+                                                  p02.threshold[idbeta]<-lambda[id.lambda,2]*abs(b02[idbeta])-((b02[idbeta]*b02[idbeta])/2*alpha[id.lambda,2])
                                                   
-                                                  p12.threshold<-rep(alpha*lambda[id.lambda,3]*lambda[id.lambda,3]/2,length(b12))
-                                                  idbeta<-which(abs(b12)<=alpha*lambda[id.lambda,3])
-                                                  p12.threshold[idbeta]<-lambda[id.lambda,3]*abs(b12[idbeta])-((b12[idbeta]*b12[idbeta])/2*alpha)
+                                                  p12.threshold<-rep(alpha[id.lambda,3]*lambda[id.lambda,3]*lambda[id.lambda,3]/2,length(b12))
+                                                  idbeta<-which(abs(b12)<=alpha[id.lambda,3]*lambda[id.lambda,3])
+                                                  p12.threshold[idbeta]<-lambda[id.lambda,3]*abs(b12[idbeta])-((b12[idbeta]*b12[idbeta])/2*alpha[id.lambda,3])
                                                   
                                                   fn.valuenew<-output.mla$fn.value-sum(p01.threshold)-sum(p02.threshold)-sum(p12.threshold)
                                                   
@@ -1487,23 +1487,23 @@ DYNidm.penalty.weib.nonproc.onepenalty<-function(beta.start,
                                                 
                                                 if(penalty=="scad"){
                                                   
-                                                  p01.threshold<-rep((lambda[id.lambda,1]^2)*(alpha+1)/2,length(b01))
+                                                  p01.threshold<-rep((lambda[id.lambda,1]^2)*(alpha[id.lambda,1]+1)/2,length(b01))
                                                   idbeta<-which(abs(b01)<=lambda[id.lambda,1])
                                                   p01.threshold[idbeta]<-lambda[id.lambda,1]*abs(b01[idbeta])
-                                                  idbeta<-which(abs(b01)<lambda[id.lambda,1]*alpha & abs(b01)>lambda[id.lambda,1])
-                                                  p01.threshold[idbeta]<-(2*alpha*lambda[id.lambda,1]*abs(b01[idbeta])-b01[idbeta]^2-lambda[id.lambda,1]^2)/(2*(alpha-1))
+                                                  idbeta<-which(abs(b01)<lambda[id.lambda,1]*alpha[id.lambda,1] & abs(b01)>lambda[id.lambda,1])
+                                                  p01.threshold[idbeta]<-(2*alpha[id.lambda,1]*lambda[id.lambda,1]*abs(b01[idbeta])-b01[idbeta]^2-lambda[id.lambda,1]^2)/(2*(alpha[id.lambda,1]-1))
                                                   
-                                                  p02.threshold<-rep((lambda[id.lambda,2]^2)*(alpha+1)/2,length(b02))
+                                                  p02.threshold<-rep((lambda[id.lambda,2]^2)*(alpha[id.lambda,2]+1)/2,length(b02))
                                                   idbeta<-which(abs(b02)<=lambda[id.lambda,2])
                                                   p02.threshold[idbeta]<-lambda[id.lambda,2]*abs(b02[idbeta])
-                                                  idbeta<-which(abs(b02)<lambda[id.lambda,2]*alpha & abs(b02)>lambda[id.lambda,2])
-                                                  p02.threshold[idbeta]<-(2*alpha*lambda[id.lambda,2]*abs(b02[idbeta])-b02[idbeta]^2-lambda[id.lambda,2]^2)/(2*(alpha-1))
+                                                  idbeta<-which(abs(b02)<lambda[id.lambda,2]*alpha[id.lambda,2] & abs(b02)>lambda[id.lambda,2])
+                                                  p02.threshold[idbeta]<-(2*alpha[id.lambda,2]*lambda[id.lambda,2]*abs(b02[idbeta])-b02[idbeta]^2-lambda[id.lambda,2]^2)/(2*(alpha[id.lambda,2]-1))
                                                   
-                                                  p12.threshold<-rep((lambda[id.lambda,3]^2)*(alpha+1)/2,length(b12))
+                                                  p12.threshold<-rep((lambda[id.lambda,3]^2)*(alpha[id.lambda,3]+1)/2,length(b12))
                                                   idbeta<-which(abs(b12)<=lambda[id.lambda,3])
                                                   p12.threshold[idbeta]<-lambda[id.lambda,3]*abs(b12[idbeta])
-                                                  idbeta<-which(abs(b12)<lambda[id.lambda,3]*alpha & abs(b12)>lambda[id.lambda,3])
-                                                  p12.threshold[idbeta]<-(2*alpha*lambda[id.lambda,3]*abs(b12[idbeta])-b12[idbeta]^2-lambda[id.lambda,3]^2)/(2*(alpha-1))
+                                                  idbeta<-which(abs(b12)<lambda[id.lambda,3]*alpha[id.lambda,3] & abs(b12)>lambda[id.lambda,3])
+                                                  p12.threshold[idbeta]<-(2*alpha[id.lambda,3]*lambda[id.lambda,3]*abs(b12[idbeta])-b12[idbeta]^2-lambda[id.lambda,3]^2)/(2*(alpha[id.lambda,3]-1))
                                                   
                                                   fn.valuenew<-output.mla$fn.value-sum(p01.threshold)-sum(p02.threshold)-sum(p12.threshold)
                                                   
@@ -1597,7 +1597,7 @@ DYNidm.penalty.weib.nonproc.onepenalty<-function(beta.start,
                                             return(list(b=c(s,beta),
                                                         H=V0,
                                                         lambda=as.double(lambda[id.lambda,]),
-                                                        alpha=alpha,
+                                                        alpha=as.double(alpha[id.lambda,]),
                                                         fn.value=ifelse(!exists("output.mla"),NA,output.mla$fn.value),
                                                         fn.value.pena=fn.value,
                                                         ni=ite,

@@ -285,24 +285,24 @@ gaussDYNidmlLikelihoodweibpena<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,
   }
   # lpen = l-pen
   if(penalty%in%c("lasso","ridge","elasticnet","adaptative.lasso")){
-    res<-res-lambda[,1]*alpha*sum(penalty.01*abs(b01))-lambda[,1]*(1-alpha)*sum(b01*b01)
-    res<-res-lambda[,2]*alpha*sum(penalty.02*abs(b02))-lambda[,2]*(1-alpha)*sum(b02*b02)
-    res<-res-lambda[,3]*alpha*sum(penalty.12*abs(b12))-lambda[,3]*(1-alpha)*sum(b12*b12)
+    res<-res-lambda[,1]*alpha[,1]*sum(penalty.01*abs(b01))-lambda[,1]*(1-alpha[,1])*sum(b01*b01)
+    res<-res-lambda[,2]*alpha[,2]*sum(penalty.02*abs(b02))-lambda[,2]*(1-alpha[,2])*sum(b02*b02)
+    res<-res-lambda[,3]*alpha[,3]*sum(penalty.12*abs(b12))-lambda[,3]*(1-alpha[,3])*sum(b12*b12)
   }
   
   if(penalty=="mcp"){
     
-    p01.threshold<-rep(alpha*lambda[,1]*lambda[,1]/2,length(b01))
-    idbeta<-which(abs(b01)<=alpha*lambda[,1])
-    p01.threshold[idbeta]<-lambda[,1]*abs(b01[idbeta])-((b01[idbeta]*b01[idbeta])/2*alpha)
+    p01.threshold<-rep(alpha[,1]*lambda[,1]*lambda[,1]/2,length(b01))
+    idbeta<-which(abs(b01)<=alpha[,1]*lambda[,1])
+    p01.threshold[idbeta]<-lambda[,1]*abs(b01[idbeta])-((b01[idbeta]*b01[idbeta])/2*alpha[,1])
     
-    p02.threshold<-rep(alpha*lambda[,2]*lambda[,2]/2,length(b02))
-    idbeta<-which(abs(b02)<=alpha*lambda[,2])
-    p02.threshold[idbeta]<-lambda[,2]*abs(b02[idbeta])-((b02[idbeta]*b02[idbeta])/2*alpha)
+    p02.threshold<-rep(alpha[,2]*lambda[,2]*lambda[,2]/2,length(b02))
+    idbeta<-which(abs(b02)<=alpha[,2]*lambda[,2])
+    p02.threshold[idbeta]<-lambda[,2]*abs(b02[idbeta])-((b02[idbeta]*b02[idbeta])/2*alpha[,2])
     
-    p12.threshold<-rep(alpha*lambda[,3]*lambda[,3]/2,length(b12))
-    idbeta<-which(abs(b12)<=alpha*lambda[,3])
-    p12.threshold[idbeta]<-lambda[,3]*abs(b12[idbeta])-((b12[idbeta]*b12[idbeta])/2*alpha)
+    p12.threshold<-rep(alpha[,3]*lambda[,3]*lambda[,3]/2,length(b12))
+    idbeta<-which(abs(b12)<=alpha[,3]*lambda[,3])
+    p12.threshold[idbeta]<-lambda[,3]*abs(b12[idbeta])-((b12[idbeta]*b12[idbeta])/2*alpha[,3])
     
     res<-res-sum(p01.threshold)-sum(p02.threshold)-sum(p12.threshold)
     
@@ -310,23 +310,23 @@ gaussDYNidmlLikelihoodweibpena<-function(b,npm,npar,bfix,fix,ctime,no,ve01,ve02,
   
   if(penalty=="scad"){
     
-    p01.threshold<-rep((lambda[,1]^2)*(alpha+1)/2,length(b01))
+    p01.threshold<-rep((lambda[,1]^2)*(alpha[,1]+1)/2,length(b01))
     idbeta<-which(abs(b01)<=lambda[,1])
     p01.threshold[idbeta]<-lambda[,1]*abs(b01[idbeta])
-    idbeta<-which(abs(b01)<lambda[,1]*alpha & abs(b01)>lambda[,1])
-    p01.threshold[idbeta]<-(2*alpha*lambda[,1]*abs(b01[idbeta])-b01[idbeta]^2-lambda[,1]^2)/(2*(alpha-1))
+    idbeta<-which(abs(b01)<lambda[,1]*alpha[,1] & abs(b01)>lambda[,1])
+    p01.threshold[idbeta]<-(2*alpha[,1]*lambda[,1]*abs(b01[idbeta])-b01[idbeta]^2-lambda[,1]^2)/(2*(alpha[,1]-1))
     
-    p02.threshold<-rep((lambda[,2]^2)*(alpha+1)/2,length(b02))
+    p02.threshold<-rep((lambda[,2]^2)*(alpha[,2]+1)/2,length(b02))
     idbeta<-which(abs(b02)<=lambda[,2])
     p02.threshold[idbeta]<-lambda[,2]*abs(b02[idbeta])
-    idbeta<-which(abs(b02)<lambda[,2]*alpha & abs(b02)>lambda[,2])
-    p02.threshold[idbeta]<-(2*alpha*lambda[,2]*abs(b02[idbeta])-b02[idbeta]^2-lambda[,2]^2)/(2*(alpha-1))
+    idbeta<-which(abs(b02)<lambda[,2]*alpha[,2] & abs(b02)>lambda[,2])
+    p02.threshold[idbeta]<-(2*alpha[,2]*lambda[,2]*abs(b02[idbeta])-b02[idbeta]^2-lambda[,2]^2)/(2*(alpha[,2]-1))
     
-    p12.threshold<-rep((lambda[,3]^2)*(alpha+1)/2,length(b12))
+    p12.threshold<-rep((lambda[,3]^2)*(alpha[,3]+1)/2,length(b12))
     idbeta<-which(abs(b12)<=lambda[,3])
     p12.threshold[idbeta]<-lambda[,3]*abs(b12[idbeta])
-    idbeta<-which(abs(b12)<lambda[,3]*alpha & abs(b12)>lambda[,3])
-    p12.threshold[idbeta]<-(2*alpha*lambda[,3]*abs(b12[idbeta])-b12[idbeta]^2-lambda[,3]^2)/(2*(alpha-1))
+    idbeta<-which(abs(b12)<lambda[,3]*alpha[,3] & abs(b12)>lambda[,3])
+    p12.threshold[idbeta]<-(2*alpha[,3]*lambda[,3]*abs(b12[idbeta])-b12[idbeta]^2-lambda[,3]^2)/(2*(alpha[,3]-1))
     
     res<-res-sum(p01.threshold)-sum(p02.threshold)-sum(p12.threshold)
   }

@@ -69,6 +69,20 @@ DYNidm.penalty.weib<-function(b,fix0,size_V,
   lambda<-unique(lambda)
   nlambda<-dim(lambda)[1]
   
+  alphagrid01<-data.frame(alpha01=alpha[[1]],
+                          lambda01=lambda01)
+  alphagrid02<-data.frame(alpha02=alpha[[2]],
+                          lambda02=lambda02)
+  alphagrid12<-data.frame(alpha12=alpha[[3]],
+                          lambda12=lambda12)
+  
+  lambdamerge<-data.frame(lambda)
+  colnames(lambdamerge)<-c("lambda01","lambda02","lambda12")
+  alphagrid<-merge(alphagrid01,lambdamerge,by=c("lambda01"))
+  alphagrid<-merge(alphagrid02,alphagrid,by=c("lambda02"))
+  alphagrid<-merge(alphagrid12,alphagrid,by=c("lambda12"))
+  alpha<-alphagrid[,c("alpha01","alpha02","alpha12")]
+  
   if(is.null(penalty.weights)){
     penalty.weights<-matrix(1,ncol=nlambda,nrow=nvat01+nvat02+nvat12+p01+p02+p12)
   }else{
